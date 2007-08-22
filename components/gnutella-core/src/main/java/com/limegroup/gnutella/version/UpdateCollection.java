@@ -15,6 +15,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
@@ -47,11 +48,18 @@ class UpdateCollection {
      * The list of DownloadDatas in this collection.
      */
     private List<DownloadInformation> downloadDataList = new LinkedList<DownloadInformation>();
+
+    private final ApplicationServices applicationServices;
     
     /**
      * Ensure that this is only created by using the factory constructor.
      */
-    private UpdateCollection() {}
+    UpdateCollection(String xml, ApplicationServices applicationServices) {
+        this.applicationServices = applicationServices;
+        if(LOG.isTraceEnabled())
+            LOG.trace("Parsing Update XML: " + xml);
+        parse(xml);
+    }
     
     /**
      * A string rep of the collection.
@@ -118,19 +126,6 @@ class UpdateCollection {
             return exactMatch;
     }
 
-    /**
-     * Constructs and returns a new UpdateCollection that corresponds
-     * to the elements in the XML.
-     */
-    static UpdateCollection create(String xml) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Parsing Update XML: " + xml);
-
-        UpdateCollection collection = new UpdateCollection();
-        collection.parse(xml);
-        return collection;
-    }
-    
     /**
      * Parses the XML and fills in the data of this collection.
      */
@@ -299,7 +294,7 @@ class UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        url = LimeWireUtils.addLWInfoToUrl(url);
+        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID());
         data.setUpdateURL(url);
         
         try {

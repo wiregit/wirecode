@@ -33,7 +33,8 @@ public class DownloadProviderHacks {
                 Providers.of(ProviderHacks.getMessageRouter()),
                 Providers.of(ProviderHacks.getTigerTreeCache()),
                 Providers.of(ProviderHacks.getTorrentManager()),
-                ProviderHacks.getBTUploaderFactory()
+                ProviderHacks.getBTUploaderFactory(),
+                ProviderHacks.getApplicationServices()
                 );
     }
 

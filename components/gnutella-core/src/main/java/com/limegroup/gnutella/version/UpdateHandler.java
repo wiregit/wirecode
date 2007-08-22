@@ -36,6 +36,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
@@ -159,6 +160,10 @@ public class UpdateHandler implements HttpClientListener {
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<DownloadManager> downloadManager;
     private final Provider<FileManager> fileManager;
+
+    private final ApplicationServices applicationServices;
+
+    private final UpdateCollectionFactory updateCollectionFactory;
     
     @Inject
     public UpdateHandler(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -169,7 +174,9 @@ public class UpdateHandler implements HttpClientListener {
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<ConnectionManager> connectionManager,
             Provider<DownloadManager> downloadManager,
-            Provider<FileManager> fileManager) {
+            Provider<FileManager> fileManager,
+            ApplicationServices applicationServices,
+            UpdateCollectionFactory updateCollectionFactory) {
         this.backgroundExecutor = backgroundExecutor;
         this.activityCallback = activityCallback;
         this.connectionServices = connectionServices;
@@ -179,6 +186,8 @@ public class UpdateHandler implements HttpClientListener {
         this.connectionManager = connectionManager;
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
+        this.applicationServices = applicationServices;
+        this.updateCollectionFactory = updateCollectionFactory;
         
         initialize(); // DPINJ: move to an initializer
     }
@@ -278,7 +287,7 @@ public class UpdateHandler implements HttpClientListener {
             if(xml != null) {
                 if(!fromDisk && handler != null)
                     networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
-                UpdateCollection uc = UpdateCollection.create(xml);
+                UpdateCollection uc = updateCollectionFactory.createUpdateCollection(xml);
                 if (fromDisk || uc.getId() <= _lastId)
                     doHttpFailover(uc);
                 if(uc.getId() > _lastId)
@@ -412,7 +421,7 @@ public class UpdateHandler implements HttpClientListener {
         if (!httpUpdate.get())
             return;
         LOG.debug("about to issue http request method");
-        HttpMethod get = new GetMethod(LimeWireUtils.addLWInfoToUrl(HTTP_FAILOVER));
+        HttpMethod get = new GetMethod(LimeWireUtils.addLWInfoToUrl(HTTP_FAILOVER, applicationServices.getMyGUID()));
         get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         get.setFollowRedirects(true);

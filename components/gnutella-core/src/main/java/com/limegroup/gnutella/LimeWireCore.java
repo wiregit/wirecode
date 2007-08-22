@@ -93,6 +93,7 @@ import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -694,6 +695,10 @@ public class LimeWireCore {
 
     public IpPortContentAuthorityFactory getIpPortContentAuthorityFactory() {
         return injector.getInstance(IpPortContentAuthorityFactory.class);
+    }
+
+    public UpdateCollectionFactory getUpdateCollectionFactory() {
+        return injector.getInstance(UpdateCollectionFactory.class);
     }
     
 }

@@ -583,9 +583,9 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     /**
      * @return whether this rfd points to myself.
      */
-    public boolean isMe() {
+    public boolean isMe(byte[] myClientGUID) {
         return needsPush() ? 
-                Arrays.equals(_clientGUID,ProviderHacks.getApplicationServices().getMyGUID()) :
+                Arrays.equals(_clientGUID, myClientGUID) :
                     NetworkUtils.isMe(getHost(),getPort());
     }
     /**

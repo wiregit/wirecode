@@ -74,6 +74,7 @@ import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -117,7 +118,6 @@ public class ProviderHacks {
     // Still needed in core...  
     // Requires some factories...
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
-    public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
     // Needs additional refactoring...
     public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }
@@ -244,6 +244,8 @@ public class ProviderHacks {
     public static PingRequestFactory getPingRequestFactory() { return i().getPingRequestFactory(); }
     public static UDPService getUdpService() { return i().getUdpService(); }     
     public static IpPortContentAuthorityFactory getIpPortContentAuthorityFactory() { return i().getIpPortContentAuthorityFactory(); }
+    public static UpdateCollectionFactory getUpdateCollectionFactory() { return i().getUpdateCollectionFactory(); }
+    public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

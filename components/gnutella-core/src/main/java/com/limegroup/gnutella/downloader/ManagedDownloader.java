@@ -36,6 +36,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Provider;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -477,6 +478,7 @@ public class ManagedDownloader extends AbstractDownloader
     protected ScheduledExecutorService backgroundExecutor;
     protected Provider<MessageRouter> messageRouter;
     protected Provider<TigerTreeCache> tigerTreeCache;
+    protected ApplicationServices applicationServices;
     
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -648,6 +650,7 @@ public class ManagedDownloader extends AbstractDownloader
         this.backgroundExecutor = downloadReferences.getBackgroundExecutor();
         this.messageRouter = downloadReferences.getMessageRouter();
         this.tigerTreeCache = downloadReferences.getTigerTreeCache();
+        this.applicationServices = downloadReferences.getApplicationServices();
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -1517,7 +1520,7 @@ public class ManagedDownloader extends AbstractDownloader
                                                            boolean cache) {
 
         // DO NOT DOWNLOAD FROM YOURSELF.
-        if( rfd.isMe() )
+        if( rfd.isMe(applicationServices.getMyGUID()) )
             return true;
         
         // already downloading from the host
@@ -1541,7 +1544,7 @@ public class ManagedDownloader extends AbstractDownloader
         
         for (Iterator<? extends RemoteFileDesc> iter = c.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd =  iter.next();
-            if (rfd.isMe()) {
+            if (rfd.isMe(applicationServices.getMyGUID())) {
                 iter.remove();
                 continue;
             }
