@@ -121,6 +121,41 @@
   			</locations>
   	    </do.clover-setup>
   	</target>
+
+    <target name="lw-gettext-extract"
+     description="Extracts message keys from the source code"
+     depends="init.gettext-extract">
+    <gettext-extract keysFile="limewire.pot" poDirectory="lib/messagebundles">
+      <fileset dir="components" includes="**/*.java"/>
+      <fileset dir="core" includes="**/*.java"/>
+      <fileset dir="gui" includes="**/*.java"/>
+    </gettext-extract>
+    </target>
+
+    <target name="lw-gettext-merge"
+     description="Merge message keys with translations"
+     depends="init.gettext-merge">
+    <gettext-merge keysFile="limewire.pot" poDirectory="lib/messagebundles"/>
+    </target>
+
+    <target name="lw-gettext-dist"
+     description="Generated resource bundles out of po files"
+     depends="init.gettext-dist">
+    <gettext-dist targetBundle="org.limewire.i18n.Messages"
+     poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"/>
+    </target>
+
+    <target name="lw-create-templates" description="Creates the translation
+     templates for translators" depends="lw-gettext-merge, lw-gettext-merge">
+    <jar destfile="lib/jars/messages.jar" basedir="lib/messagebundles"
+    includes="org/**"/>
+    </target>
+
+    <target name="lw-bundle-messages" description="Rebuilds messages and
+    bundles them" depends="lw-gettext-dist">
+    <jar destfile="lib/jars/messages.jar" basedir="lib/messagebundles"
+    includes="org/**"/>
+    </target>
    
     <!-- mask imported targets -->
     <target name="test"/>

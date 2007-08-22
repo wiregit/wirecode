@@ -12,6 +12,8 @@
 			  location="${limewire.home}/lib"/>
 	<property name="limewire.lib.jars"
 			  location="${limewire.lib}/jars"/>
+	<property name="limewire.lib.jars.ant"
+			  location="${limewire.lib}/jars/ant"/>
 	<property name="limewire.lib.native"
 			  location="${limewire.lib}/native"/>
 	<property name="limewire.library.path"
@@ -459,7 +461,30 @@
             </clover-report>
         </sequential>
     </macrodef>
-    
+
+       <property name="gettexttasks.jar" value="${limewire.lib.jars.ant}/gettexttasks.jar"/>
+
+	<target name="init.gettext-extract" description="Loads the
+	gettext-extract task">
+	 <taskdef name="gettext-extract"
+       classname="org.xnap.commons.ant.gettext.GettextExtractKeysTask"
+       classpath="${gettexttasks.jar}"/>
+	</target>
+
+	<target name="init.gettext-merge" description="Loads the
+	gettext-merge task">
+	 <taskdef name="gettext-merge"
+       classname="org.xnap.commons.ant.gettext.GettextMergeKeysTask"
+       classpath="${gettexttasks.jar}"/>
+	</target>
+
+	<target name="init.gettext-dist" description="Loads the
+	gettext-dist task">
+	 <taskdef name="gettext-dist"
+       classname="org.xnap.commons.ant.gettext.GettextDistTask"
+       classpath="${gettexttasks.jar}"/>
+	</target>
+
     <target name="clean"/> <!-- Must write a real target for this when importing. -->
     <target name="with.clover"/> <!-- Must write a real target for this when importing -->
     <target name="initialize"/> <!-- Must write a real target for this when importing -->
