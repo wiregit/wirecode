@@ -60,7 +60,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         fman = new MetaFileManager(new FileManagerControllerImpl(Providers
                 .of(ProviderHacks.getUrnCache()), Providers.of(ProviderHacks
                 .getDownloadManager()), Providers.of(ProviderHacks
-                .getCreationTimeCache()), Providers.of(new ContentManager()),
+                .getCreationTimeCache()), Providers.of(new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory())),
                 Providers.of(ProviderHacks.getAltLocManager()), Providers
                         .of(ProviderHacks.getResponseFactory()), Providers
                         .of(ProviderHacks.getSavedFileManager()), Providers

@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
@@ -68,6 +69,13 @@ public class ContentManager {
     
     /** Wehther or not we're shutting down. */
     private volatile boolean shutdown = false;
+
+    private final IpPortContentAuthorityFactory ipPortContentAuthorityFactory;
+
+    @Inject
+    public ContentManager(IpPortContentAuthorityFactory ipPortContentAuthorityFactory) {
+        this.ipPortContentAuthorityFactory = ipPortContentAuthorityFactory;
+    }
     
     /**
      * Initializes this content manager.
@@ -330,7 +338,7 @@ public class ContentManager {
      * Gets the default content authority.
      */
     protected ContentAuthority getDefaultContentAuthority() {
-        return new SettingsBasedContentAuthority();
+        return new SettingsBasedContentAuthority(ipPortContentAuthorityFactory);
     }
     
     /** Sets the content authority with the default & process all pre-requested items. */

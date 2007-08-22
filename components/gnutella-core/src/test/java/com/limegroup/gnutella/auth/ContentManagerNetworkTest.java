@@ -54,7 +54,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
-        mgr = new ContentManager();
+        mgr = new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory());
         crOne = new ContentResponse(URN_1, true);
         one = new Observer();
         assertNull(mgr.getResponse(URN_1));
@@ -72,7 +72,8 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
         
-        mgr.setContentAuthority(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort())));
+        mgr.setContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory()
+                .createIpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort())));
         mgr.request(URN_1, one, 2000);
         
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
@@ -101,9 +102,10 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         final IpPort authority = new IpPortImpl("127.0.0.1", socket.getLocalPort());
         
         mgr.shutdown();
-        mgr = new ContentManager() {
+        mgr = new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory()) {
             protected ContentAuthority getDefaultContentAuthority() {
-                return new IpPortContentAuthority(authority);
+                return ProviderHacks.getIpPortContentAuthorityFactory()
+                        .createIpPortContentAuthority(authority);
             }
         };
         mgr.request(URN_1, one, 2000);

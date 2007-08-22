@@ -24,7 +24,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     
     public void testInitialize() {
         ContentSettings.AUTHORITIES.setValue(new String[] { "yahoo.com", "google.com:82", "askjeeves.com:6346" });
-        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority();
+        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory());
         auth.initialize();
         ContentAuthority[] all = auth.getAuthorities();
         assertEquals(3, all.length);
@@ -44,7 +44,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     
     public void testInitializeDNSFails() {
         ContentSettings.AUTHORITIES.setValue(new String[] { "notarealdnsnamesodonteventryit.com", "google.com" });
-        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority();
+        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory());
         auth.initialize();
         ContentAuthority[] all = auth.getAuthorities();
         assertEquals(1, all.length);
@@ -57,7 +57,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     public void testRandomSending() throws Exception {
         final int[] randoms = new int[] { 0, 2, 1, 0, 1, 0, 0, 1, 2, 2 };
         
-        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority() {
+        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory()) {
             public Random newRandom() {
                 return new StubRandom(randoms);
             }

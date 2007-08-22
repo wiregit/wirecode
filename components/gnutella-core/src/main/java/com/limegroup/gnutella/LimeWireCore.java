@@ -26,6 +26,7 @@ import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
@@ -689,6 +690,10 @@ public class LimeWireCore {
 
     public PingRequestFactory getPingRequestFactory() {
         return injector.getInstance(PingRequestFactory.class);
+    }
+
+    public IpPortContentAuthorityFactory getIpPortContentAuthorityFactory() {
+        return injector.getInstance(IpPortContentAuthorityFactory.class);
     }
     
 }

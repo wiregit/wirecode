@@ -4,6 +4,7 @@ import org.limewire.concurrent.ThreadExecutor;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -44,7 +45,7 @@ public class ContentManagerTest extends LimeTestCase {
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        mgr = new ContentManager();
+        mgr = new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory());
         crOne = new ContentResponse(URN_1, true);
         crTwo = new ContentResponse(URN_2, false);
         one = new Observer();

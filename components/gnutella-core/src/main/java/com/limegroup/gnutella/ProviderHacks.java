@@ -16,6 +16,7 @@ import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
@@ -114,8 +115,6 @@ public class ProviderHacks {
     }
     
     // Still needed in core...  
-    public static UDPService getUdpService() { return i().getUdpService(); }     
-    
     // Requires some factories...
     public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
@@ -243,6 +242,8 @@ public class ProviderHacks {
     public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
     public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
     public static PingRequestFactory getPingRequestFactory() { return i().getPingRequestFactory(); }
+    public static UDPService getUdpService() { return i().getUdpService(); }     
+    public static IpPortContentAuthorityFactory getIpPortContentAuthorityFactory() { return i().getIpPortContentAuthorityFactory(); }
     
     // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }
