@@ -26,6 +26,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  *                              |
  *                             LEAF
  */
+@SuppressWarnings("null")
 public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
 
     private static int TIMEOUT = 300;
@@ -106,7 +107,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // stop.
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -144,7 +145,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -195,7 +196,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed AND the leaf still wants more
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -251,7 +252,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed AND the leaf still wants more
 
         // send a query from the leaf
-        QueryRequest query = QueryRequest.createQuery("berkeley");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -328,9 +329,9 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         throws Exception {
         byte[] ip = new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
         byte[] clientGUID = GUID.makeGuid();
-        Response[] resp = new Response[] {new Response(0, 10, "berkeley")};
-        QueryReply reply = new QueryReply(guid, (byte)3, 6346, ip, 0, resp,
-                                          clientGUID, false);
+        Response[] resp = new Response[] {ProviderHacks.getResponseFactory().createResponse(0, 10, "berkeley")};
+        QueryReply reply = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)3, 6346,
+                ip, 0, resp, clientGUID, false);
         source.send(reply);
         source.flush();
     }

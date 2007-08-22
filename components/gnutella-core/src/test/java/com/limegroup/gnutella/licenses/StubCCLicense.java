@@ -4,6 +4,8 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.ProviderHacks;
+
 
 class StubCCLicense extends CCLicense {
 
@@ -15,7 +17,6 @@ class StubCCLicense extends CCLicense {
         try {
             uri = new URI("http://1.2.3.4/page".toCharArray());
         } catch(URIException muri) {
-            uri = null;
         }
         LICENSE_URI = uri;
     }    
@@ -33,13 +34,13 @@ class StubCCLicense extends CCLicense {
     }
     
     StubCCLicense(String license, String page, String details) {
-        super(license, getURI(license));
+        super(license, getURI(license), ProviderHacks.getLicenseCache());
         this.page = page;
         this.details = details;
     }
    
     private static URI getURI(String license) {
-        URI uri = LicenseFactory.getLicenseURI(license);
+        URI uri = LicenseFactoryImpl.getLicenseURI(license);
         if(uri == null)
             return LICENSE_URI;
         else

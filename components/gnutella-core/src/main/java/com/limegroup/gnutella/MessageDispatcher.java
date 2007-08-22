@@ -5,17 +5,21 @@ import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
 
 /**
  * Dispatches messages to the MessageRouter.
  */
+@Singleton
 public class MessageDispatcher {
     
     private final ExecutorService DISPATCH = ExecutorsHelper.newProcessingQueue("MessageDispatch");
 
     private final MessageRouter messageRouter;
     
+    @Inject
     public MessageDispatcher(MessageRouter messageRouter) {
         this.messageRouter = messageRouter;
     }

@@ -2,8 +2,10 @@ package com.limegroup.gnutella.settings;
 
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetSetting;
 
+import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -59,4 +61,54 @@ public class UpdateSettings extends LimeProps {
      */
     public static final StringSetSetting FAILED_UPDATES = 
         FACTORY.createStringSetSetting("FAILED_UPDATES","");
+    
+    /**
+     * Pro ads.
+     */
+    public static final StringArraySetting PRO_ADS =
+        FACTORY.createRemoteStringArraySetting("PRO_ADS",
+                new String[] {
+                I18n.marktr("For Turbo-Charged searches get LimeWire PRO."),
+                "http://www.limewire.com/index.jsp/pro&21",
+                "0.111111",
+                I18n
+                        .marktr("Support LimeWire\'s peer-to-peer development. Get PRO."),
+                "http://www.limewire.com/index.jsp/pro&22",
+                "0.111111",
+                I18n
+                        .marktr("Purchase LimeWire PRO to help us make downloads faster."),
+                "http://www.limewire.com/index.jsp/pro&23",
+                "0.111111",
+                I18n.marktr("For Turbo-Charged downloads get LimeWire PRO."),
+                "http://www.limewire.com/index.jsp/pro&24",
+                "0.111111",
+                I18n.marktr("Support open networks. Get LimeWire PRO."),
+                "http://www.limewire.com/index.jsp/pro&25",
+                "0.111111",
+                I18n
+                        .marktr("Support open source and open protocols. Get LimeWire PRO."),
+                "http://www.limewire.com/index.jsp/pro&26",
+                "0.111111",
+                I18n.marktr("For Turbo-Charged performance get LimeWire PRO."),
+                "http://www.limewire.com/index.jsp/pro&27",
+                "0.111111",
+                I18n.marktr("Keep the Internet open. Get LimeWire PRO."),
+                "http://www.limewire.com/index.jsp/pro&28",
+                "0.111111",
+                I18n.marktr("Developing LimeWire costs real money. Get PRO."),
+                "http://www.limewire.com/index.jsp/pro&29",
+                "0.111111"},
+                "UpdateSettings.proAds");
+    
+    /**
+     * The timestamp of the last update message we've received.
+     */
+    public static final LongSetting LAST_UPDATE_TIMESTAMP = 
+        FACTORY.createLongSetting("LAST_UPDATE_TIMESTAMP", -1L);
+    
+    /**
+     * The last time we checked the failover url for updates.
+     */
+    public static final LongSetting LAST_HTTP_FAILOVER = 
+        FACTORY.createLongSetting("LAST_HTTP_FAILOVER", -1L);
 }

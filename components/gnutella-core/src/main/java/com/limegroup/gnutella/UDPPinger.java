@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,8 +13,11 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /**
  * Sends Gnutella messages via UDP to a set of hosts and calls back to a 
@@ -47,6 +52,23 @@ public class UDPPinger {
      */
     private static long _lastSentTime;
     
+    private final Provider<MessageRouter> messageRouter;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<UDPService> udpService;
+
+    private final PingRequestFactory pingRequestFactory;
+    
+    @Inject
+    public UDPPinger(Provider<MessageRouter> messageRouter,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<UDPService> udpService,
+            PingRequestFactory pingRequestFactory) {
+        this.messageRouter = messageRouter;
+        this.backgroundExecutor = backgroundExecutor;
+        this.udpService = udpService;
+        this.pingRequestFactory = pingRequestFactory;
+    }
+
     /**
      * Ranks the specified Collection of hosts.
      */
@@ -149,7 +171,7 @@ public class UDPPinger {
      */
     private boolean waitForListening(Cancellable canceller) {
         int waits = 0;
-        while(!UDPService.instance().isListening() && waits < 10 &&
+        while(!udpService.get().isListening() && waits < 10 &&
               !canceller.isCancelled()) {
             try {
                 Thread.sleep(600);
@@ -176,12 +198,12 @@ public class UDPPinger {
             return;
     
         if(message == null)
-            message = PingRequest.createUDPPing();
+            message = pingRequestFactory.createUDPPing();
             
         final byte[] messageGUID = message.getGUID();
         
         if (listener != null)
-            RouterService.getMessageRouter().registerMessageListener(messageGUID, listener);
+            messageRouter.get().registerMessageListener(messageGUID, listener);
 
         
         for(IpPort ipp : hosts) {
@@ -197,12 +219,12 @@ public class UDPPinger {
             // indefinitely in memory for no reason.
             Runnable udpMessagePurger = new Runnable() {
                     public void run() {
-                        RouterService.getMessageRouter().unregisterMessageListener(messageGUID, listener);
+                        messageRouter.get().unregisterMessageListener(messageGUID, listener);
                     }
                 };
          
             // Purge after 20 seconds.
-            RouterService.schedule(udpMessagePurger, expireTime, 0);
+            backgroundExecutor.scheduleWithFixedDelay(udpMessagePurger, expireTime, 0, TimeUnit.MILLISECONDS);
         }
     }
     
@@ -221,7 +243,7 @@ public class UDPPinger {
         
         if(LOG.isTraceEnabled())
             LOG.trace("Sending to " + host + ": " + message.getClass()+" "+message);
-        UDPService.instance().send(message, host);
+        udpService.get().send(message, host);
         _sentAmount++;
         _lastSentTime = now;
     }

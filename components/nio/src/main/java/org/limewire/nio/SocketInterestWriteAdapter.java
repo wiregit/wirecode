@@ -85,4 +85,9 @@ class SocketInterestWriteAdapter implements InterestWritableByteChannel {
     public void handleIOException(IOException x) {
         throw new RuntimeException("unsupported", x);
     }
+
+    public boolean hasBufferedOutput() {
+        return false;
+    }
+    
 }

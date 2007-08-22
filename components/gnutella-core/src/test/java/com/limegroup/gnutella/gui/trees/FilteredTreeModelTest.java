@@ -126,4 +126,20 @@ public class FilteredTreeModelTest extends GUIBaseTestCase {
 		assertFalse(filteredModel.isVisible(root));
 	}
 
+	public void testAddMultipleKeywords() {
+	    assertTrue(filteredModel.isVisible(a));
+	    DefaultMutableTreeNode node = addNode(root, "node", "123", "456");
+        filteredModel.filterByText("123");
+        assertTrue(filteredModel.isVisible(node));
+        assertFalse(filteredModel.isVisible(a));	    
+	}
+
+	public void testAddUpperCase() {
+	    assertTrue(filteredModel.isVisible(a));
+	    DefaultMutableTreeNode node = addNode(root, "node", "ABC", "deFGhi");
+	    filteredModel.filterByText("def");
+        assertTrue(filteredModel.isVisible(node));
+        assertFalse(filteredModel.isVisible(a));
+	}
+
 }

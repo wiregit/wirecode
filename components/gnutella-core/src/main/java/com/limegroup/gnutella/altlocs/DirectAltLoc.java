@@ -3,23 +3,18 @@ package com.limegroup.gnutella.altlocs;
 
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Set;
 
 import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
-import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -48,30 +43,6 @@ public class DirectAltLoc extends AlternateLocation {
      */
     protected volatile boolean _demoted = false;
 	
-	/**
-	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
-	 * and <tt>Date</tt> timestamp.
-	 *
-	 * @param url the <tt>URL</tt> for the <tt>AlternateLocation</tt>
-	 * @param date the <tt>Date</tt> timestamp for the 
-	 *  <tt>AlternateLocation</tt>
-	 */
-	protected DirectAltLoc(final URL url, final URN sha1)
-	  throws IOException {
-		this(new IpPortImpl(url.getHost(),url.getPort()),sha1);
-	}
-	
-	/**
-	 * creates an altloc for myself.
-	 */
-	protected DirectAltLoc(final URN sha1) throws IOException{
-	    this(new ConnectableImpl(
-		        NetworkUtils.ip2string(RouterService.getAddress()),
-		        RouterService.getPort(),
-                ConnectionSettings.TLS_INCOMING.getValue())
-		    ,sha1);
-	}
-	
 	protected DirectAltLoc(IpPort address, URN sha1) throws IOException{
 		super(sha1);
 		if (!NetworkUtils.isValidExternalIpPort(address))
@@ -89,7 +60,7 @@ public class DirectAltLoc extends AlternateLocation {
 		return ret;
 	}
 	
-	public RemoteFileDesc createRemoteFileDesc(int size) {
+	public RemoteFileDesc createRemoteFileDesc(long size) {
 		Set<URN> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
 		RemoteFileDesc ret = new RemoteFileDesc(_node.getAddress(), _node.getPort(),

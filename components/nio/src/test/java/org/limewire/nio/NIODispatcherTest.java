@@ -12,6 +12,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -579,11 +580,15 @@ public class NIODispatcherTest extends BaseTestCase {
         }
     }
     
-    private int interestOps(SelectableChannel channel) throws Exception {
-        // peeks into the NIODispatcher to get the Selector so we can assert the interetOps
-        Selector selector = (Selector)PrivilegedAccessor.invokeMethod(
-                NIODispatcher.instance(), "getSelectorFor", new Object[] {channel }, new Class[] { SelectableChannel.class });
-        return channel.keyFor(selector).interestOps();
+    private int interestOps(final SelectableChannel channel) throws Exception {
+        Future<Integer> f = NIODispatcher.instance().getScheduledExecutorService().submit(new Callable<Integer>() {
+            public Integer call() throws Exception {
+                Selector selector = (Selector)PrivilegedAccessor.invokeMethod(
+                        NIODispatcher.instance(), "getSelectorFor", new Object[] {channel }, new Class[] { SelectableChannel.class });
+                return channel.keyFor(selector).interestOps();
+            }
+        });
+        return f.get();
     }
 
 }

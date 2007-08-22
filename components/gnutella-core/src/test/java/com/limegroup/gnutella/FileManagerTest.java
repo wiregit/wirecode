@@ -1,5 +1,7 @@
  package com.limegroup.gnutella;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
@@ -8,11 +10,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -23,10 +27,8 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
-import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
@@ -37,10 +39,10 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-@SuppressWarnings("unchecked")
-public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class FileManagerTest extends LimeTestCase {
 
     protected static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
@@ -69,7 +71,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
     public static void globalSetUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         try {
-            RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+            ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
         }        
@@ -83,8 +85,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 	    fman = new SimpleFileManager();
 		
         // ensure each test gets a brand new content manager.
-        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
-	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
+      //  PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
+        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
 	}
 	
 	public void tearDown() {
@@ -121,7 +123,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        ContentManager cm = RouterService.getContentManager();
+        ContentManager cm = ProviderHacks.getContentManager();
         cm.initialize();
         // request the urn so we can use the response.
         cm.request(u1, new StubContentResponseObserver(), 1000);
@@ -180,15 +182,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
             
         // it is important to check the query at all bounds,
         // including tests for case.
-        responses=fman.query(QueryRequest.createQuery("unit",(byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery("FileManager", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery("test", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery("file", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(QueryRequest.createQuery(
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);        
                 
@@ -222,7 +224,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         assertEquals("unexpected number of files", 2, fman.getNumFiles());
         assertEquals("unexpected fman size", 4, fman.getSize());
-        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit", (byte)3));
         assertNotEquals("responses gave same index",
             responses[0].getIndex(), responses[1].getIndex() );
         for (int i=0; i<responses.length; i++) {
@@ -247,7 +249,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertNotNull("should have been able to remove shared file", fman.removeFileIfShared(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
-        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 1, responses.length);
         files=fman.getSharedFileDescriptors(_sharedDir);
         assertEquals("unexpected files length", 1, files.length);
@@ -267,7 +269,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertNotNull(result.getFileDescs()[0]);
         assertEquals("unexpected file size", 12, fman.getSize());
         assertEquals("unexpedted number of files", 2, fman.getNumFiles());
-        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
         assertNotEquals("unexpected response[0] index", 1, responses[0].getIndex());
         assertNotEquals("unexpected response[1] index", 1, responses[1].getIndex());
@@ -283,7 +285,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue("should be valid", fman.isValidIndex(0));
         assertTrue("should be valid (was at one time)", fman.isValidIndex(1));
 
-        responses=fman.query(QueryRequest.createQuery("*unit*", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
 
         files = fman.getSharedFileDescriptors(_sharedDir);
@@ -338,15 +340,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         f2 = createNewTestFile(3);
         
         //Try to add a huge file.  (It will be ignored.)
-        f4 = createFakeTestFile(Integer.MAX_VALUE+1l);
+        f4 = createFakeTestFile(MAX_FILE_SIZE+1l);
         FileManagerEvent result = addIfShared(f4);
         assertTrue(result.toString(), result.isFailedEvent());
         assertEquals(f4, result.getFiles()[0]);
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSize());
         //Add really big files.
-        f5=createFakeTestFile(Integer.MAX_VALUE-1);
-        f6=createFakeTestFile(Integer.MAX_VALUE);
+        f5=createFakeTestFile(MAX_FILE_SIZE-1);
+        f6=createFakeTestFile(MAX_FILE_SIZE);
         result = addIfShared(f5);
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(f5, result.getFileDescs()[0].getFile());
@@ -355,7 +357,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(f6, result.getFileDescs()[0].getFile());
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
         assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
-        responses=fman.query(QueryRequest.createQuery("*.*", (byte)3));
+        responses=fman.query(ProviderHacks.getQueryRequestFactory().createQuery("*.*", (byte)3));
         assertEquals("unexpected responses length", 3, responses.length);
         assertEquals("files differ", responses[0].getName(), f3.getName());
         assertEquals("files differ", responses[1].getName(), f5.getName());
@@ -371,9 +373,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());    
         
         // add one incomplete file and make sure the numbers go up.
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[0] );
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
@@ -381,16 +383,16 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
             
         // add another incomplete file with the same hash and same
         // name and make sure it's not added.
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         // add another incomplete file with another hash, it should be added.
-        urns = new HashSet();
+        urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[1] );
-        fman.addIncompleteFile(new File("c"), urns, "c", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("c"), urns, "c", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
@@ -405,12 +407,12 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[0] );
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, new VerifyingFile(0));
-        urns = new HashSet();
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
+        urns = new UrnSet();
         urns.add( HugeTestUtils.URNS[1] );
-        fman.addIncompleteFile(new File("b"), urns, "b", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("b"), urns, "b", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
             
         fman.removeFileIfShared( new File("a") );
@@ -431,13 +433,13 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());            
             
-        QueryRequest qr = QueryRequest.createQuery(urn, "sambe");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(urn, "sambe");
         Response[] hits = fman.query(qr);
         assertNotNull(hits);
         assertEquals("unexpected number of resp.", 0, hits.length);
@@ -454,10 +456,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals("unexpected pending",
             0, fman.getNumPendingFiles());
             
-        Set urns = new HashSet();
+        Set<URN> urns = new UrnSet();
         URN urn = HugeTestUtils.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
             
         // First test that we DO get this IFD.
@@ -479,7 +481,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         urns = fd.getUrns();
         
         // now add an ifd with those urns.
-        fman.addIncompleteFile(new File("sam"), urns, "b", 0, new VerifyingFile(0));
+        fman.addIncompleteFile(new File("sam"), urns, "b", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         
         FileDesc retFD = fman.getFileDescForUrn(urn);    
         assertNotNull(retFD);
@@ -496,26 +498,26 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
-			Response testResponse = new Response(fd);
+			Response testResponse = ProviderHacks.getResponseFactory().createResponse(fd);
 			URN urn = fd.getSHA1Urn();
 			assertEquals("FileDescs should match", fd, 
 						 fman.getFileDescForUrn(urn));
 			
 			// first set does not include any requested types
 			// third includes both
-			Set requestedUrnSet1 = new HashSet();
-			Set requestedUrnSet2 = new HashSet();
-			Set requestedUrnSet3 = new HashSet();
+			Set<URN.Type> requestedUrnSet1 = new HashSet<URN.Type>();
+			Set<URN.Type> requestedUrnSet2 = new HashSet<URN.Type>();
+			Set<URN.Type> requestedUrnSet3 = new HashSet<URN.Type>();
 			requestedUrnSet1.add(URN.Type.ANY_TYPE);
 			requestedUrnSet2.add(URN.Type.SHA1);
 			requestedUrnSet3.add(URN.Type.ANY_TYPE);
 			requestedUrnSet3.add(URN.Type.SHA1);
 			Set[] requestedUrnSets = {URN.Type.NO_TYPE_SET, requestedUrnSet1, 
 									  requestedUrnSet2, requestedUrnSet3};
-			Set queryUrnSet = new HashSet();
+			Set<URN> queryUrnSet = new UrnSet();
 			queryUrnSet.add(urn);
 			for(int j = 0; j < requestedUrnSets.length; j++) {
-				QueryRequest qr = QueryRequest.createQuery(queryUrnSet);
+				QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(queryUrnSet);
 				Response[] hits = fman.query(qr);
 				assertEquals("there should only be one response", 1, hits.length);
 				assertEquals("responses should be equal", testResponse, hits[0]);		
@@ -533,7 +535,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 	    boolean checked = false;
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
-			Response testResponse = new Response(fd);
+			Response testResponse = ProviderHacks.getResponseFactory().createResponse(fd);
 			URN urn = fd.getSHA1Urn();
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
             
@@ -545,7 +547,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
                 continue;
             }
             
-			QueryRequest qr = QueryRequest.createQuery(name);
+			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -553,8 +555,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 			if ( hits.length != 1 ) continue;
 			checked = true;
 			assertEquals("responses should be equal", testResponse, hits[0]);
-			Set urnSet = hits[0].getUrns();
-			URN[] responseUrns = (URN[])urnSet.toArray(new URN[0]);
+			Set<URN> urnSet = hits[0].getUrns();
+			URN[] responseUrns = urnSet.toArray(new URN[0]);
 			// this is just a sanity check
 			assertEquals("urns should be equal for " + fd, urn, responseUrns[0]);		
 		}
@@ -571,14 +573,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 	    for(int i = 0; i < fds.length; i++) {
 	        URN urn = fds[i].getSHA1Urn();
 	        for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-	            RouterService.getAltlocManager().add(AlternateLocation.create("1.2.3." + j, urn),null);
+	            ProviderHacks.getAltLocManager().add(ProviderHacks.getAlternateLocationFactory().create("1.2.3." + j, urn),null);
 	        }
 	    }
         
         boolean checked = false;
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
-			Response testResponse = new Response(fd);
+			Response testResponse = ProviderHacks.getResponseFactory().createResponse(fd);
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
             
             char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
@@ -589,7 +591,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
                 continue;
             }
             
-			QueryRequest qr = QueryRequest.createQuery(name);
+			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(name);
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -602,7 +604,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 			    testResponse.getLocations(), hits[0].getLocations());
 		}
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
-        RouterService.getAltlocManager().purge();
+        ProviderHacks.getAltLocManager().purge();
     }	
     
     /**
@@ -621,7 +623,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         QueryRouteTable qrt = fman.getQRT();
 
         //test that QRT doesn't contain random keyword
-        QueryRequest qr = QueryRequest.createQuery("asdfasdf");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("asdfasdf");
         assertFalse("query should not be in qrt",
                    qrt.contains(qr));
 
@@ -756,7 +758,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 	    assertTrue(fman.isLoadFinished());
 	    
 		// test if too large files are not shared
-		File tooLarge = createFakeTestFile(Integer.MAX_VALUE+1l);
+		File tooLarge = createFakeTestFile(MAX_FILE_SIZE+1l);
 		FileManagerEvent result = addAlways(tooLarge);
 		assertTrue(result.toString(), result.isFailedEvent());
 		assertEquals(tooLarge, result.getFiles()[0]);
@@ -891,6 +893,174 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 		assertEquals(3, fman.getNumFiles());
 		assertEquals(result.getFileDescs()[0], fman.get(2));
 	}
+	
+	public void testAddSharedFoldersWithBlackList() throws Exception {
+		File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
+				"recursive1",
+				"recursive1/sub1",
+				"recursive1/sub1/subsub",
+				"recursive1/sub2",
+				"recursive2");
+		
+		// create files in all folders, so we can see if they were shared
+		for (int i = 0; i < dirs.length; i++) {
+			createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
+		}
+		
+		List<File> whiteList = Arrays.asList(dirs[0], dirs[1], dirs[4]);
+		List<File> blackList = Arrays.asList(dirs[2], dirs[3]);
+		fman.addSharedFolders(new HashSet<File>(whiteList), new HashSet<File>(blackList));
+		waitForLoad();
+		
+		// assert blacklist worked
+		for (File dir : blackList) {
+			assertEquals(0, fman.getSharedFileDescriptors(dir).length);
+		}
+		
+		// assert others were shared
+		for (File dir : whiteList) {
+			assertEquals(1, fman.getSharedFileDescriptors(dir).length);
+		}
+	}
+	
+
+    public void testSymlinksAreResolvedInBlacklist() throws Exception {
+        if (OSUtils.isWindows()) {
+            return;
+        }
+        
+        File[] dirs = LimeTestUtils.createTmpDirs(
+                "resolvedshare",
+                "resolvedshare/resolvedsub",
+                "resolvedshare/other/shared"
+        );
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "shared" + i, dirs[i]);
+        }
+        File[] pointedTo = LimeTestUtils.createTmpDirs(
+                "notshared",
+                "notshared/sub",
+                "notshared/other/sub"
+        );
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "linkshared" + i, pointedTo[i]);
+        }
+        // add symlinks in shared folders to pointedTo
+        for (int i = 0; i < dirs.length; i++) {
+            createSymLink(dirs[i], "link", pointedTo[i]);
+        }
+        // create blacklist set
+        Set<File> blackListSet = new HashSet<File>();
+        for (File dir : dirs) {
+            blackListSet.add(new File(dir, "link"));
+        }
+        fman.addSharedFolders(Collections.singleton(dirs[0]), blackListSet);
+        waitForLoad();
+        
+        // assert blacklisted were not shared
+        for (File excluded : blackListSet) {
+            assertEquals("excluded was shared: " + excluded, 0, fman.getSharedFileDescriptors(excluded).length);
+        }
+        // same for pointed to
+        for (File excluded : pointedTo) {
+            assertEquals(0, fman.getSharedFileDescriptors(excluded).length);
+        }
+        // ensure other files were shared
+        for (File shared: dirs) {
+            assertEquals(1, fman.getSharedFileDescriptors(shared).length);
+        }
+        
+        // clean up
+        for (File dir : dirs) {
+            cleanFiles(dir, true);
+        }
+        for (File dir : pointedTo) {
+            cleanFiles(dir, true);
+        }
+    }
+    
+    private static void createSymLink(File parentDir, String name, File pointedTo) throws Exception {
+        assertEquals(0, 
+                Runtime.getRuntime().exec(new String[] { 
+                        "ln", 
+                        "-s",
+                        pointedTo.getAbsolutePath(),
+                        parentDir.getAbsolutePath() + File.separator + name
+                }).waitFor());
+    }
+    	
+    public void testExplicitlySharedSubfolderUnsharedDoesntStayShared() throws Exception {
+        File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
+                "recursive1",
+                "recursive1/sub1");
+        
+        assertEquals(2, dirs.length);
+        assertEquals("sub1", dirs[1].getName()); // make sure sub1 is second!
+        
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
+        }
+        
+        fman.removeFolderIfShared(_sharedDir);
+        fman.addSharedFolder(dirs[1]);
+        fman.addSharedFolder(dirs[0]);
+        
+        waitForLoad();
+        
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        
+        // Now unshare sub1
+        fman.removeFolderIfShared(dirs[1]);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[1]).length);
+        
+        // Now reload fman and make sure it's still not shared!
+        fman.loadSettingsAndWait(10000);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[1]).length);
+    }
+    
+    public void testExplicitlySharedSubSubfolderUnsharedDoesntStayShared() throws Exception {
+        File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
+                "recursive1",
+                "recursive1/sub1",
+                "recursive1/sub1/sub2");
+        
+        assertEquals(3, dirs.length);
+        assertEquals("sub2", dirs[2].getName()); // make sure sub2 is third!
+        
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
+        }
+        
+        fman.removeFolderIfShared(_sharedDir);
+        fman.addSharedFolder(dirs[2]);
+        fman.addSharedFolder(dirs[0]);
+        
+        waitForLoad();
+        
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[2]).length);
+        
+        // Now unshare sub2
+        fman.removeFolderIfShared(dirs[2]);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[2]).length);
+        
+        // Now reload fman and make sure it's still not shared!
+        fman.loadSettingsAndWait(10000);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[0]).length);
+        assertEquals(1, fman.getSharedFileDescriptors(dirs[1]).length);
+        assertEquals(0, fman.getSharedFileDescriptors(dirs[2]).length);
+    }
+
     
     /**
      * Tests whether the FileManager.isSensitiveDirectory(File) function is functioning properly. 
@@ -901,14 +1071,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertFalse("null directory should not be a sensitive directory", FileManager.isSensitiveDirectory(file));
         file = new File("lksfjlsakjfsldfjak.slfkjs");
         assertFalse("random file should not be a sensitive directory", FileManager.isSensitiveDirectory(file));
-        
-        //  check that system roots are sensitive directories
-        File[] faRoots = File.listRoots();
-        if(faRoots != null && faRoots.length > 0) {
-            for(int i = 0; i < faRoots.length; i++) {
-                assertTrue("root directory "+faRoots[i]+ " should be a sensitive directory", FileManager.isSensitiveDirectory(faRoots[i]));
-            }
-        }
         
         //  check that the user's home dir is a sensitive directory
         String userHome = System.getProperty("user.home");
@@ -959,12 +1121,24 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
         }
     }
     
+    public void testIsSharableFolder() throws Exception {
+        //  check that system roots are sensitive directories
+        File[] faRoots = File.listRoots();
+        if(faRoots != null && faRoots.length > 0) {
+            for(int i = 0; i < faRoots.length; i++) {
+                assertFalse("root directory "+faRoots[i]+ " should not be sharable", 
+                           fman.isFolderShareable(faRoots[i], false));
+                assertFalse("root directory "+faRoots[i]+ " should not be sharable", 
+                        fman.isFolderShareable(faRoots[i], true));
+            }
+        }
+    }
+    
     public void testGetIndexingIterator() throws Exception {
-        LimeXMLDocument document = new LimeXMLDocument(
-                "<?xml version=\"1.0\"?>"+
-                "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
-                "  <audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
-                "</audios>");
+        LimeXMLDocument document = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument("<?xml version=\"1.0\"?>"+
+        "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
+        "  <audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
+        "</audios>");
 
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
@@ -1015,7 +1189,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
     private QueryRequest get_qr(File f) {
         String norm = I18NConvert.instance().getNorm(f.getName());
         norm = StringUtils.replace(norm, "_", " ");
-        return QueryRequest.createQuery(norm);
+        return ProviderHacks.getQueryRequestFactory().createQuery(norm);
     }
 	
 	private void addFilesToLibrary() throws Exception {
@@ -1118,23 +1292,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
             return this;
         }
     }
-    
-    public class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized(loaded) {
-                loaded.notify();
-            }
-        }
-    }       
 
     protected void waitForLoad() {
-        synchronized(loaded) {
-            try {
-                fman.loadSettings();
-                loaded.wait(10000);
-            } catch (InterruptedException e) {
-                //good.
-            }
+        try {
+            fman.loadSettingsAndWait(10000);
+        } catch(InterruptedException e) {
+            fail(e);
+        } catch(TimeoutException te) {
+            fail(te);
         }
     }    
     

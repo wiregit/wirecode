@@ -19,6 +19,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 
 /**
@@ -35,13 +36,16 @@ class CCLicense extends AbstractLicense {
     
     /** The license information for each Work. */
     private Map<URN, Details> allWorks;
+
+    private final LicenseCache licenseCache;
     
     /**
      * Constructs a new CCLicense.
      */
-    CCLicense(String license, URI uri) {
-        super(uri);
+    CCLicense(String license, URI uri, LicenseCache licenseCache) {
+        super(uri, licenseCache);
         this.license = license;
+        this.licenseCache = licenseCache;
     }
     
     public String getLicense() {
@@ -465,7 +469,7 @@ class CCLicense extends AbstractLicense {
                 
                 String url = details.licenseURL.toExternalForm();
                 // First see if we have cached details.
-                Object data = LicenseCache.instance().getData(url);
+                Object data = licenseCache.getData(url);
                 String body = null;
                 if(data != null && data instanceof String) {
                     if(LOG.isDebugEnabled())
@@ -474,7 +478,7 @@ class CCLicense extends AbstractLicense {
                 } else {
                     body = getBody(url);
                     if(body != null)
-                        LicenseCache.instance().addData(url, body);
+                        ProviderHacks.getLicenseCache().addData(url, body);
                     else
                         LOG.debug("Couldn't retrieve license details from url: " + url);
                 }

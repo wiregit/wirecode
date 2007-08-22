@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
@@ -20,15 +22,17 @@ import org.limewire.util.BufferUtils;
 public class HttpChannel implements ByteChannel, ChannelReadObserver,
         ChannelWriter {
 
+    private static final Log LOG = LogFactory.getLog(HttpChannel.class);
+    
     private final HttpIOSession session;
 
     private final IOEventDispatch eventDispatch;
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-
+    
     private InterestReadableByteChannel readSource;
 
-    private InterestWritableByteChannel writeSource;
+    private volatile InterestWritableByteChannel writeSource;
 
     private boolean writeInterest;
 
@@ -36,6 +40,8 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     private ByteBuffer methodBuffer;
 
+    private volatile boolean pendingClose = false;
+    
     /**
      * Constructs a channel optionally pushing back a string that will be read
      * first. LimeWire's acceptor eats the first word of a connection to
@@ -88,6 +94,20 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         shutdown();
     }
 
+    public void closeWhenBufferedOutputHasBeenFlushed() {
+        InterestWritableByteChannel source = writeSource;
+        if (source != null) {
+            if (!source.hasBufferedOutput()) {
+                session.shutdown();
+            } else {
+                pendingClose = true;        
+                requestWrite(true);
+            }
+        } else {
+            session.shutdown();
+        }
+    }
+
     public boolean isOpen() {
         return !closed.get();
     }
@@ -98,19 +118,21 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public void handleRead() throws IOException {
         if (!readInterest) {
-            // HttpIOSession turns off read interest before switching channels
-            // using AbstractNBSocket#setReadObserver(), do not delegate to http
-            // core in this case
+            LOG.error("Unexpected call to HttpChannel.handleRead(), turning read interest back off");
+            readSource.interestRead(false);
             return;
         }
-
+        
         eventDispatch.inputReady(session);
     }
 
-    public void handleIOException(IOException iox) {
-        HttpIOReactor.LOG.error("Unexpected exception");
+    public void handleIOException(IOException e) {
+        LOG.error("Unexpected exception", e);
     }
 
+    /**
+     * Invoked in case of a read timeout or when the socket is closed.
+     */
     public void shutdown() {
         if (!closed.getAndSet(true)) {
             NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
@@ -144,7 +166,17 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public boolean handleWrite() throws IOException {
+        if (pendingClose) {
+            if (!writeSource.hasBufferedOutput()) {
+                session.shutdown();
+            }
+            return false;
+        }
+        
         if (!writeInterest) {
+            // HttpIOSession turns off read interest before switching channels
+            // using AbstractNBSocket#setWriteObserver(), do not delegate to
+            // httpcore in this case
             return false;
         }
 
@@ -154,6 +186,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void requestRead(boolean status) {
+        if (pendingClose)
+            return;
+
         this.readInterest = status;
         if (readSource != null) {
             readSource.interestRead(status);
@@ -161,6 +196,10 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void requestWrite(boolean status) {
+        if (pendingClose) {
+            status = true;
+        }
+        
         this.writeInterest = status;
         if (writeSource != null) {
             writeSource.interestWrite(this, status);

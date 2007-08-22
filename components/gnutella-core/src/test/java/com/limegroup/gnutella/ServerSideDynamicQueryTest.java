@@ -76,7 +76,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testBasicProbeMechanicsFromUltrapeer() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -90,15 +90,10 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
-		Response response1=new Response(0L, 0L, "berkeley rocks");
+		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
-		QueryReply reply1=new QueryReply(request.getGUID(),
-										 (byte)2,
-										 6346,
-										 IP,
-										 56,
-										 new Response[] {response1},
-										 guid1, false);
+		QueryReply reply1=ProviderHacks.getQueryReplyFactory().createQueryReply(request.getGUID(), (byte)2, 6346,
+                IP, 56, new Response[] {response1}, guid1, false);
         drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
 		LEAF[0].flush();
@@ -129,7 +124,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testBasicProbeMechanicsFromLeaf() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.hop();
         request.setTTL((byte)1);
         assertEquals(1, request.getHops());
@@ -145,15 +140,10 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
-		Response response1=new Response(0L, 0L, "berkeley rocks");
+		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
-		QueryReply reply1=new QueryReply(request.getGUID(),
-										 (byte)2,
-										 6346,
-										 IP,
-										 56,
-										 new Response[] {response1},
-										 guid1, false);
+		QueryReply reply1=ProviderHacks.getQueryReplyFactory().createQueryReply(request.getGUID(), (byte)2, 6346,
+                IP, 56, new Response[] {response1}, guid1, false);
         drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
 		LEAF[0].flush();
@@ -184,7 +174,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testDuplicateProbes() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -217,7 +207,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testProbeIsLimited() throws Exception {
         drainAll();
 
-        QueryRequest request = QueryRequest.createQuery("berkeley");
+        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -268,7 +258,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         for (int i = 2; i < 5; i++) {
             drainAll();
 
-            QueryRequest request = QueryRequest.createQuery("berkeley");
+            QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
             request.setTTL((byte)i);
 
             ULTRAPEER[1].send(request);

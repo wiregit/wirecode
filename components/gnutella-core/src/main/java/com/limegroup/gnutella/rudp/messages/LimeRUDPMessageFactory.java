@@ -11,10 +11,16 @@ import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.SynMessage;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
+@Singleton
 public class LimeRUDPMessageFactory implements RUDPMessageFactory {
     private final RUDPMessageFactory delegate;
 
-    public LimeRUDPMessageFactory(RUDPMessageFactory delegate) {
+    @Inject
+    public LimeRUDPMessageFactory(@Named("delegate") RUDPMessageFactory delegate) {
         if (delegate == null) {
             throw new NullPointerException("Delegate is null");
         } else if (delegate instanceof LimeRUDPMessageFactory) {

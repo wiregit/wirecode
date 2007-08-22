@@ -6,11 +6,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.http.HttpResponse;
 import org.limewire.collection.MultiRRIterator;
 
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -45,7 +44,7 @@ public class AltLocTracker {
     /**
      * the version of the FWT protocol the remote supports. Non-firewalled hosts
      * should not send this feature. INVARIANT: if this is greater than 0,
-     * _wantsFalts is set.
+     * wantsFalts is set.
      */
     private int fwtVersion = 0;
 
@@ -65,9 +64,8 @@ public class AltLocTracker {
      * Returns an AlternateLocationCollection of alternates that have not been
      * sent out already.
      */
-    public Collection<DirectAltLoc> getNextSetOfAltsToSend() {
-        AlternateLocationCollection<DirectAltLoc> coll = RouterService
-                .getAltlocManager().getDirect(urn);
+    public Collection<DirectAltLoc> getNextSetOfAltsToSend(AltLocManager altLocManager) {
+        AlternateLocationCollection<DirectAltLoc> coll = altLocManager.getDirect(urn);
         Collection<DirectAltLoc> ret = null;
         long now = System.currentTimeMillis();
         synchronized (coll) {
@@ -95,18 +93,17 @@ public class AltLocTracker {
 
     }
 
-    public Collection<PushAltLoc> getNextSetOfPushAltsToSend() {
+    public Collection<PushAltLoc> getNextSetOfPushAltsToSend(AltLocManager altLocManager) {
         if (!wantsFAlts)
             return Collections.emptySet();
 
-        AlternateLocationCollection<PushAltLoc> fwt = RouterService
-                .getAltlocManager().getPushFWT(urn);
+        AlternateLocationCollection<PushAltLoc> fwt = altLocManager.getPushFWT(urn);
 
         AlternateLocationCollection<PushAltLoc> push;
         if (fwtVersion > 0)
             push = AlternateLocationCollection.getEmptyCollection();
         else
-            push = RouterService.getAltlocManager().getPushNoFWT(urn);
+            push = altLocManager.getPushNoFWT(urn);
 
         Collection<PushAltLoc> ret = null;
         long now = System.currentTimeMillis();
@@ -173,21 +170,6 @@ public class AltLocTracker {
 
     public void setFwtVersion(int fwtVersion) {
         this.fwtVersion = fwtVersion;
-    }
-
-    public void addAltLocHeaders(HttpResponse response) {
-        response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(urn));
-        Collection<? extends AlternateLocation> alts = getNextSetOfAltsToSend();
-        if(alts.size() > 0) {
-            response.addHeader(HTTPHeaderName.ALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
-        }
-
-        if (wantsFAlts) {
-            alts = getNextSetOfPushAltsToSend();
-            if (alts.size() > 0) {
-                response.addHeader(HTTPHeaderName.FALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
-            }
-        }
     }
 
 }

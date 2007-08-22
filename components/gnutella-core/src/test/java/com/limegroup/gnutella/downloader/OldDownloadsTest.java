@@ -11,7 +11,7 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -42,7 +42,8 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         callback = new TestActivityCallback();
-        new RouterService( callback );
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService( callback );
     }
     
     public void testLegacy() throws Exception {
@@ -59,7 +60,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         //Build part of backend 
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         DownloadSettings.MAX_SIM_DOWNLOAD.setValue(0);
-        DownloadManager dm = RouterService.getDownloadManager();
+        DownloadManager dm = ProviderHacks.getDownloadManager();
         dm.initialize();
         assertTrue("unable to read snapshot!",
             dm.readSnapshot(CommonUtils.getResourceFile(filePath + file)));

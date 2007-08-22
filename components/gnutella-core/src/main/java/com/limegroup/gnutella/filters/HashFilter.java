@@ -6,7 +6,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 /**
  * filters out queries containing hash urns. 
  */
-public class HashFilter extends SpamFilter {
+public class HashFilter implements SpamFilter {
 
     public boolean allow(Message m) {
         if (! (m instanceof QueryRequest))

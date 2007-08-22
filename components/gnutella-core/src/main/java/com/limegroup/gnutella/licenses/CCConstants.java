@@ -8,8 +8,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-
 /**
  * A collection of constants & utilities for Creative Commons licenses
  */
@@ -74,7 +72,7 @@ public final class CCConstants {
     
     public static String getLicenseElement(int licenseType) {
         Integer licenseTypeI = new Integer(licenseType);
-        Assert.that(LICENSE_URI_MAP.containsKey(licenseTypeI));
+        assert(LICENSE_URI_MAP.containsKey(licenseTypeI));
         
         StringBuilder ret = new StringBuilder();
         // header - the description of the license

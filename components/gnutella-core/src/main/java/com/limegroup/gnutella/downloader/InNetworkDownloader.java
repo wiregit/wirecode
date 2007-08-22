@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -39,12 +37,13 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     /** 
      * Constructs a new downloader that's gonna work off the network.
      */
-    public InNetworkDownloader(IncompleteFileManager incompleteFileManager,
+    InNetworkDownloader(IncompleteFileManager incompleteFileManager,
                                DownloadInformation info,
                                File dir,
-                               long startTime) throws SaveLocationException {
+                               long startTime, SaveLocationManager saveLocationManager) throws SaveLocationException {
         super( new RemoteFileDesc[0], incompleteFileManager,
-               null, dir, info.getUpdateFileName(), true);
+               null, dir, info.getUpdateFileName(), true, saveLocationManager);
+        // note: even though we support bigger files, this is a good sanity check
         if(info.getSize() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("size too big for now.");
 
@@ -76,12 +75,12 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      * Overriden to ensure that the 'downloadSHA1' variable is set & we're listening
      * for alternate locations.
      */
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-                           DownloadCallback callback) {
-        super.initialize(manager, fileManager, callback);
-        if(downloadSHA1 == null) {
+    public void initialize(DownloadReferences downloadReferences) {
+        super.initialize(downloadReferences);
+        if (downloadSHA1 == null) {
             downloadSHA1 = urn;
-            RouterService.getAltlocManager().addListener(downloadSHA1,this);
+            // the listener is removed by ManagedDownloader.finished()
+            altLocManager.addListener(downloadSHA1, this);
         }
     }
     

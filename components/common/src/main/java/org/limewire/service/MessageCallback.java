@@ -95,7 +95,7 @@ public interface MessageCallback {
      * Shows a locale-specific error message to the user, using the
      * given message key & the arguments for that key.
      */
-    void showFormattedError(String errorKey, String... args);
+    void showFormattedError(String errorKey, Object... args);
     
     /**
      * Shows a locale-specific formatted error to the user, using the
@@ -105,7 +105,7 @@ public interface MessageCallback {
      * @param ignore the BooleanSetting that stores whether or not the user
      *        has chosen to receive future warnings of this message.
      */
-    void showFormattedError(String errorKey, Switch ignore, String... args);    
+    void showFormattedError(String errorKey, Switch ignore, Object... args);    
 
     
     /**
@@ -134,7 +134,7 @@ public interface MessageCallback {
      * @param messageKey the key for looking up the locale-specific message
      *  in the resource bundles
      */
-    void showFormattedMessage(String messageKey, String... args);
+    void showFormattedMessage(String messageKey, Object... args);
     
     /**
      * Shows a locale-specific formatted message to the user, using the
@@ -146,5 +146,5 @@ public interface MessageCallback {
      * @param ignore the BooleanSetting that stores whether or not the user
      *        has chosen to receive future warnings of this message.
      */
-    void showFormattedMessage(String messageKey, Switch ignore, String... args);
+    void showFormattedMessage(String messageKey, Switch ignore, Object... args);
 }

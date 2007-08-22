@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 
 public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     
@@ -20,8 +21,8 @@ public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
         //Note: some of Message's code is covered by subclass tests, e.g.,
         //PushRequestTest.
 
-        Message m1=new PingRequest((byte)3);
-        Message m2=new PingRequest((byte)3);
+        Message m1=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
+        Message m2=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
         m2.setPriority(5);
         assertGreaterThan(0, m1.compareTo(m2));
         assertLessThan(0, m2.compareTo(m1));
@@ -42,7 +43,7 @@ public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         byte[] b = new byte[40];
         try {
-            MessageFactory.read(bais,b,(byte)4);
+            ProviderHacks.getMessageFactory().read(bais,b,(byte)4);
             fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
         }

@@ -7,6 +7,7 @@ import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.Expand;
 
@@ -45,7 +46,7 @@ public class LimeXMLSchemaTest extends LimeTestCase {
 	 */
     public static void testGetFieldNames() throws Exception {
         LimeXMLSchema schema = new LimeXMLSchema(new File(
-            LimeXMLProperties.instance().getXMLSchemaDir() 
+            ProviderHacks.getLimeXMLProperties().getXMLSchemaDir() 
             + File.separator
             + "audio.xsd"));
         

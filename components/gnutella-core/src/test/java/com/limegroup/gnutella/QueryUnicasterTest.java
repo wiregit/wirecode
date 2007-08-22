@@ -20,14 +20,11 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
 
 @SuppressWarnings("unchecked")
 public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -41,7 +38,6 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
 
     private final int NUM_UDP_LOOPS = 25;
     
-    private static RouterService _rs;
 
     private boolean _shouldRun = true;
     private boolean shouldRun() {
@@ -65,14 +61,14 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public static void globalSetUp() throws Exception {
-        _rs = new RouterService(new
-                ActivityCallbackStub(),
-                new MessageRouterStub());
-        _rs.start();
+       // _rs = new RouterService(new
+      //          ActivityCallbackStub(),
+       //         new MessageRouterStub());
+        ProviderHacks.getLifecycleManager().start();
     }
     
     public void setUp() throws Exception {
-        QueryUnicaster qu = QueryUnicaster.instance();        
+        QueryUnicaster qu = ProviderHacks.getQueryUnicaster();        
         PrivilegedAccessor.invokeMethod(qu, "resetUnicastEndpointsAndQueries");
        
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
@@ -83,7 +79,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     }
 
     public void testConstruction() {
-        QueryUnicaster qu = QueryUnicaster.instance();
+        QueryUnicaster qu = ProviderHacks.getQueryUnicaster();
         
         assertEquals("unexpected amount of unicast endpoints",
             0, qu.getUnicastEndpoints().size());
@@ -110,7 +106,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         InetAddress addr = null;
         addr = InetAddress.getByName("127.0.0.1");
         for (int i = 0; i < NUM_UDP_LOOPS; i++)  {
-            QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
+            ProviderHacks.getQueryUnicaster().addUnicastEndpoint(addr, 5000+i);
             if (i % 5 == 0) {
                 try {
                     // give some time for queries to get out...
@@ -121,13 +117,13 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         }            
 
         // add a Query
-		QueryRequest qr = QueryRequest.createQuery("susheel", (byte)2);
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("susheel", (byte)2);
         
 		assertEquals("unexpected number of queries",
-		    0, QueryUnicaster.instance().getQueryNumber() );
-        QueryUnicaster.instance().addQuery(qr, null);
+		    0, ProviderHacks.getQueryUnicaster().getQueryNumber() );
+        ProviderHacks.getQueryUnicaster().addQuery(qr, null);
         assertEquals("unexpected number of queries",
-            1, QueryUnicaster.instance().getQueryNumber() );
+            1, ProviderHacks.getQueryUnicaster().getQueryNumber() );
 
         // give udpLoopers time to execute
         // get messages from vector, should be a message or a ping
@@ -181,7 +177,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         
         // get rid of old query...
         QueryReply qRep = generateFakeReply(qr.getGUID(), 251);
-        QueryUnicaster.instance().handleQueryReply(qRep);
+        ProviderHacks.getQueryUnicaster().handleQueryReply(qRep);
     }
 
 
@@ -206,14 +202,14 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         }
 
         // add a Query
-		QueryRequest qr = QueryRequest.createQuery("Daswani", (byte)2);
-        QueryUnicaster.instance().addQuery(qr, null);
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("Daswani", (byte)2);
+        ProviderHacks.getQueryUnicaster().addQuery(qr, null);
 
         // add these endpoints....
         InetAddress addr = null;
         addr = InetAddress.getByName("127.0.0.1");
         for (int i = 0; i < NUM_UDP_LOOPS; i++) {
-            QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
+            ProviderHacks.getQueryUnicaster().addUnicastEndpoint(addr, 5000+i);
             if (i % 5 == 0) {
                 try {
                     // give some time for queries to get out...
@@ -228,7 +224,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
             if( low<25 )low=25;             if( hi<35 )hi=35;
             QueryReply qRep = generateFakeReply(qr.getGUID(),
                                                 getNumberBetween(low, hi));
-            QueryUnicaster.instance().handleQueryReply(qRep);
+            ProviderHacks.getQueryUnicaster().handleQueryReply(qRep);
         }
 
         // give udpLoopers time to execute
@@ -238,7 +234,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         try {
             Thread.sleep(30 * 1000);
             assertEquals("unexpected number of queries",
-                0, QueryUnicaster.instance().getQueryNumber() );
+                0, ProviderHacks.getQueryUnicaster().getQueryNumber() );
         }
         catch (InterruptedException ignored) {}
         int numMessages = 0, numQRs = 0, numPings = 0;
@@ -264,7 +260,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         //      apply the following assert if there are more left over.
         if( NUM_UDP_LOOPS>10 )
             assertGreaterThan("unexpected endpoint size",
-                    0, QueryUnicaster.instance().getUnicastEndpoints().size() );
+                    0, ProviderHacks.getQueryUnicaster().getUnicastEndpoints().size() );
         
         if( LOG.isDebugEnabled() ) {
             LOG.debug("QueryUnicasterTest.testQueries(): numMessages = " +
@@ -292,12 +288,10 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     private QueryReply generateFakeReply(byte[] guid, int numResponses) {
         Response[] resps = new Response[numResponses];
         for (int i = 0; i< resps.length; i++)
-            resps[i] = new Response(i, i, ""+i);
+            resps[i] = ProviderHacks.getResponseFactory().createResponse(i, i, ""+i);
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
-        QueryReply toReturn = new QueryReply(guid,
-                                             (byte) 2,
-                                             1, ip, 0, resps,
-                                             GUID.makeGuid(), false);
+        QueryReply toReturn = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 2, 1,
+                ip, 0, resps, GUID.makeGuid(), false);
         return toReturn;
     }
 
@@ -353,7 +347,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in);		
+                    Message message = ProviderHacks.getMessageFactory().read(in);		
                     if(message == null) continue;
                     if (message instanceof PingRequest) {
                         PingRequest pr = (PingRequest)message;
@@ -365,7 +359,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                                         datagram.getPort());
                             
                             PingReply pRep = 
-                                PingReply.createQueryKeyReply(pr.getGUID(), 
+                                ProviderHacks.getPingReplyFactory().createQueryKeyReply(pr.getGUID(), 
                                                               (byte)1,
                                                               port,
                                                               localhost,
@@ -373,7 +367,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                                                               qk);
                             pRep.hop();
                             LOG.debug("QueryUnicasterTest.udpLoop(): sending QK.");
-                            QueryUnicaster.instance().handleQueryKeyPong(pRep);
+                            ProviderHacks.getQueryUnicaster().handleQueryKeyPong(pRep);
                         }
                     }
                     // log the message....

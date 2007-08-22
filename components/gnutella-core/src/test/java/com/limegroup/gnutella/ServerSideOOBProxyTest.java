@@ -18,12 +18,10 @@ import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
@@ -85,8 +83,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     public static void setSettings() throws Exception {
         // we want to test the expirer so make the expire period small
-        PrivilegedAccessor.setValue(GuidMapFactory.class, "EXPIRE_POLL_TIME", new Long(EXPIRE_TIME));
-        Class clazz = PrivilegedAccessor.getClass(GuidMapFactory.class, "GuidMapImpl");
+        PrivilegedAccessor.setValue(GuidMapManagerImpl.class, "EXPIRE_POLL_TIME", new Long(EXPIRE_TIME));
+        Class clazz = PrivilegedAccessor.getClass(GuidMapManagerImpl.class, "GuidMapImpl");
         PrivilegedAccessor.setValue(clazz, "TIMED_GUID_LIFETIME", new Long(EXPIRE_TIME));
         ConnectionSettings.MULTICAST_PORT.setValue(10100);
         UDP_ACCESS = new DatagramSocket();
@@ -137,10 +135,10 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        sendF(LEAF[1], MessagesSupportedVendorMessage.instance());
+        sendF(LEAF[1], ProviderHacks.getMessagesSupportedVendorMessage());
         Thread.sleep(100); // wait for processing of msvm
 
-        QueryRequest query = QueryRequest.createQuery("stanford");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
         sendF(LEAF[1], query);
         
         Thread.sleep(1000);
@@ -159,18 +157,18 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
         //------------------------------
 
-        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming",Boolean.TRUE);
-        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.TRUE);
         Thread.sleep(500);
-        assertTrue(RouterService.isGUESSCapable());
-        assertTrue(RouterService.isOOBCapable());
+        assertTrue(ProviderHacks.getNetworkManager().isGUESSCapable());
+        assertTrue(ProviderHacks.getNetworkManager().isOOBCapable());
         
         //no one has sent a MessagesSupportedVM yet so no queries should be
         //proxied
         //------------------------------
         {
         drainAll();    
-        QueryRequest query = QueryRequest.createQuery("stanford");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
@@ -193,10 +191,10 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        sendF(LEAF[0], MessagesSupportedVendorMessage.instance());
+        sendF(LEAF[0], ProviderHacks.getMessagesSupportedVendorMessage());
         Thread.sleep(100); // wait for processing of msvm
 
-        QueryRequest query = QueryRequest.createQuery("stanford");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
@@ -210,8 +208,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         byte[] proxiedGuid = new byte[queryRec.getGUID().length];
         System.arraycopy(queryRec.getGUID(), 0, proxiedGuid, 0, 
                          proxiedGuid.length);
-        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
-                RouterService.getPort());
+        GUID.addressEncodeGuid(proxiedGuid, ProviderHacks.getNetworkManager().getAddress(),
+                ProviderHacks.getNetworkManager().getPort());
         assertEquals(new GUID(proxiedGuid), new GUID(queryRec.getGUID()));
 
         // shut off query
@@ -226,7 +224,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         {
         drainAll();    
         QueryRequest query = 
-        QueryRequest.createOutOfBandQuery("leehsus",
+        ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("leehsus",
                                           LEAF[0].getInetAddress().getAddress(),
                                           LEAF[0].getPort());
         assertTrue(query.desiresOutOfBandRepliesV3());
@@ -254,11 +252,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
-                                              "whatever", null, null,
-                                              null, false, 
-                                              Network.UNKNOWN, false, 0,
-                                              true, 0);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 3,
+                "whatever", null, null, null, false, Network.UNKNOWN, false, 0, true,
+                0);
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
@@ -283,10 +279,10 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
         {
         drainAll();    
-        sendF(ULTRAPEER[0], MessagesSupportedVendorMessage.instance());
+        sendF(ULTRAPEER[0], ProviderHacks.getMessagesSupportedVendorMessage());
         Thread.sleep(100); // wait for processing of msvm
 
-        QueryRequest query = QueryRequest.createQuery("stanford");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
         sendF(ULTRAPEER[0], query);
         
         Thread.sleep(1000);
@@ -307,7 +303,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     public void testProtocolUpgrade() throws Exception {
         SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         drainAll();
-        QueryRequest nonOOB = QueryRequest.createQuery("badger");
+        QueryRequest nonOOB = ProviderHacks.getQueryRequestFactory().createQuery("badger");
         assertFalse(nonOOB.desiresOutOfBandReplies());
         nonOOB.getPayload()[0] |= 0x0004; // pretend it wants oob v2
         sendF(LEAF[0], nonOOB);
@@ -320,8 +316,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         assertTrue(OOBv2.desiresOutOfBandRepliesV3());
         
         byte[] proxiedGuid = OOBv2.getGUID().clone();
-        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
-                RouterService.getPort());
+        GUID.addressEncodeGuid(proxiedGuid, ProviderHacks.getNetworkManager().getAddress(),
+                ProviderHacks.getNetworkManager().getPort());
         // guid should be address encoded with proxying ultrapeer
         assertEquals(proxiedGuid, OOBv2.getGUID());
     }
@@ -330,7 +326,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     public void testProtocolUpgradeDisableV2() throws Exception {
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         drainAll();
-        QueryRequest nonOOB = QueryRequest.createQuery("badger");
+        QueryRequest nonOOB = ProviderHacks.getQueryRequestFactory().createQuery("badger");
         assertFalse(nonOOB.desiresOutOfBandReplies());
         nonOOB.getPayload()[0] |= 0x0004; // pretend it wants oob v2
         sendF(LEAF[0], nonOOB);
@@ -343,8 +339,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         assertTrue(OOBv2.desiresOutOfBandRepliesV3());
         
         byte[] proxiedGuid = OOBv2.getGUID().clone();
-        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
-                RouterService.getPort());
+        GUID.addressEncodeGuid(proxiedGuid, ProviderHacks.getNetworkManager().getAddress(),
+                ProviderHacks.getNetworkManager().getPort());
         // guid should be address encoded with proxying ultrapeer
         assertEquals(proxiedGuid, OOBv2.getGUID());
     }
@@ -354,7 +350,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         // default case proxying works
         {
             drainAll();    
-            QueryRequest query = QueryRequest.createQuery("stanford");
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
             sendF(LEAF[0], query);
             
             Thread.sleep(1000);
@@ -365,8 +361,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             byte[] proxiedGuid = query.getGUID().clone();
-            GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
-                    RouterService.getPort());
+            GUID.addressEncodeGuid(proxiedGuid, ProviderHacks.getNetworkManager().getAddress(),
+                    ProviderHacks.getNetworkManager().getPort());
             // guid should be address encoded with proxying ultrapeer
             assertEquals(proxiedGuid, queryRec.getGUID());
 
@@ -388,7 +384,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             // queue messages by priority
             Thread.sleep(1000);
             
-            QueryRequest query = QueryRequest.createQuery("stanford");
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
             sendF(LEAF[0], query);
             
             Thread.sleep(1000);
@@ -416,7 +412,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             
             Thread.sleep(1000);
             
-            QueryRequest query = QueryRequest.createQuery("stanford");
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
             sendF(LEAF[0], query);
             
             Thread.sleep(1000);
@@ -427,8 +423,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             byte[] proxiedGuid = query.getGUID().clone();
-            GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
-                    RouterService.getPort());
+            GUID.addressEncodeGuid(proxiedGuid, ProviderHacks.getNetworkManager().getAddress(),
+                    ProviderHacks.getNetworkManager().getPort());
             // guid should be address encoded with proxying ultrapeer
             assertEquals(proxiedGuid, queryRec.getGUID());
 
@@ -447,7 +443,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             
             Thread.sleep(1000);
             
-            QueryRequest query = QueryRequest.createQuery("stanford");
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
             sendF(LEAF[0], query);
             
             Thread.sleep(1000);
@@ -475,7 +471,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             
             Thread.sleep(1000);
             
-            QueryRequest query = QueryRequest.createQuery("stanford");
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
             sendF(LEAF[0], query);
             
             Thread.sleep(1000);
@@ -486,8 +482,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             byte[] proxiedGuid = query.getGUID().clone();
-            GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
-                    RouterService.getPort());
+            GUID.addressEncodeGuid(proxiedGuid, ProviderHacks.getNetworkManager().getAddress(),
+                    ProviderHacks.getNetworkManager().getPort());
             // guid should be address encoded with proxying ultrapeer
             assertEquals(proxiedGuid, queryRec.getGUID());
 
@@ -505,7 +501,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     public void testBasicProxy() throws Exception {
         drainAll();    
 
-        QueryRequest query = QueryRequest.createQuery("stanford");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("stanford");
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
@@ -519,19 +515,19 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         byte[] proxiedGuid = new byte[queryRec.getGUID().length];
         System.arraycopy(queryRec.getGUID(), 0, proxiedGuid, 0, 
                          proxiedGuid.length);
-        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
-                RouterService.getPort());
+        GUID.addressEncodeGuid(proxiedGuid, ProviderHacks.getNetworkManager().getAddress(),
+                ProviderHacks.getNetworkManager().getPort());
         assertEquals(new GUID(proxiedGuid), new GUID(queryRec.getGUID()));
         // 1) route some TCP results back and make sure they are mapped back to
         // the leaf
         {
             Response[] res = new Response[1];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10, 10, "stanford0");
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "stanford0");
             Message m = 
-                new QueryReply(proxiedGuid, (byte) 3, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(proxiedGuid, (byte) 3, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             sendF(ULTRAPEER[0], m);
             
             Thread.sleep(1000); // processing wait
@@ -552,16 +548,16 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         {
             Response[] res = new Response[1];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10, 10, "stanford1");
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "stanford1");
             
             
             SecurityToken token = exchangeRNVMACK(proxiedGuid);
             assertNotNull(token);
             
             Message m = 
-                new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null, token);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(proxiedGuid, (byte) 3, 6356,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null, token);
             
             // send off the reply
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -596,15 +592,15 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
             Response[] res = new Response[1];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10, 10, "stanford2");
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "stanford2");
             Message m = 
-                new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(proxiedGuid, (byte) 3, 6356,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             
             // send a ReplyNumberVM
             ReplyNumberVendorMessage replyNum = 
-                new ReplyNumberVendorMessage(new GUID(proxiedGuid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().create(new GUID(proxiedGuid), 1);
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             replyNum.write(baos);
@@ -620,7 +616,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                     pack = new DatagramPacket(new byte[1000], 1000);
                     UDP_ACCESS.receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    Message mTemp = MessageFactory.read(in);
+                    Message mTemp = ProviderHacks.getMessageFactory().read(in);
                     if (mTemp instanceof LimeACKVendorMessage)
                         fail("Should not get ACK!!!");
                 }
@@ -651,11 +647,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
      */
     public void testDropUnsolicited() throws Exception {
     	drainAll();
-    	QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
-                "not proxied", null, null,
-                null, false, 
-                Network.UNKNOWN, false, 0,
-                true, 0);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 3,
+                "not proxied", null, null, null, false, Network.UNKNOWN, false, 0, true,
+                0);
     	
     	sendF(LEAF[0], query);
         
@@ -677,11 +671,11 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         // create a bunch of responses for that guid 
         Response[] res = new Response[1];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "not proxied");
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "not proxied");
         Message m = 
-            new QueryReply(query.getGUID(), (byte) 3, 6356, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null, token);
+            ProviderHacks.getQueryReplyFactory().createQueryReply(query.getGUID(), (byte) 3, 6356,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null, token);
         
         // and send them OOB 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -703,7 +697,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     private SecurityToken exchangeRNVMACK(byte[] guid) throws Exception {
     	// send a ReplyNumberVM
     	ReplyNumberVendorMessage replyNum = 
-    		new ReplyNumberVendorMessage(new GUID(guid), 1);
+    	    ProviderHacks.getReplyNumberVendorMessageFactory().create(new GUID(guid), 1);
 
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	replyNum.write(baos);
@@ -724,7 +718,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     			fail("Did not get ack", bad);
     		}
     		InputStream in = new ByteArrayInputStream(pack.getData());
-    		Message mTemp = MessageFactory.read(in);
+    		Message mTemp = ProviderHacks.getMessageFactory().read(in);
     		if (mTemp instanceof LimeACKVendorMessage)
     			ack = (LimeACKVendorMessage) mTemp;
     	}
@@ -736,11 +730,11 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     // tests that the expirer works
     public void testExpirer() throws Exception {
         // see if anything is going to be expired
-        List expireList = (List) PrivilegedAccessor.getValue(GuidMapFactory.class, 
+        List expireList = (List) PrivilegedAccessor.getValue(GuidMapManagerImpl.class, 
                                                              "toExpire");
         assertNotNull(expireList);
         Thread.sleep(EXPIRE_TIME*2);  // old guids should be expired...
-        synchronized (GuidMapFactory.class) {
+        synchronized (GuidMapManagerImpl.class) {
             assertEquals(1, expireList.size());
             // iterator through all the maps and confirm they are empty
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
@@ -754,7 +748,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // now add a few queries and make sure some are expired but others not
         {
-        QueryRequest query = QueryRequest.createQuery("sumeet");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("sumeet");
         sendF(LEAF[0], query);
         Thread.sleep(500);
         QueryStatusResponse resp = 
@@ -763,7 +757,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         Thread.sleep(500);
         }
         {
-        QueryRequest query = QueryRequest.createQuery("berlin");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berlin");
         sendF(LEAF[0], query);
         Thread.sleep(500);
         QueryStatusResponse resp = 
@@ -773,7 +767,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
         Thread.sleep(EXPIRE_TIME*2);
         
-        synchronized (GuidMapFactory.class) {
+        synchronized (GuidMapManagerImpl.class) {
             // iterator through all the maps and confirm they are empty
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
                 Object guidMapImpl = i.next();

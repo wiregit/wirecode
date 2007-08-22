@@ -428,7 +428,6 @@ public class BEncodeTest extends LimeTestCase {
         BEncoder.getEncoder(baos, true, true, Token.ASCII).encodeDict(m);
         
         String s = new String(baos.toByteArray(),Token.ASCII);
-        System.out.println(s);
         String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeee4:key3ltlftfee4:key4fe";
         assertEquals(expected, s);
         

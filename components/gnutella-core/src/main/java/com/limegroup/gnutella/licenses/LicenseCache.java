@@ -26,7 +26,7 @@ import com.limegroup.gnutella.URN;
 /**
  * A repository of licenses.
  */
-class LicenseCache {
+public class LicenseCache {
     
     private static final Log LOG = LogFactory.getLog(LicenseCache.class);
     
@@ -57,10 +57,7 @@ class LicenseCache {
      */
     private boolean dirty = false;
 
-    private static final LicenseCache INSTANCE = new LicenseCache();
     private LicenseCache() { deserialize(); }
-    public static LicenseCache instance() { return INSTANCE; }
-    
     /**
      * Adds a verified license.
      */

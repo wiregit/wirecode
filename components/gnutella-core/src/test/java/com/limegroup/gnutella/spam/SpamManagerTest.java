@@ -6,12 +6,13 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
@@ -57,15 +58,15 @@ public class SpamManagerTest extends LimeTestCase {
     
     static LimeXMLDocument doc1, doc2;
     
-    static SpamManager manager = SpamManager.instance();
+    static SpamManager manager = ProviderHacks.getSpamManager();
     
     public static void globalSetUp() {
         try {
             urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
             urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
             urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-            doc1 = new LimeXMLDocument(xml1);
-            doc2 = new LimeXMLDocument(xml2);
+            doc1 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml1);
+            doc2 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml2);
         } catch (Exception bad) {
             fail(bad);
         }
@@ -194,7 +195,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, snakeRating);
         
         // make the user send a query with a badger and a mushroom
-        QueryRequest qr = QueryRequest.createQuery(mushroom);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(mushroom);
         manager.startedQuery(qr);
         
         // if we receive results containing badgers and snakes their rating

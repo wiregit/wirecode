@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -42,26 +43,26 @@ public class KeywordFilterTest extends LimeTestCase {
     }
 	
 	public void testLegacy() {        
-        qr=QueryRequest.createQuery("Britney", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("Britney", (byte)1);
         assertTrue(filter.allow(qr));
         filter.disallow("britney spears");
         assertTrue(filter.allow(qr));
         
-        qr=QueryRequest.createQuery("pie with rhubarb", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("pie with rhubarb", (byte)1);
         assertTrue(filter.allow(qr));
         filter.disallow("rhuBarb");
         assertTrue(!filter.allow(qr));
-        qr=QueryRequest.createQuery("rhubarb.txt", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("rhubarb.txt", (byte)1);
         assertTrue(!filter.allow(qr));
-        qr=QueryRequest.createQuery("Rhubarb*", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("Rhubarb*", (byte)1);
         assertTrue(!filter.allow(qr));
         
         filter.disallowVbs();
-        qr=QueryRequest.createQuery("test.vbs", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("test.vbs", (byte)1);
         assertTrue(!filter.allow(qr));
         
         filter.disallowHtml();
-        qr=QueryRequest.createQuery("test.htm", (byte)1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("test.htm", (byte)1);
         assertTrue(!filter.allow(qr));
     }
     
@@ -85,7 +86,7 @@ public class KeywordFilterTest extends LimeTestCase {
     }
     
     protected QueryReply createReply(String response) {
-        return createReply(new Response(5, 5, response), new GUID(), 5555, address); 
+        return createReply(ProviderHacks.getResponseFactory().createResponse(5, 5, response), new GUID(), 5555, address); 
     }
     
     public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {
@@ -99,14 +100,13 @@ public class KeywordFilterTest extends LimeTestCase {
         } catch(UnsupportedEncodingException ueex) {//no support for utf-8?? 
         }
         byte[] xmlCompressed = null;
-        if (xmlCollectionString!=null && !xmlCollectionString.equals(""))
-            xmlCompressed = 
-                LimeXMLUtils.compress(xmlBytes);
+        if (!xmlCollectionString.equals(""))
+            xmlCompressed = LimeXMLUtils.compress(xmlBytes);
         else //there is no XML
             xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
         
-        return new QueryReply(guid.bytes(), (byte)1,
-                port, address, 0, new Response[] { resp },
-                GUID.makeGuid(), xmlCompressed, false, false, true, true, true, false);
+        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid.bytes(), (byte)1,
+                port, address, 0, new Response[] { resp }, GUID.makeGuid(), xmlCompressed, false,
+                false, true, true, true, false);
     }
 }

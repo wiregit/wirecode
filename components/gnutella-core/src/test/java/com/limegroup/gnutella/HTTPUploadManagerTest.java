@@ -6,6 +6,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -40,7 +41,7 @@ public class HTTPUploadManagerTest extends BaseTestCase {
         doSettings();
 
         // TODO acceptor shutdown in globalTearDown()
-        Acceptor acceptor = RouterService.getAcceptor();
+        Acceptor acceptor = ProviderHacks.getAcceptor();
         acceptor.init();
         acceptor.start();
     }
@@ -65,16 +66,16 @@ public class HTTPUploadManagerTest extends BaseTestCase {
 
         httpAcceptor = new HTTPAcceptor();
 
-        upMan = new HTTPUploadManager(new UploadSlotManager());
+        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
-        upMan.start(httpAcceptor, fm, cb);
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());
     }
 
     @Override
     protected void tearDown() throws Exception {
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
     }
 
     public void testIsConnectedTo() throws Exception {

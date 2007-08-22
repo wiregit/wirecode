@@ -14,13 +14,12 @@ import org.apache.http.message.BasicHttpResponse;
 import org.limewire.collection.Function;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.HackConnectionManager;
 import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -30,7 +29,9 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
 public class HTTPHeaderUtilsTest extends LimeTestCase {
     
     private StubConnectionManager stub;
+    @SuppressWarnings("all") // DPINJ: textfix
     private ConnectionManager oldCM;
+    private AltLocManager altLocManager;
 
 
     public HTTPHeaderUtilsTest(String name) {
@@ -44,22 +45,22 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     public void setUp() throws Exception {
         stub = new StubConnectionManager();
         stub.proxies = new StrictIpPortSet<Connectable>();
-        oldCM = RouterService.getConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", stub);  
+        oldCM = ProviderHacks.getConnectionManager();
+        altLocManager = ProviderHacks.getAltLocManager();
+       // PrivilegedAccessor.setValue(RouterService.class, "manager", stub);  
     }
     
     public void tearDown() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.class, "manager", oldCM);
+      //  PrivilegedAccessor.setValue(RouterService.class, "manager", oldCM);
     }
         
     public void testWritesAltsWhenEmpty() throws Exception {
         MockHTTPUploader uploader = new MockHTTPUploader();
         MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        StubFileDesc fd = new StubFileDesc();
-        
+
         tracker.setNextSetOfAltsToSend(new ArrayList<DirectAltLoc>());
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         assertNull(response.getLastHeader("X-Alt"));
     }
     
@@ -67,10 +68,9 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         MockHTTPUploader uploader = new MockHTTPUploader();
         MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        StubFileDesc fd = new StubFileDesc();
-        
+
         tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "2.3.4.6", "7.3.2.1", "2.1.5.3:6201", "1.2.65.2"));
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         assertEquals("1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2", response.getLastHeader("X-Alt").getValue());
     }
     
@@ -78,16 +78,15 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         MockHTTPUploader uploader = new MockHTTPUploader();
         MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        StubFileDesc fd = new StubFileDesc();
         
         tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "T2.3.4.6", "T7.3.2.1", "2.1.5.3:6201", "T1.2.65.2"));
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         String expected = "tls=68,1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2";
         assertEquals(expected, response.getLastHeader("X-Alt").getValue());
         
         // Just make sure that AltLocUtils can parse this.
         final AtomicInteger index = new AtomicInteger(0);
-        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, expected, true, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, expected, true, ProviderHacks.getAlternateLocationFactory(), new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation argument) {
                 switch(index.getAndIncrement()) {
                 case 0: checkDirect(argument, "1.2.3.4", 5,    false); break;
@@ -105,7 +104,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     
     public void testWritePushProxiesWhenEmpty() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertNull(response.getLastHeader("X-Push-Proxy"));
     }
     
@@ -113,7 +112,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
         stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
         stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("1.2.3.4:5,2.3.4.5:6", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -122,7 +121,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
         stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("pptls=A,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -133,7 +132,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
         stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
         stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, false));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -144,7 +143,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
         stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
         stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -155,7 +154,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
         stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, true));
         stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
-        HTTPHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
@@ -167,7 +166,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
                 tls = true;
                 loc = loc.substring(1);
             }
-            alts.add((DirectAltLoc)AlternateLocation.create(loc, HugeTestUtils.SHA1, tls));
+            alts.add((DirectAltLoc)ProviderHacks.getAlternateLocationFactory().create(loc, HugeTestUtils.SHA1, tls));
         }
         return alts;
     }
@@ -189,7 +188,7 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
     
     
     /** A fake ConnectionManager with custom proxies. */
-    private static class StubConnectionManager extends ConnectionManager {
+    private static class StubConnectionManager extends HackConnectionManager {
         private Set<Connectable> proxies;
         @Override
         public Set<? extends Connectable> getPushProxies() {
@@ -197,12 +196,4 @@ public class HTTPHeaderUtilsTest extends LimeTestCase {
         }        
     }
     
-    private static class StubFileDesc extends FileDesc {
-        @Override
-        public URN getSHA1Urn() {
-            return HugeTestUtils.SHA1;
-        }
-    }
-
-
 }

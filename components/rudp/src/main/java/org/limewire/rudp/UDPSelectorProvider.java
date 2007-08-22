@@ -6,9 +6,12 @@ import java.nio.channels.Pipe;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
+import com.google.inject.Inject;
+
 
 public class UDPSelectorProvider extends SelectorProvider {
     /** A factory so the outside world can change the default UDPSelectorProvider. */
+    @Inject
     private static volatile UDPSelectorProviderFactory providerFactory = null;
     
     private final RUDPContext context;

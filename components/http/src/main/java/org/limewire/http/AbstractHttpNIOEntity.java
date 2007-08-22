@@ -9,8 +9,11 @@ import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestWritableByteChannel;
+import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
+import org.limewire.nio.timeout.StalledUploadWatchdog;
 
 /**
  * Provides a default implementation of an event based HTTP entity that
@@ -25,6 +28,31 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
     private ContentEncoder encoder;
 
     private IOControl ioctrl;
+
+    /** Cancels the transfer if inactivity for too long. */
+    private StalledUploadWatchdog watchdog;
+
+    private long timeout = StalledUploadWatchdog.DELAY_TIME;
+    
+    /** shutdownable to shut off in case of a timeout */
+    private final Shutdownable timeoutable = new Shutdownable() {
+        public void shutdown() {
+            timeout();
+        }
+    };
+    
+    protected void activateTimeout() {
+        if (this.watchdog == null) {
+            this.watchdog = new StalledUploadWatchdog(timeout, NIODispatcher.instance().getScheduledExecutorService());
+        }
+        this.watchdog.activate(timeoutable);
+    }
+
+    protected void deactivateTimeout() {
+        if (this.watchdog != null) {
+            this.watchdog.deactivate();
+        }
+    }
 
     /**
      * Throws <code>UnsupportedOperationException</code>.
@@ -139,6 +167,12 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
     public abstract void finished();
 
     /**
+     * Invoked when the transfer times out. Needs to close the underlying
+     * connection.
+     */
+    public abstract void timeout();
+    
+    /**
      * Never invoked, throws <code>UnsupportedOperationException</code>.
      */
     public void handleIOException(IOException iox) {
@@ -146,10 +180,24 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity
     }
 
     /**
-     * Never invoked, throws <code>UnsupportedOperationException</code>.
+     * Does nothing.
      */
     public void shutdown() {
-        throw new UnsupportedOperationException();
     }
 
+    /** 
+     * Returns false.
+     */
+    public boolean hasBufferedOutput() {
+        return false;
+    }
+    
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+    
+    public long getTimeout() {
+        return timeout;
+    }
+    
 }

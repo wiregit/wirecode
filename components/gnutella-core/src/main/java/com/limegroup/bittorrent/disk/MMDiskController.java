@@ -88,21 +88,24 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 	}
 	
 	public synchronized void close() {
-		LOG.debug("closing...");
-		boolean allCleaned = false;
-		try {
-			boolean cleaned = true;
-			for (MappedByteBuffer mbb : bufMap.values()) {
-				safeForce(mbb);
-				cleaned = cleaned && clean(mbb);
-			}
-			allCleaned = cleaned;
-		} finally {
-			bufMap.clear();
-			if (!allCleaned)
-				System.gc(); 
-		}
-		super.close();
+	    LOG.debug("closing...");
+	    boolean allCleaned = false;
+	    try {
+	        if (bufMap != null) {
+	            boolean cleaned = true;
+	            for (MappedByteBuffer mbb : bufMap.values()) {
+	                safeForce(mbb);
+	                cleaned = cleaned && clean(mbb);
+	            }
+	            allCleaned = cleaned;
+	        }
+	    } finally {
+            if (bufMap != null)
+                bufMap.clear();
+	        if (!allCleaned)
+	            System.gc(); 
+	        super.close();
+	    }
 	}
 	
 	public synchronized void flush() throws IOException {

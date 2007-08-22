@@ -2,8 +2,10 @@ package com.limegroup.gnutella.rudp;
 
 import org.limewire.rudp.RUDPSettings;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
+@Singleton
 public class LimeRUDPSettings implements RUDPSettings {
 
     public int getMaxSkipAcks() {

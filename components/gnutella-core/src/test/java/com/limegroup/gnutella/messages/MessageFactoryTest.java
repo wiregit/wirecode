@@ -4,6 +4,8 @@ import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
+import com.limegroup.gnutella.ProviderHacks;
+
 public class MessageFactoryTest extends BaseTestCase {
 
     public MessageFactoryTest(String name) {
@@ -15,9 +17,9 @@ public class MessageFactoryTest extends BaseTestCase {
     }
 
     public void testGetParser() {
-        assertNull(MessageFactory.getParser((byte) 0xFF));
-        assertNotNull(MessageFactory.getParser((byte) 0x0));
-        assertNotNull(MessageFactory.getParser((byte) 0x100));
+        assertNull(ProviderHacks.getMessageFactory().getParser((byte) 0xFF));
+        assertNotNull(ProviderHacks.getMessageFactory().getParser((byte) 0x0));
+        assertNotNull(ProviderHacks.getMessageFactory().getParser((byte) 0x100));
     }
 
 }

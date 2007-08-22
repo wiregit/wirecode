@@ -11,7 +11,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * "mpg" or "*.*" are to be blocked, are at least set to travel less than
  * other queries.
  */
-public class GreedyQueryFilter extends SpamFilter {
+public class GreedyQueryFilter implements SpamFilter {
     private static final int GREEDY_QUERY_MAX = 3;
 
     public boolean allow(Message m) {

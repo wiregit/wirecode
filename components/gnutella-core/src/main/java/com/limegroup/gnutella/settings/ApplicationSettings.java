@@ -193,6 +193,12 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("LOGGING_VIEW_ENABLED", false);
     
     /**
+     * Sets whether or not Library Tab should be enabled.
+     */
+    public static final BooleanSetting STORE_VIEW_ENABLED =
+        FACTORY.createBooleanSetting("STORE_VIEW_ENABLED", true);
+    
+    /**
 	 * Sets the name of the jar file to load on startup, which is read
 	 * in from the properties file by RunLime.
 	 */

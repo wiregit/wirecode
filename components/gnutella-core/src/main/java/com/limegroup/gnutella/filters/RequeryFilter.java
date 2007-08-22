@@ -7,7 +7,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 /** 
  * Blocks over-zealous automated requeries.
  */
-public class RequeryFilter extends SpamFilter {
+public class RequeryFilter implements SpamFilter {
     public boolean allow(Message m) {
         if (m instanceof QueryRequest)
             return allow((QueryRequest)m);

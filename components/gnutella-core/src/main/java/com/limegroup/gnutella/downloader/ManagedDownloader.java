@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -19,12 +21,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
-import org.limewire.collection.Interval;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
@@ -32,7 +35,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.Assert;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -43,28 +46,33 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.DirectDHTAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -242,6 +250,11 @@ public class ManagedDownloader extends AbstractDownloader
      * that it can notify the gui that a file is corrupt to ask the user what
      * should be done.  */
     private DownloadCallback callback;
+    
+    private NetworkManager networkManager;
+    private AlternateLocationFactory alternateLocationFactory;
+    
+    
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
@@ -253,31 +266,10 @@ public class ManagedDownloader extends AbstractDownloader
 	private SourceRanker ranker;
 
     /**
-     * The time to wait between requeries, in milliseconds.  This time can
-     * safely be quite small because it is overridden by the global limit in
-     * DownloadManager.  Package-access and non-final for testing.
-     * 
-     * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_GNUTELLA_REQUERIES 
-     */
-    static long TIME_BETWEEN_REQUERIES = 5L * 60L * 1000L;  //5 minutes
-    
-    /**
      * How long we'll wait after sending a GUESS query before we try something
      * else.
      */
     private static final int GUESS_WAIT_TIME = 5000;
-    
-    /**
-     * How long we'll wait before attempting to download again after checking
-     * for stable connections (and not seeing any)
-     */
-    private static final int CONNECTING_WAIT_TIME = 750;
-    
-    /**
-     * The number of times to requery the network. All requeries are
-     * user-driven.
-     */
-    private static final int GNUTELLA_REQUERY_ATTEMPTS = 1;
     
 
     /** The size of the approx matcher 2d buffer... */
@@ -391,7 +383,7 @@ public class ManagedDownloader extends AbstractDownloader
 
     /** If in CORRUPT_FILE state, the number of bytes downloaded.  Note that
      *  this is less than corruptFile.length() if there are holes. */
-    private volatile int corruptFileBytes;
+    private volatile long corruptFileBytes;
     /** If in CORRUPT_FILE state, the name of the saved corrupt file or null if
      *  no corrupt file. */
     private volatile File corruptFile;
@@ -450,28 +442,6 @@ public class ManagedDownloader extends AbstractDownloader
     protected boolean deserializedFromDisk;
     
     /**
-     * The number of Gnutella queries already done for this downloader.
-     * Influenced by the type of downloader & whether or not it was started
-     * from disk or from scratch.
-     */
-    private volatile int numGnutellaQueries;
-    
-    /**
-     * The number of DHT queries already done for this downloader.
-     */
-    private volatile int numDHTQueries;
-    
-    /**
-     * Flag for whether or not this is the first query attempt
-     */
-    private volatile boolean firstQueryAttempt = true;
-    
-    /**
-     * Flag for whether or not we've already tried to query Gnutella
-     */
-    private volatile boolean alreadyTriedGnutella = false;
-    
-    /**
      * Whether or not we've sent a GUESS query.
      */
     private boolean triedLocatingSources;
@@ -482,11 +452,6 @@ public class ManagedDownloader extends AbstractDownloader
      */
     private volatile boolean receivedNewSources;
     
-    /**
-     * The time the last query was sent out.
-     */
-    private long lastQuerySent;
-    
     /** The key under which the URN is stored in the attribute map */
     protected static final String SHA1_URN = "sha1Urn";
 	
@@ -495,7 +460,24 @@ public class ManagedDownloader extends AbstractDownloader
 	 * in {@link #startDownload()};
 	 */
     private volatile int triedHosts;
+    
+    protected volatile RequeryManager requeryManager;
 
+    protected QueryRequestFactory queryRequestFactory;
+    protected OnDemandUnicaster onDemandUnicaster;
+    protected DownloadWorkerFactory downloadWorkerFactory;
+    protected AltLocManager altLocManager;
+    protected ContentManager contentManager;
+    protected SourceRankerFactory sourceRankerFactory;
+    protected UrnCache urnCache;
+    protected SavedFileManager savedFileManager;
+    protected VerifyingFileFactory verifyingFileFactory;
+    protected DiskController diskController;
+    protected IPFilter ipFilter;
+    protected ScheduledExecutorService backgroundExecutor;
+    protected Provider<MessageRouter> messageRouter;
+    protected Provider<TigerTreeCache> tigerTreeCache;
+    
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
@@ -507,11 +489,12 @@ public class ManagedDownloader extends AbstractDownloader
      * useful for WAITING_FOR_USER state.  can be null.
 	 * @throws SaveLocationException
      */
-    public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+    protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
                              GUID originalQueryGUID, File saveDirectory, 
-                             String fileName, boolean overwrite) 
+                             String fileName, boolean overwrite, 
+                             SaveLocationManager saveLocationManager) 
 		throws SaveLocationException {
-		this(files, ifc, originalQueryGUID);
+		this(files, ifc, originalQueryGUID, saveLocationManager);
         
         assert files.length > 0 || fileName != null;
         if (files.length == 0)
@@ -521,7 +504,9 @@ public class ManagedDownloader extends AbstractDownloader
     }
 	
 	protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-							 GUID originalQueryGUID) {
+							 GUID originalQueryGUID, SaveLocationManager saveLocationManager) {
+	    super(saveLocationManager);
+	    
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
@@ -542,7 +527,7 @@ public class ManagedDownloader extends AbstractDownloader
 		if (propertiesMap.get(DEFAULT_FILENAME) == null)
 			propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
 		if (propertiesMap.get(FILE_SIZE) == null)
-			propertiesMap.put(FILE_SIZE,new Integer(rfd.getSize()));
+			propertiesMap.put(FILE_SIZE,Long.valueOf(rfd.getSize()));
     }
     
     /** 
@@ -595,7 +580,7 @@ public class ManagedDownloader extends AbstractDownloader
         // old format
         if (next instanceof RemoteFileDesc[]) {
             RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
-            if (rfds != null && rfds.length > 0) 
+            if (rfds.length > 0) 
                 defaultRFD = rfds[0];
             cachedRFDs = new HashSet<RemoteFileDesc>(Arrays.asList(rfds));
         } else if(next instanceof Set) {
@@ -641,11 +626,28 @@ public class ManagedDownloader extends AbstractDownloader
      * @param deserialized True if this downloader is being initialized after 
      * being read from disk, false otherwise.
      */
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-                           DownloadCallback callback) {
-        this.manager=manager;
-		this.fileManager=fileManager;
-        this.callback=callback;
+    public void initialize(DownloadReferences downloadReferences) {
+        this.saveLocationManager = downloadReferences.getDownloadManager();
+        this.manager=downloadReferences.getDownloadManager();
+		this.fileManager=downloadReferences.getFileManager();
+        this.callback=downloadReferences.getDownloadCallback();
+        this.requeryManager = downloadReferences.getRequeryManagerFactory().createRequeryManager(this);
+        this.networkManager = downloadReferences.getNetworkManager();
+        this.alternateLocationFactory = downloadReferences.getAlternateLocationFactory();
+        this.queryRequestFactory = downloadReferences.getQueryRequestFactory();
+        this.onDemandUnicaster = downloadReferences.getOnDemandUnicaster();
+        this.downloadWorkerFactory = downloadReferences.getDownloadWorkerFactory();
+        this.altLocManager = downloadReferences.getAltLocManager();
+        this.contentManager = downloadReferences.getContentManager();
+        this.sourceRankerFactory = downloadReferences.getSourceRankerFactory();
+        this.urnCache = downloadReferences.getUrnCache();
+        this.savedFileManager = downloadReferences.getSavedFileManager();
+        this.verifyingFileFactory = downloadReferences.getVerifyingFileFactory();
+        this.diskController = downloadReferences.getDiskController();
+        this.ipFilter = downloadReferences.getIpFilter();
+        this.backgroundExecutor = downloadReferences.getBackgroundExecutor();
+        this.messageRouter = downloadReferences.getMessageRouter();
+        this.tigerTreeCache = downloadReferences.getTigerTreeCache();
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -670,8 +672,13 @@ public class ManagedDownloader extends AbstractDownloader
         // get the SHA1 if we can.
         
         synchronized(this) {
-            if (downloadSHA1 == null)
-                downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
+            if (downloadSHA1 == null) {
+                Object value = propertiesMap.get(SHA1_URN);
+                if (value instanceof URN) {
+                    downloadSHA1 = (URN)value;
+                }
+            }
+            
             for(RemoteFileDesc rfd : cachedRFDs) {
                 if(downloadSHA1 != null)
                     break;
@@ -682,7 +689,7 @@ public class ManagedDownloader extends AbstractDownloader
         }
         
 		if (downloadSHA1 != null) 
-		    RouterService.getAltlocManager().addListener(downloadSHA1,this);
+		    altLocManager.addListener(downloadSHA1,this);
         
 		
 		// make sure all rfds have the same sha1
@@ -710,10 +717,6 @@ public class ManagedDownloader extends AbstractDownloader
             reportDiskProblem(bad);
             return;
         }
-        
-        // Initial re-query state
-        firstQueryAttempt = true;
-        alreadyTriedGnutella = false;
         
         setState(DownloadStatus.QUEUED);
     }
@@ -753,7 +756,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Starts the download.
      */
     public synchronized void startDownload() {
-        Assert.that(dloaderManagerThread == null, "already started" );
+        assert dloaderManagerThread == null : "already started";
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 try {
@@ -787,7 +790,6 @@ public class ManagedDownloader extends AbstractDownloader
      * areas, depending on what is required or what has already occurred.
      */
     private void completeDownload(DownloadStatus status) {
-    
         boolean complete;
         boolean clearingNeeded = false;
         int waitTime = 0;
@@ -817,7 +819,7 @@ public class ManagedDownloader extends AbstractDownloader
                 }
                 break;
             default:
-                Assert.that(false, "Bad status from tad2: "+status);
+                assert false : "Bad status from tad2: "+status;
             }
             
             complete = isCompleted();
@@ -828,8 +830,6 @@ public class ManagedDownloader extends AbstractDownloader
                 ranker = null;
         }
         
-        long now = System.currentTimeMillis();
-
         // Notify the manager that this download is done.
         // This MUST be done outside of this' lock, else
         // deadlock could occur.
@@ -850,13 +850,10 @@ public class ManagedDownloader extends AbstractDownloader
         
         if(LOG.isTraceEnabled()) {
             LOG.trace("MD completing <" + getSaveFile().getName() 
-                    + "> completed download, state: " + getState() 
-                    + ", numGnutellaQueries: " + numGnutellaQueries 
-                    + ", numDHTQueries: " + numDHTQueries
-                    + ", lastQuerySent: " + lastQuerySent);
+                    + "> completed download, state: " + getState());
         }
         
-        VerifyingFile.clearCaches();
+        diskController.clearCaches();
 
         // if this is all completed, nothing else to do.
         if(complete) {
@@ -868,143 +865,54 @@ public class ManagedDownloader extends AbstractDownloader
             
         // Try iterative GUESSing...
         // If that sent some queries, don't do anything else.
+        // TODO: consider moving this inside the monitor
         } else if(tryGUESSing()) {
             ; // all done for now.
             
-            // If busy, try waiting for that busy host.
-        } else if (getState() == DownloadStatus.BUSY) {
-            setState(DownloadStatus.BUSY, waitTime);
-            
-        // If we sent a query recently, then we don't want to send another,
-        // nor do we want to give up.  Just continue waiting for results
-        // from that query.
-        } else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES) {
-            setState(DownloadStatus.WAITING_FOR_RESULTS,
-                     TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
-        
-        // If we're at our requery limit, give up.
-        } else if(shouldGiveUp()) {
-            setState(DownloadStatus.GAVE_UP);
-            
-        // If we want to send the requery immediately, do so.
-        } else if(shouldSendRequeryImmediately(numGnutellaQueries)) {
-            sendRequery();
-            
-        // Otherwise, wait for the user to initiate the query.            
         } else {
-            setState(DownloadStatus.WAITING_FOR_USER);
+            // the next few checks need to be atomic wrt dht callbacks to
+            // requeryManager.
+            
+            // do not issue actual requeries while holding this.
+            boolean requery = false;
+            synchronized(this) {
+                // If busy, try waiting for that busy host.
+                if (getState() == DownloadStatus.BUSY) {
+                    setState(DownloadStatus.BUSY, waitTime);
+
+                // If we sent a query recently, then we don't want to send another,
+                // nor do we want to give up.  Just continue waiting for results
+                // from that query.
+                } else if(requeryManager.isWaitingForResults()) {
+                    switch(requeryManager.getLastQueryType()) {
+                    case DHT: setState(DownloadStatus.QUERYING_DHT, requeryManager.getTimeLeftInQuery()); break;
+                    case GNUTELLA: setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, requeryManager.getTimeLeftInQuery()); break;
+                    default: 
+                        throw new IllegalStateException("Not any query type!");
+                    }
+
+                // If we're allowed to immediately send a query, do it!
+                } else if(canSendRequeryNow()) {
+                    requery = true;
+
+                // If we can send a query after we activate, wait for the user.
+                } else if(requeryManager.canSendQueryAfterActivate()) {
+                    setState(DownloadStatus.WAITING_FOR_USER);
+
+                // Otherwise, there's nothing we can do, give up.
+                } else {
+                    setState(DownloadStatus.GAVE_UP);
+
+                }
+            }
+
+            if (requery)
+                requeryManager.sendQuery();
         }
         
         if(LOG.isTraceEnabled()) {
             LOG.trace("MD completed <" + getSaveFile().getName() 
-                    + "> completed download, state: " + getState() 
-                    + ", numGnutellaQueries: " + numGnutellaQueries
-                    + ", numDHTQueries: " + numDHTQueries);
-        }
-    }
-    
-    /**
-     * Returns whether or not we should give up 
-     */
-    private boolean shouldGiveUp() {
-    	return shouldGiveUpGnutellaQueries() && shouldGiveUpDHTQueries();
-    }
-    
-    /**
-     * Returns whether or not we should give up Gnutella queries
-     */
-    private boolean shouldGiveUpGnutellaQueries() {
-    	return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS;
-    }
-    
-    /**
-     * Returns whether or not we should give up DHT queries
-     */
-    private boolean shouldGiveUpDHTQueries() {
-    	if (!DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-    	        || !RouterService.getDHTManager().isMemberOfDHT()) {
-    	    return true;
-    	}
-    	
-    	return numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue();
-    }
-    
-    /**
-     * Determines if we should send a requery immediately, or wait for user
-     * input.
-     *
-     * 'lastQuerySent' being equal to -1 indicates that the user has already
-     * clicked resume, so we do want to send immediately.
-     */
-    protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        return (lastQuerySent == -1 || !firstQueryAttempt);
-    }
-    
-    /**
-     * Attempts to send a requery.
-     * 
-     * Try in this order:
-     * 
-     *     1) DHT
-     *     2) Gnutella
-     *  -->3) DHT
-     *  |__|
-     */
-    private void sendRequery() {
-        if (DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-                && RouterService.getDHTManager().isMemberOfDHT() 
-                && (firstQueryAttempt || alreadyTriedGnutella)) {
-            
-            if (sendDHTQuery()) {
-                firstQueryAttempt = false;
-            }
-        } else if (!alreadyTriedGnutella) {
-            if (sendGnutellaQuery()) {
-                alreadyTriedGnutella = true;
-            }
-        }
-    }
-    
-    /**
-     * Sends a DHT Query
-     */
-    private boolean sendDHTQuery() {
-        if (manager.sendDHTQuery(getSHA1Urn())) {
-            lastQuerySent = System.currentTimeMillis();
-            numDHTQueries++;
-            setState(DownloadStatus.WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
-            return true;
-        } else {
-            lastQuerySent = -1;
-            return false;
-        }
-    }
-    
-    /**
-     * Sends a Gnutella Query
-     */
-    private boolean sendGnutellaQuery() {
-        // If we don't have stable connections, wait until we do.
-        if (hasStableConnections()) {
-            try {
-                QueryRequest qr = newRequery(numGnutellaQueries);
-                if(manager.sendQuery(this, qr)) {
-                    lastQuerySent = System.currentTimeMillis();
-                    numGnutellaQueries++;
-                    setState(DownloadStatus.WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
-                    return true;
-                } else {
-                    lastQuerySent = -1; // mark as wanting to requery.
-                    return false;
-                }
-            } catch(CantResumeException cre) {
-                LOG.debug("CantResumeException", cre);
-                return false;
-            }
-        } else {
-            lastQuerySent = -1; // mark as wanting to requery.
-            setState(DownloadStatus.WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
-            return false;
+                    + "> completed download, state: " + getState()); 
         }
     }
     
@@ -1016,7 +924,6 @@ public class ManagedDownloader extends AbstractDownloader
             //LOG.trace("handling inactivity. state: " + 
                       //getState() + ", hasnew: " + hasNewSources() + 
                       //", left: " + getRemainingStateTime());
-        
         switch(getState()) {
         case BUSY:
         case WAITING_FOR_CONNECTIONS:
@@ -1028,19 +935,24 @@ public class ManagedDownloader extends AbstractDownloader
             if(getRemainingStateTime() <= 0 || hasNewSources())
                 setState(DownloadStatus.QUEUED);
             break;
-        case WAITING_FOR_RESULTS:
+        case QUERYING_DHT:
+        case WAITING_FOR_GNET_RESULTS:
             // If we have new sources but are still inactive,
             // then queue ourselves and wait to restart.
             if(hasNewSources())
                 setState(DownloadStatus.QUEUED);
-            // Otherwise, we've ran out of time waiting for results,
-            // so give up.
-            else if(getRemainingStateTime() <= 0)
+            // Otherwise, if we've ran out of time waiting for results,
+            // give up.  If another requery can be sent, the GAVE_UP
+            // pump will trigger it to start.
+            else if(requeryManager.getTimeLeftInQuery() <= 0)
                 setState(DownloadStatus.GAVE_UP);
             break;
         case WAITING_FOR_USER:
+            if (hasNewSources() || requeryManager.canSendQueryNow())
+                setState(DownloadStatus.QUEUED);
+            break;
         case GAVE_UP:
-        	if (hasNewSources())
+        	if (hasNewSources() || requeryManager.canSendQueryAfterActivate()) 
         		setState(DownloadStatus.QUEUED);
         case QUEUED:
         case PAUSED:
@@ -1048,10 +960,10 @@ public class ManagedDownloader extends AbstractDownloader
             // have given up, or are queued, there's nothing to do.
             break;
         default:
-            Assert.that(false, "invalid state: " + getState() +
-                             ", workers: " + _workers.size() + 
-                             ", _activeWorkers: " + _activeWorkers.size() +
-                             ", _queuedWorkers: " + _queuedWorkers.size());
+            throw new IllegalStateException("invalid state: " + getState() +
+                                            ", workers: " + _workers.size() + 
+                                            ", _activeWorkers: " + _activeWorkers.size() +
+                                            ", _queuedWorkers: " + _queuedWorkers.size());
         }
     }   
     
@@ -1062,8 +974,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(originalQueryGUID == null || triedLocatingSources || downloadSHA1 == null)
             return false;
             
-        MessageRouter mr = RouterService.getMessageRouter();
-        Set<GUESSEndpoint> guessLocs = mr.getQueryLocs(this.originalQueryGUID);
+        Set<GUESSEndpoint> guessLocs = messageRouter.get().getQueryLocs(this.originalQueryGUID);
         if(guessLocs.isEmpty())
             return false;
 
@@ -1073,7 +984,7 @@ public class ManagedDownloader extends AbstractDownloader
         //TODO: should we increment a stat to get a sense of
         //how much this is happening?
         for(GUESSEndpoint ep : guessLocs) {
-            OnDemandUnicaster.query(ep, downloadSHA1);
+            onDemandUnicaster.query(ep, downloadSHA1);
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
             if(receivedNewSources)
@@ -1149,10 +1060,11 @@ public class ManagedDownloader extends AbstractDownloader
         case INITIALIZING:
         case QUEUED:
         case GAVE_UP:
-        case WAITING_FOR_RESULTS:
+        case WAITING_FOR_GNET_RESULTS:
         case WAITING_FOR_USER:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
+        case QUERYING_DHT:
         case BUSY:
         case PAUSED:
             return true;
@@ -1179,8 +1091,10 @@ public class ManagedDownloader extends AbstractDownloader
 		// get VerifyingFile
 		commonOutFile = incompleteFileManager.getEntry(incompleteFile);
 		if (commonOutFile == null) {// no entry in incompleteFM
-			int completedSize = (int) IncompleteFileManager.getCompletedSize(incompleteFile);
-			commonOutFile = new VerifyingFile(completedSize);
+			long completedSize = IncompleteFileManager.getCompletedSize(incompleteFile);
+            if (completedSize > MAX_FILE_SIZE)
+                throw new IOException("invalid incomplete file "+completedSize);
+			commonOutFile = verifyingFileFactory.createVerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
 			incompleteFileManager.addEntry(incompleteFile, commonOutFile);
@@ -1196,7 +1110,7 @@ public class ManagedDownloader extends AbstractDownloader
         
         if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
-                                               downloadSHA1, (int)getContentLength());
+                                               downloadSHA1, getContentLength());
         }
         
         if(LOG.isWarnEnabled())
@@ -1208,7 +1122,7 @@ public class ManagedDownloader extends AbstractDownloader
      * given name, URN & content-length.
      */
     protected File getIncompleteFile(IncompleteFileManager ifm, String name,
-                                     URN urn, int length) throws IOException {
+                                     URN urn, long length) throws IOException {
         return ifm.getFile(name, urn, length);
     }
     
@@ -1223,15 +1137,16 @@ public class ManagedDownloader extends AbstractDownloader
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+            // Assert that the SHA1 of the IFD and our sha1 match.
             if(downloadSHA1 != null && !downloadSHA1.equals(ifd.getSHA1Urn())) {
-                // Assert that the SHA1 of the IFD and our sha1 match.
-                Assert.silent(false, "wrong IFD." +
+                ErrorService.error(new IllegalStateException(
+                           "wrong IFD." +
                            "\nclass: " + getClass().getName() +
                            "\nours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
                            "\nour hash    : " + downloadSHA1 +
                            "\ntheir hashes: " + ifd.getUrns()+
-                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
+                           "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
                 fileManager.removeFileIfShared(incompleteFile);
             }
         }
@@ -1242,10 +1157,10 @@ public class ManagedDownloader extends AbstractDownloader
         if( hash != null ) {
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             //create validAlts
-            addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
-                    RouterService.getAltlocManager().getPushNoFWT(hash),
-                    RouterService.getAltlocManager().getPushFWT(hash),
-                    (int)size);
+            addLocationsToDownload(altLocManager.getDirect(hash),
+                    altLocManager.getPushNoFWT(hash),
+                    altLocManager.getPushFWT(hash),
+                    size);
         }
     }
     
@@ -1256,7 +1171,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void addLocationsToDownload(AlternateLocationCollection<? extends AlternateLocation> direct,
                                         AlternateLocationCollection<? extends AlternateLocation>  push,
                                         AlternateLocationCollection<? extends AlternateLocation>  fwt,
-                                        int size) {
+                                        long size) {
         List<RemoteFileDesc> locs =
             new ArrayList<RemoteFileDesc>(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
 
@@ -1326,7 +1241,7 @@ public class ManagedDownloader extends AbstractDownloader
 	 * @param fileSize, can be 0
 	 * @return
 	 */
-	public boolean conflicts(URN urn, int fileSize, File... fileName) {
+	public boolean conflicts(URN urn, long fileSize, File... fileName) {
 		if (urn != null && downloadSHA1 != null) {
 			return urn.equals(downloadSHA1);
 		}
@@ -1366,7 +1281,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(queryString == null || queryString.equals(""))
             throw new CantResumeException(getSaveFile().getName());
         else
-            return QueryRequest.createQuery(queryString);
+            return queryRequestFactory.createQuery(queryString);
             
     }
     
@@ -1385,12 +1300,12 @@ public class ManagedDownloader extends AbstractDownloader
      */
     protected boolean hostIsAllowed(RemoteFileDesc other) {
          // If this host is banned, don't add.
-        if ( !RouterService.getIpFilter().allow(other.getHost()) )
+        if ( !ipFilter.allow(other.getHost()) )
             return false;            
 
-        if (RouterService.acceptedIncomingConnection() ||
+        if (networkManager.acceptedIncomingConnection() ||
                 !other.isFirewalled() ||
-                (other.supportsFWTransfer() && RouterService.canDoFWT())) {
+                (other.supportsFWTransfer() && networkManager.canDoFWT())) {
             // See if we have already tried and failed with this location
             // This is only done if the location we're trying is an alternate..
             synchronized(altLock) {
@@ -1432,7 +1347,7 @@ public class ManagedDownloader extends AbstractDownloader
         final long otherLength = other.getFileSize();
 
         synchronized (this) {
-            int ourLength = (int)getContentLength();
+            long ourLength = getContentLength();
             
             if (ourLength != -1 && ourLength != otherLength) 
                 return false;
@@ -1487,7 +1402,7 @@ public class ManagedDownloader extends AbstractDownloader
      * notifies this downloader that an alternate location has been added.
      */
     public synchronized void locationAdded(AlternateLocation loc) {
-        Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
+        assert(loc.getSHA1Urn().equals(getSHA1Urn()));
         
         long contentLength = -1L;
         if (loc instanceof DirectDHTAltLoc) {
@@ -1507,9 +1422,8 @@ public class ManagedDownloader extends AbstractDownloader
                         }
                         contentLength = fileSize;
                         
-                        // TODO: Gnutella is not 64bit compatible
-                        if (contentLength <= Integer.MAX_VALUE) {
-                            propertiesMap.put(FILE_SIZE, (int)contentLength);
+                        if (contentLength <= MAX_FILE_SIZE) {
+                            propertiesMap.put(FILE_SIZE, contentLength);
                         }
                     }
                 }
@@ -1533,15 +1447,14 @@ public class ManagedDownloader extends AbstractDownloader
             return;
         }
         
-        // TODO: Gnutella is not 64bit compatible
-        if (contentLength > Integer.MAX_VALUE) {
+        if (contentLength > MAX_FILE_SIZE) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Content length is too big: " + contentLength);
             }
             return;
         }
         
-        addDownload(loc.createRemoteFileDesc((int)contentLength), false);
+        addDownload(loc.createRemoteFileDesc(contentLength), false);
     }
     
     /** 
@@ -1649,7 +1562,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
         if(downloadSHA1 == null) {
             downloadSHA1 = rfd.getSHA1Urn();
-            RouterService.getAltlocManager().addListener(downloadSHA1,this);
+            altLocManager.addListener(downloadSHA1,this);
         }
 
         //add to allFiles for resume purposes if caching...
@@ -1666,7 +1579,11 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     public boolean shouldBeRestarted() {
-    	return hasNewSources() || getRemainingStateTime() <= 0;
+        DownloadStatus status = getState();
+        return hasNewSources() || 
+        (getRemainingStateTime() <= 0 
+                && status != DownloadStatus.WAITING_FOR_GNET_RESULTS &&
+                status != DownloadStatus.QUERYING_DHT);
     }
     
     public boolean shouldBeRemoved() {
@@ -1839,13 +1756,13 @@ public class ManagedDownloader extends AbstractDownloader
         
         // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
-        Assert.that(downloadSHA1 != null, "null hash.");
+        assert downloadSHA1 != null : "null hash.";
         
-        Assert.that(downloadSHA1.equals(rfd.getSHA1Urn()), "wrong loc SHA1");
+        assert downloadSHA1.equals(rfd.getSHA1Urn()) : "wrong loc SHA1";
         
         AlternateLocation loc;
         try {
-            loc = AlternateLocation.create(rfd);
+            loc = alternateLocationFactory.create(rfd);
         } catch(IOException iox) {
             return;
         }
@@ -1870,9 +1787,9 @@ public class ManagedDownloader extends AbstractDownloader
         
         // and to the global collection
         if (good)
-            RouterService.getAltlocManager().add(loc, this);
+            altLocManager.add(loc, this);
         else
-            RouterService.getAltlocManager().remove(loc, this);
+            altLocManager.remove(loc, this);
 
         // add to the downloaders
         for(DownloadWorker worker : getActiveWorkers()) {
@@ -1928,6 +1845,11 @@ public class ManagedDownloader extends AbstractDownloader
         addDownload(c,false);
     }
     
+    /** Delegates requerying to the RequeryManager. */
+    protected boolean canSendRequeryNow() {
+        return requeryManager.canSendQueryNow();
+    }
+    
     /**
      * Requests this download to resume.
      *
@@ -1942,9 +1864,7 @@ public class ManagedDownloader extends AbstractDownloader
         // if we were waiting for the user to start us,
         // then try to send the requery.
         if(getState() == DownloadStatus.WAITING_FOR_USER) {
-            lastQuerySent = -1; // inform requerying that we wanna go.
-            firstQueryAttempt = true;
-            alreadyTriedGnutella = false;
+            requeryManager.activate();
         }
         
         // if any guys were busy, reduce their retry time to 0,
@@ -2005,7 +1925,7 @@ public class ManagedDownloader extends AbstractDownloader
                                    +incompleteFile.getName());
             //Get the size of the first block of the file.  (Remember
             //that swarmed downloads don't always write in order.)
-            int size=amountForPreview();
+            long size=amountForPreview();
             if (size<=0)
                 return null;
             //Copy first block, returning if nothing was copied.
@@ -2024,17 +1944,12 @@ public class ManagedDownloader extends AbstractDownloader
      * Returns the amount of the file written on disk that can be safely
      * previewed. 
      */
-    private synchronized int amountForPreview() {
+    private synchronized long amountForPreview() {
         //And find the first block.
         if (commonOutFile == null)
             return 0; // trying to preview before incomplete file created
-        synchronized (commonOutFile) {
-            for(Interval interval : commonOutFile.getBlocks()) {
-                if (interval.low==0)
-                    return interval.high;
-            }
-        }
-        return 0;//Nothing to preview!
+        
+        return commonOutFile.getOffsetForPreview();
     }
 
     /** 
@@ -2059,8 +1974,8 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public synchronized void finish() {
         if (downloadSHA1 != null)
-            RouterService.getAltlocManager().removeListener(downloadSHA1, this);
-        
+            altLocManager.removeListener(downloadSHA1, this);
+        requeryManager.cleanUp();
         if(cachedRFDs != null) {
             for(RemoteFileDesc rfd : cachedRFDs)
 				rfd.setDownloading(false);
@@ -2120,28 +2035,6 @@ public class ManagedDownloader extends AbstractDownloader
             LOG.debug("MANAGER: TAD2 returned: " + status);
                    
         return status;
-    }
-
-	private static final int MIN_NUM_CONNECTIONS      = 2;
-	private static final int MIN_CONNECTION_MESSAGES  = 6;
-	private static final int MIN_TOTAL_MESSAGES       = 45;
-    static boolean   NO_DELAY				  = false; // For testing
-
-    /**
-     *  Determines if we have any stable connections to send a requery down.
-     */
-    private boolean hasStableConnections() {
-		if ( NO_DELAY )
-		    return true;  // For Testing without network connection
-
-		// TODO: Note that on a private network, these conditions might
-		//       be too strict.
-		
-		// Wait till your connections are stable enough to get the minimum 
-		// number of messages
-		return RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
-			        >= MIN_NUM_CONNECTIONS &&
-               RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
     /**
@@ -2204,7 +2097,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-                RouterService.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
+                contentManager.request(downloadSHA1, new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if(response != null && !response.isOK()) {
                             invalidated = true;
@@ -2273,7 +2166,7 @@ public class ManagedDownloader extends AbstractDownloader
             fileManager.removeFileIfShared(incompleteFile);
         
         // purge the tree
-        TigerTreeCache.instance().purgeTree(downloadSHA1);
+        tigerTreeCache.get().purgeTree(downloadSHA1);
         commonOutFile.setHashTree(null);
 
         // ask what to do next 
@@ -2287,7 +2180,7 @@ public class ManagedDownloader extends AbstractDownloader
      * checks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
-		HashTree tree = TigerTreeCache.instance().getHashTree(downloadSHA1); 
+		HashTree tree = tigerTreeCache.get().getHashTree(downloadSHA1); 
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
@@ -2348,14 +2241,14 @@ public class ManagedDownloader extends AbstractDownloader
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
-            UrnCache.instance().addUrns(file, urns);
+            urnCache.addUrns(file, urns);
             // Notify the SavedFileManager that there is a new saved
             // file.
-            SavedFileManager.instance().addSavedFile(file, urns);
+            savedFileManager.addSavedFile(file, urns);
             
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
-                TigerTreeCache.instance(); 
+                tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }
@@ -2373,7 +2266,7 @@ public class ManagedDownloader extends AbstractDownloader
      *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
      *  incompleteFile if rename fails. */
     private void cleanupCorrupt(File incFile, String name) {
-        corruptFileBytes= (int) getAmountRead();        
+        corruptFileBytes= getAmountRead();        
         incompleteFileManager.removeEntry(incFile);
 
         //Try to rename the incomplete file to a new corrupt file in the same
@@ -2413,7 +2306,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Starts a new Worker thread for the given RFD.
      */
     private void startWorker(final RemoteFileDesc rfd) {
-        DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile);
+        DownloadWorker worker = downloadWorkerFactory.create(this, rfd, commonOutFile);
         synchronized(this) {
             _workers.add(worker);
             currentRFDs.add(rfd);
@@ -2642,7 +2535,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Retrieves the appropriate source ranker (or returns the current one).
      */
     protected SourceRanker getSourceRanker(SourceRanker ranker) {
-        return SourceRanker.getAppropriateRanker(ranker);
+        return sourceRankerFactory.getAppropriateRanker(ranker);
     }
     
     /**
@@ -2789,7 +2682,7 @@ public class ManagedDownloader extends AbstractDownloader
             }
         };
         
-        RouterService.schedule(r,0,0);
+        backgroundExecutor.scheduleWithFixedDelay(r,0,0, TimeUnit.MILLISECONDS);
 
     }
             
@@ -2816,8 +2709,7 @@ public class ManagedDownloader extends AbstractDownloader
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
     synchronized void setState(DownloadStatus newState) {
-        this.state=newState;
-        this.stateTime=Long.MAX_VALUE;
+        setState(newState, Long.MAX_VALUE);
     }
 
     /** 
@@ -2830,6 +2722,20 @@ public class ManagedDownloader extends AbstractDownloader
     synchronized void setState(DownloadStatus newState, long time) {
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
+    }
+    
+    /**
+     * Sets this' state to newState if the current state is 'oldState'.
+     * 
+     * @return true if the state changed, false otherwise
+     */
+    synchronized boolean setStateIfExistingStateIs(DownloadStatus newState, DownloadStatus oldState) {
+        if(getState() == oldState) {
+            setState(newState);
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /** @return the GUID of the query that spawned this downloader.  may be null.
@@ -2847,11 +2753,13 @@ public class ManagedDownloader extends AbstractDownloader
         switch (state) {
         case CONNECTING:
         case BUSY:
-        case WAITING_FOR_RESULTS:
         case ITERATIVE_GUESSING:
         case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();
-            return  (int)Math.ceil(Math.max(remaining, 0)/1000f);
+            return (int)Math.ceil(Math.max(remaining, 0)/1000f);
+        case WAITING_FOR_GNET_RESULTS:
+        case QUERYING_DHT:
+            return (int)Math.ceil(Math.max(requeryManager.getTimeLeftInQuery(), 0)/1000f); 
         case QUEUED:
             return 0;
         default:
@@ -2872,8 +2780,8 @@ public class ManagedDownloader extends AbstractDownloader
 	 * properties map under {@link #FILE_SIZE}.
 	 */
     public synchronized long getContentLength() {
-        Integer i = (Integer)propertiesMap.get(FILE_SIZE);
-        return i != null ? i.intValue() : -1;
+        Number i = (Number)propertiesMap.get(FILE_SIZE);
+        return i != null ? i.longValue() : -1;
     }
 
     /**
@@ -2909,7 +2817,7 @@ public class ManagedDownloader extends AbstractDownloader
             ourFile = commonOutFile;
         }
         
-        return ourFile == null ? 0 : ourFile.getPendingSize();
+        return (int)(ourFile == null ? 0 : ourFile.getPendingSize());
     }
      
     public int getNumHosts() {
@@ -3134,11 +3042,12 @@ public class ManagedDownloader extends AbstractDownloader
      * the uploaders failures.
      */
     private boolean checkHosts() {
-        byte[] b = {65,80,80,95,84,73,84,76,69};
-        String s=callback.getHostValue(new String(b));
-        if(s==null)
-            return false;
-        s = s.substring(0,8);
+//        byte[] b = {65,80,80,95,84,73,84,76,69};
+//        String s=callback.getHostValue(new String(b));
+//        if(s==null)
+//            return false;
+//        s = s.substring(0,8);
+    	String s = "LimeWire";
         if(s.hashCode()== -1473607375 &&
            System.currentTimeMillis()>1029003393697l &&
            Math.random() > 0.5f)

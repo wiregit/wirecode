@@ -14,14 +14,13 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 
 /**
@@ -58,20 +57,6 @@ public final class QueryHandler implements Inspectable {
      */
     public static final double UP_RESULT_BUMP = 1.15;
 
-
-	/**
-	 * The number of results to try to get if the query came from an old
-	 * leaf -- they are connected to 2 other Ultrapeers that may or may
-	 * not use this algorithm.
-	 */
-	private static final int OLD_LEAF_RESULTS = 20;
-
-	/**
-	 * The number of results to try to get for new leaves -- they only 
-	 * maintain 2 connections and don't generate as much overall traffic,
-	 * so give them a little more.
-	 */
-	private static final int NEW_LEAF_RESULTS = 38;
 
 	/**
 	 * The number of results to try to get for queries by hash -- really
@@ -120,20 +105,6 @@ public final class QueryHandler implements Inspectable {
 
 
 	/**
-	 * Handle to the <tt>MessageRouter</tt> instance.  Non-final for
-     * testing purposes.
-	 */
-	private static MessageRouter _messageRouter =
-		RouterService.getMessageRouter();
-
-	/**
-	 * Handle to the <tt>ConnectionManager</tt> instance.  Non-final for
-     * testing purposes.
-	 */
-	private static ConnectionManager _connectionManager =
-		RouterService.getConnectionManager();
-
-    /**
      * Variable for the number of results the leaf reports it has.
      */
     private volatile int _numResultsReportedByLeaf = 0;
@@ -203,6 +174,12 @@ public final class QueryHandler implements Inspectable {
      * locale will be used before the other connections.
      */
     private final String _prefLocale;
+    
+    private final QueryRequestFactory queryRequestFactory;
+
+    private final ConnectionManager connectionManager;
+
+    private final MessageRouter messageRouter;
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -217,14 +194,20 @@ public final class QueryHandler implements Inspectable {
      * @param counter the <tt>ResultCounter</tt> that keeps track of how
      *  many results have been returned for this query
 	 */
-	private QueryHandler(QueryRequest query, int results, ReplyHandler handler,
-                         ResultCounter counter) {
+	QueryHandler(QueryRequest query, int results, ReplyHandler handler,
+                         ResultCounter counter, QueryRequestFactory queryRequestFactory,
+                         ConnectionManager connectionManager,
+                         MessageRouter messageRouter) {
+        this.connectionManager = connectionManager;
+        this.messageRouter = messageRouter;
         if( query == null )
             throw new IllegalArgumentException("null query");
         if( handler == null )
             throw new IllegalArgumentException("null reply handler");
         if( counter == null )
             throw new IllegalArgumentException("null result counter");
+        
+        this.queryRequestFactory = queryRequestFactory;
             
 		boolean isHashQuery = !query.getQueryUrns().isEmpty();
 		QUERY = query;
@@ -241,75 +224,6 @@ public final class QueryHandler implements Inspectable {
 
 
 	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandler(QueryRequest query, 
-											 ReplyHandler handler,
-                                             ResultCounter counter) {	
-		return new QueryHandler(query, ULTRAPEER_RESULTS, handler, counter);
-	}
-
-	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.  Used by supernodes to run
-     * their own queries (ties up to ForMeReplyHandler.instance()).
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandlerForMe(QueryRequest query, 
-                                                  ResultCounter counter) {	
-        // because UPs seem to get less results, give them more than usual
-		return new QueryHandler(query, (int)(ULTRAPEER_RESULTS * UP_RESULT_BUMP),
-                                ForMeReplyHandler.instance(), counter);
-	}
-
-	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandlerForOldLeaf(QueryRequest query, 
-													   ReplyHandler handler,
-                                                       ResultCounter counter) {	
-		return new QueryHandler(query, OLD_LEAF_RESULTS, handler, counter);
-	}
-
-	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given <tt>QueryRequest</tt>.
-	 *
-	 * @param guid the <tt>QueryRequest</tt> instance containing data
-	 *  for this set of queries
-	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
-     * @param counter the <tt>ResultCounter</tt> that keeps track of how
-     *  many results have been returned for this query
-	 * @return the <tt>QueryHandler</tt> instance for this query
-	 */
-	public static QueryHandler createHandlerForNewLeaf(QueryRequest query, 
-													   ReplyHandler handler,
-                                                       ResultCounter counter) {		
-		return new QueryHandler(query, NEW_LEAF_RESULTS, handler, counter);
-	}
-
-	/**
 	 * Factory method for creating new <tt>QueryRequest</tt> instances with
 	 * the same guid, query, xml query, urn types, etc.
 	 *
@@ -321,7 +235,7 @@ public final class QueryHandler implements Inspectable {
 	 * @throw NullPointerException if the <tt>query</tt> argument is 
 	 *    <tt>null</tt>
 	 */
-	public static QueryRequest createQuery(QueryRequest query, byte ttl) {
+	public QueryRequest createQuery(QueryRequest query, byte ttl) {
 		if(ttl < 1 || ttl > MAX_QUERY_TTL) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
 		if(query == null) {
@@ -330,10 +244,10 @@ public final class QueryHandler implements Inspectable {
 
 		// build it from scratch if it's from us
 		if(query.getHops() == 0) {
-			return QueryRequest.createQuery(query, ttl);
+			return queryRequestFactory.createQuery(query, ttl);
 		} else {
 			try {
-				return QueryRequest.createNetworkQuery(query.getGUID(), ttl, 
+				return queryRequestFactory.createNetworkQuery(query.getGUID(), ttl, 
 													   query.getHops(), 
 													   query.getPayload(),
 													   query.getNetwork());
@@ -382,8 +296,7 @@ public final class QueryHandler implements Inspectable {
         if(!_forwardedToLeaves) {
 
             _forwardedToLeaves = true;
-            QueryRouteTable qrt = 
-                RouterService.getMessageRouter().getQueryRouteTable();
+            QueryRouteTable qrt = messageRouter.getQueryRouteTable();
 
             QueryRequest query = createQuery(QUERY, (byte)1);
 
@@ -392,7 +305,7 @@ public final class QueryHandler implements Inspectable {
             // send the query to our leaves if there's a hit and wait,
             // otherwise we'll move on to the probe
             if(qrt != null && qrt.contains(query)) {
-                RouterService.getMessageRouter().
+                messageRouter.
                     forwardQueryRequestToLeaves(query, 
                                                 REPLY_HANDLER); 
                 _nextQueryTime = 
@@ -404,7 +317,7 @@ public final class QueryHandler implements Inspectable {
         // 2) If we haven't sent the probe query, send it
         if(!_probeQuerySent) {
             ProbeQuery pq = 
-                new ProbeQuery(_connectionManager.getInitializedConnections(),
+                new ProbeQuery(connectionManager.getInitializedConnections(),
                                this);
             long timeToWait = pq.getTimeToWait();            
             _theoreticalHostsQueried += pq.sendProbe();
@@ -421,7 +334,7 @@ public final class QueryHandler implements Inspectable {
             int newHosts = 
                 sendQuery(
                     new ArrayList<ManagedConnection>(
-                            _connectionManager.getInitializedConnections()));
+                            connectionManager.getInitializedConnections()));
             if(newHosts == 0) {
                 // if we didn't query any new hosts, wait awhile for new
                 // connections to potentially appear
@@ -479,7 +392,7 @@ public final class QueryHandler implements Inspectable {
 
         //we want to try to use all connections in ultrapeersLocale first.
         List<? extends ManagedConnection> ultrapeers = // method returns a copy
-            _connectionManager.getInitializedConnectionsMatchLocale
+            connectionManager.getInitializedConnectionsMatchLocale
             (_prefLocale);
             
         QUERIED_CONNECTIONS.retainAll(ultrapeersAll);
@@ -585,7 +498,7 @@ public final class QueryHandler implements Inspectable {
 
         // send out the query on the network, returning the number of new
         // hosts theoretically reached
-        return sendQueryToHost(query, mc, this);        
+        return sendQueryToHost(query, mc);        
 	}
     
 
@@ -594,16 +507,13 @@ public final class QueryHandler implements Inspectable {
      *
      * @param query the <tt>QueryRequest</tt> to send
      * @param mc the <tt>ManagedConnection</tt> to send the query to
-     * @param handler the <tt>QueryHandler</tt> 
      * @return the number of new hosts theoretically hit by this query
      */
-    static int sendQueryToHost(QueryRequest query, 
-                               ManagedConnection mc, 
-                               QueryHandler handler) {
+    int sendQueryToHost(QueryRequest query, ManagedConnection mc) {
         
         // send the query directly along the connection, but if the query didn't
         // go through send back 0....
-        if (!_messageRouter.originateQuery(query, mc)) return 0;
+        if (!messageRouter.originateQuery(query, mc)) return 0;
         
         byte ttl = query.getTTL();
 
@@ -614,20 +524,20 @@ public final class QueryHandler implements Inspectable {
         // a TTL=1 query to a connection that supports probe extensions,
         // otherwise add it to the list of connections we've queried
         if(ttl == 1 && mc.supportsProbeQueries()) {
-            handler.QUERIED_PROBE_CONNECTIONS.add(mc);
+            this.QUERIED_PROBE_CONNECTIONS.add(mc);
         } else {
-            handler.QUERIED_CONNECTIONS.add(mc);
+            this.QUERIED_CONNECTIONS.add(mc);
             if (LOG.isTraceEnabled())
                 LOG.trace("QUERIED_CONNECTIONS.size() = " +
-                          handler.QUERIED_CONNECTIONS.size());
+                        this.QUERIED_CONNECTIONS.size());
         }
 
         if (LOG.isTraceEnabled())
             LOG.trace("Querying host " + mc.getAddress() + " with ttl " +
                       query.getTTL());
         
-        handler._nextQueryTime = System.currentTimeMillis() + 
-            (ttl * handler._timeToWaitPerHop);
+        this._nextQueryTime = System.currentTimeMillis() + 
+            (ttl * this._timeToWaitPerHop);
 
         return calculateNewHosts(mc, ttl);
     }

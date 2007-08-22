@@ -10,13 +10,13 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.AddressSecurityToken;
-
 import junit.framework.Test;
 
+import org.limewire.security.AddressSecurityToken;
+
 import com.limegroup.gnutella.Backend;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -86,7 +86,7 @@ public class GUESSServerSideTest extends LimeTestCase {
             //}
 
         // first try to get a AddressSecurityToken....
-        PingRequest pr = PingRequest.createQueryKeyRequest();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createQueryKeyRequest();
         AddressSecurityToken qkToUse = null;
         send(pr, address, Backend.BACKEND_PORT);
         //try {
@@ -101,7 +101,7 @@ public class GUESSServerSideTest extends LimeTestCase {
             //}
 
         // send a normal ping, should get a pong....
-        pr = new PingRequest((byte)1);
+        pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         send(pr, address, Backend.BACKEND_PORT);
         //try {
             pRep = (PingReply) receive();
@@ -118,7 +118,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         (new Random()).nextBytes(fakeQueryKey);
 
 		QueryRequest crapQuery = 
-			QueryRequest.createQueryKeyQuery("susheel", 
+			ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", 
 											 new AddressSecurityToken(fakeQueryKey));
         //QueryRequest crapQuery = 
 		//  new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
@@ -141,7 +141,7 @@ public class GUESSServerSideTest extends LimeTestCase {
 
         // now try a legit one....
 		QueryRequest goodQuery =
-			QueryRequest.createQueryKeyQuery("susheel", qkToUse);
+			ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", qkToUse);
 
 		byte[] guid = goodQuery.getGUID();
         send(goodQuery, address, Backend.BACKEND_PORT);
@@ -182,7 +182,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         byte[] data = datagram.getData();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = MessageFactory.read(in);		
+        Message message = ProviderHacks.getMessageFactory().read(in);		
         return message;
     }
 

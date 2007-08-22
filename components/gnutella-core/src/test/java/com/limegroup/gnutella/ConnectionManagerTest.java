@@ -15,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
@@ -25,9 +26,11 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.HackHostCatcher;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
@@ -37,7 +40,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public class ConnectionManagerTest extends LimeTestCase {
 
     private static TestHostCatcher CATCHER;
-    private static RouterService ROUTER_SERVICE;
+  //  private static RouterService ROUTER_SERVICE;
     private static ConnectionListener LISTENER;
 
     public ConnectionManagerTest(String name) {
@@ -53,23 +56,23 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        ROUTER_SERVICE =
-            new RouterService(new ActivityCallbackStub());
+        if(true)throw new RuntimeException("fix me");
+        //ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         CATCHER = new TestHostCatcher();
         LISTENER = new ConnectionListener();
         
-        RouterService.getConnectionManager().addEventListener(LISTENER);
+        ProviderHacks.getConnectionManager().addEventListener(LISTENER);
         
         setSettings();
         launchAllBackends();
                 
-        PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
+      //  PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
 
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
                                     "_catcher",CATCHER);
              
-        ROUTER_SERVICE.start();
-        RouterService.clearHostCatcher();
+        ProviderHacks.getLifecycleManager().start();
+        LimeTestUtils.clearHostCatcher();
     }
 
     public void setUp() throws Exception {
@@ -89,7 +92,6 @@ public class ConnectionManagerTest extends LimeTestCase {
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
@@ -100,8 +102,8 @@ public class ConnectionManagerTest extends LimeTestCase {
 
     public void tearDown() throws Exception {
         //Kill all connections
-        RouterService.disconnect();
-        RouterService.clearHostCatcher();
+        ProviderHacks.getConnectionServices().disconnect();
+        LimeTestUtils.clearHostCatcher();
         Thread.sleep(500);
     }
     
@@ -204,7 +206,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(true);
         
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         
         // test preconditions
         assertTrue("should not start as supernode", !mgr.isSupernode());
@@ -283,7 +285,7 @@ public class ConnectionManagerTest extends LimeTestCase {
             nonLimePeers[i] = new SupernodeSupernode(false);
             
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         setConnectTime();
         // test preconditions
         assertTrue("should start as supernode", mgr.isSupernode());
@@ -414,7 +416,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testUnreachableHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("1.2.3.4", 5000);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForFailure(10000));
         assertEquals(0, CATCHER.getSuccessCount());
     }
@@ -425,7 +427,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testWrongProtocolHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("www.yahoo.com", 80);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForFailure(10000));
         assertEquals(0, CATCHER.getSuccessCount());
     }
@@ -435,46 +437,46 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testGoodHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);        
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
         
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
     
     public void testGoodTLSHost() throws Exception {
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertTrue(mc.isTLSEncoded());
     }
     
     public void testGoodTLSHostNotUsedIfNoSetting() throws Exception {
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, RouterService.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = RouterService.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
+        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
@@ -487,7 +489,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testRejectHost() throws Exception {
         CATCHER.endpoint =  new ExtendedEndpoint("localhost", Backend.REJECT_PORT);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
     }
@@ -496,7 +498,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(0);
         ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(0);
         ApplicationSettings.TOTAL_CONNECTIONS.setValue(0);
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         assertFalse(mgr.isConnected());
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
@@ -534,7 +536,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertGreaterThan(averageTime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         //test time changed during session
         long now = System.currentTimeMillis();
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
                 "_connectTime", new Long(now+(60L*60L*1000L)));
         mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
@@ -551,7 +553,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(30L*60L*1000L);
         ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(60L*60L*1000L);
         ApplicationSettings.TOTAL_CONNECTIONS.setValue(2);
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         assertFalse(mgr.isConnected());
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
@@ -586,65 +588,67 @@ public class ConnectionManagerTest extends LimeTestCase {
     
     public void testClassCFiltering() throws Exception {
         ServerSocket s = new ServerSocket(10000);
-        ConnectionSettings.FILTER_CLASS_C.setValue(true);
-        TestHostCatcher2 catcher = new TestHostCatcher2();
-        TestConnectionObserver observer = new TestConnectionObserver();
-        ConnectionManager cm = RouterService.getConnectionManager();
-        PrivilegedAccessor.setValue(cm,"_catcher",catcher);
-        cm.addEventListener(observer);
-        cm.connect();
-        EndpointObserver eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
-        
-        // a connection should be initialized.
-        eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
-        ConnectionLifecycleEvent event;
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        // we should be still looking for more connections
-        eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
-        // adding a new endpoint from the same class C network should not trigger a connection
-        Endpoint e2 = new Endpoint("127.0.0.2", 10000);
-        eo.handleEndpoint(e2);
-        assertNull(observer.evts.poll(1000, TimeUnit.MILLISECONDS));
-        // we should be still looking for more connections
-        eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
-        // this is a different class C - it should trigger an event.
-        eo.handleEndpoint(new Endpoint("127.0.1.1", 20000));
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        
-        // after the connection gets closed we should get the endpoint back to 
-        // hostcatcher
-        s.accept().close();
-        assertSame(e2,catcher.endpoints.poll(1000,TimeUnit.MILLISECONDS));
-        // two closed events - one for .1 and one for 1.1
-        do {
-            event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionClosedEvent());
-        do {
-            event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionClosedEvent());
-        
-        // now we should be able to establish a second connection
-        eo.handleEndpoint(new Endpoint("127.0.0.2", 10000));
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        
-        // if we allow more than one connection per class C, we'll be able to
-        // add a second connection to the same class
-        ConnectionSettings.FILTER_CLASS_C.setValue(false);
-        eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
-        do {
-            event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
-        } while( !event.isConnectionInitializingEvent());
-        assertEquals(2,cm.getNumConnections());
-        
-        s.close();
-        Thread.sleep(10);
-        cm.removeEventListener(observer);
+        try {
+            ConnectionSettings.FILTER_CLASS_C.setValue(true);
+            TestHostCatcher2 catcher = new TestHostCatcher2();
+            TestConnectionObserver observer = new TestConnectionObserver();
+            ConnectionManager cm = ProviderHacks.getConnectionManager();
+            PrivilegedAccessor.setValue(cm,"_catcher",catcher);
+            cm.addEventListener(observer);
+            cm.connect();
+            EndpointObserver eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+
+            // a connection should be initialized.
+            eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
+            ConnectionLifecycleEvent event;
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+            // we should be still looking for more connections
+            eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+            // adding a new endpoint from the same class C network should not trigger a connection
+            Endpoint e2 = new Endpoint("127.0.0.2", 10000);
+            eo.handleEndpoint(e2);
+            assertNull(observer.evts.poll(1000, TimeUnit.MILLISECONDS));
+            // we should be still looking for more connections
+            eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
+            // this is a different class C - it should trigger an event.
+            eo.handleEndpoint(new Endpoint("127.0.1.1", 20000));
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+
+            // after the connection gets closed we should get the endpoint back to 
+            // hostcatcher
+            s.accept().close();
+            assertSame(e2,catcher.endpoints.poll(1000,TimeUnit.MILLISECONDS));
+            // two closed events - one for .1 and one for 1.1
+            do {
+                event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionClosedEvent());
+            do {
+                event = observer.evts.poll(2000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionClosedEvent());
+
+            // now we should be able to establish a second connection
+            eo.handleEndpoint(new Endpoint("127.0.0.2", 10000));
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+
+            // if we allow more than one connection per class C, we'll be able to
+            // add a second connection to the same class
+            ConnectionSettings.FILTER_CLASS_C.setValue(false);
+            eo.handleEndpoint(new Endpoint("127.0.0.1", 10000));
+            do {
+                event = observer.evts.poll(1000, TimeUnit.MILLISECONDS);
+            } while( !event.isConnectionInitializingEvent());
+            assertEquals(2,cm.getNumConnections());
+
+            cm.removeEventListener(observer);
+        } finally {
+            s.close();
+        }
     }
 
     private void sleep() {
@@ -659,7 +663,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     private void setConnectTime() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
                 "_connectTime", new Integer(0));
     }
     
@@ -667,14 +671,14 @@ public class ConnectionManagerTest extends LimeTestCase {
         //  Need to setup the _outputRunner member of c as well...
         PrivilegedAccessor.setValue(c, "_outputRunner", new NullOutputRunner() );
         
-        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
+        PrivilegedAccessor.invokeMethod( ProviderHacks.getConnectionManager(),
             "connectionInitializingIncoming",
             new Object[] { c },
             new Class[] { ManagedConnection.class} );
     }
     
     private void initializeDone(ManagedConnection c) throws Exception {
-        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
+        PrivilegedAccessor.invokeMethod( ProviderHacks.getConnectionManager(),
             "connectionInitialized",
             new Object[] { c },
             new Class[] { ManagedConnection.class} );            
@@ -685,7 +689,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      * specify when our test framework requests endpoints to connect
      * to.
      */
-    private static class TestHostCatcher extends HostCatcher {
+    private static class TestHostCatcher extends HackHostCatcher {
         private volatile ExtendedEndpoint endpoint;
         private volatile CountDownLatch successLatch;
         private volatile CountDownLatch failureLatch;
@@ -783,7 +787,20 @@ public class ConnectionManagerTest extends LimeTestCase {
         private static int lastHost = 0;
 
         public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super("1.2.3." + ++lastHost, 6346);
+            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN, ProviderHacks
+                    .getConnectionManager(), ProviderHacks.getNetworkManager(),
+                    ProviderHacks.getQueryRequestFactory(), ProviderHacks
+                            .getHeadersFactory(), ProviderHacks
+                            .getHandshakeResponderFactory(), ProviderHacks
+                            .getQueryReplyFactory(), ProviderHacks
+                            .getMessageDispatcher(), ProviderHacks
+                            .getNetworkUpdateSanityChecker(), ProviderHacks
+                    .getUdpService(), ProviderHacks.getMessageRouter(),
+            ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
+            ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
+            Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
+            Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
+            ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory());
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;
@@ -875,7 +892,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     private void pretendConnected() throws Exception {
-        ConnectionManager mgr = RouterService.getConnectionManager();
+        ConnectionManager mgr = ProviderHacks.getConnectionManager();
         PrivilegedAccessor.setValue(mgr, "_disconnectTime", new Integer(0));
         PrivilegedAccessor.invokeMethod(mgr, "setPreferredConnections");
     }

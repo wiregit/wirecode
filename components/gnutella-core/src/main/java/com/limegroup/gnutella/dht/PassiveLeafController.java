@@ -14,9 +14,11 @@ class PassiveLeafController extends AbstractDHTController {
 
     private RouteTable routeTable;
     
-    public PassiveLeafController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher, DHTMode.PASSIVE_LEAF);
+    PassiveLeafController(Vendor vendor, Version version,
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
+            DHTControllerFacade dhtControllerFacade) {
+        super(vendor, version, dispatcher, DHTMode.PASSIVE_LEAF,
+                dhtControllerFacade);
     }
 
     @Override

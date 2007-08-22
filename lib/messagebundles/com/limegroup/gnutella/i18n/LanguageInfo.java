@@ -235,4 +235,9 @@ class LanguageInfo implements Comparable {
         return "<a href=\"" + HTMLOutput.PRE_LINK + fileName + "\" title=\""
                 + toString() + "\">" + displayName + "</a>";
     }
+    
+    public String getLanguageCode() {
+        return languageCode;
+    }
 }
+

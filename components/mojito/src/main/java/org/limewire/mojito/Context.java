@@ -21,8 +21,6 @@ package org.limewire.mojito;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -36,12 +34,14 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
 import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValue;
@@ -49,13 +49,15 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.DatabaseCleaner;
+import org.limewire.mojito.db.EvictorManager;
 import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.StorablePublisher;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
-import org.limewire.mojito.io.MessageDispatcherImpl;
+import org.limewire.mojito.io.MessageDispatcherFactory;
+import org.limewire.mojito.io.MessageDispatcherFactoryImpl;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
@@ -84,6 +86,7 @@ import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
+import org.limewire.mojito.security.SecurityTokenHelper;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DHTStats;
@@ -97,6 +100,7 @@ import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.SecurityToken;
+import org.limewire.service.ErrorService;
 
 
 /**
@@ -145,9 +149,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** The provider interface to create SecurityTokens */
     private volatile SecurityToken.TokenProvider tokenProvider;
     
+    private final SecurityTokenHelper tokenHelper;
+    
     private final DHTValueFactoryManager factoryManager = new DHTValueFactoryManager();
     
     private final StorableModelManager publisherManager = new StorableModelManager();
+    
+    private final EvictorManager evictorManager = new EvictorManager();
     
     private volatile HostFilter hostFilter = null;
     
@@ -174,6 +182,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.AddressSecurityTokenProvider();
+        tokenHelper = new SecurityTokenHelper(this);
         
         setRouteTable(null);
         setDatabase(null, false);
@@ -358,33 +367,19 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setMessageDispatcher(java.lang.Class)
      */
-    public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
+    public synchronized MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch MessageDispatcher while " + getName() + " is running");
         }
 
-        if (clazz == null) {
-            clazz = MessageDispatcherImpl.class;
+        if (messageDispatcherFactory == null) {
+            messageDispatcherFactory = new MessageDispatcherFactoryImpl();
         }
         
-        try {
-            Constructor<? extends MessageDispatcher> c = clazz.getConstructor(Context.class);
-            c.setAccessible(true);
-            messageDispatcher = c.newInstance(this);
-            
-            messageDispatcher.addMessageDispatcherListener(
-                    new NetworkStatisticContainer.Listener(networkStats));
-            
-            return messageDispatcher;
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException(e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
-        }
+        messageDispatcher = messageDispatcherFactory.create(this);
+        messageDispatcher.addMessageDispatcherListener(
+            new NetworkStatisticContainer.Listener(networkStats));
+        return messageDispatcher;
     }
     
     /**
@@ -573,6 +568,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return tokenProvider;
     }
     
+    /**
+     * Returns the SecurityTokenHelper
+     */
+    public SecurityTokenHelper getSecurityTokenHelper() {
+        return tokenHelper;
+    }
+    
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setExternalPort(int)
@@ -683,6 +685,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public StorableModelManager getStorableModelManager() {
         return publisherManager;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getEvictorManager()
+     */
+    public EvictorManager getEvictorManager() {
+        return evictorManager;
     }
     
     /*
@@ -980,6 +990,23 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public DHTFuture<PingResult> ping(Contact node) {
         return pingManager.ping(node);
+    }
+    
+    public void ping(final Contact node, final DHTFutureListener<PingResult> listener) {
+        Runnable command = new Runnable() {
+            public void run() {
+                try {
+                    DHTFuture<PingResult> future = ping(node);
+                    if (listener != null) {
+                        future.addDHTFutureListener(listener);
+                    }
+                } catch (RejectedExecutionException err) {
+                    ErrorService.error(err);
+                }
+            }
+        };
+        
+        getDHTExecutorService().execute(command);
     }
     
     /** 

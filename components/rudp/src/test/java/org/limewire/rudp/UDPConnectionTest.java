@@ -1,6 +1,7 @@
 package org.limewire.rudp;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,7 +14,6 @@ import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
-import org.limewire.service.ErrorService;
 import org.limewire.util.BaseTestCase;
 
 /**
@@ -21,11 +21,16 @@ import org.limewire.util.BaseTestCase;
  */
 @SuppressWarnings( { "unchecked", "cast" } )
 public final class UDPConnectionTest extends BaseTestCase {
-    
+
+    private static final int TIMEOUT = 10 * 1000;
+
     private static UDPSelectorProviderFactory defaultFactory = null;
     private static UDPServiceStub stubService;
     private static UDPMultiplexor udpMultiplexor;
 
+    private volatile UDPConnection uconn1;
+    private volatile UDPConnection uconn2;
+    
 	/*
 	 * Constructs the test.
 	 */
@@ -77,6 +82,13 @@ public final class UDPConnectionTest extends BaseTestCase {
     }
     
     public void tearDown() throws Exception {
+        if (uconn1 != null) {
+            uconn1.shutdown();
+        }
+        if (uconn2 != null) {
+            uconn2.shutdown();
+        }
+        
         // Clear out the receiver parameters for the UDPServiceStub
         stubService.clearReceivers();
     }  
@@ -93,30 +105,30 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Start the second connection in another thread
         // and run it to completion.
         class Inner extends ManagedThread {
-            public void run()  {
-                yield();
+            public void run() {
                 try {
-                    UDPConnection uconn2 = 
-                      new UDPConnection("127.0.0.1",6348);
+                    uconn2 = new UDPConnection("127.0.0.1", 6348);
                     UStandalone.echoServer(uconn2, NUM_BYTES);
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     throw new RuntimeException(ioe);
                 }
             }
         }
         Inner t = new Inner();
-        t.setName("EchoServer");
         t.setDaemon(true);
-        t.start();
+        t.setName("EchoServer");
+        try {
+            t.start();
 
-        // Init the first connection
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-        
-        // Run the first connection
-        UStandalone.echoClient(uconn1, NUM_BYTES);
+            // Init the first connection
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
 
-        // Wait for the second to finish
-        t.join();
+            // Run the first connection
+            UStandalone.echoClient(uconn1, NUM_BYTES);
+        } finally {
+            // Wait for the second to finish
+            t.join();
+        }
     }
 
     public void testBlockTransfers() throws Exception {
@@ -125,107 +137,82 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Start the second connection in another thread
         // and run it to completion.
         class Inner extends ManagedThread {
-            boolean sSuccess = false;
-
             public void run() {
-                yield();
                 try {
-                    UDPConnection uconn2 = 
-                      new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UStandalone.echoServerBlock(uconn2, NUM_BLOCKS);
-                } catch(IOException ioe) {
+                    uconn2 = new UDPConnection("127.0.0.1", 6348);
+                    UStandalone.echoServerBlock(uconn2, NUM_BLOCKS);
+                } catch (IOException ioe) {
                     throw new RuntimeException(ioe);
                 }
-            }
-
-            public boolean getSuccess() {
-                return sSuccess;
             }
         }
         Inner t = new Inner();
         t.setDaemon(true);
-        t.start();
+        try{
+            t.start();
 
-        // Init the first connection
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
+            // Init the first connection
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
 
-        // Run the first connection
-        boolean cSuccess = UStandalone.echoClientBlock(uconn1, NUM_BLOCKS);
-
-        // Wait for the second to finish
-        t.join();
-
-        // Get the success status of the second connection
-        boolean sSuccess = t.getSuccess();
-
-        // Validate the results
-        assertTrue("echoClient should return true ", 
-            cSuccess);
-        assertTrue("echoServer should return true ", 
-            sSuccess);
+            // Run the first connection
+            UStandalone.echoClientBlock(uconn1, NUM_BLOCKS);
+        } finally {
+            // Wait for the second to finish
+            t.join();
+        }
     }
 
-    public void testOneWayTransfers() throws Exception {
-        final int NUM_BYTES = 20000;
+    /**
+     * Test that transfers data from a sender to a receiver, comparing 4 bytes at a time.
+     */
+    public void testOneWayTransfer() throws Exception {
+        final int MAX_VALUE = 1 * 1000 * 1000;
 
-        // Start the second connection in another thread
-        // and run it to completion.
+        // Clear out my standard setup
+        stubService.clearReceivers();
+
+        // Add some simulated connections to the UDPServiceStub
+        // Make the connections 5% flaky
+        stubService.addReceiver(6346, 6348, 1, 0);
+        stubService.addReceiver(6348, 6346, 1, 0);
+
+        // start the first connection in another thread
         class Inner extends ManagedThread {
-            boolean sSuccess = false;
-
             public void run() {
-                yield();
                 try {
-                    UDPConnection uconn2 = 
-                      new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UStandalone.unidirectionalServer(uconn2, NUM_BYTES);
-                } catch(IOException ioe) {
-                    throw new RuntimeException(ioe);
+                    uconn1 = new UDPConnection("127.0.0.1", 6348);
+                    uconn1.setSoTimeout(TIMEOUT);
+                    InputStream  istream = uconn1.getInputStream();
+                    for (int i = 0; i < MAX_VALUE; i++) {
+                        int rval = readInt(istream);
+                        assertEquals("Unexpected data at offset: " + i, Integer.toHexString(i), Integer.toHexString(rval));
+                    }                 
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-            }
-
-            public boolean getSuccess() {
-                return sSuccess;
             }
         }
         Inner t = new Inner();
         t.setDaemon(true);
-        t.start();
+        try {
+            t.start();
 
-        // Init the first connection
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
-        // Run the first connection
-        boolean cSuccess = UStandalone.unidirectionalClient(uconn1, NUM_BYTES);
-
-        // Wait for the second to finish
-        t.join();
-
-        // Get the success status of the second connection
-        boolean sSuccess = t.getSuccess();
-
-        // Validate the results
-        assertTrue("unidirectionalClient should return true ", 
-            cSuccess);
-        assertTrue("unidirectionalServer should return true ", 
-            sSuccess);
+            // start the second connection
+            uconn2 = new UDPConnection("127.0.0.1", 6346);
+            uconn2.setSoTimeout(TIMEOUT);
+            OutputStream ostream = uconn2.getOutputStream();
+            for (int i = 0; i < MAX_VALUE; i++) {
+                writeInt(i, ostream);
+            }
+        } finally {
+            t.join();
+        }
     }
 
     public void testIOUtilsOnStream() throws Exception {
-        // Start the second connection in another thread
-        UDPConnection uconn2;
-        ConnStarter t = new ConnStarter();
-        t.setDaemon(true);
-        t.start();
-
-        // Startup connection one in original thread
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
-        // Wait for commpletion of uconn2 startup
-        t.join();
-
-        // Get the initialized connection 2
-        uconn2 = t.getConnection();
+        // initialize connection
+        ConnStarter starter = new ConnStarter();
+        starter.connect();        
         
         // Output on the first connection
         OutputStream ostream = uconn1.getOutputStream();
@@ -234,71 +221,39 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Read to end and one extra on second stream
         InputStream  istream = uconn2.getInputStream();
-        uconn2.setSoTimeout(8000); 
+        uconn2.setSoTimeout(TIMEOUT); 
         String word = IOUtils.readWord(istream,8);
-        uconn2.close();
 
-        // Validate the results
-        assertTrue("Read of word should be 'GET' - is:"+word, 
-          "GET".equals(word));
+        assertEquals("GET", word);
     }
 
     public void testBufferedByteReader() throws Exception {
         String line1 = "GET FOO BAR BLECK";
         String line2 = "Second Line";
 
-        // Start the second connection in another thread
-        UDPConnection uconn2;
-        ConnStarter t = new ConnStarter();
-        t.setDaemon(true);
-        t.start();
+        // initialize connection
+        ConnStarter starter = new ConnStarter();
+        starter.connect();
 
-        // Startup connection one in original thread
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
-        // Wait for commpletion of uconn2 startup
-        t.join();
-
-        // Get the initialized connection 2
-        uconn2 = t.getConnection();
-        
         // Output on the first connection
         OutputStream ostream = uconn1.getOutputStream();
-        ostream.write((line1+"\r\n"+line2+"\r\n").getBytes());
+        ostream.write((line1 + "\r\n" + line2 + "\r\n").getBytes());
 
         // Read to end and one extra on second stream
-        InputStream  istream = uconn2.getInputStream();
-        uconn2.setSoTimeout(8000); 
+        InputStream istream = uconn2.getInputStream();
+        uconn2.setSoTimeout(TIMEOUT);
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
-
         String line = br.readLine();
-
-        uconn1.close();
-        uconn2.close();
-
-        // Validate the results
-        assertTrue("Read of line should be:"+line1, 
-          line1.equals(line));
+        assertEquals(line1, line);
     }
 
 
     public void testReadBeyondEnd() throws Exception {
         final int NUM_BYTES = 100;
 
-        // Start the second connection in another thread
-        UDPConnection uconn2;
-        ConnStarter t = new ConnStarter();
-        t.setDaemon(true);
-        t.start();
-        
-        // Startup connection one in original thread
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-        
-        // Wait for commpletion of uconn2 startup
-        t.join();
-
-        // Get the initialized connection 2
-        uconn2 = t.getConnection();
+        // initialize connection
+        ConnStarter starter = new ConnStarter();
+        starter.connect();        
         
         // Output on the first connection
         OutputStream ostream = uconn1.getOutputStream();
@@ -328,20 +283,9 @@ public final class UDPConnectionTest extends BaseTestCase {
     public void testReadBeyondEndAsBlock() throws Exception {
         final int NUM_BYTES = 100;
 
-        // Start the second connection in another thread
-        UDPConnection uconn2;
-        ConnStarter t = new ConnStarter();
-        t.setDaemon(true);
-        t.start();
-
-        // Startup connection one in original thread
-        final UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
-        // Wait for commpletion of uconn2 startup
-        t.join();
-
-        // Get the initialized connection 2
-        uconn2 = t.getConnection();
+        // initialize connection
+        ConnStarter starter = new ConnStarter();
+        starter.connect();        
         
         // Output on the first connection
         OutputStream ostream = uconn1.getOutputStream();
@@ -382,20 +326,9 @@ public final class UDPConnectionTest extends BaseTestCase {
     public void testReadBeyondEndAsBlockDuringRead() throws Exception {
         final int NUM_BYTES = 100;
 
-        // Start the second connection in another thread
-        UDPConnection uconn2;
-        ConnStarter t = new ConnStarter();
-        t.setDaemon(true);
-        t.start();
-
-        // Startup connection one in original thread
-        final UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
-        // Wait for commpletion of uconn2 startup
-        t.join();
-
-        // Get the initialized connection 2
-        uconn2 = t.getConnection();
+        // initialize connection
+        ConnStarter starter = new ConnStarter();
+        starter.connect();        
         
         // Output on the first connection
         OutputStream ostream = uconn1.getOutputStream();
@@ -410,41 +343,85 @@ public final class UDPConnectionTest extends BaseTestCase {
                 try {
                     // Let reader lock up on block read
                     Thread.sleep(500);
-    
-                    // Close writer
-                    uconn1.close(); 
-                        
                 } catch(InterruptedException ie) {
                 }
+
+                // Close writer
+                uconn1.close(); 
             }
         }
         Inner st = new Inner();
         st.setDaemon(true);
-        st.start();
+        try {
+            st.start();
 
-        // Read to end and one extra on second stream
-        InputStream  istream = uconn2.getInputStream();
-        byte bdata[] = new byte[512];
-        int rval;
-        int i = 0;
-        while (true) {
-            int len = istream.read(bdata);
-            for ( int j = 0; j < len; j++ ) {
-                rval = (int)bdata[j] & 0xff;
-                if ( (i % 256)  != rval )
-                    fail("Error on byte:"+i);
-                i++;
+            // Read to end and one extra on second stream
+            InputStream  istream = uconn2.getInputStream();
+            byte bdata[] = new byte[512];
+            int rval;
+            int i = 0;
+            while (true) {
+                int len = istream.read(bdata);
+                for ( int j = 0; j < len; j++ ) {
+                    rval = (int)bdata[j] & 0xff;
+                    if ( (i % 256)  != rval )
+                        fail("Error on byte:"+i);
+                    i++;
+                }
+                if (i >= NUM_BYTES)
+                    break;
             }
-            if (i >= NUM_BYTES)
-                break;
-        }
-
+            
         // Read from reader
-        rval = istream.read(bdata);
+            rval = istream.read(bdata);
 
-        // Validate the results
-        assertEquals("Read at end of stream should be -1", 
-            rval, -1);
+            // Validate the results
+            assertEquals("Read at end of stream should be -1", 
+                    rval, -1);
+        } finally {
+            st.join();
+        }
+    }
+
+    /**
+     * Test that data can be written, echoed and read through 
+     * UDPConnections.
+     */
+    public void testConnection() throws Exception {
+        final int NUM_BYTES = 10000000;
+
+        // Clear out my standard setup
+        stubService.clearReceivers();
+
+        // Add some simulated connections to the UDPServiceStub
+        // Make the connections 5% flaky
+        stubService.addReceiver(6346, 6348, 0, 0);
+        stubService.addReceiver(6348, 6346, 0, 0);
+
+        // start the first connection in another thread
+        class Inner extends ManagedThread {
+            public void run() {
+                try {
+                    uconn1 = new UDPConnection("127.0.0.1", 6348);
+                    uconn1.setSoTimeout(TIMEOUT);
+                    UStandalone.echoServer(uconn1, NUM_BYTES);                   
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        Inner t = new Inner();
+        t.setDaemon(true);
+        try {
+            t.start();
+
+            // start the second connection
+            uconn2 = new UDPConnection("127.0.0.1", 6346);
+            uconn2.setSoTimeout(TIMEOUT);
+            UStandalone.echoClient(uconn2, NUM_BYTES);
+        } finally {
+            t.join();
+        }
     }
 
     /**
@@ -469,23 +446,27 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             public void run() {
                 try {
-                    UDPConnection serverConn = new UDPConnection("127.0.0.1",6348);
-                    UStandalone.echoServer(serverConn, NUM_BYTES);
-                } catch(IOException ioe) {
-                    throw new RuntimeException(ioe);
+                    uconn1 = new UDPConnection("127.0.0.1", 6348);
+                    uconn1.setSoTimeout(TIMEOUT);
+                    UStandalone.echoServer(uconn1, NUM_BYTES);                   
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
         Inner t = new Inner();
         t.setDaemon(true);
-        t.start();
+        try {
+            t.start();
 
-        // Start the first connection
-        UDPConnection clientConn = new UDPConnection("127.0.0.1",6346);
-        UStandalone.echoClient(clientConn, NUM_BYTES);
-
-        // Wait for the second to finish
-        t.join();
+            // Start the first connection
+            uconn2 = new UDPConnection("127.0.0.1", 6346);
+            uconn2.setSoTimeout(TIMEOUT);
+            UStandalone.echoClient(uconn2, NUM_BYTES);
+        } finally {
+            // Wait for the second to finish
+            t.join();
+        }
     }
 
     /**
@@ -509,28 +490,30 @@ public final class UDPConnectionTest extends BaseTestCase {
         // and run it to completion.
         class Inner extends ManagedThread {
             public void run() {
-                yield();
                 try {
-                    UDPConnection uconn2 = 
-                      new UDPConnection("127.0.0.1",6348);
+                    uconn2 = new UDPConnection("127.0.0.1", 6348);
+                    uconn2.setSoTimeout(TIMEOUT);
                     UStandalone.echoServer(uconn2, NUM_BYTES);
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     throw new RuntimeException(ioe);
                 }
             }
         }
         Inner t = new Inner();
         t.setDaemon(true);
-        t.start();
+        try {
+            t.start();
 
-        // Init the first connection
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
-        // Run the first connection
-        UStandalone.echoClient(uconn1, NUM_BYTES);
-
-        // Wait for the second to finish
-        t.join();
+            // Init the first connection
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
+            uconn1.setSoTimeout(TIMEOUT);
+            
+            // Run the first connection
+            UStandalone.echoClient(uconn1, NUM_BYTES);
+        } finally {
+            // Wait for the second to finish
+            t.join();
+        }
     }
 
     /**
@@ -554,50 +537,89 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             public void run() {
                 try {
-                    UDPConnection uconn2 = 
-                      new UDPConnection("127.0.0.1",6348);
+                    uconn2 = new UDPConnection("127.0.0.1", 6348);
+                    uconn2.setSoTimeout(TIMEOUT);
                     UStandalone.echoServer(uconn2, NUM_BYTES);
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     throw new RuntimeException(ioe);
                 }
             }
         }
         Inner t = new Inner();
         t.setDaemon(true);
-        t.start();
+        try {
+            t.start();
 
-        // Init the first connection
-        UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
-        // Run the first connection
-        UStandalone.echoClient(uconn1, NUM_BYTES);
-
-        // Wait for the second to finish
-        t.join();
+            // Init the first connection
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
+            uconn1.setSoTimeout(TIMEOUT);
+            
+            // Run the first connection
+            UStandalone.echoClient(uconn1, NUM_BYTES);
+        } finally {
+            // Wait for the second to finish
+            t.join();
+        }
     }
 
     /**
-     *  Startup a second UDPConnection in a thread since two connections will
-     *  block if started in one thread.
+     * Startup two connections. The second UDPConnection is started in a thread
+     * since two connections will block if started in one thread.
+     * <p>
+     * Connections are assigned to fields in {@link UDPConnectionTest}.  
      */
-    class ConnStarter extends ManagedThread {
-        UDPConnection uconn2;
-
+    private class ConnStarter {
+        
         public ConnStarter() {
         }
 
-        public void run() {
-            yield();
+        public void connect() throws Exception {
+            Thread t = new ManagedThread(new Runnable() {
+                public void run() {
+                    try {
+                        UDPConnectionTest.this.uconn2 = new UDPConnection("127.0.0.1", 6348);
+                    } catch (IOException e) {
+                        fail("Error establishing UDP connection to port 6348", e);
+                    }
+                }
+            });
+            t.setDaemon(true);
+                    
             try {
-                uconn2 = 
-                  new UDPConnection("127.0.0.1",6348);
-            } catch (IOException ioe) {
-                ErrorService.error(ioe);
+                t.start();
+                
+                // startup connection one in original thread
+                UDPConnectionTest.this.uconn1 = new UDPConnection("127.0.0.1", 6346);
+            } finally {
+                t.join();
             }
         }
-
-        public UDPConnection getConnection() {
-            return uconn2;
-        }
+        
     }
+
+    /**
+     * Reads an int from <code>is</code> in big-endian byte-order.
+     */
+    private int readInt(InputStream is) throws IOException {
+        int result = 0;
+        for (int i = 0; i < 4; i++) {
+            int read = is.read();  
+            if (read == -1) {
+                throw new EOFException();
+            }
+            result |= read << 8 * (3 - i); 
+        }
+        return result;
+    }
+
+    /**
+     * Writes an int to <code>os</code> in big-endian byte-order.
+     */
+    private void writeInt(int x, OutputStream os) throws IOException {
+        os.write((byte)(x >> 24));
+        os.write((byte)(x >> 16));
+        os.write((byte)(x >>  8));
+        os.write((byte) x       );
+    }
+
 }

@@ -8,7 +8,6 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -79,12 +78,11 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, RouterService.getFileManager().getNumFiles());
+        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
 
         // send a query that should be answered
-        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
-                                              "berkeley", null, null,
-                                              null, false, Network.UNKNOWN, false, 0);
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
+                "berkeley", null, null, null, false, Network.UNKNOWN, false, 0);
         ULTRAPEER[0].send(query);
         ULTRAPEER[0].flush();
 
@@ -123,7 +121,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
             currLine = in.readLine();
         } while ((currLine != null) && !currLine.equals(""));
 
-        QueryReply qr = (QueryReply) MessageFactory.read(s.getInputStream());
+        QueryReply qr = (QueryReply) ProviderHacks.getMessageFactory().read(s.getInputStream());
         assertEquals(2, qr.getResultCount());
 
         assertNull(in.readLine());

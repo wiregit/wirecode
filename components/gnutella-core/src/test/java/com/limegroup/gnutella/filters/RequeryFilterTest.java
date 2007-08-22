@@ -3,7 +3,7 @@ package com.limegroup.gnutella.filters;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -29,12 +29,12 @@ public class RequeryFilterTest extends LimeTestCase {
 	public void testLegacy() throws Exception {
 	    FilterSettings.FILTER_DUPLICATES.setValue(false);
 	    FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
-        SpamFilter filter=SpamFilter.newRouteFilter();
-        assertTrue(filter.allow(new PingRequest((byte)3)));
-        assertTrue(filter.allow(QueryRequest.createQuery("Hello")));
-        assertTrue(filter.allow(QueryRequest.createQuery("Hello")));
-        assertTrue(filter.allow(QueryRequest.createRequery("Hel lo")));
-        assertTrue(filter.allow(QueryRequest.createQuery("asd")));
+        SpamFilter filter = ProviderHacks.getSpamFilterFactory().createRouteFilter();
+        assertTrue(filter.allow(ProviderHacks.getPingRequestFactory().createPingRequest((byte)3)));
+        assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("Hello")));
+        assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("Hello")));
+        assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createRequery("Hel lo")));
+        assertTrue(filter.allow(ProviderHacks.getQueryRequestFactory().createQuery("asd")));
  
         byte[] guid=GUID.makeGuid();   //version 1
         guid[0]=(byte)0x02;
@@ -46,7 +46,7 @@ public class RequeryFilterTest extends LimeTestCase {
         assertTrue(GUID.isLimeGUID(guid));
         assertTrue(GUID.isLimeRequeryGUID(guid, 1));
         assertTrue(! GUID.isLimeRequeryGUID(guid, 0));
-        QueryRequest qr = QueryRequest.createNetworkQuery(
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             guid, (byte)5, (byte)0, "asdf".getBytes(), Network.UNKNOWN );
         assertTrue(! filter.allow(qr) );
     }

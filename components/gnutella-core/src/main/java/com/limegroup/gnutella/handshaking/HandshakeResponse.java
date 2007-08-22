@@ -10,7 +10,8 @@ import java.util.StringTokenizer;
 
 import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -389,21 +390,19 @@ public class HandshakeResponse {
 	 * @param headers the <tt>Properties</tt> instance containing the headers
 	 *  to send to the node we're rejecting
 	 */
-	static HandshakeResponse createCrawlerResponse() {
+	static HandshakeResponse createCrawlerResponse(ConnectionManager connectionManager) {
 		Properties headers = new Properties();
 		
         // add our user agent
         headers.put(HeaderNames.USER_AGENT, LimeWireUtils.getHttpServer());
-        headers.put(HeaderNames.X_ULTRAPEER, ""+RouterService.isSupernode());
+        headers.put(HeaderNames.X_ULTRAPEER, ""+ProviderHacks.getConnectionServices().isSupernode());
         
 		// add any leaves
-        List<? extends IpPort> leaves =
-            RouterService.getConnectionManager().getInitializedClientConnections();
+        List<? extends IpPort> leaves = connectionManager.getInitializedClientConnections();
 		headers.put(HeaderNames.LEAVES, createEndpointString(leaves, leaves.size()));
 
 		// add any Ultrapeers
-        List<? extends IpPort> ultrapeers = 
-            RouterService.getConnectionManager().getInitializedConnections();
+        List<? extends IpPort> ultrapeers = connectionManager.getInitializedConnections();
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(ultrapeers, ultrapeers.size()));
 			
@@ -564,7 +563,7 @@ public class HandshakeResponse {
      *  header set according to the incoming headers from the remote host
      */
     private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
-        Collection<IpPort> hosts = RouterService.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
+        Collection<IpPort> hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
 
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;

@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.limewire.collection.NameValue;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -35,10 +35,10 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         String xml2 = "<?xml version='1.0'><text>two</text>";
         String xml3 = "<?xml version='1.0'><text>three</text>";
         Iterator i = XMLParsingUtils.split(xml1+xml2+xml3).iterator();
-        Assert.that(i.next().equals(xml1));
-        Assert.that(i.next().equals(xml2));
-        Assert.that(i.next().equals(xml3));
-        Assert.that(!i.hasNext());
+        assertEquals(xml1, i.next());
+        assertEquals(xml2, i.next());
+        assertEquals(xml3, i.next());
+        assertFalse(i.hasNext());
         
         assertEquals(3,XMLParsingUtils.split("<?xml<?xml<?xml").size());
         assertEquals(1,XMLParsingUtils.split("<xml?xml<?xml<?xm").size());
@@ -52,9 +52,9 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\"/>"+
         "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audios>";
         XMLParsingUtils.ParseResult r = XMLParsingUtils.parse(xml,3);
-        Assert.that(r.schemaURI.equals("http://www.limewire.com/schemas/audio.xsd"));
-        Assert.that(r.type.equals("audio"));
-        Assert.that(r.canonicalKeyPrefix.equals("audios__audio__"));
+        assertEquals("http://www.limewire.com/schemas/audio.xsd", r.schemaURI);
+        assertEquals("audio", r.type);
+        assertEquals("audios__audio__", r.canonicalKeyPrefix);
         List list = new ArrayList();
         HashMap map = new HashMap();
         map.put("audios__audio__genre__","Rock");
@@ -71,7 +71,7 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         map.put("audios__audio__identifier__","def.txt");
         map.put("audios__audio__bitrate__","192");
         list.add(map);
-        Assert.that(r.equals(list));
+        assertEquals(list, r);
         
         String invalid = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
@@ -92,7 +92,7 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         assertFalse(r.isEmpty());
         assertNotNull(r.canonicalKeyPrefix);
         assertNotNull(r.schemaURI);
-        Assert.that(r.equals(list));
+        assertEquals(list, r);
         
         String empty1 = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
@@ -121,9 +121,9 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         list.add(new NameValue<String>("audios__audio__artist__", "also <malformed"));
         list.add(new NameValue<String>("audios__audio__license__", ">still malformed"));
         list.add(new NameValue<String>("audios__audio__language__", "s\tpace"));
-        list.add(new NameValue<String>("audios__audio__seconds__", "even[ m£r½] c²aîécters"));
+        list.add(new NameValue<String>("audios__audio__seconds__", "even[ mï¿½rï¿½] cï¿½aï¿½ï¿½cters"));
         list.add(new NameValue<String>("audios__audio__bitrate__", "a\u0002\u0003\u0004b"));
-        String xml = new LimeXMLDocument(list, AUDIO_SCHEMA).getXMLString();
+        String xml = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(list, AUDIO_SCHEMA).getXMLString();
         XMLParsingUtils.ParseResult r = XMLParsingUtils.parse(xml,1);
         assertEquals("http://www.limewire.com/schemas/audio.xsd", r.schemaURI);
         assertEquals("audio", r.type);
@@ -134,7 +134,7 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         assertEquals(result.toString(), "also <malformed", result.get("audios__audio__artist__"));
         assertEquals(result.toString(), ">still malformed", result.get("audios__audio__license__"));
         assertEquals(result.toString(), "s pace", result.get("audios__audio__language__"));
-        assertEquals(result.toString(), "even[ m£r½] c²aîécters", result.get("audios__audio__seconds__"));
+        assertEquals(result.toString(), "even[ mï¿½rï¿½] cï¿½aï¿½ï¿½cters", result.get("audios__audio__seconds__"));
         assertEquals(result.toString(), "a   b", result.get("audios__audio__bitrate__"));
     }
     

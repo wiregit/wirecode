@@ -44,9 +44,9 @@ public class BTCancel extends BTMessage {
 			throw new BadBTMessageException(
 					"invalid piece number in cancel message: " + pieceNum);
 
-		int offset = payload.getInt();
+		long offset = payload.getInt();
 
-		int length = payload.getInt();
+		long length = payload.getInt();
 		
 		if (length == 0)
 			throw new BadBTMessageException("0 length in cancel message " + pieceNum);
@@ -66,8 +66,8 @@ public class BTCancel extends BTMessage {
 			_payload = ByteBuffer.allocate(12);
 			_payload.order(ByteOrder.BIG_ENDIAN);
 			_payload.putInt(in.getId());
-			_payload.putInt(in.low);
-			_payload.putInt(in.high - in.low + 1);
+			_payload.putInt(in.get32BitLow());
+			_payload.putInt(in.get32BitLength());
 			_payload = _payload.asReadOnlyBuffer();
 		}
 		_payload.clear();

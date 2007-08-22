@@ -21,10 +21,10 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -34,7 +34,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -73,14 +72,12 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.MAX_LEAVES.setValue(33);
         ConnectionSettings.NUM_CONNECTIONS.setValue(33);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);    
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
@@ -116,20 +113,19 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         // LockTimeoutExceptions on the loopback then check this Setting!
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
         
-        if (!RouterService.isLoaded()) {
+        if (!ProviderHacks.getLifecycleManager().isLoaded()) {
             // Start an instance of LimeWire in Ultrapeer mode
-            RouterService routerService 
-                = new RouterService(new ActivityCallbackStub());
-            routerService.start();
+            //RouterService routerService = new RouterService(new ActivityCallbackStub());
+            ProviderHacks.getLifecycleManager().start();
             
-            RouterService.clearHostCatcher();
-            RouterService.connect();
+            LimeTestUtils.clearHostCatcher();
+            ProviderHacks.getConnectionServices().connect();
             
             // Make sure LimeWire is running as an Ultrapeer
-            assertTrue(RouterService.isStarted());
-            assertTrue(RouterService.isSupernode());
-            assertFalse(RouterService.isActiveSuperNode());
-            assertFalse(RouterService.isShieldedLeaf());
+            assertTrue(ProviderHacks.getLifecycleManager().isStarted());
+            assertTrue(ProviderHacks.getConnectionServices().isSupernode());
+            assertFalse(ProviderHacks.getConnectionServices().isActiveSuperNode());
+            assertFalse(ProviderHacks.getConnectionServices().isShieldedLeaf());
         }
         
         // Start and bootstrap a bunch of DHT Nodes
@@ -158,12 +154,12 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     }
     
     public static void globalTearDown() throws Exception {
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
     }
     
     public void testForwardContacts() throws Exception {
         // There should be no connections
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
@@ -176,7 +172,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // There should be one connection now
             assertEquals(1, cm.getNumConnections());
-            assertTrue(RouterService.isActiveSuperNode());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
             ManagedConnection in = cm.getConnections().get(0);
@@ -216,13 +212,13 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertNotEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertTrue(in.isPushProxyFor());
             
-            RouterService.getDHTManager().start(DHTMode.PASSIVE);
+            ProviderHacks.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, RouterService.getDHTManager().getDHTMode());
+            assertEquals(DHTMode.PASSIVE, ProviderHacks.getDHTManager().getDHTMode());
             
             
             // Bootstrap the Ultrapeer
-            RouterService.getDHTManager().getMojitoDHT()
+            ProviderHacks.getDHTManager().getMojitoDHT()
                 .bootstrap(dhts.get(0).getContactAddress()).get();
             
             // -------------------------------------
@@ -264,7 +260,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     public void testDoNotSendCapabilitiesVM() throws Exception {
         // There should be no connections
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
@@ -276,7 +272,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // There should be one connection now
             assertEquals(1, cm.getNumConnections());
-            assertTrue(RouterService.isActiveSuperNode());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
             ManagedConnection in = cm.getConnections().get(0);
@@ -298,12 +294,12 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertTrue(in.isPushProxyFor());
             
-            RouterService.getDHTManager().start(DHTMode.PASSIVE);
+            ProviderHacks.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, RouterService.getDHTManager().getDHTMode());
+            assertEquals(DHTMode.PASSIVE, ProviderHacks.getDHTManager().getDHTMode());
             
             // Bootstrap the Ultrapeer
-            RouterService.getDHTManager().getMojitoDHT()
+            ProviderHacks.getDHTManager().getMojitoDHT()
                 .bootstrap(dhts.get(0).getContactAddress()).get();
             
             // -------------------------------------
@@ -325,7 +321,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     public void testDoNotSendPushProxyRequest() throws Exception {
         // There should be no connections
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
@@ -337,7 +333,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // There should be one connection now
             assertEquals(1, cm.getNumConnections());
-            assertTrue(RouterService.isActiveSuperNode());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
             ManagedConnection in = cm.getConnections().get(0);
@@ -374,12 +370,12 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertNotEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
-            RouterService.getDHTManager().start(DHTMode.PASSIVE);
+            ProviderHacks.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, RouterService.getDHTManager().getDHTMode());
+            assertEquals(DHTMode.PASSIVE, ProviderHacks.getDHTManager().getDHTMode());
             
             // Bootstrap the Ultrapeer
-            RouterService.getDHTManager().getMojitoDHT()
+            ProviderHacks.getDHTManager().getMojitoDHT()
                 .bootstrap(dhts.get(0).getContactAddress()).get();
             
             // -------------------------------------
@@ -400,12 +396,12 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     }
     
     protected Connection createLeafConnection() throws Exception {
-        return createConnection(new LeafHeaders("localhost"));
+        return createConnection(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"));
     }
     
     /** Builds a single connection with the given headers. */
     protected Connection createConnection(Properties headers) throws Exception {
-        Connection c = new ManagedConnection("localhost", PORT);
+        Connection c = ProviderHacks.getManagedConnectionFactory().createManagedConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         return c;
     }

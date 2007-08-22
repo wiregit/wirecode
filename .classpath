@@ -64,9 +64,14 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jakarta-httpcore.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.5.0_06"/>
 	<classpathentry kind="lib" path="lib/jars/org.eclipse.swt.jmx_1.0.0.v20070510.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/org.eclipse.swt.win32.win32.x86_3.3.0.v3346.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
+	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
+	<classpathentry kind="lib" path="lib/jars/guice-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore-nio.jar"/>
+	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.limewire.collection.NECallable;
 
 import com.limegroup.bittorrent.Chokable;
+import com.limegroup.gnutella.UploadServices;
 
 /**
  * Choker that implements the choking logic during seeding
@@ -30,8 +31,8 @@ class SeedChoker extends Choker {
 	private int unchokesSinceLast;
 	
 	SeedChoker(NECallable<List<? extends Chokable>> chokables,
-			ScheduledExecutorService invoker) {
-		super(chokables, invoker);
+			ScheduledExecutorService invoker, UploadServices uploadServices) {
+		super(chokables, invoker, uploadServices);
 		round = Integer.MIN_VALUE;
 	}
 

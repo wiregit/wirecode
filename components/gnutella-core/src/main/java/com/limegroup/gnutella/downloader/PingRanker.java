@@ -21,9 +21,10 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
@@ -35,10 +36,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
 
     private static final Log LOG = LogFactory.getLog(PingRanker.class);
     
-    /**
-     * the pinger to send the pings
-     */
-    private UDPPinger pinger;
+    private static final Comparator<RemoteFileDesc> RFD_COMPARATOR = new RFDComparator();    
+    private static final Comparator<RemoteFileDesc> ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
+    
     
     /**
      * new hosts (as RFDs) that we've learned about
@@ -84,12 +84,15 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private long lastPingTime;
     
-    private static final Comparator<RemoteFileDesc> RFD_COMPARATOR = new RFDComparator();
+    private final NetworkManager networkManager;
+    private final UDPPinger udpPinger;
+
+    private final MessageRouter messageRouter;
     
-    private static final Comparator<RemoteFileDesc> ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
-    
-    protected PingRanker() {
-        pinger = new UDPPinger();
+    protected PingRanker(NetworkManager networkManager, UDPPinger udpPinger, MessageRouter messageRouter) {
+        this.networkManager = networkManager; 
+        this.udpPinger = udpPinger;
+        this.messageRouter = messageRouter;
         pingedHosts = new TreeMap<IpPort, RemoteFileDesc>(IpPort.COMPARATOR);
         testedLocations = new HashSet<RemoteFileDesc>();
         newHosts = new HashSet<RemoteFileDesc>();
@@ -159,7 +162,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // initialize the guid if we don't have one
         if (myGUID == null && meshHandler != null) {
             myGUID = new GUID(GUID.makeGuid());
-            RouterService.getMessageRouter().registerMessageListener(myGUID.bytes(),this);
+            messageRouter.registerMessageListener(myGUID.bytes(),this);
         }
         
         return ret;
@@ -257,7 +260,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
                     "\npinging hosts: "+sent);
         }
         
-        pinger.rank(toSend,null,this,ping);
+        udpPinger.rank(toSend,null,this,ping);
         lastPingTime = now;
     }
     
@@ -270,8 +273,8 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      * schedules a push ping to each proxy of the given host
      */
     private void pingProxies(RemoteFileDesc rfd) {
-        if (RouterService.acceptedIncomingConnection() || 
-                (RouterService.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
+        if (networkManager.acceptedIncomingConnection() || 
+                (networkManager.canDoFWT() && rfd.supportsFWTransfer())) {
             HeadPing pushPing = 
                 new HeadPing(myGUID,rfd.getSHA1Urn(),
                         new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
@@ -282,7 +285,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
             if (LOG.isDebugEnabled())
                 LOG.debug("pinging push location "+rfd.getPushAddr());
             
-            pinger.rank(rfd.getPushProxies(),null,this,pushPing);
+            udpPinger.rank(rfd.getPushProxies(),null,this,pushPing);
         }
         
     }
@@ -290,10 +293,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     /**
      * @return the appropriate ping flags based on current conditions
      */
-    private static int getPingFlags() {
+    private int getPingFlags() {
         int flags = HeadPing.INTERVALS | HeadPing.ALT_LOCS;
-        if (RouterService.acceptedIncomingConnection() ||
-                RouterService.getUdpService().canDoFWT())
+        if (networkManager.acceptedIncomingConnection() ||
+                networkManager.canDoFWT())
             flags |= HeadPing.PUSH_ALTLOCS;
         return flags;
     }
@@ -392,7 +395,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     protected synchronized void clearState(){
         if (myGUID != null) {
-            RouterService.getMessageRouter().unregisterMessageListener(myGUID.bytes(),this);
+            messageRouter.unregisterMessageListener(myGUID.bytes(),this);
             myGUID = null;
         }
     }

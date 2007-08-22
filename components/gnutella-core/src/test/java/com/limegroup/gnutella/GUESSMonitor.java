@@ -17,7 +17,6 @@ import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.guess.GUESSStatistics;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Starts a BackEnd (which should have a .props file configured to be an
@@ -34,18 +33,17 @@ public class GUESSMonitor extends LimeTestCase {
         "? - Help; verbose - switch verbose on/off; connect - start the " +
         "backend; disconnect - stop the backend; stats - show stats";
 
-    private RouterService _backend;
     private MyMessageRouter _messageRouter;
 
     public GUESSMonitor() {
         super("GUESS MONITOR");
         setStandardSettings();
         // make my own MessageRouter....            
-        ActivityCallback stub = new ActivityCallbackStub();
+       // ActivityCallback stub = new ActivityCallbackStub();
         _messageRouter = new MyMessageRouter();
-        _backend = new RouterService(stub, _messageRouter);
+     //   _backend = new RouterService(stub, _messageRouter);
         //_backend = Backend.createLongLivedBackend(stub, _messageRouter);
-        _backend.start();
+        ProviderHacks.getLifecycleManager().start();
         //RouterService.forceKeepAlive(8);
         //_backend.getRouterService().forceKeepAlive(5);
     }
@@ -53,19 +51,19 @@ public class GUESSMonitor extends LimeTestCase {
     public void shutdown() {
         _messageRouter.shutdown();
         _messageRouter.join();
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
     }
 
     public void connect() {
         //_backend.getRouterService().connect();
         //_backend.getRouterService().forceKeepAlive(5);
-        RouterService.connect();
+        ProviderHacks.getConnectionServices().connect();
         //RouterService.forceKeepAlive(5);
     }
 
     public void disconnect() {
     //_backend.getRouterService().disconnect();
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
     }
 
     public static void main(String argv[]) throws Exception {
@@ -102,7 +100,7 @@ public class GUESSMonitor extends LimeTestCase {
     }
 
     
-    private class MyMessageRouter extends StandardMessageRouter {
+    private class MyMessageRouter extends HackMessageRouter {
 
         private List _guessPongs = new Vector();
         private Set  _uniqueHosts = Collections.synchronizedSet(new HashSet());
@@ -124,7 +122,6 @@ public class GUESSMonitor extends LimeTestCase {
         }
 
         public MyMessageRouter() {
-            super();
             _pongLoop = new Thread() {
                     public void run() {
                         guessPongLoop();
@@ -253,9 +250,9 @@ public class GUESSMonitor extends LimeTestCase {
     private boolean notMe(InetAddress address, int port) {
         boolean retVal = true;
 
-        if ((port == RouterService.getPort()) &&
+        if ((port == ProviderHacks.getNetworkManager().getPort()) &&
 				 Arrays.equals(address.getAddress(), 
-							   RouterService.getAddress())) {			
+				         ProviderHacks.getNetworkManager().getAddress())) {			
 			retVal = false;
 		}
 

@@ -58,6 +58,6 @@ public class ProbabilisticBooleanSetting extends FloatSetting {
     @Override
     protected void loadValue(String sValue) {
         super.loadValue(sValue);
-        value = Math.random() <= getValue();
+        value = Math.random() < getValue();
     }
 }

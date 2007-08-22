@@ -11,11 +11,17 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.Connectable;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.util.CommonUtils;
@@ -25,22 +31,31 @@ import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 import org.limewire.util.VersionUtils;
 
-import com.limegroup.gnutella.Assert;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientListener;
+import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -51,11 +66,18 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * Handles queueing new data for parsing and keeping track of which current
  * version is stored in memory & on disk.
  */
-public class UpdateHandler {
+@Singleton
+public class UpdateHandler implements HttpClientListener {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandler.class);
     
     private static final long THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    
+    /** If we haven't had new updates in this long, schedule http failover */
+    private static final long ONE_MONTH = 10L * THREE_DAYS;
+    
+    /** URL to get the new version message from */
+    private static final String HTTP_FAILOVER = "http://update.limewire.com/version.def";
     
     /**
      * The filename on disk where data is stored.
@@ -85,10 +107,6 @@ public class UpdateHandler {
      * means to override the current time for tests
      */
     private static Clock clock = new Clock();
-    
-    private static final UpdateHandler INSTANCE = new UpdateHandler();
-    private UpdateHandler() { initialize(); }
-    public static UpdateHandler instance() { return INSTANCE; }
     
     /**
      * The queue that handles all incoming data.
@@ -129,10 +147,42 @@ public class UpdateHandler {
     
     private boolean _killingObsoleteNecessary;
     
-    /**
-     * The time we'll notify the gui about an update with URL
-     */
+    /** If an HTTP failover update is in progress */
+    private final AtomicBoolean httpUpdate = new AtomicBoolean(false);
     
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<ActivityCallback> activityCallback;
+    private final ConnectionServices connectionServices;
+    private final Provider<HttpExecutor> httpExecutor;
+    private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
+    private final CapabilitiesVMFactory capabilitiesVMFactory;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<DownloadManager> downloadManager;
+    private final Provider<FileManager> fileManager;
+    
+    @Inject
+    public UpdateHandler(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<ActivityCallback> activityCallback,
+            ConnectionServices connectionServices,
+            Provider<HttpExecutor> httpExecutor,
+            Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<ConnectionManager> connectionManager,
+            Provider<DownloadManager> downloadManager,
+            Provider<FileManager> fileManager) {
+        this.backgroundExecutor = backgroundExecutor;
+        this.activityCallback = activityCallback;
+        this.connectionServices = connectionServices;
+        this.httpExecutor = httpExecutor;
+        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
+        this.connectionManager = connectionManager;
+        this.downloadManager = downloadManager;
+        this.fileManager = fileManager;
+        
+        initialize(); // DPINJ: move to an initializer
+    }
+
     /**
      * Initializes data as read from disk.
      */
@@ -146,11 +196,11 @@ public class UpdateHandler {
         
         // Try to update ourselves (re-use hosts for downloading, etc..)
         // at a specified interval.
-        RouterService.schedule(new Runnable() {
+        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 QUEUE.execute(new Poller());
             }
-        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0);
+        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0, TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -164,7 +214,7 @@ public class UpdateHandler {
                 if (updateInfo != null && 
                 		updateInfo.getUpdateURN() != null &&
                 		isMyUpdateDownloaded(updateInfo))
-                    RouterService.getCallback().updateAvailable(updateInfo);
+                    activityCallback.get().updateAvailable(updateInfo);
                 
                 downloadUpdates(_updatesToDownload, null);
             }
@@ -226,19 +276,21 @@ public class UpdateHandler {
         if(data != null) {
             String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
             if(xml != null) {
-                if(!fromDisk)
-                    RouterService.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.VERSION);
+                if(!fromDisk && handler != null)
+                    networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
                 UpdateCollection uc = UpdateCollection.create(xml);
+                if (fromDisk || uc.getId() <= _lastId)
+                    doHttpFailover(uc);
                 if(uc.getId() > _lastId)
                     storeAndUpdate(data, uc, fromDisk);
             } else {
-                if(!fromDisk)
-                    RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
+                if(!fromDisk && handler != null)
+                    networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.VERSION);
                 LOG.warn("Couldn't verify signature on data.");
             }
         } else {
-            if(!fromDisk)
-                RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
+            if(!fromDisk && handler != null)
+                networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("No data to handle.");
         }
     }
@@ -252,6 +304,8 @@ public class UpdateHandler {
         _lastId = uc.getId();
         
         _lastTimestamp = uc.getTimestamp();
+        UpdateSettings.LAST_UPDATE_TIMESTAMP.setValue(_lastTimestamp);
+        
         long delay = UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue();
         long random = Math.abs(RANDOM.nextLong() % delay);
         _nextDownloadTime = _lastTimestamp + random;
@@ -259,9 +313,13 @@ public class UpdateHandler {
         _lastBytes = data;
         
         if(!fromDisk) {
+            // cancel any http and pretend we just updated.
+            httpUpdate.set(false);
+            UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
+            
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
-            CapabilitiesVM.reconstructInstance();
-            RouterService.getConnectionManager().sendUpdatedCapabilities();
+            capabilitiesVMFactory.updateCapabilities();
+            connectionManager.get().sendUpdatedCapabilities();
         }
 
         Version limeV;
@@ -315,14 +373,87 @@ public class UpdateHandler {
             
             updateInfo.setUpdateCommand(null);
             
-            RouterService.schedule(new NotificationFailover(_lastId),
+            backgroundExecutor.scheduleWithFixedDelay(new NotificationFailover(_lastId),
                     delay(clock.now(), uc.getTimestamp()),
-                    0);
+                    0, TimeUnit.MILLISECONDS);
         } else if (isMyUpdateDownloaded(updateInfo)) {
             LOG.debug("there is an update for me, but I happen to have it on disk");
-            RouterService.getCallback().updateAvailable(updateInfo);
+            activityCallback.get().updateAvailable(updateInfo);
         } else
             LOG.debug("we have an update, it needs a download.  Rely on callbacks");
+    }
+
+    /**
+     * begins an http failover.
+     */
+    private void doHttpFailover(UpdateCollection uc) {
+        LOG.debug("checking for http failover");
+        long monthAgo = clock.now() - ONE_MONTH;
+        if (UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue() < monthAgo && // more than a month ago
+                UpdateSettings.LAST_HTTP_FAILOVER.getValue() < monthAgo &&  // and last failover too
+                !httpUpdate.getAndSet(true)) { // and we're not already doing a failover
+            
+            long when = (connectionServices.isConnected() ? 1 : 5 ) * 60 * 1000;
+            if (LOG.isDebugEnabled())
+                LOG.debug("scheduling http failover in "+when);
+            
+            backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+                public void run() {
+                    launchHTTPUpdate();
+                }
+            }, when, 0, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    /**
+     * Launches an http update to the failover url.
+     */
+    private void launchHTTPUpdate() {
+        if (!httpUpdate.get())
+            return;
+        LOG.debug("about to issue http request method");
+        HttpMethod get = new GetMethod(LimeWireUtils.addLWInfoToUrl(HTTP_FAILOVER));
+        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
+        get.setFollowRedirects(true);
+        httpExecutor.get().execute(get,this, 10000);
+    }
+
+    public boolean requestComplete(HttpMethod method) {
+        httpUpdate.set(false);
+        LOG.debug("http request method succeeded");
+        
+        // remember we made an attempt even if it didn't succeed
+        UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
+        byte [] inflated = null;
+        try {
+            if (method.getStatusCode() < 200 || method.getStatusCode() >= 300) 
+                throw new IOException("bad code "+method.getStatusCode());
+
+            byte [] resp = method.getResponseBody();
+            if (resp == null || resp.length == 0)
+                throw new IOException("bad body");
+
+            // inflate the response and process.
+            inflated = IOUtils.inflate(resp);
+        } catch (IOException failed) {
+            LOG.warn("couldn't fetch data ",failed);
+            return false;
+        } finally {
+            httpExecutor.get().releaseResources(method);
+        }
+        
+        handleNewData(inflated, null);
+        // no more requests
+        return false;
+    }
+    
+    public boolean requestFailed(HttpMethod m, IOException exc) {
+        LOG.warn("http failover failed",exc);
+        httpUpdate.set(false);
+        httpExecutor.get().releaseResources(m);
+        // nothing we can do.
+        return false;
     }
     
     /**
@@ -377,14 +508,12 @@ public class UpdateHandler {
         for(DownloadInformation next : toDownload) {
             if (isHopeless(next))
                 continue; 
-
-            DownloadManager dm = RouterService.getDownloadManager();
-            FileManager fm = RouterService.getFileManager();
-            if(dm.isGUIInitd() && fm.isLoadFinished()) {
+            
+            if(downloadManager.get().isGUIInitd() && fileManager.get().isLoadFinished()) {
                 
-                FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
+                FileDesc shared = fileManager.get().getFileDescForUrn(next.getUpdateURN());
                 //TODO: remove the cast
-                ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
+                ManagedDownloader md = (ManagedDownloader)downloadManager.get().getDownloaderForURN(next.getUpdateURN());
                 if(LOG.isDebugEnabled())
                     LOG.debug("Looking for: " + next + ", got: " + shared);
                 
@@ -398,10 +527,10 @@ public class UpdateHandler {
                 // If we don't have an existing download ...
                 // and there's no existing InNetwork downloads & 
                 // we're allowed to start a new one.
-                if(md == null && !dm.hasInNetworkDownload() && canStartDownload()) {
+                if(md == null && !downloadManager.get().hasInNetworkDownload() && canStartDownload()) {
                     LOG.debug("Starting a new InNetwork Download");
                     try {
-                        md = (ManagedDownloader)dm.download(next, clock.now());
+                        md = (ManagedDownloader)downloadManager.get().download(next, clock.now());
                     } catch(SaveLocationException sle) {
                         LOG.error("Unable to construct download", sle);
                     }
@@ -422,24 +551,22 @@ public class UpdateHandler {
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-    	DownloadManager dm = RouterService.getDownloadManager();
-    	FileManager fm = RouterService.getFileManager();
-    	if (!dm.isGUIInitd() || !fm.isLoadFinished())
+    	if (!downloadManager.get().isGUIInitd() || !fileManager.get().isLoadFinished())
     		return;
     	
         if (_killingObsoleteNecessary) {
             _killingObsoleteNecessary = false;
-            dm.killDownloadersNotListed(toDownload);
+            downloadManager.get().killDownloadersNotListed(toDownload);
             
             Set<URN> urns = new HashSet<URN>(toDownload.size());
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            FileDesc [] shared = fm.getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
+            FileDesc [] shared = fileManager.get().getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
             for (int i = 0; i < shared.length; i++) {
             	if (shared[i].getSHA1Urn() != null &&
             			!urns.contains(shared[i].getSHA1Urn())) {
-            		fm.removeFileIfShared(shared[i].getFile());
+            	    fileManager.get().removeFileIfShared(shared[i].getFile());
             		shared[i].getFile().delete();
             	}
 			}
@@ -450,7 +577,7 @@ public class UpdateHandler {
      * Adds all current connections that have the right update ID as a source for this download.
      */
     private void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
-        for(ManagedConnection mc : RouterService.getConnectionManager().getConnections()) {
+        for(ManagedConnection mc : connectionManager.get().getConnections()) {
             if(mc.getRemoteHostUpdateVersion() == _lastId) {
                 LOG.debug("Adding source: " + mc);
                 md.addDownload(rfd(mc, info), false);
@@ -507,9 +634,9 @@ public class UpdateHandler {
             return;
         
         UpdateInformation update = _updateInfo;
-        Assert.that(update != null);
+        assert(update != null);
         
-        RouterService.getCallback().updateAvailable(update);
+        activityCallback.get().updateAvailable(update);
     }
     
     /**
@@ -560,9 +687,9 @@ public class UpdateHandler {
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);
-                        RouterService.schedule(new NotificationFailover(_lastId),delay,0);
+                        backgroundExecutor.scheduleWithFixedDelay(new NotificationFailover(_lastId),delay,0, TimeUnit.MILLISECONDS);
                     } else
-                        RouterService.getCallback().updateAvailable(updateInfo);
+                        activityCallback.get().updateAvailable(updateInfo);
                 }
             }
         };
@@ -573,17 +700,16 @@ public class UpdateHandler {
     /**
      * @return whether we killed any hopeless update downloads
      */
-    private static void killHopelessUpdates(List<? extends DownloadInformation> updates) {
+    private void killHopelessUpdates(List<? extends DownloadInformation> updates) {
         if (updates == null)
             return;
         
-        DownloadManager dm = RouterService.getDownloadManager();
-        if (!dm.hasInNetworkDownload())
+        if (!downloadManager.get().hasInNetworkDownload())
             return;
         
         long now = clock.now();
         for(DownloadInformation info : updates) {
-            Downloader downloader = dm.getDownloaderForURN(info.getUpdateURN());
+            Downloader downloader = downloadManager.get().getDownloaderForURN(info.getUpdateURN());
             if (downloader != null && downloader instanceof InNetworkDownloader) {
                 InNetworkDownloader iDownloader = (InNetworkDownloader)downloader;
                 if (isHopeless(iDownloader, now))  
@@ -596,7 +722,7 @@ public class UpdateHandler {
      * @param now what time is it now
      * @return whether the in-network downloader is considered hopeless
      */
-    private static boolean isHopeless(InNetworkDownloader downloader, long now) {
+    private boolean isHopeless(InNetworkDownloader downloader, long now) {
         if (now - downloader.getStartTime() < 
                 UpdateSettings.UPDATE_GIVEUP_FACTOR.getValue() * 
                 UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
@@ -612,16 +738,15 @@ public class UpdateHandler {
      * @return true if the update for our specific machine is downloaded or
      * there was nothing to download
      */
-    private static boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
-        FileManager fm = RouterService.getFileManager();
-        if (!fm.isLoadFinished())
+    private boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
+        if (!fileManager.get().isLoadFinished())
             return false;
         
         URN myUrn = myInfo.getUpdateURN();
         if (myUrn == null)
             return true;
         
-        FileDesc desc = fm.getFileDescForUrn(myUrn);
+        FileDesc desc = fileManager.get().getFileDescForUrn(myUrn);
         
         if (desc == null)
             return false;
@@ -643,11 +768,11 @@ public class UpdateHandler {
         public void run() {
             downloadUpdates(_updatesToDownload, null);
             killHopelessUpdates(_updatesToDownload);
-            RouterService.schedule( new Runnable() {
+            backgroundExecutor.scheduleWithFixedDelay( new Runnable() {
                 public void run() {
                     QUEUE.execute(new Poller());
                 }
-            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0);
+            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0, TimeUnit.MILLISECONDS);
         }
     }
     

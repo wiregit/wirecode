@@ -14,14 +14,19 @@ import org.limewire.nio.SocketFactory;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.MessageService;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
  * threads to handle requests.  This allows simple HTTP requests.
  */
+@Singleton
 public class HTTPAcceptor {
 	/** Magnet request for a default action on parameters */
     private static final String MAGNET_DEFAULT = "magnet10/default.js?";
@@ -48,6 +53,12 @@ public class HTTPAcceptor {
 	private static String         _lastRequest     = null;
 	private static long           _lastRequestTime = 0;
 
+	private final Provider<ExternalControl> externalControl;
+
+	@Inject
+    public HTTPAcceptor(Provider<ExternalControl> externalControl) {
+        this.externalControl = externalControl;
+    }
 
     /**
      * Starts listening to incoming connections.
@@ -75,7 +86,7 @@ public class HTTPAcceptor {
             }
             // no luck setting up? show user error message
             if(error) 
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+                MessageService.showError(I18n.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
         }
     }
 
@@ -174,9 +185,9 @@ public class HTTPAcceptor {
                 if (word.equals("GET")) {
                     handleHTTPRequest(_socket);
                 } else if (word.equals("MAGNET")) {
-                    ExternalControl.fireControlThread(_socket, true);
+                    externalControl.get().fireControlThread(_socket, true);
                 } else if (word.equals("TORRENT")) {
-                	ExternalControl.fireControlThread(_socket, false);
+                    externalControl.get().fireControlThread(_socket, false);
                 }
             } catch (IOException e) {
             } finally {
@@ -249,7 +260,7 @@ public class HTTPAcceptor {
 			   (curTime - _lastRequestTime) < 1500l) ) {
 			
             // trigger an operation
-            ExternalControl.handleMagnetRequest(command);
+		    externalControl.get().handleMagnetRequest(command);
 			_lastRequest     = command;
 			_lastRequestTime = curTime;
 		} 

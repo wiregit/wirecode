@@ -7,20 +7,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.StandardMessageRouter;
-import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
  
 public class ContentManagerNetworkTest extends LimeTestCase {
@@ -46,11 +42,11 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
-        RouterService.getMessageRouter().initialize();
+      //  new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
+        ProviderHacks.getMessageRouter().initialize();
         
-        new Acceptor().setListeningPort(LISTEN_PORT);
-        UDPService.instance().start();
+        ProviderHacks.getAcceptor().setListeningPort(LISTEN_PORT);
+        ProviderHacks.getUdpService().start();
         
         URN_1 = URN.createSHA1Urn(S_URN_1);
     }
@@ -133,9 +129,9 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     
     public void testResponseReceived() throws Exception {        
         mgr.shutdown();
-        mgr = RouterService.getContentManager();
+        mgr = ProviderHacks.getContentManager();
         mgr.request(URN_1, one, 4000);
-        UDPService.instance().send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
+        ProviderHacks.getUdpService().send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
         Thread.sleep(1000); // let the message process.
         assertNotNull(mgr.getResponse(URN_1));
         assertTrue(mgr.getResponse(URN_1).isOK());

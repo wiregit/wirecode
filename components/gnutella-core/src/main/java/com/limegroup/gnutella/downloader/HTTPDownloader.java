@@ -24,8 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -43,20 +43,22 @@ import org.limewire.nio.statemachine.ReadState;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
+import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.PushEndpointForSelf;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
@@ -135,13 +137,13 @@ public class HTTPDownloader implements BandwidthTracker {
      * HTTP connections
      * LOCKING: this
      */
-    private int _totalAmountRead;
+    private long _totalAmountRead;
     
     /**
      *  The amount we've downloaded.
      * LOCKING: this 
      */
-	private int _amountRead;
+	private long _amountRead;
 	
     /** 
      * The amount we'll have downloaded if the download completes properly. 
@@ -149,7 +151,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  _amountToRead - _amountRead.
      * LOCKING: this 
      */
-	private int _amountToRead;
+	private long _amountToRead;
     
     /**
      * Whether to disconnect after reading the amount we have wanted to read
@@ -160,13 +162,13 @@ public class HTTPDownloader implements BandwidthTracker {
      *  The index to start reading from the server 
      * LOCKING: this 
      */
-	private int _initialReadingPoint;
+	private long _initialReadingPoint;
 	
     /** 
      *  The index to actually start writing to the file.
      *  LOCKING:this
      */
-    private int _initialWritingPoint;
+    private long _initialWritingPoint;
     
 	/**
 	 * The content-length of the output, useful only for when we
@@ -264,7 +266,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private boolean _isActive = false;
 
 
-    private Interval _requestedInterval = null;
+    private Range _requestedInterval = null;
     
     /**
      * whether the other side wants to receive firewalled altlocs
@@ -274,49 +276,32 @@ public class HTTPDownloader implements BandwidthTracker {
     /** Whether to count the bandwidth used by this downloader */
     private final boolean _inNetwork;
     
-
-    /**
-     * Allows subclasses to construct the class without an initialized
-     * socket.
-     *
-     * @param rfd complete information for the file to download, including
-     *  host address and port
-     * @param incompleteFile the temp file to use while downloading, which need
-     *  not exist.
-     *  @param inNetwork true if this download is for an in-network downloader
-     */
-	protected HTTPDownloader(RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
-        this(null, rfd, incompleteFile, inNetwork, false);
-	}	
-
-	/**
-     * Constructs an HTTPDownloader with the given socket.
-     * If the socket was a PUSH socket, the GIV must have already been
-     * read off it.
-     * 
-     * You must call initializeTCP prior to connectHTTP.
-     * 
-     * @param socket the socket to download from.
-     * @param rfd complete information for the file to download, including
-     *  host address and port
-     * @param incompleteFile the temp file to use while downloading, which need
-     *  not exist.
-     * @param inNetwork true if this is for an in-network downloader.
-     */
-	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
-        this(socket, rfd, incompleteFile, inNetwork, true);
-    }
+    private final NetworkManager networkManager;
+    private final AlternateLocationFactory alternateLocationFactory;
+    private final DownloadManager downloadManager;
+    private final CreationTimeCache creationTimeCache;
+    private final BandwidthManager bandwidthManager;
+    private final Provider<PushEndpointCache> pushEndpointCache;
     
-    /**
-     * Constructs this HTTPDownloader with all the necessary parameters.
-     * If requireSocket is true, the socket parameter must be non-null.
-     */
-    private HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork, boolean requireSocket) {
-        if(rfd == null)
+    HTTPDownloader(Socket socket, RemoteFileDesc rfd,
+            VerifyingFile incompleteFile, boolean inNetwork,
+            boolean requireSocket, NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory,
+            DownloadManager downloadManager,
+            CreationTimeCache creationTimeCache,
+            BandwidthManager bandwidthManager,
+            Provider<PushEndpointCache> pushEndpointCache) {
+        if (rfd == null)
             throw new NullPointerException("null rfd");
         if(requireSocket && socket == null)
             throw new NullPointerException("null socket");
         
+        this.networkManager = networkManager;
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.downloadManager = downloadManager;
+        this.creationTimeCache = creationTimeCache;
+        this.bandwidthManager = bandwidthManager;
+        this.pushEndpointCache = pushEndpointCache;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -422,7 +407,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         observerHandler = new Observer();
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList<IOState>(), BUF_LENGTH);
-        _stateMachine.setReadChannel(new ThrottleReader(RouterService.getBandwidthManager().getReadThrottle()));
+        _stateMachine.setReadChannel(new ThrottleReader(bandwidthManager.getReadThrottle()));
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
         
@@ -435,7 +420,7 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      * Same as connectHTTP(start, stop, supportQueueing, -1)
      */
-    public void connectHTTP(int start, int stop, boolean supportQueueing, IOStateObserver observer) {
+    public void connectHTTP(long start, long stop, boolean supportQueueing, IOStateObserver observer) {
         connectHTTP(start, stop, supportQueueing, -1, observer);
     }
     
@@ -468,7 +453,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException could not parse headers
      * @exception UnknownCodeException unknown response code
      */
-    public void connectHTTP(int start, int stop, boolean supportQueueing, int amountDownloaded, IOStateObserver observer) {
+    public void connectHTTP(long start, long stop, boolean supportQueueing, long amountDownloaded, IOStateObserver observer) {
         if(start < 0)
             throw new IllegalArgumentException("invalid start: " + start);
         if(stop <= start)
@@ -482,7 +467,7 @@ public class HTTPDownloader implements BandwidthTracker {
             _initialWritingPoint = start;
             _bodyConsumed = false;
             _contentLength = 0;
-            _requestedInterval = new Interval(_initialReadingPoint, stop-1);
+            _requestedInterval = Range.createRange(_initialReadingPoint, stop-1);
         }
 		
         observerHandler.setDelegate(observer);
@@ -501,9 +486,9 @@ public class HTTPDownloader implements BandwidthTracker {
         //if I'm not firewalled or I can do FWT, say that I want pushlocs.
         //if I am firewalled, send the version of the FWT protocol I support.
         // (which implies that I want only altlocs that support FWT)
-        if (RouterService.acceptedIncomingConnection() || UDPService.instance().canDoFWT()) {
+        if (networkManager.acceptedIncomingConnection() || networkManager.canDoFWT()) {
             features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
-            if (!RouterService.acceptedIncomingConnection())
+            if (!networkManager.acceptedIncomingConnection())
                 features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
         }
         	
@@ -511,8 +496,8 @@ public class HTTPDownloader implements BandwidthTracker {
         // Add ourselves to the mesh if the partial file is valid
         //if I'm firewalled add myself only if the other guy wants falts
         if( isPartialFileValid() && 
-        	 (RouterService.acceptedIncomingConnection() || _wantsFalts)) {
-        		AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
+        	 (networkManager.acceptedIncomingConnection() || _wantsFalts)) {
+        		AlternateLocation me = alternateLocationFactory.create(_rfd.getSHA1Urn());
         		if (me != null)
         			addSuccessfulAltLoc(me);
         }
@@ -539,10 +524,10 @@ public class HTTPDownloader implements BandwidthTracker {
         
         headers.put(HTTPHeaderName.RANGE, new SimpleHTTPHeaderValue("bytes=" + _initialReadingPoint + "-" + (stop-1)));
         
-		if (RouterService.acceptedIncomingConnection() &&
-           !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
-            int port = RouterService.getPort();
-            String host = NetworkUtils.ip2string(RouterService.getAddress());
+		if (networkManager.acceptedIncomingConnection() &&
+           !NetworkUtils.isPrivateAddress(networkManager.getAddress())) {
+            int port = networkManager.getPort();
+            String host = NetworkUtils.ip2string(networkManager.getAddress());
             headers.put(HTTPHeaderName.NODE, new SimpleHTTPHeaderValue(host + ":" + port));
             features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
             // Legacy chat header. Replaced by X-Features header / X-Node
@@ -594,15 +579,17 @@ public class HTTPDownloader implements BandwidthTracker {
                     if(loc instanceof PushAltLoc) {
                         PushAltLoc pushLoc = (PushAltLoc)loc;
                         if (pushLoc.getPushAddress().getProxies().isEmpty()) {
-                            if (pushLoc.getPushAddress() instanceof PushEndpointForSelf)
+                            if (pushLoc.getPushAddress().isLocal())
                                 continue;
                             else
                                 assert false : "empty pushloc in downloader";
                         }
                     } else if(loc instanceof DirectAltLoc) {
                         IpPort host = ((DirectAltLoc)loc).getHost();
-                        if(includeTLS && host instanceof Connectable && ((Connectable)host).isTLSCapable())
+                        if(includeTLS && host instanceof Connectable && ((Connectable)host).isTLSCapable()) {
+                            assert bn != null;
                             bn.set(valuesToWrite.size());
+                        }
                     }
                     valuesToWrite.add(loc);
                     stored.add(loc);
@@ -809,8 +796,12 @@ public class HTTPDownloader implements BandwidthTracker {
                 readAlternateLocations(value, true);
             else if(HTTPHeaderName.QUEUE.is(header)) 
                 parseQueueHeaders(value, refQueueInfo);
-            else if (HTTPHeaderName.SERVER.is(header)) 
+            else if (HTTPHeaderName.SERVER.is(header)) {
                 _server = value;
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Server is: " + value);
+                }
+            }
             else if (HTTPHeaderName.AVAILABLE_RANGES.is(header))
                 parseAvailableRangesHeader(value, _rfd);
             else if (HTTPHeaderName.RETRY_AFTER.is(header)) 
@@ -827,7 +818,6 @@ public class HTTPDownloader implements BandwidthTracker {
                 parseProxiesHeader(value);
             else if (HTTPHeaderName.FWTPORT.is(header))
                 parseFWTPortHeader(value);
-            
         }
 
 		//Accept any 2xx's, but reject other codes.
@@ -840,7 +830,7 @@ public class HTTPDownloader implements BandwidthTracker {
             else if (code == 416) {//requested range not available
                 //See if the uploader is up to mischief
                 if(_rfd.isPartialSource()) {
-                    for(Interval next : _rfd.getAvailableRanges()) {
+                    for(Range next : _rfd.getAvailableRanges()) {
                         if(_requestedInterval.isSubrange(next))
                             throw new ProblemReadingHeaderException("Bad ranges sent");
                     }
@@ -935,7 +925,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * @param altHeader the full alternate locations header
 	 */
 	private void readAlternateLocations(String altStr, boolean allowTLS) {
-        AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 RemoteFileDesc rfd = location.createRemoteFileDesc(_rfd.getSize());
                 if(_locationsReceived.add(rfd)) {
@@ -963,19 +953,19 @@ public class HTTPDownloader implements BandwidthTracker {
 	    return _rfd.getSHA1Urn() != null && 
                _incompleteFile.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES &&
                UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-               NetworkUtils.isValidPort(RouterService.getPort()) &&
-               NetworkUtils.isValidAddress(RouterService.getAddress()); 
+               NetworkUtils.isValidPort(networkManager.getPort()) &&
+               NetworkUtils.isValidAddress(networkManager.getAddress()); 
     }
     
     /**
      * Reads the Content-Length.  Invalid Content-Lengths are set to 0.
      */
-    public static int readContentLength(final String value) {
+    public static long readContentLength(final String value) {
         if(value == null)
             return 0;
         else {
             try {
-                return Integer.parseInt(value.trim());
+                return Long.parseLong(value.trim());
             } catch(NumberFormatException nfe) {
                 return 0;
             }
@@ -1066,9 +1056,9 @@ public class HTTPDownloader implements BandwidthTracker {
         }
     }
     
-    private void validateContentRange(Interval responseRange) throws IOException {
-        int low = responseRange.low;
-        int high = responseRange.high + 1;
+    private void validateContentRange(Range responseRange) throws IOException {
+        long low = responseRange.getLow();
+        long high = responseRange.getHigh() + 1;
         synchronized(this) {
             // were we stolen from in the meantime?
             if (_disconnect)
@@ -1109,10 +1099,10 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException some problem
      *  extracting the start offset.  
      */
-    private Interval parseContentRange(String str) throws IOException {
-        int numBeforeDash;
-        int numBeforeSlash;
-        int numAfterSlash;
+    private Range parseContentRange(String str) throws IOException {
+        long numBeforeDash;
+        long numBeforeSlash;
+        long numAfterSlash;
 
         if (LOG.isDebugEnabled())
             LOG.debug("reading content range: "+str);
@@ -1132,13 +1122,13 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(LOG.isDebugEnabled())
                     LOG.debug(_rfd + " Content-Range like */?, " + str);
                 synchronized(this) {
-                    return new Interval(0, _amountToRead - 1);
+                    return Range.createRange(0, _amountToRead - 1);
                 }
             }
 
             int dash=str.lastIndexOf("-");     //skip past "Content-range"
-            numBeforeDash=Integer.parseInt(str.substring(start, dash));
-            numBeforeSlash=Integer.parseInt(str.substring(dash+1, slash));
+            numBeforeDash=Long.parseLong(str.substring(start, dash));
+            numBeforeSlash=Long.parseLong(str.substring(dash+1, slash));
 
             if(numBeforeSlash < numBeforeDash)
                 throw new ProblemReadingHeaderException(
@@ -1150,10 +1140,10 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(LOG.isDebugEnabled())
                     LOG.debug(_rfd + " Content-Range like #-#/*, " + str);
 
-                return new Interval(numBeforeDash, numBeforeSlash);
+                return Range.createRange(numBeforeDash, numBeforeSlash);
             }
 
-            numAfterSlash=Integer.parseInt(str.substring(slash+1));
+            numAfterSlash=Long.parseLong(str.substring(slash+1));
         } catch (IndexOutOfBoundsException e) {
             throw new ProblemReadingHeaderException(str);
         } catch (NumberFormatException e) {
@@ -1175,7 +1165,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         if(LOG.isDebugEnabled())
             LOG.debug(_rfd + " Content-Range like #-#/#, " + str);
-        return new Interval(numBeforeDash, numBeforeSlash);
+        return Range.createRange(numBeforeDash, numBeforeSlash);
     }
 
     /**
@@ -1209,13 +1199,13 @@ public class HTTPDownloader implements BandwidthTracker {
 
             // this is the interval to store the available 
             // range we are parsing in.
-            Interval interval = null;
+            Range interval = null;
     
             try {
                 // read number before dash
                 // bytes A-B, C-D
                 //       ^
-                int low = Integer.parseInt(line.substring(start, stop).trim());
+                long low = Long.parseLong(line.substring(start, stop).trim());
                 
                 // now moving the start index to the 
                 // character after the dash:
@@ -1233,7 +1223,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // read number after dash
                 // bytes A-B, C-D
                 //         ^
-                int high = Integer.parseInt(line.substring(start, stop).trim());
+                long high = Long.parseLong(line.substring(start, stop).trim());
 
                 // start parsing after the next comma. If we are at the
                 // end of the header line start will be set to 
@@ -1247,7 +1237,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     continue;
 
                 // this interval should be inclusive at both ends
-                interval = new Interval( low, high );
+                interval = Range.createRange( low, high );
                 
             } catch (NumberFormatException e) {
                 throw new ProblemReadingHeaderException(e);
@@ -1286,7 +1276,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException if we could not read 
      * the header
      */
-    private static void parseCreationTimeHeader(String str, RemoteFileDesc rfd) 
+    private void parseCreationTimeHeader(String str, RemoteFileDesc rfd) 
       throws IOException {
         long milliSeconds = 0;
         try {
@@ -1294,13 +1284,12 @@ public class HTTPDownloader implements BandwidthTracker {
         } catch (NumberFormatException e) {
             throw new ProblemReadingHeaderException(e);
         }
-        if (rfd.getSHA1Urn() != null) {
-            CreationTimeCache ctCache = CreationTimeCache.instance();
-            synchronized (ctCache) {
-                Long cTime = ctCache.getCreationTime(rfd.getSHA1Urn());
+        if (rfd.getSHA1Urn() != null && milliSeconds > 0) {
+            synchronized (creationTimeCache) {
+                Long cTime = creationTimeCache.getCreationTime(rfd.getSHA1Urn());
                 // prefer older times....
                 if ((cTime == null) || (cTime.longValue() > milliSeconds))
-                    ctCache.addTime(rfd.getSHA1Urn(), milliSeconds);
+                    creationTimeCache.addTime(rfd.getSHA1Urn(), milliSeconds);
             }
         }
     }
@@ -1346,7 +1335,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // try to update the FWT version and external address we know for this host
             	try {
             	    updatePEAddress();
-            	    PushEndpoint.setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
+                    pushEndpointCache.get().setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
                 } catch (IOException ignored) {}
             }
         }
@@ -1393,7 +1382,7 @@ public class HTTPDownloader implements BandwidthTracker {
             return;
         
         try {
-            PushEndpoint.overwriteProxies(_rfd.getClientGUID(),str);
+            pushEndpointCache.get().overwriteProxies(_rfd.getClientGUID(),str);
             updatePEAddress();
         }catch(IOException tooBad) {
             // invalid header - ignore it.
@@ -1410,7 +1399,7 @@ public class HTTPDownloader implements BandwidthTracker {
             int port = Integer.parseInt(str);
             if (NetworkUtils.isValidPort(port)) {
                 IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), port);
-                PushEndpoint.setAddr(_rfd.getClientGUID(), newAddr);
+                pushEndpointCache.get().setAddr(_rfd.getClientGUID(), newAddr);
             }
         }
         catch (NumberFormatException nfe) {
@@ -1422,7 +1411,7 @@ public class HTTPDownloader implements BandwidthTracker {
         if (_socket instanceof UDPConnection) {
             IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
             if (NetworkUtils.isValidExternalIpPort(newAddr))
-                PushEndpoint.setAddr(_rfd.getClientGUID(),newAddr);
+                pushEndpointCache.get().setAddr(_rfd.getClientGUID(),newAddr);
         }
     }
     
@@ -1483,10 +1472,10 @@ public class HTTPDownloader implements BandwidthTracker {
 
         private boolean readImpl(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
             while(true) {
-                int read = 0;
+                long read = 0;
                     
                 // first see how much we have left to read, if any
-                int left;
+                long left;
                 synchronized(HTTPDownloader.this) {
                     if (_amountRead >= _amountToRead) {
                         LOG.debug("Read >= to needed, done.");
@@ -1497,14 +1486,14 @@ public class HTTPDownloader implements BandwidthTracker {
                 }
                 
                 // Account for data already in the buffer.
-                int preread = Math.min(left, buffer.position());
+                int preread = (int)Math.min(left, buffer.position());
                 if(preread != 0 && LOG.isDebugEnabled())
                     LOG.debug("Using preread data of: " + preread);
                 
                 if(left - preread > 0) {
                     // ensure we don't read more into the buffer than we want.
                     if(buffer.limit() > left)
-                        buffer.limit(left);
+                        buffer.limit((int)left);
                    
                     while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0);
                 
@@ -1534,7 +1523,7 @@ public class HTTPDownloader implements BandwidthTracker {
     			synchronized(this) {
                     if (_isActive) {
                         // see if we were stolen from while reading
-                        totalRead = Math.min(totalRead, _amountToRead - _amountRead);
+                        totalRead = (int)Math.min(totalRead, _amountToRead - _amountRead);
                         if (totalRead <=0 ) {
                             LOG.debug("Someone stole completely from us while reading");
                             // if were told to not read anything more, finish
@@ -1543,7 +1532,7 @@ public class HTTPDownloader implements BandwidthTracker {
                             return false;
                         }
                         
-                        int skipped = Math.min(totalRead, Math.max(0, (int)(_initialWritingPoint - currPos)));
+                        int skipped = (int)Math.min(totalRead, Math.max(0, _initialWritingPoint - currPos));
                         if(skipped > 0)
                             LOG.debug("Amount we should skip: " + skipped);
 
@@ -1602,7 +1591,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		URN urn = _rfd.getSHA1Urn();
 		if (urn != null) {
 			ManagedDownloader myDownloader = (ManagedDownloader)
-			RouterService.getDownloadManager().getDownloaderForURN(urn);
+			downloadManager.getDownloaderForURN(urn);
 			if (myDownloader == null)
 				allWorkers = "couldn't find my downloader???";
 			else
@@ -1630,7 +1619,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         public void writeScheduled() {
             LOG.debug("Delayed write scheduled");
-            NIODispatcher.instance().getScheduledExecutorService().execute(this);
+            NIODispatcher.instance().executeLaterAlways(this);
         }
         
         public void run() {
@@ -1665,12 +1654,12 @@ public class HTTPDownloader implements BandwidthTracker {
      * @param stop the index just past the last byte to read;
      *  stop-1 is the index of the last byte to be downloaded
      */
-    public synchronized void stopAt(int stop) {
+    public synchronized void stopAt(long stop) {
         _disconnect = true;
         _amountToRead = Math.min(_amountToRead,stop-_initialReadingPoint);
     }
     
-    public synchronized void startAt(int start) {
+    public synchronized void startAt(long start) {
         _initialWritingPoint = start;
     }
     
@@ -1684,11 +1673,11 @@ public class HTTPDownloader implements BandwidthTracker {
     
     ///////////////////////////// Accessors ///////////////////////////////////
 
-    public synchronized int getInitialReadingPoint() {return _initialReadingPoint;}
-    public synchronized int getInitialWritingPoint() {return _initialWritingPoint;}
-	public synchronized int getAmountRead() {return _amountRead;}
-	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
-	public synchronized int getAmountToRead() {return _amountToRead;}
+    public synchronized long getInitialReadingPoint() {return _initialReadingPoint;}
+    public synchronized long getInitialWritingPoint() {return _initialWritingPoint;}
+	public synchronized long getAmountRead() {return _amountRead;}
+	public synchronized long getTotalAmountRead() {return _totalAmountRead + _amountRead;}
+	public synchronized long getAmountToRead() {return _amountToRead;}
 	public synchronized boolean isActive() { return _isActive; }
     synchronized boolean isVictim() {return _disconnect; }
 
@@ -1748,7 +1737,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /////////////////////Bandwidth tracker interface methods//////////////
     public void measureBandwidth() {
-        int totalAmountRead = 0;
+        long totalAmountRead = 0;
         synchronized(this) {
             if (!_isActive)
                 return;

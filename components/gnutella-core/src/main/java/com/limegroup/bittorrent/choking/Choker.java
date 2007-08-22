@@ -13,7 +13,7 @@ import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UploadServices;
 
 public abstract class Choker implements Runnable, Shutdownable {
 	
@@ -38,9 +38,14 @@ public abstract class Choker implements Runnable, Shutdownable {
 	private volatile Future periodic;
 	private final Runnable immediateChoker = new ImmediateChoker();
 	
-	Choker(NECallable<List<? extends Chokable>>chokables, ScheduledExecutorService invoker) {
-		this.invoker = invoker;
-		this.chokablesSource = chokables;
+	private final UploadServices uploadServices;
+	
+	Choker(NECallable<List<? extends Chokable>> chokables,
+            ScheduledExecutorService invoker,
+            UploadServices uploadServices) {
+        this.invoker = invoker;
+        this.chokablesSource = chokables;
+        this.uploadServices = uploadServices;
 	}
 	
 	/**
@@ -92,12 +97,12 @@ public abstract class Choker implements Runnable, Shutdownable {
 	 * @return the number of uploads that should be unchoked
 	 * Note: Copied verbatim from mainline BT
 	 */
-	protected static int getNumUploads() {
+	protected int getNumUploads() {
 		int uploads = BittorrentSettings.TORRENT_MAX_UPLOADS.getValue();
 		if (uploads > 0)
 			return uploads;
 		
-		float rate = RouterService.getRequestedUploadSpeed();
+		float rate = uploadServices.getRequestedUploadSpeed();
 		if (rate == Float.MAX_VALUE)
 			return 7; //"unlimited, just guess something here..." - Bram
 		else if (rate < 9000)

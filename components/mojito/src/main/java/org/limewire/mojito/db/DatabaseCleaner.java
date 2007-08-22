@@ -28,7 +28,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.mojito.util.DatabaseUtils;
 
 /**
  * The DatabaseCleaner removes expired values from the local Database.
@@ -76,11 +75,12 @@ public class DatabaseCleaner implements Runnable {
      * Removes all expired DHTValueEntities from the Database
      */
     private void cleanupDatabase() {
+        EvictorManager evictorManager = context.getEvictorManager();
         RouteTable routeTable = context.getRouteTable();
         Database database = context.getDatabase();
         synchronized (database) {
             for (DHTValueEntity entity : database.values()) {
-                if (DatabaseUtils.isExpired(routeTable, entity)) {
+                if (evictorManager.isExpired(routeTable, entity)) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(entity + " is expired!");
                     }

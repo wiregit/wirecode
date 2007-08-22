@@ -20,7 +20,6 @@
 package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,9 +33,10 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
-import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
+import org.limewire.security.SecurityToken.TokenData;
 
 
 /**
@@ -73,8 +73,9 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        SocketAddress addr = request.getContact().getContactAddress();
-        if (!securityToken.isFor(new AddressSecurityToken.AddressTokenData(addr))) {
+        Contact src = request.getContact();
+        TokenData expectedToken = context.getSecurityTokenHelper().createTokenData(src);
+        if (!securityToken.isFor(expectedToken)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
                         + " send us an invalid SecurityToken " + securityToken);

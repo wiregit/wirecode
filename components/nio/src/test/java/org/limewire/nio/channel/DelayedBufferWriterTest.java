@@ -271,7 +271,25 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         assertFalse(sink.status);
         
     }
-    
+
+    public void testHasBufferedData() throws Exception {
+        StubScheduler scheduler = new StubScheduler();
+        DelayedBufferWriter delayer = new DelayedBufferWriter(2, 100, scheduler);
+        setupChain(delayer);
+        sink.resize(2);
+        
+        assertFalse(delayer.hasBufferedOutput());
+        delayer.write(ByteBuffer.wrap(new byte[] { 1, 2 }));
+        assertTrue(delayer.hasBufferedOutput());        
+        delayer.handleWrite();
+        assertTrue(delayer.hasBufferedOutput());
+        assertTrue(delayer.flush());
+        assertTrue(sink.hasBufferedOutput());
+        assertTrue(delayer.hasBufferedOutput());
+        sink.getBuffer().clear();
+        assertFalse(delayer.hasBufferedOutput());
+    }
+
     private void setupChain(DelayedBufferWriter delayer) {
         source.setWriteChannel(delayer);
         delayer.interestWrite(source,true);

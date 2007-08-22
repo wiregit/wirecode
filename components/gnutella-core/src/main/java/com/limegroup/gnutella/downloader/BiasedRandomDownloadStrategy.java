@@ -5,8 +5,8 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.util.SystemUtils;
 
 
@@ -56,11 +56,11 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         super(fileSize);
     }
     
-    public synchronized Interval pickAssignment(IntervalSet candidateBytes,
+    public synchronized Range pickAssignment(IntervalSet candidateBytes,
             IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {
-        long lowerBound = neededBytes.getFirst().low;
-        long upperBound = neededBytes.getLast().high;
+        long lowerBound = neededBytes.getFirst().getLow();
+        long upperBound = neededBytes.getLast().getHigh();
         // Input validation
         if (blockSize < 1)
             throw new IllegalArgumentException("Block size cannot be "+blockSize);
@@ -80,23 +80,23 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
             return super.pickAssignment(candidateBytes, neededBytes, blockSize);
         }
         
-        Interval candidate = candidateBytes.getFirst();
+        Range candidate = candidateBytes.getFirst();
 
         // Calculate what the high byte offset should be.
         // This will be at most blockSize-1 bytes greater than the low.
-        long alignedHigh = alignHigh(candidate.low, blockSize);
+        long alignedHigh = alignHigh(candidate.getLow(), blockSize);
 
         // alignedHigh >= candidate.low, and therefore we
         // only have to check if alignedHigh > candidate.high.
-        if (alignedHigh > candidate.high)
-            alignedHigh = candidate.high;
+        if (alignedHigh > candidate.getHigh())
+            alignedHigh = candidate.getHigh();
 
         // Our ideal interval is [candidate.low, alignedHigh]
         
         // Optimize away creation of new objects, if possible
-        Interval ret = candidate;
-        if (ret.high != alignedHigh)
-            ret = new Interval(candidate.low, alignedHigh);
+        Range ret = candidate;
+        if (ret.getHigh() != alignedHigh)
+            ret = Range.createRange(candidate.getLow(), alignedHigh);
 
         if (LOG.isDebugEnabled())
             LOG.debug("Non-random download, probability="

@@ -17,15 +17,11 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.I18NConvert;
-import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
@@ -35,6 +31,7 @@ import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 /**
@@ -151,6 +148,11 @@ public class QueryRequest extends Message implements Serializable{
 	 * Cached hash code for this instance.
 	 */
 	private volatile int _hashCode = 0;
+    /**
+     * The meaningless query string we put in URN queries. Needed because
+     * LimeWire's drop empty queries....
+     */
+    static final String DEFAULT_URN_QUERY = "\\";
 
     /**
      * Constant for the default query TTL.
@@ -176,960 +178,18 @@ public class QueryRequest extends Message implements Serializable{
     private static final int MAX_XML_QUERY_LENGTH =
         SearchSettings.MAX_XML_QUERY_LENGTH.getValue();
 
-    /**
-     * The meaningless query string we put in URN queries.  Needed because
-     * LimeWire's drop empty queries....
-     */
-    private static final String DEFAULT_URN_QUERY = "\\";
-
-	/**
-	 * Creates a new requery for the specified SHA1 value.
-	 *
-	 * @param sha1 the <tt>URN</tt> of the file to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
-	 *  is <tt>null</tt>
-	 */
-	public static QueryRequest createRequery(URN sha1) {
-        if(sha1 == null) {
-            throw new NullPointerException("null sha1");
-        }
-		Set<URN> sha1Set = new UrnSet(sha1);
-        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, 
-                                DEFAULT_URN_QUERY, "", 
-                                sha1Set, null,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-
-	}
-
-	/**
-	 * Creates a new query for the specified SHA1 value.
-	 *
-	 * @param sha1 the <tt>URN</tt> of the file to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
-	 *  is <tt>null</tt>
-	 */
-	public static QueryRequest createQuery(URN sha1) {
-        if(sha1 == null) {
-            throw new NullPointerException("null sha1");
-        }
-		Set<URN> sha1Set = new UrnSet(sha1);
-        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
-                                DEFAULT_URN_QUERY, "",
-                                sha1Set, null,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-
-	}
-	/**
-	 * Creates a new requery for the specified SHA1 value with file name 
-     * thrown in for good measure (or at least until \ works as a query).
-	 *
-	 * @param sha1 the <tt>URN</tt> of the file to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
-	 *  is <tt>null</tt>
-	 */
-	public static QueryRequest createRequery(URN sha1, String filename) {
-        if(sha1 == null) {
-            throw new NullPointerException("null sha1");
-        }
-        if(filename == null) {
-            throw new NullPointerException("null query");
-        }
-		if(filename.length() == 0) {
-			filename = DEFAULT_URN_QUERY;
-		}
-		Set<URN> sha1Set = new UrnSet(sha1);
-        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
-                                sha1Set, null,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-
-	}
-
-	/**
-	 * Creates a new query for the specified SHA1 value with file name 
-     * thrown in for good measure (or at least until \ works as a query).
-	 *
-	 * @param sha1 the <tt>URN</tt> of the file to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
-	 *  is <tt>null</tt>
-	 */
-	public static QueryRequest createQuery(URN sha1, String filename) {
-        if(sha1 == null) {
-            throw new NullPointerException("null sha1");
-        }
-        if(filename == null) {
-            throw new NullPointerException("null query");
-        }
-		if(filename.length() == 0) {
-			filename = DEFAULT_URN_QUERY;
-		}
-		Set<URN> sha1Set = new UrnSet(sha1);
-        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
-                                sha1Set, null,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-
-	}
-
-	/**
-	 * Creates a new requery for the specified SHA1 value and the specified
-	 * firewall boolean.
-	 *
-	 * @param sha1 the <tt>URN</tt> of the file to search for
-	 * @param ttl the time to live (ttl) of the query
-	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
-	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the ttl value is
-	 *  negative or greater than the maximum allowed value
-	 */
-	public static QueryRequest createRequery(URN sha1, byte ttl) {
-        if(sha1 == null) {
-            throw new NullPointerException("null sha1");
-        } 
-		if(ttl <= 0 || ttl > 6) {
-			throw new IllegalArgumentException("invalid TTL: "+ttl);
-		}
-		Set<URN> sha1Set = new UrnSet(sha1);
-        return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
-                                sha1Set, null,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-	}
-	
-	/**
-	 * Creates a new query for the specified URN set.
-	 *
-	 * @param urnSet the <tt>Set</tt> of <tt>URNs</tt>s to request.
-	 * @return a new <tt>QueryRequest</tt> for the specied UrnTypes and URNs
-	 * @throws <tt>NullPointerException</tt> if either sets are null.
-	 */
-	public static QueryRequest createQuery(Set<? extends URN> urnSet) {
-	    if(urnSet == null)
-	        throw new NullPointerException("null urnSet");
-	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
-                                DEFAULT_URN_QUERY, "",
-	                            urnSet, null,
-	                            !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-    }
-	    
-	
-	/**
-	 * Creates a requery for when we don't know the hash of the file --
-	 * we don't know the hash.
-	 *
-	 * @param query the query string
-	 * @return a new <tt>QueryRequest</tt> for the specified query
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 */
-	public static QueryRequest createRequery(String query) {
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(query.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		return new QueryRequest(newQueryGUID(true), query);
-	}
-
-
-	/**
-	 * Creates a new query for the specified file name, with no XML.
-	 *
-	 * @param query the file name to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified query
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 */
-	public static QueryRequest createQuery(String query) {
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(query.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		return new QueryRequest(newQueryGUID(false), query);
-	}                           
-    
-
-	/**
-	 * Creates a new query for the specified file name and the designated XML.
-	 *
-	 * @param query the file name to search for
-     * @param guid I trust that this is a address encoded guid.  Your loss if
-     * it isn't....
-	 * @return a new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip and port into the GUID and appropriate marked the
-	 * query to signify out of band support.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 */
-    public static QueryRequest createOutOfBandQuery(byte[] guid, String query, 
-                                                    String xmlQuery) {
-        query = I18NConvert.instance().getNorm(query);
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(xmlQuery == null) {
-			throw new NullPointerException("null xml query");
-		}
-		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
-			throw new IllegalArgumentException("invalid XML");
-		}
-        return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true);
-    }                                
-
-	/**
-	 * Creates a new query for the specified file name and the designated XML.
-	 *
-	 * @param query the file name to search for
-     * @param guid I trust that this is a address encoded guid.  Your loss if
-     * it isn't....
-     * @param type can be null - the type of results you want.
-	 * @return a new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip and port into the GUID and appropriate marked the
-	 * query to signify out of band support AND specifies a file type category.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 */
-    public static QueryRequest createOutOfBandQuery(byte[] guid, String query, 
-                                                    String xmlQuery,
-                                                    MediaType type) {
-        query = I18NConvert.instance().getNorm(query);
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(xmlQuery == null) {
-			throw new NullPointerException("null xml query");
-		}
-		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
-			throw new IllegalArgumentException("invalid XML");
-		}
-        return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true, type);
-    }                                
-
-	/**
-	 * Creates a new query for the specified file name, with no XML.
-	 *
-	 * @param query the file name to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip and port into the GUID and appropriate marked the
-	 * query to signify out of band support.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 */
-    public static QueryRequest createOutOfBandQuery(String query,
-                                                    byte[] ip, int port) {
-        byte[] guid = GUID.makeAddressEncodedGuid(ip, port);
-        return QueryRequest.createOutOfBandQuery(guid, query, "");
-    }                                
-
-    /**
-     * Creates a new 'What is new'? query with the specified guid and ttl.
-     * @param ttl the desired ttl of the query.
-     * @param guid the desired guid of the query.
-     */
-    public static QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl) {
-        return createWhatIsNewQuery(guid, ttl, null);
-    }
-   
-
-    /**
-     * Creates a new 'What is new'? query with the specified guid and ttl.
-     * @param ttl the desired ttl of the query.
-     * @param guid the desired guid of the query.
-     */
-    public static QueryRequest createWhatIsNewQuery(byte[] guid, byte ttl,
-                                                    MediaType type) {
-        if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
-        return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
-                                "", null, null,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 
-                                FeatureSearchData.WHAT_IS_NEW, false, 
-                                getMetaFlag(type));
-    }
-   
-
-    /**
-     * Creates a new 'What is new'? OOB query with the specified guid and ttl.
-     * @param ttl the desired ttl of the query.
-     * @param guid the desired guid of the query.
-     */
-    public static QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl) {
-        return createWhatIsNewOOBQuery(guid, ttl, null);
-    }
-   
-
-    /**
-     * Creates a new 'What is new'? OOB query with the specified guid and ttl.
-     * @param ttl the desired ttl of the query.
-     * @param guid the desired guid of the query.
-     */
-    public static QueryRequest createWhatIsNewOOBQuery(byte[] guid, byte ttl,
-                                                       MediaType type) {
-        if (ttl < 1) throw new IllegalArgumentException("Bad TTL.");
-        return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
-                                "", null, null,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, true, FeatureSearchData.WHAT_IS_NEW,
-                                false, getMetaFlag(type));
-    }
-   
-
-	/**
-	 * Creates a new query for the specified file name, with no XML.
-	 *
-	 * @param query the file name to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified query
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt> or if the <tt>xmlQuery</tt> argument is 
-	 *  <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument and the xml query are both zero-length (empty)
-	 */
-	public static QueryRequest createQuery(String query, String xmlQuery) {
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(xmlQuery == null) {
-			throw new NullPointerException("null xml query");
-		}
-		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
-			throw new IllegalArgumentException("invalid XML");
-		}
-		return new QueryRequest(newQueryGUID(false), query, xmlQuery);
-	}
-
-
-	/**
-	 * Creates a new query for the specified file name, with no XML.
-	 *
-	 * @param query the file name to search for
-	 * @param ttl the time to live (ttl) of the query
-	 * @return a new <tt>QueryRequest</tt> for the specified query and ttl
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 * @throws <tt>IllegalArgumentException</tt> if the ttl value is
-	 *  negative or greater than the maximum allowed value
-	 */
-	public static QueryRequest createQuery(String query, byte ttl) {
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(query.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		if(ttl <= 0 || ttl > 6) {
-			throw new IllegalArgumentException("invalid TTL: "+ttl);
-		}
-		return new QueryRequest(newQueryGUID(false), ttl, query);
-	}
-
-	/**
-	 * Creates a new query with the specified guid, query string, and
-	 * xml query string.
-	 *
-	 * @param guid the message GUID for the query
-	 * @param query the query string
-	 * @param xmlQuery the xml query string
-	 * @return a new <tt>QueryRequest</tt> for the specified query, xml
-	 *  query, and guid
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> argument is <tt>null</tt>,
-	 *  or if the <tt>guid</tt> argument is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the guid length is
-	 *  not 16, if both the query strings are empty, or if the XML does
-	 *  not appear to be valid
-	 */
-	public static QueryRequest createQuery(byte[] guid, String query, 
-										   String xmlQuery) {
-        query = I18NConvert.instance().getNorm(query);
-		if(guid == null) {
-			throw new NullPointerException("null guid");
-		}
-		if(guid.length != 16) {
-			throw new IllegalArgumentException("invalid guid length");
-		}
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-        if(xmlQuery == null) {
-            throw new NullPointerException("null xml query");
-        }
-		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
-			throw new IllegalArgumentException("invalid XML");
-		}
-		return new QueryRequest(guid, query, xmlQuery);
-	}
-
-	/**
-	 * Creates a new query with the specified guid, query string, and
-	 * xml query string.
-	 *
-	 * @param guid the message GUID for the query
-	 * @param query the query string
-	 * @param xmlQuery the xml query string
-	 * @return a new <tt>QueryRequest</tt> for the specified query, xml
-	 *  query, and guid
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> argument is <tt>null</tt>,
-	 *  or if the <tt>guid</tt> argument is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the guid length is
-	 *  not 16, if both the query strings are empty, or if the XML does
-	 *  not appear to be valid
-	 */
-	public static QueryRequest createQuery(byte[] guid, String query, 
-										   String xmlQuery, MediaType type) {
-        query = I18NConvert.instance().getNorm(query);
-		if(guid == null) {
-			throw new NullPointerException("null guid");
-		}
-		if(guid.length != 16) {
-			throw new IllegalArgumentException("invalid guid length");
-		}
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-        if(xmlQuery == null) {
-            throw new NullPointerException("null xml query");
-        }
-		if(query.length() == 0 && xmlQuery.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
-			throw new IllegalArgumentException("invalid XML");
-		}
-		return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, type);
-	}
-
-	/**
-	 * Creates a new query from the existing query with the specified
-	 * ttl.
-	 *
-	 * @param qr the <tt>QueryRequest</tt> to copy
-	 * @param ttl the new ttl
-	 * @return a new <tt>QueryRequest</tt> with the specified ttl
-	 */
-	public static QueryRequest createQuery(QueryRequest qr, byte ttl) {
-	    // Construct a query request that is EXACTLY like the other query,
-	    // but with a different TTL.
-	    try {
-	        return createNetworkQuery(qr.getGUID(), ttl, qr.getHops(),
-	                                  qr.PAYLOAD, qr.getNetwork());
-	    } catch(BadPacketException ioe) {
-	        throw new IllegalArgumentException(ioe.getMessage());
-	    }
-	}
-
-	/**
-	 * Creates a new OOBquery from the existing query with the specified guid
-     * (which should be address encoded).
-	 *
-	 * @param qr the <tt>QueryRequest</tt> to copy
-	 * @return a new <tt>QueryRequest</tt> with the specified guid that is now
-     * OOB marked.
-     * @throws IllegalArgumentException thrown if guid is not right size of if
-     * query is bad.
-	 */
-	public static QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
-        if (guid.length != 16)
-            throw new IllegalArgumentException("bad guid size: " + guid.length);
-
-        // i can't just call a new constructor, since there might be stuff in
-        // the payload we don't understand and would get lost
-        byte[] newPayload = new byte[qr.PAYLOAD.length];
-        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        // disable old out of band if requested
-        if (SearchSettings.DISABLE_OOB_V2.getBoolean())
-            newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
-        else
-            newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
-        GGEP ggep = new GGEP(true);
-        // signal oob capability
-        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
-        
-        try {
-            newPayload = patchInGGEP(newPayload, ggep);
-            return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
-                    newPayload, qr.getNetwork());
-        } catch (BadPacketException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
-        }
-	}
-    
-    /**
-     * Copies a query request and marks it to not be proxied.
-     * 
-     * @throws IllegalArgumentException if the payload is not modifiable
-     * @throws IllegalArgumentException if the query request is not from
-     * a LimeWire
-     * @throws IllegalArgumentException if {@link #isOriginated()} is false 
-     */
-    public static QueryRequest createDoNotProxyQuery(QueryRequest qr) {
-        if (!GUID.isLimeGUID(qr.getGUID())) {
-            throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
-        }
-        if (!qr.isOriginated()) {
-            throw new IllegalArgumentException("query not originated from here");
-        }
-        
-        // only used for queries understood by us
-        // so we can use the copy constructor and set OOB to false
-        return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getMinSpeed(),
-                qr.getQuery(), qr.getRichQueryString(), 
-                qr.getQueryUrns(),
-                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
-                qr.desiresOutOfBandReplies(),
-                qr.getFeatureSelector(), true, // do not proxy
-                qr.getMetaMask(), false); // no normalization
-    }
-    
-	/**
-	 * Creates a new query from the existing query and loses the OOB marking.
-     * 
-     * This should only be used for messages that originated from this client.
-	 *
-	 * @param qr the <tt>QueryRequest</tt> to copy
-	 * @return a new <tt>QueryRequest</tt> with no OOB marking
-     * 
-     * @throws IllegalArgumentException if the payload is not modifiable
-     * @throws IllegalArgumentException if the query request is not from
-     * a LimeWire
-	 */
-	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
-        if (!GUID.isLimeGUID(qr.getGUID())) {
-            throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
-        }
-        
-        // only used for queries understood by us
-        // so we can use the copy constructor and set OOB to false
-        return new QueryRequest(qr.getGUID(), qr.getTTL(), 
-                qr.getQuery(), qr.getRichQueryString(), 
-                qr.getQueryUrns(),
-                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
-                false, // set oob to false
-                qr.getFeatureSelector(), qr.doNotProxy(),
-                qr.getMetaMask());
-	}
-
-    /**
-     * Creates a new query with the specified query key for use in 
-     * GUESS-style UDP queries.
-     *
-     * @param query the query string
-     * @param key the query key
-	 * @return a new <tt>QueryRequest</tt> instance with the specified 
-	 *  query string and query key
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt> or if the <tt>key</tt> argument is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-     */
-    public static QueryRequest 
-        createQueryKeyQuery(String query, AddressSecurityToken key) {
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(query.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-        if(key == null) {
-            throw new NullPointerException("null query key");
-        }
-        return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
-                                URN.NO_URN_SET, key,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-    }
-
-
-    /**
-     * Creates a new query with the specified query key for use in 
-     * GUESS-style UDP queries.
-     *
-     * @param sha1 the URN
-     * @param key the query key
-	 * @return a new <tt>QueryRequest</tt> instance with the specified 
-	 *  URN request and query key
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt> or if the <tt>key</tt> argument is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-     */
-    public static QueryRequest 
-        createQueryKeyQuery(URN sha1, AddressSecurityToken key) {
-        if(sha1 == null) {
-            throw new NullPointerException("null sha1");
-        }
-        if(key == null) {
-            throw new NullPointerException("null query key");
-        }
-		Set<URN> sha1Set = new UrnSet(sha1);
-        return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
-                                "", sha1Set, key,
-                                !RouterService.acceptedIncomingConnection(),
-                                Network.UNKNOWN, false, 0, false, 0);
-    }
-
-
-	/**
-	 * Creates a new <tt>QueryRequest</tt> instance for multicast queries.	 
-	 * This is necessary due to the unique properties of multicast queries,
-	 * such as the firewalled bit not being set regardless of whether or
-	 * not the node is truly firewalled/NATted to the world outside the
-	 * subnet.
-	 * 
-	 * @param qr the <tt>QueryRequest</tt> instance containing all the 
-	 *  data necessary to create a multicast query
-	 * @return a new <tt>QueryRequest</tt> instance with bits set for
-	 *  multicast -- a min speed bit in particular
-	 * @throws <tt>NullPointerException</tt> if the <tt>qr</tt> argument
-	 *  is <tt>null</tt> 
-	 */
-	public static QueryRequest createMulticastQuery(byte[] guid, QueryRequest qr) {
-		if(qr == null)
-			throw new NullPointerException("null query");
-
-        //modify the payload to not be OOB.
-        byte[] newPayload = new byte[qr.PAYLOAD.length];
-        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
-        newPayload[0] |= SPECIAL_XML_MASK;
-        
-        try {
-            return createNetworkQuery(guid, (byte)1, qr.getHops(),
-                                      newPayload, Network.MULTICAST);
-        } catch (BadPacketException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
-        }
-	}
-
-    /** 
-	 * Creates a new <tt>QueryRequest</tt> that is a copy of the input 
-	 * query, except that it includes the specified query key.
-	 *
-	 * @param qr the <tt>QueryRequest</tt> to use
-	 * @param key the <tt>AddressSecurityToken</tt> to add
-	 * @return a new <tt>QueryRequest</tt> from the specified query and
-	 *  key
-     */
-	public static QueryRequest 
-		createQueryKeyQuery(QueryRequest qr, AddressSecurityToken key) {
-		    
-        // TODO: Copy the payload verbatim, except add the query-key
-        //       into the GGEP section.
-        return new QueryRequest(qr.getGUID(), qr.getTTL(), 
-                                qr.getQuery(), qr.getRichQueryString(), 
-                                qr.getQueryUrns(),
-                                key, qr.isFirewalledSource(), Network.UNKNOWN,
-                                qr.desiresOutOfBandReplies(),
-                                qr.getFeatureSelector(), false,
-                                qr.getMetaMask());
-	}
-
-	/**
-	 * Creates a new specialized <tt>QueryRequest</tt> instance for 
-	 * browse host queries so that <tt>FileManager</tt> can understand them.
-	 *
-	 * @return a new <tt>QueryRequest</tt> for browse host queries
-	 */
-	public static QueryRequest createBrowseHostQuery() {
-		return new QueryRequest(newQueryGUID(false), (byte)1, 
-				FileManager.INDEXING_QUERY, "", 
-                URN.NO_URN_SET, null,
-                !RouterService.acceptedIncomingConnection(), 
-                Network.UNKNOWN, false, 0, false, 0, false);
-	}
-	
-
-	/**
-	 * Specialized constructor used to create a query without the firewalled
-	 * bit set.  This should primarily be used for testing.
-	 *
-	 * @param query the query string
-	 * @return a new <tt>QueryRequest</tt> with the specified query string
-	 *  and without the firewalled bit set
-	 */
-	public static QueryRequest 
-		createNonFirewalledQuery(String query, byte ttl) {
-		return new QueryRequest(newQueryGUID(false), ttl, 
-								query, "", 
-                                URN.NO_URN_SET, null,
-                                false, Network.UNKNOWN, false, 0, false, 0);
-	}
-
-
-
-	/**
-	 * Creates a new query from the network.
-	 *
-	 * @param guid the GUID of the query
-	 * @param ttl the time to live of the query
-	 * @param hops the hops of the query
-	 * @param payload the query payload
-	 *
-	 * @return a new <tt>QueryRequest</tt> instance from the specified data
-	 */
-	public static QueryRequest 
-		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload, Network network) 
-	    throws BadPacketException {
-		return new QueryRequest(guid, ttl, hops, payload, network);
-	}
-
-    /**
-     * Builds a new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up results
-     */
-    private QueryRequest(byte[] guid, String query) {
-        this(guid, query, "");
-    }
-
-    /**
-     * Builds a new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up results
-     */
-    private QueryRequest(byte[] guid, byte ttl, String query) {
-        this(guid, ttl, query, "");
-    }
-
-    /**
-     * Builds a new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up results
-     */
-    private QueryRequest(byte[] guid, String query, String xmlQuery) {
-        this(guid, DEFAULT_TTL, query, xmlQuery);
-    }
-
-    /**
-     * Builds a new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up
-     * results.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
-     */
-    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
-        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN,
-             false, 0, false, 0);
-    }
-
-    /**
-     * Builds a new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up
-     * results.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
-     */
-    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
-                         MediaType type) {
-        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN,
-             false, 0, false, getMetaFlag(type));
-    }
-
-    /**
-     * Builds a new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up
-     * results.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
-     */
-    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
-                         boolean canReceiveOutOfBandReplies) {
-        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN, 
-             canReceiveOutOfBandReplies, 0, false, 0);
-    }
  
-    /**
-     * Builds a new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up
-     * results.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
-     */
-    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
-                         boolean canReceiveOutOfBandReplies, MediaType type) {
-        this(guid, ttl, query, richQuery, URN.NO_URN_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Network.UNKNOWN, 
-             canReceiveOutOfBandReplies, 0, false, getMetaFlag(type));
-    }
- 
-    private static int getMetaFlag(MediaType type) {
-        int metaFlag = 0;
-        if (type == null)
-            ;
-        else if (type.getDescriptionKey() == MediaType.AUDIO)
-            metaFlag |= AUDIO_MASK;
-        else if (type.getDescriptionKey() == MediaType.VIDEO)
-            metaFlag |= VIDEO_MASK;
-        else if (type.getDescriptionKey() == MediaType.IMAGES)
-            metaFlag |= IMAGE_MASK;
-        else if (type.getDescriptionKey() == MediaType.DOCUMENTS)
-            metaFlag |= DOC_MASK;
-        else if (type.getDescriptionKey() == MediaType.PROGRAMS) {
-            if (OSUtils.isLinux() || OSUtils.isAnyMac())
-                metaFlag |= LIN_PROG_MASK;
-            else if (OSUtils.isWindows())
-                metaFlag |= WIN_PROG_MASK;
-            else // Other OS, search any type of programs
-                metaFlag |= (LIN_PROG_MASK|WIN_PROG_MASK);
-        }
-        return metaFlag;
-    }
-
-   /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.  If you need to make a query that accepts out-of-band results, 
-     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
-     * set canReceiveOutOfBandReplies .
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
-	 *  query string, and the urns are all empty, or if the feature selector
-     *  is bad
-     */
-    public QueryRequest(byte[] guid, byte ttl,  
-                        String query, String richQuery, 
-                        Set<? extends URN> queryUrns,
-                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        Network network, boolean canReceiveOutOfBandReplies,
-                        int featureSelector) {
-        // calls me with the doNotProxy flag set to false
-        this(guid, ttl, query, richQuery, queryUrns,
-             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
-             featureSelector, false, 0);
-    }
-
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.  If you need to make a query that accepts out-of-band results, 
-     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
-     * set canReceiveOutOfBandReplies .
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
-	 *  query string, and the urns are all empty, or if the feature selector
-     *  is bad
-     */
-    public QueryRequest(byte[] guid, byte ttl,  
-                        String query, String richQuery, 
-                        Set<? extends URN> queryUrns,
-                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        Network network, boolean canReceiveOutOfBandReplies,
-                        int featureSelector, boolean doNotProxy,
-                        int metaFlagMask) {
-        this(guid, ttl, 0, query, richQuery, queryUrns,
-             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
-             featureSelector, doNotProxy, metaFlagMask, true);
-    }
     
-    /**
-     * Constructs a query with an optional 'normalize' parameter, which if false,
-     * does not normalize the query string.
-     */
-    private QueryRequest(byte[] guid, byte ttl,  
+    /** Constructs a query. */
+    QueryRequest(byte[] guid, byte ttl, int minSpeed,
                         String query, String richQuery, 
                         Set<? extends URN> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
-                        int metaFlagMask,
-                        boolean normalize) {
-        this(guid, ttl, 0, query, richQuery, queryUrns,
-             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
-             featureSelector, doNotProxy, metaFlagMask, normalize);
-    }
-
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.  If you need to make a query that accepts out-of-band results, 
-     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
-     * set canReceiveOutOfBandReplies .
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
-	 *  query string, and the urns are all empty, or if the capability selector
-     *  is bad
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed,
-                        String query, String richQuery, 
-                        Set<? extends URN> queryUrns,
-                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        Network network, boolean canReceiveOutOfBandReplies,
-                        int featureSelector, boolean doNotProxy,
-                        int metaFlagMask) {
-        this(guid, ttl, minSpeed, query, richQuery,
-             queryUrns, addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
-             featureSelector, doNotProxy, metaFlagMask, true);
-    }
-    
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.  If you need to make a query that accepts out-of-band results, 
-     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
-     * set canReceiveOutOfBandReplies .
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-     * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
-     *  query string, and the urns are all empty, or if the capability selector
-     *  is bad
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed,
-                        String query, String richQuery, 
-                        Set<? extends URN> queryUrns,
-                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
-                        Network network, boolean canReceiveOutOfBandReplies,
-                        int featureSelector, boolean doNotProxy,
-                        int metaFlagMask, boolean normalize) {
+                        int metaFlagMask, boolean normalize,
+                        boolean canDoFWT,
+                        LimeXMLDocumentFactory limeXMLDocumentFactory) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
@@ -1155,7 +215,7 @@ public class QueryRequest extends Message implements Serializable{
 
         if(query != null && 
           !(queryUrns != null && queryUrns.size() > 0 &&
-            query.equals(DEFAULT_URN_QUERY))
+            query.equals(QueryRequest.DEFAULT_URN_QUERY))
            && hasIllegalChars(query)) {
             throw new IllegalArgumentException("illegal chars: " + query);
         }
@@ -1180,7 +240,7 @@ public class QueryRequest extends Message implements Serializable{
                 minSpeed |= SPECIAL_FIREWALL_MASK;
             // if i'm firewalled and can do solicited, mark the query for fw
             // transfer capability.
-            if (isFirewalled && UDPService.instance().canDoFWT())
+            if (isFirewalled && canDoFWT)
                 minSpeed |= SPECIAL_FWTRANS_MASK;
             // THE DEAL:
             // if we can NOT receive out of band replies, we want in-band XML -
@@ -1206,7 +266,7 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 		    LimeXMLDocument doc = null;
 		    try {
-		        doc = new LimeXMLDocument(richQuery);
+		        doc = limeXMLDocumentFactory.createLimeXMLDocument(richQuery);
             } catch(SAXException ignored) {
             } catch(SchemaNotFoundException ignored) {
             } catch(IOException ignored) {
@@ -1241,6 +301,7 @@ public class QueryRequest extends Message implements Serializable{
 			
             byte[] richQueryBytes = null;
             if(XML_DOC != null) {
+                assert richQuery != null;
                 richQueryBytes = richQuery.getBytes("UTF-8");
 			}
             
@@ -1331,13 +392,9 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param network the network that this query came from.
 	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
-    private QueryRequest(
-      byte[] guid, byte ttl, byte hops, byte[] payload, Network network) 
-		throws BadPacketException {
+    QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload, Network network,
+            LimeXMLDocumentFactory limeXMLDocumentFactory) throws BadPacketException {
         super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
-		if(payload == null) {
-			throw new BadPacketException("no payload");
-		}
 		PAYLOAD=payload;
 		
         QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
@@ -1346,7 +403,7 @@ public class QueryRequest extends Message implements Serializable{
 
 	    LimeXMLDocument tempDoc = null;
 	    try {
-	        tempDoc = new LimeXMLDocument(parser.richQuery);
+	        tempDoc = limeXMLDocumentFactory.createLimeXMLDocument(parser.richQuery);
         } catch(SAXException ignored) {
         } catch(SchemaNotFoundException ignored) {
         } catch(IOException ignored) {
@@ -1387,7 +444,7 @@ public class QueryRequest extends Message implements Serializable{
             throw new BadPacketException("xml too big: " + parser.richQuery);
         }
 
-        if(!(QUERY_URNS.size() > 0 && QUERY.equals(DEFAULT_URN_QUERY))
+        if(!(QUERY_URNS.size() > 0 && QUERY.equals(QueryRequest.DEFAULT_URN_QUERY))
            && hasIllegalChars(QUERY)) {
             ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
             //throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;

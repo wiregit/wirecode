@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -43,8 +45,9 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileManagerEvent.Type;
-import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -57,8 +60,6 @@ import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -68,6 +69,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *
  * This class is thread-safe.
  */
+@Singleton
 public abstract class FileManager {
 	
     private static final Log LOG = LogFactory.getLog(FileManager.class);
@@ -389,16 +391,21 @@ public abstract class FileManager {
     public final FMInspectables inspectables = new FMInspectables();
     
     /** Contains the definition of a rare file */
-    private final RareFileDefinition rareDefinition = new RareFileDefinition();
+    private final RareFileDefinition rareDefinition;
+    
+    protected final FileManagerController fileManagerController;
     
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
-    public FileManager() {
+    @Inject
+    public FileManager(FileManagerController fileManagerController) {
+        this.fileManagerController = fileManagerController;
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
         // overwrite all these variables
+        rareDefinition = new RareFileDefinition();
         resetVariables();
     }
     
@@ -434,7 +441,7 @@ public abstract class FileManager {
         _data.clean();
         cleanIndividualFiles();
 		loadSettings();
-        SimppManager.instance().addListener(qrpUpdater);
+		fileManagerController.addSimppListener(qrpUpdater);
     }
     
     /**
@@ -467,15 +474,13 @@ public abstract class FileManager {
     
     public void stop() {
         save();
-        SimppManager.instance().removeListener(qrpUpdater);
+        fileManagerController.removeSimppListener(qrpUpdater);
         shutdown = true;
     }
 
     protected void save(){
         _data.save();
-            
-        UrnCache.instance().persistCache();
-        CreationTimeCache.instance().persistCache();
+        fileManagerController.save();
     }
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -622,7 +627,7 @@ public abstract class FileManager {
         IntSet.IntSetIterator iter = _incompletesShared.iterator();
         for (int i = 0; iter.hasNext(); i++) {
             FileDesc fd = _files.get(iter.next());
-            Assert.that(fd != null, "Directory has null entry");
+            assert fd != null : "Directory has null entry";
             ret[i]=fd;
         }
         
@@ -669,7 +674,7 @@ public abstract class FileManager {
         IntSet.IntSetIterator iter = indices.iterator();
         for (int i = 0; iter.hasNext(); i++) {
             FileDesc fd = _files.get(iter.next());
-            Assert.that(fd != null, "Directory has null entry");
+            assert fd != null : "Directory has null entry";
             fds[i] = fd;
         }
         
@@ -725,20 +730,20 @@ public abstract class FileManager {
     /**
      * Loads the FileManager with a new list of directories.
      */
-    public void loadWithNewDirectories(Set<? extends File> shared) {
+    public void loadWithNewDirectories(Set<? extends File> shared, Set<File> blackListSet) {
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
         synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
-            for(File file : shared)
-                _data.DIRECTORIES_NOT_TO_SHARE.remove(file);
+            _data.DIRECTORIES_NOT_TO_SHARE.clear();
+            _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListSet));
         }
-	    RouterService.getFileManager().loadSettings();
+	    loadSettings();
     }
     
     /**
      * Kicks off necessary stuff for a load being started.
      */
     protected void loadStarted(int revision) {
-        UrnCache.instance().clearPendingHashes(this);
+        fileManagerController.loadStarted();
     }
     
     /**
@@ -767,13 +772,9 @@ public abstract class FileManager {
         
         // Various cleanup & persisting...
         trim();
-        CreationTimeCache.instance().pruneTimes();
-        RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
+        fileManagerController.loadFinished();
         save();
-        SavedFileManager.instance().run();
-        UpdateHandler.instance().tryToDownloadUpdates();
-        
-        RouterService.getCallback().fileManagerLoaded();
+        fileManagerController.loadFinishedPostSave();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADED));
     }
     
@@ -828,7 +829,7 @@ public abstract class FileManager {
         }
 
         //clear this, list of directories retrieved
-        RouterService.getCallback().fileManagerLoading();
+        fileManagerController.fileManagerLoading();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADING));
         
         // Update the FORCED_SHARE directory.
@@ -862,9 +863,11 @@ public abstract class FileManager {
         if(LOG.isDebugEnabled())
             LOG.debug("Finished queueing shared files for revision: " + revision);
             
-        _updatingFinished = revision;
-        if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
-            _pendingFinished = revision;
+        synchronized (this) {
+            _updatingFinished = revision;
+            if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
+                _pendingFinished = revision;
+        }
         tryToFinish();
     }
     
@@ -897,18 +900,9 @@ public abstract class FileManager {
             return;
         
         // STEP 0:
-		// Do not share certain directories, directories on the
-		// do not share list, or sensitive directories.
-        if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
+		// Do not share unsharable directories.
+        if(!isFolderShareable(directory, true))
             return;
-        
-        if (isApplicationSpecialShareDirectory(directory)) {
-            return;
-        }
-        
-		// Do not share directories on the do not share list
-		if (_data.DIRECTORIES_NOT_TO_SHARE.contains(directory))
-			return;
         
         // Do not share sensitive directories
         if (isSensitiveDirectory(directory)) {
@@ -920,7 +914,7 @@ public abstract class FileManager {
             if (_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
-                if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
+                if (!fileManagerController.warnAboutSharingSensitiveDirectory(directory))
                     return;
             }
         }
@@ -1025,8 +1019,12 @@ public abstract class FileManager {
                 // to remove any of its children, so we return immediately.
                 return;
             } else if(parent == null) {
-                if(!SharingSettings.DIRECTORIES_TO_SHARE.remove(folder))
+                // Add the directory in the exclude list if it wasn't in the DIRECTORIES_NOT_TO_SHARE,
+                // or if it was *and* a parent folder of it is fully shared.
+                boolean explicitlyShared = SharingSettings.DIRECTORIES_TO_SHARE.remove(folder);
+                if(!explicitlyShared || isCompletelySharedDirectory(folder.getParentFile()))
                     _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
+                
             }
             
             // note that if(parent != null && not a root share)
@@ -1048,7 +1046,7 @@ public abstract class FileManager {
                         removeFolderIfShared(f, folder);
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfShared(f) == null)
-                            UrnCache.instance().clearPendingHashesFor(f, this);
+                            fileManagerController.clearPendingShare(f);
                     }
                 }
             }
@@ -1061,16 +1059,61 @@ public abstract class FileManager {
         }
     }
     
+	/**
+	 * Adds a set of folders to be shared and a black list of subfolders that should
+	 * not be shared.
+	 * 
+	 * @param folders set of folders to  be shared
+	 * @param blackListedSet the subfolders or subsubfolders that are not to be
+	 * shared
+	 */
+	public void addSharedFolders(Set<File> folders, Set<File> blackListedSet) {
+		if (folders.isEmpty()) {
+			throw new IllegalArgumentException("Only blacklisting without sharing, not allowed");
+		}
+	    _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListedSet));
+	    for (File folder : folders) {
+	    	addSharedFolder(folder);
+	    }
+	}
+	
+	/**
+	 * Returns set of canonicalized files or the same set if there
+	 * was an IOException for one of the files while canconicalizing. 
+	 */
+	private static Set<File> canonicalize(Set<File> files) {
+	    // canonicalize blacklist
+        Set<File> canonical = new HashSet<File>(files.size());
+        try {
+            for (File excluded : files) {
+                canonical.add(FileUtils.getCanonicalFile(excluded));
+            }
+        } catch (IOException ie) {
+            // use original black list if we run into problems
+            canonical = files;
+        }
+        return canonical;
+	}
+	
+	public Set<File> getFolderNotToShare() {
+	    synchronized (_data.DIRECTORIES_NOT_TO_SHARE) {
+	        return new HashSet<File>(_data.DIRECTORIES_NOT_TO_SHARE);
+	    }
+	}
+	
     /**
      * Adds a given folder to be shared.
      */
-    public void addSharedFolder(File folder) {
+    public boolean addSharedFolder(File folder) {
 		if (!folder.isDirectory())
 			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
-		
+	
         try {
             folder = FileUtils.getCanonicalFile(folder);
         } catch(IOException ignored) {}
+        
+        if(!isFolderShareable(folder, false))
+            return false;
         
         _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
 		if (!isCompletelySharedDirectory(folder.getParentFile()))
@@ -1078,6 +1121,8 @@ public abstract class FileManager {
         _isUpdating = true;
         updateSharedDirectories(folder, null, _revision);
         _isUpdating = false;
+        
+        return true;
     }
     
 	/**
@@ -1217,7 +1262,7 @@ public abstract class FileManager {
             _pendingFinished = -1;
         }
         
-		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
+		fileManagerController.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
     /**
@@ -1259,14 +1304,21 @@ public abstract class FileManager {
                     callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.ADD_FAILED_FILE, file));
                 }
                 
-                if(_numPendingFiles == 0) {
-                    _pendingFinished = revision;
+                boolean finished = false;
+                synchronized (this) {
+                    if(_numPendingFiles == 0) {
+                        _pendingFinished = revision;
+                        finished = true;
+                    }
+                }
+                
+                if (finished) {
                     tryToFinish();
                 }
             }
             
             public boolean isOwner(Object o) {
-                return o == FileManager.this;
+                return o == fileManagerController;
             }
         };
     }
@@ -1293,7 +1345,7 @@ public abstract class FileManager {
 
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
-        ContentResponseData r = RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
+        ContentResponseData r = fileManagerController.getResponseDataFor(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
             return null;
@@ -1307,7 +1359,7 @@ public abstract class FileManager {
 	
         //Register this file with its parent directory.
         File parent = file.getParentFile();
-        Assert.that(parent != null, "Null parent to \""+file+"\"");
+        assert parent != null : "Null parent to \""+file+"\"";
         
         // Check if file is a specially shared file.  If not, ensure that
         // it is located in a shared directory.
@@ -1318,7 +1370,7 @@ public abstract class FileManager {
 		}
 		
 		boolean added = siblings.add(fileIndex);
-        Assert.that(added, "File "+fileIndex+" already found in "+siblings);
+		assert added : "File "+fileIndex+" already found in "+siblings;
         
         // files that are forcibly shared over the network
         // aren't counted or shown.
@@ -1345,23 +1397,7 @@ public abstract class FileManager {
         // so we have to make sure we don't influence the what is new
         // result set.
         if (!isForcedShare(file)) {
-            URN mainURN = fileDesc.getSHA1Urn();
-            CreationTimeCache ctCache = CreationTimeCache.instance();
-            synchronized (ctCache) {
-                Long cTime = ctCache.getCreationTime(mainURN);
-                if (cTime == null)
-                    cTime = new Long(file.lastModified());
-                // if cTime is non-null but 0, then the IO subsystem is
-                // letting us know that the file was FNF or an IOException
-                // occurred - the best course of action is to
-                // ignore the issue and not add it to the CTC, hopefully
-                // we'll get a correct reading the next time around...
-                if (cTime.longValue() > 0) {
-                    // these calls may be superfluous but are quite fast....
-                    ctCache.addTime(mainURN, cTime.longValue());
-                    ctCache.commitTime(mainURN);
-                }
-            }
+            fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
         }
 
         // Ensure file can be found by URN lookups
@@ -1388,7 +1424,7 @@ public abstract class FileManager {
 		boolean removed = _individualSharedFiles.remove(file); 
 		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
-		    UrnCache.instance().clearPendingHashesFor(file, this);
+            fileManagerController.clearPendingShare(file);
         } else {
 			file = fd.getFile();
 			// if file was not specially shared, add it to files_not_to_share
@@ -1427,8 +1463,7 @@ public abstract class FileManager {
             return null;
 
         int i = fd.getIndex();
-        Assert.that(_files.get(i).getFile().equals(f),
-                    "invariant broken!");
+        assert _files.get(i).getFile().equals(f) : "invariant broken!";
         
         _files.set(i, null);
         _fileToFileDescMap.remove(f);
@@ -1439,11 +1474,10 @@ public abstract class FileManager {
         // We also return false, because the file was never really
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
-            this.removeUrnIndex(fd);
+            removeUrnIndex(fd);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
-            Assert.that(removed,
-                "File "+i+" not found in " + _incompletesShared);
+            assert removed : "File "+i+" not found in " + _incompletesShared;
 
 			// Notify the GUI...
 	        if (notify) {
@@ -1460,10 +1494,9 @@ public abstract class FileManager {
         //Remove references to this from directory listing
         File parent = f.getParentFile();
         IntSet siblings = _sharedDirectories.get(parent);
-        Assert.that(siblings != null,
-            "Removed file's directory \""+parent+"\" not in "+_sharedDirectories);
+        assert siblings != null : "Removed file's directory \""+parent+"\" not in "+_sharedDirectories;
         boolean removed = siblings.remove(i);
-        Assert.that(removed, "File "+i+" not found in "+siblings);
+        assert removed : "File "+i+" not found in "+siblings;
 
         // files that are forcibly shared over the network aren't counted
         if(isForcedShareDirectory(parent)) {
@@ -1484,10 +1517,7 @@ public abstract class FileManager {
         }
 
         //Remove hash information.
-        this.removeUrnIndex(fd);
-        //Remove creation time information
-        if (_urnMap.get(fd.getSHA1Urn()) == null)
-            CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
+        removeUrnIndex(fd);
   
         // Notify the GUI...
         if (notify) {
@@ -1512,7 +1542,7 @@ public abstract class FileManager {
     public synchronized void addIncompleteFile(File incompleteFile,
                                                Set<? extends URN> urns,
                                                String name,
-                                               int size,
+                                               long size,
                                                VerifyingFile vf) {
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
@@ -1570,15 +1600,14 @@ public abstract class FileManager {
     
     /** Attempts to validate the given FileDesc. */
     public void validate(final FileDesc fd) {
-        ContentManager cm = RouterService.getContentManager();
         if(_requestingValidation.add(fd.getSHA1Urn())) {
-            cm.request(fd.getSHA1Urn(), new ContentResponseObserver() {
+            fileManagerController.requestValidation(fd.getSHA1Urn(), new ContentResponseObserver() {
                public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
                    if(r != null && !r.isOK())
                        removeFileIfShared(fd.getFile());
                }
-            }, 5000);
+            });
         }
     }
 
@@ -1622,12 +1651,12 @@ public abstract class FileManager {
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
             IntSet indices=_urnMap.get(urn);
-            Assert.that(indices!=null, "Invariant broken");
+            assert indices!=null : "Invariant broken";
 
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0) {
-                RouterService.getAltlocManager().purge(urn);
+                fileManagerController.lastUrnRemoved(urn);
                 _urnMap.remove(urn);
             }
 		}
@@ -1663,12 +1692,12 @@ public abstract class FileManager {
             
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
 		final FileDesc removed = removeFileIfShared(oldName, false);
-        Assert.that(removed == toRemove, "invariant broken.");
+        assert removed == toRemove : "invariant broken.";
 		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
 			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 			
         // Prepopulate the cache with new URNs.
-        UrnCache.instance().addUrns(newName, removed.getUrns());
+        fileManagerController.addUrns(newName, removed.getUrns());
 
         addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
@@ -1876,8 +1905,53 @@ public abstract class FileManager {
             return false;
                 
         long fileLength = file.length();
-        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+        if (fileLength <= 0 || fileLength > MAX_FILE_SIZE) 
             return false;
+        
+        return true;
+    }
+    
+    /**
+     * Returns true if this folder is sharable.
+     * <p>
+     * Unsharable folders include:
+     * <ul>
+     * <li>A non-directory or unreadable folder</li>
+     * <li>The incomplete directory</li>
+     * <li>The 'application special share directory'</li>
+     * <li>Any root directory</li>
+     * <li>Any directory listed in 'directories not to share' (<i>Only if
+     * includeExcludedDirectories is true</i>)</li>
+     * </ul>
+     * 
+     * @param folder The folder to check for sharability
+     * @param includeExcludedDirectories True if this should exclude the folder
+     *        from sharability if it is listed in DIRECTORIES_NOT_TO_SHARE
+     * @return true if the folder can be shared
+     */
+    public boolean isFolderShareable(File folder, boolean includeExcludedDirectories) {
+        if(!folder.isDirectory() || !folder.canRead())
+            return false;
+        
+        if (folder.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
+            return false;
+        
+        if (isApplicationSpecialShareDirectory(folder)) {
+            return false;
+        }
+        
+        // Do not share directories on the do not share list
+        if (includeExcludedDirectories && _data.DIRECTORIES_NOT_TO_SHARE.contains(folder))
+            return false;
+        
+        //  check for system roots
+        File[] faRoots = File.listRoots();
+        if (faRoots != null && faRoots.length > 0) {
+            for (int i = 0; i < faRoots.length; i++) {
+                if (folder.equals(faRoots[i]))
+                    return false;
+            }
+        }
         
         return true;
     }
@@ -1885,150 +1959,42 @@ public abstract class FileManager {
     /**
      * Returns true iff <tt>file</tt> is a sensitive directory.
      */
-    public static boolean isSensitiveDirectory(File file) {
-        if (file == null)
+    public static boolean isSensitiveDirectory(File folder) {
+        if (folder == null)
             return false;
-        
-        //  check for system roots
-        File[] faRoots = File.listRoots();
-        if (faRoots != null && faRoots.length > 0) {
-            for (int i = 0; i < faRoots.length; i++) {
-                if (file.equals(faRoots[i]))
-                    return true;
-            }
-        }
-        
-        //  check for user home directory
+
         String userHome = System.getProperty("user.home");
-        if (file.equals(new File(userHome)))
+        if (folder.equals(new File(userHome)))
             return true;
-        
-        //  check for OS-specific directories:
+
+        String[] sensitive;
         if (OSUtils.isWindows()) {
-            //  check for "Documents and Settings"
-            if (file.getName().equals("Documents and Settings"))
-                return true;
-            
-            //  check for "My Documents"
-            if (file.getName().equals("My Documents"))
-                return true;
-            
-            //  check for "Desktop"
-            if (file.getName().equals("Desktop"))
-                return true;
-            
-            //  check for "Program Files"
-            if (file.getName().equals("Program Files"))
-                return true;
-            
-            //  check for "Windows"
-            if (file.getName().equals("Windows"))
-                return true;
-            
-            //  check for "WINNT"
-            if (file.getName().equals("WINNT"))
+            sensitive = new String[] { "Documents and Settings",
+                    "My Documents", "Desktop", "Program Files", "Windows",
+                    "WINNT", "Users" };
+        } else if (OSUtils.isMacOSX()) {
+            sensitive = new String[] { "Users", "System", "System Folder",
+                    "Previous Systems", "private", "Volumes", "Desktop",
+                    "Applications", "Applications (Mac OS 9)", "Network" };
+        } else if (OSUtils.isPOSIX()) {
+            sensitive = new String[] { "bin", "boot", "dev", "etc", "home",
+                    "mnt", "opt", "proc", "root", "sbin", "usr", "var" };
+        } else {
+            sensitive = new String[0];
+        }
+
+        String folderName = folder.getName();
+        for (String name : sensitive) {
+            if (folderName.equals(name))
                 return true;
         }
-        
-        if (OSUtils.isMacOSX()) {
-            //  check for /Users
-            if (file.getName().equals("Users"))
-                return true;
-            
-            //  check for /System
-            if (file.getName().equals("System"))
-                return true;
-            
-            //  check for /System Folder
-            if (file.getName().equals("System Folder"))
-                return true;
-            
-            //  check for /Previous Systems
-            if (file.getName().equals("Previous Systems"))
-                return true;
-            
-            //  check for /private
-            if (file.getName().equals("private"))
-                return true;
-            
-            //  check for /Volumes
-            if (file.getName().equals("Volumes"))
-                return true;
-            
-            //  check for /Desktop
-            if (file.getName().equals("Desktop"))
-                return true;
-            
-            //  check for /Applications
-            if (file.getName().equals("Applications"))
-                return true;
-            
-            //  check for /Applications (Mac OS 9)
-            if (file.getName().equals("Applications (Mac OS 9)"))
-                return true;
-            
-            //  check for /Network            
-            if (file.getName().equals("Network"))
-                return true;
-        }
-        
-        if (OSUtils.isPOSIX()) {
-            //  check for /bin
-            if (file.getName().equals("bin"))
-                return true;
-            
-            //  check for /boot
-            if (file.getName().equals("boot"))
-                return true;
-            
-            //  check for /dev
-            if (file.getName().equals("dev"))
-                return true;
-            
-            //  check for /etc
-            if (file.getName().equals("etc"))
-                return true;
-            
-            //  check for /home
-            if (file.getName().equals("home"))
-                return true;
-            
-            //  check for /mnt
-            if (file.getName().equals("mnt"))
-                return true;
-            
-            //  check for /opt
-            if (file.getName().equals("opt"))
-                return true;
-            
-            //  check for /proc
-            if (file.getName().equals("proc"))
-                return true;
-            
-            //  check for /root
-            if (file.getName().equals("root"))
-                return true;
-            
-            //  check for /sbin
-            if (file.getName().equals("sbin"))
-                return true;
-            
-            //  check for /usr
-            if (file.getName().equals("usr"))
-                return true;
-            
-            //  check for /var
-            if (file.getName().equals("var"))
-                return true;
-        }
-        
+
         return false;
     }
     
     /**
-     * Returns the QRTable.
-     * If the shared files have changed, then it will rebuild the QRT.
-     * A copy is returned so that FileManager does not expose
+     * Returns the QRTable. If the shared files have changed, then it will
+     * rebuild the QRT. A copy is returned so that FileManager does not expose
      * its internal data structure.
      */
     public synchronized QueryRouteTable getQRT() {
@@ -2118,18 +2084,15 @@ public abstract class FileManager {
         for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
             FileDesc desc = _files.get(i);
-            if(desc == null)
-                Assert.that(false, 
-                            "unexpected null in FileManager for query:\n"+
-                            request);
+            assert desc != null : "unexpected null in FileManager for query:\n"+ request;
 
             if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;
 
             desc.incrementHitCount();
-            RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
+            fileManagerController.handleSharedFileUpdate(desc.getFile());
 
-            Response resp = new Response(desc);
+            Response resp = fileManagerController.createResponse(desc);
             if(includeXML) {
                 addXMLToResponse(resp, desc);
                 if(doc != null && resp.getDocument() != null &&
@@ -2151,7 +2114,7 @@ public abstract class FileManager {
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
-        List<URN> urnList = CreationTimeCache.instance().getFiles(request, 3);
+        List<URN> urnList = fileManagerController.getNewestUrns(request, 3);
         if (urnList.size() == 0)
             return EMPTY_RESPONSES;
         
@@ -2167,7 +2130,7 @@ public abstract class FileManager {
                 throw new RuntimeException("Bad Rep - No IFDs allowed!");
             
             // Formulate the response
-            Response r = new Response(desc);
+            Response r = fileManagerController.createResponse(desc);
             if(includeXML)
                 addXMLToResponse(r, desc);
             
@@ -2199,13 +2162,13 @@ public abstract class FileManager {
             if (desc==null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
                 continue;
         
-            Assert.that(j<ret.length, "_numFiles is too small");
-            ret[j] = new Response(desc);
+            assert j<ret.length : "_numFiles is too small";
+            ret[j] = fileManagerController.createResponse(desc);
             if(includeXML)
                 addXMLToResponse(ret[j], desc);
             j++;
         }
-        Assert.that(j==ret.length, "_numFiles is too large");
+        assert j==ret.length : "_numFiles is too large";
         return ret;
     }
 
@@ -2422,7 +2385,7 @@ public abstract class FileManager {
                         if (desc == null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
                             continue;
 
-                        preview = new Response(desc);
+                        preview = fileManagerController.createResponse(desc);
                         if(includeXML)
                             addXMLToResponse(preview, desc);
                         return true;
@@ -2491,7 +2454,7 @@ public abstract class FileManager {
             buildInProgress = true;
             
             // schedule a rebuild sometime in the next hour
-            RouterService.schedule(new Runnable() {
+            fileManagerController.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     synchronized(QRPUpdater.this) {
                         if (!buildInProgress)
@@ -2500,7 +2463,7 @@ public abstract class FileManager {
                         _needRebuild = true;
                     }
                 }
-            }, (int)(Math.random() * QRP_DELAY), 0);
+            }, (int)(Math.random() * QRP_DELAY), 0, TimeUnit.MILLISECONDS);
         }
         
         public synchronized void cancelRebuild() {
@@ -2610,7 +2573,7 @@ public abstract class FileManager {
                     if (isRareFile(fds[i]))
                         rare++;
                     // locking FM->ALM ok.
-                    int numAlts = RouterService.getAltlocManager().getNumLocs(fds[i].getSHA1Urn());
+                    int numAlts = fileManagerController.getAlternateLocationCount(fds[i].getSHA1Urn());
                     if (!nonZero || numAlts > 0) {
                         alts.add((double)numAlts);
                         topAltsFDs.put(numAlts,fds[i]);
@@ -2696,12 +2659,13 @@ public abstract class FileManager {
         
     }
     
-    private static class RareFileDefinition implements SimppListener {
+    private class RareFileDefinition implements SimppListener {
         
         private RPNParser parser;
         RareFileDefinition() {
             simppUpdated(0);
-            SimppManager.instance().addListener(this);
+            // TODO cleanup listener leaking
+            fileManagerController.addSimppListener(this);
         }
         
         public synchronized void simppUpdated(int ignored) {

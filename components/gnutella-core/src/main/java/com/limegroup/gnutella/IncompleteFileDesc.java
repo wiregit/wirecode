@@ -3,11 +3,11 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * This class extends FileDesc and wraps an incomplete File, 
@@ -33,13 +33,13 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	/**
 	 * The size of the file, casted to an <tt>int</tt>.
 	 */
-    private final int _size;
+    private final long _size;
 
     /**
      * Constructor for the IncompleteFileDesc object.
      */
     public IncompleteFileDesc(File file, Set<? extends URN> urns, int index, 
-                              String completedName, int completedSize,
+                              String completedName, long completedSize,
                               VerifyingFile vf) {
         super(file, urns, index);
         _name = completedName;
@@ -65,44 +65,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 		return _name;
 	}
     
-    /**
-     * Returns null, overrides super.getHashTree to prevent us from offering
-     * HashTrees for incomplete files.
-     * @return null
-     */
-    public HashTree getHashTree() {
-        return null;
-    }
-
-    private Downloader getMyDownloader() {
-        return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
-    }
-    
-	/**
-	 * Returns whether or not we are actively downloading this file.
-	 */
-	public boolean isActivelyDownloading() {
-        
-        Downloader md = getMyDownloader();
-	    
-	    if(md == null)
-	        return false;
-	        
-        switch(md.getState()) {
-        case QUEUED:
-        case BUSY:
-        case ABORTED:
-        case GAVE_UP:
-        case DISK_PROBLEM:
-        case CORRUPT_FILE:
-        case REMOTE_QUEUED:
-        case WAITING_FOR_USER:
-            return false;
-        default:
-            return true;
-        }
-    }
-    public byte [] getRangesAsByte() {
+	public IntervalSet.ByteIntervals getRangesAsByte() {
     	return _verifyingFile.toBytes();
     }
     /**
@@ -115,15 +78,15 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for(Interval interval : _verifyingFile.getVerifiedBlocks()) {
+            for(Range interval : _verifyingFile.getVerifiedBlocks()) {
     	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
     	        // ( we add one because HTTP values are exclusive )
-    	        if (interval.high - interval.low + 1 < MIN_CHUNK_SIZE)
+    	        if (interval.getHigh() - interval.getLow() + 1 < MIN_CHUNK_SIZE)
     		        continue;
     
                 added = true;
                 // ( we subtract one because HTTP values are exclusive )
-                ret.append(" ").append(interval.low).append("-").append(interval.high -1).append(",");
+                ret.append(" ").append(interval.getLow()).append("-").append(interval.getHigh() -1).append(",");
             }
         }
         // truncate off the last ',' if atleast one was added.
@@ -140,13 +103,13 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * Determines whether or not the given range is satisfied by this
      * incomplete file.
      */
-    public boolean isRangeSatisfiable(int low, int high) {
+    public boolean isRangeSatisfiable(long low, long high) {
         // This must be synchronized so that downloaders writing
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for(Interval interval : _verifyingFile.getVerifiedBlocks()) {
-                if (low >= interval.low && high <= interval.high)
+            for(Range interval : _verifyingFile.getVerifiedBlocks()) {
+                if (low >= interval.getLow() && high <= interval.getHigh())
                     return true;
             }
         }
@@ -158,14 +121,14 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * @return Interval that has been clipped to match the available range, null
      * if the interval does not overlap any available ranges
      */
-     public Interval getAvailableSubRange(int low, int high) {
+     public Range getAvailableSubRange(long low, long high) {
         synchronized(_verifyingFile) {
-            for(Interval interval : _verifyingFile.getVerifiedBlocks()) {
-                if ((interval.low <= high && low <= interval.high))
+            for(Range interval : _verifyingFile.getVerifiedBlocks()) {
+                if ((interval.getLow() <= high && low <= interval.getHigh()))
                 	// overlap found 
-                    return new Interval(Math.max(interval.low, low), 
-                                        Math.min(interval.high, high));
-                else if (interval.low > high) // passed all viable intervals
+                    return Range.createRange(Math.max(interval.getLow(), low), 
+                                        Math.min(interval.getHigh(), high));
+                else if (interval.getLow() > high) // passed all viable intervals
                     break;
             }
             return null;
@@ -176,8 +139,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * Determines whether or not the given interval is within the range
      * of our incomplete file.
      */
-    public boolean isRangeSatisfiable(Interval range) {
-        return isRangeSatisfiable(range.low, range.high);
+    public boolean isRangeSatisfiable(Range range) {
+        return isRangeSatisfiable(range.getLow(), range.getHigh());
     }
     
     // implements HTTPHeaderValue

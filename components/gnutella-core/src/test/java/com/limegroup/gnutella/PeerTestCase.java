@@ -14,7 +14,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -24,7 +23,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Allows a testcase to easily interact with a fully running LimeWire.
@@ -41,7 +40,7 @@ public abstract class PeerTestCase extends LimeTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    protected static RouterService rs;
+ //   protected static RouterService rs;
 
     private static ActivityCallback callback;
     protected static ActivityCallback getCallback() {
@@ -67,7 +66,6 @@ public abstract class PeerTestCase extends LimeTestCase {
         ConnectionSettings.NUM_CONNECTIONS.setValue(0);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
@@ -79,13 +77,12 @@ public abstract class PeerTestCase extends LimeTestCase {
         callback=
         (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
                                                          "getActivityCallback");
-        rs=new RouterService(callback);
-        RouterService.preGuiInit();
+      //  rs=new RouterService(callback);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
-        rs.start();
-        RouterService.clearHostCatcher();
-        RouterService.connect();
+        ProviderHacks.getLifecycleManager().start();
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
         Thread.sleep(2000);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
@@ -101,7 +98,7 @@ public abstract class PeerTestCase extends LimeTestCase {
          ServerSocket ss=new ServerSocket();
          ss.setReuseAddress(true);
          ss.bind(new InetSocketAddress(0));
-         RouterService.connectToHostAsynchronously("127.0.0.1", ss.getLocalPort(), ConnectType.PLAIN);
+         ProviderHacks.getConnectionServices().connectToHostAsynchronously("127.0.0.1", ss.getLocalPort(), ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          
@@ -117,7 +114,7 @@ public abstract class PeerTestCase extends LimeTestCase {
          } else {
              responder = new OldResponder();
          }
-         Connection con = new Connection(socket);
+         Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
          con.initialize(null, responder, 1000);
          replyToPing(con, ultrapeer);
          return con;
@@ -166,7 +163,7 @@ public abstract class PeerTestCase extends LimeTestCase {
         
         Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
         PingReply reply = 
-        PingReply.createExternal(guid, (byte)7,
+        ProviderHacks.getPingReplyFactory().createExternal(guid, (byte)7,
                                  socket.getLocalPort(), 
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
@@ -178,7 +175,7 @@ public abstract class PeerTestCase extends LimeTestCase {
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
+            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }

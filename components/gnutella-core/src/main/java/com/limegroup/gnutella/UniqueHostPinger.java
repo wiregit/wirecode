@@ -2,11 +2,16 @@ package com.limegroup.gnutella;
 
 
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 
 public class UniqueHostPinger extends UDPPinger {
 
@@ -14,12 +19,14 @@ public class UniqueHostPinger extends UDPPinger {
      * set of endpoints we pinged since last expiration
      */
     private final Set<IpPort> _recent = new IpPortSet();
+        
+    @Inject
+    public UniqueHostPinger(Provider<MessageRouter> messageRouter,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<UDPService> udpService, PingRequestFactory pingRequestFactory) {
+        super(messageRouter, backgroundExecutor, udpService, pingRequestFactory);
+    }    
     
-    public UniqueHostPinger() {
-        super();
-    }
-    
-
     protected void sendSingleMessage(IpPort host, Message m) {
         if (_recent.contains(host))
             return;

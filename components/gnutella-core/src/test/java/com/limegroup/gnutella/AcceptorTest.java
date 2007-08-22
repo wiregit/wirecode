@@ -20,7 +20,6 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AcceptorTest extends LimeTestCase {
@@ -47,11 +46,12 @@ public class AcceptorTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         setSettings();
-        new RouterService(new ActivityCallbackStub());
-        RouterService.getConnectionManager().initialize();
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService(new ActivityCallbackStub());
+        ProviderHacks.getConnectionManager().initialize();
         
         // start it up!
-        acceptThread = new Acceptor();
+        acceptThread = ProviderHacks.getAcceptor();
         acceptThread.start();
         
         // Give thread time to find and open it's sockets.   This race condition
@@ -171,7 +171,7 @@ public class AcceptorTest extends LimeTestCase {
          int port = bindAcceptor();
          
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
-         RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
+         ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
          
          Socket tls = new TLSNIOSocket("localhost", port);
          tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
@@ -184,7 +184,7 @@ public class AcceptorTest extends LimeTestCase {
          int port = bindAcceptor();
          
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
-         RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
+         ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
          
          SSLContext context = SSLUtils.getTLSContext();
          SSLSocket tls = (SSLSocket)context.getSocketFactory().createSocket();

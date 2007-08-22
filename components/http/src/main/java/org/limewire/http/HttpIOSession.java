@@ -15,6 +15,7 @@ import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionBufferStatus;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.channel.ThrottleWriter;
 
@@ -41,7 +42,7 @@ public class HttpIOSession implements IOSession {
     private ThrottleWriter throttleWriter;
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-    
+
     public HttpIOSession(AbstractNBSocket socket) {
         if (socket == null) {
             throw new IllegalArgumentException();
@@ -58,14 +59,14 @@ public class HttpIOSession implements IOSession {
     }
 
     public ByteChannel channel() {
-        return (channel != null) ? channel : channel;
+        return channel;
     }
 
     public void close() {
         if (this.closed.getAndSet(true)) {
             return;
         }
-        socket.close();
+        channel.closeWhenBufferedOutputHasBeenFlushed();
     }
 
     public Object getAttribute(String name) {
@@ -104,51 +105,85 @@ public class HttpIOSession implements IOSession {
         this.bufferStatus = status;
     }
 
-    public int getEventMask() {
+    public synchronized int getEventMask() {
         return eventMask;
     }
 
-    public void setEventMask(int ops) {
-        updateEventMask(ops);
-    }
-
-    private void updateEventMask(int ops) {
+    public synchronized void setEventMask(int ops) {
         if (isClosed()) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Attempted to set event mask to " + ops + " on closed session: " + this);
             return;
         }
+        
         this.eventMask = ops;
         channel.requestRead((ops & EventMask.READ) != 0);
         channel.requestWrite((ops & EventMask.WRITE) != 0);
+
+//        if ((ops & EventMask.READ) != 0) {
+//            System.err.println("read on");
+//        } else {
+//            System.err.println("read off");            
+//        }
+//        if ((ops & EventMask.WRITE) != 0) {
+//            System.err.println("write on");
+//        } else {
+//            System.err.println("write off");            
+//        }
     }
 
-    public void setEvent(int op) {
+    public synchronized void setEvent(int op) {
+        if (isClosed()) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Attempted to set event mask to " + op + " on closed session: " + this);
+            return;
+        }
+
+        this.eventMask |= op;
+        if ((op & EventMask.READ) != 0) {
+            channel.requestRead(true);
+        }
+        if ((op & EventMask.WRITE) != 0) {
+            channel.requestWrite(true);
+        }        
+        
 //        if ((op & EventMask.READ) != 0) {
-//            System.out.println("read on");
+//            System.err.println("read on");
 //        }
 //        if ((op & EventMask.WRITE) != 0) {
-//            System.out.println("write on");
+//            System.err.println("write on");
 //        }
-        updateEventMask(eventMask | op);
     }
 
-    public void clearEvent(int op) {
+    public synchronized void clearEvent(int op) {
+        if (isClosed()) {
+            if (LOG.isErrorEnabled())
+                LOG.error("Attempted to set event mask to " + op + " on closed session: " + this);
+            return;
+        }
+
+        this.eventMask &= ~op;
+        if ((op & EventMask.READ) != 0) {
+            channel.requestRead(false);
+        }
+        if ((op & EventMask.WRITE) != 0) {
+            channel.requestWrite(false);
+        }
+
 //        if ((op & EventMask.READ) != 0) {
-//            System.out.println("read off");
+//            System.err.println("read off");
 //        }
 //        if ((op & EventMask.WRITE) != 0) {
-//            System.out.println("write off");
+//            System.err.println("write off");
 //        }
-        updateEventMask(eventMask & ~op);
     }
 
     public void setSocketTimeout(int timeout) {
         this.socketTimeout = timeout;
-        if (socket != null) {
-            try {
-                socket.setSoTimeout(timeout);
-            } catch (SocketException e) {
-                LOG.warn("Could not set socket timeout", e);
-            }
+        try {
+            socket.setSoTimeout(timeout);
+        } catch (SocketException e) {
+            LOG.warn("Could not set socket timeout", e);
         }
     }
 
@@ -166,27 +201,11 @@ public class HttpIOSession implements IOSession {
      * Throttles the underlying connection using <code>throttle</code>. If
      * <code>throttle</code> is null, throtteling is disabled.
      */
-    public synchronized void setThrottle(Throttle throttle) {
-        boolean enable = (throttle != null);
-        if (enable == (this.throttleWriter != null)) {
-            return;
-        }
-
-        if (enable) {
-            this.throttleWriter = new ThrottleWriter(throttle);
-            boolean interest = channel.isWriteInterest();
-            channel.requestWrite(false);
-            channel.setWriteChannel(this.throttleWriter);
-            socket.setWriteObserver(channel);
-            channel.requestWrite(interest);
-        } else {
-            this.throttleWriter = null;
-            boolean interest = channel.isWriteInterest();
-            channel.requestWrite(false);
-            channel.setWriteChannel(null);
-            socket.setWriteObserver(channel);
-            channel.requestWrite(interest);
-        }
+    public void setThrottle(final Throttle throttle) {
+        assert NIODispatcher.instance().isDispatchThread() :
+            "wrong thread: "+Thread.currentThread().getName();
+    
+        this.throttleWriter.setThrottle(throttle);
     }
 
     public Socket getSocket() {
@@ -194,7 +213,12 @@ public class HttpIOSession implements IOSession {
     }
 
     public void shutdown() {
-        close();
+        closed.set(true);
+        socket.close();
     }
 
+    public void setThrottleChannel(final ThrottleWriter throttleWriter) {
+        this.throttleWriter = throttleWriter;
+    }
+    
 }

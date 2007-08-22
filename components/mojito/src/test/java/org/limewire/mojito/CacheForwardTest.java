@@ -51,7 +51,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
 
-
+@SuppressWarnings("null")
 public class CacheForwardTest extends MojitoTestCase {
     
     private static final int PORT = 3000;
@@ -107,7 +107,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertFalse(context2.isBootstrapping());
             
             // Get the SecurityToken...
-            Class clazz = Class.forName("org.limewire.mojito.manager.StoreManager$GetSecurityTokenHandler");
+            Class clazz = Class.forName("org.limewire.mojito.manager.StoreProcess$GetSecurityTokenHandler");
             Constructor<DHTTask<Result>> con 
                 = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
@@ -117,7 +117,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             try {
                 Result result = callable.call();
-                clazz = Class.forName("org.limewire.mojito.manager.StoreManager$GetSecurityTokenResult");
+                clazz = Class.forName("org.limewire.mojito.manager.StoreProcess$GetSecurityTokenResult");
                 Method m = clazz.getDeclaredMethod("getSecurityToken", new Class[0]);
                 m.setAccessible(true);
                 

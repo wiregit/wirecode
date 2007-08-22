@@ -3,14 +3,13 @@ package com.limegroup.gnutella;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -22,7 +21,8 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
     private MessageRouter mr;
     
     public static void globalSetUp() throws Exception {
-        new RouterService( new ActivityCallbackStub() );
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService( new ActivityCallbackStub() );
     }
     
     public void setUp() throws Exception {
@@ -37,10 +37,10 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         cm.addStubOvrConnection(peer);
         cm.addStubOvrConnection(leaf);
         
-        mr=RouterService.getMessageRouter();
+        mr=ProviderHacks.getMessageRouter();
         PrivilegedAccessor.setValue( MessageRouter.class, "_manager", cm);
         PrivilegedAccessor.setValue( MessageRouter.class, "_fileManager", new FileManagerStub() );
-        PrivilegedAccessor.setValue( RouterService.class, "manager", cm);
+    //    PrivilegedAccessor.setValue( RouterService.class, "manager", cm);
     }
     
 

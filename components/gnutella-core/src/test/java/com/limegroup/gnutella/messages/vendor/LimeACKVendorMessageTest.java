@@ -9,8 +9,8 @@ import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.MessageFactory;
 
 public class LimeACKVendorMessageTest extends BaseTestCase {
 
@@ -84,7 +84,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             LimeACKVendorMessage vmRead = 
-                (LimeACKVendorMessage) MessageFactory.read(bais);
+                (LimeACKVendorMessage) ProviderHacks.getMessageFactory().read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 

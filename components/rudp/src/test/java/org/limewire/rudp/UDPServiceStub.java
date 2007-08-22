@@ -101,11 +101,17 @@ public class UDPServiceStub implements UDPService {
 
         public void add(DatagramPacket dp) {
         	// drop message if flaky
-        	int num = _random.nextInt(100);
-        	if (num < _pctFlaky)
-        		return;
+            if (_pctFlaky > 0) {
+                int num = _random.nextInt(100);
+                if (num < _pctFlaky)
+                    return;
+            }
         	
-			_timer.schedule(new MessageWrapper(dp, _delay, this),_delay);
+            if (_delay > 0) {
+                _timer.schedule(new MessageWrapper(dp, _delay, this),_delay);
+            } else {
+                receive(new MessageWrapper(dp, _delay, this));   
+            }
 		}
         
         public void stop() {

@@ -39,13 +39,13 @@ public class MediaType implements Serializable {
     public static final String SCHEMA_STORE = "store";
     
     // These are used as resource keys to retreive descriptions in the GUI
-    public static final String ANY_TYPE = "MEDIA_ANY_TYPE";
-    public static final String DOCUMENTS = "MEDIA_DOCUMENTS";
-    public static final String PROGRAMS = "MEDIA_PROGRAMS";
-    public static final String AUDIO = "MEDIA_AUDIO";
-    public static final String VIDEO = "MEDIA_VIDEO";
-    public static final String IMAGES = "MEDIA_IMAGES";
-    public static final String STORE = "MEDIA_STORE";
+    public static final String ANY_TYPE = I18n.marktr("All Types");
+    public static final String DOCUMENTS = I18n.marktr("Documents");
+    public static final String PROGRAMS = I18n.marktr("Programs");
+    public static final String AUDIO = I18n.marktr("Audio");
+    public static final String VIDEO = I18n.marktr("Video");
+    public static final String IMAGES = I18n.marktr("Images");
+    public static final String STORE = I18n.marktr("Store");
 
     /**
      * Type for 'any file'
@@ -171,9 +171,7 @@ public class MediaType implements Serializable {
         new MediaType(SCHEMA_STORE, STORE,
             new String[] {
                 "mp3",
-            });
-    
-    
+            });    
         
     /**
      * All media types.
@@ -340,17 +338,12 @@ public class MediaType implements Serializable {
         if (obj instanceof MediaType) {
             MediaType type = (MediaType)obj;
             return schema.equals(type.schema) 
-            && areEqual(descriptionKey, type.descriptionKey)
             && exts.equals(type.exts)
             && isDefault == type.isDefault;
         }
         return false;
     }
-    
-    private final static boolean areEqual(Object o1, Object o2) {
-        return o1 == o2 || (o1 != null && o2 != null && o1.equals(o2));
-    }
-    
+        
     /*
      * We canoncialize the default mediatypes, but since MediaType has
      * a public constructor only 'equals' comparisons should be used.

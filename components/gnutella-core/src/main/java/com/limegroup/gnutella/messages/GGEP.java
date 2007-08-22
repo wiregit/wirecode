@@ -100,6 +100,8 @@ public class GGEP {
     public static final String GGEP_HEADER_SECURE_BLOCK = "SB";
     /** The extension header (key) indiciating the value has a signature in it. */
     public static final String GGEP_HEADER_SIGNATURE = "SIG";
+    /** The extention header (key) indicating the size of the file is 64 bit */
+    public static final String GGEP_HEADER_LARGE_FILE = "LF";
     
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
@@ -667,10 +669,9 @@ public class GGEP {
 
     private void validateKey(String key) throws IllegalArgumentException {
         byte[] bytes=key.getBytes();
-        if ((key == null)
-                || key.equals("")
-                || (bytes.length > MAX_KEY_SIZE_IN_BYTES)
-                || containsNull(bytes))
+        if ( key.equals("")
+            || (bytes.length > MAX_KEY_SIZE_IN_BYTES)
+            || containsNull(bytes))
             throw new IllegalArgumentException();
     }
 

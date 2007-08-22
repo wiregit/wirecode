@@ -7,6 +7,8 @@ import java.util.EventObject;
  */
 public class DHTEvent extends EventObject {
     
+    private static final long serialVersionUID = 912814275883336092L;
+
     public static enum Type {
         STARTING,
         CONNECTED,

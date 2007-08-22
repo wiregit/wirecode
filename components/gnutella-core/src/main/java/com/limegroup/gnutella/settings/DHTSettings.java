@@ -254,15 +254,17 @@ public class DHTSettings extends LimeProps {
      */
     public static final LongSetting TIME_BETWEEN_DHT_ALT_LOC_QUERIES
         = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_ALT_LOC_QUERIES", 
-                5L*60L*1000L, "DHT.TimeBetweenAltLocQueries", 30L*1000L, 24L*60L*60L*1000L);
+                30L*60L*1000L, "DHT.TimeBetweenAltLocQueries", 30L*1000L, 24L*60L*60L*1000L);
     
     /**
      * Setting for whether or not the passive DHT mode should be active at all.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
+    // Was DHT.EnablePassiveMode in 4.13.12 and prior. 
+    // Deadlock! Do not turn on! See MOJITO-119!
     public static final BooleanSetting ENABLE_PASSIVE_DHT_MODE
         = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_DHT_MODE", 
-                false, "DHT.EnablePassiveMode");
+                false, "DHT.EnablePassiveModeV2");
     
     /**
      * Setting for whether or not the passive leaf DHT mode should be active at all.
@@ -285,7 +287,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting ENABLE_PUSH_PROXY_QUERIES
         = FACTORY.createRemoteBooleanSetting("ENABLE_PUSH_PROXY_QUERIES", 
-                false, "DHT.EnablePushProxyQueries");
+                false, "DHT.EnablePushProxyQueriesV2");
     
     /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.

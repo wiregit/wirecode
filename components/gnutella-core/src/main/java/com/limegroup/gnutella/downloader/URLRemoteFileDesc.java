@@ -28,7 +28,7 @@ public class URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
      * @param url the url 
      */
 	public URLRemoteFileDesc(String host, int port, long index, String filename,
-                             int size, byte[] clientGUID, int speed, 
+                             long size, byte[] clientGUID, int speed, 
                              boolean chat, int quality, boolean browseHost, 
                              LimeXMLDocument xmlDoc, Set<? extends URN> urns,
                              boolean replyToMulticast, boolean firewalled,

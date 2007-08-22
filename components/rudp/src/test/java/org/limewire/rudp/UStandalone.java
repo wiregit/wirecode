@@ -16,10 +16,6 @@ public class UStandalone {
 	
     private static final Log LOG = LogFactory.getLog(UStandalone.class);
 
-
-	/** A boolean that tracks whether the read thread was successful */
-    private static boolean readSuccess = false;
-
     /**
      * Writes numbers to <code>usock</code> and expects to read the same
      * numbers back.
@@ -30,16 +26,18 @@ public class UStandalone {
 		InputStream  istream = usock.getInputStream();
 
 		ClientReader reader = new ClientReader(istream, numBytes);
-		reader.start();
+		try {
+		    reader.start();
 
-		for (int i = 0; i < numBytes; i++) {
-			ostream.write(i % 256);
-			if ( (i % 1000) == 0 ) 
-				LOG.debug("Write status: "+i);
+		    for (int i = 0; i < numBytes; i++) {
+		        ostream.write(i % 256);
+		        if ( (i % 1000) == 0 ) 
+		            LOG.debug("Write status: "+i);
+		    }
+		    LOG.trace("Done write");
+		} finally {
+            try { reader.join(); } catch (InterruptedException ie){}		    
 		}
-		LOG.trace("Done write");
-		
-		try { reader.join(); } catch (InterruptedException ie){}
         LOG.debug("Done echoClient test");
 	}
 
@@ -62,11 +60,9 @@ public class UStandalone {
 				for (; i < numBytes; i++) {
 					rval = istream.read();
 					AssertComparisons.assertEquals("Read unexpected value at offset " + i, i % 256, rval);
-					LOG.trace("Properly received: "+i);
 					if ( (i % 1000) == 0 ) 
 						LOG.debug("Read status: "+i);
 				}
-				readSuccess = true;
 			} catch (IOException e) {
 				AssertComparisons.fail("Unexpected exception at offset " + i + ": " + e);
 			}
@@ -93,31 +89,30 @@ public class UStandalone {
 		LOG.trace("Done echo");
 	}
 
-	public static boolean echoClientBlock(UDPConnection usock, int numBlocks) 
+	public static void echoClientBlock(UDPConnection usock, int numBlocks) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
-		readSuccess = false;
 		ClientBlockReader reader = new ClientBlockReader(istream, numBlocks);
 		reader.start();
-	
-		// setup transfer data
-		byte bdata[] = new byte[512];
-		for (int i = 0; i < 512; i++)
-			bdata[i] = (byte) (i % 256);
+		try {
+		    // setup transfer data
+		    byte bdata[] = new byte[512];
+		    for (int i = 0; i < 512; i++)
+		        bdata[i] = (byte) (i % 256);
 
-		for (int i = 0; i < numBlocks; i++) {
-			ostream.write(bdata, 0, 512);
-			if ( (i % 8) == 0 ) 
-				LOG.debug("Write status: "+i*512+
-                  " time:"+System.currentTimeMillis());
+		    for (int i = 0; i < numBlocks; i++) {
+		        ostream.write(bdata, 0, 512);
+		        if ( (i % 8) == 0 ) 
+		            LOG.debug("Write status: "+i*512+
+		                    " time:"+System.currentTimeMillis());
+		    }
+		    LOG.trace("Done write");
+		} finally {		
+		    try { reader.join(); } catch (InterruptedException ie){}
 		}
-		LOG.trace("Done write");
-		
-		try { reader.join(); } catch (InterruptedException ie){}
         LOG.debug("Done echoClientBlock test");
-		return readSuccess;
 	}
 
 	static class ClientBlockReader extends ManagedThread {
@@ -158,7 +153,6 @@ public class UStandalone {
                         }
 					}
 				}
-				readSuccess = true;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -166,16 +160,14 @@ public class UStandalone {
 		}
 	}
 
-	public static boolean echoServerBlock(UDPConnection usock, int numBlocks) 
+	public static void echoServerBlock(UDPConnection usock, int numBlocks) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
 		byte bdata[] = new byte[512];
 
-		boolean success = false;
-
-        int btest;
+		int btest;
 		int len = 0;
 		for (int i = 0; i < 512 * numBlocks; i += len) {
 			len = istream.read(bdata);
@@ -185,68 +177,16 @@ public class UStandalone {
 
 			for (int j = 0; j < len; j++) {
                 btest = bdata[j] & 0xff;
-				if ( btest != ((i+j) % 256) ) {
-					LOG.debug("Error on echo expected: "+(i+j)
-					  +" received: "+bdata[j]);
-					return false;
-				} 
+                AssertComparisons.assertEquals("Read unexpected value at offset " + j, btest, (i+j) % 256);
 				if ( ((i+j) % 1024) == 0 ) 
 					LOG.debug("Echo status: "+i+
                       " time:"+System.currentTimeMillis());
 			}
             ostream.write(bdata, 0, len);
 		}
-		success = true;
 		LOG.trace("Done echoBlock");
-		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
+		//try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         LOG.debug("Done echoServerBlock test");
-		return success;
 	}
-
-    public static boolean unidirectionalClient(UDPConnection usock, 
-	  int numBytes) throws IOException {
-        OutputStream ostream = usock.getOutputStream();
-
-		boolean success = false;
-
-        int i = 0;
-        for (i = 0; i < numBytes; i++) {
-            ostream.write(i % 256);
-            if ( (i % 1000) == 0 ) 
-                LOG.debug("Write status: "+i);
-        }
-		success = true;
-        LOG.debug("Write reached: "+i);
-        
-        try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        LOG.debug("Done unidirectionalClient test");
-		return success;
-    }
-
-    public static boolean unidirectionalServer(UDPConnection usock, 
-	  int numBytes) throws IOException {
-        InputStream  istream = usock.getInputStream();
-
-		boolean success = false;
-        int rval;
-        int i = 0;
-        for (i = 0; i < numBytes; i++) {
-            rval = istream.read();
-            if ( rval != (i % 256) ) {
-                LOG.debug("Error on read expected: "+i
-                  +" received: "+rval);
-                break;
-            } else {
-                if ( (i % 1000) == 0 ) 
-                    LOG.debug("Read Properly received: "+i);
-            }
-        }
-		success = true;
-        LOG.debug("Read reached: "+i);
-        
-        try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        LOG.debug("Done unidirectionalServer test");
-		return success;
-    }
 
 }

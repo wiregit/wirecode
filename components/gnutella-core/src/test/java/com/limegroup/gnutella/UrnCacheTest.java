@@ -50,7 +50,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testPersistence() throws Exception {
         assertTrue("cache should not be present", !cacheExists() );
         
-        UrnCache cache = UrnCache.instance();
+        UrnCache cache = ProviderHacks.getUrnCache();
         FileDesc[] descs = createFileDescs();
         assertNotNull("should have some file descs", descs);
         assertGreaterThan("should have some file descs", 0, descs.length);

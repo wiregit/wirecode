@@ -3,7 +3,10 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import org.limewire.concurrent.Providers;
+
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -16,7 +19,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 public class HTTPDownloaderStub extends HTTPDownloader {
 
 	public HTTPDownloaderStub(RemoteFileDesc file, VerifyingFile incompleteFile) {
-		super(file, incompleteFile, false);
+		super(null, file, incompleteFile, false, false, ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager(), Providers.of(ProviderHacks.getPushEndpointCache()));
 	}
 	
 	public void addFailedAltLoc(AlternateLocation loc) {
@@ -50,10 +53,10 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 	AlternateLocationCollection getAltLocsReceived() {
 		return null;
 	}
-	public int getAmountRead() {
+	public long getAmountRead() {
 		return 0;
 	}
-	public int getAmountToRead() {
+	public long getAmountToRead() {
 		return 0;
 	}
 	public float getAverageBandwidth() {
@@ -71,7 +74,7 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 	public InetAddress getInetAddress() {
 		return null;
 	}
-	public int getInitialReadingPoint() {
+	public long getInitialReadingPoint() {
 		return 0;
 	}
 	public float getMeasuredBandwidth() throws InsufficientDataException {
@@ -83,7 +86,7 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 	public RemoteFileDesc getRemoteFileDesc() {
 		return null;
 	}
-	public int getTotalAmountRead() {
+	public long getTotalAmountRead() {
 		return 0;
 	}
 	public String getVendor() {

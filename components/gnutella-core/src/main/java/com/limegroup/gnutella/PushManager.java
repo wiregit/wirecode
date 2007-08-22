@@ -14,15 +14,19 @@ import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPConnection;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Manages state for push upload requests.
  */
+@Singleton
 public final class PushManager {
     
     private static final Log LOG = LogFactory.getLog(PushManager.class);
@@ -32,7 +36,24 @@ public final class PushManager {
      * the same value as NORMAL_CONNECT_TIME is ManagedDownloader.
      */
     private static final int CONNECT_TIMEOUT = 10000;//10 secs
+    
+    private final Provider<FileManager> fileManager;
+    private final Provider<SocketsManager> socketsManager;
+    private final Provider<HTTPAcceptor> httpAcceptor;
 
+    /**
+     * @param fileManager
+     * @param socketsManager
+     * @param httpAcceptor
+     */
+    @Inject
+    public PushManager(Provider<FileManager> fileManager,
+            Provider<SocketsManager> socketsManager,
+            Provider<HTTPAcceptor> httpAcceptor) {
+        this.fileManager = fileManager;
+        this.socketsManager = socketsManager;
+        this.httpAcceptor = httpAcceptor;
+    }    
 
 	/**
 	 * Accepts a new push upload.
@@ -69,14 +90,11 @@ public final class PushManager {
             throw new IllegalArgumentException("invalid port: " + port);
         if( guid == null )
             throw new NullPointerException("null guid");
-                                    
-
-        FileManager fm = RouterService.getFileManager();
         
         // TODO: why is this check here?  it's a tiny optimization,
         // but could potentially kill any sharing of files that aren't
         // counted in the library.
-        if (fm.getNumFiles() < 1 && fm.getNumIncompleteFiles() < 1)
+        if (fileManager.get().getNumFiles() < 1 && fileManager.get().getNumIncompleteFiles() < 1)
             return;
 
         // We used to have code here that tested if the guy we are pushing to is
@@ -93,13 +111,14 @@ public final class PushManager {
                 LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
             // TODO: should FW-FW connections also use TLS?
             UDPConnection socket = new UDPConnection();
-            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, true));
+            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, true, httpAcceptor.get()));
         } else {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                ConnectType type = tlsCapable && ConnectionSettings.TLS_OUTGOING.getValue() ? ConnectType.TLS : ConnectType.PLAIN;
-                Sockets.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false), type);
+                ConnectType type = tlsCapable && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
+                // DPINJ: Change to using passed-in SocketsManager!!!
+                socketsManager.get().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false, httpAcceptor.get()), type);
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();
             }
@@ -138,10 +157,12 @@ public final class PushManager {
     private static class PushObserver implements ConnectObserver {
         private final PushData data;
         private final boolean fwt;
+        private final HTTPAcceptor httpAcceptor;
         
-        PushObserver(PushData data, boolean fwt) {
+        PushObserver(PushData data, boolean fwt, HTTPAcceptor httpAcceptor) {
             this.data = data;
             this.fwt = fwt;
+            this.httpAcceptor = httpAcceptor;
         }        
         
         public void handleIOException(IOException iox) {}
@@ -160,7 +181,10 @@ public final class PushManager {
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
-            ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data, fwt));
+            if (fwt) {
+                UploadStat.FW_FW_SUCCESS.incrementStat();
+            }
+            ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data, fwt, httpAcceptor));
         }
     }    
 
@@ -168,23 +192,23 @@ public final class PushManager {
     private static class PushConnector implements ChannelWriter {
         
         private InterestWritableByteChannel channel;
-
         private final ByteBuffer buffer;
-
         private final Socket socket;
-
         private HTTPConnectionData data;
+        private HTTPAcceptor httpAcceptor;
 
-        public PushConnector(Socket socket, PushData data, boolean fwTransfer) throws IOException {
+        public PushConnector(Socket socket, PushData data, boolean fwTransfer,
+                HTTPAcceptor httpAcceptor) throws IOException {
             this.socket = socket;
             this.data = new HTTPConnectionData();
             this.data.setPush(true);
             this.data.setLocal(data.isLan());
             this.data.setFirewalled(fwTransfer);
+            this.httpAcceptor = httpAcceptor;
             
             socket.setSoTimeout(30 * 1000);
-
-                String giv = "GIV 0:" + data.getGuid() + "/file\n\n";
+            
+            String giv = "GIV 0:" + data.getGuid() + "/file\n\n";
             this.buffer = ByteBuffer.wrap(giv.getBytes());
         }
 
@@ -200,7 +224,7 @@ public final class PushManager {
                 }
             }
 
-            RouterService.acceptUpload(socket, data);
+            httpAcceptor.acceptConnection(socket, data);
             return false;
         }
 
@@ -223,6 +247,7 @@ public final class PushManager {
                 newChannel.interestWrite(this, true);
         }
     }
-    }    
+    }
+
 
 }

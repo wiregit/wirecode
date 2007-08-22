@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;
 import org.limewire.nio.observer.Shutdownable;
@@ -24,7 +25,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     /** The last observer. */
     private volatile WriteObserver observer;
     /** The throttle we're using. */
-    private final Throttle throttle;
+    private volatile Throttle throttle;
     /** The amount of data we were told we can write. */
     private int available;    
     /** The object that the Throttle will recognize as the SelectionKey attachments */
@@ -57,7 +58,12 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     /** Sets the sink. */
     public void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
-        throttle.interest(this);
+        Throttle t = this.throttle;
+        if (t != null) {
+            t.interest(this);
+        } else if (channel != null) {
+            channel.interestWrite(this, true);
+        }
     }
     
     /** Sets the attachment that the Throttle will recognize for this Writer. */
@@ -77,8 +83,13 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     public void interestWrite(WriteObserver observer, boolean status) {
         if(status) {
             this.observer = observer;
-            if(channel != null)
-                throttle.interest(this);
+            if(channel != null) {
+                Throttle t = this.throttle;
+                if (t != null)
+                    t.interest(this);
+                else 
+                    channel.interestWrite(this, status);
+            }
         } else {
             this.observer = null;
         }
@@ -110,7 +121,12 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         InterestWritableByteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no chain!");
-            
+        
+        // throttling is disabled, just forward to underlying channel
+        if (throttle == null) {
+            return chain.write(buffer);
+        }
+        
         if(available == 0)
             return 0;
 
@@ -143,15 +159,19 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
      * Requests some bandiwdth from the throttle.
      */
     public void requestBandwidth() {
-        available = throttle.request();
+        if (throttle != null) {
+            available = throttle.request();
+        }
     }
     
     /**
      * Releases available bandwidth back to the throttle.
      */
     public void releaseBandwidth() {
-        throttle.release(available);
-        available = 0;
+        if (throttle != null) {
+            throttle.release(available);
+            available = 0;
+        }
     }
     
     /**
@@ -167,13 +187,16 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         WriteObserver interested = observer;
         chain.interestWrite(this, false);
         channelInterested = false;
-        if (available > 0) {
+        if (available > 0 || throttle == null) {
         	if(interested != null)
         		interested.handleWrite();
         	interested = observer; // re-get it, since observer may have changed interest.
         }
         if(interested != null) {
-        	throttle.interest(this);
+            if (this.throttle != null)
+                this.throttle.interest(this);
+            else 
+                chain.interestWrite(this, true);
         	return true;
         } else {
         	return false;
@@ -191,4 +214,30 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     public void handleIOException(IOException x) {
         throw new RuntimeException("Unsupported", x);
     }
+
+    public boolean hasBufferedOutput() {
+        InterestWritableByteChannel channel = this.channel;
+        return channel != null && channel.hasBufferedOutput();
+    }
+ 
+    public void setThrottle(final Throttle throttle) {
+        NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+            public void run() {
+                setThrottleInternal(throttle);
+            }
+        });        
+    }
+
+    protected void setThrottleInternal(Throttle throttle) {
+        releaseBandwidth();
+        
+        this.throttle = throttle;
+        
+        if (throttle != null) {
+            throttle.interest(ThrottleWriter.this);
+        } else if (channel != null) {
+            channel.interestWrite(this, true);
+        }
+    }
+    
 }

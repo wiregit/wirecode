@@ -10,8 +10,8 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.altlocs.AltLocListener;
-import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
@@ -65,14 +65,14 @@ public class AltLocHeaderInterceptorTest extends LimeTestCase {
         };
         
         MockHTTPUploader uploader = new MockHTTPUploader();
-        AltLocHeaderInterceptor interceptor = new AltLocHeaderInterceptor(uploader);
+        AltLocHeaderInterceptor interceptor = new AltLocHeaderInterceptor(uploader, ProviderHacks.getAltLocManager(), ProviderHacks.getAlternateLocationFactory());
         List<AlternateLocation> addedLocs = ((MockAltLocTracker)uploader.getAltLocTracker()).getAddedLocs();
         
-        AltLocManager.instance().addListener(HugeTestUtils.SHA1, listener);
+        ProviderHacks.getAltLocManager().addListener(HugeTestUtils.SHA1, listener);
         try {
             interceptor.process(new BasicHeader(key, value), null);
         } finally {
-            AltLocManager.instance().removeListener(HugeTestUtils.SHA1, listener);
+            ProviderHacks.getAltLocManager().removeListener(HugeTestUtils.SHA1, listener);
         }
         
         assertEquals(10, received.get()); // incremented one+

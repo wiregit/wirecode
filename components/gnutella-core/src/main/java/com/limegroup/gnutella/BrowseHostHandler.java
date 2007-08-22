@@ -8,31 +8,28 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.UDPConnection;
-import org.limewire.service.ErrorService;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 
@@ -59,62 +56,51 @@ public class BrowseHostHandler {
 
     private static final int SPECIAL_INDEX = 0;
 
-    /** Map from serventID to BrowseHostHandler instance.
-     */
-    private static Map<GUID, PushRequestDetails> _pushedHosts = new HashMap<GUID, PushRequestDetails>();
-
-    /** The ActivityCallBack instance.  Used for talking to GUI.
-     */
-    private ActivityCallback _callback = null;
-
-    /** The GUID to be used for incoming QRs from the Browse Request.
-     */
+    /** The GUID to be used for incoming QRs from the Browse Request. */
     private GUID _guid = null;
-
-    /** The GUID of the servent to send a Push to.  May be null if no push is
-     * needed.
-     */
+    /** The GUID of the servent to send a Push to.  May be null if no push is needed. */
     private GUID _serventID = null;
     
-    /**
-     * The total length of the http-reply.
-     */
-    private volatile long _replyLength = 0;
-    
-    /**
-     * The current length of the reply.
-     */
-    private volatile long _currentLength = 0;
-    
-    /**
-     * The current state of this BH.
-     */
-    private volatile int _state = NOT_STARTED;
-    
-    /**
-     * The time this state started.
-     */
+    /** The total length of the http-reply. */
+    private volatile long _replyLength = 0;    
+    /** The current length of the reply. */
+    private volatile long _currentLength = 0;    
+    /** The current state of this BH. */
+    private volatile int _state = NOT_STARTED;    
+    /** The time this state started. */
     private volatile long _stateStarted = 0;
+    
+    private final BrowseHostHandlerManager.BrowseHostCallback browseHostCallback;
+    private final ActivityCallback activityCallback;
+    private final SocketsManager socketsManager;
+    private final Provider<PushDownloadManager> pushDownloadManager;
+    private final Provider<ForMeReplyHandler> forMeReplyHandler;
 
-    static {
-        Expirer expirer = new Expirer();
-        RouterService.schedule(expirer, 0, 5000);// every 5 seconds
-    }
+    private final MessageFactory messageFactory;
 
     /**
      * @param callback A instance of a ActivityCallback, so I can notify it of
-     * incoming QReps...
+     *        incoming QReps...
      * @param router A instance of a MessageRouter, so I can route messages if
-     * needs be.
+     *        needs be.
      * @param guid The GUID you have associated on the front end with the
-     * results of this Browse Host request.
+     *        results of this Browse Host request.
      * @param serventID May be null, non-null if I need to push
      */
-    public  BrowseHostHandler(ActivityCallback callback, 
-                              GUID guid, GUID serventID) {
-        _callback = callback;
+    BrowseHostHandler(GUID guid, GUID serventID,
+            BrowseHostHandlerManager.BrowseHostCallback browseHostCallback,
+            ActivityCallback activityCallback, SocketsManager socketsManager,
+            Provider<PushDownloadManager> pushDownloadManager,
+            Provider<ForMeReplyHandler> forMeReplyHandler,
+            MessageFactory messageFactory) {
         _guid = guid;
         _serventID = serventID;
+        this.browseHostCallback = browseHostCallback;
+        this.activityCallback = activityCallback;
+        this.socketsManager = socketsManager;
+        this.pushDownloadManager = pushDownloadManager;
+        this.forMeReplyHandler = forMeReplyHandler;
+        this.messageFactory = messageFactory;
     }
 
     /** 
@@ -156,9 +142,10 @@ public class BrowseHostHandler {
             try {
                 // simply try connecting and getting results....
                 setState(DIRECTLY_CONNECTING);
-                LOG.trace("Attempting direct connection");
                 ConnectType type = host.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
-                Socket socket = Sockets.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Attempting direct connection with type: " + type);
+                Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 DIRECT_CONNECT_TIME, type);
                 LOG.trace("Direct connect successful");
                 browseExchange(socket);
@@ -185,16 +172,14 @@ public class BrowseHostHandler {
         				host.isTLSCapable()); 
         	// register with the map so i get notified about a response to my
         	// Push.
-        	synchronized (_pushedHosts) {
-        		_pushedHosts.put(_serventID, new PushRequestDetails(this));
-        	}
+            browseHostCallback.putInfo(_serventID, new PushRequestDetails(this));
 
         	LOG.trace("Sending push request");
         	setState(PUSHING);
 
         	// send the Push after registering in case you get a response 
-        	// really quickly.  reuse code in DM cuz that works well
-        	RouterService.getDownloadManager().getPushManager().sendPush(fakeRFD);
+        	// really quickly. 
+        	pushDownloadManager.get().sendPush(fakeRFD);
         }
     }
 
@@ -241,12 +226,12 @@ public class BrowseHostHandler {
     /**
      * Indicates that this browse host has failed.
      */   
-    private void failed() {
+    void failed() {
         setState(FINISHED);
-        _callback.browseHostFailed(_guid);
+        activityCallback.browseHostFailed(_guid);
     }
 
-    private void browseExchange(Socket socket) throws IOException {
+    void browseExchange(Socket socket) throws IOException {
     	try {
     		browseExchangeInternal(socket);
     	}finally {
@@ -271,8 +256,7 @@ public class BrowseHostHandler {
         // ask for the browse results..
         str = "GET / HTTP/1.1" + LF;
         oStream.write(str.getBytes());
-        str = "Host: " + NetworkUtils.ip2string(RouterService.getAddress()) + 
-              ":" + RouterService.getPort() + LF;
+        str = "Host: " + NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort() + LF;
         oStream.write(str.getBytes());
         str = "User-Agent: " + LimeWireUtils.getVendor() + LF;
         oStream.write(str.getBytes());
@@ -338,7 +322,7 @@ public class BrowseHostHandler {
         	try {
         		m = null;
         		LOG.debug("reading message");
-        		m = MessageFactory.read(in);
+        		m = messageFactory.read(in);
         	} catch (BadPacketException bpe) {
                 LOG.debug("BPE while reading", bpe);
         	} catch (IOException expected){
@@ -357,7 +341,7 @@ public class BrowseHostHandler {
         			reply.setGUID(_guid);
         			reply.setBrowseHostReply(true);
 					
-        			ForMeReplyHandler.instance().handleQueryReply(reply, null);
+        			forMeReplyHandler.get().handleQueryReply(reply, null);
         		}
         	}
         }
@@ -460,67 +444,7 @@ public class BrowseHostHandler {
 
     }
 
-
-
-    /** @return true if the Push was handled by me.
-     */
-    public static boolean handlePush(int index, GUID serventID, 
-                                     final Socket socket) {
-        boolean retVal = false;
-        LOG.trace("BHH.handlePush(): entered.");
-       // if (index == SPECIAL_INDEX)
-       //     ; // you'd hope, but not necessary...
-
-        PushRequestDetails prd = null;
-        synchronized (_pushedHosts) {
-            prd = _pushedHosts.remove(serventID);
-        }
-        if (prd != null) {
-            final PushRequestDetails finalPRD = prd;
-            ThreadExecutor.startThread(new Runnable() {
-                public void run() {
-                    try {
-                        finalPRD.bhh.browseExchange(socket);
-                    } catch (IOException ohWell) {
-                        LOG.debug("error while push transfer", ohWell);
-                        finalPRD.bhh.failed();
-                    }
-                }
-            }, "BrowseHost");
-            retVal = true;
-        }
-        else
-            LOG.debug("BHH.handlePush(): no matching BHH.");
-
-        LOG.trace("BHH.handlePush(): returning.");
-        return retVal;
-    }
-
-    /** Can be run to invalidate pushes that we are waiting for....
-     */
-    private static class Expirer implements Runnable {
-        public void run() {
-            try {
-                Set<GUID> toRemove = new HashSet<GUID>();
-                synchronized (_pushedHosts) {
-                    for(GUID key : _pushedHosts.keySet()) {
-                        PushRequestDetails currPRD = _pushedHosts.get(key);
-                        if ((currPRD != null) && (currPRD.isExpired())) {
-                            LOG.debug("Expirer.run(): expiring a badboy.");
-                            toRemove.add(key);
-                            currPRD.bhh.failed();
-                        }
-                    }
-                    for(GUID key : toRemove)
-                        _pushedHosts.remove(key);
-                }
-            } catch(Throwable t) {
-                ErrorService.error(t);
-            }
-        }
-    }
-
-    private static class PushRequestDetails { 
+    public static class PushRequestDetails { 
         private BrowseHostHandler bhh;
         private long timeStamp;
         
@@ -531,6 +455,10 @@ public class BrowseHostHandler {
 
         public boolean isExpired() {
             return ((System.currentTimeMillis() - timeStamp) > EXPIRE_TIME);
+        }
+        
+        public BrowseHostHandler getBrowseHostHandler() {
+            return bhh;
         }
     }
 }

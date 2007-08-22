@@ -98,14 +98,14 @@ public class ClassfulNetworkCounter implements Serializable {
         int masked = ContactUtils.getClassC(node);
         AtomicInteger counter = nodesPerNetwork.get(masked);
         if (counter == null) {
+            
+            assert (nodesPerNetwork.size() < bucket.getMaxActiveSize())
+                : nodesPerNetwork.size() + " < " + bucket.getMaxActiveSize()
+                + node + ", " + nodesPerNetwork + ", " + bucket;
+            
             counter = new AtomicInteger(0);
             nodesPerNetwork.put(masked, counter);
         }
-        
-        assert (nodesPerNetwork.size() <= bucket.getMaxActiveSize())
-            : nodesPerNetwork.size() + " <= " + bucket.getMaxActiveSize()
-            	+ node
-            	+ nodesPerNetwork;
         
         return counter.incrementAndGet();
     }
@@ -131,7 +131,7 @@ public class ClassfulNetworkCounter implements Serializable {
         AtomicInteger counter = nodesPerNetwork.get(masked);
         if (counter != null) {
             int count = counter.decrementAndGet();
-            if (count == 0) {
+            if (count <= 0) {
                 nodesPerNetwork.remove(masked);
                 assert (!nodesPerNetwork.containsKey(masked));
             }
@@ -144,7 +144,7 @@ public class ClassfulNetworkCounter implements Serializable {
      * Returns the number of Elements
      */
     public synchronized int size() {
-    	return nodesPerNetwork.size();
+        return nodesPerNetwork.size();
     }
     
     /**
@@ -179,5 +179,9 @@ public class ClassfulNetworkCounter implements Serializable {
         float k = bucket.getMaxActiveSize();
         float ratio = count/k;
         return (ratio < maxRatio);
+    }
+    
+    public synchronized String toString() {
+        return nodesPerNetwork.toString();// + ", " + bucket;
     }
 }

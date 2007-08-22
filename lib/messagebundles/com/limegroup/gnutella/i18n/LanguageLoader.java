@@ -44,7 +44,7 @@ class LanguageLoader {
      * 
      * @return the languages map (from complete locale codes to LocaleInfo)
      */
-    Map loadLanguages() {
+    Map<String, LanguageInfo> loadLanguages() {
         if (!this.lib.isDirectory())
             throw new IllegalArgumentException("invalid lib: " + this.lib);
         final String[] files = this.lib.list();
@@ -107,7 +107,7 @@ class LanguageLoader {
      * @throws IOException
      * @see Line
      */
-    List/* <Line> */getEnglishLines() throws IOException {
+    List<Line> getEnglishLines() throws IOException {
         final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(new File(this.lib,
                         BUNDLE_NAME + PROPS_EXT)), "ISO-8859-1")); //$NON-NLS-1$

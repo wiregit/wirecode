@@ -5,27 +5,29 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.collection.NameValue;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseVerifier;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
 @SuppressWarnings("unchecked")
 public class SearchResultHandlerTest extends LimeTestCase {
     
     private static StubCallback callback = new StubCallback();
+    
+    LimeXMLDocumentFactory factory;
 
     public SearchResultHandlerTest(String name) {
         super(name);
@@ -40,19 +42,21 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public static void globalSetUp()  {
-        new RouterService(callback);
+        throw new RuntimeException("fix me");
+        //new RouterService(callback);
     }
     
     public void setUp() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.class, "VERIFIER", new StubVerifier());
+       // PrivilegedAccessor.setValue(RouterService.class, "VERIFIER", new StubVerifier());
+        factory = ProviderHacks.getLimeXMLDocumentFactory();
     }
     
     public void testSecureActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
+        SearchResultHandler handler = ProviderHacks.getSearchResultHandler();
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
-        Response actionResponse = new Response(0, 1, "test", actionDoc);
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test", actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         reply.setSecureStatus(SecureMessage.SECURE);
         assertEquals(0, callback.results.size());
@@ -65,11 +69,11 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testInsecureActionNotSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
-        Response actionResponse = new Response(0, 1, "test");
+        SearchResultHandler handler =  ProviderHacks.getSearchResultHandler();
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         assertEquals(0, callback.results.size());
@@ -78,14 +82,14 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testInsecureResponseWithoutActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
-        Response actionResponse = new Response(0, 1, "test");
+        SearchResultHandler handler =  ProviderHacks.getSearchResultHandler();
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
-        Response noDoc = new Response(1, 2, "other");
+        Response noDoc = ProviderHacks.getResponseFactory().createResponse(1, 2, "other");
         QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
         assertEquals(0, callback.results.size());
         handler.handleQueryReply(reply);
@@ -96,14 +100,14 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testFailedReplyNotForwarded() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
-        Response actionResponse = new Response(0, 1, "test");
+        SearchResultHandler handler =  ProviderHacks.getSearchResultHandler();
+        Response actionResponse = ProviderHacks.getResponseFactory().createResponse(0, 1, "test");
         List list = new LinkedList();
         list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
-        Response noDoc = new Response(1, 2, "other");
+        Response noDoc = ProviderHacks.getResponseFactory().createResponse(1, 2, "other");
         QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
         reply.setSecureStatus(SecureMessage.FAILED);
         
@@ -114,24 +118,10 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     private QueryReply newQueryReply(Response[] responses) throws Exception {
         QueryReply reply = 
-               new QueryReply( new byte[16]
-                             , (byte)1
-                             , 6346
-                             , new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }
-                             , 1
-                             , responses
-                             , new byte[16]
-                             , LimeXMLDocumentHelper.getAggregateString(responses).getBytes()
-                             , false
-                             , false
-                             , true
-                             , true
-                             , false
-                             , false
-                             , false
-                             , Collections.EMPTY_SET
-                             , null);
-        PrivilegedAccessor.invokeMethod(ForMeReplyHandler.instance(), "addXMLToResponses", reply);
+               ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)1, 6346,
+                new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }, 1, responses, new byte[16], LimeXMLDocumentHelper.getAggregateString(responses).getBytes(), false, false,
+                true, true, false, false, false, Collections.EMPTY_SET, null);
+        PrivilegedAccessor.invokeMethod(ProviderHacks.getForMeReplyHandler(), "addXMLToResponses", reply);
         return reply;
     }
     
@@ -147,6 +137,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         }
     }
     
+    @SuppressWarnings("all") // DPINJ: textfix
     private static class StubVerifier extends ResponseVerifier {
 
         public synchronized boolean matchesQuery(byte[] guid, Response response) {

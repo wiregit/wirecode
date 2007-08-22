@@ -166,6 +166,30 @@ public final class NIOSocketTest extends BaseTestCase {
         socket.close();
     }
     
+    public void testSetReadObserverKeepsInterest() throws Exception {
+        ServerSocket server = new ServerSocket(PORT, 0);
+        try {
+            NIOSocket socket = new NIOSocket("localhost", PORT);
+            try {
+                socket.setSoTimeout(10);
+
+                ChannelReadObserver observer = new RCROAdapter() {
+                    public void handleRead() throws IOException {
+                        source.interestRead(false);
+                    }
+                };
+                socket.setReadObserver(observer);
+                Thread.sleep(20);
+                NIOTestUtils.waitForNIO();
+                assertFalse(socket.isClosed());
+            } finally {
+                socket.close();
+            }
+        } finally {
+            server.close();
+        }
+    }
+
     public void testBlockingConnect() throws Exception {
         NIOSocket socket = new NIOSocket();
         socket.connect(new InetSocketAddress("www.google.com", 80));
@@ -303,7 +327,7 @@ public final class NIOSocketTest extends BaseTestCase {
         }
         
     }
-    
+
     private static class Listener {
         
         private ServerSocket server;

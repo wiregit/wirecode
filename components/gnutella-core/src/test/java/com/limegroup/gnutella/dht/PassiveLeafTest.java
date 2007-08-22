@@ -25,6 +25,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -128,8 +129,8 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testPassiveLeafController() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        PassiveLeafController controller = new PassiveLeafController(
-                Vendor.UNKNOWN, Version.ZERO, new DHTEventDispatcherStub());
+        PassiveLeafController controller = ProviderHacks.getDHTControllerFactory().createPassiveLeafController(Vendor.UNKNOWN,
+                Version.ZERO, new DHTEventDispatcherStub());
         try {
             controller.start();
             
@@ -158,7 +159,7 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testPassiveLeafManager() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        DHTManager manager = new DHTManagerImpl(Executors.newSingleThreadExecutor());
+        DHTManager manager = new DHTManagerImpl(Executors.newSingleThreadExecutor(), ProviderHacks.getDHTControllerFactory());
         try {
             // Check initial state
             assertEquals(DHTMode.INACTIVE, manager.getDHTMode());

@@ -20,6 +20,7 @@ import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
 
+@SuppressWarnings("null")
 public class GetValueTest extends MojitoTestCase {
     
     public GetValueTest(String name){

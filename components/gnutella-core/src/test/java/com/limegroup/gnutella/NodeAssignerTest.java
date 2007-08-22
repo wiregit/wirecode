@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.Providers;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -14,20 +15,18 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NodeAssignerTest extends LimeTestCase {
     
     private static NodeAssigner ASSIGNER;
     
-    private static RouterService ROUTER_SERVICE;
+   // private static RouterService ROUTER_SERVICE;
     
     private static TestUltrapeer ULTRAPEER = new TestUltrapeer();
     
@@ -50,8 +49,6 @@ public class NodeAssignerTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        ROUTER_SERVICE =
-            new RouterService(new ActivityCallbackStub());
         
         setSettings();
         launchAllBackends();
@@ -63,7 +60,14 @@ public class NodeAssignerTest extends LimeTestCase {
 
     protected void setUp() throws Exception {
         setSettings();
-        ASSIGNER = new NodeAssigner(BW, BW, RouterService.getConnectionManager());
+        ASSIGNER = new NodeAssigner(Providers.of((BandwidthTracker) BW),
+                Providers.of((BandwidthTracker) BW), Providers.of(ProviderHacks
+                        .getConnectionManager()), ProviderHacks
+                        .getNetworkManager(),
+                ProviderHacks.getSearchServices(), Providers.of(ProviderHacks
+                        .getDHTManager()), ProviderHacks
+                        .getBackgroundExecutor(), ProviderHacks
+                        .getConnectionServices(), Providers.of(ProviderHacks.getUdpService()));
 
     }
     
@@ -78,7 +82,6 @@ public class NodeAssignerTest extends LimeTestCase {
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.MODEM_SPEED_INT+1);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
         //reset the node capabilities settings
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
@@ -94,7 +97,7 @@ public class NodeAssignerTest extends LimeTestCase {
 
     protected void tearDown() throws Exception {
         ULTRAPEER.shutdown();
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
         sleep();
     }
     
@@ -123,48 +126,48 @@ public class NodeAssignerTest extends LimeTestCase {
         BW.setIsGoodBandwidth(true);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.MODEM_SPEED_INT + 1);
-        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming",new Boolean(true));
-        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedUnsolicitedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedUnsolicitedIncoming",new Boolean(true));
        
-        PrivilegedAccessor.setValue(ROUTER_SERVICE,"nodeAssigner",ASSIGNER);
+    //    PrivilegedAccessor.setValue(ROUTER_SERVICE,"nodeAssigner",ASSIGNER);
     }
     
     public void connect() throws Exception {
         //now try to connect
-        RouterService.clearHostCatcher();
-        RouterService.connect();
-        assertFalse("should not be connected", RouterService.isConnected());
-        RouterService.getHostCatcher().add(new Endpoint("localhost", TEST_PORT + 1), true);
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
+        assertFalse("should not be connected", ProviderHacks.getConnectionServices().isConnected());
+        ProviderHacks.getHostCatcher().add(new Endpoint("localhost", TEST_PORT + 1), true);
         sleep();
         sleep();
-        assertTrue("should be connected", RouterService.isConnected());
+        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
     }
     
     public void testUltrapeerConnection() throws Exception{
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         //set up an ultrapeer capable host:
         setUltrapeerCapabilities();
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
         sleep();
         //the node assigner should have worked it's magic
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         ULTRAPEER.setAcceptsUltrapeers(true);
         connect();
-        assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
-        assertTrue("should be passively connected to the DHT", RouterService.getDHTManager().isRunning() 
-                && (RouterService.getDHTManager().getDHTMode() != DHTMode.ACTIVE));
+        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionManager().isActiveSupernode());
+        assertTrue("should be passively connected to the DHT", ProviderHacks.getDHTManager().isRunning() 
+                && (ProviderHacks.getDHTManager().getDHTMode() != DHTMode.ACTIVE));
         
         //make sure you can't be an active DHT node at the same time
         setDHTCapabilities();
         sleep(200);
-        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
+        assertNotEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
-          ROUTER_SERVICE.start();
+          ProviderHacks.getLifecycleManager().start();
         connect();
-        assertFalse("should be not be an ultrapeer", RouterService.isSupernode());
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        assertFalse("should be not be an ultrapeer", ProviderHacks.getConnectionServices().isSupernode());
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         setUltrapeerCapabilities();
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         ULTRAPEER.setAcceptsUltrapeers(true);
@@ -173,31 +176,31 @@ public class NodeAssignerTest extends LimeTestCase {
         
         sleep(2 * NodeAssigner.TIMER_DELAY);
         
-        assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
-        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
+        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionManager().isActiveSupernode());
+        assertNotEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
     }
     
     public void testDHTtoUltrapeerSwitch() throws Exception{
         setDHTCapabilities();
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
         sleep();
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(0);
         ULTRAPEER.setAcceptsUltrapeers(false);
         connect();
         sleep();
-        assertFalse("should not be an ultrapeer", RouterService.isSupernode());
-        assertEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
+        assertFalse("should not be an ultrapeer", ProviderHacks.getConnectionServices().isSupernode());
+        assertEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
         ULTRAPEER.setAcceptsUltrapeers(true);
         setUltrapeerCapabilities();
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24L*60L*60L*1000L));
         
         sleep(2 * NodeAssigner.TIMER_DELAY);
         
-        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTManager().getDHTMode());
-        assertTrue("should be an ultrapeer", RouterService.isSupernode());
+        assertNotEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
+        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionServices().isSupernode());
     }
     
     private static class TestBandwidthTracker implements BandwidthTracker {
@@ -228,7 +231,7 @@ public class NodeAssignerTest extends LimeTestCase {
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props = new UltrapeerHeaders("localhost"); 
+            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
@@ -239,7 +242,7 @@ public class NodeAssignerTest extends LimeTestCase {
     private static class NoUltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props= new UltrapeerHeaders("localhost");
+            Properties props= ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost");
             props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
             return HandshakeResponse.createResponse(props);
         }
@@ -262,7 +265,7 @@ public class NodeAssignerTest extends LimeTestCase {
                     socket = ss.accept();
                     ss.close();
                     socket.setSoTimeout(1000);
-                    UP = new Connection(socket);
+                    UP = ProviderHacks.getConnectionFactory().createConnection(socket);
                     if(acceptsUltrapeers) {
                         UP.initialize(null, new UltrapeerResponder());
                     } else {

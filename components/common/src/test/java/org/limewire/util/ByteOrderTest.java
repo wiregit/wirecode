@@ -2,6 +2,7 @@ package org.limewire.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.util.Random;
 
 import org.limewire.util.BaseTestCase;
@@ -376,4 +377,33 @@ public class ByteOrderTest extends BaseTestCase {
             fail("illegalargument expected.");
         } catch(IllegalArgumentException ignored) {}            
     }    
+    
+    public void testEOF() throws Exception {
+        byte[] one = new byte[1];
+        ByteArrayInputStream bais = new ByteArrayInputStream(one);
+        try {
+            ByteOrder.leb2short(bais);
+            fail("should've thrown");
+        } catch (EOFException expected){};
+        try {
+            ByteOrder.beb2short(bais);
+            fail("should've thrown");
+        } catch (EOFException expected){};
+        byte[] three = new byte[3];
+        bais = new ByteArrayInputStream(three);
+        try {
+            ByteOrder.leb2int(bais);
+            fail("should've thrown");
+        } catch (EOFException expected){};
+        try {
+            ByteOrder.beb2int(bais);
+            fail("should've thrown");
+        } catch (EOFException expected){};
+        byte []seven = new byte[7];
+        bais = new ByteArrayInputStream(seven);
+        try {
+            ByteOrder.leb2long(bais);
+            fail("should've thrown");
+        } catch (EOFException expected){};
+    }
 }        

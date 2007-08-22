@@ -22,8 +22,11 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 
 /**
@@ -31,12 +34,8 @@ import com.limegroup.gnutella.URN;
  * 
  * This class maps SHA1_URNs to TigerTreeCache
  */
+@Singleton
 public final class TigerTreeCache {
-
-    /**
-     * TigerTreeCache instance variable.
-     */
-    private static TigerTreeCache instance = null;
     
     /**
      * The ProcessingQueue to do the hashing.
@@ -69,17 +68,6 @@ public final class TigerTreeCache {
     private static boolean dirty = false;        
 
     /**
-     * Returns the <tt>TigerTreeCache</tt> instance.
-     * 
-     * @return the <tt>TigerTreeCache</tt> instance
-     */
-    public synchronized static TigerTreeCache instance() {
-        if(instance == null)
-            instance = new TigerTreeCache();
-        return instance;
-    }
-
-    /**
      * If HashTree wasn't found, schedule file for hashing
      * 
      * @param fd
@@ -88,6 +76,10 @@ public final class TigerTreeCache {
      * @return HashTree for File
      */
     public synchronized HashTree getHashTree(FileDesc fd) {
+        if (fd instanceof IncompleteFileDesc) {
+            return null;
+        }
+        
         HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
         if (tree != null && tree == BUSH)
             return null;
@@ -144,6 +136,7 @@ public final class TigerTreeCache {
     /**
      * private constructor
      */
+    //DPINJ: Delay deserialization...
     private TigerTreeCache() {
         TREE_MAP = createMap();
     }
@@ -175,16 +168,15 @@ public final class TigerTreeCache {
      * @param map
      *            the <tt>Map</tt> to check
      */
-    private static void removeOldEntries(Map <URN, HashTree> map) {
+    private static void removeOldEntries(Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
         // discard outdated info
         Iterator<URN> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             URN sha1 = iter.next();
             if (map.get(sha1) != BUSH) {
-                if (RouterService.getFileManager().getFileDescForUrn(sha1) != null)
+                if (fileManager.getFileDescForUrn(sha1) != null)
                     continue;
-                else if (RouterService.getDownloadManager()
-                        .getIncompleteFileManager().getFileForUrn(sha1) != null)
+                else if (downloadManager.getIncompleteFileManager().getFileForUrn(sha1) != null)
                     continue;
                 else if (Math.random() > map.size() / 200)
                     // lazily removing entries if we don't have
@@ -200,14 +192,14 @@ public final class TigerTreeCache {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public synchronized void persistCache() {
+    public synchronized void persistCache(FileManager fileManager, DownloadManager downloadManager) {
         if(!dirty)
             return;
         
         //It's not ideal to hold a lock while writing to disk, but I doubt
         // think
         //it's a problem in practice.
-        removeOldEntries(TREE_MAP);
+        removeOldEntries(TREE_MAP, fileManager, downloadManager);
 
         ObjectOutputStream oos = null;
         try {
@@ -226,7 +218,8 @@ public final class TigerTreeCache {
     /**
      * Simple runnable that processes the hash of a FileDesc.
      */
-    private static class HashRunner implements Runnable {
+    private class HashRunner implements Runnable {
+        
         private final FileDesc FD;
 
         HashRunner(FileDesc fd) {
@@ -237,7 +230,7 @@ public final class TigerTreeCache {
             try {
                 URN sha1 = FD.getSHA1Urn();
                 // if it was scheduled multiple times, ignore latter times.
-                if(TigerTreeCache.instance().getHashTree(sha1) == null) {
+                if (TigerTreeCache.this.getHashTree(sha1) == null) {
                     HashTree tree = HashTree.createHashTree(FD);
                     addHashTree(sha1, tree);
                 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,7 @@ import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * This class implements a simple chat protocol that allows to exchange text
@@ -101,10 +102,12 @@ public class InstantMessenger implements Chatter {
      */
     private boolean stopped;
 
+    private final SocketsManager socketsManager;
+
     /**
      * Constructor for an incoming chat request.
      */
-    public InstantMessenger(Socket socket, ChatManager manager,
+    InstantMessenger(Socket socket, ChatManager manager,
             ActivityCallback callback) {
         if (socket == null || manager == null || callback == null) {
             throw new IllegalArgumentException();
@@ -115,14 +118,15 @@ public class InstantMessenger implements Chatter {
         this.port = socket.getPort();
         this.host = socket.getInetAddress().getHostAddress();
         this.callback = callback;
+        this.socketsManager = null;
         this.outgoing = false;
     }
 
     /**
      * Constructor for an outgoing chat request
      */
-    public InstantMessenger(final String host, final int port,
-            ChatManager manager, ActivityCallback callback) {
+    InstantMessenger(final String host, final int port,
+            ChatManager manager, ActivityCallback callback, SocketsManager socketsManager) {
         if (host == null || manager == null || callback == null) {
             throw new IllegalArgumentException();
         }
@@ -131,13 +135,15 @@ public class InstantMessenger implements Chatter {
         this.port = port;
         this.manager = manager;
         this.callback = callback;
+        this.socketsManager = socketsManager;
         this.outgoing = true;
     }
 
     public void start() {
         if (outgoing) {
             try {
-                Sockets.connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
+                // DPINJ: Change to using passed-in SocketsManager!!!
+                socketsManager.connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
                         new ConnectObserver() {
                             public void handleConnect(Socket socket)
                                     throws IOException {
@@ -183,6 +189,8 @@ public class InstantMessenger implements Chatter {
 
         try {
             sender.sendMessage(message + "\n");
+        } catch (BufferOverflowException e) {
+            return false;
         } catch (IOException e) {
             stop();
             return false;

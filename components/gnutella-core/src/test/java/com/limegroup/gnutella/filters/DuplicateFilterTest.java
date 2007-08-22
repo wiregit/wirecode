@@ -5,6 +5,7 @@ import junit.framework.Test;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -33,15 +34,15 @@ public class DuplicateFilterTest extends LimeTestCase {
     
     
     public void testGUIDDuplicate() throws Exception {        
-        pr=new PingRequest((byte)2);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)2);
         byte[] guid=pr.getGUID();
         guid[9]++;
 		byte[] payload = { 0, 0, 65 };
-        qr=QueryRequest.createNetworkQuery(
+        qr=ProviderHacks.getQueryRequestFactory().createNetworkQuery(
             guid, pr.getTTL(), pr.getHops(), payload, Network.UNKNOWN);
         assertTrue(filter.allow(pr));
         assertTrue(!filter.allow(qr));
-        pr=new PingRequest((byte)2);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)2);
         assertTrue(filter.allow(pr)); //since GUIDs are currently random
         assertTrue(!filter.allow(pr));
         
@@ -54,18 +55,18 @@ public class DuplicateFilterTest extends LimeTestCase {
         
         assertTrue(filter.allow(pr));  
         assertTrue(!filter.allow(pr));
-        pr=new PingRequest((byte)2);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)2);
         assertTrue(filter.allow(pr));
         pr.hop(); //hack to get different hops count
         assertTrue(filter.allow(pr));
     }
         
     public void testQueryStringDuplicate() throws Exception {
-        qr=QueryRequest.createQuery("search1", (byte)2);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("search1", (byte)2);
         assertTrue(filter.allow(qr));
-        qr=QueryRequest.createQuery("search1", (byte)2);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("search1", (byte)2);
         assertTrue(!filter.allow(qr));
-        qr=QueryRequest.createQuery("search2", (byte)2);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("search2", (byte)2);
         assertTrue(filter.allow(qr));
 
         //Now, if I wait a few seconds, it should be allowed.
@@ -76,19 +77,19 @@ public class DuplicateFilterTest extends LimeTestCase {
         }
 
         assertTrue(filter.allow(qr));
-        qr=QueryRequest.createQuery("search2", (byte)2);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("search2", (byte)2);
         assertTrue(!filter.allow(qr));
-        qr=QueryRequest.createQuery("search3",(byte)2);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("search3",(byte)2);
         assertTrue(filter.allow(qr));
         qr.hop(); //hack to get different hops count
         assertTrue(filter.allow(qr));
     }
         
     public void testURNDuplicate() throws Exception  {
-        qr=QueryRequest.createQuery(HugeTestUtils.SHA1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.SHA1);
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
-        qr=QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1);
+        qr=ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.UNIQUE_SHA1);
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
 
@@ -104,13 +105,13 @@ public class DuplicateFilterTest extends LimeTestCase {
 
     public void testXMLDuplicate() throws Exception {
         // Only allowed once in the timeframe ...
-        qr = QueryRequest.createQuery("tests");
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("tests");
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
         // Invalid XML, considered same as plaintext.
-        qr = QueryRequest.createQuery("tests", "<?xml");
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("tests", "<?xml");
         assertTrue(!filter.allow(qr));
-        qr = QueryRequest.createQuery("tests",
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("tests",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
@@ -118,7 +119,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         // same plain-text, different XML, allowed ...
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
-        qr = QueryRequest.createQuery("another test",
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("another test",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
@@ -126,7 +127,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         // same XML, different plaint-text, allowed ...
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
-        qr = QueryRequest.createQuery("another test",
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("another test",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
@@ -134,7 +135,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         // different XML, allowed ...
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));        
-        qr = QueryRequest.createQuery("another test",
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("another test",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +

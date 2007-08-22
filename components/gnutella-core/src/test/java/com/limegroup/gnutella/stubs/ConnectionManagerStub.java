@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.HackConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 
 /** A (incomplete!) stub for ConnectionManager. */
-public class ConnectionManagerStub extends ConnectionManager {
+public class ConnectionManagerStub extends HackConnectionManager {
     boolean enableRemove=false;
 
     /** Same as this(false) */

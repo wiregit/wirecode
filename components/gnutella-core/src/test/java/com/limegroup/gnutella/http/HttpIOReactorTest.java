@@ -31,9 +31,7 @@ import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.ProviderHacks;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
@@ -54,9 +52,9 @@ public class HttpIOReactorTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
+      //  new RouterService(new ActivityCallbackStub());
 
-        acceptor = new Acceptor();
+        acceptor = ProviderHacks.getAcceptor();
         acceptor.start();
         acceptor.setListeningPort(ACCEPTOR_PORT);
 
@@ -75,8 +73,8 @@ public class HttpIOReactorTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         params = new BasicHttpParams();
-        params.setIntParameter(HttpConnectionParams.SO_TIMEOUT, 2000)
-               .setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 2000)
+        params.setIntParameter(HttpConnectionParams.SO_TIMEOUT, 2222)
+               .setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 1111)
                .setIntParameter(HttpConnectionParams.SOCKET_BUFFER_SIZE, 8 * 1024)
                .setBooleanParameter(HttpConnectionParams.STALE_CONNECTION_CHECK, false)
                .setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true)
@@ -85,14 +83,15 @@ public class HttpIOReactorTest extends BaseTestCase {
     }
     
     public void testAcceptConnection() throws Exception {
-        HttpTestServer server = new HttpTestServer();
+        HttpTestServer server = new HttpTestServer(params);
         server.execute(null);
         HttpIOReactor reactor = server.getReactor();
         
-        Socket socket = Sockets.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
+        Socket socket = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
         try {
             DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
+            assertEquals(2222, socket.getSoTimeout());
         } finally {
             socket.close();
         }
@@ -100,7 +99,7 @@ public class HttpIOReactorTest extends BaseTestCase {
     
     // disabled, see {@link HttpIOReactor#connect}
     public void disabledTestGetFromAcceptor() throws Exception {
-        final HttpTestServer server = new HttpTestServer();
+        final HttpTestServer server = new HttpTestServer(params);
         server.registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
@@ -108,7 +107,7 @@ public class HttpIOReactorTest extends BaseTestCase {
             }
         });
         server.execute(new MyEventListener());
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(
+        ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
                         server.getReactor().acceptConnection(word + " ", socket);

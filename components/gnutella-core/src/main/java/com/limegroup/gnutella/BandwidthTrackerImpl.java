@@ -40,12 +40,18 @@ public class BandwidthTrackerImpl implements Serializable {
     private transient float cachedBandwidth = 0;
     
     long lastTime;
+    
+    /** The old lastAmountRead field */
+    @Deprecated
     int lastAmountRead;
 
     /** The most recent measured bandwidth.  DO NOT DELETE THIS; it exists
      *  for backwards serialization reasons. */
     float measuredBandwidth;
 
+    /** The last amount read */
+    long lastAmountRead64;
+    
     /** 
      * Measures the data throughput since the last call to measureBandwidth,
      * assuming this has read amountRead bytes.  This value can be read by
@@ -55,22 +61,22 @@ public class BandwidthTrackerImpl implements Serializable {
      *  Should be larger than the argument passed in the last call to
      *  measureBandwidth(..).
      */
-    public synchronized void measureBandwidth(int amountRead) {
+    public synchronized void measureBandwidth(long amountRead) {
         long currentTime=System.currentTimeMillis();
         //We always discard the first sample, and any others until after
         //progress is made.  
         //This prevents sudden bandwidth spikes when resuming
         //uploads and downloads.  Remember that bytes/msec=KB/sec.
-        if (lastAmountRead==0 || currentTime==lastTime) {
+        if (lastAmountRead64==0 || currentTime==lastTime) {
             measuredBandwidth=0.f;
         } else {            
-            measuredBandwidth=(float)(amountRead-lastAmountRead)
+            measuredBandwidth=(float)(amountRead-lastAmountRead64)
                                 / (float)(currentTime-lastTime);
             //Ensure positive!
             measuredBandwidth=Math.max(measuredBandwidth, 0.f);
         }
         lastTime=currentTime;
-        lastAmountRead=amountRead;
+        lastAmountRead64=amountRead;
         averageBandwidth = (averageBandwidth*numMeasures + measuredBandwidth)
                             / ++numMeasures;
         snapShots.add(new Float(measuredBandwidth));
@@ -108,6 +114,8 @@ public class BandwidthTrackerImpl implements Serializable {
         averageBandwidth = 0;
         try {
             in.defaultReadObject();
+            if (lastAmountRead64 == 0)
+                lastAmountRead64 = lastAmountRead;
         } catch (ClassNotFoundException e) {
             throw new IOException("Class not found");
         } catch (NotActiveException e) {

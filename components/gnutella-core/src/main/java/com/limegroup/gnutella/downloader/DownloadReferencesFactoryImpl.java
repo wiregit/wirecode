@@ -10,7 +10,6 @@ import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -56,7 +55,6 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
     private final Provider<TigerTreeCache> tigerTreeCache;
     private final Provider<TorrentManager> torrentManager;
     private final BTUploaderFactory btUploaderFactory;
-    private final ApplicationServices applicationServices;
     
     @Inject
     public DownloadReferencesFactoryImpl(
@@ -84,8 +82,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
             Provider<MessageRouter> messageRouter,
             Provider<TigerTreeCache> tigerTreeCache, 
             Provider<TorrentManager> torrentManager, 
-            BTUploaderFactory btUploaderFactory,
-            ApplicationServices applicationServices) {
+            BTUploaderFactory btUploaderFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -111,7 +108,6 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
         this.tigerTreeCache = tigerTreeCache;
         this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
-        this.applicationServices = applicationServices;
     }
 
     public DownloadReferences create(Downloader downloader) {
@@ -126,7 +122,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
                         .get(), diskController.get(), ipFilter.get(),
                 requeryManagerFactory.get(), btContextFactory.get(), 
                 backgroundExecutor, messageRouter, tigerTreeCache, torrentManager, 
-                btUploaderFactory, applicationServices
+                btUploaderFactory
                 );
     }
 

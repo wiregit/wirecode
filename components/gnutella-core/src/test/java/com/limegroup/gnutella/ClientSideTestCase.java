@@ -17,7 +17,6 @@ import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -28,15 +27,14 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.spam.SpamManager;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Sets up a Test Scenario of a Leaf connected to some Ultrapeers (default of
  * 4, use alternate constructor to specify up to 4)
  * The leaf has the following settings (which you can override by implementing
  * your own doSettings()): runs on SERVER_PORT, is a Leaf, does not connect on
- * startup, GWebCaches and Watchdog are inactive, sharing only txt files, 
+ * startup, Watchdog are inactive, sharing only txt files, 
  * sharing two txt files (berkeley and susheel), and accepting all search
  * results.
  * You must also implement getActivityCallback() (for custom callbacks) 
@@ -54,7 +52,7 @@ public abstract class ClientSideTestCase
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
     protected static Connection testUP[];
-    protected static RouterService rs;
+  //  protected static RouterService rs;
 
     private static ActivityCallback callback;
     protected static ActivityCallback getCallback() {
@@ -84,7 +82,6 @@ public abstract class ClientSideTestCase
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
@@ -105,13 +102,12 @@ public abstract class ClientSideTestCase
         callback=
         (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
                                                          "getActivityCallback");
-        rs=new RouterService(callback);
-        RouterService.preGuiInit();
+      //  rs=new RouterService(callback);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
-        rs.start();
-        RouterService.clearHostCatcher();
-        RouterService.connect();
+        ProviderHacks.getLifecycleManager().start();
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
         //Thread.sleep(2000);
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
@@ -127,7 +123,7 @@ public abstract class ClientSideTestCase
             } catch(NoGnutellaOkException ngoke) {
                 fail("couldn't connect ultrapeer: " + (i+1) +
                      ", preferred is: " + 
-                     RouterService.getConnectionManager().getPreferredConnectionCount(),
+                     ProviderHacks.getConnectionManager().getPreferredConnectionCount(),
                      ngoke);
             }
         }
@@ -152,7 +148,7 @@ public abstract class ClientSideTestCase
                                        Class callingClass) 
          throws IOException, BadPacketException, Exception {
          ServerSocket ss=new ServerSocket(port);
-         RouterService.connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
+         ProviderHacks.getConnectionServices().connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          
@@ -168,7 +164,7 @@ public abstract class ClientSideTestCase
          } else {
              responder = new OldResponder();
          }
-         Connection con = new Connection(socket);
+         Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
          con.initialize(null, responder, 1000);
          Boolean shouldReply = Boolean.TRUE;
          try {
@@ -224,7 +220,7 @@ public abstract class ClientSideTestCase
         
         Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
         PingReply reply = 
-        PingReply.createExternal(guid, (byte)7,
+        ProviderHacks.getPingReplyFactory().createExternal(guid, (byte)7,
                                  socket.getLocalPort(), 
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
@@ -242,7 +238,7 @@ public abstract class ClientSideTestCase
 
     /** Marks the Responses of QueryReply as NOT spam */
     protected void markAsNotSpam(QueryReply qr) throws Exception {
-        SpamManager.instance().clearFilterData(); // Start from scratch
+        ProviderHacks.getSpamManager().clearFilterData(); // Start from scratch
         
         Response[] resp = qr.getResultsArray();
         RemoteFileDesc rfds[] = new RemoteFileDesc[resp.length];
@@ -251,11 +247,11 @@ public abstract class ClientSideTestCase
             //assertTrue(SpamManager.instance().isSpam(rfds[i]));
         }
         
-        SpamManager.instance().handleUserMarkedGood(rfds);
+        ProviderHacks.getSpamManager().handleUserMarkedGood(rfds);
         
         // Make sure they're not spam
         for(int i = 0; i < rfds.length; i++) {
-            assertFalse(SpamManager.instance().isSpam(rfds[i]));
+            assertFalse(ProviderHacks.getSpamManager().isSpam(rfds[i]));
         }
     }
     
@@ -268,7 +264,7 @@ public abstract class ClientSideTestCase
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
+            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }

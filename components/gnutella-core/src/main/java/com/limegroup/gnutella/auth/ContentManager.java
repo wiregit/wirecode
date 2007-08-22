@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.settings.ContentSettings;
 /**
  * Keeps track of content requests & responses.
  */
+@Singleton
 public class ContentManager {
     
     private static final Log LOG = LogFactory.getLog(ContentManager.class);
@@ -339,18 +341,16 @@ public class ContentManager {
             // set the authority (so newly requested ones will immediately send to it),
             // and then send off those requested.
             // note that the timeouts on processing older requests will be lagging slightly.
-            if (auth != null) {
-                Set<URN> alreadyReq = new HashSet<URN>();
-                synchronized(REQUESTED) {
-                    alreadyReq.addAll(REQUESTED);
-                    setContentAuthority(auth);
-                }
-                
-                for(URN urn : alreadyReq) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
-                    auth.send(new ContentRequest(urn));
-                }
+            Set<URN> alreadyReq = new HashSet<URN>();
+            synchronized(REQUESTED) {
+                alreadyReq.addAll(REQUESTED);
+                setContentAuthority(auth);
+            }
+            
+            for(URN urn : alreadyReq) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
+                auth.send(new ContentRequest(urn));
             }
         }
     }

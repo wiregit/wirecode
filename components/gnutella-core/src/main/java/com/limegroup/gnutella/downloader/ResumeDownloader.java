@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.io.ObjectInputStream.GetField;
 
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
@@ -23,13 +24,21 @@ public class ResumeDownloader extends ManagedDownloader
         implements Serializable {
     /** Ensures backwards compatibility of the downloads.dat file. */
     static final long serialVersionUID = -4535935715006098724L;
-
+    
     /** The temporary file to resume to. */
-    private final File _incompleteFile;
+    private volatile File _incompleteFile;
+    
     /** The name and size of the completed file, extracted from
      *  _incompleteFile. */
-    private final String _name;
-    private final int _size;
+    private volatile String _name;
+    
+    /** The old size field.  Kept around for backwards-compatibility */
+    @Deprecated
+    @SuppressWarnings("unused")
+    private volatile int _size;
+    
+    /** The size of the file*/
+    private volatile long _size64;
     
     /**
      * The hash of the completed file.  This field was not included in the LW
@@ -41,7 +50,7 @@ public class ResumeDownloader extends ManagedDownloader
      * SHA1 anyway.  It is still used, however, to keep the sha1 between
      * sessions, since it is serialized.
      */
-    private final URN _hash;
+    private volatile URN _hash;
     
 
     /** 
@@ -56,35 +65,40 @@ public class ResumeDownloader extends ManagedDownloader
      *  IncompleteFileManager.getCompletedName(incompleteFile)
      * @param size the size of the completed file, which MUST be the result of
      *  IncompleteFileManager.getCompletedSize(incompleteFile) */
-    public ResumeDownloader(IncompleteFileManager incompleteFileManager,
+    ResumeDownloader(IncompleteFileManager incompleteFileManager,
                             File incompleteFile,
                             String name,
-                            int size) {
-        super( new RemoteFileDesc[0], incompleteFileManager, null);
+                            long size, SaveLocationManager saveLocationManager) {
+        super( new RemoteFileDesc[0], incompleteFileManager, null, saveLocationManager);
         if( incompleteFile == null )
             throw new NullPointerException("null incompleteFile");
         this._incompleteFile=incompleteFile;
         if(name==null || name.equals(""))
             throw new IllegalArgumentException("Bad name in ResumeDownloader");
         this._name=name;
-        this._size=size;
+        this._size64=size;
         this._hash=incompleteFileManager.getCompletedHash(incompleteFile);
     }
 
-    /** Overrides ManagedDownloader to ensure that progress is initially
-     *  non-zero and file previewing works. */
-    public void initialize(DownloadManager manager, 
-                           FileManager fileManager, 
-                           DownloadCallback callback) {
-        if(_hash != null)
+    /**
+     * Overrides ManagedDownloader to ensure that progress is initially non-zero
+     * and file previewing works.
+     */
+    public void initialize(DownloadReferences downloadReferences) {
+        if (_hash != null)
             downloadSHA1 = _hash;
         incompleteFile = _incompleteFile;
-        super.initialize(manager, fileManager, callback);
+        super.initialize(downloadReferences);
+        // Auto-activate the requeryManager if this was created
+        // from clicking 'Resume' in the library (as opposed to
+        // from being deserialized from disk).
+        if (!deserializedFromDisk)
+            requeryManager.activate();
     }
 
     /**
      * Overrides ManagedDownloader to reserve _incompleteFile for this download.
-     * That is, any download that would use the same incomplete file is 
+     * That is, any download that would use the same incomplete file is
      * rejected, even if this is not currently downloading.
      */
     public boolean conflictsWithIncompleteFile(File incompleteFile) {
@@ -99,7 +113,7 @@ public class ResumeDownloader extends ManagedDownloader
         //Like "_incompleteFile.equals(_incompleteFileManager.getFile(other))"
         //but more efficient since no allocations in IncompleteFileManager.
         return IncompleteFileManager.same(
-            _name, _size, downloadSHA1,     
+            _name, _size64, downloadSHA1,     
             other.getFileName(), other.getSize(), other.getSHA1Urn());
     }
 
@@ -109,11 +123,11 @@ public class ResumeDownloader extends ManagedDownloader
      * when no locations have been found.
      */
     public synchronized long getContentLength() {
-        return _size;
+        return _size64;
     }
 
     protected synchronized String getDefaultFileName() {
-        return _name;
+        return _name.toString();
     }
 
     /**
@@ -125,21 +139,6 @@ public class ResumeDownloader extends ManagedDownloader
         if(ret)
             deserializedFromDisk = false;
         return ret;
-    }
-
-    /*
-     * @param numRequeries The number of requeries sent so far.
-     */
-    protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        // created from starting up LimeWire.
-        if(deserializedFromDisk)
-            return false;
-        // clicked Find More Sources?
-        else if(numRequeries > 0)
-            return super.shouldSendRequeryImmediately(numRequeries);
-        // created from clicking 'Resume' in the library
-        else
-            return true;
     }
  
     protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {
@@ -158,9 +157,21 @@ public class ResumeDownloader extends ManagedDownloader
             // TODO: we should be sending the URN with the query, but
             // we don't because URN queries are summarily dropped, though
             // this may change
-            return QueryRequest.createQuery(queryName);
+            return queryRequestFactory.createQuery(queryName);
         else
-            return QueryRequest.createQuery(queryName);
+            return queryRequestFactory.createQuery(queryName);
     }
-
+    
+    private void readObject(ObjectInputStream stream)
+    throws IOException, ClassNotFoundException {
+        GetField gets = stream.readFields();
+        _hash = (URN)gets.get("_hash", null);
+        _name = (String) gets.get("_name", null);
+        _incompleteFile = (File)gets.get("_incompleteFile",null);
+        
+        // try to read the long size first, if not there read the int
+        _size64 = gets.get("_size64", -1L);
+        if (_size64 == -1L)
+            _size64 = gets.get("_size",0);
+    }
 }

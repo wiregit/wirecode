@@ -7,7 +7,6 @@ import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
@@ -50,7 +49,6 @@ public class DownloadReferences {
     private final Provider<TigerTreeCache> tigerTreeCache;
     private final Provider<TorrentManager> torrentManager;
     private final BTUploaderFactory btUploaderFactory;
-    private final ApplicationServices applicationServices;
 
     public DownloadReferences(DownloadManager downloadManager,
             FileManager fileManager, DownloadCallback downloadCallback,
@@ -71,8 +69,7 @@ public class DownloadReferences {
             Provider<MessageRouter> messageRouter,
             Provider<TigerTreeCache> tigerTreeCache,
             Provider<TorrentManager> torrentManager,
-            BTUploaderFactory btUploaderFactory,
-            ApplicationServices applicationServices) {
+            BTUploaderFactory btUploaderFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -97,7 +94,6 @@ public class DownloadReferences {
         this.tigerTreeCache = tigerTreeCache;
         this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
-        this.applicationServices = applicationServices;
     }
     
     public DownloadManager getDownloadManager() {
@@ -196,7 +192,4 @@ public class DownloadReferences {
         return btUploaderFactory;
     }
     
-    public ApplicationServices getApplicationServices() {
-        return applicationServices;
-    }
 }

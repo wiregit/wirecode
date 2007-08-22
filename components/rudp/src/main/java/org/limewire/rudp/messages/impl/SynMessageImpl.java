@@ -11,8 +11,8 @@ import org.limewire.rudp.messages.SynMessage;
  */
 public class SynMessageImpl extends RUDPMessageImpl implements SynMessage {
 
-	private byte _senderConnectionID;
-    private short  _protocolVersionNumber;
+	private final byte _senderConnectionID;
+    private final short  _protocolVersionNumber;
 
     /**
      * Construct a new SynMessage with the specified settings and data
@@ -30,10 +30,7 @@ public class SynMessageImpl extends RUDPMessageImpl implements SynMessage {
         super(theirConnectionID, OpCode.OP_SYN, 0, connectionID, PROTOCOL_VERSION_NUMBER);
         _senderConnectionID    = connectionID;
         _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
-        _senderConnectionID    = connectionID;
-        _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
     }
-
 
     /**
      * Construct a new SynMessage from the network

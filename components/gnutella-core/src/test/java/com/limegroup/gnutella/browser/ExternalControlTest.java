@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.browser;
 
+import org.limewire.concurrent.Providers;
+
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class ExternalControlTest extends LimeTestCase {
@@ -15,15 +18,16 @@ public class ExternalControlTest extends LimeTestCase {
 	}
 	
 	public void testParseValidMagnets() {
+	    ExternalControl externalControl = new ExternalControl(ProviderHacks.getDownloadServices(), Providers.of(ProviderHacks.getActivityCallback()), ProviderHacks.getSocketsManager());
 		String magnets = createMultiLineMagnetLinks(validMagnets);
-		MagnetOptions[] opts = ExternalControl.parseMagnets(magnets);
+		MagnetOptions[] opts = externalControl.parseMagnets(magnets);
 		assertEquals("Should have parsed " + validMagnets.length + " magnets", validMagnets.length, opts.length);
 		// and parse again
 		assertEquals("Should have parsed " + opts.length + " magnets", opts.length, 
-				ExternalControl.parseMagnets(createMultiLineMagnetLinks(opts)).length);
+		        externalControl.parseMagnets(createMultiLineMagnetLinks(opts)).length);
 		
 		// compound magnets with multiple lines
-		opts = ExternalControl.parseMagnets
+		opts = externalControl.parseMagnets
 			("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7"
 					+ System.getProperty("line.separator")
 					+ "magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");

@@ -10,29 +10,46 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.http.AltLocTracker;
+import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
-import com.limegroup.gnutella.http.HTTPUtils;
 
 /**
  * Provides methods to add commonly used headers to {@link HttpResponse}s.
  */
+@Singleton
 public class HTTPHeaderUtils {
 
+    private final NetworkManager networkManager;
+    private final FeaturesWriter featuresWriter;
+    private final Provider<ConnectionManager> connectionManager;
+    
+    @Inject
+    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager, Provider<ConnectionManager> connectionManager) {
+        this.networkManager = networkManager;
+        this.featuresWriter = featuresWriter;
+        this.connectionManager = connectionManager;
+    }
+    
     /**
      * Adds the <code>X-Available-Ranges</code> header to
      * <code>response</code> if available.
      */
-    public static void addRangeHeader(HttpResponse response,
+    public void addRangeHeader(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         if (fd instanceof IncompleteFileDesc) {
             URN sha1 = uploader.getFileDesc().getSHA1Urn();
@@ -47,12 +64,11 @@ public class HTTPHeaderUtils {
      * Writes out the X-Push-Proxies header as specified by section 4.2 of the
      * Push Proxy proposal, v. 0.7
      */
-    public static void addProxyHeader(HttpResponse response) {
-        if (RouterService.acceptedIncomingConnection())
+    public void addProxyHeader(HttpResponse response) {
+        if (networkManager.acceptedIncomingConnection())
             return;
 
-        Set<? extends Connectable> proxies = RouterService.getConnectionManager()
-                .getPushProxies();
+        Set<? extends Connectable> proxies = connectionManager.get().getPushProxies();
 
         StringBuilder buf = new StringBuilder();
         int proxiesWritten = 0;
@@ -84,8 +100,8 @@ public class HTTPHeaderUtils {
         
         // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
         // for future fw-fw transfers
-        if (UDPService.instance().canDoFWT()) {
-            response.addHeader(HTTPHeaderName.FWTPORT.create(UDPService.instance().getStableUDPPort() + ""));
+        if (networkManager.canDoFWT()) {
+            response.addHeader(HTTPHeaderName.FWTPORT.create(networkManager.getStableUDPPort() + ""));
         }
     }
 
@@ -93,51 +109,62 @@ public class HTTPHeaderUtils {
      * Adds alternate locations for <code>fd</code> to <code>response</code>
      * if available.
      */
-    public static void addAltLocationsHeader(HttpResponse response,
-            HTTPUploader uploader, FileDesc fd) {
-        // write the URN in case the caller wants it
-        URN sha1 = fd.getSHA1Urn();
-        if (sha1 != null) {
-            response
-                    .addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(sha1));
-            Collection<DirectAltLoc> direct = uploader.getAltLocTracker().getNextSetOfAltsToSend();
-            if (direct.size() > 0) {
-                List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(direct.size());
-                final BitNumbers bn = new BitNumbers(direct.size());
-                for(DirectAltLoc al : direct) {
-                    IpPort ipp = al.getHost();
-                    if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
-                        bn.set(ordered.size());
-                    ordered.add(al);
-                }
-                
-                if(!bn.isEmpty()) {
-                    ordered.add(0, new HTTPHeaderValue() {
-                        public String httpStringValue() {
-                            return DirectAltLoc.TLS_IDX + bn.toHexString();
-                        }
-                    });
-                }
-                
-                response.addHeader(HTTPHeaderName.ALT_LOCATION
-                        .create(new HTTPHeaderValueCollection(ordered)));
+    public void addAltLocationsHeader(HttpResponse response, AltLocTracker altLocTracker, AltLocManager altLocManager) {
+        response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(altLocTracker.getUrn()));
+        Collection<DirectAltLoc> direct = altLocTracker.getNextSetOfAltsToSend(altLocManager);
+        if (direct.size() > 0) {
+            List<HTTPHeaderValue> ordered = new ArrayList<HTTPHeaderValue>(
+                    direct.size());
+            final BitNumbers bn = new BitNumbers(direct.size());
+            for (DirectAltLoc al : direct) {
+                IpPort ipp = al.getHost();
+                if (ipp instanceof Connectable
+                        && ((Connectable) ipp).isTLSCapable())
+                    bn.set(ordered.size());
+                ordered.add(al);
             }
 
-            if (uploader.getAltLocTracker().wantsFAlts()) {
-                Collection<PushAltLoc> pushes = uploader.getAltLocTracker().getNextSetOfPushAltsToSend();
-                if (pushes.size() > 0) {
-                    response.addHeader(HTTPHeaderName.FALT_LOCATION
-                            .create(new HTTPHeaderValueCollection(pushes)));
-                }
+            if (!bn.isEmpty()) {
+                ordered.add(0, new HTTPHeaderValue() {
+                    public String httpStringValue() {
+                        return DirectAltLoc.TLS_IDX + bn.toHexString();
+                    }
+                });
+            }
+
+            response.addHeader(HTTPHeaderName.ALT_LOCATION
+                    .create(new HTTPHeaderValueCollection(ordered)));
+        }
+
+        if (altLocTracker.wantsFAlts()) {
+            Collection<PushAltLoc> pushes = altLocTracker.getNextSetOfPushAltsToSend(altLocManager);
+            if (pushes.size() > 0) {
+                response.addHeader(HTTPHeaderName.FALT_LOCATION
+                        .create(new HTTPHeaderValueCollection(pushes)));
             }
         }
     }
 
+//    public void addAltLocationsHeaders(HttpResponse response, HTTPUploader uploader, URN urn) {
+//        response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(urn));
+//        Collection<? extends AlternateLocation> alts = uploader.getAltLocTracker().getNextSetOfAltsToSend();
+//        if(alts.size() > 0) {
+//            response.addHeader(HTTPHeaderName.ALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
+//        }
+//
+//        if (uploader.getAltLocTracker().wantsFAlts) {
+//            alts = getNextSetOfPushAltsToSend();
+//            if (alts.size() > 0) {
+//                response.addHeader(HTTPHeaderName.FALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
+//            }
+//        }
+//    }
+
     /**
      * Adds an <code>X-Features</code> header to <code>response</code>.
      */
-    public static void addFeatures(HttpResponse response) {
-        Set<HTTPHeaderValue> features = HTTPUtils.getFeaturesValue();
+    public void addFeatures(HttpResponse response) {
+        Set<HTTPHeaderValue> features = featuresWriter.getFeaturesValue();
         if (features.size() > 0) {
             response.addHeader(HTTPHeaderName.FEATURES.create(
                     new HTTPHeaderValueCollection(features)));

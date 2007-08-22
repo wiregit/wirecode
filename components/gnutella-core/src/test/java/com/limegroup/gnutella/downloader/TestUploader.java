@@ -27,8 +27,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -203,7 +202,7 @@ public class TestUploader extends AssertComparisons {
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
      */
-    private final IPFilter IP_FILTER = RouterService.getIpFilter();
+    private final IPFilter IP_FILTER = ProviderHacks.getIpFilter();
     
     
     /**
@@ -656,13 +655,13 @@ public class TestUploader extends AssertComparisons {
 			    
 
             int i=line.indexOf("Range:");
-            Assert.that(i<=0, "Range should be at the beginning or not at all");
+            assertLessThanOrEquals("Range should be at the beginning or not at all", 0, i);
             if (i==0) {
                 IntPair p = null;
                 try {
                     p=parseRange(line);
                 } catch (Exception e) { 
-                    Assert.that(false, "Bad Range request: \""+line+"\"");
+                    throw new RuntimeException("Bad Range request: \""+line+"\"", e);
                 }
                 start = Math.max(0, p.a + lowChunkOffset);
                 stop = Math.min(TestFile.length(),
@@ -737,13 +736,13 @@ public class TestUploader extends AssertComparisons {
         //Write header, stolen from NormalUploadState.writeHeader()
         long t0 = System.currentTimeMillis();
         if(minPollTime > 0) 
-            Assert.that(t0 > minPollTime,
-                        "queued downloader responded too quick by "+
-                        (minPollTime-t0)+" mS");
-        if(maxPollTime > 0) 
-            Assert.that(t0 < maxPollTime,
-                        "queued downloader responded too late, by "+
-                        (t0-maxPollTime) +" mS");        
+            assertGreaterThan("queued downloader responded too quick by "+
+                    (minPollTime-t0)+" mS", minPollTime, t0);
+                        
+        if(maxPollTime > 0)
+            assertLessThan("queued downloader responded too late, by "+
+                    (t0-maxPollTime) +" mS", maxPollTime, t0);
+                                
 
         String httpValue = respondWithHTTP11 ? "HTTP/1.1" : "HTTP/1.0";
 		String str = httpValue + " " +
@@ -834,17 +833,17 @@ public class TestUploader extends AssertComparisons {
         }
         if(interestedInFalts) {
             if (!isFirewalled) 
-                HTTPUtils.writeFeatures(out);
+                ProviderHacks.getFeaturesWriter().writeFeatures(out);
             else {
-                boolean previous = RouterService.acceptedIncomingConnection();
+                boolean previous = ProviderHacks.getNetworkManager().acceptedIncomingConnection();
                 
                 try{
-                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                         "_acceptedIncoming",new Boolean(false));
                     
-                    HTTPUtils.writeFeatures(out);
+                    ProviderHacks.getFeaturesWriter().writeFeatures(out);
                     
-                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                             "_acceptedIncoming",new Boolean(previous));
                 }catch(Exception bad) {
                     ErrorService.error(bad);
@@ -891,8 +890,9 @@ public class TestUploader extends AssertComparisons {
             
             //1 second write cycle
             if (stopAfter > -1){
-                Assert.that(fullRequestsUploaded + amountThisRequest <= stopAfter,
-                        "total "+fullRequestsUploaded+" this "+amountThisRequest+" stop "+stopAfter);
+                assertLessThanOrEquals(
+                        "total "+fullRequestsUploaded+" this "+amountThisRequest+" stop "+stopAfter,
+                        stopAfter, fullRequestsUploaded + amountThisRequest);
                 if (fullRequestsUploaded + amountThisRequest == stopAfter) {
                     
                     stopped=true;
@@ -1036,7 +1036,7 @@ public class TestUploader extends AssertComparisons {
 	 */
 	private void readAlternateLocations (String altHeader, final boolean good) {
         String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, ProviderHacks.getAlternateLocationFactory(), new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 if(location instanceof PushAltLoc)
                     ((PushAltLoc)location).updateProxies(good);
@@ -1048,7 +1048,7 @@ public class TestUploader extends AssertComparisons {
                 
                 return null;
             }
-        });
+        }, true);
 	}
 
 	/**

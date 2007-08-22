@@ -10,15 +10,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -60,16 +59,16 @@ public final class HandshakeResponseTest extends LimeTestCase {
     public static void globalSetUp(Class name) throws Exception {
         ULTRAPEER_HEADERS = 
             HandshakeResponse.createResponse(
-                new UltrapeerHeaders("45.67.89.54"));
+                    ProviderHacks.getHeadersFactory().createUltrapeerHeaders("45.67.89.54"));
         LEAF_HEADERS =
-            HandshakeResponse.createResponse(new LeafHeaders("45.67.89.54"));
-        RouterService.getHostCatcher().clear();
+            HandshakeResponse.createResponse(ProviderHacks.getHeadersFactory().createLeafHeaders("45.67.89.54"));
+        ProviderHacks.getHostCatcher().clear();
     }
 
     public void testLeafRejectIncoming() throws Exception {
         Properties props = new Properties();
         props.put(HeaderNames.X_ULTRAPEER, "false");
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         hc.add(MessageTestUtils.createPongWithFreeLeafSlots());
         HandshakeResponse headers = HandshakeResponse.createResponse(props);
         HandshakeResponse hr = HandshakeResponse.createLeafRejectIncomingResponse(headers, HandshakeStatus.NO_HEADERS);
@@ -88,11 +87,11 @@ public final class HandshakeResponseTest extends LimeTestCase {
                 Properties.class});
         // First, check to make sure that we add connected hosts when we don't
         // have any hosts in the host catcher. 
-        RouterService.getHostCatcher().clear();
-        assertEquals(0, RouterService.getHostCatcher().getNumHosts());
+        ProviderHacks.getHostCatcher().clear();
+        assertEquals(0, ProviderHacks.getHostCatcher().getNumHosts());
         List ipPorts = new LinkedList();
-        ipPorts.add(new ManagedConnection("24.67.85.4", 6346));
-        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+        ipPorts.add(ProviderHacks.getManagedConnectionFactory().createManagedConnection("24.67.85.4", 6346));
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
             "_initializedConnections", ipPorts);
         
         Object[] params = new Object[2];
@@ -105,7 +104,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
         assertEquals("unexpected header", "24.67.85.4:6346", xTry);
         
         // Add a bunch of hosts to the host catcher to look for later.
-        HostCatcher hc = RouterService.getHostCatcher();
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         int limit = 30;
         Set ultrapeersWithLeafSlots = new HashSet();
         Set ultrapeersWithUltrapeerSlots = new HashSet();
@@ -176,9 +175,9 @@ public final class HandshakeResponseTest extends LimeTestCase {
         String leafAddress = "10.254.0.";
         String ultrapeerAddress = "20.23.0.";
         for(int i=0; i<10; i++) {
-            Connection conn = new Connection(leafAddress+i, 6346);
+            Connection conn = ProviderHacks.getConnectionFactory().createConnection(leafAddress+i, 6346);
             leaves.add(conn);
-            conn = new Connection(ultrapeerAddress+i, 6346);
+            conn = ProviderHacks.getConnectionFactory().createConnection(ultrapeerAddress+i, 6346);
             ultrapeers.add(conn);
         }
         Method m = 
@@ -212,9 +211,9 @@ public final class HandshakeResponseTest extends LimeTestCase {
 		String leafAddress = "10.254.0.";
 		String ultrapeerAddress = "20.23.0.";
 		for(int i=0; i<30; i++) {
-			Connection conn = new Connection(leafAddress+i, 6346);
+			Connection conn = ProviderHacks.getConnectionFactory().createConnection(leafAddress+i, 6346);
 			leaves.add(conn);
-			conn = new Connection(ultrapeerAddress+i, 6346);
+			conn = ProviderHacks.getConnectionFactory().createConnection(ultrapeerAddress+i, 6346);
 			ultrapeers.add(conn);
 		}
 		Method m = 
@@ -288,7 +287,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
 		while(st.hasMoreTokens()) {
 			String ipPort = st.nextToken();
 			StringTokenizer ipPortST = new StringTokenizer(ipPort, ":");
-			Connection conn = new Connection(ipPortST.nextToken(), Integer.parseInt(ipPortST.nextToken()));
+			Connection conn = ProviderHacks.getConnectionFactory().createConnection(ipPortST.nextToken(), Integer.parseInt(ipPortST.nextToken()));
 			list.add(conn);
 		}
 		return list;
@@ -314,9 +313,10 @@ public final class HandshakeResponseTest extends LimeTestCase {
 	 * Tests the method for creating a response to the crawler.
 	 */
 	public void testCreateCrawlerResponse() throws Exception {
+	    @SuppressWarnings("all") // DPINJ: textfix
 		TestConnectionManager tcm = new TestConnectionManager();
-		PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse();
+	//	PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse(ProviderHacks.getConnectionManager());
 		Properties headers = hr.props();
 		String leaves = headers.getProperty(HeaderNames.LEAVES);
 		String ultrapeers = headers.getProperty(HeaderNames.PEERS);
@@ -551,7 +551,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-                new UltrapeerHeaders("32.9.8.9"));
+            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
         
         headers = new Properties();
@@ -564,7 +564,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-                new UltrapeerHeaders("32.9.8.9"));
+            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
     }
 
@@ -587,7 +587,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-                new LeafHeaders("32.9.8.9"));
+            ProviderHacks.getHeadersFactory().createLeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
@@ -595,7 +595,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
         runRejectOutgoingLeafHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptOutgoingResponse(
-            new LeafHeaders("32.9.8.9"));
+                ProviderHacks.getHeadersFactory().createLeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
     }
 
@@ -765,7 +765,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
                                                      String.class, 
                                                      Byte.TYPE}); 
 
-        Properties headers = new UltrapeerHeaders("3.7.6.8");
+        Properties headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("3.7.6.8");
         Object[] params = new Object[3];
         params[0] = headers;
         params[1] = HeaderNames.X_MAX_TTL;         
@@ -788,7 +788,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
                                                      String.class, 
                                                      Byte.TYPE}); 
 
-        Properties headers = new UltrapeerHeaders("3.7.6.8");
+        Properties headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("3.7.6.8");
         Object[] params = new Object[3];
         params[0] = headers;
         params[1] = HeaderNames.X_MAX_TTL; 
@@ -831,7 +831,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
                                                      String.class, 
                                                      Integer.TYPE}); 
 
-        Properties headers = new UltrapeerHeaders("3.7.6.8");
+        Properties headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("3.7.6.8");
 
         // construct the parameters to pass to the method
         Object[] params = new Object[3];

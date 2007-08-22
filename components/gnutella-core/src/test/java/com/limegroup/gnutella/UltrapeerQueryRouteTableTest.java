@@ -6,15 +6,13 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
 /**
@@ -26,9 +24,12 @@ import com.limegroup.gnutella.util.Sockets.ConnectType;
 @SuppressWarnings("unchecked")
 public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
+
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static ActivityCallback CALLBACK;
+    @SuppressWarnings("unused") //DPINJ - testfix
     private static TestMessageRouter MESSAGE_ROUTER;        
-    private static RouterService ROUTER_SERVICE;
+ //   private static RouterService ROUTER_SERVICE;
             
 	/**
      * A filename that won't match.
@@ -63,8 +64,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
     private static void setSettings() throws Exception {
         setStandardSettings();
         //SearchSettings.PROBE_TTL.setValue((byte)1);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.PORT.setValue(6332);
@@ -79,16 +79,16 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
         CALLBACK = new TestCallback();
         MESSAGE_ROUTER = new TestMessageRouter();
-        ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER);
-        ROUTER_SERVICE.start();
+     //   ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER);
+        ProviderHacks.getLifecycleManager().start();
         
-        RouterService.connectToHostAsynchronously("localhost", 
+        ProviderHacks.getConnectionServices().connectToHostAsynchronously("localhost", 
             Backend.BACKEND_PORT, ConnectType.PLAIN);    
         
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.
         Thread.sleep(10 * 1000);
-        assertTrue("should be connected", RouterService.isConnected());
+        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
     }
 
 	public void setUp() throws Exception {
@@ -105,8 +105,8 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * Ultrapeer that doesn't have a hit.
      */
     public void testSentQueryIsNotTTL1() throws Exception {
-        assertTrue("should be connected", RouterService.isConnected());
-        QueryRequest qr = QueryRequest.createQuery(noMatch, (byte)1);
+        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(noMatch, (byte)1);
         sendQuery(qr);        
         Thread.sleep(2000);
         // we will send the query, but with a TTL of 2, not 1, because
@@ -126,9 +126,9 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * table for that query.
      */
     public void testDynamicQueryingWithQRPHit() throws Exception {
-        assertTrue("should be connected", RouterService.isConnected());
+        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
                 
-        QueryRequest qr = QueryRequest.createQuery(
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(
             "FileManagerTest.class." + Backend.SHARED_EXTENSION, (byte)1);
         sendQuery(qr);
         Thread.sleep(4000);
@@ -152,18 +152,15 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * because QueryHandler creates new queries with appropriate TTLs.
      */
     private static void sendQuery(QueryRequest qr) throws Exception {
-        ResponseVerifier VERIFIER = (ResponseVerifier)PrivilegedAccessor.getValue(ROUTER_SERVICE, "VERIFIER");
-        VERIFIER.record(qr);
+      //  ResponseVerifier VERIFIER = (ResponseVerifier)PrivilegedAccessor.getValue(ROUTER_SERVICE, "VERIFIER");
+     //   VERIFIER.record(qr);
         
-        MessageRouter mr = RouterService.getMessageRouter();
+        MessageRouter mr = ProviderHacks.getMessageRouter();
         mr.sendDynamicQuery(qr);
         //mr.broadcastQueryRequest(qr);
     }
     
-    private static class TestMessageRouter extends StandardMessageRouter {
-        public TestMessageRouter() {
-            super();
-        }
+    private static class TestMessageRouter extends HackMessageRouter {
         
         public boolean originateQuery(QueryRequest r, ManagedConnection c) {
             SENT.add(r);

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
 
@@ -36,7 +37,7 @@ public class MessageTestUtils {
         byte c = (byte)(40 + (Math.random()*80));
         byte d = (byte)(40 + (Math.random()*80));
         
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 6346, 
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 6346, 
             new byte[]{a,b,c,d}, 10, 10, true, ggep);
         return pr;
     }
@@ -58,7 +59,7 @@ public class MessageTestUtils {
         byte c = (byte)(40 + (Math.random()*80));
         byte d = (byte)(40 + (Math.random()*80));
         
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 6346, 
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 6346, 
             new byte[]{a,b,c,d}, 10, 10, true, ggep);
         return pr;
     }

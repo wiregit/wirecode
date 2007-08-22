@@ -17,15 +17,17 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.Assert;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -77,22 +79,30 @@ public class UDPHostCache {
      * Whether or not the set contains data different than when we last wrote.
      */
     private boolean writeDirty = false;
+
+    private final Provider<MessageRouter> messageRouter;
+
+    private final PingRequestFactory pingRequestFactory;
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for 10 
 	 * minutes.
      */
-    public UDPHostCache(UDPPinger pinger) {
-        this(10 * 60 * 1000,pinger);
+    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory) {
+        this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory);
+        
     }
     
     /**
      * Constructs a new UDPHostCache that remembers attempting hosts for
      * the given amount of time, in msecs.
      */
-    public UDPHostCache(long expiryTime,UDPPinger pinger) {
+    protected UDPHostCache(long expiryTime, UDPPinger pinger, Provider<MessageRouter> messageRouter,
+            PingRequestFactory pingRequestFactory) {
         attemptedHosts = new FixedSizeExpiringSet<ExtendedEndpoint>(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
+        this.messageRouter = messageRouter;
+        this.pingRequestFactory = pingRequestFactory;
     }
     
     /**
@@ -170,7 +180,9 @@ public class UDPHostCache {
                 continue;
                 
             // if it was private (couldn't look up too) drop it.
-            if(NetworkUtils.isPrivateAddress(next.getAddress())) {
+            if(!NetworkUtils.isValidExternalIpPort(next) || 
+                    !NetworkUtils.isValidIpPort(next) || // this does explicit resolving.
+                    NetworkUtils.isPrivateAddress(next.getAddress())) {
                 invalidHosts.add(next);
                 continue;
             }
@@ -206,7 +218,7 @@ public class UDPHostCache {
             // cancel when connected -- don't send out any more pings
             new Cancellable() {
                 public boolean isCancelled() {
-                    return RouterService.isConnected();
+                    return ProviderHacks.getConnectionServices().isConnected();
                 }
             },
             getPing()
@@ -220,7 +232,7 @@ public class UDPHostCache {
      * Useful as a seperate method for tests to catch the Ping's GUID.
      */
     protected PingRequest getPing() {
-        return PingRequest.createUHCPing();
+        return pingRequestFactory.createUHCPing();
     }
 
     /**
@@ -231,8 +243,7 @@ public class UDPHostCache {
             LOG.trace("Removing endpoint: " + e);
         boolean removed1=udpHosts.remove(e);
         boolean removed2=udpHostsSet.remove(e);
-        Assert.that(removed1==removed2,
-                    "Set "+removed1+" but queue "+removed2);
+        assert removed1==removed2 : "Set "+removed1+" but queue "+removed2;
         if(removed1)
             writeDirty = true;
         return removed1;
@@ -242,7 +253,7 @@ public class UDPHostCache {
      * Adds a new udp hostcache to this.
      */
     public synchronized boolean add(ExtendedEndpoint e) {
-        Assert.that(e.isUDPHostCache());
+        assert e.isUDPHostCache();
         
         if (udpHostsSet.contains(e))
             return false;
@@ -350,8 +361,7 @@ public class UDPHostCache {
                 // OPTIMIZATION: if we've gotten succesful responses from
                 // each hosts, unregister ourselves early.
                 if(hosts.isEmpty())
-                    RouterService.getMessageRouter().
-					  unregisterMessageListener(guid, this);
+                    messageRouter.get().unregisterMessageListener(guid, this);
             }
         }
         

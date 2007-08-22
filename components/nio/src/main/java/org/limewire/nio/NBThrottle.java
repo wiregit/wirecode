@@ -240,11 +240,13 @@ public class NBThrottle implements Throttle {
      * Interests this ThrottleListener in being notified when bandwidth is available.
      */
     public void interest(ThrottleListener writer) {
+        boolean wakeup;
         synchronized(_requests) {
             //LOG.debug("Adding: " + writer + " to requests");
+            wakeup = _requests.isEmpty();
             _requests.add(writer);
         }
-        if (_available >= MINIMUM_TO_GIVE)
+        if (wakeup || _available >= MINIMUM_TO_GIVE)
         	NIODispatcher.instance().wakeup();
     }
     

@@ -23,6 +23,7 @@ import org.apache.http.ProtocolException;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
+import org.limewire.concurrent.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -35,10 +36,9 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -49,7 +49,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
@@ -93,11 +92,11 @@ public class PushUploadTest extends LimeTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
+       // RouterService rs = new RouterService(new ActivityCallbackStub());
 
         doSettings();
 
-        rs.start();
+        ProviderHacks.getLifecycleManager().start();
         Thread.sleep(2000);
 
 // // TODO acceptor shutdown in globalTearDown()
@@ -112,7 +111,7 @@ public class PushUploadTest extends LimeTestCase {
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        RouterService.getIpFilter().refreshHosts();
+        ProviderHacks.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -149,20 +148,20 @@ public class PushUploadTest extends LimeTestCase {
                 .length());
 
         // start services
-        fm = new MetaFileManager();
+        fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         fm.startAndWait(4000);
-        PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
+   //     PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
 
         httpAcceptor = new HTTPAcceptor();
-        PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
-                httpAcceptor);
+   //     PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
+     //           httpAcceptor);
 
-        upMan = new HTTPUploadManager(new UploadSlotManager());
-        PrivilegedAccessor
-                .setValue(RouterService.class, "uploadManager", upMan);
+        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
+    //    PrivilegedAccessor
+    //            .setValue(RouterService.class, "uploadManager", upMan);
 
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
-        upMan.start(httpAcceptor, fm, RouterService.getCallback());
+        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        upMan.start(httpAcceptor, fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
     }
 
     @Override
@@ -170,7 +169,7 @@ public class PushUploadTest extends LimeTestCase {
         closeConnection();
 
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
     }
 
     public void testDownloadHTTP10() throws Exception {
@@ -278,9 +277,9 @@ public class PushUploadTest extends LimeTestCase {
      */
     public void testForPushProxyHeaderWithoutProxy() throws Exception {
         // try when we are not firewalled
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming", new Boolean(true));
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
         establishConnection();
         HttpRequest request = new BasicHttpRequest("GET", url,
@@ -291,9 +290,9 @@ public class PushUploadTest extends LimeTestCase {
         // now try with an empty set of proxies
         establishPushConnection();
         
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming", new Boolean(false));
-        assertFalse(RouterService.acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
         response = sendRequest(request);
         UploadTestUtils.assertNotHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
@@ -303,30 +302,32 @@ public class PushUploadTest extends LimeTestCase {
         establishPushConnection();
 
         // now try with some proxies
-        ConnectionManager original = RouterService.getConnectionManager();
+        @SuppressWarnings("all") // DPINJ: textfix
+        ConnectionManager original = ProviderHacks.getConnectionManager();
         try {
             final Set<Connectable> proxies = new TreeSet<Connectable>(IpPort.COMPARATOR);
             Connectable ppi = new ConnectableImpl("1.2.3.4", 5, false);
             proxies.add(ppi);
 
+            @SuppressWarnings("all") // DPINJ: textfix
             ConnectionManagerStub cmStub = new ConnectionManagerStub() {
                 @Override
                 public Set<Connectable> getPushProxies() {
                     return proxies;
                 }
             };
-            PrivilegedAccessor.setValue(RouterService.class, "manager", cmStub);
+      //      PrivilegedAccessor.setValue(RouterService.class, "manager", cmStub);
 
-            PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+            PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                     "_acceptedIncoming", new Boolean(false));
-            assertFalse(RouterService.acceptedIncomingConnection());
+            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
             HttpRequest request = new BasicHttpRequest("GET", url,
                     HttpVersion.HTTP_1_1);
             HttpResponse response = sendRequest(request);
             UploadTestUtils.assertHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
         } finally {
-            PrivilegedAccessor.setValue(RouterService.class, "manager", original);
+      //      PrivilegedAccessor.setValue(RouterService.class, "manager", original);
         }
     }
 
@@ -335,11 +336,11 @@ public class PushUploadTest extends LimeTestCase {
      * than once.
      */
     public void testDuplicatePushes() throws Exception {
-        Connection connection = new Connection("localhost", PORT);
+        Connection connection = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         try {
-            connection.initialize(new UltrapeerHeaders(null),
+            connection.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
-            QueryRequest query = QueryRequest.createQuery("txt", (byte) 3);
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt", (byte) 3);
             connection.send(query);
             connection.flush();
             QueryReply reply = null;
@@ -395,13 +396,13 @@ public class PushUploadTest extends LimeTestCase {
      */
     private static Socket getSocketFromPush() throws IOException,
             BadPacketException {
-        Connection connection = new Connection("localhost", PORT);
+        Connection connection = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         try {
-            connection.initialize(new UltrapeerHeaders(null),
+            connection.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
 
             // send query
-            QueryRequest query = QueryRequest.createQuery("txt", (byte) 3);
+            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt", (byte) 3);
             connection.send(query);
             connection.flush();
 

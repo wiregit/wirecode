@@ -1,16 +1,22 @@
 package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.Periodic;
 import org.limewire.statistic.StatisticsManager;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPReplyHandlerCache;
+import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 /**
  * Handles incoming toggles for advanced stats and takes care
@@ -33,8 +39,9 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     /** Utility that will perform the shutting off. */
     private final Periodic shutOff;
     
-    public AdvancedToggleHandler() {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES);
+    @Inject
+    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager, @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
         
         shutOff = new Periodic(new Runnable() {
             public void run (){
@@ -45,7 +52,7 @@ public class AdvancedToggleHandler extends RestrictedResponder {
                     }
                 }
             }
-        }, RouterService.getScheduledExecutorService());
+        }, backgroundExecutor);
     }
     
     @Override

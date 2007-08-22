@@ -207,5 +207,12 @@ public class QuestionsHandler extends LimeWireSettings {
      */
     public static final StringSetting LAST_CHECKED_JAVA_VERSION =
         FACTORY.createStringSetting("LAST_CHECKED_JAVA_VERSION", "");
+    
+    /**
+     * Stores whether the user wants to overwrite or append to songs in the
+     * playlist
+     */
+    public static final IntSetting PLAYLIST_OVERWRITE_OK =
+        FACTORY.createIntSetting("PLAYLIST_OVERWRITE_OK", 0);
 
 }

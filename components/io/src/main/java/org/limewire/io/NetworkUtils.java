@@ -1,5 +1,6 @@
 package org.limewire.io;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -151,11 +152,32 @@ public final class NetworkUtils {
     }
     
     /**
+     * Determines if <code>hostAndPort</code> is either "host" or in
+     * "host:port" format in which case the port is checked if it is within a
+     * valid range.
+     */
+    public static boolean isAddress(String hostAndPort) {
+        hostAndPort = hostAndPort.trim();
+        int i = hostAndPort.indexOf(":");
+        if (i == -1) {
+            return hostAndPort.length() > 0;
+        } else if (i > 0){
+            try {
+                final int port = Integer.parseInt(hostAndPort.substring(i + 1));
+                return isValidPort(port);
+            } catch(NumberFormatException e) {
+            }            
+        }
+        return false;
+    }
+
+    /**
      * @return whether the IpPort is a valid external address.
      */
     public static boolean isValidExternalIpPort(IpPort addr) {
         InetAddress address = addr.getInetAddress();
-        return isValidAddress(address) 
+        return address != null 
+            && isValidAddress(address) 
             && isValidPort(addr.getPort())
             && !isPrivateAddress(address);
     }
@@ -947,5 +969,39 @@ public final class NetworkUtils {
                 && (address[3] & 0xFF) == 0xB8;
         }
         return false;
+    }
+
+    /**
+     * Returns an IpPort (or Connectable if tlsCapable == true) of the ipport
+     * as described by "a.b.c.d:port".
+     * 
+     * @param ipPort a string representing an ip and porte 
+     * @throws IOException parsing failed.
+     */
+    public static IpPort parseIpPort(String ipPort, boolean tlsCapable) throws IOException {
+        int separator = ipPort.indexOf(":");
+    	
+    	//see if this is a valid ip:port address; 
+    	if (separator == -1 || separator!= ipPort.lastIndexOf(":") || separator == ipPort.length())
+    		throw new IOException("invalid separator in http: " + ipPort);
+    		
+    	String host = ipPort.substring(0,separator);
+    	
+    	if (!isValidAddress(host) || isPrivateAddress(host))
+    	    throw new IOException("invalid addr: " + host);
+    	
+    	String portS = ipPort.substring(separator+1);
+    	
+    	try {
+    		int port = Integer.parseInt(portS);
+    		if(!isValidPort(port))
+    		    throw new IOException("invalid port: " + port);
+            if(tlsCapable)
+                return new ConnectableImpl(host, port, true);
+            else
+                return new IpPortImpl(host, port); // could technically also return a ConnectableImpl w/ tls=false
+    	} catch(NumberFormatException invalid) {
+    	    throw (IOException)new IOException().initCause(invalid);
+    	}
     }
 }

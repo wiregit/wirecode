@@ -50,25 +50,39 @@ public class DataWindow
      *  or one.
      */
 	public DataWindow(int size, long start) {
+	    if (size < 1) {
+	        throw new IllegalArgumentException("size must be > 0");
+	    }
+	    
 		windowStart = start;
 		windowSize  = size;
 		window      = new LongHashMap<DataRecord>(size+2);
 	}
 
-    /*
-     *  Add a new message to the window.  
+    /**
+     * Adds a new message to the window.  
      */
 	public DataRecord addData(DataMessage msg) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
-
-        long seqNo = msg.getSequenceNumber();
-		DataRecord d = new DataRecord(msg);
-        if(seqNo == windowStart)
+	    if (windowStart > msg.getSequenceNumber()) {
+	        throw new IllegalStateException("message is not in current window: " + windowStart + " > " + msg.getSequenceNumber());
+	    }
+	    
+	    long seqNo = msg.getSequenceNumber();
+        if (seqNo == windowStart)
             readableData = true;
-        
-		window.put(seqNo, d);
 
+        DataRecord d = window.get(seqNo);
+        if (d != null) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("received duplicate message seq: " + msg.getSequenceNumber() + ", window start: " + windowStart);
+            return d;
+        }
+
+        if (LOG.isDebugEnabled())
+            LOG.debug("adding message seq: " + msg.getSequenceNumber() + ", window start: " + windowStart);
+
+		d = new DataRecord(msg);
+		window.put(seqNo, d);
         return d;
 	}
 
@@ -120,24 +134,24 @@ public class DataWindow
      *  Calculate the average wait time of the N lowest unresponded to 
      *  blocks
      */
-	public int calculateWaitTime(long time, int n) {
-        DataRecord d;
-        int        count = 0;
-		long       totalDelta = 0;
-        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-            d = window.get(i);
-            if ( d != null && d.acks == 0 ) {
-                count++;
-				totalDelta += time - d.sentTime;
-				if (count >= n) 
-					break;
-            } 
-        }
-		if (count > 0)
-			return(((int)totalDelta)/count);
-		else
-			return 0;
-	}
+//	public int calculateWaitTime(long time, int n) {
+//        DataRecord d;
+//        int        count = 0;
+//		long       totalDelta = 0;
+//        for (long i = windowStart; i < windowStart+windowSize+1; i++) {
+//            d = window.get(i);
+//            if ( d != null && d.acks == 0 ) {
+//                count++;
+//				totalDelta += time - d.sentTime;
+//				if (count >= n) 
+//					break;
+//            } 
+//        }
+//		if (count > 0)
+//			return(((int)totalDelta)/count);
+//		else
+//			return 0;
+//	}
 
     /** 
      *  Clear out the acknowledged blocks at the beginning and advance the 
@@ -431,22 +445,22 @@ public class DataWindow
     /** 
      *  Find the record that has been acked the most.
      */
-	public DataRecord findMostAcked() {
-        DataRecord d;
-        DataRecord mostAcked = null;
-
-		// Compare ack numbers
-		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-			d = getBlock(i);
-			if ( mostAcked == null ) {
-				mostAcked = d;
-			} else if ( d != null ) {
-				if (mostAcked.acks < d.acks) 
-					mostAcked = d;
-			}
-		}
-		return mostAcked;
-	}
+//	public DataRecord findMostAcked() {
+//        DataRecord d;
+//        DataRecord mostAcked = null;
+//
+//		// Compare ack numbers
+//		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
+//			d = getBlock(i);
+//			if ( mostAcked == null ) {
+//				mostAcked = d;
+//			} else if ( d != null ) {
+//				if (mostAcked.acks < d.acks) 
+//					mostAcked = d;
+//			}
+//		}
+//		return mostAcked;
+//	}
 
     /** 
      *  Find the number of unread records
@@ -468,25 +482,20 @@ public class DataWindow
     /** 
      *  Find the number of unacked records
      */
-	public int numNotAcked() {
-        DataRecord d;
-        int count = 0;
+//	public int numNotAcked() {
+//        DataRecord d;
+//        int count = 0;
+//
+//		// Count the number of records not acked
+//		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
+//			d = getBlock(i);
+//			if ( d != null && d.acks <=0) {
+//				count++;
+//			} 
+//		}
+//		return count;
+//	}
 
-		// Count the number of records not acked
-		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-			d = getBlock(i);
-			if ( d != null && d.acks <=0) {
-				count++;
-			} 
-		}
-		return count;
-	}
-
-	public void printFinalStats() {
-		System.out.println(
-		  " avgRTT:"+averageRTT+
-		  " lowRTT:"+averageLowRTT);
-	}
 }
 
 	

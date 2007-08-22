@@ -8,10 +8,7 @@ import java.net.ServerSocket;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
@@ -110,7 +107,7 @@ public final class ServerSideIntermediateRedirectTest
             UDP_ACCESS.setSoTimeout(TIMEOUT);
             UDP_ACCESS.receive(pack);
             ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-            MessageFactory.read(bais);
+            ProviderHacks.getMessageFactory().read(bais);
             fail("Got a message");
         } catch (InterruptedIOException expected) {}
     }
@@ -118,13 +115,13 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirect() throws Exception {
 
-        Connection redirUP = new Connection("localhost", PORT);
+        Connection redirUP = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         
-        redirUP.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        redirUP.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP.isOpen());
         drain(redirUP);
 
-        Message msvm = MessagesSupportedVendorMessage.instance();
+        Message msvm = ProviderHacks.getMessagesSupportedVendorMessage();
         redirUP.send(msvm);
         redirUP.flush();
 
@@ -170,21 +167,21 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirectMultiple() throws Exception {
 
-        Connection redirUP1 = new Connection("localhost", PORT);
-        redirUP1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        Connection redirUP1 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        redirUP1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP1.isOpen());
         drain(redirUP1);
 
-        Message msvm = MessagesSupportedVendorMessage.instance();
+        Message msvm = ProviderHacks.getMessagesSupportedVendorMessage();
         redirUP1.send(msvm);
         redirUP1.flush();
 
-        Connection redirUP2 = new Connection("localhost", PORT);
-        redirUP2.initialize( new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        Connection redirUP2 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        redirUP2.initialize( ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP2.isOpen());
         drain(redirUP2);
 
-        msvm = MessagesSupportedVendorMessage.instance();
+        msvm = ProviderHacks.getMessagesSupportedVendorMessage();
         redirUP2.send(msvm);
         redirUP2.flush();
 

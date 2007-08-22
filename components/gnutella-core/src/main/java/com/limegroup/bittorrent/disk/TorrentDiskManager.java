@@ -130,5 +130,11 @@ public interface TorrentDiskManager {
 	 * of this
 	 */
 	public Serializable getSerializableObject();
+    
+    /**
+     * @return the last offset inside the torrent filesystem that has been 
+     * succesfully verified.
+     */
+    public long getLastVerifiedOffset();
 
 }

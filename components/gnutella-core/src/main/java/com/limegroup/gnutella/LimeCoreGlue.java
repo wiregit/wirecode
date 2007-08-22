@@ -6,12 +6,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SettingsProvider;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LimeProps;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SecuritySettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -86,19 +88,21 @@ public class LimeCoreGlue {
                 
         // Setup SIMPP to be the settings remote manager.
         SimppManager simppManager = SimppManager.instance();
-        SimppSettingsManager settingsManager = SimppSettingsManager.instance();
+        SimppSettingsManager settingsManager = simppManager.getSimppSettingsManager();
         LimeProps.instance().getFactory().setRemoteSettingManager(settingsManager);
+        MojitoProps.instance().getFactory().setRemoteSettingManager(settingsManager);
         settingsManager.updateSimppSettings(simppManager.getPropsString());
         
         // Setup RouterService & ConnectionSettings.LOCAL_IS_PRIVATE to 
         // be the LocalSocketAddressProvider.
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {
-                return RouterService.getAddress();
+                // DPINJ: make this work :/
+                return ProviderHacks.getNetworkManager().getAddress();
             }
 
             public int getLocalPort() {
-                return RouterService.getPort();
+                return ProviderHacks.getNetworkManager().getPort();
             }
 
             public boolean isLocalAddressPrivate() {
@@ -106,7 +110,7 @@ public class LimeCoreGlue {
             }
             
             public boolean isTLSCapable() {
-                return ConnectionSettings.TLS_INCOMING.getValue();
+                return SSLSettings.isIncomingTLSEnabled();
             }
         });
         

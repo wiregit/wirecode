@@ -855,7 +855,8 @@ public class UDPConnectionProcessor {
                 }
 
                 // The assumption is that this record has not been acked
-                if ( drec == null || drec.acks > 0) 
+                // FIXME this condition is never true
+                if ( drec.acks > 0) 
                 	break resend;
                 
 
@@ -1099,11 +1100,10 @@ public class UDPConnectionProcessor {
         }
         
         // Make sure the data is not before the window start
+        DataRecord drec = null;
         if ( seqNo >= baseSeqNo ) {
             // Record the receipt of the data in the receive window
-            DataRecord drec = _receiveWindow.addData(dmsg);  
-            drec.ackTime = System.currentTimeMillis();
-            drec.acks++;
+            drec = _receiveWindow.addData(dmsg);  
         } else {
             if(LOG.isDebugEnabled())  
                 LOG.debug("Received duplicate block num: "+ 
@@ -1117,22 +1117,11 @@ public class UDPConnectionProcessor {
         _packetsThisPeriod++;
         _totalDataPackets++;
         
-        //if we have enough history, see if we should skip an ack
-        if (_skipAcks && _enoughData && _skippedAcks < _maxSkipAck) {
-            float average = 0;
-            for (int i = 0;i < _periodHistory;i++)
-                average+=_periods[i];
-            
-            average /= _periodHistory;
-            
-            // skip an ack if the rate at which we receive data has not dropped sharply
-            if (_periods[_currentPeriodId] > average / _deviation) {
-                _skippedAcks++;
-                _skippedAcksTotal++;
-            } else {
-                safeSendAck(dmsg);
+        if (shouldSendAck()) {
+            if (drec != null) {
+                drec.ackTime = System.currentTimeMillis();
+                drec.acks++;
             }
-        } else {
             safeSendAck(dmsg);
         }
         
@@ -1147,6 +1136,26 @@ public class UDPConnectionProcessor {
             _periods[_currentPeriodId]=_packetsThisPeriod;
             _packetsThisPeriod=0;
         }
+    }
+
+    private boolean shouldSendAck() {
+        //if we have enough history, see if we should skip an ack
+        if (_skipAcks && _enoughData && _skippedAcks < _maxSkipAck) {
+            float average = 0;
+            for (int i = 0;i < _periodHistory;i++)
+                average+=_periods[i];
+            
+            average /= _periodHistory;
+            
+            // skip an ack if the rate at which we receive data has not dropped sharply
+            if (_periods[_currentPeriodId] > average / _deviation) {
+                _skippedAcks++;
+                _skippedAcksTotal++;
+                return false;
+            }
+        }
+         
+        return true;
     }
     
     /**
@@ -1170,6 +1179,8 @@ public class UDPConnectionProcessor {
         int              priorR = _receiverWindowSpace;
         _receiverWindowSpace    = kmsg.getWindowSpace();
 
+        //System.out.println("Keep alive: remote.windowStart=" + kmsg.getWindowStart() + ", remote.windowSpace=" + kmsg.getWindowSpace() + " local.sequenceNumber=" + _sequenceNumber + ", local.receiverWindowSpace=" + _receiverWindowSpace + ", local.chunkLimit=" + _chunkLimit + ", sendWindow.windowStart=" + _sendWindow.getWindowStart() + ", sendWindow.windowSize=" + _sendWindow.getWindowSize() + ", sendWindow.windowSpace=" + _sendWindow.getWindowSpace());
+        
         // Adjust the receivers window space with knowledge of
         // how many extra messages we have sent since this ack
         if ( _sequenceNumber > wStart ) 
@@ -1188,6 +1199,12 @@ public class UDPConnectionProcessor {
         if ( _sendWindow != null ) {  
             _sendWindow.pseudoAckToReceiverWindow(wStart);
             
+            // Clear out the acked blocks at window start
+            _sendWindow.clearLowAckedBlocks(_channel);
+            
+            // Update the chunk limit for fast (nonlocking) access
+            _chunkLimit = _sendWindow.getWindowSpace();
+
             // Reactivate writing if required
             if ( (priorR == 0 || _waitingForDataSpace) && 
                  _receiverWindowSpace > 0 ) {
@@ -1273,6 +1290,8 @@ public class UDPConnectionProcessor {
                     if(chunk != null)
                         sendData(chunk);
                 } else {
+                    //System.out.println("Waiting: sequenceNumber=" + _sequenceNumber + ", receiverWindowSpace=" + _receiverWindowSpace + ", chunkLimit=" + _chunkLimit + ", sendWindow.windowStart=" + _sendWindow.getWindowStart() + ", sendWindow.windowSize=" + _sendWindow.getWindowSize() + ", sendWindow.windowSpace=" + _sendWindow.getWindowSpace());
+
                     // if no room to send data then wait for the window to Open
                     // Don't wait more than 1 second for sanity checking 
                     scheduleWriteDataEvent(
@@ -1282,6 +1301,7 @@ public class UDPConnectionProcessor {
             		if(LOG.isDebugEnabled())  
                 		LOG.debug("Shutdown SendData cL:"+_chunkLimit+
 						  " rWS:"+ _receiverWindowSpace);
+            		return;
                 }
             }
 
@@ -1327,6 +1347,7 @@ public class UDPConnectionProcessor {
             // Only wait if the waitTime is more than zero
             if ( waitTime > 0 ) {
                 long time = System.currentTimeMillis() + waitTime;
+                //System.out.println("Write: sequenceNumber=" + _sequenceNumber + ", receiverWindowSpace=" + _receiverWindowSpace + ", chunkLimit=" + _chunkLimit + ", sendWindow.windowStart=" + _sendWindow.getWindowStart() + ", sendWindow.windowSize=" + _sendWindow.getWindowSize() + ", sendWindow.windowSpace=" + _sendWindow.getWindowSpace());
                 scheduleWriteDataEvent(time);
                 break;
             }

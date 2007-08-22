@@ -16,9 +16,9 @@ import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.FileDesc;
@@ -45,6 +45,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * If active torrent limit is reached and none of the torrents are seeding,
  * the new torrent is queued.
  */
+@Singleton
 public class TorrentManager 
 implements FileLocker, ConnectionAcceptor, TorrentEventListener, 
 EventDispatcher<TorrentEvent, TorrentEventListener> {
@@ -78,14 +79,18 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      *  and acquiring locks in the FileManager and should therefore not be executed
      *  on the NIODispatcher thread */
     private ScheduledExecutorService threadPool;
+
+    private IncomingConnectionHandler incomingConnectionHandler;
     
     /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
 	public void initialize(FileManager fileManager
             , ConnectionDispatcher dispatcher
-            , ScheduledExecutorService threadPool) {
-		if (LOG.isDebugEnabled())
+            , ScheduledExecutorService threadPool,
+            IncomingConnectionHandler incomingConnectionHandler) {
+		this.incomingConnectionHandler = incomingConnectionHandler;
+        if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		
 		// register ourselves as an acceptor.
@@ -184,12 +189,12 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 	
 	public void acceptConnection(String word, Socket sock) {
-		IncomingConnectionHandler.instance().handleIncoming(
+		incomingConnectionHandler.handleIncoming(
 				(AbstractNBSocket)sock, this);
 	}
 
 	private synchronized void torrentComplete(ManagedTorrent t) {
-		Assert.that(_active.contains(t));
+	    assert(_active.contains(t));
 		_seeding.add(t);
 	}
 	
@@ -198,7 +203,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 
 	private synchronized void torrentStarted(ManagedTorrent t) {
-		Assert.that(_starting.contains(t));
+	    assert(_starting.contains(t));
 		_starting.remove(t);
 		// if the user is adding a seeding torrent.. 
 		// effectively restart it

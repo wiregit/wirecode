@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,12 +22,12 @@ import org.limewire.collection.AndView;
 import org.limewire.collection.BitField;
 import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.NECallable;
 import org.limewire.collection.NotView;
 import org.limewire.collection.RRProcessingQueue;
+import org.limewire.collection.Range;
 import org.limewire.io.DiskException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.SystemUtils;
@@ -136,6 +137,11 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * Disk controller for performing the reads and writes.
 	 */
 	private final DiskController<TorrentFile> diskController;
+    
+    /** 
+     * the last continuous offset in the torrent file that has been verified.
+     */
+    private volatile long lastVerifiedOffset;
 
 	/**
 	 * constructs instance of this
@@ -212,6 +218,8 @@ class VerifyingFolder implements TorrentDiskManager {
 			BTPiece piece = factory.call();
 			
 			BTInterval in = piece.getInterval();
+            if (in.getId() >=  verified.maxSize()) 
+                return; // bad piece.
 			byte [] data = piece.getData();
 			
 			synchronized(VerifyingFolder.this) {
@@ -245,7 +253,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	private void writeBlockImpl(BTInterval in, byte[] buf) 
 	throws IOException {
 		
-		long startOffset = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.low;
+		long startOffset = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
 		diskController.write(startOffset, buf);
 		
 		synchronized(this) {
@@ -278,6 +286,18 @@ class VerifyingFolder implements TorrentDiskManager {
 			verified = context.getFullBitField();
 			missing = new NotView(verified);
 		}
+        
+        // calculate the last verified offset here rather than on the
+        // gui thread if single-file torrent.
+        if (context.getFileSystem().getFiles().size() != 1)
+            return;
+        
+        // this is a little roundabout to make iteration shorter 
+        long length = context.getMetaInfo().getPieceLength();
+        int i = (int) (lastVerifiedOffset / length);
+        while(i < verified.maxSize() && verified.get(i))
+            i++;
+        lastVerifiedOffset = Math.min(context.getFileSystem().getTotalSize(), i * length);
 	}
 	
 	private boolean verifyQuick(int pieceNum) throws IOException {
@@ -308,12 +328,12 @@ class VerifyingFolder implements TorrentDiskManager {
 			if (readNow == 0)
 				return false;
 			
-			long start = System.currentTimeMillis();
+			long start = System.nanoTime();
 			md.update(buf, 0, readNow);
 			
 			if (slow && SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
 					SharingSettings.FRIENDLY_HASHING.getValue()) {
-				long interval = System.currentTimeMillis() - start;
+				long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 				// go extra slow if there are active torrents
 				interval *= QUEUE.size() > 0 ? 5 : 3; 
 				if (interval > 0) 
@@ -375,8 +395,8 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 	}
 	
-	private boolean isCompleteBlock(Interval in, int id) {
-		return in.low == 0 && in.high == getPieceSize(id) - 1;
+	private boolean isCompleteBlock(Range in, int id) {
+		return in.getLow() == 0 && in.getHigh() == getPieceSize(id) - 1;
 	}
 	
 	public synchronized boolean hasBlock(int block) {
@@ -495,8 +515,10 @@ class VerifyingFolder implements TorrentDiskManager {
 			
 			if (LOG.isDebugEnabled())
 				LOG.debug("reading piece " + in);
-			int length = in.high - in.low + 1;
-			long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.low;
+            long length64 = in.getHigh() - in.getLow() + 1;
+            assert length64 <= Integer.MAX_VALUE;
+			int length = (int)length64;
+			long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
 			int offset = 0;
 			byte[] buf = new byte[length];
 			boolean success = false;
@@ -545,8 +567,8 @@ class VerifyingFolder implements TorrentDiskManager {
 		BTInterval leased = findRandom(interesting, exclude);
 		
 		if (leased != null) {
-			if (leased.high - leased.low + 1 > BLOCK_SIZE)
-				leased = new BTInterval(leased.low, leased.low + BLOCK_SIZE - 1, leased.getId());
+			if (leased.getHigh() - leased.getLow() + 1 > BLOCK_SIZE)
+				leased = new BTInterval(leased.getLow(), leased.getLow() + BLOCK_SIZE - 1, leased.getId());
 			requestedRanges.addInterval(leased);
 			
 			if (LOG.isDebugEnabled())
@@ -649,7 +671,7 @@ class VerifyingFolder implements TorrentDiskManager {
 				needed.delete(pending);
 			
 			// exclude any specified intervals 
-			for (Interval excluded : exclude) 
+			for (Range excluded : exclude) 
 				needed.delete(excluded);
 			
 			// try not to request any parts that are already requested
@@ -664,7 +686,7 @@ class VerifyingFolder implements TorrentDiskManager {
 					needed = requested.clone();
 					
 					// exclude the specified intervals again
-					for (Interval excluded : exclude) 
+					for (Range excluded : exclude) 
 						needed.delete(excluded);
 				}
 			}
@@ -695,7 +717,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			return false;
 		if (set.getNumberOfIntervals() != 1)
 			return false;
-		Interval i = set.getFirst();
+		Range i = set.getFirst();
 		return isCompleteBlock(i, pieceNum);
 	}
 
@@ -881,6 +903,10 @@ class VerifyingFolder implements TorrentDiskManager {
 		return interesting.nextSetBit(0) > -1;
 	}
 	
+    public long getLastVerifiedOffset() {
+        return lastVerifiedOffset;
+    }
+    
 	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {
 		
 		private static final long serialVersionUID = 4006274480019024111L;

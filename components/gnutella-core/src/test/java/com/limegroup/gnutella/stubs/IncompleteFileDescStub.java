@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -27,9 +27,7 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     private static Set localSet2,globalSet;
     public Set localSet;
     
-    private boolean _activelyDownloading;
-        
-    private byte [] _ranges;
+    private IntervalSet.ByteIntervals _ranges;
     
     public static final int size = 1126400;
     static {
@@ -48,17 +46,13 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     }
     
     public IncompleteFileDescStub(String name) {
-        super(new File(name), set, 0,name,size,null);
+        super(FileDescStub.createStubFile(new File(name)), set, 0,name,size,null);
         localSet=new HashSet();
-        
-        FileDescStub.createStubFile(this);
     }
     
     public IncompleteFileDescStub(String name, URN urn, int index) {
-    	super(new File(name), createUrnSet(urn),index,name,size,null);
+    	super(FileDescStub.createStubFile(new File(name)), createUrnSet(urn),index,name,size,null);
     	localSet=localSet2;
-    	
-    	FileDescStub.createStubFile(this);
     }
     
     private static Set createUrnSet(URN urn) {
@@ -91,27 +85,19 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 	 * @see com.limegroup.gnutella.IncompleteFileDesc#getRangesAsByte()
 	 */
     @Override
-	public byte[] getRangesAsByte() {
+	public IntervalSet.ByteIntervals getRangesAsByte() {
 		return _ranges;
 	}
 	
-	public void setRangesByte(byte [] what) {
+	public void setRangesByte(IntervalSet.ByteIntervals what) {
 		_ranges=what;
 	}
     
-    public void setRangesAsIntervals(Interval... intervals) {
+    public void setRangesAsIntervals(Range... intervals) {
         IntervalSet set = new IntervalSet();
-        for(Interval intvl : intervals)
+        for(Range intvl : intervals)
             set.add(intvl);
         _ranges = set.toBytes();
     }
 	
-	public void setActivelyDownloading(boolean yes) {
-	    _activelyDownloading=yes;
-	}
-	
-    @Override
-	public boolean isActivelyDownloading() {
-	    return _activelyDownloading;
-	}
 }

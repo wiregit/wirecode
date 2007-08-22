@@ -2,6 +2,8 @@ package com.limegroup.gnutella.licenses;
 
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.ProviderHacks;
+
 class StubWeedLicense extends WeedLicense {
     
     private final String page;
@@ -11,7 +13,7 @@ class StubWeedLicense extends WeedLicense {
     }
         
     StubWeedLicense(String cid, String vid, String page) {
-        super(buildURI(cid, vid));
+        super(buildURI(cid, vid), ProviderHacks.getLicenseCache() );
         this.page = page;
     }
     

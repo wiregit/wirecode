@@ -3,14 +3,13 @@ package com.limegroup.gnutella.search;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
+import org.limewire.util.PrivilegedAccessor;
+
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.TestResultCounter;
@@ -34,7 +33,7 @@ public class QueryDispatcherTest extends LimeTestCase {
     }    
     
     public static void globalSetUp()  {
-        new RouterService(new ActivityCallbackStub());
+        //new RouterService(new ActivityCallbackStub());
     }
 
     /**
@@ -42,16 +41,16 @@ public class QueryDispatcherTest extends LimeTestCase {
      * from the query dispatcher.
      */
     public void testRemoveReplyHandler() throws Exception {
-        QueryDispatcher qd = QueryDispatcher.instance();
+        QueryDispatcher qd = ProviderHacks.getQueryDispatcher();
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
 
         assertEquals("should not be any queries", 0, queries.size());
 
-        QueryRequest qr = QueryRequest.createQuery("test");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
         QueryHandler handler = 
-            QueryHandler.createHandlerForNewLeaf(qr, rh, 
+            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qr, rh, 
                                                  new TestResultCounter(0));
 
 
@@ -63,9 +62,9 @@ public class QueryDispatcherTest extends LimeTestCase {
         assertEquals("should not be any queries", 0, queries.size());
         
         // now add two different queries and make sure everything is koser
-        QueryRequest qrAlt = QueryRequest.createQuery("test 2");
+        QueryRequest qrAlt = ProviderHacks.getQueryRequestFactory().createQuery("test 2");
         QueryHandler handlerAlt = 
-        QueryHandler.createHandlerForNewLeaf(qrAlt, rh, 
+            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qrAlt, rh, 
                                              new TestResultCounter(0));
         
         qd.addQuery(handler);
@@ -77,10 +76,10 @@ public class QueryDispatcherTest extends LimeTestCase {
         assertEquals("should not be any queries", 0, queries.size());
 
         // one more test - make sure different RHs don't effect each other
-        QueryRequest qrOther = QueryRequest.createQuery("test other");
+        QueryRequest qrOther = ProviderHacks.getQueryRequestFactory().createQuery("test other");
         ReplyHandler rhOther = new TestReplyHandler();
         QueryHandler handlerOther = 
-        QueryHandler.createHandlerForNewLeaf(qrOther, rhOther, 
+            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qrOther, rhOther, 
                                              new TestResultCounter(0));
         
         qd.addQuery(handler);
@@ -100,19 +99,19 @@ public class QueryDispatcherTest extends LimeTestCase {
      * removed correctly
      */
     public void testRemoveStoppedQuery() throws Exception {
-        QueryDispatcher qd = QueryDispatcher.instance();
+        QueryDispatcher qd = ProviderHacks.getQueryDispatcher();
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
         
-        QueryRequest qr = QueryRequest.createQuery("test");
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
         QueryHandler qhand = 
-            QueryHandler.createHandlerForNewLeaf(qr, rh,
+            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qr, rh,
                                                  new TestResultCounter(0));
 
-        QueryRequest qr2 = QueryRequest.createQuery("test2");
+        QueryRequest qr2 = ProviderHacks.getQueryRequestFactory().createQuery("test2");
         QueryHandler qhand2 = 
-            QueryHandler.createHandlerForNewLeaf(qr2, rh,
+            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qr2, rh,
                                                  new TestResultCounter(0));
         
         qd.addQuery(qhand);

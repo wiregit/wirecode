@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.10 2007-06-22 17:28:43 rkapsi Exp $
+ * $Id: TigerTree.java,v 1.10.10.1 2007-08-22 22:07:51 jpalm Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -10,16 +10,13 @@ import java.security.DigestException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 
-import com.limegroup.gnutella.Assert;
-
 /**
  * Implementation of THEX tree hash algorithm, with Tiger as the internal
  * algorithm (using the approach as revised in December 2002, to add unique
  * prefixes to leaf and node operations)
  * 
- * For simplicity, calculates one entire generation before starting on the
- * next. A more space-efficient approach would use a stack, and calculate each
- * node as soon as its children ara available.
+ * This class calculates the root of a TigerTree, and keeps at most log(n) nodes
+ * (one for each tree level) in memory while doing so. 
  */
 public class TigerTree extends MessageDigest {
     private static final int BLOCKSIZE = 1024;
@@ -112,7 +109,7 @@ public class TigerTree extends MessageDigest {
 
         byte[] ret = collapse();
 
-        Assert.that(ret != MARKER);
+        assert(ret != MARKER);
 
         System.arraycopy(ret, 0, buf, offset, HASHSIZE);
         engineReset();
@@ -141,7 +138,7 @@ public class TigerTree extends MessageDigest {
 
             nodes.set(i, MARKER);
         }
-        Assert.that(last != null);
+        assert(last != null);
         return last;
     }
 

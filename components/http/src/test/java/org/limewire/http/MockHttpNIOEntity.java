@@ -19,6 +19,8 @@ public class MockHttpNIOEntity extends AbstractHttpNIOEntity {
     String data;
 
     boolean initialized;
+
+    boolean timeout;
     
     public MockHttpNIOEntity(String data) {
         this.data = data;
@@ -48,6 +50,11 @@ public class MockHttpNIOEntity extends AbstractHttpNIOEntity {
     @Override
     public void initialize() throws IOException {
         initialized = true;
+    }
+
+    @Override
+    public void timeout() {
+        timeout = true;
     }
     
 }

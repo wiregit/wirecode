@@ -15,7 +15,7 @@ public class IntervalTest extends BaseTestCase {
     }
 
 	public void testSubrange() {
-        Interval a=new Interval(0,3);
+        Range a=new Interval(0,3);
         Interval b=new Interval(3,5);
         Interval c=new Interval(1,6);
         

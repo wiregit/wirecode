@@ -75,7 +75,7 @@ public class TLSNIOSocket extends NIOSocket {
     protected void initIncomingSocket() {
         super.initIncomingSocket();
         tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
-        tlsLayer.initialize(getRemoteSocketAddress(), new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
+        tlsLayer.initialize(getRemoteSocketAddress(), SSLUtils.getTLSCipherSuites(), false, false);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class TLSNIOSocket extends NIOSocket {
         }
 
         public void handleConnect(Socket socket) throws IOException {
-            tlsLayer.initialize(addr, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
+            tlsLayer.initialize(addr, SSLUtils.getTLSCipherSuites(), true, false);
             delegate.handleConnect(socket);
         }
 

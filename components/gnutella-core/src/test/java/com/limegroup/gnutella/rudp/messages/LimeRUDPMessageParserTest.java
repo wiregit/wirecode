@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import junit.framework.Test;
+
 import org.limewire.rudp.messages.AckMessage;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.FinMessage;
@@ -11,8 +13,6 @@ import org.limewire.rudp.messages.KeepAliveMessage;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.Message.Network;

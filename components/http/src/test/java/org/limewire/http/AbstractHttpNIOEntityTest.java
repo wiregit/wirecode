@@ -29,11 +29,6 @@ public class AbstractHttpNIOEntityTest extends TestCase {
         } catch (UnsupportedOperationException e) {
         }
         try {
-            entity.shutdown();
-            fail("Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException e) {
-        }
-        try {
             entity.writeTo(null);
             fail("Expected UnsupportedOperationException");
         } catch (UnsupportedOperationException e) {
@@ -69,6 +64,10 @@ public class AbstractHttpNIOEntityTest extends TestCase {
 
         @Override
         public void initialize() throws IOException {
+        }
+
+        @Override
+        public void timeout() {
         }
         
     }

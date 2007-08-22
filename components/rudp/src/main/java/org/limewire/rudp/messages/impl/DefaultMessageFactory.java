@@ -16,7 +16,10 @@ import org.limewire.rudp.messages.RUDPMessage.OpCode;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Singleton;
 
+
+@Singleton
 public class DefaultMessageFactory implements RUDPMessageFactory {
     
     private static final MessageFormatException NO_MATCH = 

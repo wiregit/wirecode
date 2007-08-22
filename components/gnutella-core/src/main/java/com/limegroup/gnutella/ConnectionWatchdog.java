@@ -5,11 +5,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.messages.PingRequest;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /*
@@ -17,36 +23,36 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * replaces dud connections with better ones.  There are a number of
  * possible heuristics to use when examining connections.
  */
+@Singleton
 public final class ConnectionWatchdog {
     
     private static final Log LOG = LogFactory.getLog(ConnectionWatchdog.class);
-
-    /**
-     * Constant handle to single <tt>ConnectionWatchdog</tt> instance,
-     * following the singleton pattern.
-     */
-    private static final ConnectionWatchdog INSTANCE = new ConnectionWatchdog();
 
     /** How long (in msec) a connection can be a dud (see below) before being booted. */
     private static final int EVALUATE_TIME=30000;
     /** Additional time (in msec) to wait before rechecking connections. */
     private static final int REEVALUATE_TIME=15000;
+    
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<ConnectionManager> connectionManager;
+    private final ConnectionServices connectionServices;
 
-    /**
-     * Singleton accessor for <tt>ConnectionWatchdog</tt> instance.
-     */
-    public static ConnectionWatchdog instance() {
-        return INSTANCE;
+    private final PingRequestFactory pingRequestFactory;
+    
+    @Inject
+    public ConnectionWatchdog(
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<ConnectionManager> connectionManager,
+            ConnectionServices connectionServices,
+            PingRequestFactory pingRequestFactory) {
+        this.backgroundExecutor = backgroundExecutor;
+        this.messageRouter = messageRouter;
+        this.connectionManager = connectionManager;
+        this.connectionServices = connectionServices;
+        this.pingRequestFactory = pingRequestFactory;
     }
-
-    /** 
-	 * Creates a new <tt>ConnectionWatchdog</tt> instance to monitor
-	 * connections to make sure they are still up and responding well.
-	 *
-     * @param manager the <tt>ConnectionManager</tt> instance that provides
-	 *  access to the list of connections to monitor
-     */
-    private ConnectionWatchdog() {}
 
     /**
      * Starts the <tt>ConnectionWatchdog</tt>.
@@ -104,7 +110,7 @@ public final class ConnectionWatchdog {
             snapshot.put(c, new ConnectionState(c));
         }
         
-        RouterService.schedule(new DudChecker(snapshot, false), EVALUATE_TIME, 0);
+        backgroundExecutor.scheduleWithFixedDelay(new DudChecker(snapshot, false), EVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -130,17 +136,17 @@ public final class ConnectionWatchdog {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
-            RouterService.getMessageRouter().sendPingRequest(new PingRequest((byte)1), c);
+            messageRouter.get().sendPingRequest(pingRequestFactory.createPingRequest((byte)1), c);
         }
         
-        RouterService.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, 0);
+        backgroundExecutor.scheduleWithFixedDelay(new DudChecker(snapshot, true), REEVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
     }
 
     /** Returns an iterable of all initialized connections in this, including
      *  leaf connecions. */
     private Iterable<ManagedConnection> allConnections() {
-        List<ManagedConnection> normal = RouterService.getConnectionManager().getInitializedConnections();
-        List<ManagedConnection> leaves =  RouterService.getConnectionManager().getInitializedClientConnections();
+        List<ManagedConnection> normal = connectionManager.get().getInitializedConnections();
+        List<ManagedConnection> leaves = connectionManager.get().getInitializedClientConnections();
 
         List<ManagedConnection> buf = new ArrayList<ManagedConnection>(normal.size() + leaves.size());
         buf.addAll(normal);
@@ -191,7 +197,7 @@ public final class ConnectionWatchdog {
                         if(ConnectionSettings.WATCHDOG_ACTIVE.getValue()) {
                             if(LOG.isWarnEnabled())
                                 LOG.warn("Killing connection: " + c);
-                            RouterService.removeConnection(c);
+                            connectionServices.removeConnection(c);
                         }
                     } else {
                         if(LOG.isWarnEnabled())

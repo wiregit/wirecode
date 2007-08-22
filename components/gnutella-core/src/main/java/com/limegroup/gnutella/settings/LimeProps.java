@@ -2,8 +2,6 @@ package com.limegroup.gnutella.settings;
 
 import org.limewire.setting.SettingsFactory;
 
-import com.limegroup.gnutella.Assert;
-
 /**
  * Handler for all 'LimeWire.props' settings.  Classes such
  * as SearchSettings, ConnectionSettings, etc... should retrieve
@@ -22,8 +20,7 @@ public class LimeProps extends LimeWireSettings {
     // subclasses should NEVER instantiate a copy themselves.
     protected LimeProps() {
         super("limewire.props", "LimeWire properties file");
-        Assert.that( getClass() == LimeProps.class,
-            "should not have a subclass instantiate");
+        assert getClass() == LimeProps.class : "should not have a subclass instantiate";
     }
     
     /**

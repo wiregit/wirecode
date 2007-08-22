@@ -18,7 +18,6 @@ import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -68,10 +67,10 @@ public class UnicastSimulator {
         _pongs = new PingReply[NUM_LISTENERS];
         for (int i = 0; i < NUM_LISTENERS; i++) {
             _pongs[i] = 
-                PingReply.createExternal(GUID.makeGuid(), (byte)5,
+                ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)5,
                                          PORT_RANGE_BEGIN+i, _localAddress, 
                                          true);                                         
-            Assert.that(_pongs[i].isUltrapeer());
+            assert(_pongs[i].isUltrapeer());
         }
     }
 
@@ -129,7 +128,7 @@ public class UnicastSimulator {
                 sock.setSoTimeout(0);
 
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
-                    Connection conn = new Connection(sock);
+                    Connection conn = ProviderHacks.getConnectionFactory().createConnection(sock);
                     conn.initialize(null, null, 1000);
                     for (int i = 0; i < _pongs.length; i++) {
                         conn.send(_pongs[i]);
@@ -177,7 +176,7 @@ public class UnicastSimulator {
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in);		
+                    Message message = ProviderHacks.getMessageFactory().read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryRequest) {
                         String query = ((QueryRequest)message).getQuery();
@@ -191,14 +190,13 @@ public class UnicastSimulator {
                         byte[] inGUID = ((QueryRequest)message).getGUID();
                         Response[] resps = new Response[rand.nextInt(15)];
                         for (int i = 0; i < resps.length; i++) {
-                            resps[i] = new Response(port, 200, 
-                                                    query + " - " + 
-                                                    rand.nextInt(250));
+                            resps[i] = ProviderHacks.getResponseFactory().createResponse(port, 200,
+                                    query + " - " + 
+                                    rand.nextInt(250));
                         }
-                        QueryReply qr = new QueryReply(inGUID, (byte) 5,
-                                                       port, _localAddress,
-                                                       0, resps, 
-                                                       GUID.makeGuid(), false);
+                        QueryReply qr = ProviderHacks.getQueryReplyFactory().createQueryReply(inGUID,
+                                (byte) 5, port, _localAddress, 0, resps,
+                                GUID.makeGuid(), false);
                         // send the QR...
                         send(socket, qr, datagram.getAddress(),
                              datagram.getPort());
@@ -216,7 +214,7 @@ public class UnicastSimulator {
                                 new AddressSecurityToken(datagram.getAddress(),
                                         datagram.getPort());
                             PingReply pRep =
-                                PingReply.createQueryKeyReply(pr.getGUID(),
+                                ProviderHacks.getPingReplyFactory().createQueryKeyReply(pr.getGUID(),
                                                               (byte)1,
                                                               port,
                                                               _localAddress,

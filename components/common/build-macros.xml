@@ -242,7 +242,7 @@
 	<macrodef name="do.test-all" description="Runs all tests.">
 	    <attribute name="component"/>
 	    <element name="testLocations"  optional="true"/>
-	    <attribute name="forkmode"     default="once"/>
+	    <attribute name="forkmode"     default="perTest"/>
 	    <attribute name="filter"     default="**/*Test.class"/>
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
@@ -320,6 +320,7 @@
 	    	       showoutput="true"
 	    	       fork="true"
 	           	   forkmode="@{forkmode}"
+	        	   timeout="600000"
 	    	>
 	            <sysproperty key="java.library.path"      		 value="${@{nativePathRefId}}"/>
 	    		<sysproperty key="junit.test.method"      		 value="${method}"/>

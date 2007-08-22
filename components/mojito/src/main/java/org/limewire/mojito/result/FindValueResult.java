@@ -121,12 +121,19 @@ public class FindValueResult extends LookupResult {
         return hop;
     }
     
+    /**
+     * Returns true if the lookup was successful
+     */
+    public boolean isSuccess() {
+        return !entities.isEmpty() || !entityKeys.isEmpty();
+    }
+    
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getLookupID()).append(" (time=").append(time)
             .append("ms, hop=").append(hop).append(")\n");
 
-        if(entities.isEmpty() && entityKeys.isEmpty()) {
+        if(!isSuccess()) {
             buffer.append("No values found!");
             return buffer.toString();
         }

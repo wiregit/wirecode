@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.InetAddress;
 
 import org.apache.http.HttpResponse;
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -53,7 +53,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         uploadEnd = 0;
         containedRangeRequest = false;
         method = null;
-		}
+    }
 		
     @Override
     public void setFileDesc(FileDesc fd) {
@@ -77,7 +77,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         // for testing: if the uploader was not initialized from a real
         // connection it does not have an IO session
         if (getSession().getIOSession() != null) {
-            getSession().getIOSession().close();
+            getSession().getIOSession().shutdown();
         }
 	}
 	
@@ -118,15 +118,15 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
             // If the request contained a 'Range:' header, then we can
             // shrink the request to what we have available.
             if (containedRangeRequest()) {
-                Interval request = ifd.getAvailableSubRange((int) first,
-                        (int) last - 1);
+                Range request = ifd.getAvailableSubRange( first,
+                        last - 1);
                 if (request == null) {
                     return false;
                 }
-                setUploadBegin(request.low);
-                setUploadEnd(request.high + 1);
+                setUploadBegin(request.getLow());
+                setUploadEnd(request.getHigh() + 1);
             } else {
-                if (!ifd.isRangeSatisfiable((int) first, (int) last - 1)) {
+                if (!ifd.isRangeSatisfiable(first, last - 1)) {
                     return false;
                 } 
             }

@@ -8,8 +8,8 @@ import junit.framework.Test;
 import org.limewire.collection.NameValue;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -90,17 +90,18 @@ public class XMLDocFilterTest extends KeywordFilterTest {
         // write out to network so it is parsed again and xml docs are constructed
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         qr.writePayload(out);
-        qr = new QueryReply(GUID.makeGuid(), (byte) 1, (byte) 1, out.toByteArray());
+        qr = ProviderHacks.getQueryReplyFactory().createFromNetwork(GUID.makeGuid(), (byte) 1,
+                (byte) 1, out.toByteArray());
         
         // hack, query replies have to be equipped with xml again
-        PrivilegedAccessor.invokeMethod(ForMeReplyHandler.instance(), "addXMLToResponses", qr);
+        PrivilegedAccessor.invokeMethod(ProviderHacks.getForMeReplyHandler(), "addXMLToResponses", qr);
         return qr;
     }
     
     public static Response createXMLResponse(String fileName, String field, String values) throws Exception {
         NameValue<String> nameValue = new NameValue<String>(field, values);
-        LimeXMLDocument doc = new LimeXMLDocument(Collections.singletonList(nameValue),
+        LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(Collections.singletonList(nameValue),
                 LimeXMLNames.VIDEO_SCHEMA);
-        return new Response(101, 1340, fileName, doc);
+        return ProviderHacks.getResponseFactory().createResponse(101, 1340, fileName, doc);
     }
 }

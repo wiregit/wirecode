@@ -90,7 +90,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testIsRareFile() throws Exception {
-        FileManager fm = new MetaFileManager();
+        FileManager fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         File file = CommonUtils.getResourceFile("build.xml");
         Set urns = calculateAndCacheURN(file);
         

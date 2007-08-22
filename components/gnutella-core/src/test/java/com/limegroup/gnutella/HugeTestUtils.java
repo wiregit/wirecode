@@ -187,7 +187,7 @@ public final class HugeTestUtils {
 
 		for(int i=0; i<UNEQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
-				UNEQUAL_SHA1_LOCATIONS[i] = AlternateLocation.create(SOME_IPS[i], URNS[i]);
+				UNEQUAL_SHA1_LOCATIONS[i] = ProviderHacks.getAlternateLocationFactory().create(SOME_IPS[i], URNS[i]);
 			} catch(IOException e) {
 				// this should not happen
 				ErrorService.error(e);
@@ -196,7 +196,7 @@ public final class HugeTestUtils {
 
 		for(int i=0; i<EQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
-				EQUAL_SHA1_LOCATIONS[i] = AlternateLocation.create(SOME_IPS[i], URNS[0]);
+				EQUAL_SHA1_LOCATIONS[i] = ProviderHacks.getAlternateLocationFactory().create(SOME_IPS[i], URNS[0]);
 			} catch(IOException e) {
 				// this should not happen
 				ErrorService.error(e);

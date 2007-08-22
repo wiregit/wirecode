@@ -49,10 +49,13 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     
     /** The last time this license was verified. */
     private long lastVerifiedTime;
+
+    private final LicenseCache licenseCache;
     
     /** Constructs a new AbstractLicense. */
-    AbstractLicense(URI uri) {
+    AbstractLicense(URI uri, LicenseCache licenseCache) {
         this.licenseLocation = uri;
+        this.licenseCache = licenseCache;
     }
     
     public void setLicenseName(String name) { this.licenseName = name; }
@@ -173,7 +176,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
             parseXML(body, true);
             lastVerifiedTime = System.currentTimeMillis();
             verified = VERIFIED;
-            LicenseCache.instance().addVerifiedLicense(AbstractLicense.this);
+            licenseCache.addVerifiedLicense(AbstractLicense.this);
             if(vc != null)
                 vc.licenseVerified(AbstractLicense.this);
         }

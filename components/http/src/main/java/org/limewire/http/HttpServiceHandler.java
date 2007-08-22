@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.4 $
- * $Date: 2007-06-08 00:28:21 $
+ * $Revision: 1.4.12.1 $
+ * $Date: 2007-08-22 22:07:46 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -33,8 +33,12 @@ package org.limewire.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.ConnectionReuseStrategy;
+import org.apache.http.HttpConnection;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -57,6 +61,7 @@ import org.apache.http.nio.NHttpServiceHandler;
 import org.apache.http.nio.entity.ContentBufferEntity;
 import org.apache.http.nio.entity.ContentOutputStream;
 import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
+import org.apache.http.nio.protocol.NHttpServiceHandlerBase;
 import org.apache.http.nio.util.ByteBufferAllocator;
 import org.apache.http.nio.util.ContentInputBuffer;
 import org.apache.http.nio.util.ContentOutputBuffer;
@@ -67,11 +72,12 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpParamsLinker;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpExecutionContext;
-import org.apache.http.protocol.HttpExpectationVerifier;
 import org.apache.http.protocol.HttpProcessor;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
 import org.apache.http.util.EncodingUtils;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.nio.NIODispatcher;
 
 /**
  * A HTTP service handler implementation that processes requests and responses
@@ -81,69 +87,45 @@ import org.apache.http.util.EncodingUtils;
  * notifications when requests are received and responses have been sent.
  * <p>
  * The processing order for incoming requests is the following:
+ * 
  * <pre>
  *    {@link HttpRequestInterceptor#process(HttpRequest, HttpContext)}
  *    {@link HttpServiceEventListener#requestReceived(NHttpConnection)}
  *    {@link HttpRequestHandlerResolver#lookup(String)}
- * </pre> 
+ * </pre>
+ * 
  * <p>
- * Based on {@link BufferingHttpServiceHandler} rev. 544120.
+ * Note: Based on {@link BufferingHttpServiceHandler} rev. 547966. Changes made
+ * for LimeWire are marked with LW
  * 
  * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
  */
-public class HttpServiceHandler implements NHttpServiceHandler {
+public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttpServiceHandler {
 
-    private static final String CONN_STATE = "http.nio.conn-state";
+    private static final Log LOG = LogFactory.getLog(HttpServiceHandler.class);
     
-    private final HttpProcessor httpProcessor;
-    private final HttpResponseFactory responseFactory;
-    private final ConnectionReuseStrategy connStrategy;
-    private final ByteBufferAllocator allocator;
-    private final HttpParams params;
-
-    private HttpRequestHandlerResolver handlerResolver;
-    private HttpExpectationVerifier expectationVerifier;
-    private HttpServiceEventListener eventListener;
+    private ExecutorService executor = ExecutorsHelper.newProcessingQueue("HttpServiceHandler");
     
     public HttpServiceHandler(
             final HttpProcessor httpProcessor, 
             final HttpResponseFactory responseFactory,
             final ConnectionReuseStrategy connStrategy,
+            final ByteBufferAllocator allocator,
             final HttpParams params) {
-        super();
-        if (httpProcessor == null) {
-            throw new IllegalArgumentException("HTTP processor may not be null.");
-        }
-        if (connStrategy == null) {
-            throw new IllegalArgumentException("Connection reuse strategy may not be null");
-        }
-        if (responseFactory == null) {
-            throw new IllegalArgumentException("Response factory may not be null");
-        }
-        if (params == null) {
-            throw new IllegalArgumentException("HTTP parameters may not be null");
-        }
-        this.httpProcessor = httpProcessor;
-        this.connStrategy = connStrategy;
-        this.responseFactory = responseFactory;
-        this.params = params;
-        this.allocator = new HeapByteBufferAllocator();
+        super(httpProcessor, responseFactory, connStrategy, allocator, params);
+    }
+
+    public HttpServiceHandler(
+            final HttpProcessor httpProcessor, 
+            final HttpResponseFactory responseFactory,
+            final ConnectionReuseStrategy connStrategy,
+            final HttpParams params) {
+        this(httpProcessor, responseFactory, connStrategy, 
+                new HeapByteBufferAllocator(), params);
     }
 
     public void setEventListener(final HttpServiceEventListener eventListener) {
         this.eventListener = eventListener;
-    }
-
-    public void setHandlerResolver(final HttpRequestHandlerResolver handlerResolver) {
-        this.handlerResolver = handlerResolver;
-    }
-
-    public void setExpectationVerifier(final HttpExpectationVerifier expectationVerifier) {
-        this.expectationVerifier = expectationVerifier;
-    }
-
-    public HttpParams getParams() {
-        return this.params;
     }
     
     public void connected(final NHttpServerConnection conn) {
@@ -162,13 +144,15 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         
         HttpRequest request = conn.getHttpRequest();
         HttpParamsLinker.link(request, this.params);
-        
+
+        if (LOG.isDebugEnabled()) 
+            LOG.debug("Received request: " + request.getRequestLine());
+
         ServerConnState connState = (ServerConnState) context.getAttribute(CONN_STATE);
 
         // Update connection state
         connState.resetInput();
         connState.setRequest(request);
-        connState.setInputState(ServerConnState.REQUEST_RECEIVED);
         
         HttpVersion ver = request.getRequestLine().getHttpVersion();
         if (!ver.lessEquals(HttpVersion.HTTP_1_1)) {
@@ -220,12 +204,12 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             }
             
         } catch (IOException ex) {
-            shutdownConnection(conn);
+            shutdownConnection(conn, ex);
             if (this.eventListener != null) {
                 this.eventListener.fatalIOException(ex, conn);
             }
         } catch (HttpException ex) {
-            shutdownConnection(conn);
+            closeConnection(conn, ex);
             if (this.eventListener != null) {
                 this.eventListener.fatalProtocolException(ex, conn);
             }
@@ -234,7 +218,12 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     }
 
     public void closed(final NHttpServerConnection conn) {
+        // LW
+        ServerConnState connState = (ServerConnState) conn.getContext().getAttribute(CONN_STATE);
+        connState.resetOutput();
+        
         notifyResponseSent(conn);
+        
         if (this.eventListener != null) {
             this.eventListener.connectionClosed(conn);
         }
@@ -251,22 +240,15 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             sendResponse(conn, response);
             
         } catch (IOException ex) {
-            shutdownConnection(conn);
+            shutdownConnection(conn, ex);
             if (this.eventListener != null) {
                 this.eventListener.fatalIOException(ex, conn);
             }
         } catch (HttpException ex) {
-            shutdownConnection(conn);
+            closeConnection(conn, ex);
             if (this.eventListener != null) {
                 this.eventListener.fatalProtocolException(ex, conn);
             }
-        }
-    }
-
-    public void exception(final NHttpServerConnection conn, final IOException ex) {
-        shutdownConnection(conn);
-        if (this.eventListener != null) {
-            this.eventListener.fatalIOException(ex, conn);
         }
     }
 
@@ -277,15 +259,9 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         ServerConnState connState = (ServerConnState) context.getAttribute(CONN_STATE);
         ContentInputBuffer buffer = connState.getInbuffer();
 
-        // Update connection state
-        connState.setInputState(ServerConnState.REQUEST_BODY_STREAM);
-        
         try {
             buffer.consumeContent(decoder);
             if (decoder.isCompleted()) {
-                // Request entity has been fully received
-                connState.setInputState(ServerConnState.REQUEST_BODY_DONE);
-
                 // Create a wrapper entity instead of the original one
                 HttpEntityEnclosingRequest entityReq = (HttpEntityEnclosingRequest) request;
                 if (entityReq.getEntity() != null) {
@@ -298,12 +274,12 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             }
             
         } catch (IOException ex) {
-            shutdownConnection(conn);
+            shutdownConnection(conn, ex);
             if (this.eventListener != null) {
                 this.eventListener.fatalIOException(ex, conn);
             }
         } catch (HttpException ex) {
-            shutdownConnection(conn);
+            closeConnection(conn, ex);
             if (this.eventListener != null) {
                 this.eventListener.fatalProtocolException(ex, conn);
             }
@@ -314,8 +290,11 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         notifyResponseSent(conn);
 
         if (conn.isOpen()) {
+            LOG.debug("Response sent, ready to receive next request");
             conn.requestInput();
+            // make sure any buffered requests are processed
             if (((DefaultNHttpServerConnection)conn).hasBufferedInput()) {
+                LOG.debug("Handling buffered requests");
                 ((DefaultNHttpServerConnection)conn).consumeInput(this);
             }
         }
@@ -328,9 +307,6 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         ServerConnState connState = (ServerConnState) context.getAttribute(CONN_STATE);
         ContentOutputBuffer buffer = connState.getOutbuffer();
 
-        // Update connection state
-        connState.setOutputState(ServerConnState.RESPONSE_BODY_STREAM);
-        
         try {
             // LW
             HttpNIOEntity entity = connState.getEntity();
@@ -341,7 +317,6 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             }
 
             if (encoder.isCompleted()) {
-                connState.setOutputState(ServerConnState.RESPONSE_BODY_DONE);
                 connState.resetOutput();
                 
                 if (!this.connStrategy.keepAlive(conn.getHttpResponse(), context)) {
@@ -349,28 +324,29 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                 }
             }
         } catch (IOException ex) {
-            shutdownConnection(conn);
+            shutdownConnection(conn, ex);
             if (this.eventListener != null) {
                 this.eventListener.fatalIOException(ex, conn);
             }
         }
     }
 
-    public void timeout(final NHttpServerConnection conn) {
-        shutdownConnection(conn);
-        if (this.eventListener != null) {
-            this.eventListener.connectionTimeout(conn);
-        }
-    }
-
-    private void shutdownConnection(final NHttpConnection conn) {
-        ServerConnState connState = (ServerConnState) conn.getContext().getAttribute(CONN_STATE);
+    @Override
+    protected void closeConnection(final HttpConnection conn, final Throwable cause) {
+        // LW: make sure NIO entity is properly finished
+        ServerConnState connState = (ServerConnState) ((NHttpServerConnection)conn).getContext().getAttribute(CONN_STATE);
         connState.resetOutput();
 
-        try {
-            conn.shutdown();
-        } catch (IOException ignore) {
-        }
+        super.closeConnection(conn, cause);
+    }    
+
+    @Override
+    protected void shutdownConnection(HttpConnection conn, Throwable cause) {
+        // LW: make sure NIO entity is properly finished
+        ServerConnState connState = (ServerConnState) ((NHttpServerConnection)conn).getContext().getAttribute(CONN_STATE);
+        connState.resetOutput();
+
+        super.shutdownConnection(conn, cause);
     }
     
     private void handleException(final HttpException ex, final HttpResponse response) {
@@ -416,6 +392,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
             this.httpProcessor.process(request, context);
 
+            // LW
             notifyRequestReceived(conn);
             
             HttpRequestHandler handler = null;
@@ -424,7 +401,13 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                 handler = this.handlerResolver.lookup(requestURI);
             }
             if (handler != null) {
-                handler.handle(request, response, context);
+                // LW
+                if (handler instanceof AsyncHttpRequestHandler) {
+                    processAsyncRequest(conn, handler, request, response, context);
+                    return;
+                } else {
+                    handler.handle(request, response, context);
+                }
             } else {
                 response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
             }
@@ -438,6 +421,57 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         sendResponse(conn, response);
     }
 
+    private void processAsyncRequest(final NHttpServerConnection conn, final HttpRequestHandler handler,
+            final HttpRequest request, final HttpResponse response, final HttpContext context) {
+        executor.execute(new Runnable() {
+            public void run() {
+                try {
+                    handler.handle(request, response, context);
+                    NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+                        public void run() {
+                            sendAsyncResponse(conn, response);
+                        }
+                    });
+                } catch (final HttpException ex) {
+                    NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+                        public void run() {
+                            HttpResponse errorResponse = HttpServiceHandler.this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_0, 
+                                    HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
+                            HttpParamsLinker.link(response, HttpServiceHandler.this.params);
+                            handleException(ex, response);
+                            sendAsyncResponse(conn, errorResponse);
+                        }                        
+                    });
+                } catch (final IOException ex) {
+                    NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+                        public void run() {
+                            shutdownConnection(conn, ex);
+                            if (eventListener != null) {
+                                eventListener.fatalIOException(ex, conn);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void sendAsyncResponse(NHttpServerConnection conn, HttpResponse response) {
+        try {
+            sendResponse(conn, response);                        
+        } catch (IOException ex) {
+            shutdownConnection(conn, ex);
+            if (this.eventListener != null) {
+                this.eventListener.fatalIOException(ex, conn);
+            }
+        } catch (HttpException ex) {
+            shutdownConnection(conn, ex);
+            if (this.eventListener != null) {
+                this.eventListener.fatalProtocolException(ex, conn);
+            }
+        }
+    }
+    
     private void sendResponse(
             final NHttpServerConnection conn,
             final HttpResponse response) throws IOException, HttpException {
@@ -453,11 +487,12 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             response.setEntity(null);
         }
         
+        // LW
         connState.setResponse(response);
+        
+        if (LOG.isDebugEnabled()) 
+            LOG.debug("Sending response: " + response.getStatusLine());
         conn.submitResponse(response);
-
-        // Update connection state
-        connState.setOutputState(ServerConnState.RESPONSE_SENT);
 
         HttpEntity entity = response.getEntity();
         if (entity != null) {
@@ -475,46 +510,19 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             if (!this.connStrategy.keepAlive(response, context)) {
                 conn.close();
             }
+            // LW: read interest is turned back on in responseReady()
         }
-    }
-
-    private boolean canResponseHaveBody(
-            final HttpRequest request, final HttpResponse response) {
-
-        if (request != null && "HEAD".equalsIgnoreCase(request.getRequestLine().getMethod())) {
-            return false;
-        }
-        
-        int status = response.getStatusLine().getStatusCode(); 
-        return status >= HttpStatus.SC_OK 
-            && status != HttpStatus.SC_NO_CONTENT 
-            && status != HttpStatus.SC_NOT_MODIFIED
-            && status != HttpStatus.SC_RESET_CONTENT; 
     }
 
     static class ServerConnState {
         
-        public static final int READY                      = 0;
-        public static final int REQUEST_RECEIVED           = 1;
-        public static final int REQUEST_BODY_STREAM        = 2;
-        public static final int REQUEST_BODY_DONE          = 4;
-        public static final int RESPONSE_SENT              = 8;
-        public static final int RESPONSE_BODY_STREAM       = 16;
-        public static final int RESPONSE_BODY_DONE         = 32;
-        
-        private SimpleInputBuffer inbuffer; 
+        private ContentInputBuffer inbuffer; 
         private ContentOutputBuffer outbuffer;
 
-        private int inputState;
-        private int outputState;
-        
         private HttpRequest request;
         private final ByteBufferAllocator allocator;
         
         public ServerConnState(final ByteBufferAllocator allocator) {
-            super();
-            this.inputState = READY;
-            this.outputState = READY;
             this.allocator = allocator;
         }
 
@@ -532,22 +540,6 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             return this.outbuffer;
         }
         
-        public int getInputState() {
-            return this.inputState;
-        }
-
-        public void setInputState(int inputState) {
-            this.inputState = inputState;
-        }
-
-        public int getOutputState() {
-            return this.outputState;
-        }
-
-        public void setOutputState(int outputState) {
-            this.outputState = outputState;
-        }
-
         public HttpRequest getRequest() {
             return this.request;
         }
@@ -559,12 +551,10 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         public void resetInput() {
             this.inbuffer = null;
             this.request = null;
-            this.inputState = READY;
         }
         
         public void resetOutput() {
             this.outbuffer = null;
-            this.outputState = READY;
             // LW
             if (this.entity != null) {
                 this.entity.finished();
@@ -598,18 +588,18 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
     // LW
 
-    public void notifyRequestReceived(NHttpServerConnection conn) {
-        if (eventListener != null) {
-            eventListener.requestReceived(conn, conn.getHttpRequest());
+    private void notifyRequestReceived(NHttpServerConnection conn) {
+        if (eventListener instanceof HttpServiceEventListener) {
+            ((HttpServiceEventListener) eventListener).requestReceived(conn, conn.getHttpRequest());
         }
     }
 
-    public void notifyResponseSent(NHttpServerConnection conn) {
+    private void notifyResponseSent(NHttpServerConnection conn) {
         ServerConnState connState = (ServerConnState) conn.getContext().getAttribute(CONN_STATE);
-        if (eventListener != null) {
+        if (eventListener instanceof HttpServiceEventListener) {
             HttpResponse response = connState.getResponse();
             if (response != null) {
-                eventListener.responseSent(conn, response);
+                ((HttpServiceEventListener) eventListener).responseSent(conn, response);
             }
         }
         connState.setResponse(null);

@@ -47,16 +47,16 @@ public class RemoteContact implements Contact {
     private static final Log LOG = LogFactory.getLog(RemoteContact.class);
     
     /** This Contact's Node ID */
-    private KUID nodeId;
+    private final KUID nodeId;
     
     /** The Vendor code of this Contact */
-    private Vendor vendor;
+    private final Vendor vendor;
     
     /** The Version of this Contact */
-    private Version version;
+    private final Version version;
     
     /** The instance ID of this Contact */
-    private int instanceId;
+    private final int instanceId;
     
     /** The IP:Port of the Contact as reported in the IP Packet */
     private transient SocketAddress sourceAddress;
@@ -64,16 +64,16 @@ public class RemoteContact implements Contact {
     /** The IP:Port of the Contact as reported in the DHTMessage */
     private SocketAddress contactAddress;
     
-    /** The Rount Trip Time (RTT) */
+    /** The Round Trip Time (RTT) */
     private transient long rtt = -1L;
     
     /** The time of the last successful contact */
     private long timeStamp = 0L;
     
-    /** The time of the last unseccessful contact  */
+    /** The time of the last unsuccessful contact  */
     private long lastFailedTime = 0L;
     
-    /** The number of errors that have occured */
+    /** The number of errors that have occurred */
     private int failures = 0;
     
     /** The current state of the Node */

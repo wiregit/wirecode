@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.filters;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -13,6 +14,7 @@ import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.messages.DHTMessage;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -20,7 +22,8 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 
-public class HostileFilter extends SpamFilter {
+@Singleton
+public class HostileFilter implements SpamFilter {
 
     private static final Log LOG = LogFactory.getLog(HostileFilter.class);
     
@@ -46,7 +49,6 @@ public class HostileFilter extends SpamFilter {
      * @return true if this Message's host is allowed, false if it is banned
      *  or we are unable to create correct IP addr out of it.
      */
-    @Override
     public boolean allow(Message m) {
         if (m instanceof PingReply) {
             PingReply pr = (PingReply)m;
@@ -59,7 +61,12 @@ public class HostileFilter extends SpamFilter {
             return allow(push.getIP());
         } else if (m instanceof DHTMessage){
             DHTMessage message = (DHTMessage)m;
-            return allow(message.getContact().getContactAddress());
+            InetSocketAddress addr = 
+                (InetSocketAddress) message.getContact().getContactAddress();
+            if (addr != null && addr.getAddress() instanceof Inet4Address)
+                return allow(addr.getAddress());
+            // dht messages do not require contact address.
+            return true;
         } else {
             // we dont want to block other kinds of messages
             return true;
@@ -130,7 +137,13 @@ public class HostileFilter extends SpamFilter {
     }
     
     public boolean allow(InetAddress addr) {
-        return allowLogged(new IP(addr.getAddress()));
+        IP ip = null;
+        try {
+            ip = new IP(addr.getAddress());
+        } catch (IllegalArgumentException bad) {
+            return false;
+        }
+        return allowLogged(ip);
     }
     
     /** 

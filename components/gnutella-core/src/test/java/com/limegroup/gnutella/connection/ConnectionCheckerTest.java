@@ -1,12 +1,11 @@
 package com.limegroup.gnutella.connection;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import org.limewire.util.PrivilegedAccessor;
+
+import com.limegroup.gnutella.HackConnectionManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -31,8 +30,8 @@ public class ConnectionCheckerTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
-        PrivilegedAccessor.setValue(RouterService.class, "manager", MANAGER);
+      //  new RouterService(new ActivityCallbackStub());
+      //  PrivilegedAccessor.setValue(RouterService.class, "manager", MANAGER);
     }
     
     /**
@@ -44,7 +43,7 @@ public class ConnectionCheckerTest extends LimeTestCase {
     public void testForLiveConnection() throws Exception {
 
         // We should quickly connect to one of our hosts.
-        ConnectionChecker checker = ConnectionChecker.checkForLiveConnection();
+        ConnectionChecker checker = ProviderHacks.getConnectionCheckerManager().checkForLiveConnection();
         Thread.sleep(10000);
         assertTrue("should have successfully connected", 
             checker.hasConnected());
@@ -63,7 +62,7 @@ public class ConnectionCheckerTest extends LimeTestCase {
 
         PrivilegedAccessor.setValue(ConnectionChecker.class, 
             "STANDARD_HOSTS", dummyHosts);    
-        checker = ConnectionChecker.checkForLiveConnection();
+        checker = ProviderHacks.getConnectionCheckerManager().checkForLiveConnection();
         synchronized(LOCK) {
             LOCK.wait(10000);
         }
@@ -78,13 +77,10 @@ public class ConnectionCheckerTest extends LimeTestCase {
      * Helper class that receives the callback notifying us when there's no
      * available internet connection.
      */
-    private static class TestManager extends ConnectionManager {
+    private static class TestManager extends HackConnectionManager {
 
         private boolean _receivedCallback;
 
-        public TestManager() {
-            super();
-        }
         
         public void noInternetConnection() {
             _receivedCallback = true;

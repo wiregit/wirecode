@@ -6,8 +6,8 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -23,10 +23,10 @@ public class SpamReplyFilterTest extends LimeTestCase {
     private static final byte[] IP = new byte[] {1, 1, 1, 1};
 
     private final QueryReply _reply = 
-         new QueryReply(GUID.makeGuid(), (byte) 1, 6346, IP, (long) 3,
-                        new Response[] { new Response((long) 2, (long) 2,
-                                                      "Susheel") },
-                        GUID.makeGuid(), true, true, true, true, true, false);
+         ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 1, 6346,
+            IP, (long) 3, new Response[] { ProviderHacks.getResponseFactory().createResponse((long) 2,
+                    (long) 2, "Susheel") }, GUID.makeGuid(), true, true, true,
+            true, true, false);
 
     private byte[] _replyBytes = null;
     private int _indexOfVendor = -1;
@@ -81,7 +81,7 @@ public class SpamReplyFilterTest extends LimeTestCase {
             _replyBytes[_indexOfVendor+i] = vendorBytes[i];
         
         QueryReply qr = 
-            (QueryReply) MessageFactory.read(new ByteArrayInputStream(_replyBytes));
+            (QueryReply) ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(_replyBytes));
         return _filter.allow(qr);
     }
 

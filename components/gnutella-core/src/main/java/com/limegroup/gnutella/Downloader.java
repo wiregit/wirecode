@@ -21,7 +21,7 @@ public interface Downloader extends BandwidthTracker {
         ABORTED,
         GAVE_UP,
         DISK_PROBLEM,
-        WAITING_FOR_RESULTS,
+        WAITING_FOR_GNET_RESULTS,
         CORRUPT_FILE,
         REMOTE_QUEUED,
         HASHING,
@@ -29,6 +29,7 @@ public interface Downloader extends BandwidthTracker {
         WAITING_FOR_USER,
         WAITING_FOR_CONNECTIONS,
         ITERATIVE_GUESSING,
+        QUERYING_DHT,
         IDENTIFY_CORRUPTION,
         RECOVERY_FAILED,
         PAUSED,
@@ -41,6 +42,11 @@ public interface Downloader extends BandwidthTracker {
      * Marker string for Bittorrent downloads.
      */
     public static final String BITTORRENT_DOWNLOAD = "";
+    
+    /**
+     * Key for custom description of the inactivity state.
+     */
+    public static final String CUSTOM_INACTIVITY_KEY = "CIK";
     
     
     /**

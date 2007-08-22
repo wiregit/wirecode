@@ -30,6 +30,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpParamsLinker;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -46,6 +47,7 @@ import org.limewire.http.SynchronizedHttpRequestHandlerRegistry;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -62,6 +64,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * handling. It needs to be start by invoking
  * {@link #start(ConnectionDispatcher)} in order to accept connection.
  */
+@Singleton
 public class HTTPAcceptor {
 
     private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);
@@ -120,6 +123,8 @@ public class HTTPAcceptor {
         this.params.setIntParameter(HttpConnectionParams.MAX_HEADER_COUNT, 50);
         this.params.setParameter(HttpProtocolParams.ORIGIN_SERVER,
                 LimeWireUtils.getHttpServer());
+        this.params.setParameter(HttpProtocolParams.HTTP_ELEMENT_CHARSET,
+                HTTP.ISO_8859_1);
         
         this.connectionListener = new ConnectionEventListener();
 

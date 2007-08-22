@@ -20,13 +20,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
@@ -44,11 +45,10 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -57,7 +57,6 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -65,19 +64,18 @@ import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in
  * LimeWire.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "null"})
 public class DownloadTest extends LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(DownloadTest.class);
@@ -142,27 +140,28 @@ public class DownloadTest extends LimeTestCase {
     public static void globalSetUp() throws Exception {
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
-		RouterService rs = new RouterService(callback);
-        dm = RouterService.getDownloadManager();
+	//	RouterService rs = new RouterService(callback);
+        dm = ProviderHacks.getDownloadManager();
         dm.initialize();
 
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                 "_acceptedIncoming",new Boolean(true));
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
             }
         };
         
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+      //  PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
         
-        RouterService.getAcceptor().setAddress(NetworkUtils.getLocalAddress());
+        ProviderHacks.getAcceptor().setAddress(NetworkUtils.getLocalAddress());
         
-        assertTrue(RouterService.isConnected());
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
         
         //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
@@ -171,8 +170,8 @@ public class DownloadTest extends LimeTestCase {
             }
         };
 
-        RouterService.schedule(click,0,NodeAssigner.TIMER_DELAY);
-        rs.start();
+        ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(click,0,NodeAssigner.TIMER_DELAY, TimeUnit.MILLISECONDS);
+        ProviderHacks.getLifecycleManager().start();
     } 
     
     public DownloadTest(String name) {
@@ -193,11 +192,11 @@ public class DownloadTest extends LimeTestCase {
         dm.clearAllDownloads();
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
-        ConnectionSettings.TLS_INCOMING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(true);
         
         // Don't wait for network connections for testing
-        ManagedDownloader.NO_DELAY = true;
+        RequeryManager.NO_DELAY = true;
         
         uploader1=new TestUploader("PORT_1", PORT_1, false);
         uploader2=new TestUploader("PORT_2", PORT_2, false);
@@ -225,7 +224,7 @@ public class DownloadTest extends LimeTestCase {
         
         callback.delCorrupt = false;
         callback.corruptChecked = false;
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
     }    
 
     public void tearDown() throws Exception {
@@ -255,7 +254,7 @@ public class DownloadTest extends LimeTestCase {
         tlsUploader5.stopThread();
 
         deleteAllFiles();
-        RouterService.getAltlocManager().purge();
+        ProviderHacks.getAltLocManager().purge();
         
         Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         m.clear();
@@ -264,9 +263,9 @@ public class DownloadTest extends LimeTestCase {
         System.runFinalization();
         System.gc();
         
-        FileDesc []shared = RouterService.getFileManager().getAllSharedFileDescriptors();
+        FileDesc []shared = ProviderHacks.getFileManager().getAllSharedFileDescriptors();
         for (int i = 0; i < shared.length; i++) 
-            RouterService.getFileManager().removeFileIfShared(shared[i].getFile());
+            ProviderHacks.getFileManager().removeFileIfShared(shared[i].getFile());
         
         saveAltLocs = false;
         validAlts = null;
@@ -334,7 +333,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload10() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         RemoteFileDesc rfd=newRFD(TPORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -342,7 +341,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload11() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         RemoteFileDesc rfd=newRFDWithURN(TPORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -350,7 +349,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload10OutgoingOff() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         RemoteFileDesc rfd=newRFD(PORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -358,7 +357,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSDownload11OutgoingOff() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        ConnectionSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         RemoteFileDesc rfd=newRFDWithURN(PORT_1, true);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
@@ -381,7 +380,7 @@ public class DownloadTest extends LimeTestCase {
             //public void thexRequestStarted() {}
 
             /** The only lease that is DEFAULT_CHUNK_SIZE large */
-       	    private Interval firstLease = null;
+       	    private Range firstLease = null;
             
             public void requestHandled(){}
             public void thexRequestStarted() {}
@@ -391,14 +390,14 @@ public class DownloadTest extends LimeTestCase {
             public void requestStarted(TestUploader uploader) {
                 long fileSize = 0;
                 
-       	        Interval i = null;
+       	        Range i = null;
                 try {
        	            IntervalSet leased = null;
        	            File incomplete = null;
                     incomplete = ifm.getFile(rfd);
                     assertNotNull(incomplete);
                     VerifyingFile vf = ifm.getEntry(incomplete);
-                    fileSize = ((Integer)PrivilegedAccessor.getValue(vf, "completedSize")
+                    fileSize = ((Long)PrivilegedAccessor.getValue(vf, "completedSize")
                                   ).longValue();
                     assertNotNull(vf);
             	    leased = (IntervalSet)
@@ -406,7 +405,7 @@ public class DownloadTest extends LimeTestCase {
             	    assertNotNull(leased);
                     List l = leased.getAllIntervalsAsList();
                     assertEquals(1,l.size());
-                    i = (Interval)l.get(0);
+                    i = (Range)l.get(0);
                 } catch (Exception bad) {
                   fail(bad);
                 }
@@ -415,9 +414,9 @@ public class DownloadTest extends LimeTestCase {
                     // first request, we should have the chunk aligned to
                     // a DEFAULT_CHUNK_SIZE boundary
                     assertEquals("First chunk has improperly aligned low byte.",
-                            0, i.low % VerifyingFile.DEFAULT_CHUNK_SIZE);
-                    if (i.high != fileSize-1 &&
-                            i.high % VerifyingFile.DEFAULT_CHUNK_SIZE != 
+                            0, i.getLow() % VerifyingFile.DEFAULT_CHUNK_SIZE);
+                    if (i.getHigh() != fileSize-1 &&
+                            i.getHigh() % VerifyingFile.DEFAULT_CHUNK_SIZE != 
                                 VerifyingFile.DEFAULT_CHUNK_SIZE-1) {
                         assertTrue("First chunk has improperly aligned high byte.",
                                 false);
@@ -426,16 +425,16 @@ public class DownloadTest extends LimeTestCase {
                 } else {
                     // on all other requests, we have 256k blocks
                     // Check that the low byte is aligned    
-                    if (i.low % (256 * 1024) != 0 &&
-                            i.low != firstLease.high + 1) {
+                    if (i.getLow() % (256 * 1024) != 0 &&
+                            i.getLow() != firstLease.getHigh() + 1) {
                         assertTrue("Un-aligned low byte on chunk that is "+
                                 "not adjascent to the DEFAULT_CHUNK_SIZE chunk.",
                                 false);
                     }
                     // Check that the high byte is aligned    
-                    if (i.high % (256 * 1024) != 256*1024-1 &&
-                            i.high != firstLease.low - 1 &&
-                            i.high != fileSize-1) {
+                    if (i.getHigh() % (256 * 1024) != 256*1024-1 &&
+                            i.getHigh() != firstLease.getLow() - 1 &&
+                            i.getHigh() != fileSize-1) {
                         assertTrue("Un-aligned high byte on chunk that is "+
                                 "not adjascent to the DEFAULT_CHUNK_SIZE chunk "+
                                 "and is not the last chunk of the file",
@@ -449,8 +448,8 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         
-        TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
-        RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
+        ProviderHacks.getTigerTreeCache().purgeTree(rfd.getSHA1Urn());
+        ProviderHacks.getDownloadServices().download(rfds, Collections.EMPTY_LIST, null, false);
         
         waitForComplete();
         assertEquals(6,uploader1.getRequestsReceived());
@@ -472,7 +471,7 @@ public class DownloadTest extends LimeTestCase {
     public void testSimplePushDownload() throws Exception {
         LOG.info("-Testing non-swarmed push download");
         
-        AlternateLocation pushLoc = AlternateLocation.create(
+        AlternateLocation pushLoc = ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
        ((PushAltLoc)pushLoc).updateProxies(true);
 
@@ -482,7 +481,7 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc [] rfds = {rfd};
         TestUploader uploader = new TestUploader("push uploader");
-        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),uploader,guid);
+        new UDPAcceptor(PPORT_1,ProviderHacks.getNetworkManager().getPort(), savedFile.getName(),uploader,guid);
         
         tGeneric(rfds);
     }
@@ -520,7 +519,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleTLSSwarm() throws Exception {
         LOG.info("-Testing swarming from two sources...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -554,7 +553,7 @@ public class DownloadTest extends LimeTestCase {
         LOG.info("-Testing swarming from two sources, one push...");  
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        AlternateLocation pushLoc = AlternateLocation.create(
+        AlternateLocation pushLoc = ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
        ((PushAltLoc)pushLoc).updateProxies(true);
         RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
@@ -566,7 +565,7 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
-        new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),uploader,guid);
+        new UDPAcceptor(PPORT_2,ProviderHacks.getNetworkManager().getPort(),savedFile.getName(),uploader,guid);
         
         tGeneric(rfds);
         
@@ -690,9 +689,9 @@ public class DownloadTest extends LimeTestCase {
         TestUploader second = new TestUploader("second pusher");
         TestUploader third = new TestUploader("third pusher");
         
-        new UDPAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),first,guid);
-        new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),second,guid);
-        new UDPAcceptor(PPORT_3,RouterService.getPort(),savedFile.getName(),third,guid);
+        new UDPAcceptor(PPORT_1,ProviderHacks.getNetworkManager().getPort(),savedFile.getName(),first,guid);
+        new UDPAcceptor(PPORT_2,ProviderHacks.getNetworkManager().getPort(),savedFile.getName(),second,guid);
+        new UDPAcceptor(PPORT_3,ProviderHacks.getNetworkManager().getPort(),savedFile.getName(),third,guid);
         
         
         uploader1.setRate(RATE);
@@ -730,7 +729,7 @@ public class DownloadTest extends LimeTestCase {
         Downloader download=null;
 
         //Start one location, wait a bit, then add another.
-        download=RouterService.download(new RemoteFileDesc[] {rfd1}, false, null);
+        download=ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] {rfd1}, false, null);
         ((ManagedDownloader)download).addDownload(rfd2,true);
 
         waitForComplete();
@@ -765,7 +764,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1};
 
         ManagedDownloader downloader = (ManagedDownloader) 
-            RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
+            ProviderHacks.getDownloadServices().download(rfds,Collections.EMPTY_LIST, null, false);
         
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
         
@@ -798,7 +797,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1};
 
         ManagedDownloader downloader = (ManagedDownloader) 
-            RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
+            ProviderHacks.getDownloadServices().download(rfds,Collections.EMPTY_LIST, null, false);
         
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()/2);
         
@@ -853,7 +852,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         // at this point we should stall since we'll never get our 50 bytes
@@ -875,7 +874,7 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         md.addDownloadForced(rfd5,false);
@@ -897,7 +896,7 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         md.addDownloadForced(rfd5,false);
@@ -918,7 +917,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
         ManagedDownloader md = (ManagedDownloader)
-            RouterService.download(rfds,true,null);
+            ProviderHacks.getDownloadServices().download(rfds,true,null);
         
         Thread.sleep(5000);
         // at this point we should stall since we'll never get our 10 bytes
@@ -936,13 +935,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(false);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // the tree will fail, but it'll pick up the content-length
         // and discard the rest of the bad data.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -957,13 +956,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTree(false);
         uploader1.setSendContentLength(false);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // should pass after a bit because it retries the host
         // who gave it the bad length.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -977,13 +976,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setSendThexTree(true);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // it will fail the first time, then re-use the host after
         // a little waiting and not request thex.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNotNull(tree);
         assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
         
@@ -1003,7 +1002,7 @@ public class DownloadTest extends LimeTestCase {
         // a little waiting and not request thex.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -1017,13 +1016,13 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setSendThexTreeHeader(true);
         uploader1.setUseBadThexResponseHeader(true);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
         
         // it will fail the first time, then re-use the host after
         // a little waiting and not request thex.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
@@ -1047,11 +1046,11 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, false);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         
-        RouterService.download(new RemoteFileDesc[]{rfd1, rfd2}, Collections.EMPTY_LIST, null, false);
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[]{rfd1, rfd2}, Collections.EMPTY_LIST, null, false);
         waitForComplete();
 
         
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         assertTrue(callback.corruptChecked);
         
@@ -1085,7 +1084,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, false);
         
         tGenericCorrupt( new RemoteFileDesc[] { rfd1}, new RemoteFileDesc[] {rfd2} );
-        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        HashTree tree = ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash());
         assertNull(tree);
         assertTrue(callback.corruptChecked);
         
@@ -1135,14 +1134,14 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,badSha1, false);
         
         URN badURN = URN.createSHA1Urn(badSha1);
-        TigerTreeCache.instance().purgeTree(TestFile.hash());
-        TigerTreeCache.instance().purgeTree(badURN);
+        ProviderHacks.getTigerTreeCache().purgeTree(TestFile.hash());
+        ProviderHacks.getTigerTreeCache().purgeTree(badURN);
         
-        RouterService.download(new RemoteFileDesc[] {rfd1}, false, null);
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] {rfd1}, false, null);
         // even though the download completed, we ignore the tree 'cause the
         // URNs didn't match.
-        assertNull(TigerTreeCache.instance().getHashTree(TestFile.hash()));
-        assertNull(TigerTreeCache.instance().getHashTree(badURN));
+        assertNull(ProviderHacks.getTigerTreeCache().getHashTree(TestFile.hash()));
+        assertNull(ProviderHacks.getTigerTreeCache().getHashTree(badURN));
 
         waitForComplete(deleteCorrupt);
         assertTrue(callback.corruptChecked);
@@ -1170,8 +1169,8 @@ public class DownloadTest extends LimeTestCase {
         List<AlternateLocation> alt1 = uploader1.incomingGoodAltLocs;
         List<AlternateLocation> alt2 = uploader2.incomingGoodAltLocs;
 
-        AlternateLocation al1 = AlternateLocation.create(rfd1);
-        AlternateLocation al2 = AlternateLocation.create(rfd2);
+        AlternateLocation al1 = ProviderHacks.getAlternateLocationFactory().create(rfd1);
+        AlternateLocation al2 = ProviderHacks.getAlternateLocationFactory().create(rfd2);
         
         assertTrue("uploader didn't recieve alt", !alt1.isEmpty());
         assertTrue("uploader didn't recieve alt", !alt2.isEmpty());
@@ -1194,7 +1193,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testTwoTLSAlternateLocations() throws Exception {
         LOG.info("-Testing Two AlternateLocations w/ TLS...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         final int RATE = 50;
         tlsUploader1.setRate(RATE);
@@ -1213,8 +1212,8 @@ public class DownloadTest extends LimeTestCase {
         List<AlternateLocation> alt1 = tlsUploader1.incomingGoodAltLocs;
         List<AlternateLocation> alt2 = tlsUploader2.incomingGoodAltLocs;
 
-        AlternateLocation al1 = AlternateLocation.create(rfd1);
-        AlternateLocation al2 = AlternateLocation.create(rfd2);
+        AlternateLocation al1 = ProviderHacks.getAlternateLocationFactory().create(rfd1);
+        AlternateLocation al2 = ProviderHacks.getAlternateLocationFactory().create(rfd2);
         
         assertTrue("uploader didn't recieve alt", !alt1.isEmpty());
         assertTrue("uploader didn't recieve alt", !alt2.isEmpty());
@@ -1262,7 +1261,7 @@ public class DownloadTest extends LimeTestCase {
 
         
         AlternateLocation al2 =
-            AlternateLocation.create(rfd2);
+            ProviderHacks.getAlternateLocationFactory().create(rfd2);
         ualt.add(al2);
 
         uploader1.setGoodAlternateLocations(ualt);
@@ -1286,7 +1285,7 @@ public class DownloadTest extends LimeTestCase {
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
         LOG.info("-Testing swarming from two sources one based on alt w/ TLS...");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -1309,7 +1308,7 @@ public class DownloadTest extends LimeTestCase {
 
         
         AlternateLocation al2 =
-            AlternateLocation.create(rfd2);
+            ProviderHacks.getAlternateLocationFactory().create(rfd2);
         ualt.add(al2);
 
         uploader1.setGoodAlternateLocations(ualt);
@@ -1341,7 +1340,7 @@ public class DownloadTest extends LimeTestCase {
         TestUploader pusher = new TestUploader("push uploader");
         pusher.setRate(RATE);
         
-        AlternateLocation pushLoc = AlternateLocation.create(
+        AlternateLocation pushLoc = ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
@@ -1353,7 +1352,7 @@ public class DownloadTest extends LimeTestCase {
         
         RemoteFileDesc []rfds = {rfd};
         
-        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),pusher,guid);
+        new UDPAcceptor(PPORT_1,ProviderHacks.getNetworkManager().getPort(), savedFile.getName(),pusher,guid);
         
         tGeneric(rfds);
         
@@ -1380,10 +1379,10 @@ public class DownloadTest extends LimeTestCase {
         
         GUID guid2 = new GUID(GUID.makeGuid());
         
-        AlternateLocation firstLoc = AlternateLocation.create(
+        AlternateLocation firstLoc = ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";127.0.0.2:"+PPORT_1,TestFile.hash());
         
-        AlternateLocation pushLoc = AlternateLocation.create(
+        AlternateLocation pushLoc = ProviderHacks.getAlternateLocationFactory().create(
                 guid2.toHexString()+";127.0.0.2:"+PPORT_2,TestFile.hash());
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
@@ -1391,8 +1390,8 @@ public class DownloadTest extends LimeTestCase {
         
         first.setGoodAlternateLocations(alCol);
         
-        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),first,guid);
-        new UDPAcceptor(PPORT_2,RouterService.getPort(), savedFile.getName(),second,guid2);
+        new UDPAcceptor(PPORT_1,ProviderHacks.getNetworkManager().getPort(), savedFile.getName(),first,guid);
+        new UDPAcceptor(PPORT_2,ProviderHacks.getNetworkManager().getPort(), savedFile.getName(),second,guid2);
         
         RemoteFileDesc []rfd ={newRFDPush(PPORT_1,1,2)};
         
@@ -1431,7 +1430,7 @@ public class DownloadTest extends LimeTestCase {
         pusher.stopAfter(200000);
         
         
-        AlternateLocation pushLoc = AlternateLocation.create(
+        AlternateLocation pushLoc = ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";127.0.0.2:"+PPORT_1,TestFile.hash());
         
         RemoteFileDesc pushRFD = newRFDPush(PPORT_1,1,2);
@@ -1447,11 +1446,11 @@ public class DownloadTest extends LimeTestCase {
         later.add(openRFD1);
         later.add(openRFD2);
         
-        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),pusher,guid);
+        new UDPAcceptor(PPORT_1,ProviderHacks.getNetworkManager().getPort(), savedFile.getName(),pusher,guid);
 
         
         ManagedDownloader download=
-            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
+            (ManagedDownloader)ProviderHacks.getDownloadServices().download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(1000);
         download.addDownload(later,false);
 
@@ -1493,7 +1492,7 @@ public class DownloadTest extends LimeTestCase {
         final int RATE=100;
         final int FWTPort = 7498;
         
-        UDPService.instance().setReceiveSolicited(true);
+        ProviderHacks.getUdpService().setReceiveSolicited(true);
         uploader1.setRate(RATE);
         uploader1.stopAfter(900000);
         uploader1.setInterestedInFalts(true);
@@ -1507,13 +1506,13 @@ public class DownloadTest extends LimeTestCase {
         pusher2.setFWTPort(FWTPort);
         
         // create a set of the expected proxies and keep a ref to it
-        PushEndpoint pe = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
+        PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
         
         Set expectedProxies = new IpPortSet();
         expectedProxies.addAll(pe.getProxies());
         
         // register proxies for GUID, this will add 127.0.0.2:10002 to proxies
-        PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
+        PushAltLoc pushLocFWT = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";5:4.3.2.1;127.0.0.2:"+PPORT_2,TestFile.hash());
         pushLocFWT.updateProxies(true);
         
@@ -1524,13 +1523,13 @@ public class DownloadTest extends LimeTestCase {
         assertFalse(pushRFD2.supportsFWTransfer());
         assertTrue(pushRFD2.needsPush());
         
-        new UDPAcceptor(PPORT_2,RouterService.getPort(), savedFile.getName(),pusher2,guid);
+        new UDPAcceptor(PPORT_2,ProviderHacks.getNetworkManager().getPort(), savedFile.getName(),pusher2,guid);
         
         RemoteFileDesc [] now = {pushRFD2};
         
         // start download with rfd that needs udp push request
         ManagedDownloader download=
-            (ManagedDownloader)RouterService.download(now, Collections.EMPTY_LIST, null, false);
+            (ManagedDownloader)ProviderHacks.getDownloadServices().download(now, Collections.EMPTY_LIST, null, false);
         Thread.sleep(2000);
         // also download from uploader1, so it gets the proxy headers from pusher2
         download.addDownload(openRFD,false);
@@ -1568,7 +1567,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.stopAfter(550000);
         uploader2.stopAfter(550000);
         
-        AlternateLocation badPushLoc=AlternateLocation.create(
+        AlternateLocation badPushLoc=ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";1.2.3.4:5",TestFile.hash());
         ((PushAltLoc)badPushLoc).updateProxies(true);
         
@@ -1592,7 +1591,7 @@ public class DownloadTest extends LimeTestCase {
         assertFalse("bad pushloc got advertised",
                 uploader2.incomingGoodAltLocs.contains(badPushLoc));
         assertEquals(1,uploader1.incomingGoodAltLocs.size());
-        assertTrue(uploader1.incomingGoodAltLocs.contains(AlternateLocation.create(rfd2)));
+        assertTrue(uploader1.incomingGoodAltLocs.contains(ProviderHacks.getAlternateLocationFactory().create(rfd2)));
         
         assertEquals(1,uploader1.incomingBadAltLocs.size());
         AlternateLocation current = uploader1.incomingBadAltLocs.get(0);
@@ -1631,9 +1630,9 @@ public class DownloadTest extends LimeTestCase {
                          AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
 
-        AlternateLocation al1 = AlternateLocation.create(rfd1);
-        AlternateLocation al2 = AlternateLocation.create(rfd2);
-        AlternateLocation al3 = AlternateLocation.create(rfd3);
+        AlternateLocation al1 = ProviderHacks.getAlternateLocationFactory().create(rfd1);
+        AlternateLocation al2 = ProviderHacks.getAlternateLocationFactory().create(rfd2);
+        AlternateLocation al3 = ProviderHacks.getAlternateLocationFactory().create(rfd3);
         ualt.add(al2);
         ualt.add(al3);
 
@@ -1698,7 +1697,7 @@ public class DownloadTest extends LimeTestCase {
         List alt1 = uploader1.incomingGoodAltLocs;
         assertEquals("uploader got bad alt locs",0,alt1.size());
         
-        AlternateLocation agood = AlternateLocation.create(rfd1);
+        AlternateLocation agood = ProviderHacks.getAlternateLocationFactory().create(rfd1);
         assertTrue(validAlts.contains(agood)); 
         assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0])); 
         assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1])); 
@@ -1715,7 +1714,7 @@ public class DownloadTest extends LimeTestCase {
         // change the minimum required bytes so it'll be added.
         PrivilegedAccessor.setValue(HTTPDownloader.class,
             "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
         LOG.info("-Testing that downloader adds itself to the mesh if it has a tree");
@@ -1760,7 +1759,7 @@ public class DownloadTest extends LimeTestCase {
         assertFalse(u1Alt.isEmpty());
         assertFalse(u2Alt.isEmpty());
 
-        AlternateLocation al = AlternateLocation.create(TestFile.hash());
+        AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create(TestFile.hash());
         assertTrue(u1Alt.toString()+" should contain "+al, u1Alt.contains(al) );
         assertTrue(u2Alt.toString()+" should contain "+al,  u2Alt.contains(al) );        
 
@@ -1776,7 +1775,7 @@ public class DownloadTest extends LimeTestCase {
         // change the minimum required bytes so it'll be added.
         PrivilegedAccessor.setValue(HTTPDownloader.class,
             "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
         LOG.info("-Testing that downloader does not add itself to the mesh if it has no tree");
@@ -1817,11 +1816,11 @@ public class DownloadTest extends LimeTestCase {
         u2Alt = uploader2.incomingGoodAltLocs;
         assertEquals(1,u1Alt.size());
         assertEquals(1,u2Alt.size());
-        assertTrue(u1Alt.contains(AlternateLocation.create(rfd2)));
-        assertTrue(u2Alt.contains(AlternateLocation.create(rfd1)));
+        assertTrue(u1Alt.contains(ProviderHacks.getAlternateLocationFactory().create(rfd2)));
+        assertTrue(u2Alt.contains(ProviderHacks.getAlternateLocationFactory().create(rfd1)));
 
         // but should not know about me.
-        AlternateLocation al = AlternateLocation.create(TestFile.hash());
+        AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create(TestFile.hash());
         assertFalse( u1Alt.contains(al) );
         assertFalse( u2Alt.contains(al) );        
 
@@ -1870,13 +1869,13 @@ public class DownloadTest extends LimeTestCase {
             public void run() {
                 try {
                     Thread.sleep(complete ? 4000 : 1500);
-                    FileDesc fd = RouterService.getFileManager().
+                    FileDesc fd = ProviderHacks.getFileManager().
                         getFileDescForUrn(TestFile.hash());
                     assertTrue(fd instanceof IncompleteFileDesc);
-                    RouterService.getAltlocManager().add(
-                        AlternateLocation.create(rfd2),this);
-                    RouterService.getAltlocManager().add(
-                        AlternateLocation.create(rfd3),this);
+                    ProviderHacks.getAltLocManager().add(
+                            ProviderHacks.getAlternateLocationFactory().create(rfd2),this);
+                    ProviderHacks.getAltLocManager().add(
+                            ProviderHacks.getAlternateLocationFactory().create(rfd3),this);
                 } catch(Throwable e) {
                     ErrorService.error(e);
                 }
@@ -1922,25 +1921,25 @@ public class DownloadTest extends LimeTestCase {
         final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, TestFile.hash().toString(), false);
         final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, TestFile.hash().toString(), false);
         final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, TestFile.hash().toString(), false);
-        AlternateLocation al1 = AlternateLocation.create(rfd1);
-        AlternateLocation al2 = AlternateLocation.create(rfd2);
-        AlternateLocation al3 = AlternateLocation.create(rfd3);
+        AlternateLocation al1 = ProviderHacks.getAlternateLocationFactory().create(rfd1);
+        AlternateLocation al2 = ProviderHacks.getAlternateLocationFactory().create(rfd2);
+        AlternateLocation al3 = ProviderHacks.getAlternateLocationFactory().create(rfd3);
         
         IncompleteFileManager ifm = dm.getIncompleteFileManager();
         // put the hash for this into IFM.
         File incFile = ifm.getFile(rfd1);
         incFile.createNewFile();
         // add the entry, so it's added to FileManager.
-        ifm.addEntry(incFile, new VerifyingFile(TestFile.length()));
+        ifm.addEntry(incFile, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(TestFile.length()));
         
         // Get the IncompleteFileDesc and add these alt locs to it.
         FileDesc fd =
-            RouterService.getFileManager().getFileDescForUrn(TestFile.hash());
+            ProviderHacks.getFileManager().getFileDescForUrn(TestFile.hash());
         assertNotNull(fd);
         assertInstanceof(IncompleteFileDesc.class, fd);
-        RouterService.getAltlocManager().add(al1, null);
-        RouterService.getAltlocManager().add(al2, null);
-        RouterService.getAltlocManager().add(al3, null);
+        ProviderHacks.getAltLocManager().add(al1, null);
+        ProviderHacks.getAltLocManager().add(al2, null);
+        ProviderHacks.getAltLocManager().add(al3, null);
         
         tResume(incFile);
 
@@ -1998,7 +1997,7 @@ public class DownloadTest extends LimeTestCase {
         // we must ensure that RFD1 is tried first, so the wait
         // is only set to 1 minute.
         
-        ManagedDownloader download= (ManagedDownloader) RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
+        ManagedDownloader download= (ManagedDownloader) ProviderHacks.getDownloadServices().download(rfds, Collections.EMPTY_LIST, null, false);
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()+1000);
         download.addDownload(rfd2,true);
         
@@ -2049,7 +2048,7 @@ public class DownloadTest extends LimeTestCase {
 			AlternateLocationCollection.create(rfd1.getSHA1Urn());
 
         AlternateLocation al2 =
-			AlternateLocation.create(rfd2);
+            ProviderHacks.getAlternateLocationFactory().create(rfd2);
         ualt.add(al2);
 
         uploader1.setGoodAlternateLocations(ualt);
@@ -2101,7 +2100,7 @@ public class DownloadTest extends LimeTestCase {
     
     public void testSimpleDownloadWithInitialTLSAlts() throws Exception {
         LOG.info("-Testing download with initial TLS alts");
-        ConnectionSettings.TLS_OUTGOING.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(true);
         
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
@@ -2154,7 +2153,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, false);
         
         ManagedDownloader downloader = null;        
-        downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
+        downloader=(ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds, false, null);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getActiveWorkers().size();
         int queued = downloader.getQueuedHostCount();
@@ -2215,7 +2214,7 @@ public class DownloadTest extends LimeTestCase {
         
         ManagedDownloader downloader = null;
         
-        downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
+        downloader=(ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds, false, null);
         //Thread.sleep(1000);
         //downloader.addDownloadForced(rfd2,false);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
@@ -2288,7 +2287,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
         ManagedDownloader downloader = null;
-        downloader = (ManagedDownloader)RouterService.download(rfds, false, null);
+        downloader = (ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds, false, null);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
@@ -2361,7 +2360,7 @@ public class DownloadTest extends LimeTestCase {
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
         ManagedDownloader downloader = null;
-        downloader = (ManagedDownloader)RouterService.download(rfds,false,null);
+        downloader = (ManagedDownloader)ProviderHacks.getDownloadServices().download(rfds,false,null);
         Thread.sleep(DownloadSettings.WORKER_INTERVAL.getValue()*2 + 1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
@@ -2403,7 +2402,7 @@ public class DownloadTest extends LimeTestCase {
         uploader1.setPartial(true);
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, false);
         RemoteFileDesc[] rfds = {rfd1};
-        Downloader downloader = RouterService.download(rfds,false,null);
+        Downloader downloader = ProviderHacks.getDownloadServices().download(rfds,false,null);
         waitForBusy(downloader);
         assertEquals("Downloader did not go to busy after getting ranges",
                 DownloadStatus.BUSY, downloader.getState());
@@ -2421,28 +2420,28 @@ public class DownloadTest extends LimeTestCase {
         int sleep = DownloadSettings.WORKER_INTERVAL.getValue();
         
         // make sure we use the ping ranker
-        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming", 
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming", 
                 Boolean.TRUE);
-        assertTrue(RouterService.canReceiveSolicited());
-        assertTrue(SourceRanker.getAppropriateRanker() instanceof PingRanker);
+        assertTrue(ProviderHacks.getNetworkManager().canReceiveSolicited());
+        assertTrue(ProviderHacks.getSourceRankerFactory().getAppropriateRanker() instanceof PingRanker);
         
        // create one source that will actually download and another one to which a headping should be sent 
        RemoteFileDesc rfd = newRFDWithURN(PORT_1, false);
        RemoteFileDesc noFile = newRFDWithURN(PORT_2, false);
        
-       AlternateLocation toBeDemoted = AlternateLocation.create(noFile);
+       AlternateLocation toBeDemoted = ProviderHacks.getAlternateLocationFactory().create(noFile);
        
        // create a listener for the headping
        UDPAcceptor l = new UDPAcceptor(PORT_2);
        
        ManagedDownloader download= (ManagedDownloader) 
-           RouterService.download(new RemoteFileDesc[]{rfd}, Collections.EMPTY_LIST, null, false);
+           ProviderHacks.getDownloadServices().download(new RemoteFileDesc[]{rfd}, Collections.EMPTY_LIST, null, false);
        LOG.debug("started download");
        
        // after a while clear the ranker and add the second host.
        Thread.sleep((int)(sleep * 1.5));
-       SourceRanker.getAppropriateRanker().stop();
-       SourceRanker.getAppropriateRanker().setMeshHandler(download);
+       ProviderHacks.getSourceRankerFactory().getAppropriateRanker().stop();
+       ProviderHacks.getSourceRankerFactory().getAppropriateRanker().setMeshHandler(download);
        download.addDownload(noFile,false);
        
        LOG.debug("waiting for download to complete");
@@ -2473,10 +2472,10 @@ public class DownloadTest extends LimeTestCase {
         
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        RouterService.download(rfds,false,null);
+        ProviderHacks.getDownloadServices().download(rfds,false,null);
         Thread.sleep(1000);
         synchronized(COMPLETE_LOCK) {
-        	RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
+        	ProviderHacks.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
         	waitForInvalid();       
         }
     }
@@ -2541,7 +2540,7 @@ public class DownloadTest extends LimeTestCase {
       List alts) throws Exception {
         Downloader download=null;
 
-        download=RouterService.download(rfds, alts, null, false);
+        download=ProviderHacks.getDownloadServices().download(rfds, alts, null, false);
         if(later != null) {
             Thread.sleep(100);
             for(int i = 0; i < later.length; i++)
@@ -2570,7 +2569,7 @@ public class DownloadTest extends LimeTestCase {
                                         throws Exception {
         Downloader download=null;
 
-        download=RouterService.download(rfds, false, null);
+        download=ProviderHacks.getDownloadServices().download(rfds, false, null);
         if(later != null) {
             Thread.sleep(100);
             for(int i = 0; i < later.length; i++)
@@ -2595,7 +2594,7 @@ public class DownloadTest extends LimeTestCase {
      * Performs a generic resume download test.
      */
     private static void tResume(File incFile) throws Exception {
-         RouterService.download(incFile);
+         ProviderHacks.getDownloadServices().download(incFile);
         
         waitForComplete();
         if (isComplete())
@@ -2644,7 +2643,7 @@ public class DownloadTest extends LimeTestCase {
     }
     
     private static RemoteFileDesc newRFDPush(int port, int rfdSuffix, int proxySuffix) throws Exception{    
-        PushAltLoc al = (PushAltLoc)AlternateLocation.create(
+        PushAltLoc al = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(
                 guid.toHexString()+";127.0.0." + proxySuffix +":"+port,TestFile.hash());
         al.updateProxies(true);
         
@@ -2830,7 +2829,7 @@ public class DownloadTest extends LimeTestCase {
                 while(true) {
                     sock.receive(p);
                     ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
-                    m = MessageFactory.read(bais);
+                    m = ProviderHacks.getMessageFactory().read(bais);
                     LOG.debug("received "+m.getClass()+ " no file? "+noFile);
                     if (noFile) {
                         if (m instanceof HeadPing) 
@@ -2847,7 +2846,7 @@ public class DownloadTest extends LimeTestCase {
                 
                 LOG.debug("received a push request");
                 
-                Socket s = Sockets.connect(new InetSocketAddress("127.0.0.1",_portC),500);
+                Socket s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("127.0.0.1",_portC),500);
                 
                 OutputStream os = s.getOutputStream();
                 
@@ -2871,7 +2870,7 @@ public class DownloadTest extends LimeTestCase {
         
         private void handleNoFile(SocketAddress from,GUID g) {
             HeadPing ping = new HeadPing(g,HugeTestUtils.SHA1,0);
-            HeadPong pong = new HeadPong(ping);
+            HeadPong pong = ProviderHacks.getHeadPongFactory().create(ping);
             assertFalse(pong.hasFile());
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();

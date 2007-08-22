@@ -11,30 +11,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.collection.Range;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouteTable;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -66,7 +63,7 @@ public class RequeryDownloadTest
     /** The TestMessageRouter's queryRouteTable. */
     private RouteTable _queryRouteTable;
     /** The TestMessageRouter's FOR_ME_REPLY_HANDLER. */
-    private final ReplyHandler _ourReplyHandler = ForMeReplyHandler.instance();
+    private final ReplyHandler _ourReplyHandler = ProviderHacks.getForMeReplyHandler();
     
     private static final int PORT = 6939;
 
@@ -96,34 +93,34 @@ public class RequeryDownloadTest
         setSettings();
         
         _router=new TestMessageRouter();
-        new RouterService(new ActivityCallbackStub(), _router);  
+    //    new RouterService(new ActivityCallbackStub(), _router);  
         _router.initialize();
     }
 
     public void setUp() throws Exception {
         setSettings();
-        RouterService.setListeningPort(ConnectionSettings.PORT.getValue());
-        PrivilegedAccessor.setValue(
-            RouterService.class, "manager", new ConnectionManagerStub());
+        ProviderHacks.getNetworkManager().setListeningPort(ConnectionSettings.PORT.getValue());
+     //   PrivilegedAccessor.setValue(
+     //       RouterService.class, "manager", new ConnectionManagerStub());
         _queryRouteTable = 
             (RouteTable) PrivilegedAccessor.getValue(_router, 
                                                      "_queryRouteTable");
 
         createSnapshot();
-        _mgr=RouterService.getDownloadManager();
+        _mgr=ProviderHacks.getDownloadManager();
         _mgr.initialize();
         _mgr.scheduleWaitingPump();
         boolean ok=_mgr.readSnapshot(_snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         _uploader=new TestUploader("uploader 6666", 6666, false);
         _uploader.setRate(Integer.MAX_VALUE);
-        RouterService.getDownloadManager().clearAllDownloads();
+        ProviderHacks.getDownloadManager().clearAllDownloads();
         
         new File( getSaveDirectory(), _filename).delete();
     }    
     
     private static void setSettings() {
-        ManagedDownloader.NO_DELAY = true;
+        RequeryManager.NO_DELAY = true;
         ConnectionSettings.NUM_CONNECTIONS.setValue(0);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -177,8 +174,8 @@ public class RequeryDownloadTest
        }
 
        //Record information in IncompleteFileManager.
-       VerifyingFile vf=new VerifyingFile(TestFile.length());
-       vf.addInterval(new Interval(0, 1));  //inclusive
+       VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(TestFile.length());
+       vf.addInterval(Range.createRange(0, 1));  //inclusive
        ifm.addEntry(_incompleteFile, vf);       
        return ifm;
     }
@@ -209,6 +206,22 @@ public class RequeryDownloadTest
     /** Gets a response that doesn't match--can't download. */
     public void testNoMatch() throws Exception {
         doTest("some other file.txt", null, false);
+    }
+    
+    /** Runs the tests again with pro set */
+    public void testProExact() throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", Boolean.TRUE);
+        testExactMatch();
+    }
+    
+    public void testProHash() throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", Boolean.TRUE);
+        testHashMatch();
+    }
+    
+    public void testProNo() throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", Boolean.TRUE);
+        testNoMatch();
     }
 
 
@@ -245,7 +258,7 @@ public class RequeryDownloadTest
         Thread.sleep(1000);
         
         assertEquals("downloader isn't waiting for results", 
-                DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
+                DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
 
         // no need to do a dldr.resume() cuz ResumeDownloaders spawn the query
         // automatically
@@ -280,13 +293,10 @@ public class RequeryDownloadTest
         Response response = newResponse(0l, TestFile.length(),
                                         responseName, responseURNs);
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
-        QueryReply reply = new QueryReply(guidToUse, 
-            (byte)6, 6666, ip, 0l, 
-            new Response[] { response }, new byte[16],
-            false, false, //needs push, is busy
-            true, false,  //finished upload, measured speed
-            false, false);//supports chat, is multicast response....
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
+        QueryReply reply = ProviderHacks.getQueryReplyFactory().createQueryReply(guidToUse, (byte)6, 6666,
+                ip, 0l, new Response[] { response }, new byte[16], false, false, true, false,
+                false, false);//supports chat, is multicast response....
+        _router.handleQueryReply(reply, ProviderHacks.getManagedConnectionFactory().createManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(2000);
@@ -306,7 +316,7 @@ public class RequeryDownloadTest
         else {
             //b) No match: keep waiting for results
             assertEquals("downloader should wait for user", 
-                    DownloadStatus.WAITING_FOR_RESULTS, downloader.getState());
+                    DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
             downloader.stop();
         }
     }

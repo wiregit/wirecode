@@ -33,8 +33,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.limegroup.gnutella.Assert;
-
 /**
  * Contains utility methods
  * @author  asingla
@@ -212,7 +210,7 @@ public class LimeXMLUtils {
         for(Map.Entry<String, String> entry : queryNameValues) {
             String currFieldName = entry.getKey();
             String queryValue = entry.getValue();
-            Assert.that(queryValue != null, "null value");
+            assert queryValue != null : "null value";
             if (queryValue.equals(""))
                 continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);
@@ -712,7 +710,7 @@ public class LimeXMLUtils {
         } catch (IOException e) {
             //This should REALLY never happen because no devices are involved.
             //But could we propogate it up.
-            Assert.that(false, "Couldn't write to byte stream");
+            assert false : "Couldn't write to byte stream";
             return null;
         } finally {
             IOUtils.close(gos);
@@ -878,7 +876,7 @@ public class LimeXMLUtils {
             try {
                 md = MessageDigest.getInstance("SHA");
             } catch(NoSuchAlgorithmException nsae) {
-                Assert.that(false, "no sha algorithm.");
+                throw new IllegalStateException(nsae);
             }
 
             long fileLength = toHash.length();            

@@ -25,11 +25,10 @@ import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeCoreGlue;
-import com.limegroup.gnutella.UrnCache;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.UrnCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -39,6 +38,7 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UISettings;
@@ -210,6 +210,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
+        SSLSettings.TLS_OUTGOING.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
@@ -275,11 +276,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         Expand.expandFile(xmlWar, _settingsDir);
         //make sure it'll delete even if something odd happens.
 
-        // Expand the update.ver file.
-        File updateVer = new File(f, "gui/update.ver");
-        assertTrue(updateVer.exists());
-        Expand.expandFile(updateVer, _settingsDir);
-
         _baseDir.deleteOnExit();
     }
     
@@ -320,7 +316,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         try {
@@ -354,7 +349,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         };
         
         synchronized(myUrns) {
-            UrnCache.instance().calculateAndCacheUrns(f, blocker);
+            ProviderHacks.getUrnCache().calculateAndCacheUrns(f, blocker);
             if(myUrns.isEmpty()) // only wait if it didn't fill immediately.
                 myUrns.wait(3000);
         }
@@ -369,7 +364,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Sends a pong through the connection to keep it alive.
      */
     public static void keepAlive(Connection c) throws IOException {
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1);
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1);
         c.send(pr);
         c.flush();
     }
@@ -379,7 +374,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      */
     public static void keepAllAlive(Connection[] cs) throws IOException {
         for(int i = 0; i < cs.length; i++) {
-            PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1);
+            PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1);
             cs[i].send(pr);
             cs[i].flush();
         }
@@ -574,7 +569,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
                 return null;
             try {
                 socket.setSoTimeout(timeout);
-                Message m=MessageFactory.read(socket.getInputStream(), Network.TCP);
+                Message m=ProviderHacks.getMessageFactory().read(socket.getInputStream(), Network.TCP);
                 if(type.isInstance(m))
                     return (T)m;
                 else if(m == null) //interruptedIOException thrown

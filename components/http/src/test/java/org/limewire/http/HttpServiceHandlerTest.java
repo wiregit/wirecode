@@ -2,6 +2,8 @@ package org.limewire.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -10,11 +12,14 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseFactory;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpRequestFactory;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOEventDispatch;
@@ -25,7 +30,7 @@ import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.NIODispatcher;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.BufferUtils;
 
@@ -47,6 +52,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
 
     private HttpServiceHandler serviceHandler;
 
+    private HttpRequestHandlerRegistry registry;
+
     public HttpServiceHandlerTest(String name) {
         super(name);
     }
@@ -64,7 +71,7 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         requestFactory = new DefaultHttpRequestFactory();
 
         BasicHttpProcessor httpProcessor = new BasicHttpProcessor();
-        HttpRequestHandlerRegistry registry = new HttpRequestHandlerRegistry();
+        registry = new HttpRequestHandlerRegistry();
         stringEntity = new StringEntity("abc");
         registry.register("/get/string", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
@@ -89,8 +96,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
         serviceHandler.setEventListener(listener);
 
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -120,8 +127,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
         serviceHandler.setEventListener(listener);
 
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -140,15 +147,31 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         conn.setContentEncoder(encoder);
         conn.produceOutput(serviceHandler);
         assertNotNull(listener.exception);
-        assertTrue(session.closed);
+        assertTrue(session.isClosed());
         
         serviceHandler.closed(conn);
         assertTrue(listener.connectionClosed);
     }
 
+    public void testEventListenerTimeout() throws Exception {
+        MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
+        serviceHandler.setEventListener(listener);
+
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        
+        serviceHandler.connected(conn);
+        serviceHandler.closed(conn);
+        assertTrue(listener.connectionClosed);
+    }
+
     public void testGetRequestNIOEntity() throws Exception {
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -176,8 +199,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
     }
 
     public void testGetRequestNIOEntityThrowingException() throws Exception {
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -193,13 +216,32 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         nioEntity.exception = new IOException();
         conn.setContentEncoder(encoder);
         conn.produceOutput(serviceHandler);
-        assertTrue(session.closed);
+        assertTrue(session.isClosed());
+        assertTrue(nioEntity.finished);
+    }
+
+    public void testGetRequestNIOEntityTimeout() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        
+        serviceHandler.connected(conn);
+
+        HttpRequest request = new BasicHttpRequest("GET", "/get/nio");
+        conn.setHttpRequest(request);
+        serviceHandler.requestReceived(conn);
+        
+        assertFalse(nioEntity.finished);
+        serviceHandler.closed(conn);
         assertTrue(nioEntity.finished);
     }
 
     public void testGetRequestStringEntity() throws Exception {
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -223,8 +265,8 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
         serviceHandler.setEventListener(listener);
 
-        MockSocket socket = new MockSocket();
-        MockIOSession session = new MockIOSession(socket);
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
         MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         MockHttpServerConnection conn = new MockHttpServerConnection(session,
@@ -241,6 +283,248 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         assertNull(listener.response.getEntity());
     }
 
+    public void testPostRequest() throws Exception {
+        MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
+        serviceHandler.setEventListener(listener);
+
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        
+        serviceHandler.connected(conn);
+
+        HttpRequest request = new BasicHttpRequest("POST", "/get/string");
+        conn.setHttpRequest(request);
+        serviceHandler.requestReceived(conn);
+        conn.produceOutput(serviceHandler);
+        assertNotNull(listener.response);
+        assertEquals(HttpStatus.SC_OK, listener.response.getStatusLine().getStatusCode());        
+    }
+
+    public void testReadWriteInterestHead() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        serviceHandler.connected(conn);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+
+        conn.setHttpRequest(new BasicHttpRequest("HEAD", "/get/string"));
+        conn.consumeInput(serviceHandler);
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        // expect service handler to send response and wait for next request
+        conn.produceOutput(serviceHandler);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        conn.setHttpRequest(new BasicHttpRequest("HEAD", "/get/string"));
+        conn.consumeInput(serviceHandler);
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        // service handler should pick up next request right away
+        conn.setHasBufferedInput(true);
+        conn.produceOutput(serviceHandler);
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        conn.setHasBufferedInput(false);
+        conn.produceOutput(serviceHandler);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+    }
+
+    public void testReadWriteInterestGet() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        serviceHandler.connected(conn);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+
+        conn.setHttpRequest(new BasicHttpRequest("GET", "/get/string"));
+        conn.consumeInput(serviceHandler);
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        // expect service handler to send response and wait for next request
+        conn.produceOutput(serviceHandler);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        conn.setHttpRequest(new BasicHttpRequest("GET", "/get/string"));
+        conn.consumeInput(serviceHandler);
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        // service handler should pick up next request right away
+        conn.setHasBufferedInput(true);
+        conn.produceOutput(serviceHandler);
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        conn.setHasBufferedInput(false);
+        conn.produceOutput(serviceHandler);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+    }
+
+    public void testReadWriteInterestPost() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        serviceHandler.connected(conn);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+
+        conn.setHttpRequest(new BasicHttpEntityEnclosingRequest("POST", "/get/string"));
+        conn.consumeInput(serviceHandler);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        MockContentDecoder decoder = new MockContentDecoder("abc");
+        conn.setContentDecoder(decoder);
+        serviceHandler.inputReady(conn, decoder);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        serviceHandler.inputReady(conn, decoder);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        decoder.completed = true;
+        serviceHandler.inputReady(conn, decoder);
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+        
+        conn.produceOutput(serviceHandler);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+    }
+
+    public void testReadWriteInterestCloseGet() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        serviceHandler.connected(conn);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+
+        conn.setHttpRequest(new BasicHttpRequest("GET", "/get/string", HttpVersion.HTTP_1_0));
+        conn.consumeInput(serviceHandler);
+        assertFalse(conn.isClosed());
+        assertFalse(session.isClosed());
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        // expect service handler to send response and wait for next request
+        conn.produceOutput(serviceHandler);
+        assertTrue(conn.isClosed());
+        assertTrue(session.isClosed());
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+    }
+
+    public void testReadWriteInterestCloseHead() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+        
+        serviceHandler.connected(conn);
+        assertTrue(channel.isReadInterest());
+        assertFalse(channel.isWriteInterest());
+
+        conn.setHttpRequest(new BasicHttpRequest("HEAD", "/get/string", HttpVersion.HTTP_1_0));
+        conn.consumeInput(serviceHandler);
+        assertTrue(conn.isClosed());
+        assertFalse(session.isClosed());
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+
+        // expect service handler to send response and wait for next request
+        conn.produceOutput(serviceHandler);
+        assertTrue(conn.isClosed());
+        assertTrue(session.isClosed());
+        assertFalse(channel.isReadInterest());
+        assertTrue(channel.isWriteInterest());
+    }
+
+    public void testAsyncHttpHandler() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(2);
+        MockHttpServiceEventListener listener = new MockHttpServiceEventListener();
+        serviceHandler.setEventListener(listener);
+
+        registry.register("/get/async", new AsyncHttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                assertFalse(NIODispatcher.instance().isDispatchThread());
+                latch.countDown();
+                response.setEntity(stringEntity);
+            }
+        });
+        
+        StubIOSession session = new StubIOSession(new StubSocket());
+        MockHttpChannel channel = new MockHttpChannel(session, eventDispatch);
+        session.setHttpChannel(channel);
+        MockHttpServerConnection conn = new MockHttpServerConnection(session,
+                requestFactory, parms) {
+            @Override
+            public void submitResponse(HttpResponse response)
+            throws IOException, HttpException {
+                super.submitResponse(response);
+                latch.countDown();
+            }  
+        };
+        
+        serviceHandler.connected(conn);
+        conn.setHttpRequest(new BasicHttpRequest("GET", "/get/async"));
+        conn.consumeInput(serviceHandler);
+        assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
+
+        // make sure the request has been fully processed
+        HttpTestUtils.waitForNIO();
+        
+        assertNotNull(conn.getHttpResponse());
+        assertEquals(stringEntity, conn.getHttpResponse().getEntity());        
+        MockContentEncoder encoder = new MockContentEncoder();
+        conn.setContentEncoder(encoder);
+        conn.produceOutput(serviceHandler);
+        assertEquals("abc", encoder.data.toString());
+        assertTrue(encoder.isCompleted());        
+    }
+    
     public static class MockHttpChannel extends HttpChannel {
 
         private StringBuilder out = new StringBuilder();
@@ -253,21 +537,6 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         @Override
         public int write(ByteBuffer buffer) throws IOException {
             return BufferUtils.transfer(buffer, out);
-        }
-        
-    }
-    
-    public static class MockIOSession extends HttpIOSession {
-
-        boolean closed;
-
-        public MockIOSession(AbstractNBSocket socket) {
-            super(socket);
-        }
-
-        @Override
-        public void close() {
-            this.closed = true;
         }
         
     }

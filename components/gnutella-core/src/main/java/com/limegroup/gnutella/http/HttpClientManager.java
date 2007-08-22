@@ -22,8 +22,9 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.google.inject.Inject;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
 /**
@@ -64,6 +65,9 @@ public class HttpClientManager {
      */
     private static final HttpConnectionManager MANAGER;
     
+    @Inject
+    private static SocketsManager socketsManager; 
+    
     static {
         MANAGER = new MultiThreadedHttpConnectionManager();
         ((MultiThreadedHttpConnectionManager)MANAGER).setIdleConnectionTime(IDLE_TIME);
@@ -74,6 +78,9 @@ public class HttpClientManager {
         p = new Protocol("https", new LimeSocketFactory(ConnectType.TLS),80);
         Protocol.registerProtocol("https", p);
     }
+    
+    /** Ensures this is initialized. */
+    public static void initialize() {}
             
     /** Returns a new HttpClient with the appropriate manager. */
     public static HttpClient getNewClient() {
@@ -106,6 +113,7 @@ public class HttpClientManager {
         if(!"http".equals(scheme.toLowerCase()))
             throw new IOException("only support no NIO with http");
         Protocol http = new Protocol("http", new DefaultProtocolSocketFactory(), 80);
+        assert hc != null;
         hc.setHost(hc.getHost(), hc.getPort(), http);
         client.executeMethod(method);
     }
@@ -228,15 +236,18 @@ public class HttpClientManager {
 
         public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
           throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port),0, type);
+            // DPINJ: Change to using passed-in SocketsManager!!!
+            return socketsManager.connect(new InetSocketAddress(host,port),0, type);
         }
 
         public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port),0, type);
+            // DPINJ: Change to using passed-in SocketsManager!!!
+            return socketsManager.connect(new InetSocketAddress(host,port),0, type);
         }
         
         public Socket createSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port), timeout, type);
+            // DPINJ: Change to using passed-in SocketsManager!!!
+            return socketsManager.connect(new InetSocketAddress(host,port), timeout, type);
         }
         
     }

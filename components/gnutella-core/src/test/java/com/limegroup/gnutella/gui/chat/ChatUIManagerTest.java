@@ -6,8 +6,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GUIMediator;
@@ -42,10 +41,10 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         doSettings();
 
         GUITestUtils.initializeUI();
-        ChatManager.instance().initialize();
+        ProviderHacks.getChatManager().initialize();
 
         // start it up!
-        acceptThread = new Acceptor();
+        acceptThread = ProviderHacks.getAcceptor();
         acceptThread.start();
         acceptThread.setListeningPort(CHAT_PORT);
     }
@@ -71,8 +70,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         // the outgoing chat frame can not be registered with ChatUIManager
         // otherwise the connection will be closed since there can only be
         // one chat frame per host
-        InstantMessenger chat = new InstantMessenger("localhost", CHAT_PORT,
-                ChatManager.instance(), RouterService.getCallback());
+        InstantMessenger chat = ProviderHacks.getInstantMessengerFactory().createOutgoingInstantMessenger("localhost", CHAT_PORT);
         outgoing = new ChatFrame(chat);
         chat.start();
         chat.waitForConnect(4000);
@@ -143,7 +141,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         assertTrue(!incoming.getChat().isConnected());
         GUITestUtils.waitForSwing();
         assertTrue(incoming.getText().indexOf(
-                GUIMediator.getStringResource("CHAT_HOST_UNAVAILABLE")) != -1);
+                GUIMediator.getStringResource("Host is unavailable")) != -1);
     }
 
     private ChatFrame getIncomingChat() {

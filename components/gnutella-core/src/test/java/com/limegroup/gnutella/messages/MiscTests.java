@@ -12,6 +12,7 @@ import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class MiscTests extends LimeTestCase {
@@ -26,9 +27,9 @@ public class MiscTests extends LimeTestCase {
     
     /** Makes sure all stuff we need to work works. */
     public void testSecureUpdateMessage() throws Exception {
-        StaticMessages.initialize();
-        QueryReply reply = StaticMessages.getUpdateReply();
-        QueryReply lime = StaticMessages.getLimeReply();
+        ProviderHacks.getStaticMessages().initialize();
+        QueryReply reply = ProviderHacks.getStaticMessages().getUpdateReply();
+        QueryReply lime = ProviderHacks.getStaticMessages().getLimeReply();
         assertTrue(reply.hasSecureData());
         assertTrue(lime.hasSecureData());
 

@@ -96,19 +96,6 @@ public final class ConnectionSettings extends LimeProps {
 		FACTORY.createBooleanSetting("ALLOW_DUPLICATE", false);
 
 	/**
-	 * Setting for whether or not to connect using GWebCache.
-	 */
-	public static final BooleanSetting USE_GWEBCACHE =
-		FACTORY.createBooleanSetting("USE_GWEBCACHE", true);
-		
-    /**
-     * Setting for the last time (in msecs since epoch) that we
-     * connected to retrieve more gWebCache bootstrap servers
-     */
-    public static final LongSetting LAST_GWEBCACHE_FETCH_TIME =
-        FACTORY.createLongSetting("LAST_GWEBCACHE_FETCH_TIME", 0);
-
-	/**
 	 * Setting for whether or not to activate the connection watchdog
 	 * thread.  Particularly useful in testing.
 	 */
@@ -226,15 +213,7 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final BooleanSetting UPNP_IN_USE =
     	FACTORY.createBooleanSetting("UPNP_IN_USE", false);
-    
-    /** Whether or not we want to accept incoming TLS connections. */
-    public static final BooleanSetting TLS_INCOMING =
-        FACTORY.createBooleanSetting("TLS_INCOMING", true);
-    
-    /** Whether or not we want to make outgoing connections with TLS. */
-    public static final BooleanSetting TLS_OUTGOING =
-        FACTORY.createBooleanSetting("TLS_OUTGOING", false);
-    
+        
     public static final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
     
     public static final StringSetting CONNECT_STRING =
@@ -391,7 +370,7 @@ public final class ConnectionSettings extends LimeProps {
      * (In 1998, the IEC standardized "kibi" as the prefix denoting 1024, or "kilo binary".) 
      */
     public static final PowerOfTwoSetting QRT_SIZE_IN_KIBI_ENTRIES =
-        FACTORY.createRemotePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 64,
+        FACTORY.createRemotePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 128,
                 "ConnectionSettings.QRTSize", 128, 256);
     
     /**

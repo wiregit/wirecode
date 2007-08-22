@@ -10,10 +10,8 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
@@ -24,8 +22,8 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class VendorMessageSupportTest extends LimeTestCase {
@@ -72,8 +70,8 @@ public class VendorMessageSupportTest extends LimeTestCase {
         qrt.add("foosball");
 
         // Set up a connection to the host....
-        _leaf1=new Connection(_remoteHost, _remotePort);
-        _leaf1.initialize(new LeafHeaders(""), new EmptyResponder(), 1000);
+        _leaf1=ProviderHacks.getConnectionFactory().createConnection(_remoteHost, _remotePort);
+        _leaf1.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.send((RouteTableMessage)iter.next());
         _leaf1.flush();
@@ -81,8 +79,8 @@ public class VendorMessageSupportTest extends LimeTestCase {
         // you support any vendor message....
         
         // Set up another connection to the host....
-        _leaf2=new Connection(_remoteHost, _remotePort);
-        _leaf2.initialize(new LeafHeaders(""), new EmptyResponder(), 1000);
+        _leaf2=ProviderHacks.getConnectionFactory().createConnection(_remoteHost, _remotePort);
+        _leaf2.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.send((RouteTableMessage)iter.next());
         _leaf2.flush();
@@ -147,7 +145,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         drain(_leaf1);
         drain(_leaf2);
 
-        QueryRequest qr = QueryRequest.createQuery("susheel", (byte)3);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("susheel", (byte)3);
         
         // first make sure query gets through.....
         _leaf2.send(qr);
@@ -183,7 +181,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         }
         catch (Exception whatever) {}
 
-        qr = QueryRequest.createQuery("daswani", (byte)3);
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("daswani", (byte)3);
         _leaf2.send(qr);
         _leaf2.flush();
         
@@ -212,7 +210,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         }
         catch (InterruptedException ignored) {}
 
-        qr = QueryRequest.createQuery("foosball", (byte)3);
+        qr = ProviderHacks.getQueryRequestFactory().createQuery("foosball", (byte)3);
         _leaf2.send(qr);
         _leaf2.flush();
 
@@ -307,7 +305,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         try {
             _udpSock.receive(dp);  // wait for the UDP ConnectBack...
             ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
-            MessageFactory.read(bais);
+            ProviderHacks.getMessageFactory().read(bais);
             fail("Did recieve UDP ConnectBack!!");
         } catch (InterruptedIOException good) {
         }

@@ -11,21 +11,20 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.collection.Interval;
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.collection.Range;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "unchecked", "cast","null" } )
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
     private IncompleteFileManager ifm;
     private RemoteFileDesc rfd1, rfd2;
@@ -40,12 +39,12 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
     }
     
     public static void globalSetUp() {
-        new RouterService(new ActivityCallbackStub());
+       // new RouterService(new ActivityCallbackStub());
     }
     
     public void setUp() {
         ifm=new IncompleteFileManager();
-        fm = RouterService.getFileManager();
+        fm = ProviderHacks.getFileManager();
     }
 
     /** @param urn a SHA1 urn, or null */
@@ -71,16 +70,16 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
         File file=new File(getSaveDirectory(), "T-748-test.txt");
         IncompleteFileManager ifm=new IncompleteFileManager();
         Iterator iter=null;
-        VerifyingFile vf = new VerifyingFile(748);
+        VerifyingFile vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(748);
         //0 blocks
         assertNull(ifm.getEntry(file));
         assertEquals(0, ifm.getBlockSize(file));
         //1 block
-        vf.addInterval(new Interval(0,10));
+        vf.addInterval(Range.createRange(0,10));
         ifm.addEntry(file,vf);
         assertEquals(11, ifm.getBlockSize(file));//full inclusive now
         iter=ifm.getEntry(file).getBlocks().iterator();
-        assertEquals(new Interval(0, 10), iter.next());
+        assertEquals(Range.createRange(0, 10), iter.next());
         assertTrue(! iter.hasNext());
         
         SharingSettings.INCOMPLETE_PURGE_TIME.setValue(26);
@@ -161,7 +160,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"); 
         File tmp1=ifm.getFile(rfd1);
-        VerifyingFile vf=new VerifyingFile(1839);
+        VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(1839);
         ifm.addEntry(tmp1, vf);
 
         //After deleting entry there should be no more blocks...
@@ -187,7 +186,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         File tmp1=ifm.getFile(rfd1);
-        VerifyingFile vf=new VerifyingFile(1839);
+        VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(1839);
         ifm.addEntry(tmp1, vf);
         
         assertEquals(1, fm.getNumIncompleteFiles()); // 1 added.
@@ -332,8 +331,8 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
             RemoteFileDesc rfd=newRFD("file name.txt", 1839, 
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
             File incomplete=ifm1.getFile(rfd);
-            VerifyingFile vf=new VerifyingFile(1839);
-            vf.addInterval(new Interval(10, 100));  //inclusive
+            VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(1839);
+            vf.addInterval(Range.createRange(10, 100));  //inclusive
             ifm1.addEntry(incomplete, vf);
 
             //Write to disk.
@@ -365,7 +364,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
             assertTrue(vf2!=null);
             Iterator /* of Interval */ iter=vf2.getBlocks().iterator();
             assertTrue(iter.hasNext());
-            assertEquals(new Interval(10, 100), iter.next());
+            assertEquals(Range.createRange(10, 100), iter.next());
             assertTrue(!iter.hasNext());
             assertEquals(new File(inDir, "T-1839-file name.txt"),
                 ifm2.getFile(newRFD("different name.txt", 1839, 
@@ -380,8 +379,8 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeT
 	    try {
             return (String)PrivilegedAccessor.invokeMethod(
                 IncompleteFileManager.class, "tempName", 
-                new Object[] {s, new Integer(one), new Integer(two)},
-                new Class[] {String.class, Integer.TYPE, Integer.TYPE});
+                new Object[] {s, new Long(one), new Integer(two)},
+                new Class[] {String.class, Long.TYPE, Integer.TYPE});
         } catch(Exception e) {
             if ( e.getCause() != null ) 
                 throw e.getCause();

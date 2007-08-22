@@ -18,9 +18,9 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -45,8 +45,19 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
 
     private HTTPUploadSessionManager sessionManager;
 
-    public PushProxyRequestHandler(HTTPUploadSessionManager sessionManager) {
+    private MessageRouter messageRouter;
+
+    @Inject
+    PushProxyRequestHandler(HTTPUploadSessionManager sessionManager, MessageRouter messageRouter) {
+        if (sessionManager == null) {
+            throw new IllegalArgumentException();
+        }
+        if (messageRouter == null) {
+            throw new IllegalArgumentException();
+        }
+        
         this.sessionManager = sessionManager;
+        this.messageRouter = messageRouter;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -141,6 +152,11 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
 
         Header header = request.getLastHeader(HTTPHeaderName.NODE
                 .httpStringValue());
+        if (header == null) {
+            LOG.info("Missing X-Node header push proxy request");
+            return null;
+        }
+            
         InetSocketAddress address = getNodeAddress(header.getValue());
         if (address == null) {
             LOG.info("Invalid node address for push proxy request: " + header.getValue());
@@ -180,7 +196,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
                         .getAddress().getAddress(), request.getAddress()
                         .getPort(), Network.TCP, request.isUseTLS());
         try {
-            RouterService.getMessageRouter().sendPushRequest(push);
+            messageRouter.sendPushRequest(push);
         } catch (IOException e) {
             LOG.debug("Sending of push proxy request failed", e);
             return false;

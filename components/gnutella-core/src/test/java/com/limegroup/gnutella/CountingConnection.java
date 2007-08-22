@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public class CountingConnection extends Connection {
     
@@ -16,7 +17,7 @@ public class CountingConnection extends Connection {
 
 
     public CountingConnection(String host, int port) {
-        super(host, port);
+        super(host, port, ConnectType.PLAIN, ProviderHacks.getCapabilitiesVMFactory(), ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(), ProviderHacks.getMessageFactory(), ProviderHacks.getNetworkManager());
         countEnabled = true;
     }
 

@@ -20,10 +20,9 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -64,17 +63,18 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         }
         
         //fake a connection to the network
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
             }
         };
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-        assertTrue(RouterService.isConnected());
+   //     PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
 
     public void testRequestDHTHostsFromSingleHost() throws Exception {
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
         nodeFetcher.start();
         //request hosts
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[0].getLocalPort());
@@ -83,7 +83,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
         UDP_ACCESS[0].receive(pack);
         InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = MessageFactory.read(in);
+        Message m = ProviderHacks.getMessageFactory().read(in);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         PingRequest ping = (PingRequest)m;
@@ -100,13 +100,13 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         
         //send the pong now
         IpPortImpl ipp = new IpPortImpl("213.0.0.1", 1111);
-        PingReply reply = PingReply.create(ping.getGUID(), (byte)1, IpPort.EMPTY_LIST,
+        PingReply reply = ProviderHacks.getPingReplyFactory().create(ping.getGUID(), (byte)1, IpPort.EMPTY_LIST,
                 Arrays.asList(ipp));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         reply.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                 baos.toByteArray().length,
-                new InetSocketAddress("localhost", RouterService.getPort()));
+                new InetSocketAddress("localhost", ProviderHacks.getNetworkManager().getPort()));
         UDP_ACCESS[0].send(pack);
         //test the processing
         Thread.sleep(1000);
@@ -121,7 +121,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         nodeFetcher.requestDHTHosts(addr);
         UDP_ACCESS[1].receive(pack);
         in = new ByteArrayInputStream(pack.getData());
-        m = MessageFactory.read(in);
+        m = ProviderHacks.getMessageFactory().read(in);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         ping = (PingRequest)m;
@@ -129,7 +129,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     }
     
     public void testRequestMultipleTimesFromSingleHost() throws Exception {
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
 //      try to send a ping, unregister it and send another ping
         nodeFetcher.setPingExpireTime(100);
         //wait: LISTEN_EXPIRE_TIME is not volatile and a wrong value may be read otherwise
@@ -145,7 +145,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         nodeFetcher.requestDHTHosts(addr);
         UDP_ACCESS[2].receive(pack);
         InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = MessageFactory.read(in);
+        Message m = ProviderHacks.getMessageFactory().read(in);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         PingRequest ping = (PingRequest)m;
@@ -157,16 +157,16 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
         dhtBootstrapper.setWaitingForNodes(true);
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
         
-        RouterService.getHostCatcher().clear();
+        ProviderHacks.getHostCatcher().clear();
         for(int i=0; i < UDP_ACCESS.length; i++) {
             ExtendedEndpoint ep = new ExtendedEndpoint(
                     "127.0.0.1",
                     UDP_ACCESS[i].getLocalPort());
             ep.setDHTVersion(0);
             ep.setDHTMode(DHTMode.ACTIVE);
-            RouterService.getHostCatcher().add(ep, false);
+            ProviderHacks.getHostCatcher().add(ep, false);
         }
         
         nodeFetcher.start();
@@ -179,16 +179,16 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
         dhtBootstrapper.setWaitingForNodes(true);
-        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+        DHTNodeFetcher nodeFetcher = ProviderHacks.getDHTNodeFetcherFactory().createNodeFetcher(dhtBootstrapper);
         
-        RouterService.getHostCatcher().clear();
+        ProviderHacks.getHostCatcher().clear();
         for(int i=0; i < UDP_ACCESS.length; i++) {
             ExtendedEndpoint ep = new ExtendedEndpoint(
                     "127.0.0.1",
                     UDP_ACCESS[i].getLocalPort());
             ep.setDHTVersion(0);
             ep.setDHTMode(DHTMode.PASSIVE);
-            RouterService.getHostCatcher().add(ep, false);
+            ProviderHacks.getHostCatcher().add(ep, false);
         }
         nodeFetcher.start();
         Thread.sleep(1000);
@@ -202,7 +202,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
           pack = new DatagramPacket(datagramBytes, 1000);
           UDP_ACCESS[i].receive(pack);
           in = new ByteArrayInputStream(pack.getData());
-          m = MessageFactory.read(in);
+          m = ProviderHacks.getMessageFactory().read(in);
           m.hop();
           assertInstanceof(PingRequest.class, m);
           ping = (PingRequest)m;

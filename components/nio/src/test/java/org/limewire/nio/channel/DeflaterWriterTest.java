@@ -140,6 +140,25 @@ public final class DeflaterWriterTest extends BaseTestCase {
         assertEquals(buffer(data), out.flip());
     }
 	
+    public void testHasBufferedOutput() throws Exception {
+        assertFalse(WRITER.hasBufferedOutput());
+        WRITER.write(ByteBuffer.wrap("Hello".getBytes()));
+        assertTrue(WRITER.hasBufferedOutput());
+        WRITER.handleWrite();
+        assertTrue(SINK.hasBufferedOutput());
+        assertTrue("expected data in SINK", WRITER.hasBufferedOutput());
+        SINK.getBuffer().clear();
+        assertFalse(WRITER.hasBufferedOutput());
+
+        SINK.getBuffer().limit(2);
+        WRITER.write(ByteBuffer.wrap("Hello".getBytes()));
+        assertTrue(WRITER.hasBufferedOutput());
+        WRITER.handleWrite();
+        SINK.getBuffer().clear();
+        assertFalse(SINK.hasBufferedOutput());
+        assertTrue("expected data in WRITER.outgoing", WRITER.hasBufferedOutput());
+    }
+
 	private byte[] data(int size) {
 	    byte[] data = new byte[size];
 	   // for(int i = 0; i < size; i++)

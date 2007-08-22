@@ -406,6 +406,56 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         serverChannel.shutdown();
     }
     
+    public void testHasBufferedOutput() throws Exception {
+        Executor executor = ExecutorsHelper.newProcessingQueue("TLSTest");
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
+        
+        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
+        
+        NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
+            public void run() {
+                clientChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
+                serverChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
+            }
+        }).get();
+        
+        Pipe clientToServer = Pipe.open();
+        Pipe serverToClient = Pipe.open();
+        
+        serverToClient.source().configureBlocking(false);
+        serverToClient.sink().configureBlocking(false);
+        clientToServer.source().configureBlocking(false);
+        clientToServer.sink().configureBlocking(false);
+        
+        IWWrapper clientWriteSink = new IWWrapper(clientToServer.sink());
+        clientChannel.setReadChannel(new IRWrapper(serverToClient.source()));
+        clientChannel.setWriteChannel(clientWriteSink);
+        serverChannel.setReadChannel(new IRWrapper(clientToServer.source()));
+        serverChannel.setWriteChannel(new IWWrapper(serverToClient.sink()));
+        
+        ByteBuffer buffer = ByteBuffer.wrap("Hello".getBytes());
+        assertFalse(clientChannel.hasBufferedOutput());
+        clientChannel.write(buffer);
+        assertTrue(clientChannel.hasBufferedOutput());
+        clientChannel.handleWrite();
+        assertFalse(clientChannel.hasBufferedOutput());
+        clientChannel.handleWrite();
+        assertFalse(clientChannel.hasBufferedOutput());
+        clientChannel.write(ByteBuffer.allocate(0));
+        assertFalse(clientChannel.hasBufferedOutput());
+        clientWriteSink.hasBufferedOutput = true;
+        assertTrue(clientChannel.hasBufferedOutput());
+        
+        serverToClient.source().close();
+        serverToClient.sink().close();
+        clientToServer.source().close();
+        clientToServer.sink().close(); 
+        clientChannel.shutdown();
+        serverChannel.shutdown();
+    }
+
     
     // TODO: Test underflows & overflows
     
@@ -550,6 +600,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         private final WritableByteChannel channel;
         private volatile boolean lastWriteInterest;
         private volatile int totalWrote;
+        boolean hasBufferedOutput = false;
         
         public IWWrapper(OutputStream out) {
             this.channel = Channels.newChannel(out);
@@ -593,6 +644,10 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         }
 
         public void shutdown() {
+        }
+
+        public boolean hasBufferedOutput() {
+            return hasBufferedOutput;
         }
         
     }

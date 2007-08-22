@@ -169,6 +169,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     InterestReadableByteChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
+
+                    source.interestRead(true);
                     
                     // If the socket is still connected, read up any buffered data from the current chain.
                     // This is only done if we know the dispatcher is not going to immediately call
@@ -176,8 +178,6 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     // would not be read until future incoming data triggered another handleRead.
                     if(isConnected() && !NIODispatcher.instance().isReadReadyThisIteration(getChannel()))
                         reader.handleRead();
-                        
-                    source.interestRead(true);
                 } catch(IOException iox) {
                     shutdown();
                     oldReader.shutdown(); // in case we lost it.
@@ -352,6 +352,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 // Make sure connecting callbacks are always on the NIO thread.
                 NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
+                        // ensure it's registered in the selector, so it can be notified
+                        // for reading|writing, and polled for readiness
+                        NIODispatcher.instance().register(getChannel(), AbstractNBSocket.this);
                         try {
                             observer.handleConnect(AbstractNBSocket.this);
                         } catch(IOException iox) {
@@ -491,12 +494,16 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 }
             });
             
-            try {
-                future.get(); // Wait for the future to complete.
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
-            } catch (ExecutionException e) {
-                throw new IllegalStateException(e);
+            // Make sure that an interruption doesn't stop this from waiting to complete.
+            while(true) {
+                try {
+                    future.get(); // Wait for the future to complete.
+                    break;
+                } catch (InterruptedException e) {
+                    continue;
+                } catch (ExecutionException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
         

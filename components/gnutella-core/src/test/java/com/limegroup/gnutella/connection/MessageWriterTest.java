@@ -7,8 +7,8 @@ import java.nio.ByteBuffer;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -206,7 +206,7 @@ public final class MessageWriterTest extends LimeTestCase {
     }
 	
 	private Message read(InputStream in) throws Exception {
-	    return MessageFactory.read(in, (byte)100);
+	    return ProviderHacks.getMessageFactory().read(in, (byte)100);
     }
     
     private Message read(ByteBuffer buffer) throws Exception {
@@ -236,11 +236,11 @@ public final class MessageWriterTest extends LimeTestCase {
     }
     
     private QueryRequest q(String query) {
-        return QueryRequest.createQuery(query, (byte)5);
+        return ProviderHacks.getQueryRequestFactory().createQuery(query, (byte)5);
     }
     
     private PingReply g(int port) {
-        return PingReply.create(new byte[16], (byte)5, port, IP);
+        return ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, port, IP);
     }
     
     private PushRequest s(int port) {

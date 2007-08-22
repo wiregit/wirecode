@@ -43,7 +43,7 @@ public class GGEPParser {
         int secureEnd = -1;
             
         try {
-            while(secure == null && idx < data.length) {
+            while(idx < data.length) {
                 // optimization: don't bother constructing (and throwing exception)
                 //               if it clearly isn't a GGEP block.
                 if(data[idx] != GGEP.GGEP_PREFIX_MAGIC_NUMBER)

@@ -1,7 +1,10 @@
 
 package com.limegroup.gnutella.stubs;
 
+import org.limewire.concurrent.Providers;
+
 import com.limegroup.gnutella.HTTPUploadManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /**
@@ -10,7 +13,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 public class UploadManagerStub extends HTTPUploadManager {
 	
 	public UploadManagerStub() {
-		super(new UploadSlotManager());
+		super(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 	}
 	
 	private int _numQueuedUploads;

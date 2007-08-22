@@ -15,19 +15,18 @@ import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public abstract class DHTTestCase extends LimeTestCase {
     
     protected static final int PORT = 6667;
     
-    protected static RouterService ROUTER_SERVICE;
+    //protected static RouterService ROUTER_SERVICE;
     
     protected static MojitoDHT BOOTSTRAP_DHT;
     
@@ -53,9 +52,9 @@ public abstract class DHTTestCase extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());*/
         
-        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+     //   ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ROUTER_SERVICE.start();
+        ProviderHacks.getLifecycleManager().start();
     }
     
     protected void setSettings() {
@@ -69,8 +68,7 @@ public abstract class DHTTestCase extends LimeTestCase {
                 ConnectionSettings.PORT.getValue());
                 
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);    
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
@@ -94,7 +92,7 @@ public abstract class DHTTestCase extends LimeTestCase {
     
     public static void globalTearDown() throws Exception {
         close(DHT_LIST);
-        RouterService.shutdown();
+        ProviderHacks.getLifecycleManager().shutdown();
     }
 
     protected void fillRoutingTable(RouteTable rt, int numNodes) {

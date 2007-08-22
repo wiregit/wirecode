@@ -84,7 +84,7 @@ public class AlternateLocationCollection<T extends AlternateLocation>
 	private AlternateLocationCollection(URN sha1) {
 		if(sha1 == null)
 			throw new NullPointerException("null URN");
-		if( sha1 != null && !sha1.isSHA1())
+		if(!sha1.isSHA1())
 			throw new IllegalArgumentException("URN must be a SHA1");
 		SHA1 = sha1;
 	}

@@ -143,7 +143,7 @@ public abstract class BaseTestCase extends AssertComparisons {
         if ( dir == null ) return;
         
         File[] files = dir.listFiles();
-        for(int i=0; i< files.length; i++) {
+        for(int i=0; files != null && i < files.length; i++) {
             if ( files[i].isDirectory() ) {
                 cleanFiles(files[i], deleteDirs);
             } else {

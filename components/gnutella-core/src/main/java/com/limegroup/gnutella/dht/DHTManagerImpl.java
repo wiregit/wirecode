@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -30,6 +32,9 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.statistic.StatsUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -42,7 +47,10 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
  */
+@Singleton
 public class DHTManagerImpl implements DHTManager {
+    
+    private static final Log LOG = LogFactory.getLog(DHTManagerImpl.class);
     
     /**
      * The Vendor code of this DHT Node
@@ -62,8 +70,7 @@ public class DHTManagerImpl implements DHTManager {
     /**
      * List of event listeners for ConnectionLifeCycleEvents.
      */
-    private final CopyOnWriteArrayList<DHTEventListener> dhtEventListeners 
-        = new CopyOnWriteArrayList<DHTEventListener>();
+    private final List<DHTEventListener> dhtEventListeners = new ArrayList<DHTEventListener>();
     
     /** 
      * The executor to use to execute blocking DHT methods, such
@@ -72,10 +79,17 @@ public class DHTManagerImpl implements DHTManager {
      * */
     private final Executor executor;
     
-    private boolean stopped = false;
+    /**
+     * The executor to use for dispatching events.
+     */
+    private final Executor dispatchExecutor;
+    
+    private volatile boolean enabled = true;
     
     /** reference to a bunch of inspectables */
     public final DHTInspectables inspectables = new DHTInspectables();
+    
+    private final DHTControllerFactory dhtControllerFactory;
     
     /**
      * Constructs the DHTManager, using the given Executor to invoke blocking 
@@ -84,34 +98,96 @@ public class DHTManagerImpl implements DHTManager {
      * 
      * @param service
      */
-    public DHTManagerImpl(Executor service) {
+    @Inject
+    public DHTManagerImpl(@Named("dhtExecutor") Executor service, DHTControllerFactory dhtControllerFactory) {
         this.executor = service;
+        this.dispatchExecutor = ExecutorsHelper.newProcessingQueue("DHT-EventDispatch");
+        this.dhtControllerFactory = dhtControllerFactory;
     }
     
-    public synchronized void start(final DHTMode mode) {
-        stopped = false;
-        Runnable task = new Runnable() {
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#setEnabled(boolean)
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#isEnabled()
+     */
+    public boolean isEnabled() {
+        if (!DHTSettings.DISABLE_DHT_NETWORK.getValue() 
+                && !DHTSettings.DISABLE_DHT_USER.getValue()
+                && enabled) {
+            return true;
+        }
+        return false;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#start(com.limegroup.gnutella.dht.DHTManager.DHTMode)
+     */
+    public synchronized void start(DHTMode mode) {
+        executor.execute(createSwitchModeCommand(mode));
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.dht.DHTManager#stop()
+     */
+    public synchronized void stop() {
+        Runnable command = new Runnable() {
             public void run() {
-                synchronized(DHTManagerImpl.this) {
-                    //could have been stopped before this gets executed
-                    if(stopped) {
-                        return;
+                synchronized (DHTManagerImpl.this) {
+                    try {
+                        createSwitchModeCommand(DHTMode.INACTIVE).run();
+                    } finally {
+                        DHTManagerImpl.this.notifyAll();
                     }
-                    
-                    //controller already running in the correct mode?
-                    if(controller.isRunning() 
-                            && (controller.getDHTMode() == mode)) {
+                }
+            }
+        };
+        
+        executor.execute(command);
+        
+        try {
+            this.wait(10000);
+        } catch (InterruptedException err) {
+            LOG.error("InterruptedException", err);
+        }
+    }
+    
+    /**
+     * Creates and returns a Runnable that switches the DHT from
+     * the current DHTMode to the given DHTMode.
+     * 
+     * @param mode The new Mode of the DHT
+     * @return Runnable that switches the Mode
+     */
+    private Runnable createSwitchModeCommand(final DHTMode mode) {
+        Runnable command = new Runnable() {
+            public void run() {
+                synchronized (DHTManagerImpl.this) {
+                    // Controller already running in the current mode?
+                    if (controller.getDHTMode() == mode) {
                         return;
                     }
                     
                     controller.stop();
 
                     if (mode == DHTMode.ACTIVE) {
-                        controller = new ActiveDHTNodeController(vendor, version, DHTManagerImpl.this);
+                        controller = dhtControllerFactory.createActiveDHTNodeController(
+                                vendor, version, DHTManagerImpl.this);
                     } else if (mode == DHTMode.PASSIVE) {
-                        controller = new PassiveDHTNodeController(vendor, version, DHTManagerImpl.this);
+                        controller = dhtControllerFactory
+                                .createPassiveDHTNodeController(vendor,
+                                        version, DHTManagerImpl.this);
                     } else if (mode == DHTMode.PASSIVE_LEAF) {
-                        controller = new PassiveLeafController(vendor, version, DHTManagerImpl.this);
+                        controller = dhtControllerFactory.createPassiveLeafController(
+                                vendor, version, DHTManagerImpl.this);
                     } else {
                         controller = new NullDHTController();
                     }
@@ -120,7 +196,8 @@ public class DHTManagerImpl implements DHTManager {
                 }
             }
         };
-        executor.execute(task);
+        
+        return command;
     }
     
     public void addActiveDHTNode(final SocketAddress hostAddress) {
@@ -149,11 +226,10 @@ public class DHTManagerImpl implements DHTManager {
         executor.execute(new Runnable() {
             public void run() {
                 synchronized(DHTManagerImpl.this) {
-                    if(!controller.isRunning()) {
-                        return;
+                    if (controller.isRunning()) {
+                        controller.stop();
+                        controller.start();
                     }
-                    controller.stop();
-                    controller.start();
                 }
             }
         });
@@ -165,16 +241,6 @@ public class DHTManagerImpl implements DHTManager {
     
     public synchronized DHTMode getDHTMode() {
         return controller.getDHTMode();
-    }
-    
-    /**
-     * This method has to be synchronized to make sure the
-     * DHT actually gets stopped and persisted when it is called.
-     */
-    public synchronized void stop() {
-        stopped = true;
-        controller.stop();
-        controller = new NullDHTController();
     }
     
     public synchronized boolean isRunning() {
@@ -193,19 +259,46 @@ public class DHTManagerImpl implements DHTManager {
         return controller.isWaitingForNodes();
     }
     
-    public void addEventListener(DHTEventListener listener) {
-        if(!dhtEventListeners.addIfAbsent(listener)) {
+    /**
+     * Adds a listener to DHT Events.
+     * 
+     * Be aware that listeners will receive events after
+     * after the DHT has dispatched them.  It is possible that
+     * the DHT's status may have changed between the time the 
+     * event was dispatched and the time the event is received
+     * by a listener.
+     */
+    public synchronized void addEventListener(DHTEventListener listener) {
+        if(dhtEventListeners.contains(listener))
             throw new IllegalArgumentException("Listener " + listener + " already registered");
+        
+        dhtEventListeners.add(listener);
+    }
+
+    /**
+     * Sends an event to all listeners.
+     * 
+     * Be aware that to prevent deadlock, listeners may receive
+     * the event long after the DHT's status has changed, and the
+     * current status may be very different.
+     * 
+     * No events will be received in a different order than they were
+     * dispatched, though.
+     */
+    public synchronized void dispatchEvent(final DHTEvent event) {
+        if(!dhtEventListeners.isEmpty()) {
+            final List<DHTEventListener> listeners = new ArrayList<DHTEventListener>(dhtEventListeners);
+            dispatchExecutor.execute(new Runnable() {
+                public void run() {
+                    for(DHTEventListener listener : listeners) {
+                        listener.handleDHTEvent(event);
+                    }        
+                }
+            });
         }
     }
 
-    public void dispatchEvent(DHTEvent event) {
-        for(DHTEventListener listener : dhtEventListeners) {
-            listener.handleDHTEvent(event);
-        }
-    }
-
-    public void removeEventListener(DHTEventListener listener) {
+    public synchronized void removeEventListener(DHTEventListener listener) {
         dhtEventListeners.remove(listener);
     }
 
@@ -226,15 +319,14 @@ public class DHTManagerImpl implements DHTManager {
      * 
      * If this event is not related to disconnection from the network, it
      * is forwarded to the controller for proper handling.
-     * 
      */
     public void handleConnectionLifecycleEvent(final ConnectionLifecycleEvent evt) {
-        Runnable r;
-        if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            r = new Runnable() {
+        Runnable command = null;
+        if (evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
+            command = new Runnable() {
                 public void run() {
                     synchronized(DHTManagerImpl.this) {
-                        if(controller.isRunning() 
+                        if (controller.isRunning() 
                                 && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
                             controller.stop();
                             controller = new NullDHTController();
@@ -243,7 +335,7 @@ public class DHTManagerImpl implements DHTManager {
                 }
             };
         } else {
-            r = new Runnable() {
+            command = new Runnable() {
                 public void run() {
                     synchronized(DHTManagerImpl.this) {
                         controller.handleConnectionLifecycleEvent(evt);
@@ -251,7 +343,7 @@ public class DHTManagerImpl implements DHTManager {
                 }
             };
         }
-        executor.execute(r);
+        executor.execute(command);
     }
     
     public Vendor getVendor() {

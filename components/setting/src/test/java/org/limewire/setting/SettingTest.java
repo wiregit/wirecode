@@ -386,6 +386,15 @@ public class SettingTest extends BaseTestCase {
         // should be more yes than no but still some no's
         assertGreaterThan(0, no);
         assertGreaterThan(no, yes);
+        
+        // test that setting the value to 0 will never return true
+        // this is a best effort and most of the time will pass even 
+        // if logic is incorrect, but it if its correct should pass always.
+        for (int i = 0; i < 9000000; i++) {
+            s.setValue(0.1f);
+            s.setValue(0f);
+            assertFalse(s.getBoolean());
+        }
     }
     
     public void testPBooleanArraySetting() throws Exception {

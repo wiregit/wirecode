@@ -232,6 +232,7 @@ class UpdateCollection {
         String javaFrom = getAttributeText(attr, "javafrom");
         String javaTo = getAttributeText(attr, "javato");
         String os = getAttributeText(attr, "os");
+        String osv = getAttributeText(attr, "osv");
         String updateURN = getAttributeText(attr, "urn");
         String updateCommand = getAttributeText(attr, "ucommand");
         String updateName = getAttributeText(attr, "uname");
@@ -310,7 +311,7 @@ class UpdateCollection {
         
         if(os == null)
             os = "*";
-        data.setOSList(OS.createFromList(os));
+        data.setOSList(OS.createFromList(os,osv));
                 
         NodeList children = msg.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {

@@ -3,13 +3,13 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import org.limewire.util.ByteOrder;
-
 import junit.framework.Test;
 
+import org.limewire.util.ByteOrder;
+
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.MessageFactory;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
@@ -30,7 +30,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
     
     public void testStaticConstructor() throws Exception {
         MessagesSupportedVendorMessage vmp = 
-            MessagesSupportedVendorMessage.instance();
+            ProviderHacks.getMessagesSupportedVendorMessage();
         assertGreaterThan(0, vmp.supportsTCPConnectBack());
         assertGreaterThan(0, vmp.supportsUDPConnectBack());
         assertGreaterThan(0, vmp.supportsTCPConnectBackRedirect());
@@ -53,7 +53,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         MessagesSupportedVendorMessage vmpRead = 
-            (MessagesSupportedVendorMessage) MessageFactory.read(bais);
+            (MessagesSupportedVendorMessage) ProviderHacks.getMessageFactory().read(bais);
         assertEquals(vmp, vmpRead);
         assertGreaterThan(0, vmpRead.supportsTCPConnectBack());
         assertGreaterThan(0, vmpRead.supportsUDPConnectBack());
@@ -99,7 +99,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         MessagesSupportedVendorMessage vmp = 
-           (MessagesSupportedVendorMessage) MessageFactory.read(bais);
+           (MessagesSupportedVendorMessage) ProviderHacks.getMessageFactory().read(bais);
         // make sure it supports everything we expect....
         assertEquals(10, vmp.supportsMessage("SUSH".getBytes(), 10));
         assertEquals(5, vmp.supportsMessage("NEIL".getBytes(), 5));

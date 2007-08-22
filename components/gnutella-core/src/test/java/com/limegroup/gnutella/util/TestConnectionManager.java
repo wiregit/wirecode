@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.HackConnectionManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -15,7 +16,7 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
  * Helper class that supplies the list of connections for searching.
  */
 @SuppressWarnings("unchecked")
-public final class TestConnectionManager extends ConnectionManager {
+public final class TestConnectionManager extends HackConnectionManager {
     
     /**
      * The list of ultrapeer <tt>Connection</tt> instances
@@ -200,18 +201,18 @@ public final class TestConnectionManager extends ConnectionManager {
      */
     public boolean runQRPMatch(QueryRouteTable qrt) {
         for(int i=0; i<MY_KEYWORDS.length; i++) {
-            QueryRequest qr = QueryRequest.createQuery(MY_KEYWORDS[i]);
+            QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(MY_KEYWORDS[i]);
             if(!qrt.contains(qr)) return false;
         }
 
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
-            QueryRequest qr = QueryRequest.createQuery(LEAF_KEYWORDS[i]);
+            QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(LEAF_KEYWORDS[i]);
             if(!qrt.contains(qr)) return false;
         }
 
         for(int i=0; i<UNMATCHING_KEYWORDS.length; i++) {
             QueryRequest qr = 
-                QueryRequest.createQuery(UNMATCHING_KEYWORDS[i]);
+                ProviderHacks.getQueryRequestFactory().createQuery(UNMATCHING_KEYWORDS[i]);
             if(qrt.contains(qr)) return false;
         }
         return true;

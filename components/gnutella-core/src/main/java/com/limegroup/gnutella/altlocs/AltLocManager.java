@@ -8,16 +8,13 @@ import java.util.Map;
 
 import org.limewire.inspection.Inspectable;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
+@Singleton
 public class AltLocManager {
 
-    private static final AltLocManager INSTANCE = new AltLocManager();
-    public static AltLocManager instance() {
-        return INSTANCE;
-    }
-    
     /**
      * Map of the alternate location collections for each URN.
      * LOCKING: itself for all map operations as well as operations on the contained arrays
@@ -26,7 +23,6 @@ public class AltLocManager {
     
     public final Object inspectables = new ALMInspectables();
     
-    private AltLocManager() {}
     
     /**
      * adds a given altloc to the manager

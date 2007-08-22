@@ -26,13 +26,16 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
+import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 /**
  * A reference to a single file on a remote machine.  In this respect
@@ -70,6 +73,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	private final long _index;
 	private final byte[] _clientGUID;
 	private final int _speed;
+    @Deprecated
 	private final int _size;
 	private final boolean _chatEnabled;
     private final int _quality;
@@ -183,6 +187,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     /** the security of this RemoteFileDesc. */
     private transient int _secureStatus = SecureMessage.INSECURE;
     
+    private transient volatile long longSize;
     /**
      * A map of various properties we want to serialize.  Currently we use
      * this object only during de/serialization, but we keep it cached if we
@@ -192,8 +197,13 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     
     /** A list of keys of properties inserted into the propertiesMap. */
     private static enum RFDProperties {
-        PUSH_ADDR, CONNECT_TYPE;
+        PUSH_ADDR, CONNECT_TYPE, LONG_SIZE;
     }
+    
+    @Inject
+    private static PushEndpointFactory globalPushEndpointFactory;
+    
+    private transient volatile PushEndpointFactory pushEndpointFactory;    
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -285,7 +295,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      *  <tt>null</tt> or if the file name is <tt>null</tt>
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed, 
+						  long size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
@@ -322,7 +332,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      *  <tt>null</tt> or if the file name is <tt>null</tt>
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed, 
+						  long size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
@@ -353,7 +363,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	
     /** Constructs a RemoteFileDesc using the given PushEndpoint. */
 	public RemoteFileDesc(String host, int port, long index, String filename,
-	        			int size,int speed,boolean chat, int quality, boolean browseHost,
+	        			long size,int speed,boolean chat, int quality, boolean browseHost,
 	        			LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
 	        			boolean firewalled, String vendor,long createTime,
 	        			PushEndpoint pe) {
@@ -366,11 +376,11 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      * no PE object is passed a new one is created.
      */
     private RemoteFileDesc (String host, int port, long index, String filename,
-            int size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
+            long size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
-	    
+	    this.pushEndpointFactory = globalPushEndpointFactory;
 	    if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -383,7 +393,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		if(filename.equals("")) {
 			throw new IllegalArgumentException("cannot accept empty string file name");
 		}
-		if((size & 0xFFFFFFFF00000000L) != 0) {
+		if((size < 0 || size > MAX_FILE_SIZE) ) {
 			throw new IllegalArgumentException("invalid size: "+size);
 		}
 		if((index & 0xFFFFFFFF00000000L) != 0) {
@@ -398,7 +408,8 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		_port = port;
 		_index = index;
 		_filename = filename;
-		_size = size;
+		_size = size <= Integer.MAX_VALUE ? (int) size : -1;
+        longSize = size;
         _firewalled = firewalled;
 		
 		if (firewalled) {
@@ -406,9 +417,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 _pushAddr = pe;
             else {
                 try {
-                    _pushAddr = new PushEndpoint(clientGUID,proxies,
-                        PushEndpoint.PLAIN, FWTVersion, 
-                        new IpPortImpl(_host,_port));
+                    _pushAddr = pushEndpointFactory.createPushEndpoint(clientGUID, proxies, PushEndpoint.PLAIN, FWTVersion, new IpPortImpl(_host,_port));
                 }catch (UnknownHostException uhe) {
                     throw new IllegalArgumentException(uhe);
                 }
@@ -443,6 +452,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 
     private void readObject(ObjectInputStream stream) 
 		throws IOException, ClassNotFoundException {
+        pushEndpointFactory = globalPushEndpointFactory;
         stream.defaultReadObject();
         //Older downloads.dat files do not have _urns, so _urns will be null
         //(the default Java value).  Hence we also initialize
@@ -486,17 +496,26 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 http = (String)propertiesMap.get("_pushAddr");
             if (http != null) {
                 try {
-                    _pushAddr = new PushEndpoint(http);
+                    _pushAddr = pushEndpointFactory.createPushEndpoint(http);
                     if (!_firewalled) {
-                        Assert.silent(false, "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr);
+                        ErrorService.error(new IllegalStateException(
+                                "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr));
                         _firewalled = true;
                     }
                 } catch (IOException iox) {}
             }
             
+            Long size64 = (Long)propertiesMap.get(RFDProperties.LONG_SIZE.name());
+            if (size64 == null)
+                longSize = _size;
+            else
+                longSize = size64.longValue();
             // erase the map so it's reconstructed with the most recent
             // values upon the first write.
             propertiesMap = null;
+        } else {
+            // very old format, make sure we get the size right
+            longSize = _size;
         }
     }
     
@@ -505,6 +524,10 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     }
     
     private void writeObject(ObjectOutputStream stream) throws IOException {
+        if (longSize > Integer.MAX_VALUE) {
+            initPropertiesMap();
+            propertiesMap.put(RFDProperties.LONG_SIZE.name(), longSize);
+        } 
         if(_tlsCapable) {
             initPropertiesMap();
             propertiesMap.put(RFDProperties.CONNECT_TYPE.name(), Boolean.TRUE);
@@ -562,7 +585,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      */
     public boolean isMe() {
         return needsPush() ? 
-                Arrays.equals(_clientGUID,RouterService.getMyGUID()) :
+                Arrays.equals(_clientGUID,ProviderHacks.getApplicationServices().getMyGUID()) :
                     NetworkUtils.isMe(getHost(),getPort());
     }
     /**
@@ -713,9 +736,9 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	 *
 	 * @return the size in bytes of this file
 	 */
-	public final int getSize() {return _size;}
+	public final long getSize() {return longSize;}
 	
-	public final long getFileSize() { return _size; }
+	public final long getFileSize() { return longSize; }
 
 	/**
 	 * Accessor for the file name for this file, which can be <tt>null</tt>.
@@ -961,7 +984,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
         if (! (nullEquals(_host, other._host) && (_port==other._port)) )
             return false;
 
-        if (_size != other._size)
+        if (longSize != other.longSize)
             return false;
         
         if ( (_clientGUID ==null) != (other._clientGUID==null) )
@@ -995,7 +1018,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
             int result = 17;
             result = (37* result)+_host.hashCode();
             result = (37* result)+_port;
-			result = (37* result)+_size;
+			result = (int)((37* result)+longSize);
             result = (37* result)+_urns.hashCode();
             if (_clientGUID!=null)
                 result = (37* result)+(new GUID(_clientGUID)).hashCode();

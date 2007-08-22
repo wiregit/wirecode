@@ -20,7 +20,7 @@ import org.limewire.nio.ssl.SSLUtils;
 
 
 /**
- * Simulates a GWebCache HTTP server.  Listens on a port, accepts a single
+ * Simulates an HTTP server.  Listens on a port, accepts a single
  * connection, records request and writes result.
  */
 @SuppressWarnings("unchecked")

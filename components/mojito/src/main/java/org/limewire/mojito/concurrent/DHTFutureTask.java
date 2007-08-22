@@ -57,7 +57,11 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
     private final DHTTask<T> task;
     
-    private boolean taskIsRunning = false;
+    /**
+     * true if starting or started.
+     * LOCKING: exchanger
+     */
+    private boolean taskIsActive;
     
     private ScheduledFuture<?> watchdog = null;
     
@@ -98,16 +102,20 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
     
     public void run() {
         try {
+            synchronized(exchanger) {
+                if (isDone()) {
+                    return;
+                }
+                taskIsActive = true;
+            }
+            task.start(exchanger);
+            
             synchronized (exchanger) {
-                if (!exchanger.isDone()) {
-                    task.start(exchanger);
-                    taskIsRunning = true;
-                    
-                    if (!exchanger.isDone()) {
-                        initWatchdog();
-                    }
+                if (!isDone()) {
+                    initWatchdog();
                 }
             }
+            
         } catch (Throwable t) {
             exchanger.setException(new ExecutionException(t));
         }
@@ -121,19 +129,19 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
             public void run() {
                 boolean timeout = false;
                 synchronized (exchanger) {
-                    if (!exchanger.isDone()) {
+                    if (!isDone()) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Watchdog is canceling " + task);
                         }
                         
-                        timeout = true;
+                        timeout = taskIsActive;
                         exchanger.setException(
                                 new ExecutionException(
                                         new LockTimeoutException(task.toString())));
                     }
                 }
                 
-                if (timeout && taskIsRunning) {
+                if (timeout) {
                     task.cancel();
                 }
             }
@@ -205,7 +213,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         
         boolean done = false;
         synchronized (exchanger) {
-            done = exchanger.isDone();
+            done = isDone();
             if (!done) {
                 listeners.add(listener);
             }
@@ -236,28 +244,28 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * @see java.util.concurrent.Future#cancel(boolean)
      */
     public boolean cancel(boolean mayInterruptIfRunning) {
-        boolean canceled = false;
+        boolean cancelTask = false;
         synchronized (exchanger) {
-            if (!exchanger.isDone()) {
-                if (!taskIsRunning || mayInterruptIfRunning) {
+            if (!isDone()) {
+                if (!taskIsActive || mayInterruptIfRunning) {
                     exchanger.cancel();
-                    canceled = true;
+                    cancelTask = taskIsActive;
                 }
             }
         }
         
-        if (canceled && taskIsRunning) {
+        if (cancelTask) {
             task.cancel();
         }
         
-        return canceled;
+        return cancelTask;
     }
 
     /*
      * (non-Javadoc)
      * @see java.util.concurrent.Future#isCancelled()
      */
-    public boolean isCancelled() {
+    public final boolean isCancelled() {
         return exchanger.isCancelled();
     }
 
@@ -265,7 +273,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * (non-Javadoc)
      * @see java.util.concurrent.Future#isDone()
      */
-    public boolean isDone() {
+    public final boolean isDone() {
         return exchanger.isDone();
     }
     

@@ -1,38 +1,44 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnection;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpRecoverableException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHttpRequest;
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
@@ -44,8 +50,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -53,6 +57,8 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * lowercase characters a-z.
  */
 public class UploadTest extends LimeTestCase {
+
+    private static final String HTTP_CLIENT_REMOTE_CLOSE_MESSAGE = "org.apache.commons.httpclient.HttpRecoverableException: Error in parsing the status  line from the response: unable to find line starting with \"HTTP\"";
 
     private static final int PORT = 6668;
 
@@ -77,15 +83,15 @@ public class UploadTest extends LimeTestCase {
     private static final String badHash = "urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2SAM";
 
     private static final String incompleteHash = "urn:sha1:INCOMCPLETEXBSQEZY37FIM5QQSA2OUJ";
-
+    
     private static final String incompleteHashUrl = "/uri-res/N2R?"
-        + incompleteHash;
+            + incompleteHash;
 
     /** The verifying file for the shared incomplete file */
     private VerifyingFile vf;
 
     /** The filedesc of the shared file. */
-    private FileDesc FD;    
+    private FileDesc FD;
 
     /** The root32 of the shared file. */
     private String ROOT32;
@@ -94,12 +100,16 @@ public class UploadTest extends LimeTestCase {
 
     private HostConfiguration hostConfig;
 
-    private static RouterService ROUTER_SERVICE;
+    protected String protocol;
+
+  //  private static RouterService ROUTER_SERVICE;
 
     private static final Object loaded = new Object();
 
     public UploadTest(String name) {
         super(name);
+        
+        this.protocol = "http";
     }
 
     public static Test suite() {
@@ -111,22 +121,23 @@ public class UploadTest extends LimeTestCase {
     }
 
     public static void globalSetUp() {
-        ROUTER_SERVICE = new RouterService(new FManCallback());
+        throw new RuntimeException("fix this test!");
+        //ROUTER_SERVICE = new RouterService(new FManCallback());
     }
 
     @Override
     protected void setUp() throws Exception {
         // allows to run single tests from Eclipse
-        if (ROUTER_SERVICE == null) {
-            globalSetUp();
-        }
+      //  if (ROUTER_SERVICE == null) {
+       //     globalSetUp();
+      //  }
 
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
-        .setValue(new String[] { "*.*.*.*" });
+                .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        RouterService.getIpFilter().refreshHosts();
+        ProviderHacks.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -146,57 +157,61 @@ public class UploadTest extends LimeTestCase {
         File testDir = CommonUtils.getResourceFile(testDirName);
         // we must use a separate copy method
         // because the filename has a # in it which can't be a resource.
-        LimeTestUtils.copyFile(new File(testDir, fileName), new File(
-                _sharedDir, fileName));
-        LimeTestUtils.copyFile(new File(testDir, otherFileName), new File(
-                _sharedDir, otherFileName));
-        assertTrue("Copying resources failed", new File(_sharedDir, fileName)
-        .exists());
-        assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
-        .length());
+        File target = new File(_sharedDir, fileName);
+        LimeTestUtils.copyFile(new File(testDir, fileName), target);
+        target = new File(_sharedDir, otherFileName);
+        LimeTestUtils.copyFile(new File(testDir, otherFileName), target);
+        assertTrue("Copying resources failed", target.exists());
+        assertGreaterThan("Expected file to contain data", 0, target.length());
 
-        if (!RouterService.isLoaded()) {
+        if (!ProviderHacks.getLifecycleManager().isLoaded()) {
             startAndWaitForLoad();
             // Thread.sleep(2000);
         }
 
-        FileManager fm = RouterService.getFileManager();
+        // make sure the FileDesc objects in file manager are up-to-date 
+        FileManager fm = ProviderHacks.getFileManager();
+        fm.loadSettingsAndWait(2000);
+        
         File incFile = new File(_incompleteDir, incName);
         fm.removeFileIfShared(incFile);
-        CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile);
+        CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
         URN urn = URN.createSHA1Urn(incompleteHash);
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
-        vf = new VerifyingFile(252450);
+        vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(252450);
         fm.addIncompleteFile(incFile, urns, incName, 1981, vf);
         assertEquals(1, fm.getNumIncompleteFiles());
         assertEquals(2, fm.getNumFiles());
 
-        assertEquals("Unexpected uploads in progress", 0, RouterService
+        assertEquals("Unexpected uploads in progress", 0, ProviderHacks
                 .getUploadManager().uploadsInProgress());
-        assertEquals("Unexpected queued uploads", 0, RouterService
+        assertEquals("Unexpected queued uploads", 0, ProviderHacks
                 .getUploadManager().getNumQueuedUploads());
 
         client = HttpClientManager.getNewClient();
         hostConfig = new HostConfiguration();
-        hostConfig.setHost("localhost", PORT);
+        hostConfig.setHost("localhost", PORT, protocol);
+        client.setConnectionTimeout(500);
+        client.setTimeout(2000);
         client.setHostConfiguration(hostConfig);
     }
 
     @Override
     public void tearDown() {
-        ((HTTPUploadManager) RouterService.getUploadManager()).cleanup();
+        ((HTTPUploadManager) ProviderHacks.getUploadManager()).cleanup();
 
-        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
-        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
+        assertEquals(0, ProviderHacks.getUploadSlotManager().getNumActive());
     }
 
     private void initThexTree() throws Exception {
-        FD = RouterService.getFileManager().getFileDescForFile(new File(_sharedDir, fileName));
-        while (FD.getHashTree() == null) {
+        FD = ProviderHacks.getFileManager().getFileDescForFile(
+                new File(_sharedDir, fileName));
+        while (ProviderHacks.getTigerTreeCache().getHashTree(FD) == null) {
             Thread.sleep(300);
         }
-        ROOT32 = FD.getHashTree().getRootHash();
+        ROOT32 = ProviderHacks.getTigerTreeCache().getHashTree(FD).getRootHash();
     }
 
     public void testHTTP10Download() throws Exception {
@@ -211,7 +226,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-    
+
     public void testHTTP10DownloadRange() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.addRequestHeader("Range", "bytes=2-");
@@ -249,7 +264,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
             assertNotNull(method.getResponseHeader("Content-range"));
             assertEquals("bytes 2-5/26", method.getResponseHeader(
-            "Content-range").getValue());
+                    "Content-range").getValue());
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
@@ -261,17 +276,14 @@ public class UploadTest extends LimeTestCase {
         method.addRequestHeader(new org.apache.commons.httpclient.Header(
                 "Range", "") {
             public String toExternalForm() {
-                return "Range:bytes 2-";
-            };
-
-            public String toString() {
-                return "Range:bytes 2-";
+                return "Range:bytes 2-5\r\n";
             };
         });
         method.setHttp11(false);
         try {
             int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
+            assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
         }
@@ -316,6 +328,22 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
+    
+    public void testHTTP10DownloadHead() throws Exception {
+        HeadMethod method = new HeadMethod(fileNameUrl);
+        method.setHttp11(false);
+        method.addRequestHeader("Range", "bytes 2-5");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
+            assertNotNull(method.getResponseHeader("Content-range"));
+            assertEquals("bytes 2-5/26", method.getResponseHeader(
+                    "Content-range").getValue());
+            assertEquals(null, method.getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
 
     public void testHTTP11DownloadNoRangeHeader() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
@@ -339,7 +367,7 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-    }    
+    }
 
     public void testHTTP11DownloadRange() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
@@ -349,6 +377,17 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
             assertEquals("cdefghijklmnopqrstuvwxyz", method
                     .getResponseBodyAsString());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    public void testHTTP11DownloadInvalidRange() throws Exception {
+        GetMethod method = new GetMethod(fileNameUrl);
+        method.addRequestHeader("Range", "bytes=-0");
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE, response);
         } finally {
             method.releaseConnection();
         }
@@ -375,7 +414,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
             assertNotNull(method.getResponseHeader("Content-range"));
             assertEquals("bytes 2-5/26", method.getResponseHeader(
-            "Content-range").getValue());
+                    "Content-range").getValue());
             assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
@@ -387,16 +426,13 @@ public class UploadTest extends LimeTestCase {
         method.addRequestHeader(new org.apache.commons.httpclient.Header(
                 "Range", "") {
             public String toExternalForm() {
-                return "Range:bytes 2-";
-            };
-
-            public String toString() {
-                return "Range:bytes 2-";
+                return "Range:bytes 2-5\r\n";
             };
         });
         try {
             int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
+            assertEquals("cdef", method.getResponseBodyAsString());
         } finally {
             method.releaseConnection();
         }
@@ -428,9 +464,9 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testHTTP11IncompleteRange() throws Exception {
-        Interval iv = new Interval(2, 6);
+        Range iv = Range.createRange(2, 6);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
-        "verifiedBlocks");
+                "verifiedBlocks");
         vb.add(iv);
 
         GetMethod method = new GetMethod(incompleteHashUrl);
@@ -498,7 +534,7 @@ public class UploadTest extends LimeTestCase {
         } finally {
             client.close();
         }
-    }        
+    }
 
     /**
      * Makes sure that a HEAD request followed by a GET request does the right
@@ -514,10 +550,10 @@ public class UploadTest extends LimeTestCase {
      */
     public void testHTTP11DownloadPersistentURI() throws Exception {
         http11DownloadPersistentHeadFollowedByGet("/uri-res/N2R?" + hash);
-    }      
+    }
 
     private void http11DownloadPersistentHeadFollowedByGet(String url)
-    throws IOException {
+            throws IOException {
         HttpMethodBase method = new HeadMethod(url);
         try {
             int response = client.executeMethod(method);
@@ -542,7 +578,7 @@ public class UploadTest extends LimeTestCase {
                     .getResponseBodyAsString());
         } finally {
             method.releaseConnection();
-        }        
+        }
 
         method = new HeadMethod(url);
         try {
@@ -565,25 +601,27 @@ public class UploadTest extends LimeTestCase {
     public void testLongHeader() throws Exception {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
-            sb.append("123456890");
+            sb.append("1234567890");
         }
-        
+
         GetMethod method = new GetMethod(fileNameUrl);
         method.addRequestHeader("Header", sb.toString());
         try {
             int response = client.executeMethod(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (HttpRecoverableException expected) {                
+        } catch (HttpRecoverableException expected) {
+            assertEquals(HTTP_CLIENT_REMOTE_CLOSE_MESSAGE, expected.getMessage());
         } finally {
             method.releaseConnection();
         }
-        
+
         // request a very long filename
         method = new GetMethod("/" + sb.toString());
         try {
             int response = client.executeMethod(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (HttpRecoverableException expected) {                
+        } catch (HttpRecoverableException expected) {
+            assertEquals(HTTP_CLIENT_REMOTE_CLOSE_MESSAGE, expected.getMessage());
         } finally {
             method.releaseConnection();
         }
@@ -591,17 +629,18 @@ public class UploadTest extends LimeTestCase {
 
     public void testLongFoldedHeader() throws Exception {
         StringBuilder sb = new StringBuilder();
-        sb.append("123456890");
+        sb.append("1234567890");
         for (int i = 0; i < 1000; i++) {
-            sb.append("\n 123456890");
+            sb.append("\n 1234567890");
         }
-        
+
         GetMethod method = new GetMethod(fileNameUrl);
         method.addRequestHeader("Header", sb.toString());
         try {
             int response = client.executeMethod(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (HttpRecoverableException expected) {                
+        } catch (HttpRecoverableException expected) {
+            assertEquals(HTTP_CLIENT_REMOTE_CLOSE_MESSAGE, expected.getMessage());
         } finally {
             method.releaseConnection();
         }
@@ -615,13 +654,58 @@ public class UploadTest extends LimeTestCase {
         try {
             int response = client.executeMethod(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (HttpRecoverableException expected) {                
+        } catch (HttpRecoverableException expected) {
+            assertEquals(HTTP_CLIENT_REMOTE_CLOSE_MESSAGE, expected.getMessage());
         } finally {
             method.releaseConnection();
         }
     }
 
-    public void testHeaderLengthThatMatchesCharacterBufferLength() throws Exception {
+    public void test10KBRequest() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 100; i++) {
+            sb.append("1234567890");
+        }
+
+        GetMethod method = new GetMethod(fileNameUrl);
+        // add headers with a size of 1000 byte each
+        for (int i = 0; i < 10; i++) {
+            method.addRequestHeader("Header", sb.toString());
+        }
+
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
+        } finally {
+            method.releaseConnection();
+        }
+    }
+    
+    public void test200KBRequest() throws Exception {
+        // 4088 byte, leave some space for "Header: "
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 511; i++) {
+            sb.append("1234578");
+        }
+        
+        GetMethod method = new GetMethod(fileNameUrl);
+        // add headers with a size of 4 kb each
+        // HttpClient will add a few standard headers, so we can't add the full 50 headers
+        for (int i = 0; i < 40; i++) {
+            method.addRequestHeader("Header", sb.toString());
+        }
+
+        try {
+            int response = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_OK, response);
+        } finally {
+            method.releaseConnection();
+        }
+
+    }
+    
+    public void testHeaderLengthThatMatchesCharacterBufferLength()
+            throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         StringBuilder sb = new StringBuilder(512);
         for (int i = 0; i < 512 - 3; i++) {
@@ -630,7 +714,7 @@ public class UploadTest extends LimeTestCase {
         method.addRequestHeader("A", sb.toString());
         try {
             int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);               
+            assertEquals(HttpStatus.SC_OK, response);
         } finally {
             method.releaseConnection();
         }
@@ -638,24 +722,49 @@ public class UploadTest extends LimeTestCase {
 
     public void testInvalidCharactersInRequest() throws Exception {
         // build request with non US-ASCII characters
-        String url = new String(new char[] {
-            0x47, 0x72, 0xFC, 0x65, 0x7A, 0x69, 0x5F, 0x7A, 0xE4, 0x6D, 0xE4
-        });
+        String url = new String(new char[] { 0x47, 0x72, 0xFC, 0x65, 0x7A,
+                0x69, 0x5F, 0x7A, 0xE4, 0x6D, 0xE4 });
 
         // use home grown test client since HttpClient will not send theses
         // characters in the first place
         HttpUploadClient client = new HttpUploadClient();
         try {
             client.connect("localhost", PORT);
-            HttpRequest request = new BasicHttpRequest("GET", "/" + url);
+            HttpRequest request = new BasicHttpRequest("GET", "/get/0/" + url);
             client.writeRequest(request);
-            InputStream in = client.getSocket().getInputStream();
-            assertEquals("Expected remote end to close socket", -1, in.read());
+            HttpResponse response = client.readResponse();
+            assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
+            // this test used to expect a closed stream but LimeWire now accepts 
+            // non US-ASCII characters: CORE-225 
+//            InputStream in = client.getSocket().getInputStream();
+//            assertEquals("Expected remote end to close socket", -1, in.read());
         } finally {
             client.close();
         }
     }
 
+    public void testInvalidCharactersInHeader() throws Exception {
+        final String value = new String(new char[] { 0x31 + 0x32 + 0x38 + 0x2C
+                + 0xE9 + 0x5E + 0xB0 + 0xE7 + 0x88 + 0x76 + 0xF1 + 0xCA + 0x51
+                + 0x8F + 0x6D + 0xBF + 0xC8 + 0xAA + 0x82 + 0x6C + 0x33 + 0x35
+                + 0x25 + 0x25 + 0x86 + 0xCC + 0xBF + 0x7E + 0xC5 + 0xEE + 0x58
+                + 0x96 + 0xB6 + 0x2D + 0x7E + 0x9E + 0x21 + 0xD5 });
+        
+        // use home grown test client since HttpClient will not send theses
+        // characters in the first place
+        HttpUploadClient client = new HttpUploadClient();
+        try {
+            client.connect("localhost", PORT);
+            HttpRequest request = new BasicHttpRequest("GET", "/uri-res/N2R?" + hash);
+            request.addHeader("FP-1a: ", value);
+            client.writeRequest(request);
+            HttpResponse response = client.readResponse();
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+        } finally {
+            client.close();
+        }
+    }
+    
     public void testFreeloader() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.setRequestHeader("User-Agent", "Mozilla");
@@ -696,7 +805,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-    
+
     public void testIncompleteFileUpload() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -721,9 +830,9 @@ public class UploadTest extends LimeTestCase {
 
     public void testIncompleteFileWithRanges() throws Exception {
         // add a range to the incomplete file.
-        Interval iv = new Interval(50, 102500);
+        Range iv = Range.createRange(50, 102500);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
-        "verifiedBlocks");
+                "verifiedBlocks");
         vb.add(iv);
 
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
@@ -733,7 +842,7 @@ public class UploadTest extends LimeTestCase {
                     response);
             assertNotNull(method.getResponseHeader("X-Available-Ranges"));
             assertEquals("bytes 50-102499", method.getResponseHeader(
-            "X-Available-Ranges").getValue());
+                    "X-Available-Ranges").getValue());
         } finally {
             method.releaseConnection();
         }
@@ -741,7 +850,7 @@ public class UploadTest extends LimeTestCase {
         assertConnectionIsOpen(true);
 
         // add another range and make sure we display it.
-        iv = new Interval(150050, 252450);
+        iv = Range.createRange(150050, 252450);
         vb.add(iv);
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -758,7 +867,7 @@ public class UploadTest extends LimeTestCase {
         assertConnectionIsOpen(true);
 
         // add an interval too small to report and make sure we don't report
-        iv = new Interval(102505, 150000);
+        iv = Range.createRange(102505, 150000);
         vb.add(iv);
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -776,9 +885,9 @@ public class UploadTest extends LimeTestCase {
 
         // add the glue between the other intervals and make sure we condense
         // the ranges into a single larger range.
-        iv = new Interval(102500, 102505);
+        iv = Range.createRange(102500, 102505);
         vb.add(iv);
-        iv = new Interval(150000, 150050);
+        iv = Range.createRange(150000, 150050);
         vb.add(iv);
         method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         try {
@@ -787,7 +896,7 @@ public class UploadTest extends LimeTestCase {
                     response);
             assertNotNull(method.getResponseHeader("X-Available-Ranges"));
             assertEquals("bytes 50-252449", method.getResponseHeader(
-            "X-Available-Ranges").getValue());
+                    "X-Available-Ranges").getValue());
         } finally {
             method.releaseConnection();
         }
@@ -889,13 +998,48 @@ public class UploadTest extends LimeTestCase {
         assertConnectionIsOpen(false);
     }
 
-    /** 
+    public void testHTTP11Post() throws Exception {
+        PostMethod method = new PostMethod("/uri-res/N2R?" + hash);
+        try {
+            int response = client.executeMethod(method);
+            fail("Expected HttpConnection due to connection close, got: " + response);
+        } catch (HttpException expected) {
+            // the connection was either closed or timed out due to a failed TLS
+            // handshake
+        } finally {
+            method.releaseConnection();
+        }
+        assertConnectionIsOpen(false);
+    }
+
+    public void testHTTP11ExpectContinue() throws Exception {
+        PostMethod method = new PostMethod("/uri-res/N2R?" + hash) {
+            @Override
+            public String getName() {
+                return "GET";
+            }
+        };
+        method.setUseExpectHeader(true);
+        method.setRequestBody("Foo");
+        try {
+            int response = client.executeMethod(method);
+            // since this is actually a GET request and not a POST 
+            // the Expect header should be ignored
+            assertEquals(HttpStatus.SC_OK, response);
+        } catch (HttpException expected) {
+            assertEquals(HTTP_CLIENT_REMOTE_CLOSE_MESSAGE, expected.getMessage());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    /**
      * Test that creation time header is returned.
      */
     public void testCreationTimeHeaderReturned() throws Exception {
         // assert that creation time exists
         URN urn = URN.createSHA1Urn(hash);
-        Long creationTime = CreationTimeCache.instance().getCreationTime(urn);
+        Long creationTime = ProviderHacks.getCreationTimeCache().getCreationTime(urn);
         assertNotNull(creationTime);
         assertTrue(creationTime.longValue() > 0);
 
@@ -905,22 +1049,22 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
             assertNotNull(method.getResponseHeader("X-Create-Time"));
             assertEquals(creationTime + "", method.getResponseHeader(
-            "X-Create-Time").getValue());
+                    "X-Create-Time").getValue());
         } finally {
             method.releaseConnection();
         }
     }
 
     public void testCreationTimeHeaderReturnedForIncompleteFile()
-    throws Exception {
-        Interval iv = new Interval(2, 5);
+            throws Exception {
+        Range iv = Range.createRange(2, 5);
         IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,
-        "verifiedBlocks");
+                "verifiedBlocks");
         vb.add(iv);
 
         URN urn = URN.createSHA1Urn(incompleteHash);
         Long creationTime = new Long("10776");
-        CreationTimeCache.instance().addTime(urn, creationTime.longValue());
+        ProviderHacks.getCreationTimeCache().addTime(urn, creationTime.longValue());
 
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         method.addRequestHeader("Range", "bytes 2-5");
@@ -930,7 +1074,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("cdef", method.getResponseBodyAsString());
             assertNotNull(method.getResponseHeader("X-Create-Time"));
             assertEquals(creationTime + "", method.getResponseHeader(
-            "X-Create-Time").getValue());
+                    "X-Create-Time").getValue());
         } finally {
             method.releaseConnection();
         }
@@ -1010,7 +1154,7 @@ public class UploadTest extends LimeTestCase {
         } finally {
             method.releaseConnection();
         }
-        
+
         // the request is checked for a valid bitprint length
         method = new GetMethod("/uri-res/N2R?urn:bitprint:" + baseHash + "."
                 + "asdoihffd");
@@ -1044,7 +1188,7 @@ public class UploadTest extends LimeTestCase {
             method.releaseConnection();
         }
     }
-
+    
     public void testBadGetTreeRequest() throws Exception {
         GetMethod method = new GetMethod("/uri-res/N2X?" + badHash);
         try {
@@ -1074,16 +1218,18 @@ public class UploadTest extends LimeTestCase {
             parser.nextRecord(); // xml
             DIMERecord tree = parser.nextRecord();
             assertFalse(parser.hasNext());
-            List<List<byte[]>> allNodes = FD.getHashTree().getAllNodes();
+            List<List<byte[]>> allNodes = ProviderHacks.getTigerTreeCache().getHashTree(FD).getAllNodes();
             byte[] data = tree.getData();
             int offset = 0;
-            for (Iterator<List<byte[]>> genIter = allNodes.iterator(); genIter.hasNext();) {
-                for (Iterator<byte[]> it = genIter.next().iterator(); it.hasNext();) {
+            for (Iterator<List<byte[]>> genIter = allNodes.iterator(); genIter
+                    .hasNext();) {
+                for (Iterator<byte[]> it = genIter.next().iterator(); it
+                        .hasNext();) {
                     byte[] current = it.next();
                     for (int j = 0; j < current.length; j++) {
                         assertEquals("offset: " + offset + ", idx: " + j,
                                 current[j], data[offset++]);
-                	}
+                    }
                 }
             }
             assertEquals(data.length, offset);
@@ -1096,7 +1242,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testGetNonExistingTree() throws Exception {
         URN urn = URN.createSHA1Urn(hash);
-        TigerTreeCache.instance().purgeTree(urn);
+        ProviderHacks.getTigerTreeCache().purgeTree(urn);
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
         try {
             int response = client.executeMethod(method);
@@ -1106,28 +1252,80 @@ public class UploadTest extends LimeTestCase {
         }
     }
 
-    private static class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized (loaded) {
-                loaded.notify();
-            }
+    public void testDownloadChangedFile() throws Exception {
+        // modify shared file and make sure it gets new timestamp
+        Thread.sleep(1000);
+        File file = new File(_sharedDir, fileName);
+        FileDesc fd = ProviderHacks.getFileManager().getFileDescForFile(file);        
+        FileOutputStream out = new FileOutputStream(file);
+        try {
+            out.write("abc".getBytes());
+        } finally {
+            out.close();
         }
+        assertNotEquals(file.lastModified(), fd.lastModified());
+
+        // catch notification when file is reshared
+        final CountDownLatch latch = new CountDownLatch(1);
+        FileEventListener listener = new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent event) {
+                if (event.isAddEvent()) {
+                    latch.countDown();
+                }
+            }            
+        };
+        try {
+            ProviderHacks.getFileManager().addFileEventListener(listener);
+
+            GetMethod method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
+            try {
+                int response = client.executeMethod(method);
+                assertEquals(HttpStatus.SC_NOT_FOUND, response);
+            } finally {
+                method.releaseConnection();
+            }
+
+            latch.await(500, TimeUnit.MILLISECONDS);
+
+            fd = ProviderHacks.getFileManager().getFileDescForFile(file);
+            assertNotNull(fd);
+            method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
+            try {
+                int response = client.executeMethod(method);
+                assertEquals(HttpStatus.SC_OK, response);
+                assertEquals("abc", method.getResponseBodyAsString());
+            } finally {
+                method.releaseConnection();
+            }
+        } finally {
+            ProviderHacks.getFileManager().removeFileEventListener(listener);
+        }
+        
     }
+
+    // DPINJ - testfix
+//    private static class FManCallback extends ActivityCallbackStub {
+//        public void fileManagerLoaded() {
+//            synchronized (loaded) {
+//                loaded.notify();
+//            }
+//        }
+//    }
 
     private static void startAndWaitForLoad() {
         synchronized (loaded) {
             try {
-                ROUTER_SERVICE.start();
+                ProviderHacks.getLifecycleManager().start();
                 loaded.wait();
             } catch (InterruptedException e) {
                 // good.
-            } 
+            }
         }
     }
 
     private void assertConnectionIsOpen(boolean open) {
         HttpConnection connection = client.getHttpConnectionManager()
-        .getConnection(hostConfig);
+                .getConnection(hostConfig);
         assertEquals(open, connection.isOpen());
         client.getHttpConnectionManager().releaseConnection(connection);
     }

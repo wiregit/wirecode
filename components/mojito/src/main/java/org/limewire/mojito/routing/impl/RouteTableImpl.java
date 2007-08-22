@@ -30,17 +30,14 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
-import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
@@ -909,31 +906,19 @@ public class RouteTableImpl implements RouteTable {
      * Pings the given Contact and adds the given DHTEventListener to
      * the DHTFuture if it's not null
      */
-    DHTFuture<PingResult> ping(Contact node, DHTFutureListener<PingResult> listener) {
-        DHTFuture<PingResult> future = null;
-        
+    private void ping(Contact node, DHTFutureListener<PingResult> listener) {
         ContactPinger pinger = this.pinger;
         if (pinger != null) {
-            try {
-                future = pinger.ping(node);
-            } catch (RejectedExecutionException err) {
-                ErrorService.error(err);
-                // TODO: Do the same as below?
-            }
+            pinger.ping(node, listener);
         } else {
-            // If there's no ContactPinger then create a fake 
-            // DHTFuture that simulates an instant timeout.
-            future = new FixedDHTFuture<PingResult>(new DHTTimeoutException(
-                    node.getNodeID(), node.getContactAddress(), null, 0L));
-            
             handleFailure(node.getNodeID(), node.getContactAddress());
+            
+            if (listener != null) {
+                ExecutionException exception = new ExecutionException(
+                        new DHTTimeoutException(node.getNodeID(), node.getContactAddress(), null, 0L));
+                listener.handleExecutionException(exception);
+            }
         }
-        
-        if (future != null && listener != null) {
-            future.addDHTFutureListener(listener);
-        }
-        
-        return future;
     }
     
     /*

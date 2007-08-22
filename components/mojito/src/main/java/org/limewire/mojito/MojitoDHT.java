@@ -31,8 +31,10 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.EvictorManager;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindValueResult;
@@ -188,10 +190,9 @@ public interface MojitoDHT extends Closeable {
     public void setMessageFactory(MessageFactory messageFactory);
     
     /**
-     * Sets and returns the MessageDispatcher. The class must be a sub-class of
-     * <tt>MessageDispatcher</tt>
+     * Sets the MessageDispatcher as created from the factory.
      */
-    public MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher);
+    public MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory);
     
     /**
      * Sets the RouteTable
@@ -232,6 +233,11 @@ public interface MojitoDHT extends Closeable {
      * Returns the StorableModelManager
      */
     public StorableModelManager getStorableModelManager();
+    
+    /**
+     * Returns the EvictorManager
+     */
+    public EvictorManager getEvictorManager();
     
     /**
      * Bootstraps the MojitoDHT from the given Contact. Use

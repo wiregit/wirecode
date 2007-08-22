@@ -1,20 +1,12 @@
 package com.limegroup.gnutella.downloader;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManagerStub;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -28,9 +20,9 @@ public class MagnetDownloaderTest extends LimeTestCase {
     
     final static int PORT=6666;
     private DownloadManagerStub manager;
-    private FileManager fileman;
-    private ActivityCallback callback;
-    private MessageRouter router;
+//    private FileManager fileman;
+//    private ActivityCallback callback;
+//    private MessageRouter router;
 	
     /**
      * Creates a new test instance.
@@ -50,25 +42,26 @@ public class MagnetDownloaderTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception{
+        @SuppressWarnings("all") // DPINJ: textfix
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
             }
         };
-        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-        assertTrue(RouterService.isConnected());
+   //     PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        assertTrue(ProviderHacks.getConnectionServices().isConnected());
     }
     
     public void setUp() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         manager = new DownloadManagerStub();
-        fileman = new FileManagerStub();
-        callback = new ActivityCallbackStub();
-        router = new MessageRouterStub();
-        manager.initialize(callback, router, fileman);
-        PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-        PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
+//        fileman = new FileManagerStub();
+//        callback = new ActivityCallbackStub();
+//        router = new MessageRouterStub();
+        manager.initialize();
+     //   PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+    //    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
     }
 
     public void testInvalidMagnetDownloads() throws Exception {

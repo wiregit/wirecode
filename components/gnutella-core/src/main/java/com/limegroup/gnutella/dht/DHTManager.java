@@ -119,7 +119,22 @@ public interface DHTManager extends ConnectionLifecycleListener,
     }
     
     /**
+     * Sets whether or not the DHT is enabled
+     */
+    public void setEnabled(boolean enabled);
+    
+    /**
+     * Returns whether or not the DHT is enabled
+     */
+    public boolean isEnabled();
+    
+    /**
      * Starts the DHT Node either in active or passive mode.
+     * 
+     * Note: You can use this method to stop the DHT by passing in
+     * DHTMode.INACTIVE. The difference between using this method
+     * and the {@link #stop()} method is that stop() is synchronous 
+     * (i.e. blocking) and start() with DHTMode.INACTIVE isn't.
      */
     public void start(DHTMode mode);
 

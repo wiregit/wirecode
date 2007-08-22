@@ -340,6 +340,7 @@ public abstract class AssertComparisons extends TestCase {
      * Asserts that actual is not equal to expected.  If they are equal,
      * an AssertionFailedError is thrown with the given message.
      */
+    @SuppressWarnings("null")
     static public void assertNotEquals(String msg, Object expected, Object actual) {
         if ( actual == null && expected != null )
             return;
@@ -1126,6 +1127,7 @@ public abstract class AssertComparisons extends TestCase {
      * AssertionFailedError is thrown.
      * If both 'expected' and 'actual' are null, an AssertionFailedError is thrown.
      */
+    @SuppressWarnings("null")
     static private void assertComparison(int type, String msg, Object expected, Object actual) {
         int ret = 0;
         if ( expected == null && actual == null) {

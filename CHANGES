@@ -1,0 +1,56 @@
+-*- outline -*-
+
+* icons
+  - browser_back_large.png
+  - browser_back_small.png
+  - browser_forward_large.png
+  - browser_forward_small.png
+  - browser_home_large.png
+  - browser_home_small.png
+  - store_tab.png
+  - added following mapping in 
+    components/resources/src/main/resources/org/limewire/gui/resources/icon_mapping.properties:
+	LIBRARY_BROWSER_BACK=browser_back
+	LIBRARY_BROWSER_STOP=stop
+	LIBRARY_BROWSER_HOME=browser_home
+	LIBRARY_BROWSER_NEXT=browser_forward
+
+* buy button
+  - added ResultNameHolderRenderer to render names and possibly add
+    buy buttons
+  - change ResultNameHolder to have a getter for the TableLine
+  - added isCellEditable to the TableRowFilter to allow cells to be
+    edited so we can get the buttons clips
+
+* messages
+  -labeled with Browser LIBRARY_BROWSER_*
+  - MENU_NAV_STORE_*
+
+* new scheme in schemas/xml/schemas
+  - store.xsd
+
+* new tab in gui.tabs
+  - MainFrame.buildTabs()
+  - new value in GUIMediator.Tabs
+
+* questions + todo
+  - how to get store.xsd in the right place
+  - how to create the LimeXMLSchema for store
+  - copied jdic browser exes to gui and lib/jars
+  
+* misc
+  - if there isn't an icon in lib/xml/misc for a schema in
+    lib/xml/schemas then the schema box won't show that kind of media
+    type
+
+* menus over browser
+  - added JPopupMenu.setDefaultLightWeightPopupEnabled(false); in
+    AbstractMenu to make sure menu items didn't cover up the browser
+
+* buttons in TableLines
+  - added 'Buy' and 'Try' buttons to TableLines
+  - created a special composite cell editor and renderer for
+    ResultNameHolders and a new type of Panel that contained a label
+    and buttons for displaying ResultNameHolders.  In the case where
+    the TableLines *where't* from the store, they are not editable and
+    displayed using just the cell renderer side of the composite.

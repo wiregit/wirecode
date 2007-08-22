@@ -28,7 +28,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *
  * It would also be possible to special-case hops counts of zero.
  */
-public class DuplicateFilter extends SpamFilter {  
+public class DuplicateFilter implements SpamFilter {  
     /**
      * The number of old pings to keep in memory.  If this is too small, we
      * won't be filtering properly.  If this is too large, lookup becomes

@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -77,14 +78,14 @@ public class FileManagerStub extends FileManager {
     }
     
     public FileManagerStub(Map urns,List descs) {
-    	super();
-    	_urns = urns;
-    	_descs = descs;
+    	super(ProviderHacks.getFileManagerController());
+        _urns = urns;
+        _descs = descs;
     }
     
     public FileManagerStub(){
-    	super();
-    	_urns = new HashMap();
+    	super(ProviderHacks.getFileManagerController());
+        _urns = new HashMap();
     	_descs = new Vector();
     }
     

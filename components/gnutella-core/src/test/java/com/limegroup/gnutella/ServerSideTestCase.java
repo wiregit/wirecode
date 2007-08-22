@@ -8,14 +8,12 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  *  Common code to test an Ultrapeer.  Allows you to control how many 
@@ -24,7 +22,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *
  *  Standard setup has the following settings:
  *  * Blocks all addresses, whitelists 127.*.*.* and your local IP .
- *  * Node is in Ultrapeer mode with GWebCache and Watchdog off.
+ *  * Node is in Ultrapeer mode with Watchdog off.
  *  * Sharing 2 files - berkeley.txt and susheel.txt
  *  * Max number of leaf connections is 4, max number of UP connections is 3.
  *
@@ -63,7 +61,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	/**
 	 * The central Ultrapeer used in the test.
 	 */
-	protected static RouterService ROUTER_SERVICE;
+	//protected static RouterService ROUTER_SERVICE;
 
     public ServerSideTestCase(String name) {
         super(name);
@@ -71,12 +69,12 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
 	private static void buildConnections() throws Exception {
         for (int i = 0; i < LEAF.length; i++) {
-            LEAF[i] = new Connection("localhost", PORT);
+            LEAF[i] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
             assertTrue(LEAF[i].isOpen());
         }
         
         for (int i = 0; i < ULTRAPEER.length; i++) {
-            ULTRAPEER[i] = new Connection("localhost", PORT);
+            ULTRAPEER[i] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
             assertTrue(ULTRAPEER[i].isOpen());
         }
     }
@@ -103,8 +101,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.MAX_LEAVES.setValue(33);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(33);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
@@ -120,11 +117,10 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
 
-		ROUTER_SERVICE = new RouterService(callback);
-        RouterService.preGuiInit();
-		ROUTER_SERVICE.start();
-        RouterService.clearHostCatcher();
-        RouterService.connect();
+		//ROUTER_SERVICE = new RouterService(callback);
+		ProviderHacks.getLifecycleManager().start();
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
         
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -163,7 +159,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
 		sleep();
         for (int i = 0; i < LEAF.length; i++)
             LEAF[i].close();
@@ -195,9 +191,9 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 		buildConnections();
         // init connections
         for (int i = ULTRAPEER.length-1; i > -1; i--)
-            ULTRAPEER[i].initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+            ULTRAPEER[i].initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         for (int i = 0; i < LEAF.length; i++)
-            LEAF[i].initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+            LEAF[i].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
 
         for (int i = 0; i < ULTRAPEER.length; i++)
             assertTrue(ULTRAPEER[i].isOpen());
@@ -211,17 +207,17 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
     /** Builds a conenction with default headers */
     protected Connection createLeafConnection() throws Exception {
-        return createConnection(new LeafHeaders("localhost"));
+        return createConnection(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"));
     }
     
     /** Builds an ultrapeer connection with default headers */
     protected Connection createUltrapeerConnection() throws Exception {
-        return createConnection(new UltrapeerHeaders("localhost"));
+        return createConnection(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"));
     }
     
     /** Builds a single connection with the given headers. */
     protected Connection createConnection(Properties headers) throws Exception {
-        Connection c = new Connection("localhost", PORT);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         assertTrue(c.isOpen());
         return c;

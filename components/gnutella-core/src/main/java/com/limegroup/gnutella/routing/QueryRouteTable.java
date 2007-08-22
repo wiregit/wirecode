@@ -13,7 +13,6 @@ import org.limewire.collection.BitSet;
 import org.limewire.io.IOUtils;
 import org.limewire.io.Pools;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -477,8 +476,8 @@ public class QueryRouteTable {
                         cleaner = new Cleaner(this);
                     uncompressor = Pools.getInflaterPool().borrowObject();
                 }       
-                Assert.that(uncompressor!=null, 
-                    "Null uncompressor.  Sequence: "+m.getSequenceNumber());
+                assert uncompressor!=null : 
+                    "Null uncompressor.  Sequence: "+m.getSequenceNumber();
                 data=uncompress(data);            
             } catch (IOException e) {
                 throw new BadPacketException("Couldn't uncompress data: "+e);
@@ -556,8 +555,8 @@ public class QueryRouteTable {
         if (prev==null)
             buf.add(new ResetTableMessage(bitTableLength, infinity));
         else
-            Assert.that(prev.bitTableLength==this.bitTableLength,
-                        "TODO: can't deal with tables of different lengths");
+            assert prev.bitTableLength==this.bitTableLength :
+                        "TODO: can't deal with tables of different lengths";
 
         //1. Calculate patch array
         byte[] data=new byte[bitTableLength];

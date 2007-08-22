@@ -155,6 +155,7 @@ public class DefaultUDPService implements UDPService, ReadWriteObserver {
                 continue;
             
             // Clone the buffer while creating, so the next message can be read using it.
+            BUFFER.flip();
             ByteBuffer clone = ByteBuffer.allocate(BUFFER.remaining());
             clone.put(BUFFER);
             clone.flip();

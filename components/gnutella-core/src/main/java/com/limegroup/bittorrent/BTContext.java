@@ -14,8 +14,10 @@ public class BTContext implements TorrentContext {
 	private final BitField fullBitField;
 	
 	private TorrentDiskManager diskManager;
+	private final DiskManagerFactory diskManagerFactory;
 	
-	public BTContext(BTMetaInfo info) {
+	BTContext(BTMetaInfo info, DiskManagerFactory diskManagerFactory) {
+	    this.diskManagerFactory = diskManagerFactory;
 		this.info = info;
 		info.setContext(this);
 		fullBitField = new BitFieldSet(fullSet, info.getNumBlocks());
@@ -43,8 +45,7 @@ public class BTContext implements TorrentContext {
 	}
 
 	public void initializeDiskManager(boolean complete) {
-		diskManager = DiskManagerFactory.instance().getManager(this, 
-				info.getDiskManagerData(), complete);
+		diskManager = diskManagerFactory.getManager(this, info.getDiskManagerData(), complete);
 	}
 
 	/**

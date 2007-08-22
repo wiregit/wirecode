@@ -95,4 +95,10 @@ public abstract class UDPTimerEvent implements Comparable<UDPTimerEvent> {
         else
             return 0;
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getName() + " [eventTime=" + _eventTime + "]";
+    }
+    
 }

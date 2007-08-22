@@ -14,8 +14,10 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTTestCase;
 
+@SuppressWarnings("null")
 public class PushProxiesValueTest extends DHTTestCase {
     
     public PushProxiesValueTest(String name) {
@@ -44,9 +46,11 @@ public class PushProxiesValueTest extends DHTTestCase {
             fail("UnknownHostException", err);
         }
         
-        PushProxiesValue value1 
-            = PushProxiesValue.createPushProxiesValue(Version.ZERO, 
-                    guid, features, fwtVersion, port, proxies);
+        AbstractPushProxiesValue value1 = new PushProxiesValueFactoryImpl(
+                ProviderHacks.getNetworkManager(), ProviderHacks
+                        .getPushEndpointFactory(), ProviderHacks
+                        .getApplicationServices()).createPushProxiesValue(
+                Version.ZERO, guid, features, fwtVersion, port, proxies);
         
         assertEquals(guid, value1.getGUID());
         assertEquals(features, value1.getFeatures());
@@ -72,7 +76,11 @@ public class PushProxiesValueTest extends DHTTestCase {
         // De-serialize it
         PushProxiesValue value2 = null;
         try {
-            value2 = PushProxiesValue.createFromData(Version.ZERO, serialized);
+            value2 = new PushProxiesValueFactoryImpl(ProviderHacks
+                    .getNetworkManager(), ProviderHacks
+                    .getPushEndpointFactory(), ProviderHacks
+                    .getApplicationServices()).createFromData(Version.ZERO,
+                    serialized);
         } catch (DHTValueException err) {
             fail("DHTValueException", err);
         }

@@ -24,7 +24,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Utility class that constructs a LimeWire backend for testing
@@ -73,7 +72,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 	/**
 	 * The <tt>RouterService</tt> instance the constructs the backend.
 	 */
-	private RouterService ROUTER_SERVICE;
+//	private RouterService ROUTER_SERVICE;
     
     /**
      * The thread which is catching the error reports from the various
@@ -346,17 +345,18 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
             preSetUp();
     		setStandardSettings(port);
             populateSharedDirectory();
-            ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
-            ROUTER_SERVICE.start();
-            if (!reject) RouterService.connect();
+            if(true)throw new RuntimeException("fix me");
+            //ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+            ProviderHacks.getLifecycleManager().start();
+            if (!reject) ProviderHacks.getConnectionServices().connect();
 
             try {
                 // sleep to let the file manager initialize
                 Thread.sleep(2000);
             } catch(InterruptedException e) {}
-            if (RouterService.getPort() != port) {
+            if (ProviderHacks.getNetworkManager().getPort() != port) {
                 throw new IOException("Opened wrong port (wanted: "
-                     + port + ", was: " + RouterService.getPort() +")");
+                     + port + ", was: " + ProviderHacks.getNetworkManager().getPort() +")");
             }
             
             waitForShutdown(shutdownSocket);
@@ -428,7 +428,6 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
 		ConnectionSettings.ENCODE_DEFLATE.setValue(true);         
 
@@ -446,7 +445,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 	 * Notifies <tt>RouterService</tt> that the backend should be shut down.
 	 */
 	private void doShutdown(boolean reject, String msg) {
-		RouterService.shutdown();
+		ProviderHacks.getLifecycleManager().shutdown();
 		System.exit(0);
 	}
 

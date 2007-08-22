@@ -158,7 +158,24 @@ public final class ThrottleWriterTest extends BaseTestCase {
     	WRITER.handleWrite();
     	assertFalse(SINK.interested());
     }
-	
+
+    public void testeHasBufferedOutput() throws Exception {
+        SINK.resize(10);
+        THROTTLE.setAvailable(2);
+        WRITER.requestBandwidth();
+        
+        assertFalse(WRITER.hasBufferedOutput());
+        WRITER.handleWrite();
+        assertFalse(WRITER.hasBufferedOutput());
+        assertEquals(2, WRITER.write(buffer(data(2))));
+        assertTrue(SINK.hasBufferedOutput());
+        assertTrue(WRITER.hasBufferedOutput());
+        SINK.getBuffer().clear();
+        assertFalse(WRITER.hasBufferedOutput());
+        assertEquals(0, WRITER.write(buffer(data(2))));
+        assertFalse(WRITER.hasBufferedOutput());
+    }
+
 	private byte[] data(int size) {
 	    byte[] data = new byte[size];
 	    RND.nextBytes(data);

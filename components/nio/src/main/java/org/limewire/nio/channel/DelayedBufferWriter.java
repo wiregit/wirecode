@@ -242,4 +242,10 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     		}
     	}
     }
+
+    public boolean hasBufferedOutput() {
+        InterestWritableByteChannel channel = this.sink;
+        return hasBufferedData() || (channel != null && channel.hasBufferedOutput());
+    }
+    
 }

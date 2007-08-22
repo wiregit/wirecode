@@ -49,9 +49,9 @@ public class HttpChannelTest extends BaseTestCase {
     }
 
     public void testPushBackReadAllAtOnce() throws Exception {
-        MockSocket socket = new MockSocket();
+        StubSocket socket = new StubSocket();
         HttpIOSession session = new HttpIOSession(socket);
-        MockChannel srcChannel = new MockChannel("abc");
+        StubReadableChannel srcChannel = new StubReadableChannel("abc");
 
         HttpChannel channel = new HttpChannel(session, eventDispatch, "GET");
         channel.setReadChannel(srcChannel);
@@ -67,9 +67,9 @@ public class HttpChannelTest extends BaseTestCase {
     }
 
     public void testPushBackReadSlowly() throws Exception {
-        MockSocket socket = new MockSocket();
+        StubSocket socket = new StubSocket();
         HttpIOSession session = new HttpIOSession(socket);
-        MockChannel srcChannel = new MockChannel("abc");
+        StubReadableChannel srcChannel = new StubReadableChannel("abc");
 
         HttpChannel channel = new HttpChannel(session, eventDispatch, "GET");
         channel.setReadChannel(srcChannel);
@@ -96,9 +96,9 @@ public class HttpChannelTest extends BaseTestCase {
     }
 
     public void testNoPushBack() throws Exception {
-        MockSocket socket = new MockSocket();
+        StubSocket socket = new StubSocket();
         HttpIOSession session = new HttpIOSession(socket);
-        MockChannel srcChannel = new MockChannel("abc");
+        StubReadableChannel srcChannel = new StubReadableChannel("abc");
 
         HttpChannel channel = new HttpChannel(session, eventDispatch, null);
         channel.setReadChannel(srcChannel);
@@ -107,6 +107,42 @@ public class HttpChannelTest extends BaseTestCase {
         assertEquals(3, read);
         dst.flip();
         assertEquals("abc", new String(dst.array(), 0, 3));
+    }
+
+    public void testDelayedClosing() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+
+        StubWriteableChannel sink = new StubWriteableChannel(5);
+        HttpChannel channel = new HttpChannel(session, eventDispatch, null);
+        session.setHttpChannel(channel);
+        channel.setWriteChannel(sink);
+
+        assertTrue(channel.isOpen());        
+        assertFalse(session.isShutdown());
+        sink.write(ByteBuffer.allocate(5));
+        assertTrue(sink.hasBufferedOutput());
+        channel.closeWhenBufferedOutputHasBeenFlushed();
+        assertFalse(session.isShutdown());
+        channel.handleWrite();
+        assertFalse(session.isShutdown());
+        sink.getBuffer().clear();
+        channel.handleWrite();
+        assertTrue(session.isShutdown());
+    }
+
+    public void testClosedInstantly() throws Exception {
+        StubSocket socket = new StubSocket();
+        StubIOSession session = new StubIOSession(socket);
+
+        StubWriteableChannel sink = new StubWriteableChannel(5);
+        HttpChannel channel = new HttpChannel(session, eventDispatch, null);
+        session.setHttpChannel(channel);
+        channel.setWriteChannel(sink);
+
+        assertFalse(session.isShutdown());        
+        channel.closeWhenBufferedOutputHasBeenFlushed();
+        assertTrue(session.isShutdown());
     }
 
 }

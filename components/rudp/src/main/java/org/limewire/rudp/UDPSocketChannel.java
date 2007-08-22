@@ -10,6 +10,8 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
@@ -31,6 +33,8 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
                                                         InterestWritableByteChannel,
                                                         ChunkReleaser {
     
+    private static final Log LOG = LogFactory.getLog(UDPSocketChannel.class);
+
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
     
@@ -107,6 +111,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
      * Reads all possible data from the DataWindow into the ByteBuffer,
      * sending a keep alive if more space became available.
      */
+    long last = 0;
     public int read(ByteBuffer to) throws IOException {
         // It is possible that the channel is open but the processor
         // is closed.  In that case, this will return -1.
@@ -115,6 +120,11 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
             throw new ClosedChannelException();
         
         synchronized (processor) {
+            // Now that we've transferred all we can to the buffer, clear up
+            // the space & send a keep-alive if necessary
+            // Record how much space was previously available in the receive window
+            int priorSpace = readData.getWindowSpace();
+
             int read = 0;
             DataRecord currentRecord = readData.getReadableBlock();
             while (currentRecord != null) {
@@ -128,20 +138,18 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
                 currentRecord = readData.getReadableBlock();
             }
 
-            // Now that we've transferred all we can to the buffer, clear up
-            // the space & send a keep-alive if necessary
-            // Record how much space was previously available in the receive window
-            int priorSpace = readData.getWindowSpace();
-
             // Remove all records we just read from the receiving window
-            readData.clearEarlyReadBlocks();
+            int cleared = readData.clearEarlyReadBlocks();
 
             // If the receive window opened up then send a special
             // KeepAliveMessage so that the window state can be
             // communicated.
-            if ((priorSpace == 0 && read > 0)
-                    || (priorSpace <= UDPConnectionProcessor.SMALL_SEND_WINDOW &&
-                        readData.getWindowSpace() > UDPConnectionProcessor.SMALL_SEND_WINDOW)) {
+            if ((cleared > 0 && priorSpace == 0)
+                    /*|| (priorSpace <= UDPConnectionProcessor.SMALL_SEND_WINDOW &&
+                        readData.getWindowSpace() > UDPConnectionProcessor.SMALL_SEND_WINDOW)*/) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Sending aritifial keep alive: cleared=" + cleared + ", priorSpace="+ priorSpace + ", read=" + read + ", windowSpace=" + readData.getWindowSpace()  + ", windowStart=" + readData.getWindowStart());
+
                 processor.sendKeepAlive();
             }
         
@@ -300,10 +308,6 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
             shutdown = true;
         }
         
-        try {
-            close();
-        } catch(IOException ignored) {}
-        
         Shutdownable chain = writer;
         if(chain != null)
             chain.shutdown();
@@ -376,4 +380,9 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     void eventPending() {
     	context.getTransportListener().eventPending();
     }
+
+    public boolean hasBufferedOutput() {
+        return getNumberOfPendingChunks() > 0;
+    }
+    
 }

@@ -16,12 +16,9 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -76,29 +73,29 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @param overwrite whether file at download location should be overwritten
      * @param saveDir can be null, then the default save directory is used
 	 * @param fileName the final file name, can be <code>null</code>
+     * @param saveLocationManager 
 	 *
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
-    public MagnetDownloader(IncompleteFileManager ifm,
+    MagnetDownloader(IncompleteFileManager ifm,
 							MagnetOptions magnet,
 							boolean overwrite,
                             File saveDir,
-                            String fileName) throws SaveLocationException {
+                            String fileName, SaveLocationManager saveLocationManager) throws SaveLocationException {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
         super(new RemoteFileDesc[0], ifm, null, saveDir, 
-			  checkMagnetAndExtractFileName(magnet, fileName), overwrite);
+			  checkMagnetAndExtractFileName(magnet, fileName), overwrite, saveLocationManager);
         synchronized(this) {
             propertiesMap.put(MAGNET, magnet);
         }
     }
     
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-            DownloadCallback callback) {
-		Assert.that(getMagnet() != null);
+    public void initialize(DownloadReferences downloadReferences) {
+        assert (getMagnet() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
-        super.initialize(manager, fileManager, callback);
+        super.initialize(downloadReferences);
     }
 
 	private synchronized MagnetOptions getMagnet() {
@@ -215,7 +212,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
     /** Returns the length of the content at the given URL. 
      *  @exception IOException couldn't find the length for some reason */
-    private static int contentLength(URL url) throws IOException {
+    private static long contentLength(URL url) throws IOException {
         try {
             // Verify that the URL is valid.
             new URI(url.toExternalForm().toCharArray());
@@ -237,13 +234,12 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 throw new IOException("Got " + head.getStatusCode() +
                                       " instead of 200");
             
-            int length = head.getResponseContentLength();
+            long length = head.getResponseContentLength();
             if (length<0)
                 throw new IOException("No content length");
             return length;
         } finally {
-            if(head != null)
-                head.releaseConnection();
+            head.releaseConnection();
         }
     }
 
@@ -259,11 +255,11 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		String textQuery = magnet.getQueryString();
         if (textQuery != null) {
             String q = QueryUtils.createQueryString(textQuery);
-            return QueryRequest.createQuery(q);
+            return queryRequestFactory.createQuery(q);
         }
         else {
             String q = QueryUtils.createQueryString(getSaveFile().getName());
-            return QueryRequest.createQuery(q);
+            return queryRequestFactory.createQuery(q);
         }
     }
 
@@ -324,9 +320,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /**
 	 * Only allow requeries when <code>downloadSHA1</code> is not null.
      */
-	protected boolean shouldSendRequeryImmediately(int numRequeries) {
-		return downloadSHA1 != null ? super.shouldSendRequeryImmediately(numRequeries) 
-				: false;
+	protected boolean canSendRequeryNow() {
+		return downloadSHA1 != null ? super.canSendRequeryNow() : false;
 	}
 
 	/**

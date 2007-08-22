@@ -13,7 +13,7 @@ public final class ErrorService {
 	 * As a default the <tt>PrintStreamErrorCallback</tt> is set,
      * which prints to {@link System#out}.
 	 */
-	private static ErrorCallback _errorCallback = 
+	private volatile static ErrorCallback _errorCallback = 
 		new PrintStreamErrorCallback(System.out);
 
 	/**

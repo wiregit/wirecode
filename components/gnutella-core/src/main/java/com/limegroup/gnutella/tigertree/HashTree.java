@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -15,11 +16,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 
-import com.limegroup.gnutella.Assert;
+import com.google.inject.Inject;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -43,11 +44,11 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     private static transient final Log LOG = LogFactory.getLog(HashTree.class);
 
     // some static constants
-    private static transient final int  KB                   = 1024;
-    private static transient final int  MB                   = 1024 * KB;
+    private static transient final long  KB                   = 1024;
+    private static transient final long  MB                   = 1024 * KB;
             static transient final int  BLOCK_SIZE           = 1024;
     private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
-    
+
     /** An invalid HashTree. */
     public static final HashTree INVALID = new HashTree();
 
@@ -88,6 +89,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      */
     private transient int _nodeSize;
     
+    @Inject
+    private static HashTreeNodeManager hashTreeNodeManager;
+    
     /** Constructs an invalid HashTree. */
     private HashTree() {
         NODES = null;
@@ -115,9 +119,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         FILE_SIZE = fileSize;
         ROOT_HASH = allNodes.get(0).get(0);
         DEPTH = allNodes.size()-1;
-        Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
-        Assert.that(NODES.size() * nodeSize >= fileSize);
-        HashTreeNodeManager.instance().register(this, allNodes);
+        assert(TigerTree.log2Ceil(NODES.size()) == DEPTH);
+        assert(NODES.size() * (long)nodeSize >= fileSize);
+        hashTreeNodeManager.register(this, allNodes);
         _nodeSize = nodeSize;
     }
     
@@ -149,9 +153,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     public static int calculateNodeSize(long fileSize, int depth) {
         
         // don't create more than this many nodes
-        int maxNodes = 1 << depth;        
+        long maxNodes = 1 << depth;        
         // calculate ideal node size, 
-        int idealNodeSize = (int) (fileSize) / maxNodes;
+        long idealNodeSize = fileSize / maxNodes;
         // rounding up!
         if (fileSize % maxNodes != 0)
             idealNodeSize++;
@@ -168,14 +172,14 @@ public class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that(nodeSize * (long)maxNodes >= fileSize,
+        assert nodeSize * maxNodes >= fileSize :
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
-                    ", maxNode: " + maxNodes);
-        Assert.that(nodeSize * (long)maxNodes <= fileSize * 2,
+                    ", maxNode: " + maxNodes;
+        assert nodeSize * maxNodes <= fileSize * 2 :
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
-                    ", maxNode: " + maxNodes);
+                    ", maxNode: " + maxNodes;
  
         return nodeSize;
     }
@@ -232,25 +236,25 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     /**
      * Checks whether the specific area of the file matches the hash tree. 
      */
-    public boolean isCorrupt(Interval in, byte [] data) {
+    public boolean isCorrupt(Range in, byte [] data) {
         return isCorrupt(in, data, data.length);
     }
  
     /**
      * Checks whether the specific area of the file matches the hash tree.
      */
-    public boolean isCorrupt(Interval in, byte[] data, int length) {
-        Assert.that(in.high <= FILE_SIZE);
+    public boolean isCorrupt(Range in, byte[] data, int length) {
+        assert(in.getHigh() <= FILE_SIZE);
         
         // if the interval is not a fixed chunk, we cannot verify it.
         // (actually we can but its more complicated) 
-        if (in.low % _nodeSize == 0 && 
-                in.high - in.low +1 <= _nodeSize &&
-                (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
+        if (in.getLow() % _nodeSize == 0 && 
+                in.getHigh() - in.getLow() +1 <= _nodeSize &&
+                (in.getHigh() == in.getLow()+_nodeSize-1 || in.getHigh() == FILE_SIZE -1)) {
             TigerTree digest = new TigerTree();
             digest.update(data, 0, length);
             byte [] hash = digest.digest();
-            byte [] treeHash = NODES.get(in.low / _nodeSize);
+            byte [] treeHash = NODES.get((int)(in.getLow() / _nodeSize));
             boolean ok = Arrays.equals(treeHash, hash);
             if (LOG.isDebugEnabled())
                 LOG.debug("interval "+in+" verified "+ok);
@@ -259,6 +263,49 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         return true;
     }
 
+    /**
+     * Checks whether the specified range in the provided file matches
+     * the hash tree.
+     * @param in the Range 
+     * @param raf the RandomAccessFile to read from
+     * @param tmp a byte [] to use as temp buffer
+     * @return true if the data in the range is corrupt.
+     */
+    public boolean isCorrupt(Range in, RandomAccessFile raf, byte [] tmp) {
+        assert in.getHigh() <= FILE_SIZE : "invalid range "+in+" vs "+FILE_SIZE;
+        
+        // if the interval is not a fixed chunk, we cannot verify it.
+        // (actually we can but its more complicated) 
+        if (in.getLow() % _nodeSize == 0 && 
+                in.getHigh() - in.getLow() +1 <= _nodeSize &&
+                (in.getHigh() == in.getLow()+_nodeSize-1 || in.getHigh() == FILE_SIZE -1)) {
+            try {
+                TigerTree digest = new TigerTree();
+                long read = in.getLow();
+                while(read <= in.getHigh()) {
+                    int size = (int)Math.min(tmp.length, in.getHigh() - read + 1);
+                    synchronized(raf) {
+                        raf.seek(read);
+                        raf.readFully(tmp, 0, size);
+                    }
+                    digest.update(tmp,0,size);
+                    read += size;
+                }
+                byte [] hash = digest.digest();
+                byte [] treeHash = NODES.get((int)(in.getLow() / _nodeSize));
+                boolean ok = Arrays.equals(treeHash, hash);
+                if (LOG.isDebugEnabled())
+                    LOG.debug("interval "+in+" verified "+ok);
+                return !ok;
+            } catch (IOException assumeCorrupt) {
+                LOG.debug("iox while verifying ",assumeCorrupt);
+                return true;
+            }
+        } 
+        
+        return true;
+    }
+    
     /**
      * @return Thex URI for this HashTree
      * @see com.limegroup.gnutella.http.HTTPHeaderValue#httpStringValue()
@@ -380,7 +427,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * @return all nodes.
      */
     public List<List<byte[]>> getAllNodes() {
-        return HashTreeNodeManager.instance().getAllNodes(this);
+        return hashTreeNodeManager.getAllNodes(this);
     }
 
     public ThexWriter createAsyncWriter() {
@@ -439,8 +486,12 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             return 9;
         else if (size < 1024 * MB) // 1MB chunk, 24552B tree 
             return 10;
-        else
-            return 11; // 2MB chunks, 49128B tree
+        else if (size < 4096 * MB) // 2MB chunks, 49128B tree 
+            return 11; 
+        else if (size < 64 * 1024 * MB) 
+            return 12; // 80kb tree
+        else 
+            return 13; // 160KB tree, 8k * 128MB chunks for 1TB file
     }
     
     /**

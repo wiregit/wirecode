@@ -3,8 +3,6 @@ package com.limegroup.gnutella.downloader;
 import java.util.Collection;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 /**
  * A class that ranks sources for a download. 
@@ -112,44 +110,6 @@ public abstract class SourceRanker {
     
     protected void clearState() {}
     
-    /**
-     * @return a ranker appropriate for our system's capabilities.
-     */
-    public static SourceRanker getAppropriateRanker() {
-        if (RouterService.canReceiveSolicited() && 
-                DownloadSettings.USE_HEADPINGS.getValue())
-            return new PingRanker();
-        else 
-            return new LegacyRanker();
-    }
-    
-    /**
-     * @param original the current ranker that we use
-     * @return the ranker that should be used.  If different than the current one,
-     * the current one is stopped.
-     */
-    public static SourceRanker getAppropriateRanker(SourceRanker original) {
-        if(original == null)
-            return getAppropriateRanker();
-        
-        SourceRanker better;
-        if (RouterService.canReceiveSolicited() && 
-                DownloadSettings.USE_HEADPINGS.getValue()) {
-            if (original instanceof PingRanker)
-                return original;
-            better = new PingRanker();
-        }else {
-            if (original instanceof LegacyRanker)
-                return original;
-            better = new LegacyRanker();
-        }
-        
-        better.setMeshHandler(original.getMeshHandler());
-        better.addToPool(original.getShareableHosts());
-        original.stop();
-        return better;
-    }
-
     /** sets the Mesh handler if any */
     public synchronized void setMeshHandler(MeshHandler handler) {
         meshHandler = handler;

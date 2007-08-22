@@ -267,7 +267,7 @@ public class ExtendedEndpoint extends Endpoint {
      * Records a UDP Host Cache failure.
      */
     public void recordUDPHostCacheFailure() {
-        Assert.that(isUDPHostCache());
+        assert(isUDPHostCache());
         udpHostCacheFailures++;
     }
     
@@ -278,7 +278,7 @@ public class ExtendedEndpoint extends Endpoint {
      * we really don't want to consider the host a failure.
      */
     public void decrementUDPHostCacheFailure() {
-        Assert.that(isUDPHostCache());
+        assert(isUDPHostCache());
         // don't go below 0.
         udpHostCacheFailures = Math.max(0, udpHostCacheFailures-1);
     }
@@ -287,7 +287,7 @@ public class ExtendedEndpoint extends Endpoint {
      * Records a UDP Host Cache success.
      */
     public void recordUDPHostCacheSuccess() {
-        Assert.that(isUDPHostCache());
+        assert(isUDPHostCache());
         udpHostCacheFailures = 0;
     }
     

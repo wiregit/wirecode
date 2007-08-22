@@ -10,10 +10,7 @@ import org.limewire.collection.NameValue;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
@@ -34,7 +31,6 @@ public class PingRequest extends Message {
     /** If we support incoming TLS. */
     public static final byte SCP_TLS = 0x2;
     
-    
     /**
      * GUID to send out for UDP pings.
      */
@@ -54,14 +50,14 @@ public class PingRequest extends Message {
     /**
      * Creates a normal ping from data read on the network
      */
-    public PingRequest(byte[] guid, byte ttl, byte hops) {
+    PingRequest(byte[] guid, byte ttl, byte hops) {
         super(guid, Message.F_PING, ttl, hops, 0);
     }
 
     /**
      * Creates an incoming group ping. Used only by boot-strap server
      */
-    protected PingRequest(byte[] guid, byte ttl, byte hops, byte length) {
+    PingRequest(byte[] guid, byte ttl, byte hops, byte length) {
         super(guid, Message.F_PING, ttl, hops, length);
     }
 
@@ -70,7 +66,7 @@ public class PingRequest extends Message {
      * 
      * @param payload the headers etc. which the big pings contain.
      */
-    public PingRequest(byte[] guid, byte ttl, byte hops, byte[] payload) {
+    PingRequest(byte[] guid, byte ttl, byte hops, byte[] payload) {
         super(guid, Message.F_PING, ttl, hops, payload.length);
         this.payload = payload;
     }
@@ -81,7 +77,7 @@ public class PingRequest extends Message {
      *
      * @param ttl the ttl of the new Ping
      */
-    public PingRequest(byte ttl) {
+    PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
         addBasicGGEPs();
     }
@@ -91,7 +87,7 @@ public class PingRequest extends Message {
      *
      * @param ttl the ttl of the new Ping
      */
-    public PingRequest(byte [] guid,byte ttl) {
+    PingRequest(byte [] guid,byte ttl) {
         super(guid,(byte)0x0, ttl, (byte)0,0);
         addBasicGGEPs();
     }
@@ -99,92 +95,10 @@ public class PingRequest extends Message {
     /**
      * Creates a ping with the specified GUID, ttl, and GGEP fields.
      */
-    private PingRequest(byte[] guid, byte ttl, List<NameValue<?>> ggeps) {
+    PingRequest(byte[] guid, byte ttl, List<NameValue<?>> ggeps) {
         super(guid, (byte)0x0, ttl, (byte)0, 0);
         addGGEPs(ggeps);
     }
-
-    /**
-     * Creates a Query Key ping.
-     */
-    public static PingRequest createQueryKeyRequest() {
-        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
-        return new PingRequest(GUID.makeGuid(), (byte)1, l);
-    }
-    
-    /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to UDP hosts.
-     */
-    public static PingRequest createUDPPing() {
-        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
-    }
-    
-    /**
-     * Creates a TTL 1 Ping to request DHT nodes, intended
-     * for sending to UDP hosts. 
-     */
-    public static PingRequest createUDPingWithDHTIPPRequest() {
-        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        GUID guid = new GUID();
-        l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
-        return new PingRequest(guid.bytes(), (byte)1, l);
-    }
-    
-    /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to UHCs.
-     */    
-    public static PingRequest createUHCPing() {
-        List<NameValue<?>> ggeps = new LinkedList<NameValue<?>>();
-        GUID guid = populateUDPGGEPList(ggeps);
-        ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
-        return new PingRequest(guid.bytes(),(byte)1,ggeps);
-    }
-    
-    /**
-     * @param l list to put the standard extentions we add to UDP pings
-     * @return the guid to use for the ping
-     */
-    private static GUID populateUDPGGEPList(List<NameValue<?>> l) {
-        GUID guid;
-        if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
-            guid = UDP_GUID;
-        } else {
-            l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
-            guid = UDPService.instance().getSolicitedGUID();
-        }        
-        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
-        
-        return guid;
-    }
-    
-    private static byte[] getSCPData() {
-        byte[] data = new byte[1];
-        if(RouterService.isSupernode())
-            data[0] = SCP_ULTRAPEER;
-        else
-            data[0] = SCP_LEAF;
-        
-        if(ConnectionSettings.TLS_INCOMING.getValue())
-            data[0] |= SCP_TLS; // add our support for TLS.
-        
-        return data;
-    }
-    
-    /**
-     * Creates a TTL 1 Ping for faster bootstrapping, intended
-     * for sending to the multicast network.
-     */
-    public static PingRequest createMulticastPing() {
-        GUID guid = new GUID();        
-        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
-        return new PingRequest(guid.bytes(), (byte)1, l);
-    }    
-            
 
     /////////////////////////////methods///////////////////////////
 

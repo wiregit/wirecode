@@ -1,4 +1,5 @@
 package org.limewire.inspection;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -6,34 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+
 /**
- * Inspects an encoded field and returns a representation of that
- * field. The field must:
+ * Gets the value of an object that implements {@link Inspectable} or an object
+ * with an annotation of {@link InspectableForSize @InspectableForSize} or 
+ * {@link InspectablePrimitive @InspectablePrimitive}. 
  * <p>
- * a) implement the {@link Inspectable} interface, in which case the
- * return value of the <code>inspect</code> method is returned, 
- * or else
- * <p>
- * b) be annotated with {@link InspectablePrimitive @InspectablePrimitive}, in 
- * which case the <code>String.valueOf</code> is returned, or else
- * <p>
- * c) be annotated with {@link InspectableForSize @InspectableForSize} and have a 
- * <code>size</code> method in which case the return value of the <code>size</code>
- * method call is returned.
- *
+ * See the Lime Wire Wiki for sample code using the <a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.inspection">
+ * org.limewire.inspection</a> package.
+ * 
  */
 
 public class InspectionUtils {
     /**
      * 
-     * Inspects an encoded field and returns a representation of that
-     * field. The field must:
+     * Inspects a field and returns a representation of that field. The field must:
      * <p>
-     * a) implement the {@link Inspectable} interface, in which case the
+     * a) implement the <code>Inspectable</code> interface, in which case the
      * return value of the <code>inspect</code> method is returned, 
      * or else
      * <p>
-     * b) be annotated with {@link InspectablePrimitive @InspectablePrimitive}, in 
+     * b) be annotated with <code>@InspectablePrimitive</code>, in 
      * which case the <code>String.valueOf</code> is returned, or else
      * <p>
      * c) be annotated with {@link InspectableForSize @InspectableForSize} and have a 

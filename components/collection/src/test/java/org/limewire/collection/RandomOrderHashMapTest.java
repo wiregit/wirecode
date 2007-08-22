@@ -1,6 +1,7 @@
 package org.limewire.collection;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,5 +53,31 @@ public class RandomOrderHashMapTest extends BaseTestCase {
         for (Object o : c)
             out2 = out2 + o;
         assertNotEquals(out1, out2);
+    }
+    
+    public void testAllKeysInKeySet() {
+        testAllKeysFor(200);
+        testAllKeysFor(1);
+        testAllKeysFor(199);
+        // powers of two and values around
+        testAllKeysFor(16);
+        testAllKeysFor(15);
+        testAllKeysFor(17);
+        testAllKeysFor(2);
+    }
+    
+    private void testAllKeysFor(int size) {
+        RandomOrderHashMap<Integer, Integer> map = new RandomOrderHashMap<Integer, Integer>(size);
+        Set<Integer> set = new HashSet<Integer>();
+        // overfill it by one
+        for (int i = 1; i <= size + 1; i++) {
+            map.put(i, i);
+            set.add(i);
+        }
+        assertEquals(size, map.keySet().size());
+        for (Integer key : map.keySet()) {
+            set.remove(key);
+        }
+        assertEquals("set: " + set + "for size " + size, 1, set.size());
     }
 }

@@ -3,8 +3,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.NoSuchElementException;
 
-import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 
 
 public interface SelectionStrategy {
@@ -26,7 +26,7 @@ public interface SelectionStrategy {
      * @return the Interval that should be assigned next, which does not span a blockSize boundary
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    public Interval pickAssignment(IntervalSet candidateBytes, 
+    public Range pickAssignment(IntervalSet candidateBytes, 
             IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException;
 }

@@ -8,11 +8,13 @@ import java.lang.reflect.InvocationTargetException;
 
 import junit.framework.Test;
 
-import org.limewire.collection.Interval;
+import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.VerifyingFile.WriteCallback;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -61,7 +63,7 @@ public class VerifyingFileTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception {
         hashTree = defaultHashTree;
-        vf = new VerifyingFile((int) completeFile.length());
+        vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile((int) completeFile.length());
         vf.open(new File("outfile"));
         vf.setHashTree(defaultHashTree);
         raf.seek(0);
@@ -72,6 +74,8 @@ public class VerifyingFileTest extends LimeTestCase {
         vf.close();
     }
 
+    
+        
     /**
      * tests that sequential chunks are leased.
      */
@@ -80,16 +84,16 @@ public class VerifyingFileTest extends LimeTestCase {
         PrivilegedAccessor.setValue(vf, "blockChooser",
                 new TestSequentialStrategy());
         for (long i = 0; i < 5; i++) {
-            Interval leased = vf.leaseWhite(chunkSize);
-            assertEquals(i * chunkSize, leased.low);
-            assertEquals((i + 1) * chunkSize - 1, leased.high);
+            Range leased = vf.leaseWhite(chunkSize);
+            assertEquals(i * chunkSize, leased.getLow());
+            assertEquals((i + 1) * chunkSize - 1, leased.getHigh());
         }
 
         // the last interval is shorter
-        Interval last = vf.leaseWhite(chunkSize);
-        assertLessThan(chunkSize, last.high - last.low + 1);
-        assertEquals(chunkSize * 5, last.low);
-        assertEquals(completeFile.length(), last.high + 1);
+        Range last = vf.leaseWhite(chunkSize);
+        assertLessThan(chunkSize, last.getHigh() - last.getLow() + 1);
+        assertEquals(chunkSize * 5, last.getLow());
+        assertEquals(completeFile.length(), last.getHigh() + 1);
     }
 
     /**
@@ -103,9 +107,9 @@ public class VerifyingFileTest extends LimeTestCase {
         // rather than hard-coding the old 100,000 byte value.
         // However, running at least one test with a block size that
         // isn't a power of two has a certain appeal for testing.
-        Interval firstLease = vf.leaseWhite(100000);
-        if (firstLease.high % 100000 != 99999
-                && firstLease.high != fileSize - 1) {
+        Range firstLease = vf.leaseWhite(100000);
+        if (firstLease.getHigh() % 100000 != 99999
+                && firstLease.getHigh() != fileSize - 1) {
             assertTrue("First chunk is not aligned.", false);
         }
 
@@ -115,28 +119,28 @@ public class VerifyingFileTest extends LimeTestCase {
 
         // TODO KAM -- not really sure why this is relavant, but I have
         // modified the test to test what the javadoc claims to test
-        Interval secondLease = vf.leaseWhite(512 * 1024 + 1);
-        if (secondLease.high % (512 * 1024 + 1) != 512 * 1024
-                && secondLease.high != firstLease.low - 1
-                && secondLease.high != fileSize - 1) {
+        Range secondLease = vf.leaseWhite(512 * 1024 + 1);
+        if (secondLease.getHigh() % (512 * 1024 + 1) != 512 * 1024
+                && secondLease.getHigh() != firstLease.getLow() - 1
+                && secondLease.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 512k+1 aligned chunk.", false);
         }
 
         // now assume the chunk size is 512K
-        Interval leased = vf.leaseWhite(512 * 1024);
-        if (leased.high % (512 * 1024) != 512 * 1024 - 1
-                && leased.high != firstLease.low - 1
-                && leased.high != secondLease.low - 1
-                && leased.high != fileSize - 1) {
+        Range leased = vf.leaseWhite(512 * 1024);
+        if (leased.getHigh() % (512 * 1024) != 512 * 1024 - 1
+                && leased.getHigh() != firstLease.getLow() - 1
+                && leased.getHigh() != secondLease.getLow() - 1
+                && leased.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 512k-aligned chunk.", false);
         }
 
         // now lease assuming the chunk size is 256K
         leased = vf.leaseWhite(256 * 1024);
-        if (leased.high % (256 * 1024) != 256 * 1024 - 1
-                && leased.high != firstLease.low - 1
-                && leased.high != secondLease.low - 1
-                && leased.high != fileSize - 1) {
+        if (leased.getHigh() % (256 * 1024) != 256 * 1024 - 1
+                && leased.getHigh() != firstLease.getLow() - 1
+                && leased.getHigh() != secondLease.getLow() - 1
+                && leased.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 256k-aligned chunk.", false);
         }
     }
@@ -150,19 +154,19 @@ public class VerifyingFileTest extends LimeTestCase {
         // This test assumes a sequential download strategy.
         PrivilegedAccessor.setValue(vf, "blockChooser",
                 new TestSequentialStrategy());
-        Interval leased = vf.leaseWhite(512 * 1024);
-        vf.releaseBlock(new Interval(128 * 1024, 3 * 128 * 1024 - 1));
+        Range leased = vf.leaseWhite(512 * 1024);
+        vf.releaseBlock(Range.createRange(128 * 1024, 3 * 128 * 1024 - 1));
 
         // we should fill up everything up to the chunk offset
         leased = vf.leaseWhite(256 * 1024);
-        assertEquals(128 * 1024, leased.low);
-        assertEquals(256 * 1024 - 1, leased.high);
+        assertEquals(128 * 1024, leased.getLow());
+        assertEquals(256 * 1024 - 1, leased.getHigh());
 
         // the next lease should fill up to the start of the previously leased
         // area
         leased = vf.leaseWhite(256 * 1024);
-        assertEquals(256 * 1024, leased.low);
-        assertEquals(3 * 128 * 1024 - 1, leased.high);
+        assertEquals(256 * 1024, leased.getLow());
+        assertEquals(3 * 128 * 1024 - 1, leased.getHigh());
     }
 
     /**
@@ -210,7 +214,7 @@ public class VerifyingFileTest extends LimeTestCase {
         }
     }
 
-    private class Writer implements VerifyingFile.WriteCallback {
+    private class Writer implements WriteCallback {
         private int filePos;
 
         private int start;
@@ -353,10 +357,10 @@ public class VerifyingFileTest extends LimeTestCase {
         assertEquals(chunk.length, vf.getBlockSize());
 
         // and if we try to lease an interval, it will be from within that hole
-        Interval leased = vf.leaseWhite(hashTree.getNodeSize());
+        Range leased = vf.leaseWhite(hashTree.getNodeSize());
 
-        assertEquals(chunk.length, leased.low);
-        assertEquals(chunk.length * 2 - 1, leased.high);
+        assertEquals(chunk.length, leased.getLow());
+        assertEquals(chunk.length * 2 - 1, leased.getHigh());
     }
 
     /**
@@ -476,7 +480,7 @@ public class VerifyingFileTest extends LimeTestCase {
         raf = new RandomAccessFile(exact, "r");
 
         vf.close();
-        vf = new VerifyingFile((int) exact.length());
+        vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile((int) exact.length());
         vf.open(new File("outfile"));
         vf.setHashTree(exactTree);
         vf.leaseWhite();
@@ -489,10 +493,8 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int) (exact.length() - data.length), data);
 
         // nothing should be verified
-        System.out.println("wait");
 
         vf.waitForPending(1000);
-        System.out.println("done");
         assertEquals(0, vf.getVerifiedBlockSize());
 
         // now add the second piece of the last chunk
@@ -501,9 +503,7 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int) (exact.length() - 2 * data.length), data);
 
         // the last chunk should be verified
-        System.out.println("wait");
         vf.waitForPending(1000);
-        System.out.println("done");
         assertEquals(exactTree.getNodeSize(), vf.getVerifiedBlockSize());
     }
 
@@ -570,4 +570,49 @@ public class VerifyingFileTest extends LimeTestCase {
         Thread.sleep(1000);
         assertEquals(wrote, vf.getVerifiedBlockSize());
     }
+
+    public void testGetOffsetForPreview() throws Exception {
+        // at first we have nothing for preview.
+        assertEquals(0,vf.getOffsetForPreview());
+        
+        // one verified chunk - preview that.
+        vf.leaseWhite((int) completeFile.length());
+
+        vf.setDiscardUnverified(false);
+        byte[] chunk = new byte[hashTree.getNodeSize()];
+        raf.readFully(chunk);
+        writeImpl(0, chunk);
+
+        vf.waitForPending(1000);
+        assertEquals(chunk.length, vf.getVerifiedBlockSize());
+        
+        assertEquals(chunk.length - 1, vf.getOffsetForPreview());
+        
+        // some partial bytes at the end of that chunk
+        writeImpl(chunk.length, new byte[10000]);
+        vf.waitForPending(100);
+        assertEquals(chunk.length +10000 - 1, vf.getOffsetForPreview());
+        
+        // another full verified chunk at position 3
+        // but the amount for preview should not change
+        raf.seek(chunk.length * 2);
+        raf.readFully(chunk);
+        writeImpl(chunk.length * 2, chunk);
+        vf.waitForPending(1000);
+        assertEquals(chunk.length * 2, vf.getVerifiedBlockSize());
+        assertEquals(chunk.length +10000 - 1, vf.getOffsetForPreview());
+        
+        // fill up the space between the two good chunks with junk. 
+        byte []junk = new byte[chunk.length - 10000];
+        writeImpl(chunk.length+10000, junk);
+        vf.waitForPending(1000);
+        assertEquals(chunk.length * 2, vf.getVerifiedBlockSize());
+        assertEquals(chunk.length, vf.getAmountLost());
+        
+        // since we're not discarding, that should be added to the
+        // previewable offset that will also take the second
+        // verifyiable chunk
+        assertEquals(chunk.length * 3 - 1, vf.getOffsetForPreview());
+    }
+
 }

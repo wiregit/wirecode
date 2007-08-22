@@ -17,4 +17,10 @@ public interface InterestWritableByteChannel extends WritableByteChannel, WriteO
      */
     public void interestWrite(WriteObserver observer, boolean status);
 
+    /**
+     * Returns true, if the channel has buffered data. If the channel is closed
+     * before this method returns <code>false</code> the buffered data is lost.
+     */
+    public boolean hasBufferedOutput();
+    
 }
