@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.net;
 
 import java.net.Socket;
 import java.net.SocketException;
@@ -13,19 +13,14 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 
-import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.HTTPStat;
-
-@Singleton
-public class ConnectionDispatcher {
+public class ConnectionDispatcherImpl implements ConnectionDispatcher {
     
-    private static final Log LOG = LogFactory.getLog(ConnectionDispatcher.class);
+    private static final Log LOG = LogFactory.getLog(ConnectionDispatcherImpl.class);
     
     /**
-     * Mapping of first protocol word -> ConnectionAcceptor
+     * Mapping of first protocol word -> SocketAcceptor
      */
-    private static final Map<String, Delegator> protocols = 
+    private final Map<String, Delegator> protocols = 
     	Collections.synchronizedMap(new HashMap<String, Delegator>());
     
     /** 
@@ -34,28 +29,15 @@ public class ConnectionDispatcher {
      */
     private int longestWordSize = 0;
     
-    /**
-     * Retrieves the maximum size a word can have.
-     */
+    public ConnectionDispatcherImpl() {
+    }
+    
     public int getMaximumWordSize() {
     	synchronized(protocols) {
     		return longestWordSize; // currently GNUTELLA == 8
     	}
     }
 
-    /**
-     * Associates the given ConnectionAcceptor with the given words.
-     * If localOnly is true, non-local-host sockets will be closed
-     * when using the word.  Otherwise, localhost sockets will be
-     * forbidden from using the word.
-     * If blocking is true, a new thread will be spawned when calling
-     * acceptor.acceptConnection.
-     * 
-     * @param acceptor The ConnectionAcceptor to call acceptConnection on
-     * @param localOnly True if localhost connections are required, false if none allowed
-     * @param blocking True if the acceptor may block on I/O after acceptConnection is called
-     * @param words The list of words to associate with this ConnectionAcceptor
-     */
     public void addConnectionAcceptor(ConnectionAcceptor acceptor,
     		boolean localOnly,
     		boolean blocking,
@@ -63,40 +45,30 @@ public class ConnectionDispatcher {
     	Delegator d = new Delegator(acceptor, localOnly, blocking);
     	synchronized(protocols) {
     		for (int i = 0; i < words.length; i++) {
-    			if (words[i].length() > longestWordSize)
+    			if (words[i].length() > longestWordSize) {
     				longestWordSize = words[i].length();
+    			}
     			protocols.put(words[i],d);
     		}
     	}
     }
     
-    /** Removes any ConnectionAcceptors from being associated with the given words. */
     public void removeConnectionAcceptor(String... words) {
     	synchronized(protocols) {
             protocols.keySet().removeAll(Arrays.asList(words));
     		longestWordSize = 0;
-            for(String word : protocols.keySet()) {
-    			if (word.length() > longestWordSize)
+            for(String word : protocols.keySet()) { 
+    			if (word.length() > longestWordSize) {
     				longestWordSize = word.length();
+    			}
     		}
     	}
     }
     
-    /** Determines if the word is valid for the understood protocols. */
     public boolean isValidProtocolWord(String word) {
         return protocols.containsKey(word);
     }
     
-    
-    /**
-     * Dispatches this incoming connection to the appropriate manager, depending
-     * on the word that was read.
-     * 
-     * @param word
-     * @param client
-     * @param newThread whether or not a new thread is necessary when dispatching
-     *                  to a blocking protocol.
-     */
     public void dispatch(final String word, final Socket client, boolean newThread) {
         try {
             client.setSoTimeout(0);
@@ -111,7 +83,8 @@ public class ConnectionDispatcher {
        
         // no protocol available to handle this word 
         if (delegator == null) {
-        	HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+            // FIXME notify some listener
+//            HTTPStat.UNKNOWN_REQUESTS.incrementStat();
         	if (LOG.isErrorEnabled())
         		LOG.error("Unknown protocol: " + word);
         	IOUtils.close(client);
@@ -146,7 +119,7 @@ public class ConnectionDispatcher {
     			drop = true;
             }
             
-    		if (!localOnly && localHost && ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+    		if (!localOnly && localHost && NetworkUtils.isPrivateAddress(sock.getLocalAddress())) {
                 LOG.debug("Dropping because we want an external connection, and this is localhost");
     			drop = true;
             }

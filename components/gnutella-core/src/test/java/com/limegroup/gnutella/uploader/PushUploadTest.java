@@ -152,7 +152,7 @@ public class PushUploadTest extends LimeTestCase {
         fm.startAndWait(4000);
    //     PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
 
-        httpAcceptor = new HTTPAcceptor();
+        httpAcceptor = new HTTPAcceptor(Providers.of(ProviderHacks.getConnectionDispatcher()));
    //     PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
      //           httpAcceptor);
 
@@ -160,7 +160,7 @@ public class PushUploadTest extends LimeTestCase {
     //    PrivilegedAccessor
     //            .setValue(RouterService.class, "uploadManager", upMan);
 
-        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.start();
         upMan.start(httpAcceptor, fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
     }
 
@@ -169,7 +169,7 @@ public class PushUploadTest extends LimeTestCase {
         closeConnection();
 
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testDownloadHTTP10() throws Exception {

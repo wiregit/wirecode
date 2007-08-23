@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.uploader;
+package org.limewire.http.entity;
 
 import java.io.EOFException;
 import java.io.File;
@@ -7,10 +7,9 @@ import java.io.IOException;
 import junit.framework.Test;
 
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.http.HttpTestUtils;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.util.BaseTestCase;
-
-import com.limegroup.gnutella.LimeTestUtils;
 
 public class FilePieceReaderTest extends BaseTestCase {
 
@@ -164,93 +163,6 @@ public class FilePieceReaderTest extends BaseTestCase {
         assertEquals(0, cache.buffers);
     }
 
-    public void testInvalidLengthWithEmptyFile() throws Exception {
-        createFile(0);
-
-        MockByteBufferCache cache = new MockByteBufferCache();
-        reader = new FilePieceReader(cache, file, 0, 10, listener);
-        reader.start();
-        try {
-            listener.waitForNotification();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        try {
-            reader.next();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        reader.shutdown();
-    }
-
-    public void testInvalidLength() throws Exception {
-        createFile(10);
-
-        MockByteBufferCache cache = new MockByteBufferCache();
-        reader = new FilePieceReader(cache, file, 5, 20, listener);
-        reader.start();
-        try {
-            listener.waitForNotification();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        try {
-            reader.next();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        reader.shutdown();
-    }
-
-    public void testInvalidOffsetEmtpyFile() throws Exception {
-        createFile(0);
-
-        MockByteBufferCache cache = new MockByteBufferCache();
-        reader = new FilePieceReader(cache, file, 5, 20, listener);
-        reader.start();
-        try {
-            listener.waitForNotification();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        try {
-            reader.next();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        reader.shutdown();
-    }
-
-    public void testInvalidOffset() throws Exception {
-        createFile(10);
-
-        MockByteBufferCache cache = new MockByteBufferCache();
-        reader = new FilePieceReader(cache, file, 20, 10, listener);
-        reader.start();
-        try {
-            listener.waitForNotification();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        try {
-            reader.next();
-            fail("Expected EOFException");
-        } catch (EOFException expected) {
-        }
-        reader.shutdown();
-    }
-
-    public void testNegativeOffset() throws Exception {
-        createFile(10);
-
-        MockByteBufferCache cache = new MockByteBufferCache();
-        try {
-            reader = new FilePieceReader(cache, file, -1, 10, listener);
-            fail("Expected IllegalArgumentException");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
     public void testMultipleConcurrentReads() throws Exception {
         MockByteBufferCache cache = new MockByteBufferCache();
         class Runner implements Runnable {
@@ -271,9 +183,10 @@ public class FilePieceReaderTest extends BaseTestCase {
 
             }
 
-            public Runner(MockByteBufferCache cache, IOException exception) throws IOException {
+            public Runner(MockByteBufferCache cache, IOException exception)
+                    throws IOException {
                 this(cache);
-                
+
                 this.exception = exception;
             }
 
@@ -330,7 +243,7 @@ public class FilePieceReaderTest extends BaseTestCase {
         t3.join(5000);
         t4.join(5000);
         t5.join(5000);
-        
+
         assertFalse(t1.isAlive());
         assertFalse(t2.isAlive());
         assertFalse(t3.isAlive());
@@ -378,7 +291,7 @@ public class FilePieceReaderTest extends BaseTestCase {
     private void createFile(int size) throws IOException {
         file = File.createTempFile("limewire", "");
         file.deleteOnExit();
-        data = LimeTestUtils.writeRandomData(file, size);
+        data = HttpTestUtils.writeRandomData(file, size);
     }
 
     private class MyPieceListener implements PieceListener {
@@ -400,13 +313,9 @@ public class FilePieceReaderTest extends BaseTestCase {
 
         public synchronized int waitForNotification()
                 throws InterruptedException, IOException {
-            if (notificationCount == 0 && exception == null) {
-                this.wait(100000);
+            while (notificationCount == 0 && exception == null) {
+                this.wait();
             }
-            if (notificationCount == 0 && exception == null) {
-                throw new InterruptedException("Timeout waiting for event");
-            }
-            
             if (exception != null) {
                 throw exception;
             }

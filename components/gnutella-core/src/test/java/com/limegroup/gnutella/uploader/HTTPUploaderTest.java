@@ -94,11 +94,11 @@ public class HTTPUploaderTest extends LimeTestCase {
 
         fm = new FileManagerStub(urns, descs);
 
-        httpAcceptor = new HTTPAcceptor();
+        httpAcceptor = new HTTPAcceptor(Providers.of(ProviderHacks.getConnectionDispatcher()));
 
         upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 
-        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.start();
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());
 
         client = new HttpClient();
@@ -110,7 +110,7 @@ public class HTTPUploaderTest extends LimeTestCase {
     @Override
     protected void tearDown() throws Exception {
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testChatAndBrowseEnabled() throws Exception {

@@ -7,6 +7,8 @@ import java.util.concurrent.Executor;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.io.MessageDispatcherFactory;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
 import org.limewire.rudp.RUDPContext;
@@ -264,6 +266,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
         bind(IpPortContentAuthorityFactory.class).to(IpPortContentAuthorityFactoryImpl.class);
         bind(UpdateCollectionFactory.class).to(UpdateCollectionFactoryImpl.class);
+        bind(ConnectionDispatcher.class).toInstance(new ConnectionDispatcherImpl());
+        bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).toInstance(new ConnectionDispatcherImpl());
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
@@ -302,7 +306,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(MessageRouter.class).to(StandardMessageRouter.class);
         //bind(DownloadManager.class);
         //bind(AltLocFinder.class);
-        //bind(ConnectionDispatcher.class);
         //bind(HTTPAcceptor.class); //the one in browser
         //bind(HostCatcher.class);
         //bind(HTTPAcceptor.class); // the one in gnutella

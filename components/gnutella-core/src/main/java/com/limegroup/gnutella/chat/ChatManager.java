@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.ChatSettings;

@@ -2,11 +2,12 @@ package com.limegroup.gnutella.browser;
 
 import java.net.Socket;
 
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.statistics.HTTPStat;
 
 /**

@@ -15,6 +15,8 @@ import org.apache.http.nio.NHttpConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
+import org.limewire.concurrent.Providers;
+import org.limewire.http.HttpAcceptorListener;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -67,16 +69,16 @@ public class HTTPAcceptorTest extends BaseTestCase {
         HostConfiguration config = new HostConfiguration();
         config.setHost("localhost", PORT);
         client.setHostConfiguration(config);
-        httpAcceptor = new HTTPAcceptor();
+        httpAcceptor = new HTTPAcceptor(Providers.of(ProviderHacks.getConnectionDispatcher()));
     }
 
     @Override
     protected void tearDown() throws Exception {
-        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testGetRequest() throws Exception {
-        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.start();
 
         GetMethod method = new GetMethod("/");
         try {
@@ -98,7 +100,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
     public void testAddRemoveAcceptorListener() throws Exception {
         MyHTTPAcceptorListener listener = new MyHTTPAcceptorListener();
         httpAcceptor.addAcceptorListener(listener);
-        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.start();
         assertFalse(listener.opened);
         assertFalse(listener.closed);
         
@@ -148,7 +150,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             }
             
         };
-        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.start();
 
         httpAcceptor.registerHandler("/", handler);
         GetMethod method = new GetMethod("/");
@@ -169,7 +171,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
         }
     }
 
-    private class MyHTTPAcceptorListener implements HTTPAcceptorListener {
+    private class MyHTTPAcceptorListener implements HttpAcceptorListener {
 
         boolean closed;
 
