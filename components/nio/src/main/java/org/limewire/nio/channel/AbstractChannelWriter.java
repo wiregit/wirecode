@@ -2,6 +2,7 @@ package org.limewire.nio.channel;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /** 

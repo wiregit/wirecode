@@ -2,9 +2,6 @@ package org.limewire.nio.observer;
 
 import java.io.IOException;
 
-import org.limewire.nio.observer.IOErrorObserver;
-import org.limewire.nio.observer.ReadWriteObserver;
-
 public class StubReadWriteObserver implements IOErrorObserver, ReadWriteObserver {
     
     private volatile int amtToUse = Integer.MAX_VALUE;

@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
- * $Revision: 1.2 $
- * $Date: 2007-05-31 18:27:17 $
+ * $Revision: 1.3 $
+ * $Date: 2007-08-23 20:17:16 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -51,7 +51,6 @@ import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
-import org.limewire.http.HttpIOReactor;
 
 public class HttpTestServer {
 

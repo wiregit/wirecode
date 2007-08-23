@@ -2,8 +2,6 @@ package org.limewire.service;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.limewire.service.ErrorCallback;
-
 /**
  * Simple class that counts up how many exceptions it recieved.
  */

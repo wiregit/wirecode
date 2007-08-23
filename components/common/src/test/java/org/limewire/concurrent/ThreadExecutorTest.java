@@ -4,10 +4,9 @@ package org.limewire.concurrent;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.util.BaseTestCase;
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 public class ThreadExecutorTest extends BaseTestCase {

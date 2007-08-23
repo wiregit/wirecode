@@ -6,7 +6,6 @@ import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.util.BaseTestCase;
 
 /**

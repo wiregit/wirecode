@@ -6,14 +6,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-import org.limewire.nio.ByteBufferCache;
-import org.limewire.nio.CircularByteBuffer;
+import junit.framework.Test;
+
 import org.limewire.nio.channel.ReadBufferChannel;
 import org.limewire.nio.channel.WriteBufferChannel;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
-
-import junit.framework.Test;
 
 
 

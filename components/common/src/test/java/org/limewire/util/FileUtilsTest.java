@@ -3,9 +3,6 @@ package org.limewire.util;
 import java.io.File;
 import java.io.IOException;
 
-import org.limewire.util.FileUtils;
-import org.limewire.util.SystemUtils;
-
 import junit.framework.Test;
 
 /**

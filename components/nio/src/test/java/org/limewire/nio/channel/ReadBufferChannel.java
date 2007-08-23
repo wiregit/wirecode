@@ -4,8 +4,6 @@ package org.limewire.nio.channel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.limewire.nio.channel.InterestReadableByteChannel;
-
 
 public class ReadBufferChannel implements InterestReadableByteChannel {
     private ByteBuffer buffer;

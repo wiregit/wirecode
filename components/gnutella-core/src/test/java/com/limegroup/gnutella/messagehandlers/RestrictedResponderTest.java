@@ -25,7 +25,6 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;

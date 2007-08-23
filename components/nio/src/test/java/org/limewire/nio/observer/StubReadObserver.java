@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import org.limewire.nio.observer.ReadObserver;
 import org.limewire.nio.timeout.ReadTimeout;
 
 public class StubReadObserver implements ReadObserver, ReadTimeout {

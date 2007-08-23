@@ -11,8 +11,6 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import org.limewire.nio.channel.InflaterReader;
-import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.util.BaseTestCase;
 
 

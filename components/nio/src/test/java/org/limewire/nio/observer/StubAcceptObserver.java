@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.limewire.nio.NIOSocket;
-import org.limewire.nio.observer.AcceptObserver;
 
 @SuppressWarnings("unchecked")
 public class StubAcceptObserver implements AcceptObserver {

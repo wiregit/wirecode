@@ -3,12 +3,9 @@ package org.limewire.io;
 
 import java.net.UnknownHostException;
 
-import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
-import org.limewire.util.BaseTestCase;
-
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 public class IpPortImplTest extends BaseTestCase {

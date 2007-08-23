@@ -1,7 +1,5 @@
 package org.limewire.nio;
 
-import org.limewire.nio.Throttle;
-import org.limewire.nio.ThrottleListener;
 import org.limewire.nio.observer.StubReadWriteObserver;
 
 class StubThrottleListener implements ThrottleListener {

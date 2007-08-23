@@ -2,8 +2,6 @@ package org.limewire.nio.statemachine;
 
 import java.io.IOException;
 
-import org.limewire.nio.statemachine.IOStateObserver;
-
 public class StubIOStateObserver implements IOStateObserver {
     
     private boolean statesFinished;

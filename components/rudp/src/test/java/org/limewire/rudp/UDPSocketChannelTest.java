@@ -6,12 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.util.Random;
 
-import org.limewire.rudp.DataWindow;
-import org.limewire.rudp.UDPConnectionProcessor;
-import org.limewire.rudp.UDPSocketChannel;
-import org.limewire.util.BaseTestCase;
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 public class UDPSocketChannelTest extends BaseTestCase {

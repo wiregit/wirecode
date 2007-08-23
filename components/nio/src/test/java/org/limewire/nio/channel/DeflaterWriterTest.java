@@ -9,7 +9,6 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import org.limewire.nio.channel.DeflaterWriter;
 import org.limewire.util.BaseTestCase;
 
 /**

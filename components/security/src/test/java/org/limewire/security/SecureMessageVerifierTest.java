@@ -9,11 +9,9 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Random;
 
-import org.limewire.security.SecureMessage;
-import org.limewire.security.SecureMessageVerifier;
-import org.limewire.util.BaseTestCase;
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 public class SecureMessageVerifierTest extends BaseTestCase {

@@ -2,8 +2,6 @@ package org.limewire.util;
 
 import java.util.Arrays;
 
-import org.limewire.util.StringUtils;
-
 import junit.framework.Test;
 
 /**
