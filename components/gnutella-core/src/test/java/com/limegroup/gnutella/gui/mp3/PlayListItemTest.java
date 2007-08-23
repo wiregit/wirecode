@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.gui.mp3;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,27 +22,32 @@ public class PlayListItemTest extends BaseTestCase {
         return buildTestSuite(PlayListItemTest.class);
     }
     
-    public void testItem(){
+    public void testItem() throws URISyntaxException{
         URL url = null;
         try {
-            url = new URL("http:\\test.txt");
+            url = new URL("http://test.txt");
+            System.out.println(url);
         } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        PlayListItem item = new PlayListItem(url, "test", false, false);
+
+        assert(url != null );
+        URI uri = url.toURI();
+
+        PlayListItem item = new PlayListItem(uri, "test", false, false);
         
-        assertEquals(item.getURL(), url);
+        assertEquals(item.getURI(), uri);
         assertEquals(item.getName(), "test");
         assertEquals(item.isFile(), false);
         assertEquals(item.isStorePreview(), false);
-        assertEquals(item.getProperties(), null);
+        assertEquals(item.getProperty(PlayListItem.ARTIST), null);
+        assertEquals(item.getProperty(PlayListItem.BITRATE), null);
     }
     
-    public void testConstructor(){
+    public void testConstructor() throws URISyntaxException{
         URL url = null;
         try {
-            url = new URL("http:\\test.txt");
+            url = new URL("http://test.txt");
         } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -73,27 +80,28 @@ public class PlayListItemTest extends BaseTestCase {
         map.put(PlayListItem.TYPE, type);
         map.put(PlayListItem.YEAR, year);
         
-        PlayListItem item = new PlayListItem(url, "test", true, true, map);
+        assert(url != null );
+        URI uri = url.toURI();
         
-        assertEquals(item.getURL(), url);
+        PlayListItem item = new PlayListItem(uri, "test", false, true, map);
+        
+        assertEquals(item.getURI(), uri);
         assertEquals(item.getName(), "test");
         assertEquals(item.isStorePreview(), true);
-        assertEquals(item.isFile(), true);
-        
-        Map<String,String> props = item.getProperties();
-        
-        assertEquals(props.get(PlayListItem.ALBUM),album);
-        assertEquals(props.get(PlayListItem.ARTIST),artist);
-        assertEquals(props.get(PlayListItem.BITRATE),bitrate);
-        assertEquals(props.get(PlayListItem.COMMENT),comment);
-        assertEquals(props.get(PlayListItem.COPYRIGHT),copyright);
-        assertEquals(props.get(PlayListItem.GENRE),genre);
-        assertEquals(props.get(PlayListItem.LENGTH),length);
-        assertEquals(props.get(PlayListItem.SIZE),size);
-        assertEquals(props.get(PlayListItem.TITLE),title);
-        assertEquals(props.get(PlayListItem.TRACK),track);
-        assertEquals(props.get(PlayListItem.TYPE),type);
-        assertEquals(props.get(PlayListItem.YEAR),year);
+        assertEquals(item.isFile(), false);
+
+        assertEquals(item.getProperty(PlayListItem.ALBUM),album);
+        assertEquals(item.getProperty(PlayListItem.ARTIST),artist);
+        assertEquals(item.getProperty(PlayListItem.BITRATE),bitrate);
+        assertEquals(item.getProperty(PlayListItem.COMMENT),comment);
+        assertEquals(item.getProperty(PlayListItem.COPYRIGHT),copyright);
+        assertEquals(item.getProperty(PlayListItem.GENRE),genre);
+        assertEquals(item.getProperty(PlayListItem.LENGTH),length);
+        assertEquals(item.getProperty(PlayListItem.SIZE),size);
+        assertEquals(item.getProperty(PlayListItem.TITLE),title);
+        assertEquals(item.getProperty(PlayListItem.TRACK),track);
+        assertEquals(item.getProperty(PlayListItem.TYPE),type);
+        assertEquals(item.getProperty(PlayListItem.YEAR),year);
     }
 
 }
