@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-23 11:23-0400\n"
+"POT-Creation-Date: 2007-08-23 13:39-0400\n"
 "PO-Revision-Date: 2007-02-10 21:31-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2878,8 +2878,8 @@ msgid "Search for: {0}"
 msgstr "Mencari: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:31
-#, java-format
-msgid "Search \"What''s New\" for: {0}"
+#, fuzzy
+msgid "Search \"What's New\" for: {0}"
 msgstr "Mencari \"Hal-hal baru\": {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:48
@@ -4567,28 +4567,34 @@ msgid "Select your Language Prefereces"
 msgstr "Pilih bahasa pilihan anda"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
-msgid ". The file type is not recognized."
+#, fuzzy
+msgid "The file type is not recognized."
 msgstr ". Tipe berkas tidak dikenali."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
-msgid ". The file cannot be found."
+#, fuzzy
+msgid "The file cannot be found."
 msgstr ". Berkas tidak ditemukan."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
-msgid ". The file is corrupt."
+#, fuzzy
+msgid "The file is corrupt."
 msgstr ". Berkas rusak."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
-msgid ". There is an unknown error with the audio file."
+#, fuzzy
+msgid "There is an unknown error with the audio file."
 msgstr ". Ada kesalahan yg tidak diketahui pada berkas audio."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:164
-msgid ". The file cannot be parsed."
+#, fuzzy
+msgid "The file cannot be parsed."
 msgstr ". Berkas tidak dapat dipilah."
 
-#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:169
+#. {0}: filename, {1} cause of error (e.g. The file is corrupt.)
+#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:170
 #, fuzzy, java-format
-msgid "LimeWire cannot play the file {0}. {1}"
+msgid "LimeWire cannot play the file {0}: {1}"
 msgstr "LimeWire tidak dapat membagikan berkas \"{0}\"."
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:93
@@ -5752,8 +5758,7 @@ msgstr "Penutupan setelah transfer"
 msgid "Minimize to System Tray"
 msgstr "Kecilkan ke System Tray"
 
-#. TODO not title there
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:19
 #, fuzzy
 msgid "Start Upload Slots"
 msgstr "Mulai celah upload:"
@@ -5763,8 +5768,8 @@ msgstr "Mulai celah upload:"
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #.
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:22
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:28
 msgid "Start Upload Slots:"
 msgstr "Mulai celah upload:"
 
