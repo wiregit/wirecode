@@ -370,7 +370,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         PushProxyAcknowledgement ppAck = 
             new PushProxyAcknowledgement(InetAddress.getLocalHost(), 
                                          testUP[2].getPort(),
-                                         new GUID(ProviderHacks.getMessageRouter()._clientGUID));
+                                         new GUID(ProviderHacks.getApplicationServices().getMyGUID()));
         testUP[2].send(ppAck); testUP[2].flush();
 
         { // this should not go through because of firewall/firewall

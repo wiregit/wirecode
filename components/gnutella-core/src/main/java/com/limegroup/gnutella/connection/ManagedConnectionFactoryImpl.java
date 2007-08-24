@@ -6,12 +6,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageDispatcher;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.UDPService;
@@ -41,7 +41,6 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final Provider<MessageDispatcher> messageDispatcher;
     private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     private final Provider<UDPService> udpService;
-    private final Provider<MessageRouter> messageRouter;
     private final Provider<SearchResultHandler> searchResultHandler;
     private final CapabilitiesVMFactory capabilitiesVMFactory;
     private final Provider<SocketsManager> socketsManager;
@@ -54,6 +53,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final SpamFilterFactory spamFilterFactory;
     private final MessageFactory messageFactory;
     private final MessageReaderFactory messageReaderFactory;
+    private final ApplicationServices applicationServices;
 
 
     @Inject
@@ -67,7 +67,6 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             Provider<MessageDispatcher> messageDispatcher,
             Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
             Provider<UDPService> udpService,
-            Provider<MessageRouter> messageRouter,
             Provider<SearchResultHandler> searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<SocketsManager> socketsManager,
@@ -78,7 +77,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory,
             MessageFactory messageFactory,
-            MessageReaderFactory messageReaderFactory) {
+            MessageReaderFactory messageReaderFactory,
+            ApplicationServices applicationServices) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -88,7 +88,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.messageDispatcher = messageDispatcher;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.udpService = udpService;
-        this.messageRouter = messageRouter;
+        this.applicationServices = applicationServices;
         this.searchResultHandler = searchResultHandler;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.socketsManager = socketsManager;
@@ -125,11 +125,11 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory, messageDispatcher
                         .get(), networkUpdateSanityChecker.get(), udpService
-                        .get(), messageRouter.get(), searchResultHandler.get(),
+                        .get(), searchResultHandler.get(),
                         capabilitiesVMFactory,
                         socketsManager.get(), acceptor.get(), supportedVendorMessage,
                         simppManager, updateHandler, connectionServices, guidMapManager,
-                        spamFilterFactory, messageReaderFactory, messageFactory);
+                        spamFilterFactory, messageReaderFactory, messageFactory, applicationServices);
     }
 
     /*
@@ -142,10 +142,10 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 networkManager, queryRequestFactory, headersFactory,
                 handshakeResponderFactory, queryReplyFactory,
                 messageDispatcher.get(), networkUpdateSanityChecker.get(), udpService.get(),
-                messageRouter.get(), searchResultHandler.get(), capabilitiesVMFactory,
+                searchResultHandler.get(), capabilitiesVMFactory,
                 acceptor.get(), supportedVendorMessage, simppManager, updateHandler, 
                 connectionServices, guidMapManager, spamFilterFactory,
-                messageReaderFactory, messageFactory);
+                messageReaderFactory, messageFactory, applicationServices);
     }
 
 }

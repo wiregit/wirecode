@@ -307,7 +307,6 @@ public class ManagedConnection extends Connection
     private final MessageDispatcher messageDispatcher;
     private final NetworkUpdateSanityChecker networkUpdateSanityChecker;
     private final UDPService udpService;
-    private final MessageRouter messageRouter;
     private final SearchResultHandler searchResultHandler;
     private final Provider<SimppManager> simppManager;
     private final Provider<UpdateHandler> updateHandler;
@@ -317,6 +316,8 @@ public class ManagedConnection extends Connection
     private final GuidMap guidMap;
 
     private final MessageReaderFactory messageReaderFactory;
+
+    private final ApplicationServices applicationServices;
     
     
     /**
@@ -336,7 +337,7 @@ public class ManagedConnection extends Connection
             QueryReplyFactory queryReplyFactory,
             MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            UDPService udService, MessageRouter messageRouter,
+            UDPService udService,
             SearchResultHandler searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
@@ -344,7 +345,8 @@ public class ManagedConnection extends Connection
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
             MessageReaderFactory messageReaderFactory,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory,
+            ApplicationServices applicationServices) {
         super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, messageFactory, networkManager);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -355,13 +357,13 @@ public class ManagedConnection extends Connection
         this.messageDispatcher = messageDispatcher;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.udpService = udService;
-        this.messageRouter = messageRouter;
         this.searchResultHandler = searchResultHandler;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
         this.connectionServices = connectionServices;
         this.guidMapManager = guidMapManager;
         this.messageReaderFactory = messageReaderFactory;
+        this.applicationServices = applicationServices;
         this.guidMap = guidMapManager.getMap();
         this._routeFilter = spamFilterFactory.createRouteFilter();
         this._personalFilter = spamFilterFactory.createPersonalFilter();
@@ -384,14 +386,15 @@ public class ManagedConnection extends Connection
             QueryReplyFactory queryReplyFactory,
             MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            UDPService udService, MessageRouter messageRouter,
+            UDPService udService,
             SearchResultHandler searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
             MessageReaderFactory messageReaderFactory,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory,
+            ApplicationServices applicationServices) {
         super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage, messageFactory, networkManager);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -402,13 +405,13 @@ public class ManagedConnection extends Connection
         this.messageDispatcher = messageDispatcher;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.udpService = udService;
-        this.messageRouter = messageRouter;
         this.searchResultHandler = searchResultHandler;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
         this.connectionServices = connectionServices;
         this.guidMapManager = guidMapManager;
         this.messageReaderFactory = messageReaderFactory;
+        this.applicationServices = applicationServices;
         this.guidMap = guidMapManager.getMap();
 	    this._routeFilter = spamFilterFactory.createRouteFilter();
         this._personalFilter = spamFilterFactory.createPersonalFilter();
@@ -1218,7 +1221,7 @@ public class ManagedConnection extends Connection
             // this connection can serve as a PushProxy, so note this....
             PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
             if (Arrays.equals(ack.getGUID(),
-                              messageRouter._clientGUID)) {
+                              applicationServices.getMyGUID())) {
                 myPushProxy = true;
             }
             // else mistake on the server side - the guid should be my client
@@ -1267,7 +1270,7 @@ public class ManagedConnection extends Connection
             // test incorporates my leaf status in it.....
             if (remoteHostSupportsPushProxy() > -1) {
                 // get the client GUID and send off a PushProxyRequest
-                GUID clientGUID = new GUID(messageRouter._clientGUID);
+                GUID clientGUID = new GUID(applicationServices.getMyGUID());
                 PushProxyRequest req = new PushProxyRequest(clientGUID);
                 send(req);
             }

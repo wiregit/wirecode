@@ -96,7 +96,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
         httpAcceptor = new HTTPAcceptor();
 
-        upMan = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
+        upMan = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 
         httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());

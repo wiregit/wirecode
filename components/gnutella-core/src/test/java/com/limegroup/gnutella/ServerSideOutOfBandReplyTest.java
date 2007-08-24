@@ -897,8 +897,9 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         final int MAX_BUFFERED_REPLIES = 10;
 
         // ok, we need to set MAX_BUFFERED_REPLIES in MessageRouter
-        int oldMaxBufferedReplies = MessageRouter.MAX_BUFFERED_REPLIES;
-        MessageRouter.MAX_BUFFERED_REPLIES = MAX_BUFFERED_REPLIES;
+        fail("fix the two lines below without resorting to MessageRouter hacks");
+//        int oldMaxBufferedReplies = MessageRouter.MAX_BUFFERED_REPLIES;
+//        MessageRouter.MAX_BUFFERED_REPLIES = MAX_BUFFERED_REPLIES;
 
         // clear stored results from other tests
         Hashtable table = (Hashtable) PrivilegedAccessor.getValue(ProviderHacks.getMessageRouter(), 
@@ -970,7 +971,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             catch (IOException expected) {}
         }
         finally {
-            MessageRouter.MAX_BUFFERED_REPLIES = oldMaxBufferedReplies;
+//            MessageRouter.MAX_BUFFERED_REPLIES = oldMaxBufferedReplies;
         }
     }   
 

@@ -21,12 +21,13 @@ public class ManagedConnectionStub extends ManagedConnection {
                         .getQueryReplyFactory(), ProviderHacks
                         .getMessageDispatcher(), ProviderHacks
                         .getNetworkUpdateSanityChecker(), ProviderHacks
-                        .getUdpService(), ProviderHacks.getMessageRouter(),
+                        .getUdpService(), 
                 ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
                 ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
                 Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
                 Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
-                ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory());
+                ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory(),
+                ProviderHacks.getApplicationServices());
     }
 
     public void initialize() {

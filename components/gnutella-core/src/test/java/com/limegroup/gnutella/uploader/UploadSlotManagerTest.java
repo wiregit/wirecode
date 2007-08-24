@@ -21,7 +21,7 @@ public class UploadSlotManagerTest extends LimeTestCase {
 		UploadSettings.SOFT_MAX_UPLOADS.revertToDefault();
 		UploadSettings.HARD_MAX_UPLOADS.revertToDefault();
 		UploadSettings.UPLOAD_QUEUE_SIZE.revertToDefault();
-		manager = new UploadSlotManager();
+		manager = new UploadSlotManagerImpl();
 	}
 	
 	/**
@@ -195,7 +195,7 @@ public class UploadSlotManagerTest extends LimeTestCase {
 		assertGreaterThan(0, manager.pollForSlot(lowPoller, true, false));
 		assertEquals(0, manager.requestSlot(highListener, true));
 		assertGreaterThan(0, manager.requestSlot(lowListener, false));
-		manager = new UploadSlotManager();
+		manager = new UploadSlotManagerImpl();
 		
 		// if there is a high priority listener, everyone but the high
 		// priority poller gets queued.  The latter gets in but does not
@@ -204,7 +204,7 @@ public class UploadSlotManagerTest extends LimeTestCase {
 		assertGreaterThan(0, manager.requestSlot(lowListener, false));
 		assertGreaterThan(0, manager.pollForSlot(lowPoller, true, false));
 		assertEquals(0, manager.pollForSlot(highPoller, false, true));
-		manager = new UploadSlotManager();
+		manager = new UploadSlotManagerImpl();
 		
 		// low priority pollers force low priority listeners to get queued
 		// the rest go through and do not preempt it

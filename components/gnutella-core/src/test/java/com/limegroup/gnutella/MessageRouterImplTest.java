@@ -47,7 +47,8 @@ import com.limegroup.gnutella.xml.MetaFileManager;
  * This class tests the <tt>MessageRouter</tt>.
  */
 @SuppressWarnings( { "unchecked", "cast" } )
-public final class MessageRouterTest extends LimeTestCase {
+// TODO write test for storing bypassed results
+public final class MessageRouterImplTest extends LimeTestCase {
 
     /**
      * Handle to the <tt>MessageRouter</tt> for all tests to use
@@ -63,12 +64,12 @@ public final class MessageRouterTest extends LimeTestCase {
         "me",
     };
 
-    public MessageRouterTest(String name) {
+    public MessageRouterImplTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(MessageRouterTest.class);
+        return buildTestSuite(MessageRouterImplTest.class);
     }    
    
 	public static void main(String[] args) {

@@ -143,6 +143,8 @@ import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateCollectionFactoryImpl;
@@ -289,7 +291,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(HTTPHeaderUtils.class)
         //bind(FeaturesWriter.class);
         bind(FileManager.class).to(MetaFileManager.class);
-        //bind(UploadSlotManager.class);
+        bind(UploadSlotManager.class).to(UploadSlotManagerImpl.class);
         //bind(SourceRankerFactory.class);
         //bind(SocketsManager.class);
         //bind(VerifyingFileFactory.class);
@@ -314,7 +316,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(IPFilter.class).toProvider(IPFilterProvider.class);
         //bind(HostileFilter.class);
         //bind(NetworkUpdateSanityChecker.class);
-        //bind(BandwidthManager.class);
+        bind(BandwidthManager.class).to(BandwidthManagerImpl.class);
         //bind(QueryStats.class);
         //bind(NodeAssigner.class);
         bind(SecureMessageVerifier.class).toProvider(SecureMessageVerifierProvider.class);

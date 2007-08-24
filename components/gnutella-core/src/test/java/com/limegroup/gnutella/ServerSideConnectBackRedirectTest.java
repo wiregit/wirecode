@@ -263,7 +263,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         // simulate the running of the thread - technically i'm not testing
         // the situation precisely, but i'm confident the schedule work so the
         // abstraction isn't terrible
-        Thread cbThread = new Thread(new MessageRouter.ConnectBackExpirer());
+        Thread cbThread = new Thread(new MessageRouterImpl.ConnectBackExpirer());
         cbThread.start();
         cbThread.join();
 

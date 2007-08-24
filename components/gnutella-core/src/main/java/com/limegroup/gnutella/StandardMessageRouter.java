@@ -62,7 +62,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This class is the message routing implementation for TCP messages.
  */
 @Singleton
-public class StandardMessageRouter extends MessageRouter {
+public class StandardMessageRouter extends MessageRouterImpl {
     
     private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
     

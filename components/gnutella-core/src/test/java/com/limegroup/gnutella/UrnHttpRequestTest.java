@@ -19,7 +19,7 @@ import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -71,7 +71,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
         fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         acceptor = new HTTPAcceptor();
-        uploadManager = new HTTPUploadManager(new UploadSlotManager(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
+        uploadManager = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
         connectionDispatcher = new ConnectionDispatcher();
         
         fm.startAndWait(4000);
