@@ -72,10 +72,23 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    ReplyNumberVendorMessage(GUID replyGUID, int version, int numResults, byte[] payload) {
-        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, version, payload);
+    ReplyNumberVendorMessage(GUID replyGUID, int version, int numResults, boolean canReceiveUnsolicited) {
+        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, version, derivePayload(numResults, canReceiveUnsolicited));
         setGUID(replyGUID);
     }
+    
+    /** Constructs the payload from the desired number of results. */
+    private static byte[] derivePayload(int numResults, boolean canReceiveUnsolicited) {
+        if ((numResults < 1) || (numResults > 255))
+            throw new IllegalArgumentException("Number of results too big: " +
+                                               numResults);
+        byte[] bytes = new byte[2];
+        ByteOrder.short2leb((short) numResults, bytes, 0);
+        bytes[1] = canReceiveUnsolicited ? ReplyNumberVendorMessage.UNSOLICITED : 0x0;
+        
+        return bytes;
+    }
+
     
     /** @return an int (1-255) representing the amount of results that a host
      *  for a given query (as specified by the guid of this message).
