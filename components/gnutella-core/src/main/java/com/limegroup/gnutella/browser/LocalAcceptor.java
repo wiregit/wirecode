@@ -19,63 +19,55 @@ import com.google.inject.name.Named;
 @Singleton
 public class LocalAcceptor {
 
-    private int listeningPort = 45100;
+    private final static int FIRST_PORT = 45100;
 
     private final ExternalControl externalControl;
 
-    private SocketAcceptor acceptor;
+    private final SocketAcceptor acceptor;
 
     @Inject
-    public LocalAcceptor(ExternalControl externalControl, @Named("local") ConnectionDispatcher connectionDispatcher) {
+    public LocalAcceptor(ExternalControl externalControl, @Named("local")
+    ConnectionDispatcher connectionDispatcher) {
         this.externalControl = externalControl;
         this.acceptor = new SocketAcceptor(connectionDispatcher);
     }
-    
+
     /**
      * Starts listening to incoming connections.
      */
     public void start() {
-        acceptor.getDispatcher().addConnectionAcceptor(new ConnectionAcceptor() {
-            public void acceptConnection(String word, Socket socket) {
-                externalControl.fireControlThread(socket, true);
-            }
-        }, true, true, "MAGNET");
+        acceptor.getDispatcher().addConnectionAcceptor(
+                new ConnectionAcceptor() {
+                    public void acceptConnection(String word, Socket socket) {
+                        externalControl.fireControlThread(socket, true);
+                    }
+                }, true, true, "MAGNET");
 
-        acceptor.getDispatcher().addConnectionAcceptor(new ConnectionAcceptor() {
-            public void acceptConnection(String word, Socket socket) {
-                externalControl.fireControlThread(socket, false);
-            }
-        }, true, true, "TORRENT");
+        acceptor.getDispatcher().addConnectionAcceptor(
+                new ConnectionAcceptor() {
+                    public void acceptConnection(String word, Socket socket) {
+                        externalControl.fireControlThread(socket, false);
+                    }
+                }, true, true, "TORRENT");
 
-        // Create the server socket, bind it to a port, and listen for
-        // incoming connections. If there are problems, we can continue
-        // onward.
-        // 1. Try suggested port.
-        try {
-            acceptor.bind(listeningPort);
-        } catch (IOException e) {
-            boolean error = true;
-            // 2. Try 20 different consecutive ports from 45100 to 45119
-            // (inclusive)
-            // no longer random, since this listening socket is used by the
-            // executable stub
-            // to launch magnet downloads, so the stub needs to know what
-            // (small) range of
-            // ports to try...
-            for (int i = 1; i < 20; i++) {
-                listeningPort = i + 45100;
-                try {
-                    acceptor.bind(listeningPort);
-                    error = false;
-                    break;
-                } catch (IOException ignored) {
-                }
-            }
+        if (!bind(FIRST_PORT)) {
+            MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+        }
+    }
 
-            if (error) {
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+    private boolean bind(final int listeningPort) {
+        // try 20 different consecutive ports from 45100 to 45119 (inclusive)
+        // no longer random, since this listening socket is used by the
+        // executable stub to launch magnet downloads, so the stub needs to know
+        // what (small) range of ports to try...
+        for (int i = 0; i < 20; i++) {
+            try {
+                acceptor.bind(listeningPort + i);
+                return true;
+            } catch (IOException ignored) {
             }
         }
+        return false;
     }
 
     /**
