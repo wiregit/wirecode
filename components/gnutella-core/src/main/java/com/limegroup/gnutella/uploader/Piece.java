@@ -43,8 +43,8 @@ public class Piece implements Comparable<Piece> {
     }    
 
     public int compareTo(Piece o) {
-        long l = offset - o.offset;
-        return (l < 0) ? -1 : (l == 0) ? 0 : 1;
+        long diff = offset - o.offset;
+        return (diff < 0) ? -1 : (diff == 0) ? 0 : 1;
     }
     
     @Override
