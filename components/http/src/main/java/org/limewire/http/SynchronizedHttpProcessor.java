@@ -11,6 +11,11 @@ import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpProcessor;
 
+/**
+ * A synchronized thread-safe of {@link HttpProcessor}. It is safe to add and
+ * remove interceptors on a different threads than the thread that invokes
+ * <code>process()</code>.
+ */
 public class SynchronizedHttpProcessor implements HttpProcessor {
 
     private final CopyOnWriteArrayList<HttpRequestInterceptor> requestInterceptors = new CopyOnWriteArrayList<HttpRequestInterceptor>();

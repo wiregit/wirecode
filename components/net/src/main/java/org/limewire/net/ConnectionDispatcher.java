@@ -2,6 +2,10 @@ package org.limewire.net;
 
 import java.net.Socket;
 
+/**
+ * Defines the requirements for classes that forward incoming connections to
+ * {@link ConnectionAcceptor}s.
+ */
 public interface ConnectionDispatcher {
 
     /**

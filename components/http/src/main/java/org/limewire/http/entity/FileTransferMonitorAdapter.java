@@ -1,20 +1,19 @@
 package org.limewire.http.entity;
 
+import java.io.IOException;
+
 public class FileTransferMonitorAdapter implements FileTransferMonitor {
 
-    public FileTransferMonitorAdapter() {
-    }
-    
     public void addAmountUploaded(int written) {
     }
 
-    public void shutdown() {
+    public void failed(IOException e) {
     }
-    
+
     public void start() {
     }
 
-    public void stop() {
+    public void timeout() {
     }
 
 }

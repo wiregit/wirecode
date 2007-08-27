@@ -46,7 +46,7 @@ import com.google.inject.Provider;
  * objects that can be registered for a URL pattern.
  * <p>
  * The acceptor uses HttpCore and LimeWire's HTTP component for connection
- * handling. It needs to be start by invoking
+ * handling. <code>BasicHttpAcceptor</code> needs to be started by invoking
  * {@link #start(ConnectionDispatcher)} in order to accept connection.
  */
 public class BasicHttpAcceptor {

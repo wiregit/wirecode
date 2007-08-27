@@ -1,5 +1,7 @@
 package org.limewire.http.entity;
 
+import java.io.IOException;
+
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HttpIOReactor;
 import org.limewire.http.HttpIOSession;
@@ -19,16 +21,21 @@ public class BasicFileTransferMonitor implements FileTransferMonitor {
     public void addAmountUploaded(int written) {
     }
 
-    public void shutdown() {
-        if (this.ioSession != null) {
-            this.ioSession.shutdown();
-        }
-    }
-    
     public void start() {
     }
 
-    public void stop() {
+    public void failed(IOException e) {
+        shutdown();
     }
+
+    public void timeout() {
+        shutdown();
+    }
+
+    private void shutdown() {
+        if (this.ioSession != null) {
+            this.ioSession.shutdown();
+        }
+    }    
 
 }

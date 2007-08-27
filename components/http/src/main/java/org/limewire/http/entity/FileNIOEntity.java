@@ -265,7 +265,7 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
     public void timeout() {
         if (LOG.isWarnEnabled())
             LOG.warn("File transfer timed out: " + transfer);
-        transfer.stop();
+        transfer.timeout();
     }
 
     private class PieceHandler implements PieceListener {
@@ -273,7 +273,7 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
         public void readFailed(IOException e) {
             if (LOG.isWarnEnabled())
                 LOG.warn("Error reading file from disk: " + transfer, e);
-            transfer.shutdown();
+            transfer.failed(e);
         }
 
         public void readSuccessful() {
