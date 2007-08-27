@@ -105,7 +105,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
 
         // suppress duplicate requests from some browsers
         long currentTime = System.currentTimeMillis();
-        if (!(command.equals(lastCommand) && (currentTime - lastCommandTime) < MIN_REQUEST_INTERVAL)) {
+        if (!command.equals(lastCommand) || (currentTime - lastCommandTime) >= MIN_REQUEST_INTERVAL) {
             // trigger an operation
             externalControl.handleMagnetRequest(MAGNET + command);
             lastCommand = command;
