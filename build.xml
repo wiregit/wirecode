@@ -141,23 +141,18 @@
     <target name="lw-gettext-dist"
      description="Generated resource bundles out of po files"
      depends="init.gettext">
+    <delete dir="lib/messagebundles/org"/>
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
      poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"/>
     </target>
 	
-	<target name="lw-gettext-default" description="Creates default bundle" depends="init.gettext">
-		<gettext-generate-default targetBundle="org.limewire.i18n.Messages"
-     outputDirectory="lib/messagebundles" potfile="lib/messagebundles/limewire.pot" />
-	</target>
-
-    <target name="lw-create-templates" description="Creates the translation
-     templates for translators" depends="lw-gettext-merge, lw-gettext-merge">
-    <jar destfile="lib/jars/messages.jar" basedir="lib/messagebundles"
-    includes="org/**"/>
+    <target name="lw-gettext-default" description="Creates the English default bundle" depends="init.gettext">
+	<gettext-generate-default targetBundle="org.limewire.i18n.Messages"
+     outputDirectory="lib/messagebundles" potfile="lib/messagebundles/limewire.pot"/>
     </target>
 
     <target name="lw-bundle-messages" description="Rebuilds messages and
-    bundles them" depends="lw-gettext-dist">
+    bundles them" depends="lw-gettext-dist, lw-gettext-default">
     <jar destfile="lib/jars/messages.jar" basedir="lib/messagebundles"
     includes="org/**"/>
     </target>
