@@ -462,27 +462,21 @@
         </sequential>
     </macrodef>
 
-       <property name="gettexttasks.jar" value="${limewire.lib.jars.ant}/gettexttasks.jar"/>
+    <property name="gettexttasks.jar" value="${limewire.lib.jars.ant}/gettext-ant-tasks.jar"/>
 
-	<target name="init.gettext-extract" description="Loads the
-	gettext-extract task">
+	<target name="init.gettext" description="Loads the gettext ant tasks">
 	 <taskdef name="gettext-extract"
        classname="org.xnap.commons.ant.gettext.GettextExtractKeysTask"
        classpath="${gettexttasks.jar}"/>
-	</target>
-
-	<target name="init.gettext-merge" description="Loads the
-	gettext-merge task">
 	 <taskdef name="gettext-merge"
        classname="org.xnap.commons.ant.gettext.GettextMergeKeysTask"
        classpath="${gettexttasks.jar}"/>
-	</target>
-
-	<target name="init.gettext-dist" description="Loads the
-	gettext-dist task">
 	 <taskdef name="gettext-dist"
        classname="org.xnap.commons.ant.gettext.GettextDistTask"
        classpath="${gettexttasks.jar}"/>
+      <taskdef name="gettext-generate-default"
+	   classname="org.xnap.commons.ant.gettext.GenerateDefaultBundleTask"
+	   classpath="${gettexttasks.jar}"/>
 	</target>
 
     <target name="clean"/> <!-- Must write a real target for this when importing. -->

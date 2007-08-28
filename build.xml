@@ -124,7 +124,7 @@
 
     <target name="lw-gettext-extract"
      description="Extracts message keys from the source code"
-     depends="init.gettext-extract">
+     depends="init.gettext">
     <gettext-extract keysFile="limewire.pot" poDirectory="lib/messagebundles">
       <fileset dir="components" includes="**/*.java"/>
       <fileset dir="core" includes="**/*.java"/>
@@ -134,16 +134,21 @@
 
     <target name="lw-gettext-merge"
      description="Merge message keys with translations"
-     depends="init.gettext-merge">
+     depends="init.gettext">
     <gettext-merge keysFile="limewire.pot" poDirectory="lib/messagebundles"/>
     </target>
 
     <target name="lw-gettext-dist"
      description="Generated resource bundles out of po files"
-     depends="init.gettext-dist">
+     depends="init.gettext">
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
      poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"/>
     </target>
+	
+	<target name="lw-gettext-default" description="Creates default bundle" depends="init.gettext">
+		<gettext-generate-default targetBundle="org.limewire.i18n.Messages"
+     outputDirectory="lib/messagebundles" potfile="lib/messagebundles/limewire.pot" />
+	</target>
 
     <target name="lw-create-templates" description="Creates the translation
      templates for translators" depends="lw-gettext-merge, lw-gettext-merge">
