@@ -11,6 +11,8 @@ import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.util.BufferUtils;
 
+import com.limegroup.gnutella.settings.SSLSettings;
+
 /**
  * A ConnectionDispatcher that reads asynchronously from the socket.
  */
@@ -94,11 +96,12 @@ public class AsyncConnectionDispatcher extends AbstractChannelInterestReader {
      * @throws IOException if there was an error starting TLS
      */
     private void startTLS() throws IOException {
-        if(!SSLUtils.isTLSEnabled(socket) && SSLUtils.isStartTLSCapable(socket)) {
+        if(SSLSettings.isIncomingTLSEnabled() &&
+                !SSLUtils.isTLSEnabled(socket) && SSLUtils.isStartTLSCapable(socket)) {
             LOG.debug("Attempting to start TLS");
             buffer.flip();
-            AbstractNBSocket asyncSocket = SSLUtils.startTLS(socket, buffer);
-            asyncSocket.setReadObserver(new AsyncConnectionDispatcher(dispatcher, socket, allowedWord));
+            AbstractNBSocket tlsSocket = SSLUtils.startTLS(socket, buffer);
+            tlsSocket.setReadObserver(new AsyncConnectionDispatcher(dispatcher, tlsSocket, allowedWord));
         } else {
             close();
         }
