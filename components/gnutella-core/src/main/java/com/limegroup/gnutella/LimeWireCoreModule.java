@@ -24,6 +24,7 @@ import org.limewire.security.SecureMessageVerifier;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
@@ -266,8 +267,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
         bind(IpPortContentAuthorityFactory.class).to(IpPortContentAuthorityFactoryImpl.class);
         bind(UpdateCollectionFactory.class).to(UpdateCollectionFactoryImpl.class);
-        bind(ConnectionDispatcher.class).annotatedWith(Names.named("global")).toInstance(new ConnectionDispatcherImpl());
-        bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).toInstance(new ConnectionDispatcherImpl());
+        bind(ConnectionDispatcher.class).annotatedWith(Names.named("global")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
+        bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
