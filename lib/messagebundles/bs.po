@@ -7,14 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-23 11:23-0400\n"
+"POT-Creation-Date: 2007-08-27 16:43-0400\n"
 "PO-Revision-Date: 2007-02-10 21:31-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Rosetta-Export-Date: 2007-08-28 14:59:16+0000\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -105,7 +107,8 @@ msgstr ""
 "Datoteka koju ste koristili za pohranjivanje prioriteta bila je potkupljena. "
 "LimeWire će koristiti standardnu opciju."
 
-#: core/com/limegroup/gnutella/Acceptor.java:284
+#: core/com/limegroup/gnutella/Acceptor.java:287
+#: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
@@ -119,91 +122,91 @@ msgstr ""
 "Žao nam je, ali LimeWie nije bio u mogućnosti ponovo restartovati vaše stare "
 "downloade."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:283
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 #, fuzzy
 msgid "Loading TLS Encryption..."
 msgstr "Punjenje HTML mašine..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:295
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:289
 #, fuzzy
 msgid "Loading Safe Content Management..."
 msgstr "Punjenje ustaljenom konekcijom poslovanja..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:300
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:294
 msgid "Loading Message Router..."
 msgstr "Punjenje-router poruke..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:305
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:299
 #, fuzzy
 msgid "Loading Upload Management..."
 msgstr "Priključni menadžer se puni..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:314
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:308
 msgid "Loading Connection Listener..."
 msgstr "Punjenje pregledne liste..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:323
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:317
 msgid "Loading Connection Management..."
 msgstr "Priključni menadžer se puni..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:328
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:322
 #, fuzzy
 msgid "Loading Download Management..."
 msgstr "Priključni menadžer se puni..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:333
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:327
 #, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "Punjenje ustaljenom konekcijom poslovanja..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:338
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:332
 msgid "Locating Peers..."
 msgstr "Odredi mjesto peers..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
 #, fuzzy
 msgid "Loading Shared Files..."
 msgstr "Punjenje pohranjenih datoteka..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:359
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 #, fuzzy
 msgid "Loading bittorrent Management..."
 msgstr "Priključni menadžer se puni..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:358
 #, fuzzy
 msgid "Loading magnet Management..."
 msgstr "Priključni menadžer se puni..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:370
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 msgid "Loading Old Downloads..."
 msgstr "Punjenje sa starim downloadom..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:375
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 msgid "Checking for Updates..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
 msgstr "Punjenje usmjerenog ispitivača..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
 msgid "Loading Magnet Listener..."
 msgstr "Punjenje MAGNETNE pregledne liste..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Peer Listener..."
 msgstr "Punjenje peer slušalica..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Loading Stale Connection Management..."
 msgstr "Punjenje ustaljenom konekcijom poslovanja..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
 msgstr "Punjenje pohranjenih datoteka..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:409
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 #, fuzzy
 msgid "Loading Spam Management..."
 msgstr "Priključni menadžer se puni..."
@@ -258,12 +261,12 @@ msgstr ""
 "ispravno downloadovati."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
-#, fuzzy, java-format
+#, fuzzy
 msgid "You have already downloaded {0}"
 msgstr "Vi ste već downloadovali ovu datoteku u \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
-#, fuzzy, java-format
+#, fuzzy
 msgid "You are already downloading this file to {0}"
 msgstr "Vi ste već downloadovali ovu datoteku u \"{0}\"."
 
@@ -343,7 +346,7 @@ msgstr "Traka"
 
 #. *
 #. * The resource to use for the extension property.
-#.
+#. 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:105
@@ -547,8 +550,8 @@ msgstr ""
 msgid ""
 "You can choose whether or not LimeWire should manage your Bittorrent "
 "protocol settings. It is highly recommended that LimeWire manage these "
-"settings. Invalid or inappropriate values may cause severe performance and/"
-"or memory problems."
+"settings. Invalid or inappropriate values may cause severe performance "
+"and/or memory problems."
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:62
@@ -637,8 +640,8 @@ msgstr "Uvijek odbaci prislušne uređaje"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:504
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
-"bug report. For further help and to aid with debugging, please visit www."
-"limewire.com and click 'Support'. Thank you."
+"bug report. For further help and to aid with debugging, please visit "
+"www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 "LimeWire nije bio u mogućnosti da se priključi na kvarni server po naredbi "
 "da odašalje donji kvarni izvještaj. Za pomoć u otkrivanju kvara, molimo "
@@ -777,7 +780,7 @@ msgstr ""
 
 #. *
 #. * The select all action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:317
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:73
 msgid "Select All"
@@ -865,9 +868,9 @@ msgid ""
 msgstr ""
 "LimeWire nije bio u mogućnosti da započne Digitalni pristup audio protokolu "
 "(za razmjenu datoteka u iTunes-u) zato što mu Firewall zaustavlja pristup. "
-"Za nastavak koristite sljedeći oblik, pritisnite 'Da' i dozvolite 'LimeWire."
-"exe' potpuni pristup ulazno-izlaznoj konekciji. Za onesposovljavanje ovakvog "
-"oblika, pritisnite 'Ne'."
+"Za nastavak koristite sljedeći oblik, pritisnite 'Da' i dozvolite "
+"'LimeWire.exe' potpuni pristup ulazno-izlaznoj konekciji. Za "
+"onesposovljavanje ovakvog oblika, pritisnite 'Ne'."
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:80
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:98
@@ -929,8 +932,8 @@ msgid ""
 msgstr ""
 "Vaš komjuter ne pokazuje da imate aktivnu internet konekciju ili je Firewall "
 "blokirao LimeWire pristup internetu. LimeWire će automatski pokušavati da se "
-"priključi na mrežu ukoliko vi u imenuku datoteke ne selektirate \"isljučenje"
-"\"."
+"priključi na mrežu ukoliko vi u imenuku datoteke ne selektirate "
+"\"isljučenje\"."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
@@ -963,9 +966,9 @@ msgid "Lo&gging"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
-#, fuzzy, java-format
+#, java-format
 msgid "Display the {0} Screen"
-msgstr "Pokaži pano za opcije."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -1010,12 +1013,12 @@ msgstr "LimeWire ne može pristupiti datoj datoteci iz sigurnosnih razloga."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1694
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1717
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
 "\n"
 "Executed command: {0}."
-msgstr "LimeWire ne može pristupiti datoj datoteci iz sigurnosnih razloga."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1697
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1720
@@ -1188,83 +1191,15 @@ msgstr ""
 msgid "Do not Show Again"
 msgstr "Download razmjena"
 
-#. Aafrican, South Africa
-#. Amharic, Ethiopia
-#. arabic, Egypt
-#. belarusian, Belarus
-#. Bulgarian, Bulgaria
-#. Bengali, Bangladesh
-#. Tibetan, China
-#. Brezhoneg, spoken in france
-#. Bosanski, Bosnia
-#. Burmese, Myanmar
-#. Catala, Spain
-#. Cestina, Czech Republic
-#. Welsh (Cymraeg) part of GB, part of UK
-#. Wales has a dragon on it we need more flags
-#. Dansk, Denmark
-#. Deutsch, Germany
-#. Divehi, Maldive
-#. Greek, Grece
-#. Spanish, Spain
-#. Estonian, ET
-#. Euskara, Spain
-#. Persian, Iran
-#. Finnish (Suomi), Finland
-#. French, France
-#. Irish, Ireland
-#. Geez, Ethiopia
-#. Gujarati, India
-#. Gallego, Spain
-#. Hindi, India
-#. Hrvatski, Croatia
-#. Magyar, Hungary
-#. Armenian, Armenia
-#. Bahasa, Indonesia
-#. Islenska, Iceland
-#. Italian, Italy
-#. Hebrew, Israel
-#. Japanese, Japan
-#. Georgian, Georgia (added this flag .gif)
-#. Kazakh, Kazakhstan
-#. Kannada, India
-#. Kashmiri, India
-#. Korean, South Korea
-#. Khmer, Cambodia
-#. Luxemburgish, Luxembourg
-#. Lao, Laos
-#. Lietuva, Lituania
-#. Latvija, Latvia
-#. Malagasy, Madagascar
-#. Macedonian, Macedonia
-#. Malayan, India
-#. Mongol, Mongolia
-#. Marathi, India
-#. Bahasa Melayu, Malaysia
-#. Malti, Malta
-#. Nepali, Nepal
-#. Nederlands
-#. Norsk, Norway
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:83
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:84
-#: gui/com/limegroup/gnutella/gui/MessageService.java:535
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
-msgid "No"
-msgstr "Ne"
-
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
-#, fuzzy
 msgid "Change Language"
-msgstr "Prom&jeni jezik"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
-#, fuzzy
 msgid "Show Language in status bar"
-msgstr "Prikaži Firewall status."
+msgstr ""
 
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
 msgid "Help Translate LimeWire"
 msgstr "Pomoć za prevod LimeWire"
@@ -1346,7 +1281,8 @@ msgid "View Usage Rights"
 msgstr "Pravo opšte upotrebe"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:515
-msgid "LimeWire is contacting www.weedshare.com for the details of this file."
+msgid ""
+"LimeWire is contacting www.weedshare.com for the details of this file."
 msgstr "LimWire je kontaktirao www.weedshare.com za detalje o ovoj datoteci."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:520
@@ -1371,35 +1307,35 @@ msgstr "Detalji licence"
 
 #. *
 #. * The undo action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:28
 msgid "Undo"
 msgstr "Povrati nazad"
 
 #. *
 #. * The cut action
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:37
 msgid "Cut"
 msgstr "Odsijeci"
 
 #. *
 #. * The copy action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:46
 msgid "Copy"
 msgstr "Kopiraj"
 
 #. *
 #. * The paste action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:55
 msgid "Paste"
 msgstr "Umetni"
 
 #. *
 #. * The delete action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:64
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:785
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:791
@@ -1472,6 +1408,13 @@ msgstr "Poruka"
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:424
 msgid "Yes"
 msgstr "Da"
+
+#: gui/com/limegroup/gnutella/gui/MessageService.java:535
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
+msgid "No"
+msgstr "Ne"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:609
 msgid "Do not display this message again"
@@ -1554,34 +1497,27 @@ msgstr "Dodaj novu stavku na listu."
 msgid "Remove Selected Item"
 msgstr "Ukloni selektiranu stavku."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:128
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:127
 msgid "Loading Status Window..."
 msgstr "Punjenje stanja prozora..."
 
-#. initialize tool tip
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:329
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:830
-#, java-format
-msgid "You are sharing {0} files (Loading...)"
-msgstr "Broj datoteka koje ste razmjenili. {0} datoteke (Puni...)"
-
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:449
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:448
 msgid "LimeWire has not detected a firewall"
 msgstr "LimeWire nije detektirao firewall."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:452
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:451
 msgid "LimeWire has detected a firewall"
 msgstr "LimeWire je detektirao firewall."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:537
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:536
 msgid "Connection"
 msgstr "Kvalitet"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:539
 msgid "Disconnected"
 msgstr "Isključeno"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:541
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
@@ -1589,108 +1525,122 @@ msgstr ""
 "Iskopčani ste sa interneta. Za ponovnu konekciju, odaberite 'Uključenje' u "
 "listi datoteka."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:543
 msgid "Starting"
 msgstr "Priključivanje"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:545
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
 msgid "You are currently connecting to the network"
 msgstr "I dalje se konektujete na internet."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:547
 msgid "Poor"
 msgstr "Slab"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:549
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 "Priključeni ste na nekoliko računara i vaša konekcija na internetu je "
 "nestabilna."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:551
 msgid "Fair"
 msgstr "Fer"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:553
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
 msgid "Your connection to the network is getting stronger"
 msgstr "Vaša konekcija na internet je jača."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:555
 msgid "Good"
 msgstr "Dobro"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:557
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
 msgstr ""
 "Niste još potpuno priključeni na internet, ali imate veoma dobru konekciju."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:560
 msgid "Excellent"
 msgstr "Odlično"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:562
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
 msgid "Your connection to the network is very strong"
 msgstr "Vaša konekcija na internetu je veoma jaka."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:564
 msgid "Turbo-Charged"
 msgstr "TurboPunjenje"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
 msgid "Your connection to the network is extremely strong"
 msgstr "Vaša konekcija na internetu je ekstremno jaka."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:567
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
-msgstr "Možete isprobati konekciju Turbo Punjenja ukoliko imate LimeWire PRO."
+msgstr ""
+"Možete isprobati konekciju Turbo Punjenja ukoliko imate LimeWire PRO."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:573
 msgid "Waking Up"
 msgstr "Probudi"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:575
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
 msgid "LimeWire is waking up from sleep mode"
 msgstr "LimeWire se budi iz uspavanog stanja."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:678
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:677
 msgid "Show Connection Quality"
 msgstr "Prikaži kvalitet priključka."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:694
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:693
 msgid "Show Shared Files Count"
 msgstr "Prikaži brojno podjelu datoteka."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:710
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:709
 #, fuzzy
 msgid "Show Language Status"
 msgstr "Prikaži Firewall status."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:731
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:730
 msgid "Show Firewall Status"
 msgstr "Prikaži Firewall status."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:747
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:746
 msgid "Show Bandwidth Consumption"
 msgstr "Prikaži potrošnju širine trake."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:763
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:762
 msgid "Show Media Player"
 msgstr "Prikaži Media Player."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:828
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:832
 #, java-format
-msgid "You are sharing {0} files"
-msgstr "Broj datoteka koje ste razmjenili. {0} datoteke"
+msgid "You are sharing {0} file"
+msgid_plural "You are sharing {0} files"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:895
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:835
+#, java-format
+msgid "You are sharing {0} file (Loading...)"
+msgid_plural "You are sharing {0} files (Loading...)"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
 msgstr "Download:"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:897
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:903
 msgid "Uploads:"
 msgstr "Upload:"
 
@@ -1813,9 +1763,9 @@ msgstr ""
 #, java-format
 msgid ""
 "Need more help? Visit <a href=\"{0}\">our message boards</a> and see if "
-"others have already answered your question! You can also review the <a href="
-"\"{1}\">FAQ</a> for answers to commonly asked questions or the <a href=\"{2}"
-"\">User Guide</a> for more information."
+"others have already answered your question! You can also review the <a "
+"href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
+"href=\"{2}\">User Guide</a> for more information."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
@@ -1829,8 +1779,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
 msgid ""
-"Do you have a tip for effectively using LimeWire? Add it to <a href=\"{0}"
-"\">the wiki</a> and it may make it into future Tips of the Day!"
+"Do you have a tip for effectively using LimeWire? Add it to <a "
+"href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
@@ -1858,8 +1808,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 #, java-format
 msgid ""
-"Want to know more about the development of LimeWire? Visit <a href=\"{0}"
-"\">LimeWire's open-source website</a> and look around!"
+"Want to know more about the development of LimeWire? Visit <a "
+"href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
@@ -1935,9 +1885,9 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, java-format
 msgid ""
-"Did you know LimeWire is completely open-source? Visit <a href=\"{0}\">www."
-"limewire.org</a> for information on how to join developer mailing lists or "
-"to review the code."
+"Did you know LimeWire is completely open-source? Visit <a "
+"href=\"{0}\">www.limewire.org</a> for information on how to join developer "
+"mailing lists or to review the code."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
@@ -2577,8 +2527,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
 msgid ""
-"Set LimeWire to be your default program for opening magnet links and ."
-"torrent files for the smoothest experience using LimeWire with the web. Go "
+"Set LimeWire to be your default program for opening magnet links and "
+".torrent files for the smoothest experience using LimeWire with the web. Go "
 "to Tools &gt; Options &gt; Advanced &gt; File Associations. "
 msgstr ""
 
@@ -2752,9 +2702,10 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:649
 msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
-"b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
-"limewire.com</a> and download the newest official version of LimeWire.</html>"
+"<html><b>Your LimeWire may have been corrupted by a virus or "
+"trojan!</b><br><br>Please visit <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
+"the newest official version of LimeWire.</html>"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:33
@@ -2850,9 +2801,8 @@ msgid "Search for: {0}"
 msgstr "Traži za: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:31
-#, java-format
-msgid "Search \"What''s New\" for: {0}"
-msgstr "Traži \"Šta je novo\" za: {0}"
+msgid "Search \"What's New\" for: {0}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:48
 #, java-format
@@ -2890,7 +2840,7 @@ msgstr "Otvori jedan prozor i odaberi jedan novi folder za razmjenu"
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:50
 msgid "Block Host"
 msgstr "Blokiraj Host računar"
@@ -2898,7 +2848,7 @@ msgstr "Blokiraj Host računar"
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:56
 msgid "Send Message"
 msgstr "Pošalji poruku"
@@ -2906,7 +2856,7 @@ msgstr "Pošalji poruku"
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:62
 msgid "Block Current Host"
 msgstr "Blokiraj trenutni Host računar."
@@ -2914,7 +2864,7 @@ msgstr "Blokiraj trenutni Host računar."
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:68
 msgid "Send a Message to a Host"
 msgstr "Pošalji poruku Host računaru."
@@ -3098,7 +3048,7 @@ msgstr "Host računar:"
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the port text field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:377
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:54
 #, fuzzy
@@ -3351,7 +3301,7 @@ msgstr "Programi"
 
 #. *
 #. * The resource to use for the speed property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:404
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:313
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
@@ -4010,19 +3960,9 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:366
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:371
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:937
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:936
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr "Možete formirati foldere koje dijelite u LimeWire opciji."
-
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:369
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:934
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
-#, fuzzy
-msgid "Sharing"
-msgstr "Priključivanje"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:370
 msgid "Configure..."
@@ -4052,7 +3992,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:83
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:388
-msgid "Your search is too long. Please make your search smaller and try again."
+msgid ""
+"Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Vaše traženje traje predugo. Molimo vas podesite da vaše traženje bude manje "
 "i probajte ponovo."
@@ -4097,6 +4038,14 @@ msgstr "Mjesto(a)"
 msgid "Last Modified"
 msgstr "Promjena datuma:"
 
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
+#, fuzzy
+msgid "Sharing"
+msgstr "Priključivanje"
+
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:278
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:307
@@ -4136,7 +4085,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1028
 #, java-format
-msgid "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
+msgid ""
+"The file \"{0}\" is not a valid incomplete file and cannot be resumed."
 msgstr "Datoteka {0} nepotpuna datoteka nije važeća i neće biti sažeta."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1244
@@ -4344,12 +4294,6 @@ msgstr "&Datoteka"
 msgid "Filter&s"
 msgstr "Filteri"
 
-#: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:17
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
-#, fuzzy
-msgid "Content"
-msgstr "HTTP sadržaja"
-
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:18
 msgid "&Configure Content Filters"
 msgstr ""
@@ -4538,29 +4482,30 @@ msgid "Select your Language Prefereces"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
-msgid ". The file type is not recognized."
-msgstr ". Vrsta datoteke nije prepoznata"
+msgid "The file type is not recognized."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
-msgid ". The file cannot be found."
-msgstr ". Datoteka nije pronađena."
+msgid "The file cannot be found."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
-msgid ". The file is corrupt."
-msgstr ". Datoteka je korumpirana"
+msgid "The file is corrupt."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
-msgid ". There is an unknown error with the audio file."
-msgstr ". Tu je nepoznata greška u audio datoteci."
+msgid "There is an unknown error with the audio file."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:164
-msgid ". The file cannot be parsed."
-msgstr ". Datoteka ne može biti rasčlanjena"
+msgid "The file cannot be parsed."
+msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:169
-#, fuzzy, java-format
-msgid "LimeWire cannot play the file {0}. {1}"
-msgstr "LimeWire je nemoćan da razmijeni datoteku \"{0}\"."
+#. {0}: filename, {1} cause of error (e.g. The file is corrupt.)
+#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:170
+#, java-format
+msgid "LimeWire cannot play the file {0}: {1}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:93
 msgid "Play"
@@ -4715,6 +4660,11 @@ msgstr ""
 msgid "Filters"
 msgstr "Filteri"
 
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+#, fuzzy
+msgid "Content"
+msgstr "HTTP sadržaja"
+
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:254
@@ -4781,8 +4731,8 @@ msgstr "Propustite host"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AllowMessagesPaneItem.java:28
 msgid ""
-"You can allow messages from specific hosts by adding their IP addresses (e."
-"g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
+"You can allow messages from specific hosts by adding their IP addresses "
+"(e.g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
 "\"192.168.12.16/28\") to the allow list. This list is only needed to "
 "override the banned list."
 msgstr ""
@@ -4819,7 +4769,7 @@ msgstr "Možete odabrati koji audio player želite koristiti."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:30
 msgid "Audio Player"
 msgstr "Audio Player"
@@ -4881,7 +4831,7 @@ msgstr "Možete odabrati koji ćete pretraživač koristiti."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:36
 msgid "Browser"
 msgstr "Pretraživač"
@@ -5164,7 +5114,7 @@ msgstr "Možete odabrati koju dodatnu datoteku želite da razmjenjujete."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:34
 msgid "Extensions:"
 msgstr "Ekstenzije:"
@@ -5234,12 +5184,13 @@ msgstr "Pročišćavanje vrste rezultata"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:23
 msgid "You can specify general types of search results to filter."
-msgstr "Možete generalno specificirati vrstu pretrage filtriranjem rezultata."
+msgstr ""
+"Možete generalno specificirati vrstu pretrage filtriranjem rezultata."
 
 #. *
 #. * Key for the locale-specifis string for the adult content check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:49
 msgid "Ignore Adult Content"
 msgstr "Filtriraj pornografski sadržaj"
@@ -5247,7 +5198,7 @@ msgstr "Filtriraj pornografski sadržaj"
 #. *
 #. * Key for the locale-specifis string for the html file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:55
 msgid "Ignore .htm/.html Files"
 msgstr "Zanemarite .htm/.html datoteke"
@@ -5255,14 +5206,14 @@ msgstr "Zanemarite .htm/.html datoteke"
 #. *
 #. * Key for the locale-specifis string for the vbs file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:61
 msgid "Ignore .vbs Files"
 msgstr "Zanemarite .vbs datoteke"
 
 #. *
 #. * Key for the locale-specific string for the wmv and asf file check box label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:66
 #, fuzzy
 msgid "Ignore .wmv/.asf files"
@@ -5288,7 +5239,7 @@ msgstr "Možete odabrati koji prikazivač slika želite koristiti."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:36
 msgid "Image Viewer"
 msgstr "Prikazivač slika"
@@ -5319,7 +5270,7 @@ msgstr "Možete postaviti najveći mogući broj istovremenih downloada."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:28
 msgid "Maximum Downloads:"
 msgstr "Najveći mogući broj downloada:"
@@ -5337,7 +5288,7 @@ msgstr "Možete podesiti maksimalan broj uporednih traženja."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:28
 msgid "Maximum Searches:"
 msgstr "Najveći broj traženja:"
@@ -5358,7 +5309,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:28
 msgid "Max Upload Slots:"
 msgstr "Maksimalni uploads otvori:"
@@ -5452,7 +5403,7 @@ msgstr "Dozvolite ovoliko uploads po osobi."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:28
 msgid "Uploads Per Person:"
 msgstr "Uploads po osobi:"
@@ -5468,8 +5419,8 @@ msgid ""
 "restart will be required when enabling or disabling the media controls."
 msgstr ""
 "Možete koristiti unutarnji player ili tretenutnu opciju vašeg sistema. "
-"Preporučuje se ponovno startovanje Windowsa ukoliko želite aktivirati/"
-"deaktivirati kontrolu playera."
+"Preporučuje se ponovno startovanje Windowsa ukoliko želite "
+"aktivirati/deaktivirati kontrolu playera."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:28
 msgid "Use LimeWire Media Player:"
@@ -5507,7 +5458,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:31
 msgid "Listen on Port:"
 msgstr "Prisluškivanje na Porti broj:"
@@ -5561,7 +5512,7 @@ msgstr "HTTP"
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the proxy host field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:48
 msgid "Proxy:"
 msgstr "Proxy"
@@ -5574,7 +5525,7 @@ msgstr "Možete automatski izbrisati staru nedovršenu downloadovanu datoteku."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:29
 msgid "Days to Keep Incomplete Files:"
 msgstr "Dani kojima se zadržavaju nekopletirane datoteke:"
@@ -5587,14 +5538,14 @@ msgstr "Možete odabrati folder u kojem ćete sačuvati datoteku."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for this
 #. * <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:45
 msgid "Folder:"
 msgstr "Folder:"
 
 #. *
 #. *  The mediator's description label id.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:69
 msgid "You can specify a download location for each media type."
 msgstr "Vi možete specificirati download za svaku vrstu media."
@@ -5614,8 +5565,7 @@ msgid ""
 "will be shared:"
 msgstr ""
 "Želite li razmijeniti vaš novi pohranjeni folder? Sljedeći novi folder biće "
-"razmijenjen:\n"
-"\n"
+"razmijenjen:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:21
 msgid "Search Result Quality"
@@ -5653,7 +5603,8 @@ msgstr "Tražite rezultat brzine"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:24
 msgid "You can select the minimum speed of search results to display."
-msgstr "Možete odabrati minimalnu brzinu ili potražiti rezultate na displeju."
+msgstr ""
+"Možete odabrati minimalnu brzinu ili potražiti rezultate na displeju."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:58
 msgid "Show Only Results of T3 Speed or Higher"
@@ -5728,19 +5679,17 @@ msgstr "Zatvorite nakon transakcije"
 msgid "Minimize to System Tray"
 msgstr "Smanjite zamjenu sistema"
 
-#. TODO not title there
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
-#, fuzzy
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:19
 msgid "Start Upload Slots"
-msgstr "Pokrenite upload otvore:"
+msgstr ""
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:22
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:29
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:28
 msgid "Start Upload Slots:"
 msgstr "Pokrenite upload otvore:"
 
@@ -5777,7 +5726,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:38
 msgid "Speed:"
 msgstr "Brzina:"
@@ -5909,7 +5858,7 @@ msgstr "Možete odabrati koji video player želite koristiti."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:36
 msgid "Video Player"
 msgstr "Video Player"
@@ -6002,7 +5951,7 @@ msgstr "Željeli ste download početi sa sljedećeg magneta?"
 
 #. *
 #. * The resource to use for the vendor property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:48
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:82
 msgid "Vendor"
@@ -6149,7 +6098,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:360
 msgid "When your friends want to connect to you, they should enter"
-msgstr "Ako vaš prijatelj hoće da se priključi vama, onda morate udariti enter"
+msgstr ""
+"Ako vaš prijatelj hoće da se priključi vama, onda morate udariti enter"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:365
 msgid ""
@@ -6408,7 +6358,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:112
 msgid "To try your new skin, you must restart LimeWire."
-msgstr "Da bi koristili vašu novu podlogu, morate iznova startovati LimeWire."
+msgstr ""
+"Da bi koristili vašu novu podlogu, morate iznova startovati LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:182
 msgid "Invalid Skin"
@@ -6502,7 +6453,7 @@ msgid "Awaiting Requests"
 msgstr "Chat molba"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:312
-#, fuzzy, java-format
+#, fuzzy
 msgid "Swarm for {0}"
 msgstr "Traži za: {0}"
 
@@ -6515,47 +6466,47 @@ msgstr "Punjenje upload prozora..."
 msgid "Seeding"
 msgstr "Traženje"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:35
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:36
 msgid "Invalid Filename"
 msgstr "Nevažeće ime datoteke"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:38
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:39
 msgid "Download Already Finished"
 msgstr "Download je već završio"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:41
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:42
 msgid "No Write Permission"
 msgstr "Nemate dozvolu za upis"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:44
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:45
 msgid "Folder Does Not Exist"
 msgstr "Direktorij ne postoji"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:47
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:48
 msgid "File Already Exists"
 msgstr "Datoteka već postoji"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:50
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:51
 msgid "Filename Taken"
 msgstr "Preuzeto ime datoteke"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:53
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:54
 msgid "Not a Folder"
 msgstr "Ni jedan folder"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:56
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:57
 msgid "Not a File"
 msgstr "Ni jedna datoteka"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:59
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:60
 msgid "Filesystem Error"
 msgstr "Greška u sistemu datoteka"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:62
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:63
 msgid "Same File Already Being Downloaded"
 msgstr "Ista datoteka je već jednom downloadovana"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:86
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:87
 #, java-format
 msgid ""
 "Could not set file location to {0}, because the filename is invalid and may "
@@ -6564,11 +6515,11 @@ msgstr ""
 "Ne mogu postaviti lokaciju datoteke u {0}, zbog toga što je ime datoteke "
 "nevažeće i može da ošteti vaš sistem."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:89
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:90
 msgid "Could not set the file location, the download is already finished."
 msgstr "Ne mogu datoteku postaviti na lokaciju, download je već završio."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:92
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:93
 #, java-format
 msgid ""
 "Could not save download to the folder {0}, because you do not have write "
@@ -6577,24 +6528,24 @@ msgstr ""
 "Ne mogu pohraniti download u folder {0}, zbog toga što vi nemate pristup za "
 "upisivanje."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:96
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:97
 #, java-format
 msgid ""
 "Could not save download to folder {0}, because the folder does not exist."
 msgstr ""
 "Ne mogu pohraniti download u dirktorij {0}, zbog toga što folder ne postoji."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:100
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:101
 #, java-format
 msgid "A file already exists at {0}."
 msgstr "Jedna datoteka već postoji na {0}."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:104
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:105
 #, java-format
 msgid "Another download is already saving to {0}."
 msgstr "Drugi download se već snima na {0}."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:108
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:109
 #, java-format
 msgid ""
 "Could not set download folder to {0}, because it represents an individual "
@@ -6603,24 +6554,24 @@ msgstr ""
 "Ne mogu postaviti dowloadovani folder u {0}, zbog toga što on predstavlja "
 "individualnu datoteku, a ne folder."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:112
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:113
 #, java-format
 msgid "Could not set file location to {0}, because it is not a regular file."
 msgstr ""
 "Ne mogu postaviti lokaciju datoteke u {0}, zbog toga što nije uredna "
 "datoteka."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:115
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:116
 msgid "Could not set file location due to an error in the filesystem."
 msgstr ""
 "Ne mogu postaviti datoteku na mjesto koje će uzrokovati grešku u sistemu "
 "datoteka."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:117
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:118
 msgid "The same file is already being downloaded."
 msgstr "Ista datoteka je već downloadovana."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:119
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:120
 #, java-format
 msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
@@ -7101,32 +7052,12 @@ msgid "Info"
 msgstr "Info"
 
 #, fuzzy
-#~ msgid "test1"
-#~ msgstr "Vrati na nulu"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "Vrati na nulu"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "Ethernet"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "Priključivanje"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
+#~ msgid "United States"
+#~ msgstr "Updates"
 
 #, fuzzy
 #~ msgid "English"
 #~ msgstr "Završetak"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Updates"
 
 #, fuzzy
 #~ msgid "Loading Languages"
@@ -7135,6 +7066,33 @@ msgstr "Info"
 #, fuzzy
 #~ msgid "false"
 #~ msgstr "Umetni"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Broj datoteka koje ste razmjenili. {0} datoteke (Puni...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Broj datoteka koje ste razmjenili. {0} datoteke"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Traži \"Šta je novo\" za: {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Vrsta datoteke nije prepoznata"
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Datoteka nije pronađena."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Datoteka je korumpirana"
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Tu je nepoznata greška u audio datoteci."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Datoteka ne može biti rasčlanjena"
 
 #~ msgid "Close the Window"
 #~ msgstr "Zatvori ovaj prozor."
@@ -7210,14 +7168,14 @@ msgstr "Info"
 
 #~ msgid ""
 #~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check "
-#~ "your connection or firewall settings and then select \"Connect\" from the "
-#~ "File menu to connect LimeWire to the network."
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
 #~ msgstr ""
-#~ "Vaš komjuter ne pokazuje da imate aktivnu internet konekciju ili je "
-#~ "Firewall blokirao LimeWire pristup internetu. Molimo vas provjerite vašu "
-#~ "konekciju ili podesite Firewall i onda u imeniku datoteke selektujte "
-#~ "\"Konekcija\" za pristup LimeWire na internet."
+#~ "Vaš komjuter ne pokazuje da imate aktivnu internet konekciju ili je Firewall "
+#~ "blokirao LimeWire pristup internetu. Molimo vas provjerite vašu konekciju "
+#~ "ili podesite Firewall i onda u imeniku datoteke selektujte \"Konekcija\" za "
+#~ "pristup LimeWire na internet."
 
 #~ msgid ""
 #~ "Could not find a port to use for incoming connections.\n"
@@ -7231,21 +7189,21 @@ msgstr "Info"
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the "
-#~ "desired statistics."
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
 #~ msgstr ""
-#~ "Statistika širine trake propusnog obima uključuje i potpune informacije "
-#~ "svih poslatih obima odtoka Upstreams i dotoka Downstreams. Pritisnite na "
-#~ "jednu od kategorija da vidite željenu statistiku."
+#~ "Statistika širine trake propusnog obima uključuje i potpune informacije svih "
+#~ "poslatih obima odtoka Upstreams i dotoka Downstreams. Pritisnite na jednu od "
+#~ "kategorija da vidite željenu statistiku."
 
 #~ msgid "Network"
 #~ msgstr "Mreža"
 
 #~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are "
-#~ "quite inaccurate due to the dynamic, distributed nature of Gnutella and "
-#~ "should not be taken too literally. They can, however, give you a general "
-#~ "idea regarding the current state of your connection."
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
 #~ msgstr ""
 #~ "Statistika trenutnog stanja mreže. Ove statistike su prilično netačne za "
 #~ "prirodu dinamike i raspodijeljenosti Gnutela mreže i ne treba ih uzimati "
@@ -7253,16 +7211,15 @@ msgstr "Info"
 #~ "trenutnog priključenja."
 
 #~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages "
-#~ "and HTTP traffic. This information can be useful for advanced users as "
-#~ "well as for researchers working on the Gnutella network. Advanced "
-#~ "statistics are not displayed by default and are not recommended for most "
-#~ "users."
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
 #~ msgstr ""
-#~ "Dodatna statistika uključuje detaljne informacije za Gnutella poruke i "
-#~ "HTTP protok. Ove informacije mogu biti korištene za isturene korisnike "
-#~ "kao i istraživanje rada na Gnutella mreži. Dodatna statistika nije "
-#~ "označena kao standardna forma i nije preporučljiva za mnoge korisnike."
+#~ "Dodatna statistika uključuje detaljne informacije za Gnutella poruke i HTTP "
+#~ "protok. Ove informacije mogu biti korištene za isturene korisnike kao i "
+#~ "istraživanje rada na Gnutella mreži. Dodatna statistika nije označena kao "
+#~ "standardna forma i nije preporučljiva za mnoge korisnike."
 
 #~ msgid "Show Advanced Statistics:"
 #~ msgstr "Pokažite dodatnu statistiku:"
@@ -7274,12 +7231,12 @@ msgstr "Info"
 #~ "Total bandwidth used to send outgoing data, either through uploads or "
 #~ "Gnutella messages."
 #~ msgstr ""
-#~ "Ukupno korištenje protoka za slanje izlaznih podataka, takođe kroz "
-#~ "uploads ili Gnutella poruke."
+#~ "Ukupno korištenje protoka za slanje izlaznih podataka, takođe kroz uploads "
+#~ "ili Gnutella poruke."
 
 #~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads "
-#~ "or Gnutella messages."
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
 #~ msgstr ""
 #~ "Ukupno korištenje obima za primanje ulaznih podataka, takođe za downloads "
 #~ "ili Gnutella poruke."
@@ -7307,11 +7264,11 @@ msgstr "Info"
 #~ "pitanja."
 
 #~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total "
-#~ "number of queries."
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
 #~ msgstr ""
-#~ "Broj dupliciranih pitanja primljenih preko Multicast u odnosu na ukupan "
-#~ "broj pitanja."
+#~ "Broj dupliciranih pitanja primljenih preko Multicast u odnosu na ukupan broj "
+#~ "pitanja."
 
 #~ msgid "All received queries, by hops."
 #~ msgstr "Sva primljena pitanja, o tranzitu."
@@ -7344,15 +7301,14 @@ msgstr "Info"
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over UDP, by message type."
 #~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko UDP, uz vrstu "
-#~ "poruke"
+#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko UDP, uz vrstu poruke"
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over Multicast, by message "
 #~ "type."
 #~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko Multicast, uz "
-#~ "vrstu poruke."
+#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko Multicast, uz vrstu "
+#~ "poruke."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
@@ -7364,15 +7320,15 @@ msgstr "Info"
 #~ "Total kilobytes in duplicate queries received over TCP versus the total "
 #~ "number of queries."
 #~ msgstr ""
-#~ "Ukupan broj kilobajta u duplim pitanjima preko TCP u odnosu na ukupan "
-#~ "broj pitanja."
+#~ "Ukupan broj kilobajta u duplim pitanjima preko TCP u odnosu na ukupan broj "
+#~ "pitanja."
 
 #~ msgid ""
 #~ "Total kilobytes in duplicate queries received over Multicast versus the "
 #~ "total number of queries."
 #~ msgstr ""
-#~ "Ukupan broj kilobajta u dupliciranim pitanjima primljenih preko "
-#~ "Multicasta u odnosu na ukupan broj pitanja."
+#~ "Ukupan broj kilobajta u dupliciranim pitanjima primljenih preko Multicasta u "
+#~ "odnosu na ukupan broj pitanja."
 
 #~ msgid "All received queries in kilobytes, by hops."
 #~ msgstr "Sva primljeni pitanja u kilobajtima, kod tranzita."
@@ -7404,26 +7360,22 @@ msgstr "Info"
 #~ msgstr ""
 #~ "UDP rezultati primljeni od Gnutella klijenata prema drugim LimeWires."
 
-#~ msgid ""
-#~ "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "UDP pritisci primljeni od svih Gnutella klijenata prema drugim LimeWires."
 
 #~ msgid ""
 #~ "Multicast pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Multicast pings primljeni od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
+#~ "Multicast pings primljeni od svih Gnutella klijenata prema drugim LimeWires."
 
 #~ msgid ""
 #~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Multicast pongs primljeni od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
+#~ "Multicast pongs primljeni od svih Gnutella klijenata prema drugim LimeWires."
 
 #~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Multicast pitanja primljena od svih Gnutella klijenata prema drugim "
 #~ "LimeWires."
@@ -7436,8 +7388,7 @@ msgstr "Info"
 #~ "LimeWires."
 
 #~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Multicast pritisci primljeni od svih Gnutella klijenata prema drugim "
 #~ "LimeWires."
@@ -7460,22 +7411,22 @@ msgstr "Info"
 #~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za UDP pitanja primljena od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
+#~ "Kilobajti za UDP pitanja primljena od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
 
 #~ msgid ""
-#~ "Kilobytes for UDP query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za UDP udarna pitanja primljeni od svih Gnutella klijenata "
-#~ "protiv drugih LimeWires."
+#~ "Kilobajti za UDP udarna pitanja primljeni od svih Gnutella klijenata protiv "
+#~ "drugih LimeWires."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za UDP pritiske primljene od svih Gnutella klijenata protiv "
-#~ "drugih LimeWires."
+#~ "Kilobajti za UDP pritiske primljene od svih Gnutella klijenata protiv drugih "
+#~ "LimeWires."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
@@ -7499,18 +7450,18 @@ msgstr "Info"
 #~ "drugim LimeWires."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients "
-#~ "versus other LimeWires."
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za Multicast udarna pitanja primljeni od svih Gnutella "
-#~ "klijenata prema drugim LimeWires."
+#~ "Kilobajti za Multicast udarna pitanja primljeni od svih Gnutella klijenata "
+#~ "prema drugim LimeWires."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
 #~ "other LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za Multicast pritiske primljeni od svih Gnutella klijenata "
-#~ "prema drugim LimeWires."
+#~ "Kilobajti za Multicast pritiske primljeni od svih Gnutella klijenata prema "
+#~ "drugim LimeWires."
 
 #~ msgid "The average size in kilobytes of received Gnutella messages."
 #~ msgstr "Prosječna veličina primljenih Gnutella poruka u kilobajtima"
@@ -7530,8 +7481,8 @@ msgstr "Info"
 
 #~ msgid "All queries that were routed to leaves, using query routing tables."
 #~ msgstr ""
-#~ "Sva ispitivanja koja su usmjerena ka izlazu, koristeći ispitivače "
-#~ "smjernih tabela."
+#~ "Sva ispitivanja koja su usmjerena ka izlazu, koristeći ispitivače smjernih "
+#~ "tabela."
 
 #~ msgid "All queries that were received from routed connections."
 #~ msgstr "Sva ispitivanja koja su bila primljena od usmjerenih priključaka"
@@ -7591,24 +7542,19 @@ msgstr "Info"
 #~ msgstr ""
 #~ "Ukupan broj kilobajta za Gnutella poruke poslate vani od ovog klijenta."
 
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
 #~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko TCP, uz vrstu "
-#~ "poruke."
+#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko TCP, uz vrstu poruke."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko UDP, uz vrstu poruke."
 
 #~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
 #~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko UDP, uz vrstu "
+#~ "Ukupan broj kilobajta za Gnutella poruke odaslanih preko Multicast, uz vrstu "
 #~ "poruke."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke odaslanih preko Multicast, uz "
-#~ "vrstu poruke."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
@@ -7617,8 +7563,7 @@ msgstr "Info"
 #~ "Multicast."
 
 #~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP pings poslati od svih Gnutella klijenata prema drugim LimeWires."
+#~ msgstr "UDP pings poslati od svih Gnutella klijenata prema drugim LimeWires."
 
 #~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
@@ -7628,11 +7573,9 @@ msgstr "Info"
 #~ msgstr ""
 #~ "UDP pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
 
-#~ msgid ""
-#~ "UDP query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "UDP udarna pitanja poslata od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
+#~ "UDP udarna pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
 
 #~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
@@ -7651,12 +7594,10 @@ msgstr "Info"
 #~ msgid ""
 #~ "Multicast queries sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Multicast pitanja poslata od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
+#~ "Multicast pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
 
 #~ msgid ""
-#~ "Multicast query hits sent from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Multicast udarna pitanja poslata od Gnutella klijenata prema drugim "
 #~ "LimeWires."
@@ -7664,8 +7605,7 @@ msgstr "Info"
 #~ msgid ""
 #~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Multicast pritisci poslati od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
+#~ "Multicast pritisci poslati od svih Gnutella klijenata prema drugim LimeWires."
 
 #~ msgid "Total kilobytes sent by other LimeWires."
 #~ msgstr "Ukupan broj kilobajta poslatih od drugih LimeWires."
@@ -7695,8 +7635,8 @@ msgstr "Info"
 #~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za UDP rezultate poslati od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
+#~ "Kilobajti za UDP rezultate poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
@@ -7709,19 +7649,19 @@ msgstr "Info"
 #~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za Multicast pings poslati od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
+#~ "Kilobajti za Multicast pings poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Kilobajti za Multicast pongs poslati od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
+#~ "Kilobajti za Multicast pongs poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
 #~ "Kilobajti za Multicast pitanja poslati od svih Gnutella klijenata prema "
 #~ "drugim LimeWires."
@@ -7734,8 +7674,8 @@ msgstr "Info"
 #~ "drugim LimeWires."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
 #~ "Kilobajti za Multicast pritiske od svih Gnutella klijenata prema drugim "
 #~ "LimeWires."
@@ -7759,8 +7699,8 @@ msgstr "Info"
 #~ msgstr "Izlazni server odbijen"
 
 #~ msgid ""
-#~ "Statistics for outgoing Gnutella connection handshaking rejections from "
-#~ "the server."
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
 #~ msgstr ""
 #~ "Statistika za izlazne Gnutella priključke rukovanjem odbijena od strane "
 #~ "servera."
@@ -7796,11 +7736,10 @@ msgstr "Info"
 #~ msgstr "Ukupan broj pročišćenih poruka."
 
 #~ msgid ""
-#~ "Total number of Gnutella connection attempts, either initiated internally "
-#~ "or externally."
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
 #~ msgstr ""
-#~ "Ukupan broj Gnutella pokušaja konekcije, bilo da su upućeni unutra ili "
-#~ "vani."
+#~ "Ukupan broj Gnutella pokušaja konekcije, bilo da su upućeni unutra ili vani."
 
 #~ msgid ""
 #~ "Total incoming requests received over time. This includes all connection "
@@ -7810,8 +7749,8 @@ msgstr "Info"
 #~ "priključka (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, itd...)"
 
 #~ msgid ""
-#~ "Total outgoing download connections attempts over time. This includes "
-#~ "both direct connections and pushed requests."
+#~ "Total outgoing download connections attempts over time. This includes both "
+#~ "direct connections and pushed requests."
 #~ msgstr ""
 #~ "Ukupan broj izlaznih pokušaja kontaktiranja downloada preko vremana. Ovo "
 #~ "uključuje oba priključna pravca kao i zahtjeve pritiska."
@@ -7821,8 +7760,8 @@ msgstr "Info"
 #~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
 #~ msgstr ""
 #~ "Ukupan broj odgovora primljenih od downloads. Ovo uključuje i zauzeto, "
-#~ "datoteka nije pronađena, nije za razmjenu, čekanje, razno. IO greške, i "
-#~ "OK odgovori."
+#~ "datoteka nije pronađena, nije za razmjenu, čekanje, razno. IO greške, i OK "
+#~ "odgovori."
 
 #~ msgid ""
 #~ "Total alternate locations received and removed over time. This includes "
@@ -7832,23 +7771,22 @@ msgstr "Info"
 #~ msgstr ""
 #~ "Ukupan broj alternativnih lokacija primljenih i pomjerenih preko vremana. "
 #~ "Ovo uključuje mjesto gdje se aktivno pokušavamo priključiti, mjesto koje "
-#~ "ćemo zanemariti, mjesto koje neće biti pomjereno, i mjesto koje smo "
-#~ "trajno odstranili od pokušaja konekcije."
+#~ "ćemo zanemariti, mjesto koje neće biti pomjereno, i mjesto koje smo trajno "
+#~ "odstranili od pokušaja konekcije."
 
 #~ msgid "Transfers"
 #~ msgstr "Prenošenje"
 
 #~ msgid ""
-#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 "
-#~ "transfers. For HTTP1.1, values are per chunk."
+#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
+#~ "For HTTP1.1, values are per chunk."
 #~ msgstr ""
-#~ "Ukupan prenos preko vremena. Ovo uključuje oba HTTP1.1 i HTTP1.0 prenosa. "
-#~ "Za HTTP1.0, vrijednost je po komadu."
+#~ "Ukupan prenos preko vremena. Ovo uključuje oba HTTP1.1 i HTTP1.0 prenosa. Za "
+#~ "HTTP1.0, vrijednost je po komadu."
 
 #~ msgid ""
-#~ "Records the time in milliseconds to establish TCP connections for "
-#~ "downloads. This can vary, for example, when servers are experiencing high "
-#~ "loads."
+#~ "Records the time in milliseconds to establish TCP connections for downloads. "
+#~ "This can vary, for example, when servers are experiencing high loads."
 #~ msgstr ""
 #~ "Registrira vrijeme u milisekundama za uspostavljanje TCP priključka za "
 #~ "downloads. Ovo može varirati, na primjer, kada su serveri pod pritiskom "
@@ -7867,39 +7805,39 @@ msgstr "Info"
 #~ "HTTP1.1 prenosa."
 
 #~ msgid ""
-#~ "Total outgoing responses. These numbers are incremented before sending "
-#~ "each response, and thus include every chunk for HTTP/1.1 transfers. "
-#~ "'Normal' is the number of requests for which we have attempted to "
-#~ "transfer a portion of a file."
+#~ "Total outgoing responses. These numbers are incremented before sending each "
+#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
+#~ "the number of requests for which we have attempted to transfer a portion of "
+#~ "a file."
 #~ msgstr ""
-#~ "Ukupan broj izlaznih odgovora. Ovi podaci su dopunjeni prije slanja "
-#~ "svakog odgovora, i prema tome uključuje svaki dio za HTTP/1.1 transfer. "
-#~ "'Normalno' je broj zahtjeva za svaki prenos koji smo pokušali "
-#~ "transferirati za dio datoteke."
+#~ "Ukupan broj izlaznih odgovora. Ovi podaci su dopunjeni prije slanja svakog "
+#~ "odgovora, i prema tome uključuje svaki dio za HTTP/1.1 transfer. 'Normalno' "
+#~ "je broj zahtjeva za svaki prenos koji smo pokušali transferirati za dio "
+#~ "datoteke."
 
 #~ msgid "Request Methods"
 #~ msgstr "Zahtjev metodike"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
-#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for "
-#~ "push requests, after we have sent the initial GIV."
+#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
+#~ "requests, after we have sent the initial GIV."
 #~ msgstr ""
-#~ "Ukupan broj ulaznih metodičkih zahtjeva. Ovi podaci su dopunjeni takodje "
-#~ "sa HTTP/1.1 prenosom NAKON što je zatraženo ulazno priključenje, nakon "
-#~ "što smo poslali početni GIV."
+#~ "Ukupan broj ulaznih metodičkih zahtjeva. Ovi podaci su dopunjeni takodje sa "
+#~ "HTTP/1.1 prenosom NAKON što je zatraženo ulazno priključenje, nakon što smo "
+#~ "poslali početni GIV."
 
 #~ msgid "General"
 #~ msgstr "Općenito"
 
 #~ msgid ""
 #~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
-#~ "are incremented per connection, not per chunk. (Stalled uploads will also "
-#~ "be counted as an interrupted upload.)"
+#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
+#~ "counted as an interrupted upload.)"
 #~ msgstr ""
-#~ "Ukupan broj pokušaja, kompletnih, prekinutih ili zaustavljeni uploads. "
-#~ "Ovi podaci su dopunjeni po priključku, ne po komadu. (Zaustavljeni "
-#~ "uploads biće izbrojani kao prekinuti uploads.)"
+#~ "Ukupan broj pokušaja, kompletnih, prekinutih ili zaustavljeni uploads. Ovi "
+#~ "podaci su dopunjeni po priključku, ne po komadu. (Zaustavljeni uploads biće "
+#~ "izbrojani kao prekinuti uploads.)"
 
 #~ msgid "seconds"
 #~ msgstr "sekunda"

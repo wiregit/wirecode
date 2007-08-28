@@ -7,31 +7,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-23 11:23-0400\n"
+"POT-Creation-Date: 2007-08-27 16:43-0400\n"
 "PO-Revision-Date: 2007-02-10 21:31-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=1; plural=(0);\n"
+"X-Rosetta-Export-Date: 2007-08-28 14:59:09+0000\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"하드 디스크의 빈 용량이 부족하기 때문에, 필요한 파일을 다른 이름으로 저장할 "
-"수 없는 상태. LimeWire의 사용을 계속하려면 , 하드 디스크의 빈 용량을 증 할 "
-"것."
+"하드 디스크의 빈 용량이 부족하기 때문에, 필요한 파일을 다른 이름으로 저장할 수 없는 상태. LimeWire의 사용을 계속하려면 , "
+"하드 디스크의 빈 용량을 증 할 것."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"필요한 파일을 다른 프로그램이 사용하고 있기때문에, LimeWire는 파일을 열지 않"
-"는 상태. LimeWire는, 이 파일이 열릴 때까지 조작을 조 돌려주는 것."
+"필요한 파일을 다른 프로그램이 사용하고 있기때문에, LimeWire는 파일을 열지 않는 상태. LimeWire는, 이 파일이 열릴 때까지 "
+"조작을 조 돌려주는 것."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
@@ -39,34 +39,31 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"필요한 접속권한이 없기 때문에, 필요한 파일을 기입해 불가. 다음에 LimeWire 가 "
-"시작되었을 때, 선택한 환경 설정이 보관 유지되어 있지 않을 가능성 있어. 또, "
-"LimeWire가 예기치 않은 작동을 할 가능성도 생각할 수 있습니다."
+"필요한 접속권한이 없기 때문에, 필요한 파일을 기입해 불가. 다음에 LimeWire 가 시작되었을 때, 선택한 환경 설정이 보관 유지되어 "
+"있지 않을 가능성 있어. 또, LimeWire가 예기치 않은 작동을 할 가능성도 생각할 수 있습니다."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:37
 msgid ""
 "LimeWire cannot open a necessary file because the filename contains "
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
-msgstr ""
-"파일명에 사용의 시스템으로 대응하고 있지 않는 문자가 있기때문에, 필요한 파일"
-"을 열리지 않는 상황."
+msgstr "파일명에 사용의 시스템으로 대응하고 있지 않는 문자가 있기때문에, 필요한 파일을 열리지 않는 상황."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:39
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"하드 디스크의 빈 용량이 부족하기 때문에, 선택한 파일을 다운로드할 수 없는 상"
-"태. 더욱 파일을 다운로드하려면 , 하드 디스크의 빈 용량을 늘리는 것."
+"하드 디스크의 빈 용량이 부족하기 때문에, 선택한 파일을 다운로드할 수 없는 상태. 더욱 파일을 다운로드하려면 , 하드 디스크의 빈 "
+"용량을 늘리는 것."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:40
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"다른 프로그램이 파일을 사용하고 있기때문에, 선택한 파일을 다운로드할 수 없는 "
-"상태. 다른 프로그램을 종료시키고 나서, 다운로드를 재개하는 것."
+"다른 프로그램이 파일을 사용하고 있기때문에, 선택한 파일을 다운로드할 수 없는 상태. 다른 프로그램을 종료시키고 나서, 다운로드를 "
+"재개하는 것."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:41
 msgid ""
@@ -75,18 +72,15 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"선택한 다운로드에 대해, 미완성 폴더에 접속권한이 없기 때문에, 미완성 파일을 "
-"작성 또는 기입해 불가. LimeWire를 계속 사용하려면  , 다른 다른 이름으로 저장"
-"처 폴더를 선택."
+"선택한 다운로드에 대해, 미완성 폴더에 접속권한이 없기 때문에, 미완성 파일을 작성 또는 기입해 불가. LimeWire를 계속 사용하려면 "
+" , 다른 다른 이름으로 저장처 폴더를 선택."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:42
 msgid ""
 "LimeWire was unable to open the incomplete file for the selected download "
 "because the filename contains characters which are not supported by your "
 "operating system."
-msgstr ""
-"선택한 다운로드에 의한 파일명에, 사용의 시스템이 대응하고 있지 않는 문자가 있"
-"기때문에, 불완전한 파일을 열지 않는 상황."
+msgstr "선택한 다운로드에 의한 파일명에, 사용의 시스템이 대응하고 있지 않는 문자가 있기때문에, 불완전한 파일을 열지 않는 상황."
 
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
@@ -96,103 +90,102 @@ msgid ""
 "default values."
 msgstr "환경 설정을 다른 이름으로 저장하는 파일이 파손. 초기설정을 사용"
 
-#: core/com/limegroup/gnutella/Acceptor.java:284
+#: core/com/limegroup/gnutella/Acceptor.java:287
+#: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
-msgstr ""
-"내향의 접속의 포트를 설정할 수 없는 상태. 몇개의 기능은 기대한 대로 들지 않"
-"을 가능성 있어."
+msgstr "내향의 접속의 포트를 설정할 수 없는 상태. 몇개의 기능은 기대한 대로 들지 않을 가능성 있어."
 
 #: core/com/limegroup/gnutella/DownloadManager.java:216
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr "유감스럽게도 이전의 다운로드를 재개할 수 없는 상태입니다."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:283
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 #, fuzzy
 msgid "Loading TLS Encryption..."
 msgstr "Loading HTML 엔진..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:295
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:289
 #, fuzzy
 msgid "Loading Safe Content Management..."
 msgstr "오래된 접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:300
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:294
 msgid "Loading Message Router..."
 msgstr "메시지 라우터를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:305
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:299
 #, fuzzy
 msgid "Loading Upload Management..."
 msgstr "접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:314
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:308
 msgid "Loading Connection Listener..."
 msgstr "접속 청취자를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:323
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:317
 msgid "Loading Connection Management..."
 msgstr "접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:328
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:322
 #, fuzzy
 msgid "Loading Download Management..."
 msgstr "접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:333
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:327
 #, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "오래된 접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:338
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:332
 msgid "Locating Peers..."
 msgstr "사용자들 자리 매김..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
 #, fuzzy
 msgid "Loading Shared Files..."
 msgstr "다른 이름으로 저장 파일을 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:359
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 #, fuzzy
 msgid "Loading bittorrent Management..."
 msgstr "접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:358
 #, fuzzy
 msgid "Loading magnet Management..."
 msgstr "접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:370
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 msgid "Loading Old Downloads..."
 msgstr "낡은 다운로드를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:375
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 msgid "Checking for Updates..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
 msgstr "나온 요청을 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
 msgid "Loading Magnet Listener..."
 msgstr "마그넷 청취자를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Peer Listener..."
 msgstr "상대의 청취자를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Loading Stale Connection Management..."
 msgstr "오래된 접속 관리를 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
 msgstr "다른 이름으로 저장 파일을 불러오는 중..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:409
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 #, fuzzy
 msgid "Loading Spam Management..."
 msgstr "접속 관리를 불러오는 중..."
@@ -242,17 +235,15 @@ msgstr ""
 msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
-msgstr ""
-"마그넷 링크에 사용되고 있는 URL가 무효. 파일이 올바르게 다운로드할 수 없을 가"
-"능성 있어."
+msgstr "마그넷 링크에 사용되고 있는 URL가 무효. 파일이 올바르게 다운로드할 수 없을 가능성 있어."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
-#, fuzzy, java-format
+#, fuzzy
 msgid "You have already downloaded {0}"
 msgstr "이 파일을 \"{0}\"에 이미 다운로드하고 있습니다."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
-#, fuzzy, java-format
+#, fuzzy
 msgid "You are already downloading this file to {0}"
 msgstr "이 파일을 \"{0}\"에 이미 다운로드하고 있습니다."
 
@@ -329,7 +320,7 @@ msgstr "트랙"
 
 #. *
 #. * The resource to use for the extension property.
-#.
+#. 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:105
@@ -533,8 +524,8 @@ msgstr "BitTorrent"
 msgid ""
 "You can choose whether or not LimeWire should manage your Bittorrent "
 "protocol settings. It is highly recommended that LimeWire manage these "
-"settings. Invalid or inappropriate values may cause severe performance and/"
-"or memory problems."
+"settings. Invalid or inappropriate values may cause severe performance "
+"and/or memory problems."
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:62
@@ -575,9 +566,8 @@ msgid ""
 "'Send' to notify LimeWire about the problem. If desired, you can click "
 "'Review' to look at the information that will be sent. Thank you."
 msgstr ""
-"LimeWire의 내부에서 에러가 일어났습니다. LimeWire는 복구되어 정상 작동됩니"
-"다. LimeWire의 버그 수정을 위해서 \"송신\" 버튼을 클릭하여 정보를 보내주세"
-"요. 또, 에러를 재검토하고 싶으면\"재검토\" 버튼을 클릭해 주세요. 감사합니다."
+"LimeWire의 내부에서 에러가 일어났습니다. LimeWire는 복구되어 정상 작동됩니다. LimeWire의 버그 수정을 위해서 "
+"\"송신\" 버튼을 클릭하여 정보를 보내주세요. 또, 에러를 재검토하고 싶으면\"재검토\" 버튼을 클릭해 주세요. 감사합니다."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:379
 msgid ""
@@ -586,9 +576,8 @@ msgid ""
 "'Discard'. If desired, you can click 'Review' to look at the information "
 "about the error."
 msgstr ""
-"LimeWire의 내부에서 에러 발생. LimeWire는 복구되어 정상 작동됩니다. LimeWire"
-"의 버그 수정을 위해서 \"송신\" 버튼을 클릭하여 정보를 발송. 또, 에러를 재검토"
-"하고 싶으면 \"재검토\" 버튼을 클릭하여 주세요."
+"LimeWire의 내부에서 에러 발생. LimeWire는 복구되어 정상 작동됩니다. LimeWire의 버그 수정을 위해서 \"송신\" "
+"버튼을 클릭하여 정보를 발송. 또, 에러를 재검토하고 싶으면 \"재검토\" 버튼을 클릭하여 주세요."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:390
 msgid "Send"
@@ -620,12 +609,11 @@ msgstr "항상 모든 에러를 삭제"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:504
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
-"bug report. For further help and to aid with debugging, please visit www."
-"limewire.com and click 'Support'. Thank you."
+"bug report. For further help and to aid with debugging, please visit "
+"www.limewire.com and click 'Support'. Thank you."
 msgstr ""
-"LimeWire가 버그 서버에 접속 불가합니다. LimeWire의 버그 수정을 위해서 www."
-"limewire.com으로 방문하셔서 'Support'를 클릭하여 정보를 보내주십시오. 감사합"
-"니다."
+"LimeWire가 버그 서버에 접속 불가합니다. LimeWire의 버그 수정을 위해서 www.limewire.com으로 방문하셔서 "
+"'Support'를 클릭하여 정보를 보내주십시오. 감사합니다."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:533
 msgid "Copy Report"
@@ -659,7 +647,7 @@ msgstr "LimeWire 정보"
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:34
 #, fuzzy
 msgid "LimeWire"
-msgstr "LimeWire &PRO "
+msgstr "LimeWire &PRO"
 
 #. set up close button
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
@@ -684,30 +672,25 @@ msgid ""
 "collection of protocols that is constantly improving -- a testament to the "
 "power of open protocols and open standards."
 msgstr ""
-"LimeWire의 소유자인 마크, 고톤이 LimeWire 프로젝트를 공동 제작의<a href="
-"\"http://www.limewire.org/\">open source 효과</a>로 전세계의 프로그래머와 연"
-"구자를 모으고 있습니다. 이 공동 제작형의 그누테라는, LimeWire가 참가하는 그누"
-"테라 개발 포럼(GDF)에도 반영되고 있습니다. GDF 사업의 면면은 매일 전선에 서, "
-"그누테라가 항상 개량되어 실로 혁신적인 프로토콜의 집합으로 하고 있습니다. 오"
-"픈 프로토콜과 오픈 기본적인 기술을 도입한 것입니다."
+"LimeWire의 소유자인 마크, 고톤이 LimeWire 프로젝트를 공동 제작의<a "
+"href=\"http://www.limewire.org/\">open source 효과</a>로 전세계의 프로그래머와 연구자를 모으고 "
+"있습니다. 이 공동 제작형의 그누테라는, LimeWire가 참가하는 그누테라 개발 포럼(GDF)에도 반영되고 있습니다. GDF 사업의 "
+"면면은 매일 전선에 서, 그누테라가 항상 개량되어 실로 혁신적인 프로토콜의 집합으로 하고 있습니다. 오픈 프로토콜과 오픈 기본적인 기술을 "
+"도입한 것입니다."
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
 msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
-msgstr ""
-"LimeWire는 또 당연한 일이면서, LimeWire 개발자가 장기에 걸치는 일의 결과에서"
-"도 있습니다."
+msgstr "LimeWire는 또 당연한 일이면서, LimeWire 개발자가 장기에 걸치는 일의 결과에서도 있습니다."
 
 #. business developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:197
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
-msgstr ""
-"비지니스 전략과 일상적인 업무는, LimeWire의 비지니스 개발자가 관리하고 있습니"
-"다."
+msgstr "비지니스 전략과 일상적인 업무는, LimeWire의 비지니스 개발자가 관리하고 있습니다."
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:207
@@ -715,8 +698,8 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
-"또, LimeWire의<a href=\"http://www.limewire.com/\">웹 사이트</a>와 LimeWire"
-"의 그래픽 디자인은 LimeWire의 웹 팀의 노력의 산물입니다."
+"또, LimeWire의<a href=\"http://www.limewire.com/\">웹 사이트</a>와 LimeWire의 그래픽 "
+"디자인은 LimeWire의 웹 팀의 노력의 산물입니다."
 
 #. support staff
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:215
@@ -729,8 +712,7 @@ msgstr "LimeWire Pro에 관한 요청은 LimeWire의 기술 서포트가 담당�
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
-msgstr ""
-"과거에 LimeWire 팀에서 일한 개발자들은 그 외 프로젝트에서 작업하고 있습니다."
+msgstr "과거에 LimeWire 팀에서 일한 개발자들은 그 외 프로젝트에서 작업하고 있습니다."
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
@@ -740,9 +722,8 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
-"LimeWire open source에 공헌한 사람들은 현 프로젝트에 중요한 코드, 많은 버그 "
-"수정, 아이디어, 연구, 그 이상으로 도움을 주셨습니다. 아래는 LimeWire의 각 버"
-"전에 기입된 코드, 코드상의 중대한 버그로서 확인된 것, 혹은 둘다 해당됩니다."
+"LimeWire open source에 공헌한 사람들은 현 프로젝트에 중요한 코드, 많은 버그 수정, 아이디어, 연구, 그 이상으로 "
+"도움을 주셨습니다. 아래는 LimeWire의 각 버전에 기입된 코드, 코드상의 중대한 버그로서 확인된 것, 혹은 둘다 해당됩니다."
 
 #. internationalization contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:285
@@ -750,9 +731,7 @@ msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
-msgstr ""
-"LimeWire는 또, 어플리케이션 자체와 LimeWire 웹 사이트에대해 많은 국제적 프로"
-"젝트 공헌자에게 감사드립니다."
+msgstr "LimeWire는 또, 어플리케이션 자체와 LimeWire 웹 사이트에대해 많은 국제적 프로젝트 공헌자에게 감사드립니다."
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:289
@@ -768,22 +747,20 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
-"마지막으로, LimeWire는 프로젝트에 아이디어를 준 개발자, 유저, 한국어 번역을 "
-"담당해주신 <a href=\"http://cafe.daum.net/onlymyU\">라임와이어 코리아</a> 여"
-"태한님, 그 외 공헌자에게 깊게 감사의 말씀을 드립니다. LimeWire의 네트워크는 "
-"LimeWire 사용자없이는 존재할 수 없습니다."
+"마지막으로, LimeWire는 프로젝트에 아이디어를 준 개발자, 유저, 한국어 번역을 담당해주신 <a "
+"href=\"http://cafe.daum.net/onlymyU\">라임와이어 코리아</a> 여태한님, 그 외 공헌자에게 깊게 감사의 "
+"말씀을 드립니다. LimeWire의 네트워크는 LimeWire 사용자없이는 존재할 수 없습니다."
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:315
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
 msgstr ""
-"BitTorrent, the BitTorrent 로고, 그리고 Torrent는 BitTorrent Inc.의 대표 브랜"
-"드입니다."
+"BitTorrent, the BitTorrent 로고, 그리고 Torrent는 BitTorrent Inc.의 대표 브랜드입니다."
 
 #. *
 #. * The select all action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:317
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:73
 #, fuzzy
@@ -843,9 +820,8 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
-"iTunes 의 파일 공유에 사용되는 디지털 오디오 접속 프로토콜로 에러를 검출. 이 "
-"기능은 무효가 되지만, 이 기능은\"iTunes\" -> \"공유\" 로부터 되돌릴 수 있습니"
-"다."
+"iTunes 의 파일 공유에 사용되는 디지털 오디오 접속 프로토콜로 에러를 검출. 이 기능은 무효가 되지만, 이 기능은\"iTunes\" "
+"-> \"공유\" 로부터 되돌릴 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:326
 msgid ""
@@ -855,10 +831,9 @@ msgid ""
 "information if you want to use this feature. Click 'Yes' to go to the patch, "
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
-"LimeWire는 방화벽이 액세스를 차단하고 있기 때문에, 디지털 오디오 액세스 프로"
-"토콜(iTunes로 파일 공유)을 실행 할 수 없습니다.  이 기능을 계속 사용하려면  ,"
-"「네」를 클릭해 방화벽을 변경해,‘LimeWire.exe＇로 100%의 접속을 내향과 외국용"
-"의 접속에 허가.  이 기능을 사용하지 않는 경우는,「아니오」를 클릭."
+"LimeWire는 방화벽이 액세스를 차단하고 있기 때문에, 디지털 오디오 액세스 프로토콜(iTunes로 파일 공유)을 실행 할 수 "
+"없습니다.  이 기능을 계속 사용하려면  ,「네」를 클릭해 방화벽을 변경해,‘LimeWire.exe＇로 100%의 접속을 내향과 외국용의 "
+"접속에 허가.  이 기능을 사용하지 않는 경우는,「아니오」를 클릭."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:339
 #, fuzzy
@@ -869,10 +844,9 @@ msgid ""
 "access to incoming and outgoing connections. To disable this feature, click "
 "'No'."
 msgstr ""
-"LimeWire는 방화벽이 액세스를 차단하고 있기 때문에, 디지털 오디오 액세스 프로"
-"토콜(iTunes로 파일 공유)을 실행 할 수 없습니다.  이 기능을 계속 사용하려면  ,"
-"「네」를 클릭해 방화벽을 변경해,‘LimeWire.exe＇로 100%의 접속을 내향과 외국용"
-"의 접속에 허가.  이 기능을 사용하지 않는 경우는,「아니오」를 클릭."
+"LimeWire는 방화벽이 액세스를 차단하고 있기 때문에, 디지털 오디오 액세스 프로토콜(iTunes로 파일 공유)을 실행 할 수 "
+"없습니다.  이 기능을 계속 사용하려면  ,「네」를 클릭해 방화벽을 변경해,‘LimeWire.exe＇로 100%의 접속을 내향과 외국용의 "
+"접속에 허가.  이 기능을 사용하지 않는 경우는,「아니오」를 클릭."
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:80
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:98
@@ -964,9 +938,9 @@ msgid "Lo&gging"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
-#, fuzzy, java-format
+#, java-format
 msgid "Display the {0} Screen"
-msgstr "옵션 화면을 표시"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -993,8 +967,7 @@ msgid ""
 msgstr ""
 "LimeWire는 이 파일의 라이센스를 확인할 수 없습니다. 다운로드하시겠습니까? \n"
 "\n"
-"주의：LimeWire는 그누테라 네트워크의 내용을 감시 또는 관리할 수 없습니다. 유"
-"저는 현지의 판권에 관한 법률을 지켜야합니다."
+"주의：LimeWire는 그누테라 네트워크의 내용을 감시 또는 관리할 수 없습니다. 유저는 현지의 판권에 관한 법률을 지켜야합니다."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1673
 #, java-format
@@ -1010,12 +983,12 @@ msgstr "보안상의 이유로, LimeWire는 지정 파일을 실행하지 않을
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1694
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1717
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
 "\n"
 "Executed command: {0}."
-msgstr "보안상의 이유로, LimeWire는 지정 파일을 실행하지 않을 것입니다."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1697
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1720
@@ -1080,9 +1053,8 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
-"iTunes 의 파일 공유에 사용되는 Digital Audio Access Protocol 를 실행할 수 없"
-"는 상태. 이 기능은 무효가 되지만, 이 기능은 \"iTunes\" ->\"공유\"로부터 되돌"
-"릴 수 있습니다."
+"iTunes 의 파일 공유에 사용되는 Digital Audio Access Protocol 를 실행할 수 없는 상태. 이 기능은 무효가 "
+"되지만, 이 기능은 \"iTunes\" ->\"공유\"로부터 되돌릴 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:449
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -1095,10 +1067,9 @@ msgid ""
 "connections on the local machine. Please allow LimeWire access to the "
 "internet and restart LimeWire."
 msgstr ""
-"LimeWire는 초기화해 시작을 할 수 없는 상태.  통상 이 문제는 방화벽 프로그램"
-"이, 인터넷 또는 로컬의 기기에 의한 루프백 접속에의, LimeWire의 접속을 차단하"
-"고 있기 때문에 일어나는 것.  LimeWire의 인터넷에의 접속을 허가한 후 LimeWire"
-"를 다시 실행하여주십시오."
+"LimeWire는 초기화해 시작을 할 수 없는 상태.  통상 이 문제는 방화벽 프로그램이, 인터넷 또는 로컬의 기기에 의한 루프백 "
+"접속에의, LimeWire의 접속을 차단하고 있기 때문에 일어나는 것.  LimeWire의 인터넷에의 접속을 허가한 후 LimeWire를 "
+"다시 실행하여주십시오."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:461
 msgid ""
@@ -1189,86 +1160,18 @@ msgstr ""
 msgid "Do not Show Again"
 msgstr "다운로드 공유"
 
-#. Aafrican, South Africa
-#. Amharic, Ethiopia
-#. arabic, Egypt
-#. belarusian, Belarus
-#. Bulgarian, Bulgaria
-#. Bengali, Bangladesh
-#. Tibetan, China
-#. Brezhoneg, spoken in france
-#. Bosanski, Bosnia
-#. Burmese, Myanmar
-#. Catala, Spain
-#. Cestina, Czech Republic
-#. Welsh (Cymraeg) part of GB, part of UK
-#. Wales has a dragon on it we need more flags
-#. Dansk, Denmark
-#. Deutsch, Germany
-#. Divehi, Maldive
-#. Greek, Grece
-#. Spanish, Spain
-#. Estonian, ET
-#. Euskara, Spain
-#. Persian, Iran
-#. Finnish (Suomi), Finland
-#. French, France
-#. Irish, Ireland
-#. Geez, Ethiopia
-#. Gujarati, India
-#. Gallego, Spain
-#. Hindi, India
-#. Hrvatski, Croatia
-#. Magyar, Hungary
-#. Armenian, Armenia
-#. Bahasa, Indonesia
-#. Islenska, Iceland
-#. Italian, Italy
-#. Hebrew, Israel
-#. Japanese, Japan
-#. Georgian, Georgia (added this flag .gif)
-#. Kazakh, Kazakhstan
-#. Kannada, India
-#. Kashmiri, India
-#. Korean, South Korea
-#. Khmer, Cambodia
-#. Luxemburgish, Luxembourg
-#. Lao, Laos
-#. Lietuva, Lituania
-#. Latvija, Latvia
-#. Malagasy, Madagascar
-#. Macedonian, Macedonia
-#. Malayan, India
-#. Mongol, Mongolia
-#. Marathi, India
-#. Bahasa Melayu, Malaysia
-#. Malti, Malta
-#. Nepali, Nepal
-#. Nederlands
-#. Norsk, Norway
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:83
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:84
-#: gui/com/limegroup/gnutella/gui/MessageService.java:535
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
-msgid "No"
-msgstr "아니오"
-
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
-#, fuzzy
 msgid "Change Language"
-msgstr "언어를 변경 "
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
-#, fuzzy
 msgid "Show Language in status bar"
-msgstr "사용 언어 표시"
+msgstr ""
 
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
 msgid "Help Translate LimeWire"
-msgstr "LimeWire 번역 도움 "
+msgstr "LimeWire 번역 도움"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:119
 msgid "LimeWire must be restarted for the new language to take effect."
@@ -1322,8 +1225,7 @@ msgid ""
 "Click 'verify' to locate the details of this Creative Commons license."
 msgstr ""
 "LimeWire는 이 라이센스를 검증하고 있지 않는 상태. \n"
-"[검증]을 클릭해, 이 창조적으로 일반용의 라이센스의 상세한 것에 대하여 조사하"
-"는 것."
+"[검증]을 클릭해, 이 창조적으로 일반용의 라이센스의 상세한 것에 대하여 조사하는 것."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:467
 msgid "Creative Commons Details"
@@ -1346,10 +1248,9 @@ msgid "View Usage Rights"
 msgstr "사용법의 권리를 본다"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:515
-msgid "LimeWire is contacting www.weedshare.com for the details of this file."
-msgstr ""
-"LimeWire는 www.weedshare.com에 접속하여 이 파일의 상세내용을 확인하고 있습니"
-"다."
+msgid ""
+"LimeWire is contacting www.weedshare.com for the details of this file."
+msgstr "LimeWire는 www.weedshare.com에 접속하여 이 파일의 상세내용을 확인하고 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:520
 msgid ""
@@ -1373,35 +1274,35 @@ msgstr "라이센스의 상세"
 
 #. *
 #. * The undo action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:28
 msgid "Undo"
 msgstr "되돌리기"
 
 #. *
 #. * The cut action
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:37
 msgid "Cut"
 msgstr "자르기"
 
 #. *
 #. * The copy action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:46
 msgid "Copy"
 msgstr "복사"
 
 #. *
 #. * The paste action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:55
 msgid "Paste"
 msgstr "붙이기"
 
 #. *
 #. * The delete action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:64
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:785
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:791
@@ -1431,7 +1332,7 @@ msgstr "다운로드하는 페이지"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:14
 msgid "File Listing for"
-msgstr "파일의 리스트 "
+msgstr "파일의 리스트"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:18
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
@@ -1475,6 +1376,13 @@ msgstr "메시지"
 msgid "Yes"
 msgstr "네"
 
+#: gui/com/limegroup/gnutella/gui/MessageService.java:535
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
+msgid "No"
+msgstr "아니오"
+
 #: gui/com/limegroup/gnutella/gui/MessageService.java:609
 msgid "Do not display this message again"
 msgstr "다음부터 이 메시지를 표시하지 않음"
@@ -1497,8 +1405,8 @@ msgid ""
 "Your client is a leaf node shielded by an Ultrapeer. Hence you will see few "
 "or no searches in the monitor window."
 msgstr ""
-"사용의 클라이언트는 울트라 유저에 의해 보호된 Leaf node 입니다. 따라 모니터 "
-"윈도우에서는, 검색 문자를 약간인가 전혀 볼 수 없습니다."
+"사용의 클라이언트는 울트라 유저에 의해 보호된 Leaf node 입니다. 따라 모니터 윈도우에서는, 검색 문자를 약간인가 전혀 볼 수 "
+"없습니다."
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:85
 msgid "Show Last"
@@ -1514,8 +1422,8 @@ msgid ""
 "permissions to write to it, or there may be another problem. Please choose a "
 "different folder."
 msgstr ""
-"저장폴더에 문제가 있습니다. 삭제되었거나, 폴더에 쓰기 접근권한이 없거나 혹은 "
-"다른 문제가 있을 가능성이 있습니다. 다른 폴더를 선택해 주세요."
+"저장폴더에 문제가 있습니다. 삭제되었거나, 폴더에 쓰기 접근권한이 없거나 혹은 다른 문제가 있을 가능성이 있습니다. 다른 폴더를 선택해 "
+"주세요."
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:157
 #, java-format
@@ -1555,141 +1463,139 @@ msgstr "신규 리스트 항목을 추가"
 msgid "Remove Selected Item"
 msgstr "선택 항목을 제거"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:128
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:127
 msgid "Loading Status Window..."
 msgstr "스테이터스 윈도우를 불러오는 중..."
 
-#. initialize tool tip
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:329
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:830
-#, java-format
-msgid "You are sharing {0} files (Loading...)"
-msgstr "공유하고 있는 파일의 수 {0} 파일(불러오는 중...)"
-
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:449
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:448
 msgid "LimeWire has not detected a firewall"
 msgstr "LimeWire는 방화벽을 감지하고 있지 않습니다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:452
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:451
 msgid "LimeWire has detected a firewall"
 msgstr "LimeWire가 방화벽을 감지했습니다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:537
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:536
 msgid "Connection"
 msgstr "접속"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:539
 msgid "Disconnected"
 msgstr "접속해제"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:541
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
-msgstr ""
-"네트워크로부터 접속해제 되었습니다..  접속하려면 , \"파일\" 메뉴에서 \"접속"
-"\" 을 눌러주세요."
+msgstr "네트워크로부터 접속해제 되었습니다..  접속하려면 , \"파일\" 메뉴에서 \"접속\" 을 눌러주세요."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:543
 msgid "Starting"
 msgstr "접속 실행"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:545
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
 msgid "You are currently connecting to the network"
 msgstr "현재 네트워크에 접속하고 있습니다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:547
 msgid "Poor"
 msgstr "불량"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:549
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
-msgstr ""
-"소수의 호스트 밖에 접속되어 있지 않기 때문에, 접속 레벨은 그다지 좋지 않다"
+msgstr "소수의 호스트 밖에 접속되어 있지 않기 때문에, 접속 레벨은 그다지 좋지 않다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:551
 msgid "Fair"
 msgstr "보통"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:553
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
 msgid "Your connection to the network is getting stronger"
 msgstr "네트워크에의 접속이, 점차 좋아지고 있습니다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:555
 msgid "Good"
 msgstr "좋다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:557
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
 msgstr "아직 네트워크에 충분히는 접속되어 있지 않지만, 좋은 접속 레벨입니다."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:560
 msgid "Excellent"
 msgstr "최고상태"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:562
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
 msgid "Your connection to the network is very strong"
 msgstr "네트워크에의 접속은 몹시 우수합니다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:564
 msgid "Turbo-Charged"
 msgstr "터보모드"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
 msgid "Your connection to the network is extremely strong"
 msgstr "네트워크에의 접속이 최적화되었습니다"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:567
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
-msgstr ""
-"당신은 LimeWire Pro에서 언제나 터보모드 접속방식을 경험 할 수 있습니다."
+msgstr "당신은 LimeWire Pro에서 언제나 터보모드 접속방식을 경험 할 수 있습니다."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:573
 msgid "Waking Up"
 msgstr "깨움"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:575
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
 msgid "LimeWire is waking up from sleep mode"
 msgstr "LimeWire가 sleeve 모드로부터 돌아오고있습니다."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:678
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:677
 msgid "Show Connection Quality"
 msgstr "접속 레벨 표시"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:694
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:693
 msgid "Show Shared Files Count"
 msgstr "공유 파일수 표시"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:710
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:709
 msgid "Show Language Status"
 msgstr "사용 언어 표시"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:731
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:730
 msgid "Show Firewall Status"
 msgstr "방화벽 표시"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:747
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:746
 msgid "Show Bandwidth Consumption"
 msgstr "사용 대역 표시"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:763
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:762
 msgid "Show Media Player"
 msgstr "미디어 플레이어"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:828
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:832
 #, java-format
-msgid "You are sharing {0} files"
-msgstr "공유하고 있는 파일의 수 {0} 파일"
+msgid "You are sharing {0} file"
+msgid_plural "You are sharing {0} files"
+msgstr[0] ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:895
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:835
+#, java-format
+msgid "You are sharing {0} file (Loading...)"
+msgid_plural "You are sharing {0} files (Loading...)"
+msgstr[0] ""
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
 msgstr "다운로드:"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:897
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:903
 msgid "Uploads:"
 msgstr "업로드:"
 
@@ -1811,9 +1717,9 @@ msgstr ""
 #, java-format
 msgid ""
 "Need more help? Visit <a href=\"{0}\">our message boards</a> and see if "
-"others have already answered your question! You can also review the <a href="
-"\"{1}\">FAQ</a> for answers to commonly asked questions or the <a href=\"{2}"
-"\">User Guide</a> for more information."
+"others have already answered your question! You can also review the <a "
+"href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
+"href=\"{2}\">User Guide</a> for more information."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
@@ -1827,8 +1733,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
 msgid ""
-"Do you have a tip for effectively using LimeWire? Add it to <a href=\"{0}"
-"\">the wiki</a> and it may make it into future Tips of the Day!"
+"Do you have a tip for effectively using LimeWire? Add it to <a "
+"href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
@@ -1856,8 +1762,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 #, java-format
 msgid ""
-"Want to know more about the development of LimeWire? Visit <a href=\"{0}"
-"\">LimeWire's open-source website</a> and look around!"
+"Want to know more about the development of LimeWire? Visit <a "
+"href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
@@ -1933,9 +1839,9 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, java-format
 msgid ""
-"Did you know LimeWire is completely open-source? Visit <a href=\"{0}\">www."
-"limewire.org</a> for information on how to join developer mailing lists or "
-"to review the code."
+"Did you know LimeWire is completely open-source? Visit <a "
+"href=\"{0}\">www.limewire.org</a> for information on how to join developer "
+"mailing lists or to review the code."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
@@ -2575,8 +2481,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
 msgid ""
-"Set LimeWire to be your default program for opening magnet links and ."
-"torrent files for the smoothest experience using LimeWire with the web. Go "
+"Set LimeWire to be your default program for opening magnet links and "
+".torrent files for the smoothest experience using LimeWire with the web. Go "
 "to Tools &gt; Options &gt; Advanced &gt; File Associations. "
 msgstr ""
 
@@ -2637,7 +2543,7 @@ msgstr "LimeWire의 신버젼이 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:156
 msgid "Update Now"
-msgstr "지금 업데이트 "
+msgstr "지금 업데이트"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:159
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:192
@@ -2650,9 +2556,8 @@ msgid ""
 "update now, LimeWire will update automatically when you close. Would you "
 "like to update now?"
 msgstr ""
-"LimeWire는 업데이트를 설치하려면 재시작이 필요합니다. 지금 업데이트 하지 않는"
-"다면, LimeWire는 유저가 종료시킨후 자동적으로 업데이트하게 됩니다. 지금 업데"
-"이트 하시겠습니까?"
+"LimeWire는 업데이트를 설치하려면 재시작이 필요합니다. 지금 업데이트 하지 않는다면, LimeWire는 유저가 종료시킨후 자동적으로 "
+"업데이트하게 됩니다. 지금 업데이트 하시겠습니까?"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:170
 msgid "Update Ready"
@@ -2660,7 +2565,7 @@ msgstr "업데이트의 준비 완료"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:189
 msgid "Update Later"
-msgstr "다음에 업데이트 "
+msgstr "다음에 업데이트"
 
 #: gui/com/limegroup/gnutella/gui/UpdatePanel.java:20
 #: gui/com/limegroup/gnutella/gui/UpdatePanel.java:38
@@ -2677,9 +2582,8 @@ msgid ""
 "love the improved performance of PRO. Thank you for helping keep the "
 "Internet open by running LimeWire."
 msgstr ""
-"최적화된 다운로드를 하려면 , LimeWire PRO를 구입해 주세요. 퍼포먼스의 향상"
-"을, 마음에 들어 받을 수 있는 것을 보증합니다.  LimeWire를 사용하는 것으로, 인"
-"터넷에 공헌해 주셔, 감사합니다."
+"최적화된 다운로드를 하려면 , LimeWire PRO를 구입해 주세요. 퍼포먼스의 향상을, 마음에 들어 받을 수 있는 것을 보증합니다.  "
+"LimeWire를 사용하는 것으로, 인터넷에 공헌해 주셔, 감사합니다."
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:66
 msgid "Upgrade to LimeWire PRO?"
@@ -2696,9 +2600,8 @@ msgid ""
 "include support for scroll-wheels on mice, a Windows XP look, and many other "
 "improvements."
 msgstr ""
-"LimeWire가 유저가 낡은 버젼의 Java를 사용하고 있는 것을 감지했습니다. "
-"LimeWire는 새로운 버젼의 Java로 보다 좋고 외관 작동합니다. 특징으로서는, 마우"
-"스의 스크롤 휠을 지지, 윈도우즈 XP의 볼품, 그 외 많은 개량점이 있습니다."
+"LimeWire가 유저가 낡은 버젼의 Java를 사용하고 있는 것을 감지했습니다. LimeWire는 새로운 버젼의 Java로 보다 좋고 "
+"외관 작동합니다. 특징으로서는, 마우스의 스크롤 휠을 지지, 윈도우즈 XP의 볼품, 그 외 많은 개량점이 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:76
 msgid "Would you like to get your free Java upgrade?"
@@ -2747,14 +2650,14 @@ msgstr ""
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
-msgstr ""
-"LimeWire이 파손된 파일을 감지하였습니다 {0} 다운로드를 계속하시겠습니까?"
+msgstr "LimeWire이 파손된 파일을 감지하였습니다 {0} 다운로드를 계속하시겠습니까?"
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:649
 msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
-"b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
-"limewire.com</a> and download the newest official version of LimeWire.</html>"
+"<html><b>Your LimeWire may have been corrupted by a virus or "
+"trojan!</b><br><br>Please visit <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
+"the newest official version of LimeWire.</html>"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:33
@@ -2774,9 +2677,7 @@ msgstr "선택 파일의 마그넷 링크를 클립보드에 복사"
 msgid ""
 "One or more of the created magnet links may not be accessible since their "
 "hosts are firewalled."
-msgstr ""
-"작성된 마그넷 링크의 하나 또는 그 이상은, 호스트가 방화벽을 작동하고 있으므"
-"로 접속하지 못할 수 있습니다."
+msgstr "작성된 마그넷 링크의 하나 또는 그 이상은, 호스트가 방화벽을 작동하고 있으므로 접속하지 못할 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:37
 msgid "C&onnect"
@@ -2849,9 +2750,8 @@ msgid "Search for: {0}"
 msgstr "{0}을 검색"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:31
-#, java-format
-msgid "Search \"What''s New\" for: {0}"
-msgstr "\"새로운 정보\"검색： {0}"
+msgid "Search \"What's New\" for: {0}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:48
 #, java-format
@@ -2889,7 +2789,7 @@ msgstr "윈도우를 열어 공유할 새로운 폴더를 선택할 수 있습�
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:50
 msgid "Block Host"
 msgstr "호스트 차단"
@@ -2897,7 +2797,7 @@ msgstr "호스트 차단"
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:56
 msgid "Send Message"
 msgstr "메시지 송신"
@@ -2905,15 +2805,15 @@ msgstr "메시지 송신"
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:62
 msgid "Block Current Host"
-msgstr "현재의 호스트 차단 "
+msgstr "현재의 호스트 차단"
 
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:68
 msgid "Send a Message to a Host"
 msgstr "호스트에게 메시지 송신"
@@ -3097,7 +2997,7 @@ msgstr "호스트："
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the port text field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:377
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:54
 #, fuzzy
@@ -3348,7 +3248,7 @@ msgstr "프로그램"
 
 #. *
 #. * The resource to use for the speed property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:404
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:313
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
@@ -3463,9 +3363,7 @@ msgstr "스킨을 적용 (&A)"
 msgid ""
 "You have downloaded a new skin titled {0}. Would you like to use this new "
 "skin?"
-msgstr ""
-"타이틀 첨부된 새로운 스킨을 다운로드했습니다.{0}\"이 새로운 스킨을 사용하겠습"
-"니까?"
+msgstr "타이틀 첨부된 새로운 스킨을 다운로드했습니다.{0}\"이 새로운 스킨을 사용하겠습니까?"
 
 #. could not read torrent file or bad torrent file.
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:455
@@ -3521,7 +3419,7 @@ msgstr "미리보기"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:809
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:922
 msgid "Preview Selected Downloads"
-msgstr "선택한 다운로드를 미리보기 "
+msgstr "선택한 다운로드를 미리보기"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:877
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:46
@@ -3651,9 +3549,7 @@ msgstr "다운로드 취소"
 msgid ""
 "LimeWire may not be able to start the download you have selected unless you "
 "start a search for it."
-msgstr ""
-"LimeWire는 검색을 실행하지 않는다면 선택한 다운로드된 파일을 실행 할 수 없을 "
-"것입니다."
+msgstr "LimeWire는 검색을 실행하지 않는다면 선택한 다운로드된 파일을 실행 할 수 없을 것입니다."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:185
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1020
@@ -3747,9 +3643,7 @@ msgstr "설정 완료"
 msgid ""
 "Your LimeWire setup has successfully completed. Please press the \"Finish\" "
 "button to begin using LimeWire."
-msgstr ""
-"설정이 성공적으로 저장되었습니다. \"완료\"버튼을 눌러 LimeWire를 사용해 주세"
-"요."
+msgstr "설정이 성공적으로 저장되었습니다. \"완료\"버튼을 눌러 LimeWire를 사용해 주세요."
 
 #: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:22
 msgid "Firewall Setup"
@@ -3761,9 +3655,8 @@ msgid ""
 "security warnings appear, please unblock LimeWire and choose to remember the "
 "setting. Your firewall software may look different than the below picture."
 msgstr ""
-"LimeWire는 인터넷에 최적화된 접속을 하려고 합니다. 만약 방화벽이나 보안안내창"
-"이 나타나면, LimeWire를 막지마시고 세팅방법을 기억해두십시오. 당신이 사용하"
-"는 방화벽 프로그램이 아래의 그림과 다를 수 있습니다."
+"LimeWire는 인터넷에 최적화된 접속을 하려고 합니다. 만약 방화벽이나 보안안내창이 나타나면, LimeWire를 막지마시고 세팅방법을 "
+"기억해두십시오. 당신이 사용하는 방화벽 프로그램이 아래의 그림과 다를 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/init/LanguageWindow.java:50
 msgid "Language Options"
@@ -3788,9 +3681,7 @@ msgstr "폴더："
 msgid ""
 "Please choose a folder where you would like your files to be downloaded. "
 "This folder will also be shared with other gnutella users by default."
-msgstr ""
-"다운로드한 파일을 다른 이름으로 저장하는 폴더를 선택해 주세요. 이 폴더는 초기"
-"설정으로 다른 그누테라 유저와 공유됩니다."
+msgstr "다운로드한 파일을 다른 이름으로 저장하는 폴더를 선택해 주세요. 이 폴더는 초기설정으로 다른 그누테라 유저와 공유됩니다."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:68
 msgid "Save Folder:"
@@ -3800,9 +3691,7 @@ msgstr "폴더："
 msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
 "a different folder."
-msgstr ""
-"LimeWire는 지정한 폴더로 파일 다른 이름으로 저장 불가합니다. 다른 폴더를 지정"
-"해주세요."
+msgstr "LimeWire는 지정한 폴더로 파일 다른 이름으로 저장 불가합니다. 다른 폴더를 지정해주세요."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:126
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:87
@@ -3838,23 +3727,19 @@ msgid ""
 "would like to share one of these folders, simply check its associated "
 "checkbox. Subfolders of shared folders will also be shared."
 msgstr ""
-"공유 후보의 폴더가 아래와 같이 발견되었습니다. 이 중의 하나를 공유하고 싶으"
-"면 체크 박스를 선택하시고, 이경우 선택된 폴더의 서브 폴더도 같이 공유됩니다."
+"공유 후보의 폴더가 아래와 같이 발견되었습니다. 이 중의 하나를 공유하고 싶으면 체크 박스를 선택하시고, 이경우 선택된 폴더의 서브 "
+"폴더도 같이 공유됩니다."
 
 #: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:61
 msgid ""
 "LimeWire was unable to locate any files that may be shared. To continue "
 "configuring LimeWire, click \"Next\"."
-msgstr ""
-"공유 가능한 파일이 발견되지 않았습니다. 설정을 계속하려면 ,\"다음\"을 클릭해 "
-"주세요."
+msgstr "공유 가능한 파일이 발견되지 않았습니다. 설정을 계속하려면 ,\"다음\"을 클릭해 주세요."
 
 #: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:72
 #, fuzzy
 msgid "The selected folders below (and their subfolders) will be shared."
-msgstr ""
-"파일 공유 폴더에 문제가 있습니다. 다른 폴더를 사용하거나 초기설정으로 복구하"
-"십시오."
+msgstr "파일 공유 폴더에 문제가 있습니다. 다른 폴더를 사용하거나 초기설정으로 복구하십시오."
 
 #: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:33
 msgid "Scan for Files"
@@ -3866,8 +3751,7 @@ msgid ""
 "files? You will have the opportunity to specify which folders you would like "
 "to share when the scan is complete."
 msgstr ""
-"LimeWire가 하드 디스크내에 있는 미디어 파일을 검색하도록 하겠습니까? 검색하"
-"면 공유하고 싶은 폴더를 간단하게 선택할 수 있습니다."
+"LimeWire가 하드 디스크내에 있는 미디어 파일을 검색하도록 하겠습니까? 검색하면 공유하고 싶은 폴더를 간단하게 선택할 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:51
 msgid "Scan Hard Drive?"
@@ -3911,9 +3795,8 @@ msgid ""
 "what type of Internet connection you have, or if your connection type is not "
 "listed, simply select whichever one seems the most appropriate."
 msgstr ""
-"인터넷 접속 회선의 속도를 선택해 주세요. 네트워크의 퍼포먼스를 최적화하기 위"
-"해서 이 속도의 올바른 설정이 중요합니다. 만약 사용의 접속 회선이 분명히 모르"
-"는지, 리스트상에 없는 경우는 단지 어떤 것이나 적당한 1개를 선택해 주세요."
+"인터넷 접속 회선의 속도를 선택해 주세요. 네트워크의 퍼포먼스를 최적화하기 위해서 이 속도의 올바른 설정이 중요합니다. 만약 사용의 접속 "
+"회선이 분명히 모르는지, 리스트상에 없는 경우는 단지 어떤 것이나 적당한 1개를 선택해 주세요."
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:48
 msgid "Select Speed"
@@ -3931,8 +3814,8 @@ msgid ""
 "Would you like LimeWire to start when you log into your computer? This will "
 "cause LimeWire to start faster when you use it later."
 msgstr ""
-"컴퓨터에 로그인했을 때에, LimeWire를 자동적으로 시작시킵니까? 이것에 의해 "
-"LimeWire를 시작시키는 것은 다음에보다 빠르게 할 수 있습니다."
+"컴퓨터에 로그인했을 때에, LimeWire를 자동적으로 시작시킵니까? 이것에 의해 LimeWire를 시작시키는 것은 다음에보다 빠르게 할 "
+"수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:39
 msgid "Start Automatically"
@@ -3968,16 +3851,15 @@ msgid ""
 "features that require your configuration. LimeWire will guide you through a "
 "series of steps to configure these new features."
 msgstr ""
-"LimeWire 설정 위저드에 어서 오십시오. LimeWire는 신기능에 대응한 설정이 필요"
-"합니다. 이러한 신기능의 설정을 일련의 스텝을 통해 안내합니다."
+"LimeWire 설정 위저드에 어서 오십시오. LimeWire는 신기능에 대응한 설정이 필요합니다. 이러한 신기능의 설정을 일련의 스텝을 "
+"통해 안내합니다."
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:22
 msgid ""
 "Welcome to the LimeWire setup wizard. LimeWire will guide you through a "
 "series of steps to configure LimeWire for optimum performance."
 msgstr ""
-"LimeWire 설정 위저드에 어서 오십시오. LimeWire를 쾌적하게 사용 받기 위한 조정"
-"을, 일련의 스텝을 통해 안내합니다."
+"LimeWire 설정 위저드에 어서 오십시오. LimeWire를 쾌적하게 사용 받기 위한 조정을, 일련의 스텝을 통해 안내합니다."
 
 #: gui/com/limegroup/gnutella/gui/library/IncompleteDirectoryHolder.java:15
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:20
@@ -3993,25 +3875,13 @@ msgstr "라이브러리 윈도우를 불러오는 중..."
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:122
 msgid ""
 "The selected folder cannot be shared.  Please select another folder to share."
-msgstr ""
-"파일 공유 폴더에 문제가 있습니다. 다른 폴더를 사용하거나 초기설정으로 복구하"
-"십시오."
+msgstr "파일 공유 폴더에 문제가 있습니다. 다른 폴더를 사용하거나 초기설정으로 복구하십시오."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:366
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:371
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:937
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:936
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr "LimeWire의 옵션으로 공유하는 폴더를 설정할 수 있습니다"
-
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:369
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:934
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
-#, fuzzy
-msgid "Sharing"
-msgstr "접속 실행"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:370
 msgid "Configure..."
@@ -4035,12 +3905,12 @@ msgstr "검색 수"
 msgid ""
 "Your search must be at least three characters long to avoid too many "
 "meaningless results."
-msgstr ""
-"네트워크의 혼잡을 피하기 위해서, 검색은 최저 세자 이상으로 입력해야합니다."
+msgstr "네트워크의 혼잡을 피하기 위해서, 검색은 최저 세자 이상으로 입력해야합니다."
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:83
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:388
-msgid "Your search is too long. Please make your search smaller and try again."
+msgid ""
+"Your search is too long. Please make your search smaller and try again."
 msgstr "검색이 너무 길므로, 검색을 소규모로 해 재시행"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:28
@@ -4083,6 +3953,14 @@ msgstr "위치"
 msgid "Last Modified"
 msgstr "수정일："
 
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
+#, fuzzy
+msgid "Sharing"
+msgstr "접속 실행"
+
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:278
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:307
@@ -4116,13 +3994,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:969
 msgid ""
 "Unable to rename the file '{0}'. It may be in use by another application."
-msgstr ""
-"다음의 파일의 명칭 변경을 할 수 없습니다 {0} 다른 어플리케이션으로, 사용되어 "
-"있을지도 모르다"
+msgstr "다음의 파일의 명칭 변경을 할 수 없습니다 {0} 다른 어플리케이션으로, 사용되어 있을지도 모르다"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1028
 #, java-format
-msgid "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
+msgid ""
+"The file \"{0}\" is not a valid incomplete file and cannot be resumed."
 msgstr "이 파일은 유효한 {0} 불완전 파일이 아니기에 재개할 수 없습니다."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1244
@@ -4331,12 +4208,6 @@ msgstr "파일 (&F)"
 msgid "Filter&s"
 msgstr "필터"
 
-#: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:17
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
-#, fuzzy
-msgid "Content"
-msgstr "HTTP 내용"
-
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:18
 msgid "&Configure Content Filters"
 msgstr "내용 필터 구성"
@@ -4379,7 +4250,7 @@ msgstr "게시판"
 
 #: gui/com/limegroup/gnutella/gui/menu/HelpMenu.java:52
 msgid "Access the LimeWire Users' Forum"
-msgstr "LimeWire의 유저 게시판 접속 "
+msgstr "LimeWire의 유저 게시판 접속"
 
 #: gui/com/limegroup/gnutella/gui/menu/HelpMenu.java:71
 msgid "Tip of the &Day"
@@ -4419,7 +4290,7 @@ msgstr "자원 (&R)"
 
 #: gui/com/limegroup/gnutella/gui/menu/ResourcesMenu.java:23
 msgid "LimeWire &PRO"
-msgstr "LimeWire &PRO "
+msgstr "LimeWire &PRO"
 
 #: gui/com/limegroup/gnutella/gui/menu/ResourcesMenu.java:24
 msgid "Display the LimeWire PRO Website"
@@ -4427,7 +4298,7 @@ msgstr "LimeWire PRO 웹 사이트를 표시"
 
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:28
 msgid "Result &Filters"
-msgstr "결과의 필터 "
+msgstr "결과의 필터"
 
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:29
 msgid "Show Search Result Filters"
@@ -4435,7 +4306,7 @@ msgstr "검색 결과의 필터를 표시"
 
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:32
 msgid "&MagnetMix"
-msgstr "마그넷 믹스 "
+msgstr "마그넷 믹스"
 
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:33
 msgid "Show Magnetmix Button"
@@ -4516,36 +4387,37 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:59
 msgid "C&hange Language"
-msgstr "언어를 변경 "
+msgstr "언어를 변경"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:60
 msgid "Select your Language Prefereces"
 msgstr "당신의 언어 제어판 선택"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
-msgid ". The file type is not recognized."
-msgstr "파일 형식을 인식할 수 없다"
+msgid "The file type is not recognized."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
-msgid ". The file cannot be found."
-msgstr "파일을 찾을 수 없다."
+msgid "The file cannot be found."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
-msgid ". The file is corrupt."
-msgstr "파일이 망가져 있습니다"
+msgid "The file is corrupt."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
-msgid ". There is an unknown error with the audio file."
-msgstr "음악 파일내에 불명한 에러가 있습니다"
+msgid "There is an unknown error with the audio file."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:164
-msgid ". The file cannot be parsed."
-msgstr "그 파일은 해석할 수 없다"
+msgid "The file cannot be parsed."
+msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:169
-#, fuzzy, java-format
-msgid "LimeWire cannot play the file {0}. {1}"
-msgstr "LimeWire는 파일\"{0}\"을 공유할 수 없습니다."
+#. {0}: filename, {1} cause of error (e.g. The file is corrupt.)
+#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:170
+#, java-format
+msgid "LimeWire cannot play the file {0}: {1}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:93
 msgid "Play"
@@ -4557,11 +4429,11 @@ msgstr "정지"
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:112
 msgid "Next"
-msgstr "다음 "
+msgstr "다음"
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:118
 msgid "Previous"
-msgstr "이전 "
+msgstr "이전"
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:164
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:332
@@ -4699,6 +4571,11 @@ msgstr ""
 msgid "Filters"
 msgstr "필터"
 
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+#, fuzzy
+msgid "Content"
+msgstr "HTTP 내용"
+
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:254
@@ -4763,13 +4640,13 @@ msgstr "호스트를 허가"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AllowMessagesPaneItem.java:28
 msgid ""
-"You can allow messages from specific hosts by adding their IP addresses (e."
-"g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
+"You can allow messages from specific hosts by adding their IP addresses "
+"(e.g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
 "\"192.168.12.16/28\") to the allow list. This list is only needed to "
 "override the banned list."
 msgstr ""
-"IP주소를 허가 리스트에 입력하는 것으로, 특정의 호스트로부터의 메시지를 허가"
-"할 수 있습니다. 이 리스트는 무시 리스트에 추가하는 경우에게만 필요. \n"
+"IP주소를 허가 리스트에 입력하는 것으로, 특정의 호스트로부터의 메시지를 허가할 수 있습니다. 이 리스트는 무시 리스트에 추가하는 "
+"경우에게만 필요. \n"
 "예 \"192.168. 0.1\" \"192. *. *. *\" \"192.168. 12.16/255. 255.255. 240\" "
 "\"192.168. 12.16/28\""
 
@@ -4802,7 +4679,7 @@ msgstr "어느 오디오 플레이어를 사용할지 선택할 수 있습니다
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:30
 msgid "Audio Player"
 msgstr "오디오 플레이어"
@@ -4859,7 +4736,7 @@ msgstr "사용할 브라우저를 선택할 수 있습니다"
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:36
 msgid "Browser"
 msgstr "브라우저"
@@ -4873,12 +4750,10 @@ msgid ""
 "approval before sending a bug to the bug server. Choosing 'Always Discard "
 "All Errors' will cause LimeWire to ignore all bugs (this is not recommended)."
 msgstr ""
-"버그 리포트의 송신 방법 선택할 수 있습니다. \"예시 보기\"을 클릭하면 버그 리"
-"포트의 예를 볼 수 있습니다. 또\"항상 즉시 송신\"을 선택하면, 자동적으로 버그 "
-"리포트를 LimeWire의 버그 서버에 송신. 한편\"항상 재검토를 요구\"를 선택하면, "
-"에러가 일어났을 때 그 에러가 표시되고 송신할지 선택할 수 있습니다. \"항상 모"
-"든 에러를 삭제\"를 선택하면, 에러를 삭제해 모든 버그를 무시하게 됩니다. (이 "
-"설정은 추천하지 않습니다.)"
+"버그 리포트의 송신 방법 선택할 수 있습니다. \"예시 보기\"을 클릭하면 버그 리포트의 예를 볼 수 있습니다. 또\"항상 즉시 "
+"송신\"을 선택하면, 자동적으로 버그 리포트를 LimeWire의 버그 서버에 송신. 한편\"항상 재검토를 요구\"를 선택하면, 에러가 "
+"일어났을 때 그 에러가 표시되고 송신할지 선택할 수 있습니다. \"항상 모든 에러를 삭제\"를 선택하면, 에러를 삭제해 모든 버그를 "
+"무시하게 됩니다. (이 설정은 추천하지 않습니다.)"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:43
 msgid "View Example"
@@ -4908,9 +4783,7 @@ msgstr "시작시 접속"
 msgid ""
 "You can choose whether or not to automatically connect to the network when "
 "the application starts up."
-msgstr ""
-"어플리케이션의 시작시에, 자동적으로 네트워크에 접속할것인지 선택할 수 있습니"
-"다."
+msgstr "어플리케이션의 시작시에, 자동적으로 네트워크에 접속할것인지 선택할 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:28
 msgid "Connect on Startup:"
@@ -4994,11 +4867,11 @@ msgid ""
 "You can share your Music on the Local Area Network and make it accessible "
 "for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players."
 msgstr ""
-"로컬 네트워크상에서 음악을 공유해, iTunes 나 다른 Digital Audio Access "
-"Protocol(DAAP)에 대응한 플레이어로, 접속을 허가할 수가 있습니다. \n"
+"로컬 네트워크상에서 음악을 공유해, iTunes 나 다른 Digital Audio Access Protocol(DAAP)에 대응한 "
+"플레이어로, 접속을 허가할 수가 있습니다. \n"
 "\n"
-"도 해 iTunes 로 문제가 있는 경우는, 호환 모드를 사용하십시오. 이 모드는 많은 "
-"자원을 소비해 늦어지지만, 문제를 해결할지도 모릅니다."
+"도 해 iTunes 로 문제가 있는 경우는, 호환 모드를 사용하십시오. 이 모드는 많은 자원을 소비해 늦어지지만, 문제를 해결할지도 "
+"모릅니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:23
 msgid "Share My Music:"
@@ -5068,8 +4941,8 @@ msgid ""
 "Out-Of-Band Searching results in faster result delivery to your client, "
 "though some internet connections may not work well with this feature."
 msgstr ""
-"Out-Of-Band 검색을 사용하는 것에 의해, 검색 결과가 보다 빠르게 전송됩니다.. "
-"그러나, 일부의 인터넷 접속은 이 기능을 사용할 수 없는 것이 있습니다."
+"Out-Of-Band 검색을 사용하는 것에 의해, 검색 결과가 보다 빠르게 전송됩니다.. 그러나, 일부의 인터넷 접속은 이 기능을 사용할 "
+"수 없는 것이 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:28
 msgid "Enable OOB Searching:"
@@ -5100,9 +4973,7 @@ msgstr "다운로드를 지움"
 msgid ""
 "You can choose whether to be warned about downloading a file without a "
 "license."
-msgstr ""
-"라이센스 없는 파일을 다운로드하는 것에 대하여, 알려줄 것인지 선택할 수 있습니"
-"다"
+msgstr "라이센스 없는 파일을 다운로드하는 것에 대하여, 알려줄 것인지 선택할 수 있습니다"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:29
 msgid "Show License Warning:"
@@ -5139,7 +5010,7 @@ msgstr "공유하고 싶은 파일의 확장자(extension)를 선택할 수 있�
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:34
 msgid "Extensions:"
 msgstr "확장자(extension)："
@@ -5164,11 +5035,9 @@ msgid ""
 "support UPnP, LimeWire can be set to advertise an external port manually. "
 "(You must also configure your router if you choose manual configuration.)"
 msgstr ""
-"LimeWire는 방화벽 또는 라우터환경에서 작동할 수 있습니다. 유니버설 플러그 인 "
-"플레이(UpnP)를 이용해, LimeWire는 자동적으로 유저의 라우터 또는 방화벽에 대"
-"해, 최고의 퍼포먼스를 구성할 수 있습니다. 만약 사용중인 라우터가 UpnP를 서포"
-"트하지 않는 경우는, LimeWire에서 외부 포트를 변경시킬 수 있습니다. (수동 구성"
-"을 선택하려면, 라우터의 구성을 설정할 필요가 있습니다. )"
+"LimeWire는 방화벽 또는 라우터환경에서 작동할 수 있습니다. 유니버설 플러그 인 플레이(UpnP)를 이용해, LimeWire는 "
+"자동적으로 유저의 라우터 또는 방화벽에 대해, 최고의 퍼포먼스를 구성할 수 있습니다. 만약 사용중인 라우터가 UpnP를 서포트하지 않는 "
+"경우는, LimeWire에서 외부 포트를 변경시킬 수 있습니다. (수동 구성을 선택하려면, 라우터의 구성을 설정할 필요가 있습니다. )"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:48
 msgid "Use UPnP (Recommended)"
@@ -5197,8 +5066,7 @@ msgid ""
 "(e.g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
 "\"192.168.12.16/28\") to the banned list."
 msgstr ""
-"IP 주소를 무시 리스트에 입력하는 것으로, 특정의 호스트로부터의 메시지를 무시"
-"할 수 있습니다. \n"
+"IP 주소를 무시 리스트에 입력하는 것으로, 특정의 호스트로부터의 메시지를 무시할 수 있습니다. \n"
 "예 \"192.168. 0.1\" \"192. *. *. *\" \"192.168. 12.16/255. 255.255. 240\" "
 "\"192.168. 12.16/28\""
 
@@ -5213,7 +5081,7 @@ msgstr "필터를 걸치는 검색 결과의, 일반적인 형식을 지정할 �
 #. *
 #. * Key for the locale-specifis string for the adult content check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:49
 msgid "Ignore Adult Content"
 msgstr "성인 컨텐츠를 무시"
@@ -5221,7 +5089,7 @@ msgstr "성인 컨텐츠를 무시"
 #. *
 #. * Key for the locale-specifis string for the html file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:55
 msgid "Ignore .htm/.html Files"
 msgstr ".htm/.html 파일을 무시"
@@ -5229,14 +5097,14 @@ msgstr ".htm/.html 파일을 무시"
 #. *
 #. * Key for the locale-specifis string for the vbs file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:61
 msgid "Ignore .vbs Files"
 msgstr ".vbs 파일을 무시"
 
 #. *
 #. * Key for the locale-specific string for the wmv and asf file check box label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:66
 #, fuzzy
 msgid "Ignore .wmv/.asf files"
@@ -5262,7 +5130,7 @@ msgstr "어느 이미지 viewer를 사용할지 선택할 수 있습니다."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:36
 msgid "Image Viewer"
 msgstr "이미지 viewer"
@@ -5274,8 +5142,8 @@ msgstr "우선하는 지역"
 #: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:20
 msgid "You can choose to preference hosts using the same language as you."
 msgstr ""
-"같은 지역으로서 신고하고 있는 호스트에게 접속하는 수를 선택할 수 있습니다. 우"
-"선하는 접속의 수가 많아지면(자), 네트워크에 접속하는데 시간이 걸린다."
+"같은 지역으로서 신고하고 있는 호스트에게 접속하는 수를 선택할 수 있습니다. 우선하는 접속의 수가 많아지면(자), 네트워크에 접속하는데 "
+"시간이 걸린다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:23
 msgid "Turn preferencing on:"
@@ -5293,7 +5161,7 @@ msgstr "최고 동시 다운로드수를 설정할 수 있습니다"
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:28
 msgid "Maximum Downloads:"
 msgstr "최고 다운로드수："
@@ -5311,7 +5179,7 @@ msgstr "병행해 실시할 수 있는 대검찰청색수를 설정할 수 있�
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:28
 msgid "Maximum Searches:"
 msgstr "대검찰청색수："
@@ -5324,15 +5192,13 @@ msgstr "최고 업로드 슬롯"
 msgid ""
 "Never allow more than this many uploads. This value will only be reached if "
 "you have enough bandwidth."
-msgstr ""
-"더 이상의 업로드수를 허가하지 않습니다. 그 때문에 충분한 처리 능력을 사용하"
-"는 경우만 이 수치에 이를 수 있습니다."
+msgstr "더 이상의 업로드수를 허가하지 않습니다. 그 때문에 충분한 처리 능력을 사용하는 경우만 이 수치에 이를 수 있습니다."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:28
 msgid "Max Upload Slots:"
 msgstr "최고 업로드 슬롯："
@@ -5348,8 +5214,8 @@ msgid ""
 "to the selected folder. LimeWire will revert to your previously selected "
 "folder."
 msgstr ""
-"선택한 저장폴더에 문제가 있습니다. 선택된 폴더에 쓰기 접근권한이 없을 가능성"
-"있습니다. LimeWire는 이전에 선택된 폴더로 복구될 것입니다."
+"선택한 저장폴더에 문제가 있습니다. 선택된 폴더에 쓰기 접근권한이 없을 가능성있습니다. LimeWire는 이전에 선택된 폴더로 복구될 "
+"것입니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:202
 msgid "Open Dialog to Select a Folder"
@@ -5424,7 +5290,7 @@ msgstr "일인당 이만큼의 업로드를 허가"
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:28
 msgid "Uploads Per Person:"
 msgstr "일인당 업로드수："
@@ -5439,8 +5305,8 @@ msgid ""
 "The media player and playlist will appear only if this option is set. A "
 "restart will be required when enabling or disabling the media controls."
 msgstr ""
-"LimeWire 또는 시스템 초기설정의 플레이어를 사용할 수 있습니다. 또, 플레이어"
-"의 컨트롤을 작동/종료하려면 LimeWire를 재시작해야 합니다."
+"LimeWire 또는 시스템 초기설정의 플레이어를 사용할 수 있습니다. 또, 플레이어의 컨트롤을 작동/종료하려면 LimeWire를 "
+"재시작해야 합니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:28
 msgid "Use LimeWire Media Player:"
@@ -5450,9 +5316,7 @@ msgstr "LimeWire MP3 플레이어를 사용："
 msgid ""
 "Redisplay messages for which you have chosen 'Do not display this message "
 "again' or 'Always use this answer'."
-msgstr ""
-"\"다음부터 이 메시지를 표시하지 않음\" 또는 \"항상 이 내용을 적용\"과 설정된 "
-"메시지를 다시보여줌"
+msgstr "\"다음부터 이 메시지를 표시하지 않음\" 또는 \"항상 이 내용을 적용\"과 설정된 메시지를 다시보여줌"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:28
 msgid "Revert to Default:"
@@ -5469,16 +5333,14 @@ msgid ""
 "your system, or if a specific port number is required by the configuration "
 "of your firewall to direct incoming connections to your host."
 msgstr ""
-"내향의 접속을 기다리는 로컬 네트워크의 포트를 설정할 수 있습니다. 시스템상의 "
-"타서비스와 충돌 할 때 이외는, 자유롭게 포트를 변경할 수 있습니다. 혹은 내향 "
-"접속으로 호스트에 연결하려면, 방화벽의 설정으로 인하여 특정 포트 번호가 필요"
-"합니다.."
+"내향의 접속을 기다리는 로컬 네트워크의 포트를 설정할 수 있습니다. 시스템상의 타서비스와 충돌 할 때 이외는, 자유롭게 포트를 변경할 수 "
+"있습니다. 혹은 내향 접속으로 호스트에 연결하려면, 방화벽의 설정으로 인하여 특정 포트 번호가 필요합니다.."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:31
 msgid "Listen on Port:"
 msgstr "다음의 포트 기다림："
@@ -5532,7 +5394,7 @@ msgstr "HTTP"
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the proxy host field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:48
 msgid "Proxy:"
 msgstr "프록시"
@@ -5545,7 +5407,7 @@ msgstr "다운로드 미완성 파일을 자동적으로 삭제할 수 있습니
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:29
 msgid "Days to Keep Incomplete Files:"
 msgstr "미완성 파일을 보관 유지하는 날짜："
@@ -5558,14 +5420,14 @@ msgstr "파일저장을 위해 다른 이름 폴더를 선택할 수 있습니�
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for this
 #. * <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:45
 msgid "Folder:"
 msgstr "폴더："
 
 #. *
 #. *  The mediator's description label id.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:69
 msgid "You can specify a download location for each media type."
 msgstr "각 미디어의 종류에 맞추어, 다운로드 위치를 정할 수 있습니다"
@@ -5575,18 +5437,13 @@ msgstr "각 미디어의 종류에 맞추어, 다운로드 위치를 정할 수 
 msgid ""
 "Invalid folder for saving files. Please use another folder or revert to the "
 "default."
-msgstr ""
-"파일저장 폴더에 문제가 있습니다. 다른 폴더를 사용거나 초기설정으로 되돌리세"
-"요."
+msgstr "파일저장 폴더에 문제가 있습니다. 다른 폴더를 사용거나 초기설정으로 되돌리세요."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:223
 msgid ""
 "Would you like to share your new save folders? The following new folders "
 "will be shared:"
-msgstr ""
-"새롭게 다른 이름으로 저장된 폴더를 공유하고 싶습니까? 아래의 새로운 폴더가 공"
-"유되는：:\n"
-"\n"
+msgstr "새롭게 다른 이름으로 저장된 폴더를 공유하고 싶습니까? 아래의 새로운 폴더가 공유되는：:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:21
 msgid "Search Result Quality"
@@ -5598,8 +5455,8 @@ msgid ""
 "results indicate that the host returning the result is not firewalled and "
 "has free upload slots."
 msgstr ""
-"표시하는 검색 결과의 접속 레벨을 선택할 수 있습니다. 또 4등 별은 방화벽이 설"
-"정되어 있지 않은 업로드 슬롯의 빈 곳이 있는 호스트를 나타냅니다."
+"표시하는 검색 결과의 접속 레벨을 선택할 수 있습니다. 또 4등 별은 방화벽이 설정되어 있지 않은 업로드 슬롯의 빈 곳이 있는 호스트를 "
+"나타냅니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:65
 msgid "Show Only Four Star Results"
@@ -5672,9 +5529,7 @@ msgstr ". torrent 파일 다운로드 중..."
 msgid ""
 "You can choose the folders for sharing files. Files in these folders are "
 "displayed in the library."
-msgstr ""
-"공유 파일의 폴더를 선택할 수 있습니다. 이러한 폴더내의 파일이 라이브러리에 표"
-"시됩니다."
+msgstr "공유 파일의 폴더를 선택할 수 있습니다. 이러한 폴더내의 파일이 라이브러리에 표시됩니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:30
 msgid "Shutdown Behavior"
@@ -5696,19 +5551,17 @@ msgstr "파일 전송 후에 종료"
 msgid "Minimize to System Tray"
 msgstr "시스템 트레이에 최소화함"
 
-#. TODO not title there
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
-#, fuzzy
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:19
 msgid "Start Upload Slots"
-msgstr "최소 업로드 슬롯："
+msgstr ""
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:22
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:29
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:28
 msgid "Start Upload Slots:"
 msgstr "최소 업로드 슬롯："
 
@@ -5737,15 +5590,13 @@ msgstr ""
 msgid ""
 "You can specify your connection speed so that LimeWire can optimize "
 "performance."
-msgstr ""
-"LimeWire 의 퍼포먼스 최적화를 위해서(때문에), 접속 속도를 지정할 수가 있습니"
-"다"
+msgstr "LimeWire 의 퍼포먼스 최적화를 위해서(때문에), 접속 속도를 지정할 수가 있습니다"
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:38
 msgid "Speed:"
 msgstr "속도："
@@ -5849,9 +5700,7 @@ msgstr "업로드 처리 능력"
 msgid ""
 "You can set the percentage of your bandwidth devoted to uploads. To turn off "
 "uploads, reduce your upload slots to zero."
-msgstr ""
-"업로드에 사용하는 처리 능력을 비율로 설정할 수 있습니다. 업로드를 정지하려면 "
-"업로드 슬롯을 0 으로 하면 됩니다."
+msgstr "업로드에 사용하는 처리 능력을 비율로 설정할 수 있습니다. 업로드를 정지하려면 업로드 슬롯을 0 으로 하면 됩니다."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:37
 msgid "Upload Speed:"
@@ -5869,7 +5718,7 @@ msgstr "어느 비디오 플레이어를 사용할지 선택할 수 있습니다
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:36
 msgid "Video Player"
 msgstr "비디오 플레이어"
@@ -5961,7 +5810,7 @@ msgstr "마그넷으로부터 다운로드를 계속 실행하겠습니까?"
 
 #. *
 #. * The resource to use for the vendor property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:48
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:82
 msgid "Vendor"
@@ -5982,10 +5831,8 @@ msgid ""
 "one type of content (music, video, etc...), you can narrow your search "
 "results by using the buttons above the text field."
 msgstr ""
-"LimeWire 사용을 시작하려면, 왼쪽의 텍스트 필드에 무엇인가 찾고 싶은 단어를 입"
-"력한 후, \"검색\" 버튼을 클릭하세요. 한 종류만의 컨텐츠(음악, 동영상 등)를 찾"
-"고 싶을 때는, 텍스트 필드아래에 있는 검색종류 버튼을 사용해 결과 내용을 분류"
-"할 수 있습니다."
+"LimeWire 사용을 시작하려면, 왼쪽의 텍스트 필드에 무엇인가 찾고 싶은 단어를 입력한 후, \"검색\" 버튼을 클릭하세요. 한 "
+"종류만의 컨텐츠(음악, 동영상 등)를 찾고 싶을 때는, 텍스트 필드아래에 있는 검색종류 버튼을 사용해 결과 내용을 분류할 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:211
 msgid "The Most Advanced File Sharing Program on the Planet!"
@@ -6103,21 +5950,18 @@ msgid ""
 "Enter the IP address of a friend you'd like to connect to, click 'Direct "
 "Connect', and LimeWire will try to browse the files of that user."
 msgstr ""
-"접속하고 싶은 상대의 친구의 IP주소를 입력해 \"다이렉트 접속\" 을 클릭해 주세"
-"요. 그러면, LimeWire가 유저의 파일 참조를 시도합니다."
+"접속하고 싶은 상대의 친구의 IP주소를 입력해 \"다이렉트 접속\" 을 클릭해 주세요. 그러면, LimeWire가 유저의 파일 참조를 "
+"시도합니다."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:360
 msgid "When your friends want to connect to you, they should enter"
-msgstr ""
-"만약 친구가 당신에게 접속하고 싶다면, 다음의 IP를 입력할 필요가 있습니다."
+msgstr "만약 친구가 당신에게 접속하고 싶다면, 다음의 IP를 입력할 필요가 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:365
 msgid ""
 "Your computer is behind a firewall or router and cannot receive direct "
 "connections."
-msgstr ""
-"당신의 컴퓨터에서는 방화벽 또는 라우터로 인하여 다이렉트 접속을 할 수 없습니"
-"다."
+msgstr "당신의 컴퓨터에서는 방화벽 또는 라우터로 인하여 다이렉트 접속을 할 수 없습니다."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:379
 msgid "Don't Know"
@@ -6131,8 +5975,7 @@ msgstr "무엇을 찾으면 좋을까?"
 msgid ""
 "A \"What's New\" search will search for files that have been recently added "
 "to the network."
-msgstr ""
-"\"새로운 정보\" 검색으로, 네트워크에 최근 추가된 파일을 검색할 수 있습니다."
+msgstr "\"새로운 정보\" 검색으로, 네트워크에 최근 추가된 파일을 검색할 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:398
 msgid "Current Search:"
@@ -6190,8 +6033,7 @@ msgstr "검색 윈도우를 불러오는 중..."
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
-msgstr ""
-"네트워크의 혼잡을 피하기 위해서, 검색은 최저 세자 이상으로 입력해야합니다."
+msgstr "네트워크의 혼잡을 피하기 위해서, 검색은 최저 세자 이상으로 입력해야합니다."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:391
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:395
@@ -6210,26 +6052,21 @@ msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
 msgstr ""
-"네트워크에 접속되고 있지 않습니다. 접속하려면 \"파일\" 메뉴로부터 \"접속\" "
-"을 선택해 주세요. 접속할 때까지는, 검색은 아무런 결과를 보여주지 않을 수 있습"
-"니다."
+"네트워크에 접속되고 있지 않습니다. 접속하려면 \"파일\" 메뉴로부터 \"접속\" 을 선택해 주세요. 접속할 때까지는, 검색은 아무런 "
+"결과를 보여주지 않을 수 있습니다."
 
 #. if attempting to connect, show another.
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:412
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
-msgstr ""
-"네트워크로 접속을 하고 있습니다. 네트워크에 완벽히 연결되기전이라 검색결과가 "
-"많지 않을 수 있습니다."
+msgstr "네트워크로 접속을 하고 있습니다. 네트워크에 완벽히 연결되기전이라 검색결과가 많지 않을 수 있습니다."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:707
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
-msgstr ""
-"선택한 파일중 하나가 바이러스를 포함하고 있는 듯하며 또한 실행될 수 있습니"
-"다. 정말 다운로드하시겠습니까?"
+msgstr "선택한 파일중 하나가 바이러스를 포함하고 있는 듯하며 또한 실행될 수 있습니다. 정말 다운로드하시겠습니까?"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:363
 #, java-format
@@ -6354,9 +6191,7 @@ msgstr "검색해 파일을 다운로드"
 msgid ""
 "The skin file you selected does not exist or is invalid. Please choose "
 "another file, or use the default."
-msgstr ""
-"선택한 스킨 파일은 존재하고 있지 않는지, 혹은 무효. 다른 파일을 선택할까 초기"
-"설정 스킨을 사용하는 것."
+msgstr "선택한 스킨 파일은 존재하고 있지 않는지, 혹은 무효. 다른 파일을 선택할까 초기설정 스킨을 사용하는 것."
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:112
 msgid "To try your new skin, you must restart LimeWire."
@@ -6370,8 +6205,7 @@ msgstr "쓸모없는 스킨"
 msgid ""
 "The skin you selected is out of date. Please download the latest version of "
 "the skin."
-msgstr ""
-"선택한 스킨의 유효기간이 지났습니다.  최신 버젼의 스킨을 다운로드하십시오."
+msgstr "선택한 스킨의 유효기간이 지났습니다.  최신 버젼의 스킨을 다운로드하십시오."
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:198
 msgid "Get New Skins"
@@ -6462,107 +6296,101 @@ msgstr "업로드 윈도우를 불러오는 중..."
 msgid "Seeding"
 msgstr "검색"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:35
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:36
 msgid "Invalid Filename"
 msgstr "쓸모없는 파일명"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:38
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:39
 msgid "Download Already Finished"
 msgstr "이미 다운로드 완료"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:41
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:42
 msgid "No Write Permission"
 msgstr "기입 금지"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:44
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:45
 msgid "Folder Does Not Exist"
 msgstr "폴더 없음"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:47
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:48
 msgid "File Already Exists"
 msgstr "기존 파일 있어"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:50
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:51
 msgid "Filename Taken"
 msgstr "파일명이 기존"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:53
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:54
 msgid "Not a Folder"
 msgstr "폴더는 아니다"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:56
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:57
 msgid "Not a File"
 msgstr "파일은 아니다"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:59
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:60
 msgid "Filesystem Error"
 msgstr "파일 시스템 에러"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:62
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:63
 msgid "Same File Already Being Downloaded"
 msgstr "같은 파일이 이미 다운로드되고 있습니다"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:86
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:87
 #, java-format
 msgid ""
 "Could not set file location to {0}, because the filename is invalid and may "
 "corrupt your system."
-msgstr ""
-"파일명에 이상이 있어 유저의 시스템을 문제를 야기할 수 있으므로, 파일 위치를"
-"{0}으로 설정할 수 없다"
+msgstr "파일명에 이상이 있어 유저의 시스템을 문제를 야기할 수 있으므로, 파일 위치를{0}으로 설정할 수 없다"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:89
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:90
 msgid "Could not set the file location, the download is already finished."
 msgstr "파일 위치를 설정하지 못하였으며, 다운로드는 이미 완료되었습니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:92
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:93
 #, java-format
 msgid ""
 "Could not save download to the folder {0}, because you do not have write "
 "access to it."
-msgstr ""
-"쓰기위해 접근할 수 없어서, 다운로드를 폴더{0}에 다른 이름으로 저장 불가합니"
-"다."
+msgstr "쓰기위해 접근할 수 없어서, 다운로드를 폴더{0}에 다른 이름으로 저장 불가합니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:96
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:97
 #, java-format
 msgid ""
 "Could not save download to folder {0}, because the folder does not exist."
-msgstr ""
-"폴더가 없기 때문에, 다운로드를 폴더 {0}에 다른 이름으로 저장할 수 없습니다."
+msgstr "폴더가 없기 때문에, 다운로드를 폴더 {0}에 다른 이름으로 저장할 수 없습니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:100
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:101
 #, java-format
 msgid "A file already exists at {0}."
 msgstr "이미 파일은{0}에 존재합니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:104
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:105
 #, java-format
 msgid "Another download is already saving to {0}."
 msgstr "다른 다운로드가 {0}에 다른 이름으로 저장되고 있습니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:108
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:109
 #, java-format
 msgid ""
 "Could not set download folder to {0}, because it represents an individual "
 "file, not a folder."
-msgstr ""
-"개별의 파일로 폴더가 아니기 때문에, 다운로드 폴더를{0}으로 설정이 불가합니다."
+msgstr "개별의 파일로 폴더가 아니기 때문에, 다운로드 폴더를{0}으로 설정이 불가합니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:112
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:113
 #, java-format
 msgid "Could not set file location to {0}, because it is not a regular file."
 msgstr "레귤러 파일은 아니기 때문에, 파일 위치를{0}으로 설정 불가합니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:115
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:116
 msgid "Could not set file location due to an error in the filesystem."
 msgstr "파일 시스템의 에러에 의해 파일 위치를 설정할 수 없습니다"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:117
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:118
 msgid "The same file is already being downloaded."
 msgstr "같은 파일이 이미 다운로드 되었습니다."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:119
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:120
 #, java-format
 msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
@@ -6621,8 +6449,7 @@ msgstr "내부 에러. 데이터는 다른 이름으로 저장되지 않는다"
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:178
 msgid "File not found or corrupt file. Data could not be saved"
-msgstr ""
-"파일이 발견되지 않는가, 또는 파손.  데이터는 다른 이름으로 저장할 수 없었다"
+msgstr "파일이 발견되지 않는가, 또는 파손.  데이터는 다른 이름으로 저장할 수 없었다"
 
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:304
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:181
@@ -6818,8 +6645,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:50
 msgid ""
 "Please wait while LimeWire is uploading your files to the Internet Archive"
-msgstr ""
-"LimeWire가 당신의 파일을 인터넷 저장소에 업로드하는 동안 기다려주십시오."
+msgstr "LimeWire가 당신의 파일을 인터넷 저장소에 업로드하는 동안 기다려주십시오."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:117
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:140
@@ -7034,40 +6860,47 @@ msgid "Info"
 msgstr "정보"
 
 #, fuzzy
-#~ msgid "test1"
-#~ msgstr "복원"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "복원"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "이더넷"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "접속 실행"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
+#~ msgid "United States"
+#~ msgstr "업데이트"
 
 #, fuzzy
 #~ msgid "English"
 #~ msgstr "완료"
 
 #, fuzzy
-#~ msgid "United States"
-#~ msgstr "업데이트"
-
-#, fuzzy
 #~ msgid "Loading Languages"
-#~ msgstr "언어를 변경 "
+#~ msgstr "언어를 변경"
 
 #, fuzzy
 #~ msgid "false"
 #~ msgstr "붙이기"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "공유하고 있는 파일의 수 {0} 파일(불러오는 중...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "공유하고 있는 파일의 수 {0} 파일"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "\"새로운 정보\"검색： {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr "파일 형식을 인식할 수 없다"
+
+#~ msgid ". The file cannot be found."
+#~ msgstr "파일을 찾을 수 없다."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr "파일이 망가져 있습니다"
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr "음악 파일내에 불명한 에러가 있습니다"
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr "그 파일은 해석할 수 없다"
 
 #~ msgid "Close the Window"
 #~ msgstr "창 닫기"
@@ -7157,8 +6990,7 @@ msgstr "정보"
 #~ msgstr "원래 쿼리"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr ""
-#~ "죄송합니다만, LimeWire는 당신의 오래된 torrents를 재시작 할 수 없습니다."
+#~ msgstr "죄송합니다만, LimeWire는 당신의 오래된 torrents를 재시작 할 수 없습니다."
 
 #~ msgid "Validation Required"
 #~ msgstr "확인 요구"
@@ -7196,36 +7028,32 @@ msgstr "정보"
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the "
-#~ "desired statistics."
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
 #~ msgstr ""
-#~ "처리 능력의 누계에는, 윗방향과 아래방향에 보내지는 모든 처리 능력 언제 있"
-#~ "던 정보가 있습니다. 카테고리의 1개를 클릭해, 소망의 누계를 보는 것."
+#~ "처리 능력의 누계에는, 윗방향과 아래방향에 보내지는 모든 처리 능력 언제 있던 정보가 있습니다. 카테고리의 1개를 클릭해, 소망의 누계를 "
+#~ "보는 것."
 
 #~ msgid "Network"
 #~ msgstr "네트워크"
 
 #~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are "
-#~ "quite inaccurate due to the dynamic, distributed nature of Gnutella and "
-#~ "should not be taken too literally. They can, however, give you a general "
-#~ "idea regarding the current state of your connection."
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
 #~ msgstr ""
-#~ "네트워크의 현상에서의 누계이다. 이러한 누계는 그누테라의 동적인 배치에 의"
-#~ "해 매우 불확실해, 그대로의 수치로 받아들여지지 않는 것으로 있습니다. 그러"
-#~ "나 유저에게는, 접속의 현상에 관한 일반적인 견해를 알 수 있습니다."
+#~ "네트워크의 현상에서의 누계이다. 이러한 누계는 그누테라의 동적인 배치에 의해 매우 불확실해, 그대로의 수치로 받아들여지지 않는 것으로 "
+#~ "있습니다. 그러나 유저에게는, 접속의 현상에 관한 일반적인 견해를 알 수 있습니다."
 
 #~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages "
-#~ "and HTTP traffic. This information can be useful for advanced users as "
-#~ "well as for researchers working on the Gnutella network. Advanced "
-#~ "statistics are not displayed by default and are not recommended for most "
-#~ "users."
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
 #~ msgstr ""
-#~ "고급 누계에는, 그누테라 메시지와 HTTP 트래픽에 대한 상세한 정보가 있습니"
-#~ "다. 이 정보는 그누테라 네트워크로 작업하는 연구자 뿐만이 아니라 고급 유저"
-#~ "에게도 도움이 됩니다.. 고급 누계는 초기설정으로 표시되지 않고, 일반 유저에"
-#~ "게 추천하지 않습니다."
+#~ "고급 누계에는, 그누테라 메시지와 HTTP 트래픽에 대한 상세한 정보가 있습니다. 이 정보는 그누테라 네트워크로 작업하는 연구자 뿐만이 "
+#~ "아니라 고급 유저에게도 도움이 됩니다.. 고급 누계는 초기설정으로 표시되지 않고, 일반 유저에게 추천하지 않습니다."
 
 #~ msgid "Show Advanced Statistics:"
 #~ msgstr "고급 누계 표시"
@@ -7236,16 +7064,12 @@ msgstr "정보"
 #~ msgid ""
 #~ "Total bandwidth used to send outgoing data, either through uploads or "
 #~ "Gnutella messages."
-#~ msgstr ""
-#~ "송신 또는 그누테라 메시지를 통해 밖으로 향한 데이터를 송신하는데 사용하는 "
-#~ "모든 정보처리량"
+#~ msgstr "송신 또는 그누테라 메시지를 통해 밖으로 향한 데이터를 송신하는데 사용하는 모든 정보처리량"
 
 #~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads "
-#~ "or Gnutella messages."
-#~ msgstr ""
-#~ "하부 또는 그누테라 메시지를 통해 내향 데이터를 수신하는데 사용하는 모든 정"
-#~ "보처리량"
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr "하부 또는 그누테라 메시지를 통해 내향 데이터를 수신하는데 사용하는 모든 정보처리량"
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "이 클라이언트로 부터 모든 그누테라 메시지가 수신되었습니다."
@@ -7268,8 +7092,8 @@ msgstr "정보"
 #~ msgstr "TCP로 수신한 사본의 요청수에 대한 모든 요청수"
 
 #~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total "
-#~ "number of queries."
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
 #~ msgstr "멀티 캐스트로 수신한 사본의 요청수에 대한 모든 요청수"
 
 #~ msgid "All received queries, by hops."
@@ -7295,38 +7119,30 @@ msgstr "정보"
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over TCP, by message type."
-#~ msgstr ""
-#~ "메시지의 종류에 의해, TCP로 수신된 그누테라 메시지의 킬로바이트 총수"
+#~ msgstr "메시지의 종류에 의해, TCP로 수신된 그누테라 메시지의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over UDP, by message type."
-#~ msgstr ""
-#~ "메시지의 종류에 의해, UDP로 수신된 그누테라 메시지의 킬로바이트 총수"
+#~ msgstr "메시지의 종류에 의해, UDP로 수신된 그누테라 메시지의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over Multicast, by message "
 #~ "type."
-#~ msgstr ""
-#~ "메시지의 종류에 의해, 멀티 캐스트로 수신된 그누테라 메시지의 킬로바이트 총"
-#~ "수"
+#~ msgstr "메시지의 종류에 의해, 멀티 캐스트로 수신된 그누테라 메시지의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "TCP, UDP 또는 멀티 캐스트에 의해 수신된, 그누테라 메시지의 킬로바이트 총수"
+#~ msgstr "TCP, UDP 또는 멀티 캐스트에 의해 수신된, 그누테라 메시지의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Total kilobytes in duplicate queries received over TCP versus the total "
 #~ "number of queries."
-#~ msgstr ""
-#~ "TCP로 수신한 사본의 요청에 해당되는 킬로바이트 총수에 대한 모든요청수"
+#~ msgstr "TCP로 수신한 사본의 요청에 해당되는 킬로바이트 총수에 대한 모든요청수"
 
 #~ msgid ""
 #~ "Total kilobytes in duplicate queries received over Multicast versus the "
 #~ "total number of queries."
-#~ msgstr ""
-#~ "멀티 캐스트로 수신한 요청의 사본에 해당되는 킬로바이트 총수에 대한 모든요"
-#~ "청수"
+#~ msgstr "멀티 캐스트로 수신한 요청의 사본에 해당되는 킬로바이트 총수에 대한 모든요청수"
 
 #~ msgid "All received queries in kilobytes, by hops."
 #~ msgstr "홉스로 부터 요청된 모든 쿼리 킬로바이트 총수"
@@ -7348,131 +7164,91 @@ msgstr "정보"
 
 #~ msgid ""
 #~ "UDP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대한 그누테라의 클라이언트 전원으로부터 수신한 UDP의 요"
-#~ "청"
+#~ msgstr "그 외 LimeWires에 대한 그누테라의 클라이언트 전원으로부터 수신한 UDP의 요청"
 
 #~ msgid ""
 #~ "UDP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대한 그누테라의 클라이언트 전원으로부터 수신한 UDP의 요"
-#~ "청수"
+#~ msgstr "그 외 LimeWires에 대한 그누테라의 클라이언트 전원으로부터 수신한 UDP의 요청수"
 
-#~ msgid ""
-#~ "UDP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대한 그누테라의 클라이언트 전원으로부터 수신한 UDP의 푸"
-#~ "쉬"
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWires에 대한 그누테라의 클라이언트 전원으로부터 수신한 UDP의 푸쉬"
 
 #~ msgid ""
 #~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트 핑의 수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 핑의 수"
 
 #~ msgid ""
 #~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트 퐁의 수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 퐁의 수"
 
 #~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트의 요청"
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 요청"
 
 #~ msgid ""
 #~ "Multicast query hits received from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트의 요청수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 요청수"
 
 #~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트의 푸쉬"
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 푸쉬"
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 핑의 "
-#~ "킬로바이트수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 핑의 킬로바이트수"
 
 #~ msgid ""
 #~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 퐁의 "
-#~ "킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 퐁의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 요청"
-#~ "의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 요청의 킬로바이트 총수"
 
 #~ msgid ""
-#~ "Kilobytes for UDP query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 요청"
-#~ "의 킬로바이트 총수"
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP 요청의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP의 킬"
-#~ "로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
 #~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트 핑의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 핑의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
 #~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트 퐁의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 퐁의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
 #~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트 요청의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 요청의 킬로바이트 총수"
 
 #~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients "
-#~ "versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트 요청의 킬로바이트 총수"
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 요청의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
 #~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스"
-#~ "트 푸쉬의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 푸쉬의 킬로바이트 총수"
 
 #~ msgid "The average size in kilobytes of received Gnutella messages."
 #~ msgstr "수신된 그누테라 메시지에 있어서의 평균적 사이즈의 킬로바이트수"
 
 #~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr ""
-#~ "LimeWires로부터 수신한 메시지에 있어서의 평균적 사이즈의 킬로바이트수"
+#~ msgstr "LimeWires로부터 수신한 메시지에 있어서의 평균적 사이즈의 킬로바이트수"
 
 #~ msgid "QRP"
 #~ msgstr "QRP"
@@ -7480,9 +7256,7 @@ msgstr "정보"
 #~ msgid ""
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
-#~ msgstr ""
-#~ "요청 루트표를 이용해, 마지막 호프에 대해, 그 외 UI트랍파에 루트 된 모든 요"
-#~ "청"
+#~ msgstr "요청 루트표를 이용해, 마지막 호프에 대해, 그 외 UI트랍파에 루트 된 모든 요청"
 
 #~ msgid "All queries that were routed to leaves, using query routing tables."
 #~ msgstr "요청 루트표를 이용해, 루트 된 모든요청"
@@ -7542,82 +7316,59 @@ msgstr "정보"
 #~ msgstr "멀티 캐스트를 개입시켜 송신된 그누테라의 모든종류별 메시지"
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "TCP, UDP 또는 멀티 캐스트를 개입시켜 송신된 그누테라로부터의 모든메시지"
+#~ msgstr "TCP, UDP 또는 멀티 캐스트를 개입시켜 송신된 그누테라로부터의 모든메시지"
 
 #~ msgid "Total kilobytes for Gnutella messages sent out from this client."
 #~ msgstr "이 클라이언트로부터 송신된 그누테라 메시지의 킬로바이트 총수"
 
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
 #~ msgstr "TCP를 개입시켜 송신된 그누테라 메시지의 종류별 킬로바이트 총수"
 
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
 #~ msgstr "UDP를 개입시켜 송신된 그누테라 메시지의 종류별 킬로바이트 총수"
 
 #~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "멀티 캐스트를 개입시켜 송신된 그누테라 메시지의 종류별 킬로바이트 총수"
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
+#~ msgstr "멀티 캐스트를 개입시켜 송신된 그누테라 메시지의 종류별 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "TCP, UDP 또는 멀티 캐스트를 개입시켜 송신된 그누테라 메시지의 킬로바이트 "
-#~ "총수"
+#~ msgstr "TCP, UDP 또는 멀티 캐스트를 개입시켜 송신된 그누테라 메시지의 킬로바이트 총수"
 
 #~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 핑"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 핑"
 
 #~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 퐁"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 퐁"
 
 #~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 요청"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 요청"
 
-#~ msgid ""
-#~ "UDP query hits sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 요청수"
+#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 요청수"
 
 #~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 푸쉬"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 UDP 푸쉬"
 
 #~ msgid ""
 #~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스트"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스트"
 
 #~ msgid ""
 #~ "Multicast pongs sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스"
-#~ "트 퐁"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스트 퐁"
 
 #~ msgid ""
 #~ "Multicast queries sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스"
-#~ "트 요청"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스트 요청"
 
 #~ msgid ""
-#~ "Multicast query hits sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스"
-#~ "트 요청"
+#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스트 요청"
 
 #~ msgid ""
 #~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스"
-#~ "트 푸쉬"
+#~ msgstr "그 외 LimeWire에 대한, 모든 그누테라의 클라이언트로부터 송신된 멀티 캐스트 푸쉬"
 
 #~ msgid "Total kilobytes sent by other LimeWires."
 #~ msgstr "그 외 LimeWire에 의해 송신된 킬로바이트 총수"
@@ -7625,72 +7376,52 @@ msgstr "정보"
 #~ msgid ""
 #~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 핑의 킬"
-#~ "로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 핑의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 퐁의 킬"
-#~ "로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 퐁의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 요청의 "
-#~ "킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 요청의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 요청수"
-#~ "의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 요청수의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 푸쉬의 "
-#~ "킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 UDP 푸쉬의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 "
-#~ "핑의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 핑의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
 #~ "LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 "
-#~ "퐁의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 퐁의 킬로바이트 총수"
 
 #~ msgid ""
-#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 "
-#~ "요청의 킬로바이트 총수"
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 요청의 킬로바이트 총수"
 
 #~ msgid ""
 #~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
 #~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 "
-#~ "요청의 킬로바이트 총수"
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 요청의 킬로바이트 총수"
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 "
-#~ "푸쉬의 킬로바이트 총수"
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 푸쉬의 킬로바이트 총수"
 
 #~ msgid "Handshaking"
 #~ msgstr "악수"
@@ -7711,8 +7442,8 @@ msgstr "정보"
 #~ msgstr "밖으로 향한 서버 거부"
 
 #~ msgid ""
-#~ "Statistics for outgoing Gnutella connection handshaking rejections from "
-#~ "the server."
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
 #~ msgstr "밖으로 향한 그누테라 접속 악수의 서버로부터의 거부에 관한 누계"
 
 #~ msgid "Compression"
@@ -7746,30 +7477,28 @@ msgstr "정보"
 #~ msgstr "필터화 된 메시지 총수"
 
 #~ msgid ""
-#~ "Total number of Gnutella connection attempts, either initiated internally "
-#~ "or externally."
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
 #~ msgstr "내부 또는 외부에서 실행된 그누테라 접속 시행의 총수"
 
 #~ msgid ""
 #~ "Total incoming requests received over time. This includes all connection "
 #~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
 #~ msgstr ""
-#~ "장기에 걸쳐 수신된 내향 요청의 총수. 여기에는 모든접속 시도가 포함되어 있"
-#~ "습니다(GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, 그 외)."
+#~ "장기에 걸쳐 수신된 내향 요청의 총수. 여기에는 모든접속 시도가 포함되어 있습니다(GET, HEAD, GIV, CHAT, "
+#~ "GNUTELLA, MAGNET, 그 외)."
 
 #~ msgid ""
-#~ "Total outgoing download connections attempts over time. This includes "
-#~ "both direct connections and pushed requests."
-#~ msgstr ""
-#~ "장기에 걸쳐 수신된 밖으로 향한 요청의 총수. 여기에는 다이렉트 접속과 푸쉬 "
-#~ "요청의 쌍방이 있습니다."
+#~ "Total outgoing download connections attempts over time. This includes both "
+#~ "direct connections and pushed requests."
+#~ msgstr "장기에 걸쳐 수신된 밖으로 향한 요청의 총수. 여기에는 다이렉트 접속과 푸쉬 요청의 쌍방이 있습니다."
 
 #~ msgid ""
 #~ "Total responses received from downloaders over time. This includes Busy, "
 #~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
 #~ msgstr ""
-#~ "장기에 걸쳐 다운로드로 수신된 대답의 총수. 여기에는, Busy, 파일 없음, 공"
-#~ "유 없음, 큐 된, 그 외, IO에러, OK의 대답이 있습니다."
+#~ "장기에 걸쳐 다운로드로 수신된 대답의 총수. 여기에는, Busy, 파일 없음, 공유 없음, 큐 된, 그 외, IO에러, OK의 대답이 "
+#~ "있습니다."
 
 #~ msgid ""
 #~ "Total alternate locations received and removed over time. This includes "
@@ -7777,25 +7506,22 @@ msgstr "정보"
 #~ "ignore, locations that couldn't be removed, and locations that we removed "
 #~ "permanently from attempting to connect to."
 #~ msgstr ""
-#~ "장기에 걸쳐 수신과 제거된 대체 위치의 총수. 여기에는 유저가 적극적으로 접"
-#~ "속하려고 하는 위치, 유저가 무시하는 위치, 제거할 수 없는 위치, 접속의 시도"
-#~ "를 영구적으로 제거한 위치가 있습니다."
+#~ "장기에 걸쳐 수신과 제거된 대체 위치의 총수. 여기에는 유저가 적극적으로 접속하려고 하는 위치, 유저가 무시하는 위치, 제거할 수 없는 "
+#~ "위치, 접속의 시도를 영구적으로 제거한 위치가 있습니다."
 
 #~ msgid "Transfers"
 #~ msgstr "전송"
 
 #~ msgid ""
-#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 "
-#~ "transfers. For HTTP1.1, values are per chunk."
+#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
+#~ "For HTTP1.1, values are per chunk."
 #~ msgstr "장기에 걸쳐 전송 된 총수"
 
 #~ msgid ""
-#~ "Records the time in milliseconds to establish TCP connections for "
-#~ "downloads. This can vary, for example, when servers are experiencing high "
-#~ "loads."
+#~ "Records the time in milliseconds to establish TCP connections for downloads. "
+#~ "This can vary, for example, when servers are experiencing high loads."
 #~ msgstr ""
-#~ "TCP 접속의 다운로드를 달성하기 위해서, 1,000분의 1초 단위로 시간을 기록. "
-#~ "예를 들면 서버가 높은 로드일 때는, 이 시간은 변화."
+#~ "TCP 접속의 다운로드를 달성하기 위해서, 1,000분의 1초 단위로 시간을 기록. 예를 들면 서버가 높은 로드일 때는, 이 시간은 변화."
 
 #~ msgid "Requests"
 #~ msgstr "요청"
@@ -7805,41 +7531,38 @@ msgstr "정보"
 #~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
 #~ "transfers."
 #~ msgstr ""
-#~ "내향 업로드 요청의 총수. 이 수치는 요청를 구문 분석 하는 시도마다 구분되"
-#~ "어 HHTP/1. 1의 전송에 대해 정리가 됩니다.."
+#~ "내향 업로드 요청의 총수. 이 수치는 요청를 구문 분석 하는 시도마다 구분되어 HHTP/1. 1의 전송에 대해 정리가 됩니다.."
 
 #~ msgid ""
-#~ "Total outgoing responses. These numbers are incremented before sending "
-#~ "each response, and thus include every chunk for HTTP/1.1 transfers. "
-#~ "'Normal' is the number of requests for which we have attempted to "
-#~ "transfer a portion of a file."
+#~ "Total outgoing responses. These numbers are incremented before sending each "
+#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
+#~ "the number of requests for which we have attempted to transfer a portion of "
+#~ "a file."
 #~ msgstr ""
-#~ "밖으로 향한 회답의 총수. 각 대답을 송신하기 전에 이 수치는 구문 분석 되어 "
-#~ "HHTP/1. 1의 전송에 대해 정리가 됩니다.. [노멀]이란, 파일의 일부분을 전송 "
-#~ "하려고 하는 요청수."
+#~ "밖으로 향한 회답의 총수. 각 대답을 송신하기 전에 이 수치는 구문 분석 되어 HHTP/1. 1의 전송에 대해 정리가 됩니다.. "
+#~ "[노멀]이란, 파일의 일부분을 전송 하려고 하는 요청수."
 
 #~ msgid "Request Methods"
 #~ msgstr "요청 방법"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
-#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for "
-#~ "push requests, after we have sent the initial GIV."
+#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
+#~ "requests, after we have sent the initial GIV."
 #~ msgstr ""
-#~ "내향 요청 방법의 총수. 유저가 첫회의 GIV를 송신한 후에, 첫회의 내향 접속 "
-#~ "요청 또는 푸쉬 요청에 관계되어, 이 수치에 HHTP/1. 1의 구문 분석이 됩니다.."
+#~ "내향 요청 방법의 총수. 유저가 첫회의 GIV를 송신한 후에, 첫회의 내향 접속 요청 또는 푸쉬 요청에 관계되어, 이 수치에 "
+#~ "HHTP/1. 1의 구문 분석이 됩니다.."
 
 #~ msgid "General"
 #~ msgstr "일반"
 
 #~ msgid ""
 #~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
-#~ "are incremented per connection, not per chunk. (Stalled uploads will also "
-#~ "be counted as an interrupted upload.)"
+#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
+#~ "counted as an interrupted upload.)"
 #~ msgstr ""
-#~ "시행, 완료, 중단, 또는 한계 상태에 있는 업로드의 총수. 이러한 수치는 정리"
-#~ "는 아니고, 각 접속에 대해 구문 분석 됩니다.. (한계의 업로드는, 중단된 업로"
-#~ "드로서 센다. )"
+#~ "시행, 완료, 중단, 또는 한계 상태에 있는 업로드의 총수. 이러한 수치는 정리는 아니고, 각 접속에 대해 구문 분석 됩니다.. (한계의 "
+#~ "업로드는, 중단된 업로드로서 센다. )"
 
 #~ msgid "seconds"
 #~ msgstr "초"

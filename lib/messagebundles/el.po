@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-23 11:23-0400\n"
+"POT-Creation-Date: 2007-08-27 16:43-0400\n"
 "PO-Revision-Date: 2007-02-10 21:31-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -15,6 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Rosetta-Export-Date: 2007-08-28 15:00:45+0000\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -105,7 +106,8 @@ msgstr ""
 "Ένα αρχείο που χρησιμοποιούνταν για την αποθήκευση των προτιμήσεών σας έχει "
 "φθαρεί. Το Limewire θα χρησιμοποιήσει τις προκαθορισμένες θέσεις."
 
-#: core/com/limegroup/gnutella/Acceptor.java:284
+#: core/com/limegroup/gnutella/Acceptor.java:287
+#: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
@@ -119,92 +121,92 @@ msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr ""
 "Συγγνώμη, αλλά το LimeWire αδυνατεί να επανεκκινήσει τις παλιές σας λήψεις."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:283
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 #, fuzzy
 msgid "Loading TLS Encryption..."
 msgstr "Φόρτωση μηχανής HTML..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:295
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:289
 #, fuzzy
 msgid "Loading Safe Content Management..."
 msgstr "Φόρτωση οργάνωσης παλιάς σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:300
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:294
 msgid "Loading Message Router..."
 msgstr "Φόρτωση router μηνύματος..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:305
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:299
 #, fuzzy
 msgid "Loading Upload Management..."
 msgstr "Φόρτωση οργάνωσης της σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:314
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:308
 msgid "Loading Connection Listener..."
 msgstr "Φόρτωση ακροατή σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:323
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:317
 msgid "Loading Connection Management..."
 msgstr "Φόρτωση οργάνωσης της σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:328
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:322
 #, fuzzy
 msgid "Loading Download Management..."
 msgstr "Φόρτωση οργάνωσης της σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:333
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:327
 #, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "Φόρτωση οργάνωσης παλιάς σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:338
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:332
 msgid "Locating Peers..."
 msgstr "Εντόπιση peers..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
 #, fuzzy
 msgid "Loading Shared Files..."
 msgstr "Φόρτωση αποθηκευμένων αρχείων..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:359
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 #, fuzzy
 msgid "Loading bittorrent Management..."
 msgstr "Φόρτωση οργάνωσης της σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:358
 #, fuzzy
 msgid "Loading magnet Management..."
 msgstr "Φόρτωση οργάνωσης της σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:370
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 msgid "Loading Old Downloads..."
 msgstr "Φόρτωση παλιών λήψεων..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:375
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 #, fuzzy
 msgid "Checking for Updates..."
 msgstr "Έλεγχος"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
 msgstr "Φόρτωση παραθύρου directed querier..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
 msgid "Loading Magnet Listener..."
 msgstr "Φόρτωση ακροατή MAGNET..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Peer Listener..."
 msgstr "Φόρτωση ακροατή peer..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Loading Stale Connection Management..."
 msgstr "Φόρτωση οργάνωσης παλιάς σύνδεσης..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
 msgstr "Φόρτωση αποθηκευμένων αρχείων..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:409
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 #, fuzzy
 msgid "Loading Spam Management..."
 msgstr "Φόρτωση οργάνωσης της σύνδεσης..."
@@ -259,12 +261,12 @@ msgstr ""
 "που ζητάτε μπορεί να μην κατεβεί σωστά."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
-#, fuzzy, java-format
+#, fuzzy
 msgid "You have already downloaded {0}"
 msgstr "Ήδη κατεβάζετε το αρχείο στο \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
-#, fuzzy, java-format
+#, fuzzy
 msgid "You are already downloading this file to {0}"
 msgstr "Ήδη κατεβάζετε το αρχείο στο \"{0}\"."
 
@@ -346,7 +348,7 @@ msgstr "Τραγούδι"
 
 #. *
 #. * The resource to use for the extension property.
-#.
+#. 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:105
@@ -548,8 +550,8 @@ msgstr "Ρυθμίσεις BitTorrent"
 msgid ""
 "You can choose whether or not LimeWire should manage your Bittorrent "
 "protocol settings. It is highly recommended that LimeWire manage these "
-"settings. Invalid or inappropriate values may cause severe performance and/"
-"or memory problems."
+"settings. Invalid or inappropriate values may cause severe performance "
+"and/or memory problems."
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:62
@@ -639,8 +641,8 @@ msgstr "Πάντοτε απόρριψη των προγραμματιστικώ�
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:504
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
-"bug report. For further help and to aid with debugging, please visit www."
-"limewire.com and click 'Support'. Thank you."
+"bug report. For further help and to aid with debugging, please visit "
+"www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 "Το LimeWire αδυνατεί να συνδεθεί με τον κεντρικό υπολογιστή "
 "προγραμματιστικών λαθών, προκειμένου να σταλεί η παρακάτω έκθεση "
@@ -792,7 +794,7 @@ msgstr ""
 "Τελικά, το LimeWire θα ήθελε να απευθύνει τις ειλικρινές του ευχαριστίες "
 "στους προγραμματιστές, τους χρήστες και όλους τους άλλους που έχουν "
 "παραθέσει τις ιδέες του στο project. Χωρίς τους χρήστες του LimeWire, το "
-"δίκτυο του LimeWire δεν θα υπήρχε. "
+"δίκτυο του LimeWire δεν θα υπήρχε."
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:315
 msgid ""
@@ -800,11 +802,11 @@ msgid ""
 "Inc."
 msgstr ""
 "Το Bit Torrent, το λογότυπο του BitTorrent, και το Torrent είναι εμπορικά "
-"σήματα του BitTorrent, Inc. "
+"σήματα του BitTorrent, Inc."
 
 #. *
 #. * The select all action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:317
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:73
 #, fuzzy
@@ -995,9 +997,9 @@ msgid "Lo&gging"
 msgstr "Εισαγωγή"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
-#, fuzzy, java-format
+#, java-format
 msgid "Display the {0} Screen"
-msgstr "Εμφάνιση πίνακα επιλογών."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -1039,7 +1041,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1692
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1715
 msgid "LimeWire will not launch the specified file for security reasons."
-msgstr "Το LimeWire δεν θα ανοίξει το καθορισμένο αρχείο για λόγους ασφάλειας."
+msgstr ""
+"Το LimeWire δεν θα ανοίξει το καθορισμένο αρχείο για λόγους ασφάλειας."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1694
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1717
@@ -1099,7 +1102,7 @@ msgid ""
 msgstr ""
 "Το LimeWire ήταν ανίκανο να δημιουργήσει το φάκελο ρυθμίσεών σας, και "
 "χρησιμοποιεί έναν προσωρινό φάκελο. Οι ρυθμίσεις σας ίσως διαγραφούν όταν "
-"κλείσετε το LimeWire."
+"κλείσετε το LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:367
 msgid "Loading Icons..."
@@ -1229,83 +1232,15 @@ msgstr ""
 msgid "Do not Show Again"
 msgstr "Μήν δείξεις αυτό το μήνυμα ξανά."
 
-#. Aafrican, South Africa
-#. Amharic, Ethiopia
-#. arabic, Egypt
-#. belarusian, Belarus
-#. Bulgarian, Bulgaria
-#. Bengali, Bangladesh
-#. Tibetan, China
-#. Brezhoneg, spoken in france
-#. Bosanski, Bosnia
-#. Burmese, Myanmar
-#. Catala, Spain
-#. Cestina, Czech Republic
-#. Welsh (Cymraeg) part of GB, part of UK
-#. Wales has a dragon on it we need more flags
-#. Dansk, Denmark
-#. Deutsch, Germany
-#. Divehi, Maldive
-#. Greek, Grece
-#. Spanish, Spain
-#. Estonian, ET
-#. Euskara, Spain
-#. Persian, Iran
-#. Finnish (Suomi), Finland
-#. French, France
-#. Irish, Ireland
-#. Geez, Ethiopia
-#. Gujarati, India
-#. Gallego, Spain
-#. Hindi, India
-#. Hrvatski, Croatia
-#. Magyar, Hungary
-#. Armenian, Armenia
-#. Bahasa, Indonesia
-#. Islenska, Iceland
-#. Italian, Italy
-#. Hebrew, Israel
-#. Japanese, Japan
-#. Georgian, Georgia (added this flag .gif)
-#. Kazakh, Kazakhstan
-#. Kannada, India
-#. Kashmiri, India
-#. Korean, South Korea
-#. Khmer, Cambodia
-#. Luxemburgish, Luxembourg
-#. Lao, Laos
-#. Lietuva, Lituania
-#. Latvija, Latvia
-#. Malagasy, Madagascar
-#. Macedonian, Macedonia
-#. Malayan, India
-#. Mongol, Mongolia
-#. Marathi, India
-#. Bahasa Melayu, Malaysia
-#. Malti, Malta
-#. Nepali, Nepal
-#. Nederlands
-#. Norsk, Norway
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:83
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:84
-#: gui/com/limegroup/gnutella/gui/MessageService.java:535
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
-msgid "No"
-msgstr "Όχι"
-
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
-#, fuzzy
 msgid "Change Language"
-msgstr "Αλλαγή γλώσσας [&G]"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
-#, fuzzy
 msgid "Show Language in status bar"
-msgstr "Δείξε στοιχεία γλώσσας"
+msgstr ""
 
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
 msgid "Help Translate LimeWire"
 msgstr "Βοηθήστε να μεταφραστεί το LimeWire [B]"
@@ -1392,7 +1327,8 @@ msgid "View Usage Rights"
 msgstr "Δείτε δικαιώματα χρήσης"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:515
-msgid "LimeWire is contacting www.weedshare.com for the details of this file."
+msgid ""
+"LimeWire is contacting www.weedshare.com for the details of this file."
 msgstr ""
 "Το LimeWire επικοινωνεί με το www.weedshare.com για τις πληροφορίες του "
 "αρχείου."
@@ -1419,35 +1355,35 @@ msgstr "Λεπτομέρειες άδειας"
 
 #. *
 #. * The undo action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:28
 msgid "Undo"
 msgstr "Αναίρεση"
 
 #. *
 #. * The cut action
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:37
 msgid "Cut"
 msgstr "Αποκοπή"
 
 #. *
 #. * The copy action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:46
 msgid "Copy"
 msgstr "Αντιγραφή"
 
 #. *
 #. * The paste action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:55
 msgid "Paste"
 msgstr "Επικόλληση"
 
 #. *
 #. * The delete action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:64
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:785
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:791
@@ -1522,6 +1458,13 @@ msgstr "μηνύματα"
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:424
 msgid "Yes"
 msgstr "Ναι"
+
+#: gui/com/limegroup/gnutella/gui/MessageService.java:535
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
+msgid "No"
+msgstr "Όχι"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:609
 msgid "Do not display this message again"
@@ -1606,34 +1549,27 @@ msgstr "Προσθήκη νέου αντικειμένου λίστας."
 msgid "Remove Selected Item"
 msgstr "Αφαίρεση επιλεγμένου αντικειμένου."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:128
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:127
 msgid "Loading Status Window..."
 msgstr "Φόρτωση παραθύρου κατάστασης..."
 
-#. initialize tool tip
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:329
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:830
-#, java-format
-msgid "You are sharing {0} files (Loading...)"
-msgstr "Ο αριθμός των αρχείων που μοιράζεστε. {0} αρχεία (Φόρτωμα...)"
-
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:449
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:448
 msgid "LimeWire has not detected a firewall"
 msgstr "Το LimeWire δεν έχει εντοπίσε ένα τοίχος προστασίας"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:452
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:451
 msgid "LimeWire has detected a firewall"
 msgstr "Το LimeWire έχει εντοπίσε ένα τοίχος προστασίας"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:537
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:536
 msgid "Connection"
 msgstr "Ποιότητα:"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:539
 msgid "Disconnected"
 msgstr "Αποσυνδεδεμένος"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:541
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
@@ -1641,37 +1577,37 @@ msgstr ""
 "Είστε αποσυνδεδεμένος από το δίκτυο. Για να συνδεθείτε, επιλέξτε «Σύνδεση» "
 "από το μενού του αρχείου."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:543
 msgid "Starting"
 msgstr "Σύνδεση"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:545
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
 msgid "You are currently connecting to the network"
 msgstr "Αυτή τη στιγμή συνδέεστε στο δίκτυο."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:547
 msgid "Poor"
 msgstr "Φτωχή"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:549
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 "Είστε συνδεδεμένος με λίγους παρόχους και έχετε ασταθή σύνδεση με το δίκτυο."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:551
 msgid "Fair"
 msgstr "Μέτρια"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:553
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
 msgid "Your connection to the network is getting stronger"
 msgstr "Η σύνδεσή σας στο δίκτυο γίνεται ισχυρότερη."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:555
 msgid "Good"
 msgstr "Καλή"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:557
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
@@ -1679,70 +1615,81 @@ msgstr ""
 "Δεν είστε ακόμα απόλυτα συνδεδεμένος στο δίκτυο, αλλά έχετε πολύ καλή "
 "σύνδεση."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:560
 msgid "Excellent"
 msgstr "Εξαιρετική"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:562
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
 msgid "Your connection to the network is very strong"
 msgstr "Η σύνδεση σας στο δίκτυο είναι πολύ ισχυρή."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:564
 msgid "Turbo-Charged"
 msgstr "Turbo-σύνδεση"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
 msgid "Your connection to the network is extremely strong"
 msgstr "Η σύνδεση σας στο δίκτυο είναι εξαιρετικά ισχυρή."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:567
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
 msgstr ""
 "Μπορείτε να έχετε Turbo-σύνδεση συνδέσεις όλη την ώρα με το LimeWire Pro."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:573
 msgid "Waking Up"
 msgstr "Αφύπνιση"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:575
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
 msgid "LimeWire is waking up from sleep mode"
 msgstr "Το LimeWire αφυπνίζεται από την κατάσταση νάρκης."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:678
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:677
 msgid "Show Connection Quality"
 msgstr "Δείξε ποιότητα σύνδεσης"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:694
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:693
 msgid "Show Shared Files Count"
 msgstr "Δείξε άθροισμα μοιρασμένων αρχείων"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:710
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:709
 msgid "Show Language Status"
 msgstr "Δείξε στοιχεία γλώσσας"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:731
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:730
 msgid "Show Firewall Status"
 msgstr "Δείξε στοιχεία τοίχους προστασίας"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:747
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:746
 msgid "Show Bandwidth Consumption"
 msgstr "Προβολή Περίληψης Bandwidth"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:763
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:762
 msgid "Show Media Player"
 msgstr "Δείξε τον Media Player"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:828
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:832
 #, java-format
-msgid "You are sharing {0} files"
-msgstr "Ο αριθμός των αρχείων που μοιράζεστε. {0} αρχεία"
+msgid "You are sharing {0} file"
+msgid_plural "You are sharing {0} files"
+msgstr[0] ""
+msgstr[1] ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:895
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:835
+#, java-format
+msgid "You are sharing {0} file (Loading...)"
+msgid_plural "You are sharing {0} files (Loading...)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
 msgstr "Κατεβάσματα:"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:897
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:903
 msgid "Uploads:"
 msgstr "Ανεβάσματα:"
 
@@ -1864,9 +1811,9 @@ msgstr ""
 #, java-format
 msgid ""
 "Need more help? Visit <a href=\"{0}\">our message boards</a> and see if "
-"others have already answered your question! You can also review the <a href="
-"\"{1}\">FAQ</a> for answers to commonly asked questions or the <a href=\"{2}"
-"\">User Guide</a> for more information."
+"others have already answered your question! You can also review the <a "
+"href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
+"href=\"{2}\">User Guide</a> for more information."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
@@ -1880,8 +1827,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
 msgid ""
-"Do you have a tip for effectively using LimeWire? Add it to <a href=\"{0}"
-"\">the wiki</a> and it may make it into future Tips of the Day!"
+"Do you have a tip for effectively using LimeWire? Add it to <a "
+"href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
@@ -1909,8 +1856,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 #, java-format
 msgid ""
-"Want to know more about the development of LimeWire? Visit <a href=\"{0}"
-"\">LimeWire's open-source website</a> and look around!"
+"Want to know more about the development of LimeWire? Visit <a "
+"href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
@@ -1986,9 +1933,9 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, java-format
 msgid ""
-"Did you know LimeWire is completely open-source? Visit <a href=\"{0}\">www."
-"limewire.org</a> for information on how to join developer mailing lists or "
-"to review the code."
+"Did you know LimeWire is completely open-source? Visit <a "
+"href=\"{0}\">www.limewire.org</a> for information on how to join developer "
+"mailing lists or to review the code."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
@@ -2628,8 +2575,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
 msgid ""
-"Set LimeWire to be your default program for opening magnet links and ."
-"torrent files for the smoothest experience using LimeWire with the web. Go "
+"Set LimeWire to be your default program for opening magnet links and "
+".torrent files for the smoothest experience using LimeWire with the web. Go "
 "to Tools &gt; Options &gt; Advanced &gt; File Associations. "
 msgstr ""
 
@@ -2808,14 +2755,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:649
 msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
-"b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
-"limewire.com</a> and download the newest official version of LimeWire.</html>"
+"<html><b>Your LimeWire may have been corrupted by a virus or "
+"trojan!</b><br><br>Please visit <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
+"the newest official version of LimeWire.</html>"
 msgstr ""
-"=<html><b>Το LimeWire ίσως έχει προσβληθεί από έναν ιυό ή trojan!</"
-"b><br><br>Παρακαλώ επισκευθείτε το <a href=\"http://www.limewire.com/"
-"corrupted\">www.limewire.com</a> και κατεβάστε την νεότερη εγκεκριμένη "
-"έκδοση του LimeWire.</html>"
+"=<html><b>Το LimeWire ίσως έχει προσβληθεί από έναν ιυό ή "
+"trojan!</b><br><br>Παρακαλώ επισκευθείτε το <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> και "
+"κατεβάστε την νεότερη εγκεκριμένη έκδοση του LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:33
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
@@ -2913,9 +2861,8 @@ msgid "Search for: {0}"
 msgstr "Ψάξε για: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:31
-#, java-format
-msgid "Search \"What''s New\" for: {0}"
-msgstr "Ψάξε \"Τί είναι νέο\" για: {0}"
+msgid "Search \"What's New\" for: {0}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:48
 #, java-format
@@ -2955,7 +2902,7 @@ msgstr ""
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:50
 msgid "Block Host"
 msgstr "Παρεμπόδιση παρόχου"
@@ -2963,7 +2910,7 @@ msgstr "Παρεμπόδιση παρόχου"
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:56
 msgid "Send Message"
 msgstr "Αποστολή μηνύματος"
@@ -2971,7 +2918,7 @@ msgstr "Αποστολή μηνύματος"
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:62
 msgid "Block Current Host"
 msgstr "Παρεμπόδιση τρέχοντος παρόχου."
@@ -2979,7 +2926,7 @@ msgstr "Παρεμπόδιση τρέχοντος παρόχου."
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:68
 msgid "Send a Message to a Host"
 msgstr "Αποστολή μηνύματος σε έναν πάροχο."
@@ -3162,7 +3109,7 @@ msgstr "Πάροχου:"
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the port text field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:377
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:54
 #, fuzzy
@@ -3421,7 +3368,7 @@ msgstr "Προγράμματα"
 
 #. *
 #. * The resource to use for the speed property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:404
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:313
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
@@ -4093,20 +4040,10 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:366
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:371
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:937
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:936
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr ""
 "Μπορείτε να διαμορφώσετε το φάκελο που μοιράζεστε στις επιλογές του LimeWire."
-
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:369
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:934
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
-#, fuzzy
-msgid "Sharing"
-msgstr "Σύνδεση"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:370
 msgid "Configure..."
@@ -4135,7 +4072,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:83
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:388
-msgid "Your search is too long. Please make your search smaller and try again."
+msgid ""
+"Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Η έρευνά σας έχει πολλούς όρους. Παρακαλώ, χρησιμοποιήστε λιγότερους και "
 "ξαναδοκιμάστε."
@@ -4177,6 +4115,14 @@ msgstr "Τοποθεσίες"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:154
 msgid "Last Modified"
 msgstr "Τελευταία Τροποποίηση"
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
+#, fuzzy
+msgid "Sharing"
+msgstr "Σύνδεση"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:278
@@ -4220,7 +4166,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1028
 #, java-format
-msgid "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
+msgid ""
+"The file \"{0}\" is not a valid incomplete file and cannot be resumed."
 msgstr ""
 "Το αρχείο {0} δεν είναι έγκυρο ανολοκλήρωτο αρχείο και δεν μπορεί να "
 "επαναρχίσει."
@@ -4429,11 +4376,6 @@ msgstr "Αρχείο [&A]"
 msgid "Filter&s"
 msgstr "F;iltra"
 
-#: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:17
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
-msgid "Content"
-msgstr "Περιεχόμενο"
-
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:18
 msgid "&Configure Content Filters"
 msgstr "Ρύθμιση φίλτρων περιεχομένων"
@@ -4620,29 +4562,30 @@ msgid "Select your Language Prefereces"
 msgstr "Διαλέξτε προτιμήσεις γλώσσας"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
-msgid ". The file type is not recognized."
-msgstr ". O τύπος αρχείου δεν είναι αναγνωρίσιμος."
+msgid "The file type is not recognized."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
-msgid ". The file cannot be found."
-msgstr ". Το αρχείο δεν μπορεί να βρεθεί."
+msgid "The file cannot be found."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
-msgid ". The file is corrupt."
-msgstr "Το αρχείο είναι φθαρμένο."
+msgid "The file is corrupt."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
-msgid ". There is an unknown error with the audio file."
-msgstr ". Υπάρχει ένα άγνωστο σφάλμα με το αρχείο ήχου."
+msgid "There is an unknown error with the audio file."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:164
-msgid ". The file cannot be parsed."
-msgstr ". Το αρχείο δεν μπορεί να αναλυθεί."
+msgid "The file cannot be parsed."
+msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:169
-#, fuzzy, java-format
-msgid "LimeWire cannot play the file {0}. {1}"
-msgstr "Το LimeWire δεν μπορεί να μοιραστεί το αρχείο \"{0}\"."
+#. {0}: filename, {1} cause of error (e.g. The file is corrupt.)
+#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:170
+#, java-format
+msgid "LimeWire cannot play the file {0}: {1}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:93
 msgid "Play"
@@ -4796,6 +4739,10 @@ msgstr ""
 msgid "Filters"
 msgstr "Φίλτρα"
 
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+msgid "Content"
+msgstr "Περιεχόμενο"
+
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:254
@@ -4862,8 +4809,8 @@ msgstr "Επιτρεπόμενοι πάροχοι"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AllowMessagesPaneItem.java:28
 msgid ""
-"You can allow messages from specific hosts by adding their IP addresses (e."
-"g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
+"You can allow messages from specific hosts by adding their IP addresses "
+"(e.g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
 "\"192.168.12.16/28\") to the allow list. This list is only needed to "
 "override the banned list."
 msgstr ""
@@ -4902,7 +4849,7 @@ msgstr "Μπορείτε να επιλέξετε ποιο μέσο αναπαρ�
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:30
 msgid "Audio Player"
 msgstr "Μέσο αναπαραγωγής ήχου"
@@ -4965,7 +4912,7 @@ msgstr "Μπορείτε να επιλέξετε ποιον φυλλομετρη
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:36
 msgid "Browser"
 msgstr "Φυλλομετρητής"
@@ -5086,7 +5033,7 @@ msgstr ""
 "Μπορείτε να επεξεργαστείτε το μέγεθος της μνήμης για μετάδοση των πολυμέσων. "
 "Αν το iTunes ή άλλοι αναπαραγωγείς πολυμέσων παρουσιάζουν συχνή επανεκκίνηση "
 "της μνήμης, παρακαλούμε αυξήστε την τιμή. Μια υψηλότερη ρύθμιση ίσως "
-"χρησιμοποιεί περισσότερη μνήμη. "
+"χρησιμοποιεί περισσότερη μνήμη."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:23
 msgid "Password Protection"
@@ -5267,7 +5214,7 @@ msgstr "Μπορείτε να επιλέξετε ποιες επεκτάσεις
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:34
 msgid "Extensions:"
 msgstr "Επεκτάσεις:"
@@ -5347,7 +5294,7 @@ msgstr ""
 #. *
 #. * Key for the locale-specifis string for the adult content check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:49
 msgid "Ignore Adult Content"
 msgstr "Παράβλεψη περιεχομένου για ενήλικες"
@@ -5355,7 +5302,7 @@ msgstr "Παράβλεψη περιεχομένου για ενήλικες"
 #. *
 #. * Key for the locale-specifis string for the html file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:55
 msgid "Ignore .htm/.html Files"
 msgstr "Παράβλεψη αρχείων .htm/.html"
@@ -5363,14 +5310,14 @@ msgstr "Παράβλεψη αρχείων .htm/.html"
 #. *
 #. * Key for the locale-specifis string for the vbs file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:61
 msgid "Ignore .vbs Files"
 msgstr "Παράβλεψη αρχείων .vbs"
 
 #. *
 #. * Key for the locale-specific string for the wmv and asf file check box label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:66
 msgid "Ignore .wmv/.asf files"
 msgstr "Αγνόησε τα αρχεία με κατάληξη .wmv/.asf"
@@ -5397,7 +5344,7 @@ msgstr "Μπορείτε να επιλέξετε ποιο εικονοσκόπι
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:36
 msgid "Image Viewer"
 msgstr "Εικονοσκόπιο"
@@ -5428,7 +5375,7 @@ msgstr "Μπορείτε να καθορίσετε τον μέγιστο αρι�
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:28
 msgid "Maximum Downloads:"
 msgstr "Μέγιστος αριθμός λήψεων:"
@@ -5448,7 +5395,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:28
 msgid "Maximum Searches:"
 msgstr "Ανώτατο όριο αναζητήσεων:"
@@ -5469,7 +5416,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:28
 msgid "Max Upload Slots:"
 msgstr "Μέγιστο όριο αποστολών:"
@@ -5567,7 +5514,7 @@ msgstr "Επιτρεπόμενος αριθμός αποστολών ανά άτ
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:28
 msgid "Uploads Per Person:"
 msgstr "Αποστολές ανά άτομο:"
@@ -5623,7 +5570,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:31
 msgid "Listen on Port:"
 msgstr "Ακρόαση στην πύλη:"
@@ -5680,7 +5627,7 @@ msgstr "Πρωτόκολλο HTTP"
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the proxy host field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:48
 msgid "Proxy:"
 msgstr "Διακομιστής μεσολάβησης παρόχου"
@@ -5693,7 +5640,7 @@ msgstr "Μπορείτε να διαγράφετε αυτόματα τα παλ�
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:29
 msgid "Days to Keep Incomplete Files:"
 msgstr "Αριθμός ημερών για φύλαξη των μη ολοκληρωμένων αρχείων:"
@@ -5706,14 +5653,14 @@ msgstr "Μπορείτε να επιλέξετε τον κατάλογο για 
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for this
 #. * <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:45
 msgid "Folder:"
 msgstr "Κατάλογος:"
 
 #. *
 #. *  The mediator's description label id.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:69
 msgid "You can specify a download location for each media type."
 msgstr ""
@@ -5734,8 +5681,7 @@ msgid ""
 "will be shared:"
 msgstr ""
 "Θα θέλατε να μοιραστείτε τους νέους φακέλους; Οι ακόλουθοι φάκελοι θα "
-"μοιραστούν:\n"
-"\n"
+"μοιραστούν:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:21
 msgid "Search Result Quality"
@@ -5848,19 +5794,17 @@ msgstr "Παύση λειτουργίας μετά τις μεταφορές."
 msgid "Minimize to System Tray"
 msgstr "Ελαχιστοποίηση στη γραμμή εργασιών"
 
-#. TODO not title there
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
-#, fuzzy
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:19
 msgid "Start Upload Slots"
-msgstr "Εκκίνηση αποστολών:"
+msgstr ""
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:22
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:29
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:28
 msgid "Start Upload Slots:"
 msgstr "Εκκίνηση αποστολών:"
 
@@ -5896,7 +5840,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:38
 msgid "Speed:"
 msgstr "Ταχύτητα:"
@@ -5921,7 +5865,8 @@ msgstr "Εύρους ζώνης (Εισ/Εξ)"
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:21
 #, fuzzy
 msgid "You can display your bandwidth consumption in the status bar."
-msgstr "Μπορείτε να εμφανίσετε το τοίχος προστασίας σας στη γραμμή εργαλείων."
+msgstr ""
+"Μπορείτε να εμφανίσετε το τοίχος προστασίας σας στη γραμμή εργαλείων."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:28
 #, fuzzy
@@ -5948,7 +5893,8 @@ msgstr "Μετρητής Τοίχους Προστασίας"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:21
 msgid "You can display your firewall status in the status bar."
-msgstr "Μπορείτε να εμφανίσετε το τοίχος προστασίας σας στη γραμμή εργαλείων."
+msgstr ""
+"Μπορείτε να εμφανίσετε το τοίχος προστασίας σας στη γραμμή εργαλείων."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:28
 msgid "Show Firewall Indicator:"
@@ -6024,13 +5970,14 @@ msgstr "Επιλογές βίντεο"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:29
 msgid "You can choose which video player to use."
-msgstr "Μπορείτε να επιλέξετε ποιο μέσο αναπαραγωγής βίντεο θα χρησιμοποιείτε."
+msgstr ""
+"Μπορείτε να επιλέξετε ποιο μέσο αναπαραγωγής βίντεο θα χρησιμοποιείτε."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:36
 msgid "Video Player"
 msgstr "Μέσο αναπαραγωγής βίντεο"
@@ -6125,7 +6072,7 @@ msgstr "Θα θέλατε να αρχίσετε το download από τους α
 
 #. *
 #. * The resource to use for the vendor property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:48
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:82
 msgid "Vendor"
@@ -6191,7 +6138,8 @@ msgstr "Μαρκάρισε τις επελεγμένες έρευνες ως μ�
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:526
 msgid "Do you want to block search results from the following list of hosts?"
-msgstr "Θέλετε να μπλοκάρετε τα αποτελέσματα της αναζήτησης από τον πάροχο στο"
+msgstr ""
+"Θέλετε να μπλοκάρετε τα αποτελέσματα της αναζήτησης από τον πάροχο στο"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:856
 msgid "More Info..."
@@ -6212,7 +6160,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:194
 msgid "Search For Video Files, Including avi, mpg, wmv, and More"
-msgstr "Ψάξε για αρχεία video, συμπεριλαμβανομένων των avi, mpg, wmv και άλλα"
+msgstr ""
+"Ψάξε για αρχεία video, συμπεριλαμβανομένων των avi, mpg, wmv και άλλα"
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:199
 msgid "Search for Document Files, Including html, txt, pdf, and More"
@@ -6276,7 +6225,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:360
 msgid "When your friends want to connect to you, they should enter"
-msgstr "Όταν οι φίλοι σας θέλουν να συνδεθούν με εσάς, θα πρέπει να εισαγάγουν"
+msgstr ""
+"Όταν οι φίλοι σας θέλουν να συνδεθούν με εσάς, θα πρέπει να εισαγάγουν"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:365
 msgid ""
@@ -6626,7 +6576,7 @@ msgid "Awaiting Requests"
 msgstr "Περιμένει Απαιτήσεις"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:312
-#, fuzzy, java-format
+#, fuzzy
 msgid "Swarm for {0}"
 msgstr "Ψάξε για: {0}"
 
@@ -6639,47 +6589,47 @@ msgstr "Φόρτωση παραθύρου αποστολής..."
 msgid "Seeding"
 msgstr "Έρευνα"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:35
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:36
 msgid "Invalid Filename"
 msgstr "Άκυρο όνομα αρχείου"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:38
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:39
 msgid "Download Already Finished"
 msgstr "Το download έχει ήδη τελειώσει"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:41
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:42
 msgid "No Write Permission"
 msgstr "Δεν υπάρχει άδεια Εγγραφής"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:44
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:45
 msgid "Folder Does Not Exist"
 msgstr "Ο φάκελος δεν υπάρχει"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:47
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:48
 msgid "File Already Exists"
 msgstr "Το αρχείο ήδη υπάρχει"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:50
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:51
 msgid "Filename Taken"
 msgstr "Το όνομα υπάρχει ήδη"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:53
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:54
 msgid "Not a Folder"
 msgstr "Δεν είναι φάκελος"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:56
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:57
 msgid "Not a File"
 msgstr "Δεν είναι αρχείο"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:59
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:60
 msgid "Filesystem Error"
 msgstr "Σφάλμα Συστήματος"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:62
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:63
 msgid "Same File Already Being Downloaded"
 msgstr "Το ίδιο αρχείο έχει ήδη κατεβαστεί"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:86
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:87
 #, java-format
 msgid ""
 "Could not set file location to {0}, because the filename is invalid and may "
@@ -6688,13 +6638,13 @@ msgstr ""
 "Δεν μπόρεσε να καθορίσε την τοποθεσία του αρχείου σε {0}, επειδή το όνομα "
 "του αρχείου είναι άκυρο και ίσως το σύστημά σας καταρρεύσει."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:89
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:90
 msgid "Could not set the file location, the download is already finished."
 msgstr ""
 "Δεν μπόρεσε να καθορίσει την τοποθεσία του αρχείου, το download έχει ήδη "
 "τελειώσει."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:92
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:93
 #, java-format
 msgid ""
 "Could not save download to the folder {0}, because you do not have write "
@@ -6703,7 +6653,7 @@ msgstr ""
 "Δεν μπόρεσε να σωσει το download στο φάκελο {0}, επειδή δεν έχειτε πρόσβαση "
 "εγγραφής σε αυτόν."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:96
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:97
 #, java-format
 msgid ""
 "Could not save download to folder {0}, because the folder does not exist."
@@ -6711,17 +6661,17 @@ msgstr ""
 "Δεν μπόρεσε να σωσει το download στο φάκελο {0}, επειδή ο φάκελος δεν "
 "υπάρχει."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:100
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:101
 #, java-format
 msgid "A file already exists at {0}."
 msgstr "Ένα αρχείο υπάρχει ήδη στο {0}."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:104
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:105
 #, java-format
 msgid "Another download is already saving to {0}."
 msgstr "Ένα άλλο download έχει ήδη σωθεί στο {0}"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:108
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:109
 #, java-format
 msgid ""
 "Could not set download folder to {0}, because it represents an individual "
@@ -6730,24 +6680,24 @@ msgstr ""
 "Δεν μπόρεσε να καθορίσε τον φάκελο {0} για το download, επειδή "
 "αντιπροσωπεύει ένα συγκεκριμένο αρχείο, όχι έναν φάκελο."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:112
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:113
 #, java-format
 msgid "Could not set file location to {0}, because it is not a regular file."
 msgstr ""
 "Δεν μπόρεσε να καθορίσει την τοποθεσία του αρχείου σε {0}, επειδή δεν είναι "
 "ένα πρόσφατο αρχείο."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:115
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:116
 msgid "Could not set file location due to an error in the filesystem."
 msgstr ""
 "Δεν μπόρεσε να καθορίσει την τοποθεσία του αρχείου λόγω ενός σφάλματος του "
 "συστήματος."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:117
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:118
 msgid "The same file is already being downloaded."
 msgstr "Το ίδιο αρχείο είναι ήδη κατεβασμένο."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:119
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:120
 #, java-format
 msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
@@ -6845,12 +6795,10 @@ msgstr ""
 "αντίγραφο αυτού του αρχείου;"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:208
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "The description for this file is too short. Please enter at least {0} words."
 msgstr ""
-"Η περιγραφή γι' αυτό το αρχείο είναι πολύ μικρή. Παρακαλώ εισάγετε "
-"τουλάχιστον {0} λέξεις."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:315
 msgid ""
@@ -6938,7 +6886,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:581
 msgid "I want to use the Internet Archive to host the file."
-msgstr "Θέλω να χρησιμοποιήσω το \"Internet Archive\" για να παρέχω το αρχείο."
+msgstr ""
+"Θέλω να χρησιμοποιήσω το \"Internet Archive\" για να παρέχω το αρχείο."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:584
 msgid "I want to host the verification file myself at the following URL:"
@@ -7242,32 +7191,12 @@ msgid "Info"
 msgstr "Πληροφορίες"
 
 #, fuzzy
-#~ msgid "test1"
-#~ msgstr "Επαναφορά"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "Επαναφορά"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "Ethernet"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "Σύνδεση"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
+#~ msgid "United States"
+#~ msgstr "Αναβαθμίσεις"
 
 #, fuzzy
 #~ msgid "English"
 #~ msgstr "Τέλος"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Αναβαθμίσεις"
 
 #~ msgid "Loading Languages"
 #~ msgstr "Φόρτωμα Γλωσσών"
@@ -7275,6 +7204,33 @@ msgstr "Πληροφορίες"
 #, fuzzy
 #~ msgid "false"
 #~ msgstr "Επικόλληση"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Ο αριθμός των αρχείων που μοιράζεστε. {0} αρχεία (Φόρτωμα...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Ο αριθμός των αρχείων που μοιράζεστε. {0} αρχεία"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Ψάξε \"Τί είναι νέο\" για: {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". O τύπος αρχείου δεν είναι αναγνωρίσιμος."
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Το αρχείο δεν μπορεί να βρεθεί."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr "Το αρχείο είναι φθαρμένο."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Υπάρχει ένα άγνωστο σφάλμα με το αρχείο ήχου."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Το αρχείο δεν μπορεί να αναλυθεί."
 
 #~ msgid "Close the Window"
 #~ msgstr "Κλείσιμο παραθύρου."
@@ -7338,8 +7294,7 @@ msgstr "Πληροφορίες"
 
 #~ msgid "Only search results with a {0} are official LimeWire communications."
 #~ msgstr ""
-#~ "Μόνο αποτελέσματα με ένα {0} είναι αναγωνρισμένες πληροφορίες του "
-#~ "LimeWire."
+#~ "Μόνο αποτελέσματα με ένα {0} είναι αναγωνρισμένες πληροφορίες του LimeWire."
 
 #~ msgid "Files"
 #~ msgstr "αρχεία"
@@ -7374,14 +7329,12 @@ msgstr "Πληροφορίες"
 #~ msgid "Orginal query"
 #~ msgstr "Αρχικό ερώτημα"
 
-#~ msgid ""
-#~ "Performs the same search as the one which found this file previously."
+#~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr "Κάνε την ίδια έρευνα σαν αυτή που βρήκες το προηγούμενο αρχείο."
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
 #~ msgstr ""
-#~ "Συγγνώμη, αλλά το LimeWire δεν μπόρεσε να επανεκκινήσει τα παλιά σας "
-#~ "torrent."
+#~ "Συγγνώμη, αλλά το LimeWire δεν μπόρεσε να επανεκκινήσει τα παλιά σας torrent."
 
 #~ msgid "Validation Required"
 #~ msgstr "Επικύρωση Αναγκαία"
@@ -7416,15 +7369,15 @@ msgstr "Πληροφορίες"
 
 #~ msgid ""
 #~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check "
-#~ "your connection or firewall settings and then select \"Connect\" from the "
-#~ "File menu to connect LimeWire to the network."
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
 #~ msgstr ""
-#~ "Φαίνεται πως υπολογιστής σας δεν έχει κάποια σύνδεση στο Internet ή "
-#~ "κάποιο firewall αποτρέπει το LimeWire από το να έχει πρόσβαση στο "
-#~ "Internet. Παρακαλώ ελέγξτε τη σύνδεσή σας ή τις επιλογές firewall και "
-#~ "μετά επιλέξτε «Σύνδεση» από το μενού του «Αρχείου», για να συνδεθείτε στο "
-#~ "δίκτυο του LimeWire."
+#~ "Φαίνεται πως υπολογιστής σας δεν έχει κάποια σύνδεση στο Internet ή κάποιο "
+#~ "firewall αποτρέπει το LimeWire από το να έχει πρόσβαση στο Internet. "
+#~ "Παρακαλώ ελέγξτε τη σύνδεσή σας ή τις επιλογές firewall και μετά επιλέξτε "
+#~ "«Σύνδεση» από το μενού του «Αρχείου», για να συνδεθείτε στο δίκτυο του "
+#~ "LimeWire."
 
 #~ msgid ""
 #~ "Could not find a port to use for incoming connections.\n"
@@ -7452,8 +7405,8 @@ msgstr "Πληροφορίες"
 #~ msgid ""
 #~ "LimeWire was unable to download the torrent file from the specified URL:"
 #~ msgstr ""
-#~ "Το LimeWire ήταν ανίκανο να κατεβάσει το αρχείο με επέκταση torrent από "
-#~ "τη συγκεκριμένη ιστοσελίδα(URL):"
+#~ "Το LimeWire ήταν ανίκανο να κατεβάσει το αρχείο με επέκταση torrent από τη "
+#~ "συγκεκριμένη ιστοσελίδα(URL):"
 
 #~ msgid "Weedshare"
 #~ msgstr "Δημόσιο μοίρασμα"
@@ -7466,41 +7419,39 @@ msgstr "Πληροφορίες"
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the "
-#~ "desired statistics."
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
 #~ msgstr ""
 #~ "Τα στατιστικά στοιχεία εύρους ζώνης περιλαμβάνουν πλήρεις πληροφορίες για "
-#~ "όλο το εύρους ζώνης που στάληκε είτε προς τα πάνω είτε προς τα κάτω. "
-#~ "Πατήστε σε μια κατηγορία για να δείτε τα επιθυμητά στατιστικά στοιχεία."
+#~ "όλο το εύρους ζώνης που στάληκε είτε προς τα πάνω είτε προς τα κάτω. Πατήστε "
+#~ "σε μια κατηγορία για να δείτε τα επιθυμητά στατιστικά στοιχεία."
 
 #~ msgid "Network"
 #~ msgstr "Δίκτυο"
 
 #~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are "
-#~ "quite inaccurate due to the dynamic, distributed nature of Gnutella and "
-#~ "should not be taken too literally. They can, however, give you a general "
-#~ "idea regarding the current state of your connection."
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
 #~ msgstr ""
-#~ "Στατιστικά στοιχεία για την τρέχουσα κατάσταση του δικτύου. Τα στοιχεία "
-#~ "αυτά είναι πολύ ανακριβή εξαιτίας της δυναμικής, κατανεμημένης φύσης της "
+#~ "Στατιστικά στοιχεία για την τρέχουσα κατάσταση του δικτύου. Τα στοιχεία αυτά "
+#~ "είναι πολύ ανακριβή εξαιτίας της δυναμικής, κατανεμημένης φύσης της "
 #~ "Gnutella, γι’ αυτό και δεν πρέπει να εκλαμβάνονται πολύ στην κυριολεξία. "
 #~ "Μπορούν, ωστόσο, να σας δώσουν μια γενική ιδέα όσον αφορά τη τρέχουσα "
 #~ "κατάσταση της σύνδεσής σας."
 
 #~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages "
-#~ "and HTTP traffic. This information can be useful for advanced users as "
-#~ "well as for researchers working on the Gnutella network. Advanced "
-#~ "statistics are not displayed by default and are not recommended for most "
-#~ "users."
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
 #~ msgstr ""
 #~ "Τα στοιχεία αυτά περιλαμβάνουν λεπτομερείς πληροφορίες για τα μηνύματα "
-#~ "Gnutella και την κίνηση του πρωτοκόλλου HTTP. Οι πληροφορίες αυτές μπορεί "
-#~ "να είναι χρήσιμες για προχωρημένους χρήστες, καθώς επίσης και για "
-#~ "ερευνητές που εργάζονται στο δίκτυο Gnutella. Τα προχωρημένα αυτά "
-#~ "στατιστικά στοιχεία δεν εμφαίνονται εξ ορισμού και δεν συνιστώνται για "
-#~ "τους περισσότερους χρήστες."
+#~ "Gnutella και την κίνηση του πρωτοκόλλου HTTP. Οι πληροφορίες αυτές μπορεί να "
+#~ "είναι χρήσιμες για προχωρημένους χρήστες, καθώς επίσης και για ερευνητές που "
+#~ "εργάζονται στο δίκτυο Gnutella. Τα προχωρημένα αυτά στατιστικά στοιχεία δεν "
+#~ "εμφαίνονται εξ ορισμού και δεν συνιστώνται για τους περισσότερους χρήστες."
 
 #~ msgid "Show Advanced Statistics:"
 #~ msgstr "Εμφάνιση προχωρημένων στατιστικών στοιχείων:"
@@ -7516,11 +7467,11 @@ msgstr "Πληροφορίες"
 #~ "δεδομένων είτε μέσω αποστολών είτε μέσω μηνυμάτων Gnutella."
 
 #~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads "
-#~ "or Gnutella messages."
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
 #~ msgstr ""
-#~ "Σύνολο εύρους ζώνης που χρησιμοποιήθηκε για την λήψη εισερχόμενων "
-#~ "δεδομένων είτε μέσω λήψεων είτε μέσω μηνυμάτων Gnutella."
+#~ "Σύνολο εύρους ζώνης που χρησιμοποιήθηκε για την λήψη εισερχόμενων δεδομένων "
+#~ "είτε μέσω λήψεων είτε μέσω μηνυμάτων Gnutella."
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "Όλα τα μηνύματα Gnutella που λήφθηκαν μέσω αυτόν τον πελάτη."
@@ -7547,12 +7498,12 @@ msgstr "Πληροφορίες"
 #~ "Number of duplicate queries received over TCP versus the total number of "
 #~ "queries."
 #~ msgstr ""
-#~ "Αριθμός αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω TCP, σε "
-#~ "αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
+#~ "Αριθμός αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω TCP, σε αντιδιαστολή "
+#~ "με συνολικός αριθμός αιτήσεις αναζήτησης."
 
 #~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total "
-#~ "number of queries."
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
 #~ msgstr ""
 #~ "Αριθμός αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω Multicast, σε "
 #~ "αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
@@ -7562,8 +7513,7 @@ msgstr "Πληροφορίες"
 
 #~ msgid "All received queries, by time to live (TTL)."
 #~ msgstr ""
-#~ "Όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον time to live "
-#~ "(TTL)."
+#~ "Όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον time to live (TTL)."
 
 #~ msgid "Special Queries"
 #~ msgstr "Ειδικά ερωτήματα"
@@ -7586,61 +7536,61 @@ msgstr "Πληροφορίες"
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over TCP, by message type."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω TCP, "
-#~ "ανάλογα με τον τύπο του μηνύματος."
+#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω TCP, ανάλογα "
+#~ "με τον τύπο του μηνύματος."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over UDP, by message type."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω UDP, "
-#~ "ανάλογα με τον τύπο του μηνύματος."
+#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω UDP, ανάλογα "
+#~ "με τον τύπο του μηνύματος."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over Multicast, by message "
 #~ "type."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω "
-#~ "Multicast, ανάλογα με τον τύπο του μηνύματος."
+#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω Multicast, "
+#~ "ανάλογα με τον τύπο του μηνύματος."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω TCP, UDP "
-#~ "ή Multicast."
+#~ "Σύνολο kilobytes για όλα τα μηνύματα Gnutella που λήφθηκαν μέσω TCP, UDP ή "
+#~ "Multicast."
 
 #~ msgid ""
 #~ "Total kilobytes in duplicate queries received over TCP versus the total "
 #~ "number of queries."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν "
-#~ "μέσω TCP, σε αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
+#~ "Σύνολο kilobytes για όλα τα αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω "
+#~ "TCP, σε αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
 
 #~ msgid ""
 #~ "Total kilobytes in duplicate queries received over Multicast versus the "
 #~ "total number of queries."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν "
-#~ "μέσω Multicast, σε αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
+#~ "Σύνολο kilobytes για όλα τα αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω "
+#~ "Multicast, σε αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
 
 #~ msgid "All received queries in kilobytes, by hops."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με "
-#~ "τον hops."
+#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "hops."
 
 #~ msgid "All received queries in kilobytes, by time to live (TTL)."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με "
-#~ "τον time to live (TTL)."
+#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "time to live (TTL)."
 
 #~ msgid "All received query hits in kilobytes, by hops."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με "
-#~ "τον hops."
+#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "hops."
 
 #~ msgid "All received query hits in kilobytes, by time to live (TTL)."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με "
-#~ "τον time to live (TTL)."
+#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "time to live (TTL)."
 
 #~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
@@ -7649,23 +7599,22 @@ msgstr "Πληροφορίες"
 
 #~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Απαντήσεις σε ping UDP που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Απαντήσεις σε ping UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "UDP queries received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Αιτήσεις αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αιτήσεις αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "UDP query hits received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Χτύποι αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Χτύποι αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
-#~ msgid ""
-#~ "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Αιτήσεις push UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
 #~ "αντιδιαστολή με άλλα LimeWire."
@@ -7673,8 +7622,8 @@ msgstr "Πληροφορίες"
 #~ msgid ""
 #~ "Multicast pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Αιτήσεις ping Multicast που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αιτήσεις ping Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
@@ -7683,8 +7632,7 @@ msgstr "Πληροφορίες"
 #~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Αιτήσεις αναζήτησης Multicast που στάληκαν από όλους τους πελάτες του "
 #~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
@@ -7697,18 +7645,17 @@ msgstr "Πληροφορίες"
 #~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Αιτήσεις push Multicast που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αιτήσεις push Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για αιτήσεις ping UDP που στάληκαν από όλους τους "
-#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+#~ "Σύνολο kilobytes για αιτήσεις ping UDP που στάληκαν από όλους τους πελάτες "
+#~ "του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
@@ -7725,8 +7672,8 @@ msgstr "Πληροφορίες"
 #~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Kilobytes for UDP query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
 #~ "Σύνολο kilobytes για χτύποι αναζήτησης UDP που στάληκαν από όλους τους "
 #~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
@@ -7735,8 +7682,8 @@ msgstr "Πληροφορίες"
 #~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για αιτήσεις push UDP που στάληκαν από όλους τους "
-#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+#~ "Σύνολο kilobytes για αιτήσεις push UDP που στάληκαν από όλους τους πελάτες "
+#~ "του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
@@ -7760,11 +7707,11 @@ msgstr "Πληροφορίες"
 #~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients "
-#~ "versus other LimeWires."
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για χτύποι αναζήτησης Multicast που στάληκαν από όλους "
-#~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+#~ "Σύνολο kilobytes για χτύποι αναζήτησης Multicast που στάληκαν από όλους τους "
+#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
@@ -7791,8 +7738,8 @@ msgstr "Πληροφορίες"
 
 #~ msgid "All queries that were routed to leaves, using query routing tables."
 #~ msgstr ""
-#~ "Όλα τα ερωτήματα που διανεμήθηκαν σε φύλλα, χρησιμοποιόντας πίνακες "
-#~ "διανομής ερωτημάτων."
+#~ "Όλα τα ερωτήματα που διανεμήθηκαν σε φύλλα, χρησιμοποιόντας πίνακες διανομής "
+#~ "ερωτημάτων."
 
 #~ msgid "All queries that were received from routed connections."
 #~ msgstr "Όλα τα ερωτήματα που λήφθηκαν από συνδέσεις διανομής"
@@ -7851,8 +7798,8 @@ msgstr "Πληροφορίες"
 
 #~ msgid "All Gnutella messages sent over Multicast, by message type."
 #~ msgstr ""
-#~ "Σύνολο μηνυμάτων Gnutella που στάληκαν μέσω Multicast, ανάλογα με τον "
-#~ "τύπο του μηνύματος."
+#~ "Σύνολο μηνυμάτων Gnutella που στάληκαν μέσω Multicast, ανάλογα με τον τύπο "
+#~ "του μηνύματος."
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr "Σύνολο μηνυμάτων Gnutella που στάληκαν μέσω TCP, UDP ή Multicast."
@@ -7861,24 +7808,21 @@ msgstr "Πληροφορίες"
 #~ msgstr ""
 #~ "Σύνολο kilobytes για μηνύματα Gnutella, που στάληκαν από αυτόν τον πελάτη."
 
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για μηνύματα Gnutella που στάληκαν μέσω TCP, ανάλογα με "
-#~ "τον τύπο του μηνύματος."
+#~ "Σύνολο kilobytes για μηνύματα Gnutella που στάληκαν μέσω TCP, ανάλογα με τον "
+#~ "τύπο του μηνύματος."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για μηνύματα Gnutella που στάληκαν μέσω UDP, ανάλογα με τον "
+#~ "τύπο του μηνύματος."
 
 #~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
 #~ msgstr ""
-#~ "Σύνολο kilobytes για μηνύματα Gnutella που στάληκαν μέσω UDP, ανάλογα με "
-#~ "τον τύπο του μηνύματος."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Σύνολο kilobyte για μηνύματα Gnutella που στάληκαν μέσω Multicast, "
-#~ "ανάλογα με τον τύπο του μηνύματος."
+#~ "Σύνολο kilobyte για μηνύματα Gnutella που στάληκαν μέσω Multicast, ανάλογα "
+#~ "με τον τύπο του μηνύματος."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
@@ -7893,19 +7837,18 @@ msgstr "Πληροφορίες"
 
 #~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Απαντήσεις σε ping UDP που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Απαντήσεις σε ping UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Αιτήσεις αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αιτήσεις αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
-#~ msgid ""
-#~ "UDP query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Χτύποι αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Χτύποι αναζήτησης UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
@@ -7915,8 +7858,8 @@ msgstr "Πληροφορίες"
 #~ msgid ""
 #~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Αιτήσεις ping Multicast που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αιτήσεις ping Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Multicast pongs sent from all Gnutella clients versus other LimeWires."
@@ -7931,8 +7874,7 @@ msgstr "Πληροφορίες"
 #~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Multicast query hits sent from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Χτύποι αναζήτησης Multicast που στάληκαν από όλους τους πελάτες του "
 #~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
@@ -7940,8 +7882,8 @@ msgstr "Πληροφορίες"
 #~ msgid ""
 #~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Αιτήσεις push Multicast που στάληκαν από όλους τους πελάτες του Gnutella, "
-#~ "σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αιτήσεις push Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid "Total kilobytes sent by other LimeWires."
 #~ msgstr "Συνολικός αριθμός kilobyte που στάληκαν από άλλα LimeWire."
@@ -7950,8 +7892,8 @@ msgstr "Πληροφορίες"
 #~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Αριθμός kilobytes για αιτήσεις ping UDP που στάληκαν από όλους τους "
-#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αριθμός kilobytes για αιτήσεις ping UDP που στάληκαν από όλους τους πελάτες "
+#~ "του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
@@ -7978,8 +7920,8 @@ msgstr "Πληροφορίες"
 #~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Αριθμός kilobytes για αιτήσεις push UDP που στάληκαν από όλους τους "
-#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αριθμός kilobytes για αιτήσεις push UDP που στάληκαν από όλους τους πελάτες "
+#~ "του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
@@ -7996,11 +7938,11 @@ msgstr "Πληροφορίες"
 #~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
-#~ "Αριθμός kilobyte για αιτήσεις αναζήτησης Multicast, που στάληκαν από "
-#~ "όλους τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+#~ "Αριθμός kilobyte για αιτήσεις αναζήτησης Multicast, που στάληκαν από όλους "
+#~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
@@ -8010,8 +7952,8 @@ msgstr "Πληροφορίες"
 #~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
 #~ "Αριθμός kilobyte για αιτήσεις push Multicast, που στάληκαν από όλους τους "
 #~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
@@ -8035,8 +7977,8 @@ msgstr "Πληροφορίες"
 #~ msgstr "Εξερχόμενο απορριψη διακομιστή"
 
 #~ msgid ""
-#~ "Statistics for outgoing Gnutella connection handshaking rejections from "
-#~ "the server."
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
 #~ msgstr ""
 #~ "Στατιστικά για εξερχόμενες συνδέσεις Gnutella χειραψίας οι οποίες "
 #~ "απορρίφθηκαν από τον διακομιστή."
@@ -8045,8 +7987,7 @@ msgstr "Πληροφορίες"
 #~ msgstr "Συμπίεση"
 
 #~ msgid "Statistics for compressed upstream traffic in kilobytes."
-#~ msgstr ""
-#~ "Στατιστικά στοιχεία για την κίνηση ανερχόμενων αρχείων σε kilobytes."
+#~ msgstr "Στατιστικά στοιχεία για την κίνηση ανερχόμενων αρχείων σε kilobytes."
 
 #~ msgid "Statistics for compressed downstream traffic in kilobytes."
 #~ msgstr ""
@@ -8075,15 +8016,15 @@ msgstr "Πληροφορίες"
 #~ msgstr "Σύνολο φιλτραρισμένων μηνυμάτων."
 
 #~ msgid ""
-#~ "Total number of Gnutella connection attempts, either initiated internally "
-#~ "or externally."
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
 #~ msgstr ""
 #~ "Συνολικός αριθμός προσπαθειών σύνδεσης Gnutella, που τέθηκαν σε εφαρμογή "
 #~ "είτε εσωτερικά είτε εξωτερικά."
 
 #~ msgid ""
-#~ "Total outgoing download connections attempts over time. This includes "
-#~ "both direct connections and pushed requests."
+#~ "Total outgoing download connections attempts over time. This includes both "
+#~ "direct connections and pushed requests."
 #~ msgstr ""
 #~ "Σύνολο προσπαθειών εξερχόμενων συνδέσεων συν τω χρόνω. Αυτό περιλαμβάνει "
 #~ "τόσο τις απευθείας συνδέσεις όσο και τις πιεστικές αιτήσεις."
@@ -8092,9 +8033,9 @@ msgstr "Πληροφορίες"
 #~ "Total responses received from downloaders over time. This includes Busy, "
 #~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
 #~ msgstr ""
-#~ "Σύνολο απαντήσεων που λήφθηκαν από χρήστες συν τω χρόνω. Αυτό "
-#~ "περιλαμβάνει τα «Απασχολημένο», «Το αρχείο δεν βρέθηκε», «Όχι μοίρασμα», "
-#~ "«Στην ουρά», «Ποικίλα», «Εισ/Εξ σφάλματα», και «Απαντήσεις ΟΚ»."
+#~ "Σύνολο απαντήσεων που λήφθηκαν από χρήστες συν τω χρόνω. Αυτό περιλαμβάνει "
+#~ "τα «Απασχολημένο», «Το αρχείο δεν βρέθηκε», «Όχι μοίρασμα», «Στην ουρά», "
+#~ "«Ποικίλα», «Εισ/Εξ σφάλματα», και «Απαντήσεις ΟΚ»."
 
 #~ msgid "Alt. Locations"
 #~ msgstr "Εναλλακτικές τοποθεσίες"
@@ -8105,8 +8046,8 @@ msgstr "Πληροφορίες"
 #~ "ignore, locations that couldn't be removed, and locations that we removed "
 #~ "permanently from attempting to connect to."
 #~ msgstr ""
-#~ "Σύνολο εναλλακτικών τοποθεσιών που λήφθηκαν και απορρίφθηκαν συν τω "
-#~ "χρόνω. Αυτό περιλαμβάνει τοποθεσίες με τις οποίες προσπαθήσαμε ενεργά να "
+#~ "Σύνολο εναλλακτικών τοποθεσιών που λήφθηκαν και απορρίφθηκαν συν τω χρόνω. "
+#~ "Αυτό περιλαμβάνει τοποθεσίες με τις οποίες προσπαθήσαμε ενεργά να "
 #~ "συνδεθούμε, τοποθεσίες που θα αγνοήσουμε, τοποθεσίες που δεν μπορούσαν να "
 #~ "απορριφθούν και τοποθεσίες που απορρίφθηκαν μόνιμα."
 
@@ -8114,20 +8055,19 @@ msgstr "Πληροφορίες"
 #~ msgstr "Μεταφορές αρχείων"
 
 #~ msgid ""
-#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 "
-#~ "transfers. For HTTP1.1, values are per chunk."
+#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
+#~ "For HTTP1.1, values are per chunk."
 #~ msgstr ""
-#~ "Σύνολο μεταφορών συν τω χρόνω. Αυτό περιλαμβάνει τις μεταφορές "
-#~ "πρωτοκόλλων HTTP1.1 και HTTP1.0. Για το HTTP1.1, οι αξίες είναι ανά τμήμα."
+#~ "Σύνολο μεταφορών συν τω χρόνω. Αυτό περιλαμβάνει τις μεταφορές πρωτοκόλλων "
+#~ "HTTP1.1 και HTTP1.0. Για το HTTP1.1, οι αξίες είναι ανά τμήμα."
 
 #~ msgid ""
-#~ "Records the time in milliseconds to establish TCP connections for "
-#~ "downloads. This can vary, for example, when servers are experiencing high "
-#~ "loads."
+#~ "Records the time in milliseconds to establish TCP connections for downloads. "
+#~ "This can vary, for example, when servers are experiencing high loads."
 #~ msgstr ""
 #~ "Καταγραφή χρόνου σε χιλιοστά του δευτερολέπτου, που απαιτήθηκε για την "
-#~ "εγκαθίδρυση συνδέσεων TCP για κατέβασμα αρχείων. Αυτό μπορεί να "
-#~ "ποικίλλει, για παράδειγμα, στην περίπτωση υπερφόρτωσης των διακομιστών."
+#~ "εγκαθίδρυση συνδέσεων TCP για κατέβασμα αρχείων. Αυτό μπορεί να ποικίλλει, "
+#~ "για παράδειγμα, στην περίπτωση υπερφόρτωσης των διακομιστών."
 
 #~ msgid "Requests"
 #~ msgstr "Αιτήσεις"
@@ -8142,40 +8082,39 @@ msgstr "Πληροφορίες"
 #~ "περιλαμβάνουν κάθε τμήμα για μεταφορές HTTP/1.1."
 
 #~ msgid ""
-#~ "Total outgoing responses. These numbers are incremented before sending "
-#~ "each response, and thus include every chunk for HTTP/1.1 transfers. "
-#~ "'Normal' is the number of requests for which we have attempted to "
-#~ "transfer a portion of a file."
+#~ "Total outgoing responses. These numbers are incremented before sending each "
+#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
+#~ "the number of requests for which we have attempted to transfer a portion of "
+#~ "a file."
 #~ msgstr ""
 #~ "Σύνολο εξερχόμενων απαντήσεων. Οι αριθμοί αυτοί αυξάνονται πριν από την "
-#~ "αποστολή κάθε απάντησης, και γι’ αυτό περιλαμβάνουν κάθε τμήμα για "
-#~ "μεταφορές HTTP/1.1. «Κανονικό» είναι το σύνολο των αιτήσεων για τις "
-#~ "οποίες προσπαθήσαμε να μεταφέρουμε ένα μέρος από κάποιο αρχείο."
+#~ "αποστολή κάθε απάντησης, και γι’ αυτό περιλαμβάνουν κάθε τμήμα για μεταφορές "
+#~ "HTTP/1.1. «Κανονικό» είναι το σύνολο των αιτήσεων για τις οποίες "
+#~ "προσπαθήσαμε να μεταφέρουμε ένα μέρος από κάποιο αρχείο."
 
 #~ msgid "Request Methods"
 #~ msgstr "Μέθοδοι αιτήσεων"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
-#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for "
-#~ "push requests, after we have sent the initial GIV."
+#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
+#~ "requests, after we have sent the initial GIV."
 #~ msgstr ""
-#~ "Σύνολο εισερχόμενων μεθόδων αιτήσεων. Οι αριθμοί αυτοί αυξάνονται είτε "
-#~ "για μεταφορά HTTP/1.1 ΥΣΤΕΡΑ από την αρχική εισερχόμενη αίτηση για "
-#~ "σύνδεση ή για αναγκαστικές αιτήσεις, αφού έχουμε στείλει το αρχικό GIV."
+#~ "Σύνολο εισερχόμενων μεθόδων αιτήσεων. Οι αριθμοί αυτοί αυξάνονται είτε για "
+#~ "μεταφορά HTTP/1.1 ΥΣΤΕΡΑ από την αρχική εισερχόμενη αίτηση για σύνδεση ή για "
+#~ "αναγκαστικές αιτήσεις, αφού έχουμε στείλει το αρχικό GIV."
 
 #~ msgid "General"
 #~ msgstr "Γενικά"
 
 #~ msgid ""
 #~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
-#~ "are incremented per connection, not per chunk. (Stalled uploads will also "
-#~ "be counted as an interrupted upload.)"
+#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
+#~ "counted as an interrupted upload.)"
 #~ msgstr ""
-#~ "Σύνολο αποστολών που επιχειρήθηκαν, συμπληρώθηκαν, διακόπηκαν ή που "
-#~ "έμειναν στάσιμες. Οι αριθμοί αυτοί αυξάνονται ανά σύνδεση και όχι ανά "
-#~ "τμήμα. (Οι στάσιμες αποστολές θα καταχωρηθούν ως αποστολές που "
-#~ "διακόπηκαν.)"
+#~ "Σύνολο αποστολών που επιχειρήθηκαν, συμπληρώθηκαν, διακόπηκαν ή που έμειναν "
+#~ "στάσιμες. Οι αριθμοί αυτοί αυξάνονται ανά σύνδεση και όχι ανά τμήμα. (Οι "
+#~ "στάσιμες αποστολές θα καταχωρηθούν ως αποστολές που διακόπηκαν.)"
 
 #~ msgid "seconds"
 #~ msgstr "δευτερόλεπτα"

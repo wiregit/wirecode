@@ -7,14 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-23 11:23-0400\n"
+"POT-Creation-Date: 2007-08-27 16:43-0400\n"
 "PO-Revision-Date: 2007-02-10 21:31-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=1; plural=(0);\n"
+"X-Rosetta-Export-Date: 2007-08-28 15:00:05+0000\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -99,7 +100,8 @@ msgid ""
 msgstr ""
 "A beï¿½llï¿½tï¿½sokat tï¿½rolï¿½ fï¿½jl hibï¿½s. A LimeWire visszatï¿½r az alapï¿½rtelmezï¿½shez."
 
-#: core/com/limegroup/gnutella/Acceptor.java:284
+#: core/com/limegroup/gnutella/Acceptor.java:287
+#: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
@@ -109,94 +111,95 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/DownloadManager.java:216
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr "Sajnos, a LimeWire-nek nem sikerï¿½lt ï¿½jraindï¿½tania a rï¿½gi letï¿½ltï¿½seket."
+msgstr ""
+"Sajnos, a LimeWire-nek nem sikerï¿½lt ï¿½jraindï¿½tania a rï¿½gi letï¿½ltï¿½seket."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:283
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 #, fuzzy
 msgid "Loading TLS Encryption..."
 msgstr "HTML motor betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:295
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:289
 #, fuzzy
 msgid "Loading Safe Content Management..."
 msgstr "Elï¿½vï¿½ltkapcsolat-kezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:300
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:294
 msgid "Loading Message Router..."
 msgstr "ï¿½zenetszï¿½rï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:305
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:299
 #, fuzzy
 msgid "Loading Upload Management..."
 msgstr "Kapcsolatkezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:314
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:308
 msgid "Loading Connection Listener..."
 msgstr "Kapcsolatfigyelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:323
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:317
 msgid "Loading Connection Management..."
 msgstr "Kapcsolatkezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:328
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:322
 #, fuzzy
 msgid "Loading Download Management..."
 msgstr "Kapcsolatkezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:333
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:327
 #, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "Elï¿½vï¿½ltkapcsolat-kezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:338
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:332
 msgid "Locating Peers..."
 msgstr "Partnerek kï¿½rï¿½lhatï¿½rolï¿½sa..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
 #, fuzzy
 msgid "Loading Shared Files..."
 msgstr "Mentett fï¿½jlok betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:359
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 #, fuzzy
 msgid "Loading bittorrent Management..."
 msgstr "Kapcsolatkezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:358
 #, fuzzy
 msgid "Loading magnet Management..."
 msgstr "Kapcsolatkezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:370
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 msgid "Loading Old Downloads..."
 msgstr "Rï¿½gi letï¿½ltï¿½sek betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:375
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 #, fuzzy
 msgid "Checking for Updates..."
 msgstr "Bejelentkezï¿½s..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
 msgstr "Irï¿½nyï¿½tott lekï¿½rdezï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
 msgid "Loading Magnet Listener..."
 msgstr "Magnet-figyelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Peer Listener..."
 msgstr "Partnerfigyelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Loading Stale Connection Management..."
 msgstr "Elï¿½vï¿½ltkapcsolat-kezelï¿½ betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
 msgstr "Mentett fï¿½jlok betï¿½ltï¿½se..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:409
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 #, fuzzy
 msgid "Loading Spam Management..."
 msgstr "Kapcsolatkezelï¿½ betï¿½ltï¿½se..."
@@ -251,12 +254,12 @@ msgstr ""
 "nï¿½lkï¿½l letï¿½ltï¿½dik."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
-#, fuzzy, java-format
+#, fuzzy
 msgid "You have already downloaded {0}"
 msgstr "A fï¿½jl mï¿½r letï¿½ltï¿½s alatt van \"{0}\"-ba."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
-#, fuzzy, java-format
+#, fuzzy
 msgid "You are already downloading this file to {0}"
 msgstr "A fï¿½jl mï¿½r letï¿½ltï¿½s alatt van \"{0}\"-ba."
 
@@ -336,7 +339,7 @@ msgstr "Sï¿½"
 
 #. *
 #. * The resource to use for the extension property.
-#.
+#. 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:105
@@ -540,8 +543,8 @@ msgstr "BitTorrent-beï¿½llï¿½tï¿½sok"
 msgid ""
 "You can choose whether or not LimeWire should manage your Bittorrent "
 "protocol settings. It is highly recommended that LimeWire manage these "
-"settings. Invalid or inappropriate values may cause severe performance and/"
-"or memory problems."
+"settings. Invalid or inappropriate values may cause severe performance "
+"and/or memory problems."
 msgstr ""
 "Kivï¿½laszthatod, hogy a LimeWire kezelje-e a BitTorrent protokoll "
 "beï¿½llï¿½tï¿½sait. Erï¿½sen ajï¿½nlott, hogy a LimeWire tegye ezt. ï¿½rvï¿½nytelen vagy "
@@ -636,8 +639,8 @@ msgstr "Mindig dobj el minden hibï¿½"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:504
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
-"bug report. For further help and to aid with debugging, please visit www."
-"limewire.com and click 'Support'. Thank you."
+"bug report. For further help and to aid with debugging, please visit "
+"www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 "A LimeWire nem tudot kapcsolï¿½dni a bugszerverhez a jelentï¿½s elkï¿½ldï¿½se "
 "vï¿½gett. Tovï¿½bbi segï¿½tsï¿½ghez lï¿½togasd meg a www.limewire.com-ot, ï¿½s kattints "
@@ -802,7 +805,7 @@ msgstr ""
 
 #. *
 #. * The select all action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:317
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:73
 #, fuzzy
@@ -990,9 +993,9 @@ msgid "Lo&gging"
 msgstr "Naplï¿½zï¿½"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
-#, fuzzy, java-format
+#, java-format
 msgid "Display the {0} Screen"
-msgstr "A beï¿½llï¿½tï¿½sok megvï¿½ltoztatï¿½sa"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -1098,7 +1101,7 @@ msgid ""
 "temporary directory.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
 "A LimeWire nem tudta lï¿½trehozni a beï¿½llï¿½tï¿½s-mappï¿½dat, ï¿½s most egy ideiglenes "
-"mappï¿½t hasznï¿½l. A beï¿½llï¿½tï¿½said letï¿½rlï¿½dhetnek a LimeWire bezï¿½rï¿½sakor."
+"mappï¿½t hasznï¿½l. A beï¿½llï¿½tï¿½said letï¿½rlï¿½dhetnek a LimeWire bezï¿½rï¿½sakor. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:367
 msgid "Loading Icons..."
@@ -1125,7 +1128,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/Initializer.java:449
 #, fuzzy
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr "Ez az Alpha verziï¿½ lejï¿½rt. Kattints az 'Ok'-ra a kilï¿½pï¿½shez."
+msgstr "Ez az Alpha verziï¿½ lejï¿½rt. Kattints az 'Ok'-ra a kilï¿½pï¿½shez. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:455
 msgid ""
@@ -1228,83 +1231,15 @@ msgstr ""
 msgid "Do not Show Again"
 msgstr "Ne jelenjen meg ï¿½jra ez az ï¿½zenet."
 
-#. Aafrican, South Africa
-#. Amharic, Ethiopia
-#. arabic, Egypt
-#. belarusian, Belarus
-#. Bulgarian, Bulgaria
-#. Bengali, Bangladesh
-#. Tibetan, China
-#. Brezhoneg, spoken in france
-#. Bosanski, Bosnia
-#. Burmese, Myanmar
-#. Catala, Spain
-#. Cestina, Czech Republic
-#. Welsh (Cymraeg) part of GB, part of UK
-#. Wales has a dragon on it we need more flags
-#. Dansk, Denmark
-#. Deutsch, Germany
-#. Divehi, Maldive
-#. Greek, Grece
-#. Spanish, Spain
-#. Estonian, ET
-#. Euskara, Spain
-#. Persian, Iran
-#. Finnish (Suomi), Finland
-#. French, France
-#. Irish, Ireland
-#. Geez, Ethiopia
-#. Gujarati, India
-#. Gallego, Spain
-#. Hindi, India
-#. Hrvatski, Croatia
-#. Magyar, Hungary
-#. Armenian, Armenia
-#. Bahasa, Indonesia
-#. Islenska, Iceland
-#. Italian, Italy
-#. Hebrew, Israel
-#. Japanese, Japan
-#. Georgian, Georgia (added this flag .gif)
-#. Kazakh, Kazakhstan
-#. Kannada, India
-#. Kashmiri, India
-#. Korean, South Korea
-#. Khmer, Cambodia
-#. Luxemburgish, Luxembourg
-#. Lao, Laos
-#. Lietuva, Lituania
-#. Latvija, Latvia
-#. Malagasy, Madagascar
-#. Macedonian, Macedonia
-#. Malayan, India
-#. Mongol, Mongolia
-#. Marathi, India
-#. Bahasa Melayu, Malaysia
-#. Malti, Malta
-#. Nepali, Nepal
-#. Nederlands
-#. Norsk, Norway
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:83
-#: gui/com/limegroup/gnutella/gui/LanguageFlagFactory.java:84
-#: gui/com/limegroup/gnutella/gui/MessageService.java:535
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
-msgid "No"
-msgstr "Nem"
-
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
-#, fuzzy
 msgid "Change Language"
-msgstr "N&yelv vï¿½lasztï¿½sa (=Language)"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
-#, fuzzy
 msgid "Show Language in status bar"
-msgstr "Nyelvi ï¿½llapot mutatï¿½sa"
+msgstr ""
 
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
 msgid "Help Translate LimeWire"
 msgstr "A LimeWire lefordï¿½tï¿½sï¿½nak segï¿½tï¿½se"
@@ -1324,7 +1259,8 @@ msgstr "A LimeWire nem tudta betï¿½lteni a licensz rï¿½szleteit."
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:432
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:558
 msgid "You can try validating this license again by clicking 'Verify'."
-msgstr "ï¿½jra megprï¿½bï¿½lhatod a licensz ï¿½rvï¿½nyesï¿½tï¿½sï¿½t az 'Ellenï¿½rzï¿½s' gombbal."
+msgstr ""
+"ï¿½jra megprï¿½bï¿½lhatod a licensz ï¿½rvï¿½nyesï¿½tï¿½sï¿½t az 'Ellenï¿½rzï¿½s' gombbal."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:437
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:563
@@ -1386,7 +1322,8 @@ msgid "View Usage Rights"
 msgstr "Hasznï¿½lati jogok megtekintï¿½se"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:515
-msgid "LimeWire is contacting www.weedshare.com for the details of this file."
+msgid ""
+"LimeWire is contacting www.weedshare.com for the details of this file."
 msgstr "A LimeWire a www.weedshare.com-hoz kapcsolï¿½dik a fï¿½jl rï¿½szleteiï¿½rt."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:520
@@ -1411,35 +1348,35 @@ msgstr "Licensz rï¿½szletei"
 
 #. *
 #. * The undo action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:28
 msgid "Undo"
 msgstr "Visszavonï¿½"
 
 #. *
 #. * The cut action
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:37
 msgid "Cut"
 msgstr "Kivï¿½gï¿½"
 
 #. *
 #. * The copy action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:46
 msgid "Copy"
 msgstr "Mï¿½solï¿½"
 
 #. *
 #. * The paste action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:55
 msgid "Paste"
 msgstr "Beillesztï¿½"
 
 #. *
 #. * The delete action.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:64
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:785
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:791
@@ -1473,7 +1410,8 @@ msgstr "Fï¿½jllistï¿½zï¿½"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:18
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
-msgstr "Magnet hivatkozï¿½sok a gyors letï¿½ltï¿½shez (ha van LimeWire-ï¿½d telepï¿½tve)"
+msgstr ""
+"Magnet hivatkozï¿½sok a gyors letï¿½ltï¿½shez (ha van LimeWire-ï¿½d telepï¿½tve)"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:84
 msgid "Loading Messages..."
@@ -1513,6 +1451,13 @@ msgstr "ï¿½zenetek"
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:424
 msgid "Yes"
 msgstr "Igen"
+
+#: gui/com/limegroup/gnutella/gui/MessageService.java:535
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
+msgid "No"
+msgstr "Nem"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:609
 msgid "Do not display this message again"
@@ -1597,34 +1542,27 @@ msgstr "ï¿½j listaelem hozzï¿½adï¿½sa"
 msgid "Remove Selected Item"
 msgstr "Kijelï¿½lt elem eltï¿½volï¿½tï¿½sa"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:128
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:127
 msgid "Loading Status Window..."
 msgstr "ï¿½llapotablak betï¿½ltï¿½se..."
 
-#. initialize tool tip
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:329
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:830
-#, java-format
-msgid "You are sharing {0} files (Loading...)"
-msgstr "Megosztva: {0} fï¿½jl (Betï¿½ltï¿½s...)"
-
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:449
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:448
 msgid "LimeWire has not detected a firewall"
 msgstr "A LimeWire nem ï¿½szlelt tï¿½zfalat"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:452
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:451
 msgid "LimeWire has detected a firewall"
 msgstr "A LimeWire tï¿½zfalat ï¿½szlelt"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:537
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:536
 msgid "Connection"
 msgstr "kapcsolat"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:539
 msgid "Disconnected"
 msgstr "Lekapcsolva"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:541
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
@@ -1632,107 +1570,116 @@ msgstr ""
 "Jelenleg nem kapcsolï¿½dsz a hï¿½lï¿½zathoz. A kapcsolï¿½dï¿½shoz vï¿½laszd a "
 "Kapcsolï¿½dï¿½s menï¿½pontot a Fï¿½jl menï¿½"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:543
 msgid "Starting"
 msgstr "Betï¿½ltï¿½"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:545
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
 msgid "You are currently connecting to the network"
 msgstr "Jelenleg kapcsolï¿½dva vagy a hï¿½lï¿½zathoz"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:547
 msgid "Poor"
 msgstr "Rossz"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:549
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 "Csak nï¿½hï¿½ny kiszolgï¿½lï¿½hoz kapcsolï¿½dsz ï¿½s a hï¿½lï¿½zati kapcsolatod instabil"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:551
 msgid "Fair"
 msgstr "Kï¿½zepes"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:553
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
 msgid "Your connection to the network is getting stronger"
 msgstr "A hï¿½lï¿½zati kapcsolat minï¿½sï¿½ge egyre javul"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:555
 msgid "Good"
 msgstr "Jï¿½"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:557
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
 msgstr ""
 "Mï¿½g nem teljesen kapcsolï¿½dtï¿½l a hï¿½lï¿½zathoz, de mï¿½r jï¿½nak mondhatï¿½ a kapcsolat"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:560
 msgid "Excellent"
 msgstr "Kivï¿½lï¿½"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:562
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
 msgid "Your connection to the network is very strong"
 msgstr "A hï¿½lï¿½zati kapcsolat rendkï¿½vï¿½l jï¿½ minï¿½sï¿½gï¿½"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:564
 msgid "Turbo-Charged"
 msgstr "Turbï¿½-sebessï¿½gï¿½"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
 msgid "Your connection to the network is extremely strong"
 msgstr "A hï¿½lï¿½zati kapcsolatod a lehetï¿½ legjobb"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:567
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
 msgstr ""
 "A LimeWire PRO-val mindig turbï¿½ sebessï¿½ggel kapcsolï¿½dhatsz a hï¿½lï¿½zathoz!"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:573
 msgid "Waking Up"
 msgstr "Visszaï¿½llï¿½tï¿½s..."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:575
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
 msgid "LimeWire is waking up from sleep mode"
 msgstr "A LimeWire ï¿½ppen kï¿½szenlï¿½ti mï¿½dbï¿½l ï¿½ll vissza"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:678
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:677
 msgid "Show Connection Quality"
 msgstr "Kapcsolat minï¿½sï¿½gï¿½nek megjelenï¿½tï¿½se"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:694
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:693
 msgid "Show Shared Files Count"
 msgstr "Megosztott fï¿½jlok szï¿½mï¿½nak mutatï¿½sa"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:710
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:709
 msgid "Show Language Status"
 msgstr "Nyelvi ï¿½llapot mutatï¿½sa"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:731
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:730
 msgid "Show Firewall Status"
 msgstr "Tï¿½zfalstï¿½tusz megjelenï¿½tï¿½se"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:747
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:746
 msgid "Show Bandwidth Consumption"
 msgstr "Sï¿½vszï¿½lessï¿½g-felhasznï¿½lï¿½s mutatï¿½sa"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:763
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:762
 msgid "Show Media Player"
 msgstr "Mï¿½dialejï¿½tszï¿½"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:828
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:832
 #, java-format
-msgid "You are sharing {0} files"
-msgstr "Megosztva: {0} fï¿½jl"
+msgid "You are sharing {0} file"
+msgid_plural "You are sharing {0} files"
+msgstr[0] ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:895
+#. {0}: number of shared files
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:835
+#, java-format
+msgid "You are sharing {0} file (Loading...)"
+msgid_plural "You are sharing {0} files (Loading...)"
+msgstr[0] ""
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
 msgstr "Letï¿½ltï¿½sek:"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:897
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:903
 msgid "Uploads:"
 msgstr "Feltï¿½ltï¿½sek:"
 
@@ -1854,9 +1801,9 @@ msgstr ""
 #, java-format
 msgid ""
 "Need more help? Visit <a href=\"{0}\">our message boards</a> and see if "
-"others have already answered your question! You can also review the <a href="
-"\"{1}\">FAQ</a> for answers to commonly asked questions or the <a href=\"{2}"
-"\">User Guide</a> for more information."
+"others have already answered your question! You can also review the <a "
+"href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
+"href=\"{2}\">User Guide</a> for more information."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
@@ -1870,8 +1817,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
 msgid ""
-"Do you have a tip for effectively using LimeWire? Add it to <a href=\"{0}"
-"\">the wiki</a> and it may make it into future Tips of the Day!"
+"Do you have a tip for effectively using LimeWire? Add it to <a "
+"href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
@@ -1899,8 +1846,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 #, java-format
 msgid ""
-"Want to know more about the development of LimeWire? Visit <a href=\"{0}"
-"\">LimeWire's open-source website</a> and look around!"
+"Want to know more about the development of LimeWire? Visit <a "
+"href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
@@ -1976,9 +1923,9 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, java-format
 msgid ""
-"Did you know LimeWire is completely open-source? Visit <a href=\"{0}\">www."
-"limewire.org</a> for information on how to join developer mailing lists or "
-"to review the code."
+"Did you know LimeWire is completely open-source? Visit <a "
+"href=\"{0}\">www.limewire.org</a> for information on how to join developer "
+"mailing lists or to review the code."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
@@ -2618,8 +2565,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
 msgid ""
-"Set LimeWire to be your default program for opening magnet links and ."
-"torrent files for the smoothest experience using LimeWire with the web. Go "
+"Set LimeWire to be your default program for opening magnet links and "
+".torrent files for the smoothest experience using LimeWire with the web. Go "
 "to Tools &gt; Options &gt; Advanced &gt; File Associations. "
 msgstr ""
 
@@ -2796,14 +2743,15 @@ msgstr "A LimeWire hibï¿½t talï¿½lt a fï¿½jlban {0} Folytatni akarod a letï¿½ltï
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:649
 msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
-"b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
-"limewire.com</a> and download the newest official version of LimeWire.</html>"
+"<html><b>Your LimeWire may have been corrupted by a virus or "
+"trojan!</b><br><br>Please visit <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
+"the newest official version of LimeWire.</html>"
 msgstr ""
-"<html><b>A LimeWire-t vï¿½rus vagy trï¿½jai falï¿½ tï¿½madta meg!</"
-"b><br><br>Haladï¿½ktalanul lï¿½togasd meg a <a href=\"http://www.limewire.com/"
-"corrupted\">www.limewire.com</a>-ot, ï¿½s tï¿½ltsd le a legï¿½jabb hivatalos "
-"LimeWire-verziï¿½t.</html>"
+"<html><b>A LimeWire-t vï¿½rus vagy trï¿½jai falï¿½ tï¿½madta "
+"meg!</b><br><br>Haladï¿½ktalanul lï¿½togasd meg a <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a>-ot, ï¿½s "
+"tï¿½ltsd le a legï¿½jabb hivatalos LimeWire-verziï¿½t.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:33
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
@@ -2898,9 +2846,8 @@ msgid "Search for: {0}"
 msgstr "Keresï¿½s erre: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:31
-#, java-format
-msgid "Search \"What''s New\" for: {0}"
-msgstr "\"Mi ï¿½jsï¿½g\"-keresï¿½s erre: {0}"
+msgid "Search \"What's New\" for: {0}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:48
 #, java-format
@@ -2938,7 +2885,7 @@ msgstr "Egy ablakban kivï¿½laszthatsz egy megosztï¿½sra kerï¿½lï¿½ ï¿½j mappï¿½"
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:50
 msgid "Block Host"
 msgstr "Kiszolgï¿½lï¿½ blokkolï¿½sa"
@@ -2946,7 +2893,7 @@ msgstr "Kiszolgï¿½lï¿½ blokkolï¿½sa"
 #. *
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:56
 msgid "Send Message"
 msgstr "ï¿½zenet kï¿½ldï¿½se"
@@ -2954,7 +2901,7 @@ msgstr "ï¿½zenet kï¿½ldï¿½se"
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat block sender button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:62
 msgid "Block Current Host"
 msgstr "Aktuï¿½lis kiszolgï¿½lï¿½ blokkolï¿½sa"
@@ -2962,7 +2909,7 @@ msgstr "Aktuï¿½lis kiszolgï¿½lï¿½ blokkolï¿½sa"
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat send button.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:68
 msgid "Send a Message to a Host"
 msgstr "ï¿½zenet kï¿½ldï¿½se a kiszolgï¿½lï¿½nak"
@@ -3143,7 +3090,7 @@ msgstr "Kiszolgï¿½lï¿½"
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the port text field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:377
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:54
 #, fuzzy
@@ -3397,7 +3344,7 @@ msgstr "Programok"
 
 #. *
 #. * The resource to use for the speed property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:404
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:313
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
@@ -4056,19 +4003,9 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:366
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:371
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:937
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:936
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr "Beï¿½llï¿½thatod a megosztott mappï¿½kat a LimeWire Beï¿½llï¿½tï¿½sok kartonjï¿½"
-
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:369
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:934
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
-#, fuzzy
-msgid "Sharing"
-msgstr "Betï¿½ltï¿½"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:370
 msgid "Configure..."
@@ -4097,7 +4034,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:83
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:388
-msgid "Your search is too long. Please make your search smaller and try again."
+msgid ""
+"Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Az ï¿½ltalad megadott keresï¿½s tï¿½l hosszï¿½. Rï¿½vidï¿½tsd le, majd prï¿½bï¿½lkozz ï¿½jra."
 
@@ -4138,6 +4076,14 @@ msgstr "Helyek"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:154
 msgid "Last Modified"
 msgstr "Utolsï¿½ mï¿½dosï¿½tï¿½"
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
+#, fuzzy
+msgid "Sharing"
+msgstr "Betï¿½ltï¿½"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:278
@@ -4180,7 +4126,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1028
 #, java-format
-msgid "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
+msgid ""
+"The file \"{0}\" is not a valid incomplete file and cannot be resumed."
 msgstr "A {0} fï¿½jl nem ï¿½rvï¿½nyes fï¿½lkï¿½sz fï¿½jl ï¿½s nem folytathatï¿½ a letï¿½ltï¿½se."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1244
@@ -4385,11 +4332,6 @@ msgstr "&Fï¿½jl"
 msgid "Filter&s"
 msgstr "S&zï¿½"
 
-#: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:17
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
-msgid "Content"
-msgstr "Tartalom"
-
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:18
 msgid "&Configure Content Filters"
 msgstr "Tartalomszï¿½rï¿½&k konfigurï¿½lï¿½sa"
@@ -4576,29 +4518,30 @@ msgid "Select your Language Prefereces"
 msgstr "Nyelvi beï¿½llï¿½tï¿½sok megvï¿½ltoztatï¿½sa"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
-msgid ". The file type is not recognized."
-msgstr "Ismeretlen fï¿½jltï¿½pus"
+msgid "The file type is not recognized."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
-msgid ". The file cannot be found."
-msgstr "A fï¿½jl nem talï¿½lhatï¿½"
+msgid "The file cannot be found."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
-msgid ". The file is corrupt."
-msgstr "A fï¿½jl hibï¿½s."
+msgid "The file is corrupt."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
-msgid ". There is an unknown error with the audio file."
-msgstr "Ismeretlen hiba a hangfï¿½jllal kapcsolatban."
+msgid "There is an unknown error with the audio file."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:164
-msgid ". The file cannot be parsed."
-msgstr ". A fï¿½jl ï¿½rtelmezhetetlen."
+msgid "The file cannot be parsed."
+msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:169
-#, fuzzy, java-format
-msgid "LimeWire cannot play the file {0}. {1}"
-msgstr "A LimeWire nem tudta megosztani a \"{0}\" fï¿½jlt."
+#. {0}: filename, {1} cause of error (e.g. The file is corrupt.)
+#: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:170
+#, java-format
+msgid "LimeWire cannot play the file {0}: {1}"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:93
 msgid "Play"
@@ -4752,6 +4695,10 @@ msgstr ""
 msgid "Filters"
 msgstr "Szï¿½"
 
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+msgid "Content"
+msgstr "Tartalom"
+
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:254
@@ -4808,7 +4755,8 @@ msgstr "Beï¿½llï¿½tï¿½ablak betï¿½ltï¿½se..."
 #: gui/com/limegroup/gnutella/gui/options/OptionsPaneManager.java:124
 msgid ""
 "One or more options will take effect the next time LimeWire is restarted."
-msgstr "Egy vagy tï¿½bb opciï¿½ csak a LimeWire kï¿½vetkezï¿½ indï¿½tï¿½sakor lï¿½p ï¿½letbe."
+msgstr ""
+"Egy vagy tï¿½bb opciï¿½ csak a LimeWire kï¿½vetkezï¿½ indï¿½tï¿½sakor lï¿½p ï¿½letbe."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AllowMessagesPaneItem.java:26
 msgid "Allow Hosts"
@@ -4816,8 +4764,8 @@ msgstr "Kiszolgï¿½lï¿½k engedï¿½lyezï¿½se"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AllowMessagesPaneItem.java:28
 msgid ""
-"You can allow messages from specific hosts by adding their IP addresses (e."
-"g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
+"You can allow messages from specific hosts by adding their IP addresses "
+"(e.g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
 "\"192.168.12.16/28\") to the allow list. This list is only needed to "
 "override the banned list."
 msgstr ""
@@ -4855,7 +4803,7 @@ msgstr "Kivï¿½laszthatod a hasznï¿½landï¿½ hang/zenelejï¿½tszï¿½"
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:30
 msgid "Audio Player"
 msgstr "Hang/zenelejï¿½tszï¿½"
@@ -4915,7 +4863,7 @@ msgstr "Megadhatod, melyik bï¿½ngï¿½szï¿½t szeretnï¿½d hasznï¿½lni."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:36
 msgid "Browser"
 msgstr "Bï¿½ngï¿½szï¿½"
@@ -4934,7 +4882,7 @@ msgstr ""
 "vï¿½lasztï¿½sa utï¿½n a LimeWire hiba ï¿½szlelï¿½sekor azonnal kapcsolatva fog lï¿½pni a "
 "bugszerverrel. A 'Mindig rï¿½kï¿½rdez' vï¿½lasztï¿½sï¿½val a LimeWire megerï¿½sï¿½tï¿½st fog "
 "kï¿½rni jelentï¿½s kï¿½ldï¿½se elï¿½tt. Az 'ï¿½sszes hiba eldobï¿½sa' gomb az ï¿½sszes hiba "
-"figyelmen kï¿½vï¿½l hagyï¿½sï¿½t jelenti (ez nem ajï¿½nlott). "
+"figyelmen kï¿½vï¿½l hagyï¿½sï¿½t jelenti (ez nem ajï¿½nlott)."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:43
 msgid "View Example"
@@ -5102,8 +5050,8 @@ msgid ""
 "You can disable these if needed."
 msgstr ""
 "Ha az internethozzï¿½fï¿½rï¿½sed gyorsnak mondhatï¿½, a LimeWire a lassabb "
-"felhasznï¿½lï¿½k szï¿½mï¿½ra ï¿½s a Mojito DHT-hez valï¿½ kapcsolï¿½dï¿½shoz \"Ultrapartner"
-"\"-kï¿½nt szolgï¿½lhat. Ha kell, ez kikapcsolhatï¿½"
+"felhasznï¿½lï¿½k szï¿½mï¿½ra ï¿½s a Mojito DHT-hez valï¿½ kapcsolï¿½dï¿½shoz "
+"\"Ultrapartner\"-kï¿½nt szolgï¿½lhat. Ha kell, ez kikapcsolhatï¿½"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:38
 msgid "Disable Ultrapeer Capabilities:"
@@ -5128,7 +5076,7 @@ msgid ""
 "though some internet connections may not work well with this feature."
 msgstr ""
 "A sï¿½von kï¿½vï¿½li (OOB) keresï¿½s gyorsabb eredmï¿½nymegjelenï¿½tï¿½st tesz lehetï¿½vï¿½, "
-"bï¿½r nï¿½hï¿½ny internethozzï¿½fï¿½rï¿½si tï¿½pus ezt nem tï¿½mogatja. "
+"bï¿½r nï¿½hï¿½ny internethozzï¿½fï¿½rï¿½si tï¿½pus ezt nem tï¿½mogatja."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:28
 msgid "Enable OOB Searching:"
@@ -5199,7 +5147,7 @@ msgstr "Kivï¿½laszthatod, hogy mely kiterjesztï¿½seket kï¿½vï¿½nod megosztani."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:34
 msgid "Extensions:"
 msgstr "Kiterjesztï¿½sek:"
@@ -5272,7 +5220,7 @@ msgstr "A keresï¿½s eredmï¿½nyï¿½bï¿½l bizonyos tï¿½pusokat kiszï¿½rhet."
 #. *
 #. * Key for the locale-specifis string for the adult content check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:49
 msgid "Ignore Adult Content"
 msgstr "Felnï¿½tt tartalom kiszï¿½rï¿½se"
@@ -5280,7 +5228,7 @@ msgstr "Felnï¿½tt tartalom kiszï¿½rï¿½se"
 #. *
 #. * Key for the locale-specifis string for the html file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:55
 msgid "Ignore .htm/.html Files"
 msgstr "A .htm/.html fï¿½jlok kiszï¿½rï¿½se"
@@ -5288,14 +5236,14 @@ msgstr "A .htm/.html fï¿½jlok kiszï¿½rï¿½se"
 #. *
 #. * Key for the locale-specifis string for the vbs file check box
 #. * label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:61
 msgid "Ignore .vbs Files"
 msgstr "A .vbs fï¿½jlok kiszï¿½rï¿½se"
 
 #. *
 #. * Key for the locale-specific string for the wmv and asf file check box label.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:66
 msgid "Ignore .wmv/.asf files"
 msgstr "A .wmv/.asf fï¿½jlok kiszï¿½rï¿½se"
@@ -5320,7 +5268,7 @@ msgstr "Megadhatod a hasznï¿½landï¿½ kï¿½pnï¿½zegetï¿½ programot."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:36
 msgid "Image Viewer"
 msgstr "Kï¿½pnï¿½zegetï¿½"
@@ -5350,7 +5298,7 @@ msgstr "Beï¿½llï¿½thatod az egyidejï¿½ letï¿½ltï¿½sek maximï¿½lis szï¿½mï¿½t."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:28
 msgid "Maximum Downloads:"
 msgstr "Maximum letï¿½ltï¿½sek:"
@@ -5362,13 +5310,14 @@ msgstr "Maximum keresï¿½sek"
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:21
 msgid ""
 "You can set the maximum number of simultaneous searches you can perform."
-msgstr "Beï¿½llï¿½thatod az egyidejï¿½leg vï¿½grehajthatï¿½ keresï¿½sek maximï¿½lis szï¿½mï¿½t."
+msgstr ""
+"Beï¿½llï¿½thatod az egyidejï¿½leg vï¿½grehajthatï¿½ keresï¿½sek maximï¿½lis szï¿½mï¿½t."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:28
 msgid "Maximum Searches:"
 msgstr "Maximum keresï¿½sek:"
@@ -5389,7 +5338,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:28
 msgid "Max Upload Slots:"
 msgstr "Max. feltï¿½ltï¿½sek szï¿½ma:"
@@ -5490,7 +5439,7 @@ msgstr "Szemï¿½lyenkï¿½nt ennyi feltï¿½ltï¿½st engedï¿½lyezel."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:28
 msgid "Uploads Per Person:"
 msgstr "Feltï¿½ltï¿½s szemï¿½lyenkï¿½nt:"
@@ -5545,7 +5494,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:31
 msgid "Listen on Port:"
 msgstr "Figyelï¿½s ezen a porton:"
@@ -5599,7 +5548,7 @@ msgstr "HTTP"
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the proxy host field.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:48
 msgid "Proxy:"
 msgstr "Proxy:"
@@ -5612,7 +5561,7 @@ msgstr "Automatikusan tï¿½rï¿½lheted a rï¿½gi fï¿½lkï¿½sz letï¿½ltï¿½seket."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:29
 msgid "Days to Keep Incomplete Files:"
 msgstr "Fï¿½lkï¿½sz fï¿½jlok megtartï¿½sa ennyi napig:"
@@ -5625,14 +5574,14 @@ msgstr "Itt kivï¿½laszthatod a fï¿½jlok mentï¿½sï¿½re szolgï¿½lï¿½ mappï¿½t."
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for this
 #. * <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:45
 msgid "Folder:"
 msgstr "Mappa:"
 
 #. *
 #. *  The mediator's description label id.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:69
 msgid "You can specify a download location for each media type."
 msgstr "Az egyes mï¿½diatï¿½pusoknak kï¿½lï¿½n letï¿½ltï¿½si mappï¿½t adhatsz meg."
@@ -5652,8 +5601,7 @@ msgid ""
 "will be shared:"
 msgstr ""
 "Szeretnï¿½d megosztani az ï¿½j mentï¿½si mappï¿½idat? A kï¿½vetkezï¿½ ï¿½j mappï¿½k meg "
-"lesznek osztva:\n"
-"\n"
+"lesznek osztva:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:21
 msgid "Search Result Quality"
@@ -5691,7 +5639,8 @@ msgstr "Kiszolgï¿½lï¿½k min. sebessï¿½ge"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:24
 msgid "You can select the minimum speed of search results to display."
-msgstr "Kivï¿½laszthatod a legkisebb sebessï¿½get, amely megjelenjen a keresï¿½snï¿½l."
+msgstr ""
+"Kivï¿½laszthatod a legkisebb sebessï¿½get, amely megjelenjen a keresï¿½snï¿½l."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:58
 msgid "Show Only Results of T3 Speed or Higher"
@@ -5762,19 +5711,17 @@ msgstr "Kilï¿½pï¿½s ï¿½tvitel befejezï¿½se utï¿½"
 msgid "Minimize to System Tray"
 msgstr "Kis mï¿½ret a tï¿½lcï¿½ra"
 
-#. TODO not title there
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
-#, fuzzy
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:19
 msgid "Start Upload Slots"
-msgstr "Feltï¿½ltï¿½si helyek indï¿½tï¿½sa:"
+msgstr ""
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:22
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:29
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:28
 msgid "Start Upload Slots:"
 msgstr "Feltï¿½ltï¿½si helyek indï¿½tï¿½sa:"
 
@@ -5810,7 +5757,7 @@ msgstr ""
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:38
 msgid "Speed:"
 msgstr "Sebessï¿½g:"
@@ -5936,7 +5883,7 @@ msgstr "Kivï¿½laszthatod a hasznï¿½landï¿½ videï¿½lejï¿½tszï¿½"
 #. * Constant for the key of the locale-specific <code>String</code> for the
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:36
 msgid "Video Player"
 msgstr "Videï¿½lejï¿½tszï¿½"
@@ -6029,7 +5976,7 @@ msgstr "Szeretnï¿½l letï¿½ltï¿½st kezdeni a kï¿½vetkezï¿½ mï¿½gnesekrï¿½"
 
 #. *
 #. * The resource to use for the vendor property.
-#.
+#. 
 #: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:48
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:82
 msgid "Vendor"
@@ -6533,81 +6480,81 @@ msgstr "Feltï¿½ltï¿½ablak betï¿½ltï¿½se..."
 msgid "Seeding"
 msgstr "Keresï¿½"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:35
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:36
 msgid "Invalid Filename"
 msgstr "Helytelen fï¿½jlnï¿½"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:38
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:39
 msgid "Download Already Finished"
 msgstr "A letï¿½ltï¿½s mï¿½r befejezï¿½dï¿½"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:41
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:42
 msgid "No Write Permission"
 msgstr "A lemez nem ï¿½rhatï¿½"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:44
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:45
 msgid "Folder Does Not Exist"
 msgstr "A mappa nem lï¿½tezik"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:47
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:48
 msgid "File Already Exists"
 msgstr "A fï¿½jl mï¿½r lï¿½tezik"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:50
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:51
 msgid "Filename Taken"
 msgstr "Mï¿½r letï¿½ltve"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:53
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:54
 msgid "Not a Folder"
 msgstr "Nem mappa"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:56
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:57
 msgid "Not a File"
 msgstr "Nem fï¿½jl"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:59
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:60
 msgid "Filesystem Error"
 msgstr "Fï¿½jlrendszer hiba"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:62
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:63
 msgid "Same File Already Being Downloaded"
 msgstr "Egy ugyanilyen fï¿½jl mï¿½r letï¿½ltï¿½s alatt van"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:86
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:87
 #, java-format
 msgid ""
 "Could not set file location to {0}, because the filename is invalid and may "
 "corrupt your system."
 msgstr "Ez a fï¿½jlnï¿½v: {0}, hibï¿½s."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:89
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:90
 msgid "Could not set the file location, the download is already finished."
 msgstr "Nem sikerï¿½lt beï¿½llï¿½tani a fï¿½jl helyï¿½t, a letï¿½ltï¿½s mï¿½r befejezï¿½dï¿½tt."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:92
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:93
 #, java-format
 msgid ""
 "Could not save download to the folder {0}, because you do not have write "
 "access to it."
 msgstr "Nem menthetï¿½ a fï¿½jl a {0} mappï¿½ba, mert nincs ï¿½rï¿½si jogosultsï¿½god."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:96
-#, fuzzy, java-format
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:97
+#, fuzzy
 msgid ""
 "Could not save download to folder {0}, because the folder does not exist."
 msgstr "Nem menthetï¿½ a fï¿½jl a {0} mappï¿½ba, mert nincs ï¿½rï¿½si jogosultsï¿½god."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:100
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:101
 #, java-format
 msgid "A file already exists at {0}."
 msgstr "Mï¿½r lï¿½tezik egy fï¿½jl {0} nï¿½ven."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:104
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:105
 #, java-format
 msgid "Another download is already saving to {0}."
 msgstr "Egy mï¿½sik letï¿½ltï¿½s mï¿½r ment ebbe a fï¿½jlba: {0}."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:108
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:109
 #, java-format
 msgid ""
 "Could not set download folder to {0}, because it represents an individual "
@@ -6615,20 +6562,20 @@ msgid ""
 msgstr ""
 "Nem ï¿½llï¿½thatï¿½ be ide a letï¿½ltï¿½si mappa: {0}, mert ez fï¿½jlt ï¿½s nem mappï¿½t jelï¿½"
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:112
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:113
 #, java-format
 msgid "Could not set file location to {0}, because it is not a regular file."
 msgstr "A cï¿½lfï¿½jl nem lehet {0}, mert ez nem egy szabï¿½lyos fï¿½jl."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:115
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:116
 msgid "Could not set file location due to an error in the filesystem."
 msgstr "Fï¿½jlrendszerbeli hiba miatt nem ï¿½llï¿½thatï¿½ be a fï¿½jl helye."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:117
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:118
 msgid "The same file is already being downloaded."
 msgstr "Egy ugyanilyen fï¿½jl mï¿½r letï¿½ltï¿½s alatt van."
 
-#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:119
+#: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:120
 #, java-format
 msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
@@ -7103,32 +7050,12 @@ msgid "Info"
 msgstr "Infï¿½"
 
 #, fuzzy
-#~ msgid "test1"
-#~ msgstr "Elï¿½zï¿½ mï¿½ret"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "Elï¿½zï¿½ mï¿½ret"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "Ethernet"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "Betï¿½ltï¿½"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
+#~ msgid "United States"
+#~ msgstr "Frissï¿½tï¿½sek"
 
 #, fuzzy
 #~ msgid "English"
 #~ msgstr "Befejezï¿½"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Frissï¿½tï¿½sek"
 
 #~ msgid "Loading Languages"
 #~ msgstr "Nyelvek betï¿½ltï¿½se"
@@ -7136,6 +7063,33 @@ msgstr "Infï¿½"
 #, fuzzy
 #~ msgid "false"
 #~ msgstr "Beillesztï¿½"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Megosztva: {0} fï¿½jl (Betï¿½ltï¿½s...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Megosztva: {0} fï¿½jl"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "\"Mi ï¿½jsï¿½g\"-keresï¿½s erre: {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr "Ismeretlen fï¿½jltï¿½pus"
+
+#~ msgid ". The file cannot be found."
+#~ msgstr "A fï¿½jl nem talï¿½lhatï¿½"
+
+#~ msgid ". The file is corrupt."
+#~ msgstr "A fï¿½jl hibï¿½s."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr "Ismeretlen hiba a hangfï¿½jllal kapcsolatban."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". A fï¿½jl ï¿½rtelmezhetetlen."
 
 #~ msgid "Close the Window"
 #~ msgstr "Ablak bezï¿½rï¿½sa."
@@ -7205,8 +7159,7 @@ msgstr "Infï¿½"
 
 #~ msgid "Only search results with a {0} are official LimeWire communications."
 #~ msgstr ""
-#~ "Csak a {0}-t tartalmazï¿½ keresï¿½si eredmï¿½nyek hivatalos LimeWire "
-#~ "kommunikï¿½ciï¿½"
+#~ "Csak a {0}-t tartalmazï¿½ keresï¿½si eredmï¿½nyek hivatalos LimeWire kommunikï¿½ciï¿½"
 
 #~ msgid "Files"
 #~ msgstr "Fï¿½jlok"
@@ -7244,8 +7197,7 @@ msgstr "Infï¿½"
 #~ msgid "Orginal query"
 #~ msgstr "Eredeti lekï¿½rdezï¿½"
 
-#~ msgid ""
-#~ "Performs the same search as the one which found this file previously."
+#~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr ""
 #~ "Ugyanazt a keresï¿½st indï¿½tja el, amely az elï¿½bb mï¿½r megtalï¿½lta ezt a fï¿½jlt."
 
@@ -7281,14 +7233,13 @@ msgstr "Infï¿½"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr ""
-#~ "Tï¿½mogasd a LimeWire-ï¿½n keresztï¿½l a fï¿½ggetlen mï¿½diï¿½t! Vï¿½lts a LimeWire PRO-"
-#~ "ra."
+#~ "Tï¿½mogasd a LimeWire-ï¿½n keresztï¿½l a fï¿½ggetlen mï¿½diï¿½t! Vï¿½lts a LimeWire PRO-ra."
 
 #~ msgid ""
 #~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check "
-#~ "your connection or firewall settings and then select \"Connect\" from the "
-#~ "File menu to connect LimeWire to the network."
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
 #~ msgstr ""
 #~ "A szï¿½mï¿½tï¿½gï¿½pednek valï¿½szï¿½nï¿½leg nincs aktï¿½v internet-hozzï¿½fï¿½rï¿½se, vagy egy "
 #~ "tï¿½zfal blokkolja a LimeWire-t az internet elï¿½rï¿½sï¿½tï¿½l. Ellenï¿½rizd a "
@@ -7329,21 +7280,21 @@ msgstr "Infï¿½"
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the "
-#~ "desired statistics."
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
 #~ msgstr ""
-#~ "A sï¿½vszï¿½lessï¿½g-statisztikï¿½k magukban foglaljï¿½k a teljes infï¿½t minden "
-#~ "kimenï¿½ ï¿½s bejï¿½vï¿½ sï¿½vszï¿½lessï¿½grï¿½l. Kattints egy kategï¿½riï¿½ra a kï¿½vï¿½nt "
-#~ "statisztika megjelenï¿½tï¿½sï¿½hez."
+#~ "A sï¿½vszï¿½lessï¿½g-statisztikï¿½k magukban foglaljï¿½k a teljes infï¿½t minden kimenï¿½ "
+#~ "ï¿½s bejï¿½vï¿½ sï¿½vszï¿½lessï¿½grï¿½l. Kattints egy kategï¿½riï¿½ra a kï¿½vï¿½nt statisztika "
+#~ "megjelenï¿½tï¿½sï¿½hez."
 
 #~ msgid "Network"
 #~ msgstr "Hï¿½lï¿½zat"
 
 #~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are "
-#~ "quite inaccurate due to the dynamic, distributed nature of Gnutella and "
-#~ "should not be taken too literally. They can, however, give you a general "
-#~ "idea regarding the current state of your connection."
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
 #~ msgstr ""
 #~ "A hï¿½lï¿½zat jelenlegi ï¿½llapotï¿½rï¿½l szï¿½lï¿½ statisztikï¿½k. Ezek a statisztikï¿½k "
 #~ "viszonylag pontatlanok a Gnutella dinamikus, vï¿½ltozï¿½ termï¿½szetï¿½nek "
@@ -7351,17 +7302,16 @@ msgstr "Infï¿½"
 #~ "adhatnak a hï¿½lï¿½zat ï¿½llapotï¿½rï¿½"
 
 #~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages "
-#~ "and HTTP traffic. This information can be useful for advanced users as "
-#~ "well as for researchers working on the Gnutella network. Advanced "
-#~ "statistics are not displayed by default and are not recommended for most "
-#~ "users."
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
 #~ msgstr ""
-#~ "Ezek a tovï¿½bbi statisztikï¿½k rï¿½szletes infï¿½t nyï¿½jtanak a Gnutella "
-#~ "ï¿½zenetekrï¿½l ï¿½s a HTTP forgalomrï¿½l. Ez az infï¿½ haladï¿½ felhasznï¿½lï¿½knak ï¿½s a "
-#~ "Gnutella hï¿½lï¿½zaton dolgozï¿½ kutatï¿½knak lehetnek hasznosak. A haladï¿½ "
-#~ "statisztikï¿½k alapï¿½rtelmezï¿½sben rejtve vannak, ï¿½s a legtï¿½bb felhasznï¿½lï¿½nak "
-#~ "nem mondanak semmit."
+#~ "Ezek a tovï¿½bbi statisztikï¿½k rï¿½szletes infï¿½t nyï¿½jtanak a Gnutella ï¿½zenetekrï¿½l "
+#~ "ï¿½s a HTTP forgalomrï¿½l. Ez az infï¿½ haladï¿½ felhasznï¿½lï¿½knak ï¿½s a Gnutella "
+#~ "hï¿½lï¿½zaton dolgozï¿½ kutatï¿½knak lehetnek hasznosak. A haladï¿½ statisztikï¿½k "
+#~ "alapï¿½rtelmezï¿½sben rejtve vannak, ï¿½s a legtï¿½bb felhasznï¿½lï¿½nak nem mondanak "
+#~ "semmit."
 
 #~ msgid "Show Advanced Statistics:"
 #~ msgstr "Haladï¿½ statisztika mutatï¿½sa:"
@@ -7377,11 +7327,11 @@ msgstr "Infï¿½"
 #~ "Gnutella ï¿½zeneteken keresztï¿½"
 
 #~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads "
-#~ "or Gnutella messages."
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
 #~ msgstr ""
-#~ "A bejï¿½vï¿½ adatra szï¿½nt teljes sï¿½vszï¿½lessï¿½g, vagy letï¿½ltï¿½seken, vagy "
-#~ "Gnutella ï¿½zeneteken keresztï¿½"
+#~ "A bejï¿½vï¿½ adatra szï¿½nt teljes sï¿½vszï¿½lessï¿½g, vagy letï¿½ltï¿½seken, vagy Gnutella "
+#~ "ï¿½zeneteken keresztï¿½"
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "A kliens ï¿½ltal fogadott ï¿½sszes Gnutella ï¿½zenet."
@@ -7398,8 +7348,7 @@ msgstr "Infï¿½"
 
 #~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
 #~ msgstr ""
-#~ "Az ï¿½sszes TCP-n, UDP-n vagy Multicaston keresztï¿½l fogadott Gnutella "
-#~ "ï¿½zenet."
+#~ "Az ï¿½sszes TCP-n, UDP-n vagy Multicaston keresztï¿½l fogadott Gnutella ï¿½zenet."
 
 #~ msgid ""
 #~ "Number of duplicate queries received over TCP versus the total number of "
@@ -7409,11 +7358,11 @@ msgstr "Infï¿½"
 #~ "ï¿½sszes szï¿½mï¿½hoz kï¿½pest."
 
 #~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total "
-#~ "number of queries."
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
 #~ msgstr ""
-#~ "Kï¿½t pï¿½ldï¿½nyban lï¿½tezï¿½ Multicaston fogadott lekï¿½rdezï¿½sek szï¿½ma a "
-#~ "lekï¿½rdezï¿½sek ï¿½sszes szï¿½mï¿½hoz kï¿½pest."
+#~ "Kï¿½t pï¿½ldï¿½nyban lï¿½tezï¿½ Multicaston fogadott lekï¿½rdezï¿½sek szï¿½ma a lekï¿½rdezï¿½sek "
+#~ "ï¿½sszes szï¿½mï¿½hoz kï¿½pest."
 
 #~ msgid "All received queries, by hops."
 #~ msgstr "Az ï¿½sszes fogadott lekï¿½rdezï¿½s, hopok szerint."
@@ -7439,21 +7388,21 @@ msgstr "Infï¿½"
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over TCP, by message type."
 #~ msgstr ""
-#~ "Az ï¿½sszes TCP-n keresztï¿½l fogadott Gnutella ï¿½zenet mï¿½rete kilobï¿½jtban, "
-#~ "tï¿½pus szerint."
+#~ "Az ï¿½sszes TCP-n keresztï¿½l fogadott Gnutella ï¿½zenet mï¿½rete kilobï¿½jtban, tï¿½pus "
+#~ "szerint."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over UDP, by message type."
 #~ msgstr ""
-#~ "Az ï¿½sszes UDP-n keresztï¿½l fogadott Gnutella ï¿½zenet mï¿½rete kilobï¿½jtban, "
-#~ "tï¿½pus szerint."
+#~ "Az ï¿½sszes UDP-n keresztï¿½l fogadott Gnutella ï¿½zenet mï¿½rete kilobï¿½jtban, tï¿½pus "
+#~ "szerint."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over Multicast, by message "
 #~ "type."
 #~ msgstr ""
-#~ "Az ï¿½sszes Multicaston keresztï¿½l fogadott Gnutella ï¿½zenet mï¿½rete "
-#~ "kilobï¿½jtban, tï¿½pus szerint."
+#~ "Az ï¿½sszes Multicaston keresztï¿½l fogadott Gnutella ï¿½zenet mï¿½rete kilobï¿½jtban, "
+#~ "tï¿½pus szerint."
 
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
@@ -7472,15 +7421,14 @@ msgstr "Infï¿½"
 #~ "Total kilobytes in duplicate queries received over Multicast versus the "
 #~ "total number of queries."
 #~ msgstr ""
-#~ "Kï¿½t pï¿½ldï¿½nyban lï¿½tezï¿½ Multicaston fogadott lekï¿½rdezï¿½sek mï¿½rete "
-#~ "kilobï¿½jtban a lekï¿½rdezï¿½sek ï¿½sszes szï¿½mï¿½hoz kï¿½pest."
+#~ "Kï¿½t pï¿½ldï¿½nyban lï¿½tezï¿½ Multicaston fogadott lekï¿½rdezï¿½sek mï¿½rete kilobï¿½jtban a "
+#~ "lekï¿½rdezï¿½sek ï¿½sszes szï¿½mï¿½hoz kï¿½pest."
 
 #~ msgid "All received queries in kilobytes, by hops."
 #~ msgstr "Az ï¿½sszes lekï¿½rdezï¿½s mï¿½rete kilobï¿½jtban, hopok szerint."
 
 #~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr ""
-#~ "Az ï¿½sszes lekï¿½rdezï¿½s mï¿½rete kilobï¿½jtban, time to live (TTL) szerint."
+#~ msgstr "Az ï¿½sszes lekï¿½rdezï¿½s mï¿½rete kilobï¿½jtban, time to live (TTL) szerint."
 
 #~ msgid "All received query hits in kilobytes, by hops."
 #~ msgstr "Az ï¿½sszes talï¿½lat mï¿½rete kilobï¿½jtban, hopok szerint."
@@ -7506,29 +7454,25 @@ msgstr "Infï¿½"
 #~ msgstr ""
 #~ "Gnutella kliensektï¿½l kapott UDP talï¿½latok szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
-#~ msgid ""
-#~ "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Gnutella kliensektï¿½l kapott UDP pushok szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Multicast pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast pingek szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast pingek szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast pongok szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast pongok szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast lekï¿½rdezï¿½sek szï¿½ma mï¿½s LimeWire-"
-#~ "ï¿½khï¿½z kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast lekï¿½rdezï¿½sek szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z "
+#~ "kï¿½pest."
 
 #~ msgid ""
 #~ "Multicast query hits received from all Gnutella clients versus other "
@@ -7538,36 +7482,32 @@ msgstr "Infï¿½"
 #~ "kï¿½pest."
 
 #~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast pushok szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast pushok szï¿½ma mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott UDP pingek kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott UDP pingek kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott UDP pongok kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott UDP pongok kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott UDP lekï¿½rdezï¿½sek kilobï¿½jtban mï¿½s LimeWire-"
-#~ "ï¿½khï¿½z kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott UDP lekï¿½rdezï¿½sek kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
+#~ "kï¿½pest."
 
 #~ msgid ""
-#~ "Kilobytes for UDP query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
 #~ "Gnutella kliensektï¿½l kapott UDP talï¿½latok kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
 #~ "kï¿½pest."
@@ -7576,33 +7516,32 @@ msgstr "Infï¿½"
 #~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott UDP pushok kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott UDP pushok kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
 #~ "other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast pingek kilobï¿½jtban mï¿½s LimeWire-"
-#~ "ï¿½khï¿½z kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast pingek kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
+#~ "kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
 #~ "other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast pongok kilobï¿½jtban mï¿½s LimeWire-"
-#~ "ï¿½khï¿½z kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast pongok kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
+#~ "kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
 #~ "other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast lekï¿½rdezï¿½sek kilobï¿½jtban mï¿½s "
-#~ "LimeWire-ï¿½khï¿½z kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast lekï¿½rdezï¿½sek kilobï¿½jtban mï¿½s LimeWire-"
+#~ "ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients "
-#~ "versus other LimeWires."
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
 #~ msgstr ""
 #~ "Gnutella kliensektï¿½l kapott Multicast talï¿½latok kilobï¿½jtban mï¿½s LimeWire-"
 #~ "ï¿½khï¿½z kï¿½pest."
@@ -7611,8 +7550,8 @@ msgstr "Infï¿½"
 #~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
 #~ "other LimeWires."
 #~ msgstr ""
-#~ "Gnutella kliensektï¿½l kapott Multicast pushok kilobï¿½jtban mï¿½s LimeWire-"
-#~ "ï¿½khï¿½z kï¿½pest."
+#~ "Gnutella kliensektï¿½l kapott Multicast pushok kilobï¿½jtban mï¿½s LimeWire-ï¿½khï¿½z "
+#~ "kï¿½pest."
 
 #~ msgid "The average size in kilobytes of received Gnutella messages."
 #~ msgstr "A fogadott Gnutella ï¿½zenetek ï¿½tlagos mï¿½rete kilobï¿½jtban."
@@ -7627,8 +7566,8 @@ msgstr "Infï¿½"
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
 #~ msgstr ""
-#~ "Az ï¿½sszes, mï¿½s Ultrapartnerekhez lekï¿½rdezï¿½sirï¿½nyï¿½tï¿½ tï¿½blï¿½kkal "
-#~ "ï¿½tï¿½rï¿½nyï¿½tott lekï¿½rdezï¿½s az utolsï¿½ hopra."
+#~ "Az ï¿½sszes, mï¿½s Ultrapartnerekhez lekï¿½rdezï¿½sirï¿½nyï¿½tï¿½ tï¿½blï¿½kkal ï¿½tï¿½rï¿½nyï¿½tott "
+#~ "lekï¿½rdezï¿½s az utolsï¿½ hopra."
 
 #~ msgid "All queries that were routed to leaves, using query routing tables."
 #~ msgstr ""
@@ -7695,21 +7634,18 @@ msgstr "Infï¿½"
 #~ msgid "Total kilobytes for Gnutella messages sent out from this client."
 #~ msgstr "Az elkï¿½ldï¿½tt ï¿½sszes Gnutella ï¿½zenet szï¿½ma."
 
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
 #~ msgstr ""
 #~ "A TCP-n keresztï¿½l elkï¿½ldï¿½tt Gnutella ï¿½zenetek mï¿½rete kilobï¿½jtban, tï¿½pus "
 #~ "szerint."
 
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
 #~ msgstr ""
 #~ "Az UDP-n keresztï¿½l elkï¿½ldï¿½tt Gnutella ï¿½zenetek mï¿½rete kilobï¿½jtban, tï¿½pus "
 #~ "szerint."
 
 #~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over Multicast, by message "
-#~ "type."
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
 #~ msgstr ""
 #~ "A Multicaston keresztï¿½l elkï¿½ldï¿½tt Gnutella ï¿½zenetek mï¿½rete kilobï¿½jtban, "
 #~ "tï¿½pus szerint."
@@ -7717,34 +7653,29 @@ msgstr "Infï¿½"
 #~ msgid ""
 #~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr ""
-#~ "Az ï¿½sszes TCP-n, UDP-n vagy Multicaston kï¿½ldï¿½tt Gnutella ï¿½zenet "
-#~ "kilobï¿½jtban."
+#~ "Az ï¿½sszes TCP-n, UDP-n vagy Multicaston kï¿½ldï¿½tt Gnutella ï¿½zenet kilobï¿½jtban."
 
 #~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP ping mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP ping mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP pong mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP pong mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP lekï¿½rdezï¿½s mï¿½s LimeWire-ï¿½khï¿½z "
 #~ "kï¿½pest."
 
-#~ msgid ""
-#~ "UDP query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP talï¿½lat mï¿½s LimeWire-ï¿½khï¿½z "
 #~ "kï¿½pest."
 
 #~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP push mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP push mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
@@ -7765,11 +7696,10 @@ msgstr "Infï¿½"
 #~ "ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
-#~ "Multicast query hits sent from all Gnutella clients versus other "
-#~ "LimeWires."
+#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt Multicast talï¿½lat mï¿½s LimeWire-"
-#~ "ï¿½khï¿½z kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt Multicast talï¿½lat mï¿½s LimeWire-ï¿½khï¿½z "
+#~ "kï¿½pest."
 
 #~ msgid ""
 #~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
@@ -7784,15 +7714,13 @@ msgstr "Infï¿½"
 #~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP ping mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP ping mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP pong mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP pong mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
@@ -7812,8 +7740,7 @@ msgstr "Infï¿½"
 #~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
 #~ "LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP push mï¿½s LimeWire-ï¿½khï¿½z "
-#~ "kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt UDP push mï¿½s LimeWire-ï¿½khï¿½z kï¿½pest."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
@@ -7830,8 +7757,8 @@ msgstr "Infï¿½"
 #~ "kï¿½pest."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
 #~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt Multicast lekï¿½rdezï¿½s mï¿½s LimeWire-"
 #~ "ï¿½khï¿½z kï¿½pest."
@@ -7840,12 +7767,12 @@ msgstr "Infï¿½"
 #~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
 #~ "other LimeWires."
 #~ msgstr ""
-#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt Multicast talï¿½lat mï¿½s LimeWire-"
-#~ "ï¿½khï¿½z kï¿½pest."
+#~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt Multicast talï¿½lat mï¿½s LimeWire-ï¿½khï¿½z "
+#~ "kï¿½pest."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus "
-#~ "other LimeWires."
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
 #~ msgstr ""
 #~ "Az ï¿½sszes, Gnutella kliensektï¿½l kï¿½ldï¿½tt Multicast push mï¿½s LimeWire-ï¿½khï¿½z "
 #~ "kï¿½pest."
@@ -7869,8 +7796,8 @@ msgstr "Infï¿½"
 #~ msgstr "Kimenï¿½ kapcsolatok visszautasï¿½tï¿½sa"
 
 #~ msgid ""
-#~ "Statistics for outgoing Gnutella connection handshaking rejections from "
-#~ "the server."
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
 #~ msgstr ""
 #~ "Statisztikï¿½k a szerver ï¿½ltal visszautasï¿½tott kimenï¿½ Gnutella kï¿½zrï¿½zï¿½sokrï¿½"
 
