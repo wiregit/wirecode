@@ -26,6 +26,7 @@ import org.limewire.nio.NIODispatcher;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -48,7 +49,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
     private final HttpRequestHandler notFoundHandler;
 
     @Inject
-    public HTTPAcceptor(Provider<ConnectionDispatcher> connectionDispatcher) {
+    public HTTPAcceptor(@Named("global") Provider<ConnectionDispatcher> connectionDispatcher) {
         super(connectionDispatcher, false, createDefaultParams(LimeWireUtils.getHttpServer(),
                 Constants.TIMEOUT), SUPPORTED_METHODS);
 

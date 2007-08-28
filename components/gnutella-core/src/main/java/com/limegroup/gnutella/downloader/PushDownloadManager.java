@@ -107,7 +107,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
-    		Provider<ConnectionDispatcher> connectionDispatcher,
+    		@Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
     		Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService) {
     	this.downloadAcceptor = downloadAcceptor;

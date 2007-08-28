@@ -139,7 +139,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     public Acceptor(NetworkManager networkManager,
             Provider<UDPService> udpService,
             Provider<MulticastService> multicastService,
-            Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<ActivityCallback> activityCallback,
             Provider<ConnectionManager> connectionManager,

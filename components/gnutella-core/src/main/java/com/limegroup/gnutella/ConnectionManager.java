@@ -280,7 +280,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     @Inject
     public ConnectionManager(NetworkManager networkManager,
             Provider<HostCatcher> hostCatcher,
-            Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<SimppManager> simppManager,
             CapabilitiesVMFactory capabilitiesVMFactory,

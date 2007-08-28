@@ -266,8 +266,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
         bind(IpPortContentAuthorityFactory.class).to(IpPortContentAuthorityFactoryImpl.class);
         bind(UpdateCollectionFactory.class).to(UpdateCollectionFactoryImpl.class);
-        bind(ConnectionDispatcher.class).to(ConnectionDispatcherImpl.class);
-        bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).to(ConnectionDispatcherImpl.class);
+        bind(ConnectionDispatcher.class).annotatedWith(Names.named("global")).toInstance(new ConnectionDispatcherImpl());
+        bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).toInstance(new ConnectionDispatcherImpl());
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

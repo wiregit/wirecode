@@ -129,7 +129,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<HostCatcher> hostCatcher,
             Provider<FileManager> fileManager,
             Provider<TorrentManager> torrentManager,
-            Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             Provider<UpdateHandler> updateHandler,
             Provider<QueryUnicaster> queryUnicaster,
             Provider<LocalHTTPAcceptor> localHttpAcceptor,

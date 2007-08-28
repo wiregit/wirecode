@@ -8,6 +8,7 @@ import org.limewire.net.ConnectionDispatcher;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.statistics.HTTPStat;
 
 /**
@@ -22,7 +23,7 @@ public class ControlRequestAcceptor implements ConnectionAcceptor {
     
     @Inject
 	public ControlRequestAcceptor(Provider<ExternalControl> externalControl,
-            Provider<ConnectionDispatcher> connectionDispatcher) {
+	        @Named("global") Provider<ConnectionDispatcher> connectionDispatcher) {
         this.externalControl = externalControl;
         this.connectionDispatcher = connectionDispatcher;
     }
