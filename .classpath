@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
-	<classpathentry excluding="windows/|macosx/|target/" kind="src" output="gui" path="gui"/>
-	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
-	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
-	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
-	<classpathentry kind="src" output="components/test-util/build/tests" path="components/test-util/src/test/java"/>
-	<classpathentry kind="src" output="components/common/src/main/resources" path="components/common/src/main/resources"/>
-	<classpathentry kind="src" output="components/common/src/test/resources" path="components/common/src/test/resources"/>
-	<classpathentry kind="src" output="components/common/build/classes" path="components/common/src/main/java"/>
-	<classpathentry kind="src" output="components/common/build/tests" path="components/common/src/test/java"/>
-	<classpathentry kind="src" output="components/collection/build/classes" path="components/collection/src/main/java"/>
-	<classpathentry kind="src" output="components/collection/build/tests" path="components/collection/src/test/java"/>
-	<classpathentry kind="src" output="components/collection/src/test/resources" path="components/collection/src/test/resources"/>
-	<classpathentry kind="src" output="components/io/build/classes" path="components/io/src/main/java"/>
-	<classpathentry kind="src" output="components/io/build/tests" path="components/io/src/test/java"/>
-	<classpathentry kind="src" output="components/security/build/classes" path="components/security/src/main/java"/>
-	<classpathentry kind="src" output="components/security/build/tests" path="components/security/src/test/java"/>
-	<classpathentry kind="src" output="components/setting/build/classes" path="components/setting/src/main/java"/>
-	<classpathentry kind="src" output="components/setting/build/tests" path="components/setting/src/test/java"/>
-	<classpathentry kind="src" output="components/nio/build/classes" path="components/nio/src/main/java"/>
-	<classpathentry kind="src" output="components/nio/build/tests" path="components/nio/src/test/java"/>
-	<classpathentry kind="src" output="components/rudp/build/classes" path="components/rudp/src/main/java"/>
-	<classpathentry kind="src" output="components/rudp/build/tests" path="components/rudp/src/test/java"/>
-	<classpathentry kind="src" output="components/statistic/build/classes" path="components/statistic/src/main/java"/>
-	<classpathentry kind="src" output="components/http/build/classes" path="components/http/src/main/java"/>
-	<classpathentry kind="src" output="components/http/build/tests" path="components/http/src/test/java"/>
-	<classpathentry kind="src" output="components/mojito/build/classes" path="components/mojito/src/main/java"/>
-	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/java"/>
-	<classpathentry kind="src" output="components/mojito-ui/build/classes" path="components/mojito-ui/src/main/java"/>
-	<classpathentry kind="src" output="components/mojito-ui/build/misc" path="components/mojito-ui/misc/java"/>
+	<classpathentry excluding="examples/mojito/|target/" kind="src" path="core"/>
+	<classpathentry excluding="windows/|macosx/|target/" kind="src" path="gui"/>
+	<classpathentry excluding="build/|testData/" kind="src" path="tests"/>
+	<classpathentry kind="src" path="components/resources/src/main/resources"/>
+	<classpathentry kind="src" path="components/test-util/src/main/java"/>
+	<classpathentry kind="src" path="components/test-util/src/test/java"/>
+	<classpathentry kind="src" path="components/common/src/main/resources"/>
+	<classpathentry kind="src" path="components/common/src/test/resources"/>
+	<classpathentry kind="src" path="components/common/src/main/java"/>
+	<classpathentry kind="src" path="components/common/src/test/java"/>
+	<classpathentry kind="src" path="components/collection/src/main/java"/>
+	<classpathentry kind="src" path="components/collection/src/test/java"/>
+	<classpathentry kind="src" path="components/collection/src/test/resources"/>
+	<classpathentry kind="src" path="components/io/src/main/java"/>
+	<classpathentry kind="src" path="components/io/src/test/java"/>
+	<classpathentry kind="src" path="components/security/src/main/java"/>
+	<classpathentry kind="src" path="components/security/src/test/java"/>
+	<classpathentry kind="src" path="components/setting/src/main/java"/>
+	<classpathentry kind="src" path="components/setting/src/test/java"/>
+	<classpathentry kind="src" path="components/nio/src/main/java"/>
+	<classpathentry kind="src" path="components/nio/src/test/java"/>
+	<classpathentry kind="src" path="components/rudp/src/main/java"/>
+	<classpathentry kind="src" path="components/rudp/src/test/java"/>
+	<classpathentry kind="src" path="components/statistic/src/main/java"/>
+	<classpathentry kind="src" path="components/http/src/main/java"/>
+	<classpathentry kind="src" path="components/http/src/test/java"/>
+	<classpathentry kind="src" path="components/mojito/src/main/java"/>
+	<classpathentry kind="src" path="components/mojito/src/test/java"/>
+	<classpathentry kind="src" path="components/mojito-ui/src/main/java"/>
+	<classpathentry kind="src" path="components/mojito-ui/misc/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="src" path="components/net/src/main/java"/>
 	<classpathentry kind="src" path="components/net/src/test/java"/>
