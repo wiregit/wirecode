@@ -28,6 +28,8 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.SystemUtils;
 
 import com.google.inject.Inject;
@@ -278,7 +280,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     @Inject
     public ConnectionManager(NetworkManager networkManager,
             Provider<HostCatcher> hostCatcher,
-            Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<SimppManager> simppManager,
             CapabilitiesVMFactory capabilitiesVMFactory,

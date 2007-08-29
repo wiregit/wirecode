@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
@@ -29,7 +30,8 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.browser.ExternalControl;
-import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.browser.LocalAcceptor;
+import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
@@ -284,20 +286,28 @@ public class LimeWireCore {
         return injector.getInstance(AltLocFinder.class);
     }
 
+    public ConnectionDispatcher getLocalConnectionDispatcher() {
+        return injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("local")));
+    }
+
     public ConnectionDispatcher getConnectionDispatcher() {
         return injector.getInstance(ConnectionDispatcher.class);
     }
 
-    public HTTPAcceptor getHTTPAcceptor() {
-        return injector.getInstance(HTTPAcceptor.class);
+    public LocalAcceptor getLocalAcceptor() {
+        return injector.getInstance(LocalAcceptor.class);
+    }
+    
+    public LocalHTTPAcceptor getLocalHTTPAcceptor() {
+        return injector.getInstance(LocalHTTPAcceptor.class);
     }
 
     public HostCatcher getHostCatcher() {
         return injector.getInstance(HostCatcher.class);
     }
 
-    public com.limegroup.gnutella.HTTPAcceptor getHttpUploadAcceptor() {
-        return injector.getInstance(com.limegroup.gnutella.HTTPAcceptor.class);
+    public HTTPAcceptor getHttpUploadAcceptor() {
+        return injector.getInstance(HTTPAcceptor.class);
     }
 
     public PushManager getPushManager() {

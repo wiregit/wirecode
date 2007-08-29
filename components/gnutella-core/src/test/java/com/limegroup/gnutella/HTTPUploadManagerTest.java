@@ -64,18 +64,18 @@ public class HTTPUploadManagerTest extends BaseTestCase {
 
         fm = new FileManagerStub();
 
-        httpAcceptor = new HTTPAcceptor();
+        httpAcceptor = new HTTPAcceptor(Providers.of(ProviderHacks.getConnectionDispatcher()));
 
         upMan = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 
-        httpAcceptor.start(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.start();
         upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());
     }
 
     @Override
     protected void tearDown() throws Exception {
         upMan.stop(httpAcceptor);
-        httpAcceptor.stop(ProviderHacks.getConnectionDispatcher());
+        httpAcceptor.stop();
     }
 
     public void testIsConnectedTo() throws Exception {

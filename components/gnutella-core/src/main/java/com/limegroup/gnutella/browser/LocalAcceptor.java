@@ -1,0 +1,87 @@
+package com.limegroup.gnutella.browser;
+
+import java.io.IOException;
+import java.net.Socket;
+
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketAcceptor;
+import org.limewire.service.MessageService;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
+/**
+ * Listens on an HTTP port, accepts incoming connections, and dispatches threads
+ * to handle requests. This allows simple HTTP requests.
+ */
+@Singleton
+public class LocalAcceptor {
+
+    private final static int FIRST_PORT = 45100;
+
+    private final ExternalControl externalControl;
+
+    private final SocketAcceptor acceptor;
+
+    @Inject
+    public LocalAcceptor(ExternalControl externalControl, @Named("local")
+    ConnectionDispatcher connectionDispatcher) {
+        this.externalControl = externalControl;
+        this.acceptor = new SocketAcceptor(connectionDispatcher);
+    }
+
+    /**
+     * Starts listening to incoming connections.
+     */
+    public void start() {
+        acceptor.getDispatcher().addConnectionAcceptor(
+                new ConnectionAcceptor() {
+                    public void acceptConnection(String word, Socket socket) {
+                        externalControl.fireControlThread(socket, true);
+                    }
+                }, true, true, "MAGNET");
+
+        acceptor.getDispatcher().addConnectionAcceptor(
+                new ConnectionAcceptor() {
+                    public void acceptConnection(String word, Socket socket) {
+                        externalControl.fireControlThread(socket, false);
+                    }
+                }, true, true, "TORRENT");
+
+        if (!bind(FIRST_PORT)) {
+            MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+        }
+    }
+
+    private boolean bind(final int listeningPort) {
+        // try 20 different consecutive ports from 45100 to 45119 (inclusive)
+        // no longer random, since this listening socket is used by the
+        // executable stub to launch magnet downloads, so the stub needs to know
+        // what (small) range of ports to try...
+        for (int i = 0; i < 20; i++) {
+            try {
+                acceptor.bind(listeningPort + i);
+                return true;
+            } catch (IOException ignored) {
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the listening port.
+     */
+    public int getPort() {
+        return acceptor.getPort();
+    }
+
+    /**
+     * Returns the dispatcher that dispatches incoming requests to a handler.
+     */
+    public ConnectionDispatcher getDispatcher() {
+        return acceptor.getDispatcher();
+    }
+
+}

@@ -12,6 +12,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.limewire.concurrent.Providers;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -70,20 +72,20 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 
         fm = new MetaFileManager(ProviderHacks.getFileManagerController());
-        acceptor = new HTTPAcceptor();
+        connectionDispatcher = new ConnectionDispatcherImpl();
+        acceptor = new HTTPAcceptor(Providers.of(connectionDispatcher));
         uploadManager = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
-        connectionDispatcher = new ConnectionDispatcher();
         
         fm.startAndWait(4000);
         assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
                 .getNumFiles());
         uploadManager.start(acceptor, fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
-        acceptor.start(connectionDispatcher);
+        acceptor.start();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        acceptor.stop(connectionDispatcher);
+        acceptor.stop();
         uploadManager.stop(acceptor);
         fm.stop();
     }

@@ -6,12 +6,13 @@ import java.util.List;
 
 import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.ConnectionDispatcher;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.ChatSettings;
@@ -34,7 +35,7 @@ public final class ChatManager implements ConnectionAcceptor {
     private final InstantMessengerFactory instantMessengerFactory;
         
     @Inject
-	public ChatManager(Provider<ConnectionDispatcher> connectionDispatcher,
+	public ChatManager(@Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             SpamServices spamServices, Provider<IPFilter> ipFilter,
             InstantMessengerFactory instantMessengerFactory) {
         this.connectionDispatcher = connectionDispatcher;

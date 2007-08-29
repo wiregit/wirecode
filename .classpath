@@ -31,6 +31,8 @@
 	<classpathentry kind="src" output="components/mojito-ui/build/classes" path="components/mojito-ui/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito-ui/build/misc" path="components/mojito-ui/misc/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
+	<classpathentry kind="src" path="components/net/src/main/java"/>
+	<classpathentry kind="src" path="components/net/src/test/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar" sourcepath="lib/sources/commons-httpclient-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
@@ -69,7 +71,7 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio.jar" sourcepath="lib/sources/httpcore-nio-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-1.0.jar" sourcepath="lib/sources/guice-1.0-src.jar"/>
-	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
+	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

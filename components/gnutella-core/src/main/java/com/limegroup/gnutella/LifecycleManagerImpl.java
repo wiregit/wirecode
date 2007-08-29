@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
@@ -30,6 +31,8 @@ import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
+import com.limegroup.gnutella.browser.LocalAcceptor;
+import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -84,7 +87,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final Provider<UpdateHandler> updateHandler;
     private final Provider<QueryUnicaster> queryUnicaster;
-    private final Provider<com.limegroup.gnutella.browser.HTTPAcceptor> httpAcceptor;
+    private final Provider<LocalHTTPAcceptor> localHttpAcceptor;
+    private final Provider<LocalAcceptor> localAcceptor;
     private final Provider<Pinger> pinger;
     private final Provider<ConnectionWatchdog> connectionWatchdog;
     private final Provider<SavedFileManager> savedFileManager;
@@ -125,10 +129,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<HostCatcher> hostCatcher,
             Provider<FileManager> fileManager,
             Provider<TorrentManager> torrentManager,
-            Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             Provider<UpdateHandler> updateHandler,
             Provider<QueryUnicaster> queryUnicaster,
-            Provider<com.limegroup.gnutella.browser.HTTPAcceptor> httpAcceptor,
+            Provider<LocalHTTPAcceptor> localHttpAcceptor,
+            Provider<LocalAcceptor> localAcceptor,
             Provider<Pinger> pinger,
             Provider<ConnectionWatchdog> connectionWatchdog,
             Provider<SavedFileManager> savedFileManager,
@@ -164,7 +169,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.connectionDispatcher = connectionDispatcher;
         this.updateHandler = updateHandler;
         this.queryUnicaster = queryUnicaster;
-        this.httpAcceptor = httpAcceptor;
+        this.localHttpAcceptor = localHttpAcceptor;
+        this.localAcceptor = localAcceptor;
         this.pinger = pinger;
         this.connectionWatchdog = connectionWatchdog;
         this.savedFileManager = savedFileManager;
@@ -301,7 +307,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP HTTPUploadManager");
 
         LOG.trace("START HTTPUploadAcceptor");
-        httpUploadAcceptor.get().start(connectionDispatcher.get()); 
+        httpUploadAcceptor.get().start(); 
         LOG.trace("STOP HTTPUploadAcceptor");
 
         LOG.trace("START Acceptor");
@@ -375,10 +381,14 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		queryUnicaster.get().start();
 		LOG.trace("STOP QueryUnicaster");
 		
-		LOG.trace("START HTTPAcceptor");
+		LOG.trace("START LocalHTTPAcceptor");
 		activityCallback.get().componentLoading(I18n.marktr("Loading Magnet Listener..."));
-        httpAcceptor.get().start();
-        LOG.trace("STOP HTTPAcceptor");
+        localHttpAcceptor.get().start();
+        LOG.trace("STOP LocalHTTPAcceptor");
+
+        LOG.trace("START LocalAcceptor");
+        localAcceptor.get().start();
+        LOG.trace("STOP LocalAcceptor");
         
         LOG.trace("START Pinger");
         activityCallback.get().componentLoading(I18n.marktr("Loading Peer Listener..."));

@@ -11,6 +11,7 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocTracker;
+import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
  * Maintains state for an HTTP upload.
@@ -77,6 +78,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         // for testing: if the uploader was not initialized from a real
         // connection it does not have an IO session
         if (getSession().getIOSession() != null) {
+            UploadStat.STALLED.incrementStat();
             getSession().getIOSession().shutdown();
         }
 	}

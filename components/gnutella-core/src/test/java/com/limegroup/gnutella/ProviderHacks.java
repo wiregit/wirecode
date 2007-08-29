@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
