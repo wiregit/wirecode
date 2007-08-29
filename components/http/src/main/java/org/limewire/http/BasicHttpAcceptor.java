@@ -181,7 +181,7 @@ public class BasicHttpAcceptor {
     }
     
     /* Simulates the processing of request for testing. */
-    public HttpResponse process(HttpRequest request) throws IOException,
+    public HttpResponse testProcess(HttpRequest request) throws IOException,
             HttpException {
         HttpExecutionContext context = new HttpExecutionContext(null);
         HttpResponse response = responseFactory.newHttpResponse(request

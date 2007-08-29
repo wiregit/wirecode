@@ -64,10 +64,11 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
     }
 
     private void initializeAcceptor(int timeout, String... methods) throws Exception {
-        acceptor = new SocketAcceptor(new ConnectionDispatcherImpl());
+        connectionDispatcher = new ConnectionDispatcherImpl();
+        
+        acceptor = new SocketAcceptor(connectionDispatcher);
         acceptor.bind(PORT);
 
-        connectionDispatcher = new ConnectionDispatcherImpl();
         httpAcceptor = new BasicHttpAcceptor(Providers.of(connectionDispatcher), true, BasicHttpAcceptor
                 .createDefaultParams("agent", timeout), methods);
         httpAcceptor.start();
@@ -82,9 +83,21 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             acceptor.unbind();
             acceptor = null;
         }
-        // FIXME wait for NIO?
+        HttpTestUtils.waitForNIO();
     }
-    
+
+    public void testDefaultHandler() throws IOException, Exception {
+        initializeAcceptor(TIMEOUT, "HEAD");
+        
+        HeadMethod method = new HeadMethod("/");
+        try {
+            int result = client.executeMethod(method);
+            assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, result);
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
     public void testWatchdogTriggeredTimeout() throws IOException, Exception {
         initializeAcceptor(TIMEOUT, "GET");
         
@@ -154,18 +167,6 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             int result = client.executeMethod(method);
             fail("Expected IOException, got: " + result);
         } catch (IOException expected) {
-        } finally {
-            method.releaseConnection();
-        }
-    }
-
-    public void testDefaultHandler() throws IOException, Exception {
-        initializeAcceptor(TIMEOUT, "HEAD");
-        
-        HeadMethod method = new HeadMethod("/");
-        try {
-            int result = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, result);
         } finally {
             method.releaseConnection();
         }

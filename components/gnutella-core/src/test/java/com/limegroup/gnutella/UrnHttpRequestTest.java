@@ -244,7 +244,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     private void sendRequestThatShouldSucceed(HttpRequest request, FileDesc fd)
             throws Exception {
-        HttpResponse response = acceptor.process(request);
+        HttpResponse response = acceptor.testProcess(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         // clean up any created uploaders
@@ -296,7 +296,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     private void sendRequestThatShouldFail(HttpRequest request, String error)
             throws Exception {
-        HttpResponse response = acceptor.process(request);
+        HttpResponse response = acceptor.testProcess(request);
         assertEquals("unexpected HTTP response", error, getStatusLine(response));
     }
 
