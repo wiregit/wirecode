@@ -15,13 +15,10 @@ import org.apache.http.HttpStatus;
 import org.limewire.concurrent.Providers;
 import org.limewire.http.handler.BasicMimeTypeProvider;
 import org.limewire.http.handler.FileRequestHandler;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
-import org.limewire.nio.NIOTestUtils;
 import org.limewire.util.BaseTestCase;
-
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.http.HttpClientManager;
 
 public class BasicHttpAcceptorTest extends BaseTestCase {
 
@@ -37,6 +34,8 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
 
     private SocketAcceptor acceptor;
 
+    private ConnectionDispatcher connectionDispatcher;
+
     public BasicHttpAcceptorTest(String name) {
         super(name);
     }
@@ -51,7 +50,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        client = HttpClientManager.getNewClient();
+        client = new HttpClient();
         hostConfig = new HostConfiguration();
         hostConfig.setHost("localhost", PORT);
         client.setHostConfiguration(hostConfig);
@@ -68,7 +67,8 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
         acceptor = new SocketAcceptor(new ConnectionDispatcherImpl());
         acceptor.bind(PORT);
 
-        httpAcceptor = new BasicHttpAcceptor(Providers.of(ProviderHacks.getConnectionDispatcher()), true, BasicHttpAcceptor
+        connectionDispatcher = new ConnectionDispatcherImpl();
+        httpAcceptor = new BasicHttpAcceptor(Providers.of(connectionDispatcher), true, BasicHttpAcceptor
                 .createDefaultParams("agent", timeout), methods);
         httpAcceptor.start();
     }
@@ -82,7 +82,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             acceptor.unbind();
             acceptor = null;
         }
-        NIOTestUtils.waitForNIO();
+        // FIXME wait for NIO?
     }
     
     public void testWatchdogTriggeredTimeout() throws IOException, Exception {
