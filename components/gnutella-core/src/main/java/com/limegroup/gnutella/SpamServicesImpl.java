@@ -35,10 +35,6 @@ public class SpamServicesImpl implements SpamServices {
         this.udpReplyHandlerCache = udpReplyHandlerCache;
     }
     
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.SpamServices#adjustSpamFilters()
-     */
     public void adjustSpamFilters() {
         udpReplyHandlerCache.setPersonalFilter(spamFilterFactory.createPersonalFilter());
         
@@ -57,9 +53,6 @@ public class SpamServicesImpl implements SpamServices {
         // TODO: notify DownloadManager & UploadManager about new banned IP ranges
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.SpamServices#reloadIPFilter()
-     */
     public void reloadIPFilter() {
         ipFilter.get().refreshHosts(new IPFilter.IPFilterCallback() {
             public void ipFiltersLoaded() {
@@ -74,35 +67,31 @@ public class SpamServicesImpl implements SpamServices {
         return ipFilter.get().allow(host);
     }
 
-
     public void blockHost(String host) {
+        // FIXME move into IPFilter
+        // FIXME synchronize access to setting properly?
         String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
         Arrays.sort(bannedIPs, Comparators.stringComparator());
-        synchronized (this) {
-            if ( Arrays.binarySearch(bannedIPs, host, 
-                                     Comparators.stringComparator()) < 0 ) {
-                String[] more_banned = new String[bannedIPs.length+1];
-                System.arraycopy(bannedIPs, 0, more_banned, 0, 
-                                 bannedIPs.length);
-                more_banned[bannedIPs.length] = host;
-                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
-                reloadIPFilter();
-            }
+
+        if (Arrays.binarySearch(bannedIPs, host, Comparators.stringComparator()) < 0) {
+            String[] more_banned = new String[bannedIPs.length + 1];
+            System.arraycopy(bannedIPs, 0, more_banned, 0, bannedIPs.length);
+            more_banned[bannedIPs.length] = host;
+            FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
+            reloadIPFilter();
         }
     }
-
 
     public void unblockHost(String host) {
-        String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        // FIXME move into IPFilter
+        // FIXME synchronize access to setting properly?
+        String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES
+                .getValue();
         List<String> bannedList = Arrays.asList(bannedIPs);
-        synchronized (this) {
-            if (bannedList.remove(host) ) {
-                FilterSettings.BLACK_LISTED_IP_ADDRESSES.
-                    setValue((String[])bannedList.toArray());
-                reloadIPFilter();
-            }
+        if (bannedList.remove(host)) {
+            FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(bannedList.toArray(new String[0]));
+            reloadIPFilter();
         }
     }
-
 
 }
