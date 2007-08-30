@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.net.InetAddress;
+
 public interface SpamServices {
 
     /**
@@ -13,4 +15,9 @@ public interface SpamServices {
      */
     public void reloadIPFilter();
 
+    public void blockHost(String host);
+    
+    public boolean isAllowed(InetAddress host);
+
+    public void unblockHost(String host);
 }

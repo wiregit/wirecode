@@ -1,29 +1,18 @@
 package com.limegroup.gnutella.chat;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.Providers;
-import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.SocketsManager;
 
 public class InstantMessengerTest extends BaseTestCase {
 
-    private static final int CHAT_PORT = 9999;
-    private static Acceptor acceptThread;
-    private static MyActivityCallback receiver;
-    private MyActivityCallback callback;
-    private InstantMessenger messenger;
-    private InstantMessengerFactory factory;
-    
     public InstantMessengerTest(String name) {
         super(name);
     }
@@ -36,106 +25,32 @@ public class InstantMessengerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetUp() throws Exception {
-        doSettings();
+    public void testIsOutgoing() {
+        InstantMessenger im = new InstantMessenger("host", 1234, new ActivityCallbackStub(), new SocketsManager());
+        assertTrue(im.isOutgoing());
+        assertEquals("host", im.getHost());
+        assertEquals(1234, im.getPort());
         
-        receiver = new MyActivityCallback();
-        if(true)throw new RuntimeException("fix me");
-        //new RouterService(receiver);
-        //RouterService.getConnectionManager().initialize();
-        ProviderHacks.getChatManager().initialize();
-        
-        // start it up!
-        acceptThread = ProviderHacks.getAcceptor();
-        acceptThread.start();
+        im = new InstantMessenger(new StubSocket(), new ActivityCallbackStub());
+        assertFalse(im.isOutgoing());
+        assertEquals("1.2.3.4", im.getHost());
+        assertEquals(1234, im.getPort());
     }
 
-    public static void globealTearDown() throws Exception {
-        acceptThread.setListeningPort(0);
-        receiver = null;
-        acceptThread = null;
-    }
-    
-    private static void doSettings() {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-    }
-    
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        doSettings();
-        
-        acceptThread.setListeningPort(CHAT_PORT);
-        
-        factory = new InstantMessengerFactoryImpl(
-                Providers.of(ProviderHacks.getChatManager()), 
-                Providers.of((ActivityCallback) callback), 
-                Providers.of(ProviderHacks.getSocketsManager()));
-    }
-    
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
-        if (messenger != null) {
+    private class StubSocket extends Socket {
+        @Override
+        public InetAddress getInetAddress() {
             try {
-                messenger.stop();
-            } catch (Exception e) {
+                return InetAddress.getByAddress(new byte[] { 1, 2, 3, 4 });
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
             }
-        }
-    }
-      
-    public void testChatThroughAcceptor() throws Exception {
-        callback = new MyActivityCallback();
-        messenger = factory.createOutgoingInstantMessenger("localhost", CHAT_PORT);
-        messenger.start();
-        callback.waitForConnect(1000);
-        assertTrue(messenger.isConnected());
-        assertTrue(messenger.send("foo"));
-        receiver.assertMessageReceived("foo", 1000);
-        assertTrue(messenger.send("bar"));
-        receiver.assertMessageReceived("bar", 1000);
-    }
-    
-    public void testSendHugeMessage() throws Exception {
-        callback = new MyActivityCallback();
-        messenger = factory.createOutgoingInstantMessenger("localhost", CHAT_PORT);
-        messenger.start();
-        callback.waitForConnect(1000);
-        assertFalse(messenger.send(new String(new char[10000])));
-    }
-    
-    private static class MyActivityCallback extends ActivityCallbackStub {
-        
-        private volatile String message;
-        private volatile CountDownLatch connectLatch = new CountDownLatch(1);
-
-        @Override
-        public void acceptChat(Chatter chatter) {
-            connectLatch.countDown();
         }
         
         @Override
-        public synchronized void receiveMessage(Chatter chatter, String message) {
-            this.message = message;
-            notify();
+        public int getPort() {
+            return 1234;
         }
-
-        public void waitForConnect(long timeout) throws Exception {
-            AssertComparisons.assertTrue("Timeout while waiting for connect", connectLatch.await(timeout, TimeUnit.MILLISECONDS));
-        }
-        
-        public void assertMessageReceived(String message, long timeout) throws Exception {
-            synchronized (this) {
-                if (this.message == null) {
-                    this.wait(1000);
-                }
-            }
-            assertEquals("Message not received", message, this.message);
-            this.message = null;
-        }
-        
     }
     
 }

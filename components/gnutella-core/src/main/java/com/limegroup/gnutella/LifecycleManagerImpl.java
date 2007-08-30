@@ -411,7 +411,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		LOG.trace("START loading spam data");
         
         LOG.trace("START ChatManager");
-        chatManager.get().initialize();
+        chatManager.get().start();
         LOG.trace("END ChatManager");
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())

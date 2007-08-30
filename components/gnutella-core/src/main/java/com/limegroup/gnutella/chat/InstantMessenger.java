@@ -73,8 +73,6 @@ public class InstantMessenger implements Chatter {
 
     private final ActivityCallback callback;
 
-    private final ChatManager manager;
-
     private final Object connectionLock = new Object();
 
     /**
@@ -107,13 +105,11 @@ public class InstantMessenger implements Chatter {
     /**
      * Constructor for an incoming chat request.
      */
-    InstantMessenger(Socket socket, ChatManager manager,
-            ActivityCallback callback) {
-        if (socket == null || manager == null || callback == null) {
+    InstantMessenger(Socket socket, ActivityCallback callback) {
+        if (socket == null || callback == null) {
             throw new IllegalArgumentException();
         }
 
-        this.manager = manager;
         this.socket = socket;
         this.port = socket.getPort();
         this.host = socket.getInetAddress().getHostAddress();
@@ -126,14 +122,13 @@ public class InstantMessenger implements Chatter {
      * Constructor for an outgoing chat request
      */
     InstantMessenger(final String host, final int port,
-            ChatManager manager, ActivityCallback callback, SocketsManager socketsManager) {
-        if (host == null || manager == null || callback == null) {
+            ActivityCallback callback, SocketsManager socketsManager) {
+        if (host == null || callback == null) {
             throw new IllegalArgumentException();
         }
 
         this.host = host;
         this.port = port;
-        this.manager = manager;
         this.callback = callback;
         this.socketsManager = socketsManager;
         this.outgoing = true;
@@ -210,10 +205,6 @@ public class InstantMessenger implements Chatter {
      */
     public int getPort() {
         return port;
-    }
-
-    public void blockHost(String host) {
-        manager.blockHost(host);
     }
 
     private List<IOState> createIncomingShakeStates() {

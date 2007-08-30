@@ -1,11 +1,18 @@
 package com.limegroup.gnutella;
 
+import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.List;
+
+import org.limewire.collection.Comparators;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
+import com.limegroup.gnutella.settings.FilterSettings;
 
 @Singleton
 public class SpamServicesImpl implements SpamServices {
@@ -60,6 +67,41 @@ public class SpamServicesImpl implements SpamServices {
             }
         });
         hostilesFilter.get().refreshHosts();
+    }
+
+
+    public boolean isAllowed(InetAddress host) {
+        return ipFilter.get().allow(host);
+    }
+
+
+    public void blockHost(String host) {
+        String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        Arrays.sort(bannedIPs, Comparators.stringComparator());
+        synchronized (this) {
+            if ( Arrays.binarySearch(bannedIPs, host, 
+                                     Comparators.stringComparator()) < 0 ) {
+                String[] more_banned = new String[bannedIPs.length+1];
+                System.arraycopy(bannedIPs, 0, more_banned, 0, 
+                                 bannedIPs.length);
+                more_banned[bannedIPs.length] = host;
+                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
+                reloadIPFilter();
+            }
+        }
+    }
+
+
+    public void unblockHost(String host) {
+        String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        List<String> bannedList = Arrays.asList(bannedIPs);
+        synchronized (this) {
+            if (bannedList.remove(host) ) {
+                FilterSettings.BLACK_LISTED_IP_ADDRESSES.
+                    setValue((String[])bannedList.toArray());
+                reloadIPFilter();
+            }
+        }
     }
 
 

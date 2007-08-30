@@ -29,8 +29,6 @@ public interface Chatter {
      */
     public int getPort();
 
-    public void blockHost(String host);
-
     public void start();
 
     public boolean isOutgoing();
