@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -139,15 +140,19 @@ public class LimeTestUtils {
      * @param callbackClass the class that is used as a callback
      * @return the injector
      */
-    public static Injector createInjector(Module module, Class<? extends ActivityCallback> callbackClass) {
-        return Guice.createInjector(new LimeWireCoreModule(callbackClass), new ModuleHacks(), module);
+    public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
+        List<Module> list = new ArrayList<Module>();
+        list.add(new LimeWireCoreModule(callbackClass));
+        list.add(new ModuleHacks());
+        list.addAll(Arrays.asList(modules));
+        return Guice.createInjector(list);
     }
 
     /**
      * Wraps {@link #createInjector(Module, Class) createInjector(Module, ActivityCallbackStub.class)}.
      */
-    public static Injector createInjector(Module module) {
-        return createInjector(module, ActivityCallbackStub.class);
+    public static Injector createInjector(Module... modules) {
+        return createInjector(ActivityCallbackStub.class, modules);
     }
 
     /**
@@ -160,8 +165,8 @@ public class LimeTestUtils {
      * @param callbackClass the class that is used as a callback
      * @return the injector
      */
-    public static Injector createInjectorAndStart(Module module, Class<? extends ActivityCallback> callbackClass) {
-        Injector injector = createInjector(module, callbackClass);
+    public static Injector createInjectorAndStart(Class<? extends ActivityCallback> callbackClass, Module...modules) {
+        Injector injector = createInjector(callbackClass, modules);
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
         return injector;
@@ -170,8 +175,8 @@ public class LimeTestUtils {
     /**
      * Wraps {@link #createInjectorAndStart(Module, Class) createInjectorAndStart(Module, ActivityCallbackStub.class)}.
      */
-    public static Injector createInjectorAndStart(Module module) {
-        return createInjectorAndStart(module, ActivityCallbackStub.class);
+    public static Injector createInjectorAndStart(Module...modules) {
+        return createInjectorAndStart(ActivityCallbackStub.class, modules);
     }
 
 }
