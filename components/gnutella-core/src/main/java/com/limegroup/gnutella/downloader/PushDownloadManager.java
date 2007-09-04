@@ -26,7 +26,6 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
-import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
@@ -92,8 +91,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private final Provider<SocketProcessor> socketProcessor;
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;    
-    private final NetworkManager networkManager;    
-    private final Provider<ConnectionDispatcher> connectionDispatcher;
+    private final NetworkManager networkManager;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<PushedSocketHandler> downloadAcceptor;
     private final Provider<IPFilter> ipFilter;
@@ -107,7 +105,6 @@ public class PushDownloadManager implements ConnectionAcceptor {
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
-    		@Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
     		Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService) {
     	this.downloadAcceptor = downloadAcceptor;
@@ -116,17 +113,12 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	this.backgroundExecutor = scheduler;
     	this.socketProcessor = processor;
     	this.networkManager = networkManager;
-    	this.connectionDispatcher = connectionDispatcher;
         this.ipFilter = ipFilter;
         this.udpService = udpService;
     }
     
-    /** Informs the ConnectionDispatcher that this will be handling GIV requests. */
-    public void initialize() {
-        connectionDispatcher.get().addConnectionAcceptor(this,
-    			false,
-    			true,
-    			"GIV");
+    public boolean isBlocking() {
+        return true;
     }
     
     /**

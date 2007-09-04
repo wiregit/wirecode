@@ -7,7 +7,7 @@ import org.limewire.io.IpPort;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -15,7 +15,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
 @Singleton
 public class ActivityCallbackAdapter implements ActivityCallback {
 
-    public void acceptChat(Chatter ctr) {
+    public void acceptChat(InstantMessenger ctr) {
         // TODO Auto-generated method stub
         
     }
@@ -35,12 +35,12 @@ public class ActivityCallbackAdapter implements ActivityCallback {
         
     }
 
-    public void chatErrorMessage(Chatter chatter, String str) {
+    public void chatErrorMessage(InstantMessenger chatter, String str) {
         // TODO Auto-generated method stub
         
     }
 
-    public void chatUnavailable(Chatter chatter) {
+    public void chatUnavailable(InstantMessenger chatter) {
         // TODO Auto-generated method stub
         
     }
@@ -111,7 +111,7 @@ public class ActivityCallbackAdapter implements ActivityCallback {
         return false;
     }
 
-    public void receiveMessage(Chatter chr, String messsage) {
+    public void receiveMessage(InstantMessenger chr, String messsage) {
         // TODO Auto-generated method stub
         
     }

@@ -294,7 +294,10 @@ public class BasicHttpAcceptor {
             public void acceptConnection(String word, Socket socket) {
                 reactor.acceptConnection(word + " ", socket);
             }
-        }, localOnly, false, supportedMethods);
+            public boolean isBlocking() {
+                return false;
+            }
+        }, localOnly, supportedMethods);
     }
 
     /**

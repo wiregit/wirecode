@@ -4,12 +4,9 @@ import java.net.Socket;
 
 import org.limewire.io.IOUtils;
 import org.limewire.net.ConnectionAcceptor;
-import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -24,27 +21,19 @@ import com.limegroup.gnutella.statistics.HTTPStat;
 @Singleton
 public final class ChatManager implements ConnectionAcceptor {
 
-    private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final SpamServices spamServices;
     private final InstantMessengerFactory instantMessengerFactory;
         
     @Inject
-	public ChatManager(@Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
-            SpamServices spamServices, InstantMessengerFactory instantMessengerFactory) {
-        this.connectionDispatcher = connectionDispatcher;
+	public ChatManager(SpamServices spamServices, InstantMessengerFactory instantMessengerFactory) {
         this.spamServices = spamServices;
         this.instantMessengerFactory = instantMessengerFactory;
     }
 
-    public void start() {
-        connectionDispatcher.get().addConnectionAcceptor(this, false, false,
-                "CHAT");
+    public boolean isBlocking() {
+        return false;
     }
-
-    public void stop() {
-        connectionDispatcher.get().removeConnectionAcceptor("CHAT");
-    }
-
+    
 	/**
      * Invoked by the acceptor to notify this class of a new connection. Accepts
      * the given socket for a one-to-one chat connection, like an instant
@@ -74,7 +63,7 @@ public final class ChatManager implements ConnectionAcceptor {
 	 * will be called when the connection is established or
 	 * the connection has died.
 	 */
-	public Chatter request(String host, int port) {
+	public InstantMessenger createConnection(String host, int port) {
         InstantMessenger im = instantMessengerFactory.createOutgoingInstantMessenger(host, port);
         return im;
 	}

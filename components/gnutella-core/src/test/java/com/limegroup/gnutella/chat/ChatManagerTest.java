@@ -63,8 +63,8 @@ public class ChatManagerTest extends BaseTestCase {
         factory = new InstantMessengerFactoryImpl(Providers.of((ActivityCallback) receiverCallback),
                 Providers.of(new SocketsManager()));
         
-        chatManager = new ChatManager(Providers.of(connectionDispatcher), new StubSpamServices(), factory);
-        chatManager.start();
+        chatManager = new ChatManager(new StubSpamServices(), factory);
+        connectionDispatcher.addConnectionAcceptor(chatManager, false, "CHAT");
         
         acceptor = new SocketAcceptor(connectionDispatcher);
         acceptor.bind(CHAT_PORT);
@@ -88,7 +88,7 @@ public class ChatManagerTest extends BaseTestCase {
 
     public void testChatThroughAcceptor() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessenger("localhost", CHAT_PORT, callback, new SocketsManager());
+        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManager());
         messenger.start();
         callback.waitForConnect(1000);
         assertTrue(messenger.isConnected());
@@ -100,7 +100,7 @@ public class ChatManagerTest extends BaseTestCase {
 
     public void testSendHugeMessage() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessenger("localhost", CHAT_PORT, callback, new SocketsManager());
+        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManager());
         messenger.start();
         callback.waitForConnect(1000);
         assertFalse(messenger.send(new String(new char[10000])));
@@ -113,12 +113,12 @@ public class ChatManagerTest extends BaseTestCase {
         private volatile CountDownLatch connectLatch = new CountDownLatch(1);
 
         @Override
-        public void acceptChat(Chatter chatter) {
+        public void acceptChat(InstantMessenger chatter) {
             connectLatch.countDown();
         }
 
         @Override
-        public synchronized void receiveMessage(Chatter chatter, String message) {
+        public synchronized void receiveMessage(InstantMessenger chatter, String message) {
             this.message = message;
             notify();
         }

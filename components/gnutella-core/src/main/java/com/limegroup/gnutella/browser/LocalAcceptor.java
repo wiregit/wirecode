@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.browser;
 
 import java.io.IOException;
-import java.net.Socket;
 
-import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.service.MessageService;
@@ -21,14 +19,10 @@ public class LocalAcceptor {
 
     private final static int FIRST_PORT = 45100;
 
-    private final ExternalControl externalControl;
-
     private final SocketAcceptor acceptor;
 
     @Inject
-    public LocalAcceptor(ExternalControl externalControl, @Named("local")
-    ConnectionDispatcher connectionDispatcher) {
-        this.externalControl = externalControl;
+    public LocalAcceptor(@Named("local") ConnectionDispatcher connectionDispatcher) {
         this.acceptor = new SocketAcceptor(connectionDispatcher);
     }
 
@@ -36,23 +30,13 @@ public class LocalAcceptor {
      * Starts listening to incoming connections.
      */
     public void start() {
-        acceptor.getDispatcher().addConnectionAcceptor(
-                new ConnectionAcceptor() {
-                    public void acceptConnection(String word, Socket socket) {
-                        externalControl.fireControlThread(socket, true);
-                    }
-                }, true, true, "MAGNET");
-
-        acceptor.getDispatcher().addConnectionAcceptor(
-                new ConnectionAcceptor() {
-                    public void acceptConnection(String word, Socket socket) {
-                        externalControl.fireControlThread(socket, false);
-                    }
-                }, true, true, "TORRENT");
-
         if (!bind(FIRST_PORT)) {
             MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
         }
+    }
+    
+    public void stop() {
+        acceptor.unbind();
     }
 
     private boolean bind(final int listeningPort) {

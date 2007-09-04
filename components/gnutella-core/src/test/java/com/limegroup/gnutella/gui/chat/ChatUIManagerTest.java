@@ -7,7 +7,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.chat.InstantMessenger;
+import com.limegroup.gnutella.chat.InstantMessengerImpl;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GUIMediator;
 import com.limegroup.gnutella.gui.GUITestUtils;
@@ -41,7 +41,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         doSettings();
 
         GUITestUtils.initializeUI();
-        ProviderHacks.getChatManager().start();
+        ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(ProviderHacks.getChatManager(), false, "CHAT");
 
         // start it up!
         acceptThread = ProviderHacks.getAcceptor();
@@ -70,7 +70,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         // the outgoing chat frame can not be registered with ChatUIManager
         // otherwise the connection will be closed since there can only be
         // one chat frame per host
-        InstantMessenger chat = ProviderHacks.getInstantMessengerFactory().createOutgoingInstantMessenger("localhost", CHAT_PORT);
+        InstantMessengerImpl chat = (InstantMessengerImpl) ProviderHacks.getInstantMessengerFactory().createOutgoingInstantMessenger("localhost", CHAT_PORT);
         outgoing = new ChatFrame(chat);
         chat.start();
         chat.waitForConnect(4000);
@@ -96,7 +96,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
     // tests that chats to localhost are closed right away
     public void testChatLocalhost() throws Exception {
         outgoing = GUIMediator.createChat("127.0.0.1", CHAT_PORT);
-        ((InstantMessenger) outgoing.getChat()).waitForConnect(4000);
+        ((InstantMessengerImpl) outgoing.getChat()).waitForConnect(4000);
         LimeTestUtils.waitForNIO();
         // wait for SwingUtilities.invokeLater() to create chat frame
         GUITestUtils.waitForSwing();

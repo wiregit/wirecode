@@ -56,6 +56,15 @@
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbis.jar"/>
 	<classpathentry kind="lib" path="lib/jars/gettext-commons.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/cglib-nodep.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/cglib-src.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/hamcrest-core.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/hamcrest-library.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/jmock.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/jmock-junit3.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/jmock-junit4.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/jmock-legacy.jar"/>
+	<classpathentry kind="lib" path="tests/lib/jmock/objenesis.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="lib" path="tests/lib/jaxen-core-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jing.jar"/>

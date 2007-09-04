@@ -26,12 +26,12 @@ public class InstantMessengerTest extends BaseTestCase {
     }
 
     public void testIsOutgoing() {
-        InstantMessenger im = new InstantMessenger("host", 1234, new ActivityCallbackStub(), new SocketsManager());
+        InstantMessenger im = new InstantMessengerImpl("host", 1234, new ActivityCallbackStub(), new SocketsManager());
         assertTrue(im.isOutgoing());
         assertEquals("host", im.getHost());
         assertEquals(1234, im.getPort());
         
-        im = new InstantMessenger(new StubSocket(), new ActivityCallbackStub());
+        im = new InstantMessengerImpl(new StubSocket(), new ActivityCallbackStub());
         assertFalse(im.isOutgoing());
         assertEquals("1.2.3.4", im.getHost());
         assertEquals(1234, im.getPort());

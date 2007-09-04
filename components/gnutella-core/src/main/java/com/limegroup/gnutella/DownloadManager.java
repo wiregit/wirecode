@@ -193,7 +193,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      */
     public void initialize() {
         scheduleWaitingPump();
-        pushDownloadManager.get().initialize();
     }
 
     /**

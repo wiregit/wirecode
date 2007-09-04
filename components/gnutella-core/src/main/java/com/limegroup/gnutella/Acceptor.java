@@ -349,8 +349,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(),
                 TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES,
                 TimeUnit.MILLISECONDS);
-        connectionDispatcher.get().addConnectionAcceptor(this, false, false,
-                "CONNECT", "\n\n");
+        connectionDispatcher.get().addConnectionAcceptor(this, false, "CONNECT", "\n\n");
         _started = true;
     }
 	
@@ -363,6 +362,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	    synchronized(Acceptor.class) {
 	        return Arrays.equals(getAddress(true), _externalAddress);
 	    }
+	}
+	
+	public boolean isBlocking() {
+	    return false;
 	}
 	
 	/**

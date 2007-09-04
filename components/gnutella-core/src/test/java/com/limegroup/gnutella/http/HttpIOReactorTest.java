@@ -112,7 +112,10 @@ public class HttpIOReactorTest extends BaseTestCase {
                     public void acceptConnection(String word, Socket socket) {
                         server.getReactor().acceptConnection(word + " ", socket);
                     }
-                }, false, false, "GET", "HEAD", "POST" );
+                    public boolean isBlocking() {
+                        return false;
+                    }
+                }, false, "GET", "HEAD", "POST" );
 
         final HttpTestClient client = new HttpTestClient();
         MyHttpRequestExecutionHandler executionHandler = new MyHttpRequestExecutionHandler();
