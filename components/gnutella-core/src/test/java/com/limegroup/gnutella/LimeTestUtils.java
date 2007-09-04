@@ -14,6 +14,11 @@ import java.util.concurrent.Future;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+
 public class LimeTestUtils {
 
     public static void waitForNIO() throws InterruptedException {
@@ -125,4 +130,48 @@ public class LimeTestUtils {
     public static void clearHostCatcher() {
         ProviderHacks.getHostCatcher().clear();
     }
+
+    /**
+     * Creates the Guice injector with the limewire default modules and the 
+     * test module that can override bindings in the former modules.
+     * 
+     * @param module the test modules that can override bindings
+     * @param callbackClass the class that is used as a callback
+     * @return the injector
+     */
+    public static Injector createInjector(Module module, Class<? extends ActivityCallback> callbackClass) {
+        return Guice.createInjector(new LimeWireCoreModule(callbackClass), new ModuleHacks(), module);
+    }
+
+    /**
+     * Wraps {@link #createInjector(Module, Class) createInjector(Module, ActivityCallbackStub.class)}.
+     */
+    public static Injector createInjector(Module module) {
+        return createInjector(module, ActivityCallbackStub.class);
+    }
+
+    /**
+     * Creates the Guice injector with the limewire default modules and the 
+     * test module that can override bindings in the former modules.
+     * 
+     * Also starts the {@link LifecycleManager}.
+     * 
+     * @param module the test modules that can override bindings
+     * @param callbackClass the class that is used as a callback
+     * @return the injector
+     */
+    public static Injector createInjectorAndStart(Module module, Class<? extends ActivityCallback> callbackClass) {
+        Injector injector = createInjector(module, callbackClass);
+        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager.start();
+        return injector;
+    }
+    
+    /**
+     * Wraps {@link #createInjectorAndStart(Module, Class) createInjectorAndStart(Module, ActivityCallbackStub.class)}.
+     */
+    public static Injector createInjectorAndStart(Module module) {
+        return createInjectorAndStart(module, ActivityCallbackStub.class);
+    }
+
 }

@@ -14,18 +14,23 @@ import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
@@ -34,7 +39,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactoryImpl;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.stubs.MockNetworkManager;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 
 public class OOBHandlerTest extends BaseTestCase {
@@ -55,6 +60,9 @@ public class OOBHandlerTest extends BaseTestCase {
     private ReplyNumberVendorMessageFactory factory;
     private volatile boolean canReceiveUnsolicited;
     
+    ResponseFactory responseFactory;
+    QueryReplyFactory queryReplyFactory;
+    
     public void setUp() throws Exception {
         router = new MyMessageRouter();
         router.initialize();
@@ -63,12 +71,23 @@ public class OOBHandlerTest extends BaseTestCase {
         address = InetAddress.getByName("1.2.3.4");
         replyHandler = new MyReplyHandler(address, 1);
         canReceiveUnsolicited = false;
-        factory = new ReplyNumberVendorMessageFactoryImpl(new MockNetworkManager() {
+        factory = new ReplyNumberVendorMessageFactoryImpl(new NetworkManagerStub() {
             @Override
             public boolean canReceiveUnsolicited() {
                 return canReceiveUnsolicited;
             }
         });
+        
+        Module module = new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ReplyNumberVendorMessageFactory.class).toInstance(factory);
+            }
+        };
+        
+        Injector injector = LimeTestUtils.createInjector(module);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
     }
 
     public void testDropsLargeResponses() throws Exception {
@@ -577,9 +596,9 @@ public class OOBHandlerTest extends BaseTestCase {
             byte[] addr, SecurityToken token, int offset, boolean needsPush) {
         Response[] res = new Response[numResults];
         for (int j = 0; j < res.length; j++)
-            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel" + j + offset);
+            res[j] = responseFactory.createResponse(10, 10, "susheel" + j + offset);
 
-        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, 1,
+        return queryReplyFactory.createQueryReply(guid, (byte) 1, 1,
                 addr, 0, res, GUID.makeGuid(), new byte[0], needsPush, false,
                 true, true, false, false, true, null, token);
     }

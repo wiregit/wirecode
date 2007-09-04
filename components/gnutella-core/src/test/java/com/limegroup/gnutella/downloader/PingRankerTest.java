@@ -19,18 +19,15 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LimeWireCore;
-import com.limegroup.gnutella.LimeWireCoreModule;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ModuleHacks;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -46,7 +43,6 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -93,9 +89,7 @@ public class PingRankerTest extends LimeTestCase {
             
         };
         
-        Injector injector = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class), new ModuleHacks(), module);
-        LimeWireCore core = injector.getInstance(LimeWireCore.class);
-        core.getLifecycleManager().start();
+        Injector injector = LimeTestUtils.createInjector(module);
         
         udpReplyHandlerFactory = injector.getInstance(UDPReplyHandlerFactory.class);
         spamFilterFactory = injector.getInstance(SpamFilterFactory.class);
