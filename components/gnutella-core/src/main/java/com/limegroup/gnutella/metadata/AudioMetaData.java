@@ -38,9 +38,13 @@ public abstract class AudioMetaData extends MetaData {
     private String license;
     private String price;
     private String licensetype;
+    private int encoder = NON_LWS;
     
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
+    public static final int NON_LWS = 0;
+    public static final int LWS = 1;
+    public static final String MAGIC_KEY = "NOT CLEARED";
     
     protected AudioMetaData() {}
 
@@ -94,6 +98,7 @@ public abstract class AudioMetaData extends MetaData {
     public int getLength() { return length; }
     public String getLicense() { return license; }
     public String getLicenseType() { return licensetype; }
+    public int getEncoder() { return encoder; }
     
     void setPrice(String price)  { this.price = price; }
     void setTitle(String title) { this.title = title; }
@@ -110,6 +115,7 @@ public abstract class AudioMetaData extends MetaData {
     void setLength(int length) { this.length = length; }    
     void setLicense(String license) { this.license = license; }
     void setLicenseType(String licensetype) { this.licensetype = licensetype; }
+    void setEncoder(int encoder) {this.encoder = encoder; }
     
     /**
      * Determines if all fields are valid.
@@ -143,7 +149,10 @@ public abstract class AudioMetaData extends MetaData {
         add(list, bitrate, LimeXMLNames.AUDIO_BITRATE);
         add(list, length, LimeXMLNames.AUDIO_SECONDS);
         add(list, license, LimeXMLNames.AUDIO_LICENSE);
-        add(list, licensetype, LimeXMLNames.AUDIO_LICENSETYPE);
+        if( getEncoder() == LWS ) 
+            add(list, MAGIC_KEY, LimeXMLNames.AUDIO_LICENSETYPE);
+        else
+            add(list, licensetype, LimeXMLNames.AUDIO_LICENSETYPE);
         return list;
     }
     

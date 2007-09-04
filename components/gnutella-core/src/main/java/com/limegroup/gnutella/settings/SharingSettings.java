@@ -2,10 +2,14 @@ package com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetSetting;
 import org.limewire.setting.FileSetting;
@@ -16,11 +20,18 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.gui.GUIMediator;
+import com.limegroup.gnutella.gui.options.panes.StoreSaveTemplateProcessor;
+import com.limegroup.gnutella.gui.options.panes.StoreSaveTemplateProcessor.IllegalTemplateException;
+import com.limegroup.gnutella.metadata.MP3MetaData;
+import com.limegroup.gnutella.metadata.MetaData;
 
 /**
  * Settings for sharing
  */
 public class SharingSettings extends LimeProps {
+    
+    private static final Log LOG = LogFactory.getLog(SharingSettings.class);
     
     private SharingSettings() {}
 
@@ -37,6 +48,13 @@ public class SharingSettings extends LimeProps {
         new File(CommonUtils.getUserHomeDir(), "Shared");
     
     /**
+     * Default directory for songs purchased from LWS, this should always
+     * be different than the shared folder.
+     */
+    public static final File DEFAULT_SAVE_LWS_DIR = 
+        new File(CommonUtils.getUserHomeDir(), "LimeWireStore");
+    
+    /**
      * Whether or not we're going to add an alternate for ourselves
      * to our shared files.  Primarily set to false for testing.
      */
@@ -49,6 +67,21 @@ public class SharingSettings extends LimeProps {
     public static final FileSetting DIRECTORY_FOR_SAVING_FILES = 
         FACTORY.createFileSetting("DIRECTORY_FOR_SAVING_FILES", 
             DEFAULT_SAVE_DIR).setAlwaysSave(true);
+    
+    /**
+     * Directory for saving songs purchased from LimeWire Store
+     */
+    public static final FileSetting DIRECTORY_FOR_SAVING_LWS_FILES = 
+        FACTORY.createFileSetting("DIRETORY_FOR_SAVING_LWS_FILES",
+                DEFAULT_SAVE_LWS_DIR).setAlwaysSave(true);
+    
+    /**
+     * Template for substructure when saving songs purchased from LimeWire Store
+     * The template allows purchased songs to be saved in a unique fashion, 
+     * ie. LWS_dir/artist/album/songX.mp3
+     */
+    public static final StringSetting TEMPLATE_FOR_SAVING_LWS_FILES = 
+        (StringSetting)FACTORY.createStringSetting("TEMPLATE_FOR_SAVING_LWS_FILES","").setAlwaysSave(true);
     
     /**
      * The directory where incomplete files are stored (downloads in progress).
@@ -195,6 +228,105 @@ public class SharingSettings extends LimeProps {
         return set;  
     }  
 
+    /**
+     * Sets the directory to save the purchased songs from the LWS
+     *  
+     * @param   saveDir  A <tt>File</tt> instance denoting the
+     *                   abstract pathname of the directory for
+     *                   saving files.
+     *
+     * @throws  <tt>IOException</tt>
+     *          If the directory denoted by the directory pathname
+     *          String parameter did not exist prior to this method
+     *          call and could not be created, or if the canonical
+     *          path could not be retrieved from the file system.
+     *
+     * @throws  <tt>NullPointerException</tt>
+     *          If the "dir" parameter is null.
+     */
+    public static final void setSaveLWSDirectory(File storeDir) throws IOException { 
+        if(storeDir == null) throw new NullPointerException();
+        if(!storeDir.isDirectory()) {
+            if(!storeDir.mkdirs()) throw new IOException("could not create save dir");
+        }
+        
+        FileUtils.setWriteable(storeDir);
+
+        if(!storeDir.canRead() || !storeDir.canWrite()) {
+            throw new IOException("could not write to selected directory");
+        }
+        
+        // Canonicalize the files ... 
+        try {
+            storeDir = FileUtils.getCanonicalFile(storeDir);
+        } catch(IOException ignored) {}
+        
+        DIRECTORY_FOR_SAVING_LWS_FILES.setValue(storeDir);
+    }
+    
+    
+    /**
+     * @return directory of where to save songs purchased from LimeWireStore
+     * @throws IllegalTemplateException 
+     */
+    public static final File getSaveLWSDirectory(File incompleteFile) {
+        File f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
+        final String template = getSaveLWSTemplate();
+        
+        // if mp3, try to get meta-data to use template pattern when saving
+        if( incompleteFile.getName().toLowerCase().endsWith("mp3")) {
+            try {
+                final MP3MetaData data = (MP3MetaData) MetaData.parse(incompleteFile);
+                final Map<String, String> subs = new HashMap<String, String>();
+                String artist = data.getArtist();
+                if (artist == null) {
+                    artist = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ARTIST");
+                }
+                String album = data.getAlbum();
+                if (album == null) {
+                    album = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ALBUM");
+                }
+                subs.put(StoreSaveTemplateProcessor.ARTIST_LABEL, artist);
+                subs.put(StoreSaveTemplateProcessor.ALBUM_LABEL, album);
+                subs.put(StoreSaveTemplateProcessor.HOME_LABEL, System.getProperty("user.dir"));
+                File outDir = null;
+                try {
+                    outDir = new StoreSaveTemplateProcessor().getOutputDirectory(template, subs, f);
+                } catch (IllegalTemplateException e) {
+                    GUIMediator.showError("STORE_DOWNLOADER_INVALID_TEMPLATE", System.getProperty("line.separator") + e.getMessage());
+                }
+                if (outDir != null) f = outDir;
+            } catch (IOException e) { 
+                LOG.error("getSaveLWSDirectory", e);
+            }
+            if (!f.exists()) 
+                f.mkdirs();
+            if( !f.isDirectory())
+                f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
+        }
+        return f;
+    }
+    
+    /**
+     * @return directory of where to save songs purchased from LimeWireStore
+     */
+    public static final File getSaveLWSDirectory() {
+        final File f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();        
+        if (!f.exists()) f.mkdirs();
+        return f;
+    }
+    
+    public static final void setSaveLWSTemplate(String template) throws IOException { 
+        if(template == null) template = "";
+        TEMPLATE_FOR_SAVING_LWS_FILES.setValue(template);
+    }
+
+    /**
+     * @return template of how to store LWS files
+     */
+    public static final String getSaveLWSTemplate() {
+        return TEMPLATE_FOR_SAVING_LWS_FILES.getValue();
+    }
     
     /*********************************************************************/
     

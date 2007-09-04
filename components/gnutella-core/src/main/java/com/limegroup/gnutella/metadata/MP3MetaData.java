@@ -6,6 +6,8 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.limewire.util.ByteOrder;
 
@@ -131,7 +133,6 @@ public class MP3MetaData extends AudioMetaData {
      */
     private void parseID3v2Data(File file) {
         
-        
         ID3v2 id3v2Parser = null;
         try {
             id3v2Parser = new ID3v2(file);
@@ -169,8 +170,12 @@ public class MP3MetaData extends AudioMetaData {
                 }
             }
 
-            if(frameContent == null || frameContent.trim().equals(""))
+            // need to check is PRIV field here since frameContent may be null in ISO_LATIN format
+            //  but not UTF-8 format
+            if( (frameContent == null || frameContent.trim().equals("")) &&
+                    !MP3DataEditor.PRIV_ID.equals(frameID)){
                 continue;
+            }
             //check which tag we are looking at
             if(MP3DataEditor.TITLE_ID.equals(frameID)) 
                 setTitle(frameContent);
@@ -178,8 +183,10 @@ public class MP3MetaData extends AudioMetaData {
                 setArtist(frameContent);
             else if(MP3DataEditor.ALBUM_ID.equals(frameID)) 
                 setAlbum(frameContent);
-            else if(MP3DataEditor.YEAR_ID.equals(frameID)) 
+            else if(MP3DataEditor.YEAR_ID.equals(frameID)) {
                 setYear(frameContent);
+                checkLWS(frameContent );
+            }
             else if(MP3DataEditor.COMMENT_ID.equals(frameID)) {
                 //ID3v2 comments field has null separators embedded to encode
                 //language etc, the real content begins after the last null
@@ -195,6 +202,7 @@ public class MP3MetaData extends AudioMetaData {
                 frameContent = 
                   new String(bytes, startIndex, bytes.length-startIndex).trim();
                 setComment(frameContent);
+                checkLWS(frameContent );
             }
             else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
                 try {
@@ -202,6 +210,8 @@ public class MP3MetaData extends AudioMetaData {
                 } catch (NumberFormatException ignored) {} 
             }
             else if(MP3DataEditor.GENRE_ID.equals(frameID)) {
+                if( frameContent == null )
+                    continue;
                 //ID3v2 frame for genre has the byte used in ID3v1 encoded
                 //within it -- we need to parse that out
                 int startIndex = frameContent.indexOf("(");
@@ -237,11 +247,51 @@ public class MP3MetaData extends AudioMetaData {
             }
             else if (MP3DataEditor.LICENSE_ID.equals(frameID)) {
                 setLicense(frameContent);
+                checkLWS(frameContent );
+            }
+            // PRIV fields in LWS songs are encoded in UTF-8 format
+            else if (MP3DataEditor.PRIV_ID.equals(frameID)) {
+                try {
+                    String content = new String(contentBytes,"UTF-8");
+                    checkLWS(content);
+                } catch (UnsupportedEncodingException e) {
+                }
+            }
+            // another key we don't care about except for searching for 
+            //  protected content
+            else {
+                checkLWS(frameContent );
+            }
             }
         }
         
+    /**
+     * If the song is not a LWS already, do a substring search to see if
+     * it is a LWS song
+     * @param content
+     */
+    private void checkLWS(String content) {
+        if( getEncoder() != LWS) {
+            if( containsKey(content, MAGIC_KEY) ) {
+                setEncoder(LWS);
+            }
+       }
     }
 
+    /**
+     * Determines if a substring exists in the file
+     * @param file - string to search
+     * @param key - substring to search for
+     * 
+     * @return - return true if the substring is contained at least once in the string
+     */
+    private static boolean containsKey(String file, String key) {
+        if( file == null || key == null || file.length() == 0 )
+            return false;
+        Pattern pattern  = Pattern.compile(key);
+        Matcher matcher = pattern.matcher(file);
+        return matcher.find();
+    }
 
 	/**
 	 * Takes a short and returns the corresponding genre string

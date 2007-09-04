@@ -7,6 +7,7 @@ import java.util.List;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.store.StoreDescriptor;
 
 public interface DownloadServices {
 
@@ -51,6 +52,19 @@ public interface DownloadServices {
      */
     public Downloader download(MagnetOptions magnet, boolean overwrite)
             throws SaveLocationException;
+    
+    /**
+     * Creates a downloader for songs purchased from the LimeWire Store
+     * @param store - provides information of the file to download including a URN
+     * @param overwrite - whether an existing file with the same name should be overwritten
+     * @param saveDir - location to store the completed download to, this may be different than
+     *              downloads from gnutella
+     * @param fileName - name of the file once completed
+     * @return
+     * @throws SaveLocationException
+     */
+    public Downloader download(StoreDescriptor store, boolean overwrite,
+            File saveDir, String fileName) throws SaveLocationException;
 
     public Downloader download(RemoteFileDesc[] files, boolean overwrite,
             GUID queryGUID) throws SaveLocationException;
