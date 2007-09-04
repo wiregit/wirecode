@@ -67,7 +67,7 @@ public class SourceRankerFactoryTest extends BaseTestCase {
         SourceRanker ranker = factory.getAppropriateRanker();
         assertTrue(ranker instanceof LegacyRanker);
         context.assertIsSatisfied();
-        
+    
         expectPingRanker();
         DownloadSettings.USE_HEADPINGS.setValue(false);
         
