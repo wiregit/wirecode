@@ -1,144 +1,82 @@
 package com.limegroup.gnutella.chat;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.net.InetAddress;
 
-import junit.framework.Test;
-
-import org.limewire.concurrent.Providers;
-import org.limewire.io.LocalSocketAddressService;
-import org.limewire.net.ConnectionDispatcher;
-import org.limewire.net.ConnectionDispatcherImpl;
-import org.limewire.net.SocketAcceptor;
-import org.limewire.util.AssertComparisons;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.StubSpamServices;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.SpamServices;
+import com.limegroup.gnutella.stubs.StubSocket;
 
 public class ChatManagerTest extends BaseTestCase {
 
-    private static final int CHAT_PORT = 9999;
-
-    private MyActivityCallback receiverCallback;
-
-    private ChatManager chatManager;
-
-    private ConnectionDispatcher connectionDispatcher;
-
-    private MyActivityCallback callback;
-
-    private InstantMessenger messenger;
-
-    private InstantMessengerFactory factory;
-
-    private SocketAcceptor acceptor;
+    private final Mockery context = new Mockery();
+    
+    private InetAddress address;
 
     public ChatManagerTest(String name) {
         super(name);
     }
 
-    public static Test suite() {
-        return buildTestSuite(ChatManagerTest.class);
-    }
-
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(suite());
-    }
-
-    @Override
     protected void setUp() throws Exception {
-        super.setUp();
-        
-        // make sure local connections are accepted
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-
-        receiverCallback = new MyActivityCallback();
-        
-        connectionDispatcher = new ConnectionDispatcherImpl();
-
-        factory = new InstantMessengerFactoryImpl(Providers.of((ActivityCallback) receiverCallback),
-                Providers.of(new SocketsManager()));
-        
-        chatManager = new ChatManager(new StubSpamServices(), factory);
-        connectionDispatcher.addConnectionAcceptor(chatManager, false, "CHAT");
-        
-        acceptor = new SocketAcceptor(connectionDispatcher);
-        acceptor.bind(CHAT_PORT);
+        address = InetAddress.getByAddress(new byte[] { 1, 2, 3, 4 });
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
-        if (messenger != null) {
-            try {
-                messenger.stop();
-            } catch (Exception e) {
-            }
-        }
+    public void testAcceptConnection() {
+        final StubSocket socket = new StubSocket(address, 5678);
+        final SpamServices spamServices = context.mock(SpamServices.class);
+        final InstantMessengerFactory instantMessengerFactory = context.mock(InstantMessengerFactory.class);
+        final InstantMessenger instantMessenger = context.mock(InstantMessenger.class);
         
-        if (acceptor != null) {
-            acceptor.unbind();
-        }
+        context.checking(new Expectations() {{
+            one(spamServices).isAllowed(address);
+            will(returnValue(true));
+            
+            one(instantMessengerFactory).createIncomingInstantMessenger(socket);
+            will(returnValue(instantMessenger));
+            
+            one(instantMessenger).start();
+        }});
+        
+        ChatManager chatManager = new ChatManager(spamServices, instantMessengerFactory);
+        chatManager.acceptConnection("CHAT", socket);
+        
+        context.assertIsSatisfied();
     }
 
-    public void testChatThroughAcceptor() throws Exception {
-        callback = new MyActivityCallback();
-        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManager());
-        messenger.start();
-        callback.waitForConnect(1000);
-        assertTrue(messenger.isConnected());
-        assertTrue(messenger.send("foo"));
-        receiverCallback.assertMessageReceived("foo", 1000);
-        assertTrue(messenger.send("bar"));
-        receiverCallback.assertMessageReceived("bar", 1000);
+    public void testAcceptConnectionNotAllowed() {
+        final StubSocket socket = new StubSocket(address, 5678);
+        final SpamServices spamServices = context.mock(SpamServices.class);
+        final InstantMessengerFactory instantMessengerFactory = context.mock(InstantMessengerFactory.class);
+        
+        context.checking(new Expectations() {{
+            one(spamServices).isAllowed(address);
+            will(returnValue(false));
+        }});
+        
+        ChatManager chatManager = new ChatManager(spamServices, instantMessengerFactory);
+        chatManager.acceptConnection("CHAT", socket);
+
+        assertTrue(socket.closed);
+        
+        context.assertIsSatisfied();
     }
 
-    public void testSendHugeMessage() throws Exception {
-        callback = new MyActivityCallback();
-        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManager());
-        messenger.start();
-        callback.waitForConnect(1000);
-        assertFalse(messenger.send(new String(new char[10000])));
-    }
-
-    private static class MyActivityCallback extends ActivityCallbackStub {
-
-        private volatile String message;
-
-        private volatile CountDownLatch connectLatch = new CountDownLatch(1);
-
-        @Override
-        public void acceptChat(InstantMessenger chatter) {
-            connectLatch.countDown();
-        }
-
-        @Override
-        public synchronized void receiveMessage(InstantMessenger chatter, String message) {
-            this.message = message;
-            notify();
-        }
-
-        public void waitForConnect(long timeout) throws Exception {
-            AssertComparisons.assertTrue("Timeout while waiting for connect",
-                    connectLatch.await(timeout, TimeUnit.MILLISECONDS));
-        }
-
-        public void assertMessageReceived(String message, long timeout)
-                throws Exception {
-            synchronized (this) {
-                if (this.message == null) {
-                    this.wait(1000);
-                }
-            }
-            assertEquals("Message not received", message, this.message);
-            this.message = null;
-        }
-
+    public void testCreateConnection() {
+        final SpamServices spamServices = context.mock(SpamServices.class);
+        final InstantMessengerFactory instantMessengerFactory = context.mock(InstantMessengerFactory.class);
+        final InstantMessenger instantMessenger = context.mock(InstantMessenger.class);
+        
+        context.checking(new Expectations() {{
+            one(instantMessengerFactory).createOutgoingInstantMessenger("host", 5678);
+            will(returnValue(instantMessenger));
+        }});
+        
+        ChatManager chatManager = new ChatManager(spamServices, instantMessengerFactory);
+        assertSame(instantMessenger, chatManager.createConnection("host", 5678));
+        
+        context.assertIsSatisfied();
     }
 
 }
