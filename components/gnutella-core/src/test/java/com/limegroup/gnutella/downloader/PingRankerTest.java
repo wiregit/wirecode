@@ -33,6 +33,7 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPPingerImpl;
 import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
@@ -532,7 +533,7 @@ public class PingRankerTest extends LimeTestCase {
      * a mock pinger.  Note that the base code will still register messsage listeners
      * but we don't care because they will never be used.
      */
-    static class MockPinger extends UDPPinger {
+    static class MockPinger extends UDPPingerImpl {
         
         @Inject
         public MockPinger(Provider<MessageRouter> messageRouter, @Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService,

@@ -22,7 +22,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPPingerImpl;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -305,7 +305,7 @@ public class UDPHostCacheTest extends LimeTestCase {
     
     public void testRecordingFailuresAndSuccesses() throws Exception {
         assertEquals(0, cache.getSize());
-        UDPPinger.DEFAULT_LISTEN_EXPIRE_TIME = 3 * 1000;
+        UDPPingerImpl.DEFAULT_LISTEN_EXPIRE_TIME = 3 * 1000;
         cache.doRealFetch = true;
         
         ExtendedEndpoint e1 = create("1.2.3.4");

@@ -13,7 +13,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
-public class UniqueHostPinger extends UDPPinger {
+public class UniqueHostPinger extends UDPPingerImpl {
 
     /**
      * set of endpoints we pinged since last expiration

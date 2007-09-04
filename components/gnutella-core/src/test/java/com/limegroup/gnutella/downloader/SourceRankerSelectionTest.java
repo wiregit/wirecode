@@ -24,7 +24,7 @@ public class SourceRankerSelectionTest extends LimeTestCase {
     
     public void testSelectRanker() throws Exception {
         // if we cannot do solicited udp, we get the legacy ranker
-        ProviderHacks.getNetworkManager().acceptedIncomingConnection();
+//        
         PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming",Boolean.FALSE);
         assertFalse(ProviderHacks.getNetworkManager().canReceiveSolicited());
         SourceRanker ranker = ProviderHacks.getSourceRankerFactory().getAppropriateRanker();

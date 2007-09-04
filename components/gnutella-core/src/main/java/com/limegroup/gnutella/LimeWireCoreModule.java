@@ -271,6 +271,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateCollectionFactory.class).to(UpdateCollectionFactoryImpl.class);
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("global")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
+        bind(UDPPinger.class).to(UDPPingerImpl.class);
         
         // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
