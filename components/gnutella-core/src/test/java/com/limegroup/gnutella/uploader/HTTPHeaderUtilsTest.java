@@ -14,6 +14,7 @@ import org.apache.http.message.BasicHttpResponse;
 import org.limewire.concurrent.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.HackConnectionManager;
@@ -24,10 +25,9 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
-public class HTTPHeaderUtilsTest extends LimeTestCase {
+public class HTTPHeaderUtilsTest extends BaseTestCase {
     
     private StubConnectionManager connectionManager;
     private AltLocManager altLocManager;
