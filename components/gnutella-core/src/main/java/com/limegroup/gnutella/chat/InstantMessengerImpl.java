@@ -137,7 +137,6 @@ public class InstantMessengerImpl implements InstantMessenger {
     public void start() {
         if (outgoing) {
             try {
-                // DPINJ: Change to using passed-in SocketsManager!!!
                 socketsManager.connect(new InetSocketAddress(host, port), Constants.TIMEOUT,
                         new ConnectObserver() {
                             public void handleConnect(Socket socket)

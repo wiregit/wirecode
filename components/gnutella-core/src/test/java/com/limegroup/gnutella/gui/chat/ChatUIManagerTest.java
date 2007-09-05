@@ -4,26 +4,40 @@ import java.awt.event.WindowEvent;
 
 import junit.framework.Test;
 
+import org.limewire.io.LocalSocketAddressService;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.util.BaseTestCase;
+
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.chat.InstantMessenger;
+import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.chat.InstantMessengerImpl;
-import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GUIMediator;
 import com.limegroup.gnutella.gui.GUITestUtils;
+import com.limegroup.gnutella.gui.LimeWireGUIModule;
+import com.limegroup.gnutella.gui.ResourceManager;
+import com.limegroup.gnutella.gui.VisualConnectionCallback;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
-public class ChatUIManagerTest extends GUIBaseTestCase {
+public class ChatUIManagerTest extends BaseTestCase {
 
     private static final int CHAT_PORT = 9999;
-
-    private static Acceptor acceptThread;
-
-    private ChatUIManager chatManager;
 
     private ChatFrame outgoing;
 
     private ChatFrame incoming;
+
+    private Acceptor acceptor;
+
+    private InstantMessengerFactory instantMessengerFactory;
+
+    private ChatManager chatManager;
 
     public ChatUIManagerTest(String name) {
         super(name);
@@ -37,65 +51,55 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetUp() throws Exception {
-        doSettings();
-
-        GUITestUtils.initializeUI();
-        ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(ProviderHacks.getChatManager(), false, "CHAT");
-
-        // start it up!
-        acceptThread = ProviderHacks.getAcceptor();
-        acceptThread.start();
-        acceptThread.setListeningPort(CHAT_PORT);
-    }
-
-    public static void globealTearDown() throws Exception {
-        acceptThread.setListeningPort(0);
-    }
-
-    private static void doSettings() {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        doSettings();
-
-        chatManager = ChatUIManager.instance();
-    }
-
-    private void setupChat() throws Exception {
-        // the outgoing chat frame can not be registered with ChatUIManager
-        // otherwise the connection will be closed since there can only be
-        // one chat frame per host
-        InstantMessengerImpl chat = (InstantMessengerImpl) ProviderHacks.getInstantMessengerFactory().createOutgoingInstantMessenger("localhost", CHAT_PORT);
-        outgoing = new ChatFrame(chat);
-        chat.start();
-        chat.waitForConnect(4000);
-        assertTrue("Could not establish outgoing chat connection", chat.isConnected());
-        LimeTestUtils.waitForNIO();
-        GUITestUtils.waitForSwing();
-        incoming = getIncomingChat();
+        // make sure local connections are accepted
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
+        
+        Injector injector = LimeTestUtils.createInjector(VisualConnectionCallback.class, new LimeWireGUIModule());
+        
+        // initialize chat classes
+        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        chatManager = injector.getInstance(ChatManager.class);
+        connectionDispatcher.addConnectionAcceptor(chatManager, false, "CHAT");
+        acceptor = injector.getInstance(Acceptor.class);
+        acceptor.setListeningPort(CHAT_PORT);
+        acceptor.start();
+        
+        instantMessengerFactory = injector.getInstance(InstantMessengerFactory.class);
+        
+        // initialize ui
+        ResourceManager.instance();
     }
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
 
+        ChatUIManager.instance().clear();
+        
         if (outgoing != null) {
             outgoing.getChat().stop();
             outgoing.dispose();
             outgoing = null;
         }
 
-        chatManager.clear();
+        if (acceptor != null) {
+            acceptor.setListeningPort(0);
+            acceptor.shutdown();
+        }
+        
+        LimeTestUtils.waitForNIO();
     }
 
     // tests that chats to localhost are closed right away
     public void testChatLocalhost() throws Exception {
-        outgoing = GUIMediator.createChat("127.0.0.1", CHAT_PORT);
+        InstantMessenger chatter = chatManager.createConnection("127.0.0.1", CHAT_PORT);
+        outgoing = ChatUIManager.instance().acceptChat(chatter);
+        chatter.start();
         ((InstantMessengerImpl) outgoing.getChat()).waitForConnect(4000);
         LimeTestUtils.waitForNIO();
         // wait for SwingUtilities.invokeLater() to create chat frame
@@ -145,7 +149,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
     }
 
     private ChatFrame getIncomingChat() {
-        for (ChatFrame frame : chatManager.getChatFrames()) {
+        for (ChatFrame frame : ChatUIManager.instance().getChatFrames()) {
             if (!frame.getChat().isOutgoing()) {
                 return frame;
             }
@@ -154,4 +158,18 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         return null;
     }
 
+    private void setupChat() throws Exception {
+        // the outgoing chat frame can not be registered with ChatUIManager
+        // otherwise the connection will be closed since there can only be
+        // one chat frame per host
+        InstantMessengerImpl chat = (InstantMessengerImpl) instantMessengerFactory.createOutgoingInstantMessenger("localhost", CHAT_PORT);
+        outgoing = new ChatFrame(chat);
+        chat.start();
+        chat.waitForConnect(4000);
+        assertTrue("Could not establish outgoing chat connection", chat.isConnected());
+        LimeTestUtils.waitForNIO();
+        GUITestUtils.waitForSwing();
+        incoming = getIncomingChat();
+    }
+    
 }

@@ -46,13 +46,9 @@ public class AcceptorTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-    private static void setSettings() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-    }
-    
     @Override
     public void setUp() throws Exception {
-        setSettings();
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         Injector injector = LimeTestUtils.createInjector();
         
@@ -66,6 +62,7 @@ public class AcceptorTest extends LimeTestCase {
         acceptor.setListeningPort(0);
     }
     
+    @Override
     public void tearDown() throws Exception {
         //shut off the various services,
         //if an exception is thrown, something bad happened.
