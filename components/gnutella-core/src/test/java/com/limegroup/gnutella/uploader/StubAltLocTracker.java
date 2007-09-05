@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.limegroup.gnutella.uploader;
 
 import java.util.ArrayList;
@@ -15,17 +12,17 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.AltLocTracker;
 
-class MockAltLocTracker extends AltLocTracker {
+class StubAltLocTracker extends AltLocTracker {
     private List<AlternateLocation> addedLocs = new ArrayList<AlternateLocation>();
     
     private Collection<DirectAltLoc> nextSetOfAltsToSend = null;
     private Collection<PushAltLoc> nextSetOfPushAltsToSend = null;
 
-    public MockAltLocTracker() {
+    public StubAltLocTracker() {
         super(HugeTestUtils.SHA1);
     }
     
-    public MockAltLocTracker(URN urn) {
+    public StubAltLocTracker(URN urn) {
         super(urn);
     }
 

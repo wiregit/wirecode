@@ -195,7 +195,6 @@ public class AltLocUtilsTest extends LimeTestCase {
         }
     }
     
-    
     private void checkDirect(AlternateLocation alt, URN sha1, String host, int port, boolean tls) {
         assertInstanceof(DirectAltLoc.class, alt);
         DirectAltLoc d = (DirectAltLoc)alt;

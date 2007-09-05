@@ -291,7 +291,7 @@ public class LimeWireCore {
     }
 
     public ConnectionDispatcher getConnectionDispatcher() {
-        return injector.getInstance(ConnectionDispatcher.class);
+        return injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
     }
 
     public LocalAcceptor getLocalAcceptor() {
