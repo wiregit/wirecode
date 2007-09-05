@@ -142,7 +142,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         // needed to avoid NullPointerException in HTTPUploadManager.mayBeServiceable() which is invoked by
         // MessageRouter.responsesToQueryReplies()
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        ProviderHacks.getUploadManager().start(ProviderHacks.getHTTPUploadAcceptor(), ProviderHacks.getFileManager(), ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
+        ProviderHacks.getUploadManager().start();
         try {
             Class[] paramTypes = new Class[] {
                     Response[].class, 
@@ -195,7 +195,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
 
             assertEquals("responses should have been put in 20 hits", 20, size);
         } finally {
-            ProviderHacks.getUploadManager().stop(ProviderHacks.getHTTPUploadAcceptor());
+            ProviderHacks.getUploadManager().stop();
         }
     }
 

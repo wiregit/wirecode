@@ -74,19 +74,19 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         connectionDispatcher = new ConnectionDispatcherImpl();
         acceptor = new HTTPAcceptor(Providers.of(connectionDispatcher));
-        uploadManager = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
-        
+        uploadManager = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()),
+                Providers.of(acceptor), Providers.of((FileManager)fm), Providers.of(ProviderHacks.getActivityCallback()));
         fm.startAndWait(4000);
         assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
                 .getNumFiles());
-        uploadManager.start(acceptor, fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
+        uploadManager.start();
         acceptor.start();
     }
 
     @Override
     protected void tearDown() throws Exception {
         acceptor.stop();
-        uploadManager.stop(acceptor);
+        uploadManager.stop();
         fm.stop();
     }
 

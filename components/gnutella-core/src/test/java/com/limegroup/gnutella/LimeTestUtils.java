@@ -142,9 +142,9 @@ public class LimeTestUtils {
      */
     public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
         List<Module> list = new ArrayList<Module>();
+        list.addAll(Arrays.asList(modules));
         list.add(new LimeWireCoreModule(callbackClass));
         list.add(new ModuleHacks());
-        list.addAll(Arrays.asList(modules));
         return Guice.createInjector(list);
     }
 

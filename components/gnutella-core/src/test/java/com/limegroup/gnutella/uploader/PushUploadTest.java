@@ -32,6 +32,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
@@ -156,19 +157,20 @@ public class PushUploadTest extends LimeTestCase {
    //     PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
      //           httpAcceptor);
 
-        upMan = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
+        upMan = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()),
+                Providers.of(httpAcceptor), Providers.of((FileManager)fm), Providers.of(ProviderHacks.getActivityCallback()));
     //    PrivilegedAccessor
     //            .setValue(RouterService.class, "uploadManager", upMan);
 
         httpAcceptor.start();
-        upMan.start(httpAcceptor, fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
+        upMan.start();
     }
 
     @Override
     public void tearDown() throws IOException {
         closeConnection();
 
-        upMan.stop(httpAcceptor);
+        upMan.stop();
         httpAcceptor.stop();
     }
 

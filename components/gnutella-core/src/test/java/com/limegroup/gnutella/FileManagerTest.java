@@ -34,7 +34,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.StubFileManager;
+import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -71,7 +71,7 @@ public class FileManagerTest extends LimeTestCase {
         //ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
         
 	    cleanFiles(_sharedDir, false);
-	    fman = new StubFileManager();
+	    fman = new SimpleFileManager();
 	}
 	
 	public void tearDown() {
@@ -692,7 +692,7 @@ public class FileManagerTest extends LimeTestCase {
         assertNull(fman.getFileDescForFile(notShared));
         
         // simulate restart
-        fman = new StubFileManager();
+        fman = new SimpleFileManager();
         waitForLoad();
         
         //  assert that "shared" is shared

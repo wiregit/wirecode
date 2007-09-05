@@ -13,13 +13,13 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A file manager that behaves exactly like FileManager would if
  * MetaFileManager didn't exist.
  */
-public class StubFileManager extends FileManager {
+public class SimpleFileManager extends FileManager {
     
-    public StubFileManager(FileManagerController fileManagerController) {
+    public SimpleFileManager(FileManagerController fileManagerController) {
         super(fileManagerController);
     }
     
-    public StubFileManager() {
+    public SimpleFileManager() {
         super(new FileManagerControllerAdapter());
     }
 

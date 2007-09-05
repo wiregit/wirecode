@@ -67,11 +67,11 @@ public interface UploadManager extends BandwidthTracker {
 	/**
      * Registers {@link HttpRequestHandler}s with <code>acceptor</code>.
 	 */
-    void start(HTTPAcceptor acceptor, FileManager fileManager, ActivityCallback activityCallback, MessageRouter messageRouter);
+    void start();
         
 	/**
      * Deregisters {@link HttpRequestHandler}s with <code>acceptor</code>.
 	 */
-    void stop(HTTPAcceptor acceptor);
+    void stop();
     
 }

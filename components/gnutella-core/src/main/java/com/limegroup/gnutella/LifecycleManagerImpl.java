@@ -311,7 +311,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         LOG.trace("START HTTPUploadManager");
         activityCallback.get().componentLoading(I18n.marktr("Loading Upload Management..."));
-        uploadManager.get().start(httpUploadAcceptor.get(), fileManager.get(), activityCallback.get(), messageRouter.get()); 
+        uploadManager.get().start(); 
         LOG.trace("STOP HTTPUploadManager");
 
         LOG.trace("START HTTPUploadAcceptor");

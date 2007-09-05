@@ -13,7 +13,8 @@ import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 public class UploadManagerStub extends HTTPUploadManager {
 	
 	public UploadManagerStub() {
-		super(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
+		super(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()),
+		        Providers.of(ProviderHacks.getHTTPUploadAcceptor()), Providers.of(ProviderHacks.getFileManager()), Providers.of(ProviderHacks.getActivityCallback()));
 	}
 	
 	private int _numQueuedUploads;

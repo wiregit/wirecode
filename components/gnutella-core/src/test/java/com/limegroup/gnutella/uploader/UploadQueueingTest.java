@@ -145,7 +145,7 @@ public class UploadQueueingTest extends BaseTestCase {
 
         LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
         upManager = (HTTPUploadManager) ProviderHacks.getUploadManager();
-        upManager.start(ProviderHacks.getHTTPUploadAcceptor(), fm, ProviderHacks.getActivityCallback(), ProviderHacks.getMessageRouter());
+        upManager.start();
 
         ProviderHacks.getHTTPUploadAcceptor().start();
         
@@ -167,7 +167,7 @@ public class UploadQueueingTest extends BaseTestCase {
         upManager.cleanup();
         LimeTestUtils.waitForNIO();
         
-        upManager.stop(ProviderHacks.getHTTPUploadAcceptor());
+        upManager.stop();
         upManager = null;
         
         assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
