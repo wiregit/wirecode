@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -37,8 +34,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.stubs.StubFileManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -68,25 +64,14 @@ public class FileManagerTest extends LimeTestCase {
         return buildTestSuite(FileManagerTest.class);
     }
     
-    public static void globalSetUp() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        try {
-            ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
-        } catch (UnknownHostException e) {
-        } catch (SecurityException e) {
-        }        
-    }
-    
 	public void setUp() throws Exception {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        	    
+        	
+        //ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
+        
 	    cleanFiles(_sharedDir, false);
-	    fman = new SimpleFileManager();
-		
-        // ensure each test gets a brand new content manager.
-      //  PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
-        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
+	    fman = new StubFileManager();
 	}
 	
 	public void tearDown() {
@@ -707,7 +692,7 @@ public class FileManagerTest extends LimeTestCase {
         assertNull(fman.getFileDescForFile(notShared));
         
         // simulate restart
-        fman = new SimpleFileManager();
+        fman = new StubFileManager();
         waitForLoad();
         
         //  assert that "shared" is shared
@@ -1293,14 +1278,8 @@ public class FileManagerTest extends LimeTestCase {
         }
     }
 
-    protected void waitForLoad() {
-        try {
-            fman.loadSettingsAndWait(10000);
-        } catch(InterruptedException e) {
-            fail(e);
-        } catch(TimeoutException te) {
-            fail(te);
-        }
+    protected void waitForLoad() throws Exception {
+        fman.loadSettingsAndWait(10000);
     }    
     
     public static class Listener implements FileEventListener {

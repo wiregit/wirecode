@@ -53,7 +53,7 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.stubs.StubFileManager;
 
 /**
  * This class tests the QueryReply class.
@@ -119,7 +119,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
 	    cleanFiles(_sharedDir, false);
-	    fman = new SimpleFileManager();
+	    fman = new StubFileManager();
 	   // PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	
         byte[] data = new byte[16];

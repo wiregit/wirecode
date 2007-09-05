@@ -4,7 +4,7 @@ import java.io.File;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -13,10 +13,14 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A file manager that behaves exactly like FileManager would if
  * MetaFileManager didn't exist.
  */
-public class SimpleFileManager extends FileManager {
+public class StubFileManager extends FileManager {
     
-    public SimpleFileManager() {
-        super(ProviderHacks.getFileManagerController());
+    public StubFileManager(FileManagerController fileManagerController) {
+        super(fileManagerController);
+    }
+    
+    public StubFileManager() {
+        super(new FileManagerControllerAdapter());
     }
 
     public boolean shouldIncludeXMLInResponse(QueryRequest qr) {
