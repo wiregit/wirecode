@@ -33,7 +33,6 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-//ITEST
 public class HTTPUploaderTest extends LimeTestCase {
 
     private static final int PORT = 6668;
@@ -48,7 +47,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
     private FileManagerStub fm;
 
-    private HTTPUploadManager upMan;
+    private HTTPUploadManager uploadManager;
 
     private FileDescStub fd1;
 
@@ -89,13 +88,13 @@ public class HTTPUploaderTest extends LimeTestCase {
 
         acceptor = injector.getInstance(Acceptor.class);
         httpAcceptor = injector.getInstance(HTTPAcceptor.class);
-        upMan = injector.getInstance(HTTPUploadManager.class);
+        uploadManager = injector.getInstance(HTTPUploadManager.class);
 
         acceptor.setListeningPort(PORT);
         acceptor.start();
         
         httpAcceptor.start();
-        upMan.start();
+        uploadManager.start();
 
         client = new HttpClient();
         HostConfiguration config = new HostConfiguration();
@@ -105,7 +104,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        upMan.stop();
+        uploadManager.stop();
         httpAcceptor.stop();
         
         acceptor.setListeningPort(0);

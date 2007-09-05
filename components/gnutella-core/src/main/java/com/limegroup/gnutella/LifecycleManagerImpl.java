@@ -466,6 +466,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         dhtManager.get().stop();
         
+        try {
+            acceptor.get().setListeningPort(0);
+        } catch (IOException e1) {}
         acceptor.get().shutdown();
         
         //clean-up connections and record connection uptime for this session
