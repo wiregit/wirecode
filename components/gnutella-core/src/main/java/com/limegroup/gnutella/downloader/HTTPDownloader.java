@@ -950,8 +950,9 @@ public class HTTPDownloader implements BandwidthTracker {
 	 *  - Our port and IP address are valid 
 	 */
 	private boolean isPartialFileValid() {
+//        System.out.println("instance of: " + (_rfd instanceof StoreDownloader));
 	    return _rfd.getSHA1Urn() != null && 
-               _incompleteFile.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES &&
+               _incompleteFile.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES && 
                UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
                NetworkUtils.isValidPort(networkManager.getPort()) &&
                NetworkUtils.isValidAddress(networkManager.getAddress()); 

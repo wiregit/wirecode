@@ -24,6 +24,7 @@ public class FileManagerEvent extends EventObject {
         FILEMANAGER_LOADING,
         FILEMANAGER_LOADED,
         ADD_STORE_FILE,
+        ADD_STORE_FAILED_FILE,
         REMOVE_STORE_FILE,
         RENAME_STORE_FILE,
         CHANGE_STORE_FILE,

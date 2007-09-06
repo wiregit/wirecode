@@ -48,10 +48,23 @@ public class LibraryData extends AbstractSettingsGroup {
     public final Set<File> FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
     
     /**
+     * Files in a shared folder that is not the location of the LWS downloads but 
+     * were purchased from the LWS
+     */
+    public final Set<File> SPECIAL_STORE_FILES = DATA.getSet("SPECIAL_STORE_FILES");
+    
+    /**
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
     public LibraryData() {
         SettingsGroupManager.instance().addSettingsGroup(this);
+        System.out.println("library");
+        System.out.println(DIRECTORIES_NOT_TO_SHARE.toString());
+        System.out.println(SENSITIVE_DIRECTORIES_VALIDATED.toString());
+        System.out.println(SENSITIVE_DIRECTORIES_NOT_TO_SHARE.toString());
+        System.out.println(SPECIAL_FILES_TO_SHARE.toString());
+        System.out.println(FILES_NOT_TO_SHARE.toString());
+        System.out.println(SPECIAL_STORE_FILES.toString());
     }
     
     /**
@@ -87,13 +100,14 @@ public class LibraryData extends AbstractSettingsGroup {
 	 * Cleans special file sharing settings by removing references to files that
 	 * no longer exist.
 	 */
-	public final void clean() {
+	public final void clean() { System.out.println("cleaning");
 		SharingSettings.DIRECTORIES_TO_SHARE.clean();
 		Set<File> parents = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
 		clean(DIRECTORIES_NOT_TO_SHARE, parents);
 		clean(FILES_NOT_TO_SHARE, parents);
 		clean(SENSITIVE_DIRECTORIES_VALIDATED, parents);
 		clean(SENSITIVE_DIRECTORIES_NOT_TO_SHARE, parents);
+        clean(SPECIAL_STORE_FILES, parents);
 	}
 	
 	/**
