@@ -138,7 +138,7 @@ public class ProviderHacks {
     public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
     public static ConnectionCheckerManager getConnectionCheckerManager() { return i().getConnectionCheckerManager(); }
     public static SpamServices getSpamServices() { return i().getSpamServices(); }
-    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
+    public static HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
     public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }
     public static StaticMessages getStaticMessages() { return i().getStaticMessages(); }
     public static Statistics getStatistics() { return i().getStatistics(); }

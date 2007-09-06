@@ -468,7 +468,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         try {
             acceptor.get().setListeningPort(0);
-        } catch (IOException e1) {}
+        } catch (IOException e) {
+            LOG.error("Error stopping acceptor", e);
+        }
         acceptor.get().shutdown();
         
         //clean-up connections and record connection uptime for this session
@@ -486,7 +488,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
         //Write gnutella.net
         try {
             hostCatcher.get().write();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            LOG.error("Error saving host catcher file", e);   
+        }
         
         // save limewire.props & other settings
         SettingsGroupManager.instance().save();

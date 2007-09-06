@@ -211,12 +211,9 @@ public class UploadTest extends LimeTestCase {
     }
 
     @Override
-    public void tearDown() {
+    public void tearDown() throws Exception {
         lifeCycleManager.shutdown();
-        //((HTTPUploadManager) uploadManager).cleanup();
-
-        //assertEquals(0, ProviderHacks.getUploadSlotManager().getNumQueued());
-        //assertEquals(0, ProviderHacks.getUploadSlotManager().getNumActive());
+        LimeTestUtils.waitForNIO();
     }
 
     public void testHTTP10Download() throws Exception {
