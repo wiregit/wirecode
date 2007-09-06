@@ -33,7 +33,6 @@ import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
@@ -142,11 +141,7 @@ public class UploadTest extends LimeTestCase {
         assertGreaterThan("Expected file to contain data", 0, target.length());
 
         // initialize services
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-            }
-        });
+        injector = LimeTestUtils.createInjector();
 
         uploadManager = injector.getInstance(UploadManager.class);
         
@@ -1130,7 +1125,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testThexHeader() throws Exception {
         TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
-        HashTree tree = initThexTree(tigerTreeCache);
+        HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod(fileNameUrl);
         try {
@@ -1146,7 +1141,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testDownloadFromBitprintUrl() throws Exception {
         TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
-        HashTree tree = initThexTree(tigerTreeCache);
+        HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod("/uri-res/N2R?urn:bitprint:"
                 + baseHash + "." + tree.getRootHash());
@@ -1213,7 +1208,7 @@ public class UploadTest extends LimeTestCase {
 
     public void testGetTree() throws Exception {
         TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
-        HashTree tree = initThexTree(tigerTreeCache);
+        HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
         try {
@@ -1317,13 +1312,9 @@ public class UploadTest extends LimeTestCase {
         client.getHttpConnectionManager().releaseConnection(connection);
     }
 
-    private HashTree initThexTree(TigerTreeCache tigerTreeCache) throws Exception {
+    private HashTree getThexTree(TigerTreeCache tigerTreeCache) throws Exception {
         FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
-        HashTree tree;
-        while ((tree = tigerTreeCache.getHashTree(fd)) == null) {
-            Thread.sleep(300);
-        }
-        return tree;
+        return tigerTreeCache.getHashTreeAndWait(fd, 1000);
     }
 
 }
