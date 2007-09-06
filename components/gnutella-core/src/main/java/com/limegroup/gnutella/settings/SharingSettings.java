@@ -295,7 +295,12 @@ public class SharingSettings extends LimeProps {
                 } catch (IllegalTemplateException e) {
                     GUIMediator.showError("STORE_DOWNLOADER_INVALID_TEMPLATE", System.getProperty("line.separator") + e.getMessage());
                 }
-                if (outDir != null) f = outDir;
+                if (outDir != null) {
+                	FileUtils.setWriteable(outDir);
+
+           			if(outDir.canRead() && outDir.canWrite()) 
+                    	f = outDir;
+                }
             } catch (IOException e) { 
                 LOG.error("getSaveLWSDirectory", e);
             }
