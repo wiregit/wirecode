@@ -447,7 +447,7 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         if (!request.filename.equals(fd.getFileName())) {
             if (LOG.isDebugEnabled())
-                LOG.debug("Wrong file name in request: " + request);
+                LOG.debug("Wrong file name in request: " + request + ", expected: " + fd.getFileName());
             return null;
         }
 

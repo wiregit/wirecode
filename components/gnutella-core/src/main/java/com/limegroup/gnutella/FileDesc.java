@@ -399,7 +399,7 @@ public class FileDesc implements StringLookup {
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
 				"urns:     "+URNS+"\r\n"+
-				"docs:     "+ _limeXMLDocs);
+				"docs:     "+ _limeXMLDocs+"\r\n");
 	}
     
     /**

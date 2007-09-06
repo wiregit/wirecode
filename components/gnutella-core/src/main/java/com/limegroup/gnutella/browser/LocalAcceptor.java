@@ -9,6 +9,7 @@ import org.limewire.service.MessageService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.I18n;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches threads
@@ -31,7 +32,7 @@ public class LocalAcceptor {
      */
     public void start() {
         if (!bind(FIRST_PORT)) {
-            MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+            MessageService.showError(I18n.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
         }
     }
     
