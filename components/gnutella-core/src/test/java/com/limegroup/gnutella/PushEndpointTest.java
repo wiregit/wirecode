@@ -1,6 +1,4 @@
-	
 package com.limegroup.gnutella;
-
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -8,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -22,9 +19,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
-
-/** tests the PushEndpoint class. */
-@SuppressWarnings({"unchecked", "null"})
 public class PushEndpointTest extends LimeTestCase {
 
     /* useful testing variables. */
@@ -42,14 +36,8 @@ public class PushEndpointTest extends LimeTestCase {
     private IpPort tls5;
     private IpPort tls6;
     
-    private static Map m;
-    
 	public PushEndpointTest(String name) {
 		super(name);
-	}
-    
-	public static void globalSetUp () throws Exception {
-	    m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
 	}
     
     public static Test suite() {
@@ -70,8 +58,11 @@ public class PushEndpointTest extends LimeTestCase {
         tls4 = new ConnectableImpl("1.2.3.7", 1235, true);
         tls5 = new ConnectableImpl("1.2.3.8", 1235, true);
         tls6 = new ConnectableImpl("1.2.3.9", 1235, true);
+        
+        //FIXME pushEndpointFactory = new PushEndpointFactoryImpl()
     }
     
+    @SuppressWarnings("null")
     public void testConstructors() throws Exception {
     	GUID guid1 = new GUID(GUID.makeGuid());
     	GUID guid2 = new GUID(GUID.makeGuid());
@@ -82,9 +73,9 @@ public class PushEndpointTest extends LimeTestCase {
     	IpPort ppi2 = new IpPortImpl("1.2.3.5",1235);
         IpPort ppi3 = new ConnectableImpl("1.2.3.6", 1236, true);
 		
-    	Set set1 = new HashSet();
-    	Set set2 = new HashSet();
-        Set set3 = new HashSet();
+    	Set<IpPort> set1 = new HashSet<IpPort>();
+    	Set<IpPort> set2 = new HashSet<IpPort>();
+        Set<IpPort> set3 = new HashSet<IpPort>();
     	
     	set1.add(ppi1); 
     	set2.add(ppi1);
@@ -149,7 +140,7 @@ public class PushEndpointTest extends LimeTestCase {
     
     public void testBasicToAndFromBytes() throws Exception {
     	GUID guid1 = new GUID(GUID.makeGuid());		
-    	Set set1 = ippset(ppi1);
+    	IpPortSet set1 = ippset(ppi1);
     	PushEndpoint one = ProviderHacks.getPushEndpointFactory().createPushEndpoint(guid1.bytes(), set1);
         for (IpPort ipp : one.getProxies()) {
             if (ipp instanceof Connectable
@@ -200,7 +191,7 @@ public class PushEndpointTest extends LimeTestCase {
     
     public void testToAndFromWithTLS() throws Exception {
         GUID guid1 = new GUID(GUID.makeGuid());
-        Set tet1 = ippset(ppi1, ppi2, tls3, tls4);
+        IpPortSet tet1 = ippset(ppi1, ppi2, tls3, tls4);
 
         byte[] expected = new byte[42];
         expected[ 0] = 0x4 | (byte)0x80; // 1 proxy, no f2f, tls fields added
@@ -298,7 +289,7 @@ public class PushEndpointTest extends LimeTestCase {
         // makes sure we cut off adding PPIs at 4.
         
         GUID guid1 = new GUID(GUID.makeGuid());
-        Set set = ippset(ppi1, ppi2, ppi3, ppi4, tls5, tls6);
+        IpPortSet set = ippset(ppi1, ppi2, ppi3, ppi4, tls5, tls6);
         byte[] expected = new byte[41];
         expected[ 0] = 0x4; // 1 proxy, no f2f, no tls
         for(int i = 0; i < 15; i++)
@@ -340,8 +331,10 @@ public class PushEndpointTest extends LimeTestCase {
         
     public void testToAndFromBytesWithFWT() throws Exception {
         GUID guid2 = new GUID(GUID.makeGuid());
-        Set set6 = ippset(ppi1, ppi2, ppi3, ppi4, ppi5, ppi6);
+        IpPortSet set6 = ippset(ppi1, ppi2, ppi3, ppi4, ppi5, ppi6);
         
+        Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
+
     	m.clear();
         // test a PE that claims it supports FWT but doesn't have external address -
         // its FWT status gets cleared
@@ -355,7 +348,7 @@ public class PushEndpointTest extends LimeTestCase {
     	assertEquals(0,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
         
-    	Set sent = new TreeSet(IpPort.COMPARATOR);
+    	IpPortSet sent = new IpPortSet();
         sent.addAll(set6);
     	assertTrue(set6.containsAll(four.getProxies()));
     	
@@ -390,7 +383,7 @@ public class PushEndpointTest extends LimeTestCase {
         
     public void testSimpleHTTPStringValue() throws Exception {
     	GUID guid1 = new GUID();
-        Set set = ippset(ppi1);
+    	IpPortSet set = ippset(ppi1);
     	PushEndpoint one = ProviderHacks.getPushEndpointFactory().createPushEndpoint(guid1.bytes(), set);
     	String httpString = one.httpStringValue();
         assertEquals(guid1.toHexString() + ";1.2.3.4:1235", httpString);
@@ -402,7 +395,7 @@ public class PushEndpointTest extends LimeTestCase {
     
     public void testHttpStringValueWithMyIp() throws Exception {
         GUID g1 = new GUID();
-        Set set = ippset(ppi1, ppi2, ppi3, ppi4, ppi5, ppi6);
+        IpPortSet set = ippset(ppi1, ppi2, ppi3, ppi4, ppi5, ppi6);
         
     	//now test a bigger endpoint with an ip in it
     	IpPort ip = new IpPortImpl("1.2.3.4",5);
@@ -421,7 +414,7 @@ public class PushEndpointTest extends LimeTestCase {
     
     public void testHttpStringWithTLS() throws Exception {
         GUID g1 = new GUID();
-        Set set = ippset(ppi1, tls2, ppi3, tls4);
+        IpPortSet set = ippset(ppi1, tls2, ppi3, tls4);
         PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1.bytes(), set);
         String httpString = pe.httpStringValue();
         assertEquals(g1.toHexString() + ";pptls=5;1.2.3.4:1235;1.2.3.5:1235;1.2.3.6:1235;1.2.3.7:1235", httpString);
@@ -451,7 +444,7 @@ public class PushEndpointTest extends LimeTestCase {
     
     public void testHttpStringWithTLSAndMyIP() throws Exception {
         GUID g1 = new GUID();
-        Set set = ippset(tls1, ppi2, tls3, ppi4);
+        IpPortSet set = ippset(tls1, ppi2, tls3, ppi4);
         IpPort myIp = new IpPortImpl("1.3.2.5:7");
         PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1.bytes(), set, (byte)0, 2, myIp);
         String httpString = pe.httpStringValue();
@@ -482,9 +475,10 @@ public class PushEndpointTest extends LimeTestCase {
         assertTrue( (!(read4 instanceof Connectable)) || (!((Connectable)read4).isTLSCapable()));
     }
     
+    @SuppressWarnings("null")
     public void testUpdateProxiesAndOverwriteProxies() throws Exception {
         GUID g1 = new GUID();
-        Set set1 = ippset(ppi1, ppi2, ppi3, ppi4);
+        IpPortSet set1 = ippset(ppi1, ppi2, ppi3, ppi4);
         PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1.bytes(), set1);
         pe.updateProxies(true);
         
@@ -494,7 +488,7 @@ public class PushEndpointTest extends LimeTestCase {
         assertEquals(4, pe2.getProxies().size());
         
         // Basic overwrite.
-        Set set2 = ippset(ppi5, ppi6);
+        IpPortSet set2 = ippset(ppi5, ppi6);
         ProviderHacks.getPushEndpointCache().overwriteProxies(g1.bytes(), set2);
         assertEquals(2, pe.getProxies().size());
         assertEquals(2, pe2.getProxies().size());
@@ -527,7 +521,7 @@ public class PushEndpointTest extends LimeTestCase {
     
     public void testNoFWTInHTTPGetsNoEndpoint() throws Exception {
         GUID g1 = new GUID();
-        Set set1 = ippset(ppi1);
+        IpPortSet set1 = ippset(ppi1);
         IpPort me = new IpPortImpl("1.2.3.4:5");
         
     	//now test an endpoint with an ip in it, but which does not support
@@ -569,9 +563,6 @@ public class PushEndpointTest extends LimeTestCase {
     	assertEquals("1.2.3.4",unknown.getAddress());
     	assertEquals(5,unknown.getPort());
     }
-    
-    
-
     
     private IpPortSet ippset(IpPort... ipps) {
         IpPortSet set = new IpPortSet();
