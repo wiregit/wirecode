@@ -38,7 +38,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             throw new NullPointerException("null sha1");
         }
         Set<URN> sha1Set = new UrnSet(sha1);
-        return createQueryRequest(QueryRequest.newQueryGUID(true),
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(true),
                 QueryRequest.DEFAULT_TTL, QueryRequest.DEFAULT_URN_QUERY, "",
                 sha1Set, null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, false, 0, false, 0);
@@ -53,7 +53,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             throw new NullPointerException("null sha1");
         }
         Set<URN> sha1Set = new UrnSet(sha1);
-        return createQueryRequest(QueryRequest.newQueryGUID(false),
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(false),
                 QueryRequest.DEFAULT_TTL, QueryRequest.DEFAULT_URN_QUERY, "",
                 sha1Set, null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, false, 0, false, 0);
@@ -74,7 +74,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             filename = QueryRequest.DEFAULT_URN_QUERY;
         }
         Set<URN> sha1Set = new UrnSet(sha1);
-        return createQueryRequest(QueryRequest.newQueryGUID(false),
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(false),
                 QueryRequest.DEFAULT_TTL, filename, "", sha1Set, null,
                 !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
                 false, 0, false, 0);
@@ -92,7 +92,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             throw new IllegalArgumentException("invalid TTL: " + ttl);
         }
         Set<URN> sha1Set = new UrnSet(sha1);
-        return createQueryRequest(QueryRequest.newQueryGUID(true), ttl,
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(true), ttl,
                 QueryRequest.DEFAULT_URN_QUERY, "", sha1Set, null,
                 !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
                 false, 0, false, 0);
@@ -104,7 +104,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     public QueryRequest createQuery(Set<? extends URN> urnSet) {
         if (urnSet == null)
             throw new NullPointerException("null urnSet");
-        return createQueryRequest(QueryRequest.newQueryGUID(false),
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(false),
                 QueryRequest.DEFAULT_TTL, QueryRequest.DEFAULT_URN_QUERY, "",
                 urnSet, null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, false, 0, false, 0);
@@ -120,7 +120,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         if (query.length() == 0) {
             throw new IllegalArgumentException("empty query");
         }
-        return create(QueryRequest.newQueryGUID(true), query);
+        return create(QueryRequestImpl.newQueryGUID(true), query);
     }
 
     /* (non-Javadoc)
@@ -133,7 +133,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         if (query.length() == 0) {
             throw new IllegalArgumentException("empty query");
         }
-        return create(QueryRequest.newQueryGUID(false), query);
+        return create(QueryRequestImpl.newQueryGUID(false), query);
     }
 
     /* (non-Javadoc)
@@ -243,7 +243,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         if (xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
             throw new IllegalArgumentException("invalid XML");
         }
-        return create(QueryRequest.newQueryGUID(false), query, xmlQuery);
+        return create(QueryRequestImpl.newQueryGUID(false), query, xmlQuery);
     }
 
     /* (non-Javadoc)
@@ -259,7 +259,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         if (ttl <= 0 || ttl > 6) {
             throw new IllegalArgumentException("invalid TTL: " + ttl);
         }
-        return create(QueryRequest.newQueryGUID(false), ttl, query);
+        return create(QueryRequestImpl.newQueryGUID(false), ttl, query);
     }
 
     /* (non-Javadoc)
@@ -337,7 +337,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
 
         try {
-            newPayload = QueryRequest.patchInGGEP(newPayload, ggep);
+            newPayload = QueryRequestImpl.patchInGGEP(newPayload, ggep);
             return createNetworkQuery(guid, qr.getTTL(), qr.getHops(),
                     newPayload, qr.getNetwork());
         } catch (BadPacketException ioe) {
@@ -412,7 +412,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         if (key == null) {
             throw new NullPointerException("null query key");
         }
-        return createQueryRequest(QueryRequest.newQueryGUID(false), (byte) 1,
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(false), (byte) 1,
                 query, "", URN.NO_URN_SET, key, !networkManager
                         .acceptedIncomingConnection(), Network.UNKNOWN, false,
                 0, false, 0);
@@ -429,7 +429,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             throw new NullPointerException("null query key");
         }
         Set<URN> sha1Set = new UrnSet(sha1);
-        return createQueryRequest(QueryRequest.newQueryGUID(false), (byte) 1,
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(false), (byte) 1,
                 QueryRequest.DEFAULT_URN_QUERY, "", sha1Set, key,
                 !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
                 false, 0, false, 0);
@@ -476,7 +476,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createBrowseHostQuery()
      */
     public QueryRequest createBrowseHostQuery() {
-        return createQueryRequest(QueryRequest.newQueryGUID(false), (byte) 1,
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(false), (byte) 1,
                 FileManager.INDEXING_QUERY, "", URN.NO_URN_SET, null,
                 !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
                 false, 0, false, 0, false);
@@ -486,7 +486,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createNonFirewalledQuery(java.lang.String, byte)
      */
     public QueryRequest createNonFirewalledQuery(String query, byte ttl) {
-        return createQueryRequest(QueryRequest.newQueryGUID(false), ttl, query,
+        return createQueryRequest(QueryRequestImpl.newQueryGUID(false), ttl, query,
                 "", URN.NO_URN_SET, null, false, Network.UNKNOWN, false, 0,
                 false, 0);
     }
@@ -496,7 +496,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     public QueryRequest createNetworkQuery(byte[] guid, byte ttl, byte hops,
             byte[] payload, Network network) throws BadPacketException {
-        return new QueryRequest(guid, ttl, hops, payload, network, limeXMLDocumentFactory);
+        return new QueryRequestImpl(guid, ttl, hops, payload, network, limeXMLDocumentFactory);
     }
 
     /**
@@ -677,7 +677,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector, boolean doNotProxy, int metaFlagMask,
             boolean normalize) {
-        return new QueryRequest(guid, ttl, minSpeed, query, richQuery,
+        return new QueryRequestImpl(guid, ttl, minSpeed, query, richQuery,
                 queryUrns, addressSecurityToken, isFirewalled, network,
                 canReceiveOutOfBandReplies, featureSelector, doNotProxy,
                 metaFlagMask, normalize, networkManager.canDoFWT(), limeXMLDocumentFactory);

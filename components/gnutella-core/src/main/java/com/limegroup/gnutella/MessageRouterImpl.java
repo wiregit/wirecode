@@ -646,7 +646,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
-        MessageHandler msgHandler = getMessageHandler(msg.getClass());
+        MessageHandler msgHandler = getMessageHandler(msg.getHandlerClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, null, receivingConnection);
         } else if (msg instanceof VendorMessage) {
@@ -693,7 +693,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
         
         UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
-        MessageHandler msgHandler = getUDPMessageHandler(msg.getClass());
+        MessageHandler msgHandler = getUDPMessageHandler(msg.getHandlerClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
         }  else if (msg instanceof VendorMessage) {
@@ -735,7 +735,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
         UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
         
-        MessageHandler msgHandler = getMulticastMessageHandler(msg.getClass());
+        MessageHandler msgHandler = getMulticastMessageHandler(msg.getHandlerClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
         } else if (msg instanceof VendorMessage) {

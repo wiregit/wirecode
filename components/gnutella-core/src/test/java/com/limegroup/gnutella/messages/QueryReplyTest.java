@@ -80,7 +80,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private byte[] bytes;
     private int ggepLen;
 
-    private QueryReply.GGEPUtil _ggepUtil = new QueryReply.GGEPUtil();
+    private QueryReplyImpl.GGEPUtil _ggepUtil = new QueryReplyImpl.GGEPUtil();
     private FileManager fman = null;
     private Object loaded = new Object();
     

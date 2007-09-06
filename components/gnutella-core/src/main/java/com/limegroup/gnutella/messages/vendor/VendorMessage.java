@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.messages.AbstractMessage;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 /** Vendor Messages are Gnutella Messages that are NEVER forwarded after
@@ -15,7 +15,7 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
  *  This message is abstract because it provides common methods for ALL
  *  VendorMessages, but it makes no sense to instantiate a VendorMessage.
  */
-public abstract class VendorMessage extends Message {
+public abstract class VendorMessage extends AbstractMessage {
 
     //Functional IDs defined by Gnutella VendorMessage protocol....
     public static final int F_MESSAGES_SUPPORTED = 0;

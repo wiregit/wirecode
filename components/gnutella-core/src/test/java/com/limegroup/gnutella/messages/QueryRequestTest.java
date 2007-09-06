@@ -23,7 +23,7 @@ import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.messages.QueryRequest.QueryRequestPayloadParser;
+import com.limegroup.gnutella.messages.QueryRequestImpl.QueryRequestPayloadParser;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -483,7 +483,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 */
 	public void testGUIDStringXMLConstructor() throws Exception {
 		QueryRequest qr = 
-			ProviderHacks.getQueryRequestFactory().createQuery(QueryRequest.newQueryGUID(false),
+			ProviderHacks.getQueryRequestFactory().createQuery(QueryRequestImpl.newQueryGUID(false),
 			    "tests", XML_STRING);
 		runStandardChecks(qr, "tests", XML_STRING);
 		runNonRequeryChecks(qr);
@@ -1126,7 +1126,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertFalse(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
-        byte[] newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        byte[] newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
         
         QueryRequest proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1138,7 +1138,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
-        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
         
         proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1161,7 +1161,7 @@ public final class QueryRequestTest extends LimeTestCase {
         query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
-        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
         
         proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1182,7 +1182,7 @@ public final class QueryRequestTest extends LimeTestCase {
         query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
-        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
         
         proxy = ProviderHacks.getQueryRequestFactory().createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1202,7 +1202,7 @@ public final class QueryRequestTest extends LimeTestCase {
         query = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Network.UNKNOWN);
         assertEquals("limewire", query.getQuery());
         
-        newPayload = QueryRequest.patchInGGEP(query.getPayload(), ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(query.getPayload(), ggep);
         
         QueryRequest patched = ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Network.UNKNOWN);
         assertEquals(query.getQuery(), patched.getQuery());

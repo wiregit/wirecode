@@ -34,7 +34,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable, IpPort, Connectable {
+public class PingReply extends AbstractMessage implements Serializable, IpPort, Connectable {
     
     /**
      * The list of extra Gnutella ip/ports contained in this reply.
