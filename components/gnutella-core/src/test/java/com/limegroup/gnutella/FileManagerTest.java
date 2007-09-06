@@ -64,7 +64,8 @@ public class FileManagerTest extends LimeTestCase {
         return buildTestSuite(FileManagerTest.class);
     }
     
-	public void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	
@@ -74,7 +75,8 @@ public class FileManagerTest extends LimeTestCase {
 	    fman = new SimpleFileManager();
 	}
 	
-	public void tearDown() {
+    @Override
+	protected void tearDown() {
         if (f1!=null) f1.delete();
         if (f2!=null) f2.delete();
         if (f3!=null) f3.delete();
