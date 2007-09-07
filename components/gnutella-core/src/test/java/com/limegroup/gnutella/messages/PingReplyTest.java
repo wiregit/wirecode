@@ -261,16 +261,16 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
       
     public void testPowerOf2() {
-        assertTrue(! PingReply.isPowerOf2(-1));
-        assertTrue(! PingReply.isPowerOf2(0));
-        assertTrue(PingReply.isPowerOf2(1));
-        assertTrue(PingReply.isPowerOf2(2));
-        assertTrue(! PingReply.isPowerOf2(3));
-        assertTrue(PingReply.isPowerOf2(4));
-        assertTrue(PingReply.isPowerOf2(16));
-        assertTrue(! PingReply.isPowerOf2(18));
-        assertTrue(PingReply.isPowerOf2(64));
-        assertTrue(! PingReply.isPowerOf2(71));
+        assertTrue(! PingReplyImpl.isPowerOf2(-1));
+        assertTrue(! PingReplyImpl.isPowerOf2(0));
+        assertTrue(PingReplyImpl.isPowerOf2(1));
+        assertTrue(PingReplyImpl.isPowerOf2(2));
+        assertTrue(! PingReplyImpl.isPowerOf2(3));
+        assertTrue(PingReplyImpl.isPowerOf2(4));
+        assertTrue(PingReplyImpl.isPowerOf2(16));
+        assertTrue(! PingReplyImpl.isPowerOf2(18));
+        assertTrue(PingReplyImpl.isPowerOf2(64));
+        assertTrue(! PingReplyImpl.isPowerOf2(71));
     }
 
     public void testNonGGEPBigPong() throws Exception  {
