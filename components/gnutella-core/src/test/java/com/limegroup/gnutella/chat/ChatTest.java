@@ -52,8 +52,6 @@ public class ChatTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        super.setUp();
-        
         // make sure local connections are accepted
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
 
@@ -73,8 +71,6 @@ public class ChatTest extends BaseTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        super.tearDown();
-
         if (messenger != null) {
             try {
                 messenger.stop();
