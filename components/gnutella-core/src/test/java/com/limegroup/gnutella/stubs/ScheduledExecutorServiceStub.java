@@ -42,27 +42,28 @@ public class ScheduledExecutorServiceStub implements ScheduledExecutorService {
         return false;
     }
 
-    public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks)
+    public <T> List<Future<T>> invokeAll(Collection tasks)
             throws InterruptedException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks,
-            long timeout, TimeUnit unit) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(
+            Collection tasks, long timeout, TimeUnit unit)
+            throws InterruptedException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public <T> T invokeAny(Collection<Callable<T>> tasks)
+    public <T> T invokeAny(Collection tasks)
             throws InterruptedException, ExecutionException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public <T> T invokeAny(Collection<Callable<T>> tasks, long timeout,
-            TimeUnit unit) throws InterruptedException, ExecutionException,
-            TimeoutException {
+    public <T> T invokeAny(Collection tasks,
+            long timeout, TimeUnit unit) throws InterruptedException,
+            ExecutionException, TimeoutException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -79,7 +80,7 @@ public class ScheduledExecutorServiceStub implements ScheduledExecutorService {
 
     public void shutdown() {
         // TODO Auto-generated method stub
-
+        
     }
 
     public List<Runnable> shutdownNow() {
@@ -104,7 +105,7 @@ public class ScheduledExecutorServiceStub implements ScheduledExecutorService {
 
     public void execute(Runnable command) {
         // TODO Auto-generated method stub
-
+        
     }
 
 }
