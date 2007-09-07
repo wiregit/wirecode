@@ -36,15 +36,12 @@ class CCLicense extends AbstractLicense {
     /** The license information for each Work. */
     private Map<URN, Details> allWorks;
 
-    private final LicenseCache licenseCache;
-    
     /**
      * Constructs a new CCLicense.
      */
     CCLicense(String license, URI uri, LicenseCache licenseCache) {
         super(uri, licenseCache);
         this.license = license;
-        this.licenseCache = licenseCache;
     }
     
     public String getLicense() {

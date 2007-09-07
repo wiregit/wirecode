@@ -21,13 +21,14 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A base license class, implementing common functionality.
  */
-abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable {
+public abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable {
     
     private static final Log LOG = LogFactory.getLog(AbstractLicense.class);
     
@@ -50,7 +51,10 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     /** The last time this license was verified. */
     private long lastVerifiedTime;
 
-    private final LicenseCache licenseCache;
+    protected transient LicenseCache licenseCache;
+    
+    @Inject
+    private static LicenseCache globalLicenseCache;
     
     /** Constructs a new AbstractLicense. */
     AbstractLicense(URI uri, LicenseCache licenseCache) {
@@ -73,6 +77,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         verified = VERIFIED;
+        licenseCache = globalLicenseCache;
     }
     
     /**
