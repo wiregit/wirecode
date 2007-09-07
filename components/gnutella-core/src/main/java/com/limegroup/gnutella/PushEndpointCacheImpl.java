@@ -179,6 +179,12 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         return guidRef;
     }
 
+    public void clear() {
+        synchronized (GUID_PROXY_MAP) {
+            GUID_PROXY_MAP.clear();
+        }
+    }
+    
     private final class WeakCleaner implements Runnable {
         public void run() {
             GUID_PROXY_MAP.size();
@@ -254,4 +260,5 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             return _guidRef.get();
         }
     }
+
 }
