@@ -30,8 +30,22 @@ public class LimeCoreGlue {
     private static AtomicBoolean preinstalled = new AtomicBoolean(false);
     private static AtomicBoolean installed = new AtomicBoolean(false);
     
-    /** Wires initial pieces together that are required for nearly everything. */
+    
+    /**
+     * Wires initial pieces together that are required for nearly everything.
+     * 
+     * @param userSettingsDir the preferred directory for user settings
+     */
     public static void preinstall() throws InstallFailedException {
+        preinstall(LimeWireUtils.getRequestedUserSettingsLocation());
+    }
+    
+    /**
+     * Wires initial pieces together that are required for nearly everything.
+     * 
+     * @param userSettingsDir the preferred directory for user settings
+     */
+    public static void preinstall(File userSettingsDir) throws InstallFailedException {
         // Only preinstall once
         if(!preinstalled.compareAndSet(false, true))
             return;
@@ -48,7 +62,7 @@ public class LimeCoreGlue {
         //  - If it can't be set, bail.
         //  - Otherwise, success.
         try {
-            CommonUtils.setUserSettingsDir(LimeWireUtils.getRequestedUserSettingsLocation());
+            CommonUtils.setUserSettingsDir(userSettingsDir);
         } catch(IOException requestedFailed) {
             try {
                 // First clear any older temporary settings directories.
