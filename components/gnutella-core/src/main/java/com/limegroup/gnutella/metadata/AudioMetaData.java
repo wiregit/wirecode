@@ -48,12 +48,12 @@ public abstract class AudioMetaData extends MetaData {
     
     protected AudioMetaData() {}
 
-    public AudioMetaData(File f) throws IOException{
+    public AudioMetaData(File f) throws IOException{ 
     	parseFile(f);
     }
     
     
-    public static AudioMetaData parseAudioFile(File f) throws IOException {
+    public static AudioMetaData parseAudioFile(File f) throws IOException { 
     	if (LimeXMLUtils.isMP3File(f))
     		return new MP3MetaData(f);
     	if (LimeXMLUtils.isOGGFile(f))

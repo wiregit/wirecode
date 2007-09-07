@@ -48,7 +48,7 @@ public class LibraryData extends AbstractSettingsGroup {
     public final Set<File> FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
     
     /**
-     * Files in a shared folder that is not the location of the LWS downloads but 
+     * Files in a shared folder that are not the location of the LWS downloads but 
      * were purchased from the LWS
      */
     public final Set<File> SPECIAL_STORE_FILES = DATA.getSet("SPECIAL_STORE_FILES");

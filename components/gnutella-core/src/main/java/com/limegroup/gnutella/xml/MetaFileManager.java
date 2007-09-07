@@ -120,7 +120,7 @@ public class MetaFileManager extends FileManager {
      * that the existing metadata is the one that's added, short-circuiting any
      * infinite loops.
      */
-    public void fileChanged(File f) {
+    public void fileChanged(File f) { 
         if (LOG.isTraceEnabled())
             LOG.debug("File Changed: " + f);
 
@@ -248,7 +248,6 @@ public class MetaFileManager extends FileManager {
      */
     protected void loadStarted(int revision) {
         fileManagerController.setAnnotateEnabled(false);
-
         // Load up new ReplyCollections.
         String[] schemas = fileManagerController.getAvailableSchemaURIs();
         for (int i = 0; i < schemas.length; i++) {

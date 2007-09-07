@@ -26,7 +26,7 @@ import de.vdheide.mp3.NoID3v2TagException;
 
 public class MP3MetaData extends AudioMetaData {
 	
-	public MP3MetaData(File f) throws IOException {
+	public MP3MetaData(File f) throws IOException { 
 		super(f);
 	}
 
@@ -112,6 +112,8 @@ public class MP3MetaData extends AudioMetaData {
                 try {
                     randomAccessFile.close();
                 } catch(IOException ignored) {}
+            if( getEncoder() == AudioMetaData.LWS )
+                setLicenseType( AudioMetaData.MAGIC_KEY);
         }
         
     }
@@ -132,7 +134,6 @@ public class MP3MetaData extends AudioMetaData {
      * Generates ID3Data from id3v2 data in the file.
      */
     private void parseID3v2Data(File file) {
-        
         ID3v2 id3v2Parser = null;
         try {
             id3v2Parser = new ID3v2(file);
