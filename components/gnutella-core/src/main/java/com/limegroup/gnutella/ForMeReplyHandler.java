@@ -67,7 +67,6 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     private final ScheduledExecutorService backgroundExecutor;
     private final ApplicationServices applicationServices;
     private final ConnectionServices connectionServices;
-
     private final LimeXMLDocumentHelper limeXMLDocumentHelper;
 
     @Inject
@@ -136,7 +135,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         // XML must be added to the response first, so that
         // whomever calls toRemoteFileDesc on the response
         // will create the cachedRFD with the correct XML.
-        boolean validResponses = addXMLToResponses(reply);
+        boolean validResponses = addXMLToResponses(reply, limeXMLDocumentHelper);
         // responses invalid?  exit.
         if(!validResponses)
             return;
@@ -166,7 +165,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	/**
 	 * Adds XML to the responses in a QueryReply.
 	 */
-    private boolean addXMLToResponses(QueryReply qr) {
+    public static boolean addXMLToResponses(QueryReply qr, LimeXMLDocumentHelper limeXMLDocumentHelper) {
         // get xml collection string, then get dis-aggregated docs, then 
         // in loop
         // you can match up metadata to responses
