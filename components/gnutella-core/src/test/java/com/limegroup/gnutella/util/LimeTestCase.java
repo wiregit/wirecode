@@ -44,6 +44,9 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UISettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
+/**
+ * Should be used when the test case requires to change settings.
+ */
 @SuppressWarnings("unchecked")
 public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback {
     
