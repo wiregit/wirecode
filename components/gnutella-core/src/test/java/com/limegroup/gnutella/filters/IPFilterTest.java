@@ -2,21 +2,21 @@ package com.limegroup.gnutella.filters;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.limewire.util.BaseTestCase;
-
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.FilterSettings;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
-public class IPFilterTest extends BaseTestCase {
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.util.LimeTestCase;
+
+public class IPFilterTest extends LimeTestCase {
 
     private byte[] whiteListedAddress;
     private byte[] blackListedAddress;
