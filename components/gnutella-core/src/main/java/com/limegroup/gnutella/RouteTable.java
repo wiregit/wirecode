@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.limewire.collection.MultiIterable;
 import org.limewire.inspection.Inspectable;
 import org.limewire.statistic.StatsUtils;
+import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -635,7 +636,7 @@ public final class RouteTable  {
          */
         public final Inspectable RTDump = new Inspectable() {
             public Object inspect() {
-                Map<byte [], Object> ret = new HashMap<byte [], Object>();
+                Map<String, Object> ret = new HashMap<String,Object>();
                 Iterable<Map.Entry<byte[], RouteTableEntry>> bothMaps = 
                     new MultiIterable<Map.Entry<byte[],RouteTableEntry>>(_newMap.entrySet(),_oldMap.entrySet());
                 for (Map.Entry<byte[], RouteTableEntry> entry : bothMaps) {
@@ -650,7 +651,7 @@ public final class RouteTable  {
                     m.put("nets", Arrays.asList(e.networks));
                     m.put("hops", Arrays.asList(e.hops));
                     m.put("ttls", Arrays.asList(e.ttls));
-                    ret.put(entry.getKey(), m);
+                    ret.put(Base32.encode(entry.getKey()), m);
                 }
                 return ret;
             }
