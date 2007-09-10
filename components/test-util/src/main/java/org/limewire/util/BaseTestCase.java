@@ -9,6 +9,8 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.commons.logging.LogFactory;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
@@ -164,8 +166,10 @@ public abstract class BaseTestCase extends AssertComparisons {
 	 */
 	public void runBare() throws Throwable {
         _currentTestName = getName();
-        if(System.getProperty("junit.test.hidetestname", "${hidetestname}").equals("${hidetestname}"))
+        if(System.getProperty("junit.test.hidetestname", "${hidetestname}").equals("${hidetestname}")) {
             System.out.println("Running test: " + _currentTestName);
+            LogFactory.getLog(this.getClass()).info("Running test: " + _currentTestName);
+        }
         assertNotNull(_currentTestName);
         try {
             preSetUp();

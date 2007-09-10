@@ -20,13 +20,10 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHttpAcceptor;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.HttpIOSession;
-import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -43,15 +40,13 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
 
     private static final Log LOG = LogFactory.getLog(HTTPAcceptor.class);
 
-    private static final String[] SUPPORTED_METHODS = new String[] { "GET",
-            "HEAD", };
+    private static final String[] SUPPORTED_METHODS = new String[] { "GET", "HEAD", };
 
     private final HttpRequestHandler notFoundHandler;
 
     @Inject
-    public HTTPAcceptor(@Named("global") Provider<ConnectionDispatcher> connectionDispatcher) {
-        super(connectionDispatcher, false, createDefaultParams(LimeWireUtils.getHttpServer(),
-                Constants.TIMEOUT), SUPPORTED_METHODS);
+    public HTTPAcceptor() {
+        super(createDefaultParams(LimeWireUtils.getHttpServer(), Constants.TIMEOUT), SUPPORTED_METHODS);
 
         this.notFoundHandler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,

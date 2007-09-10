@@ -21,6 +21,7 @@ import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpRecoverableException;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -30,16 +31,21 @@ import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHttpRequest;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.io.LocalSocketAddressService;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
@@ -54,6 +60,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -101,8 +108,6 @@ public class UploadTest extends LimeTestCase {
 
     private Injector injector;
 
-    private LifecycleManager lifeCycleManager;
-
     private UploadManager uploadManager;
 
     private FileManager fileManager;
@@ -142,22 +147,17 @@ public class UploadTest extends LimeTestCase {
 
         // initialize services
         injector = LimeTestUtils.createInjector();
-
-        uploadManager = injector.getInstance(UploadManager.class);
         
-        // start services
-        lifeCycleManager = injector.getInstance(LifecycleManager.class);
-        lifeCycleManager.start();
-        
-        // make sure the FileDesc objects in file manager are up-to-date
-        fileManager = injector.getInstance(FileManager.class);
-        fileManager.loadSettingsAndWait(2000);
+        startServices(injector);
 
         // get urls from file manager
-        int index = fileManager.getFileDescForFile(new File(_sharedDir, fileName)).getIndex();
-        fileNameUrl = "/get/" + index + "/" + URLEncoder.encode(fileName, "UTF-8");
-        index = fileManager.getFileDescForFile(new File(_sharedDir, otherFileName)).getIndex();
-        otherFileNameUrl = "/get/" + index + "/" + URLEncoder.encode(otherFileName, "UTF-8");
+        FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
+        assertNotNull("File not loaded", fd);
+        fileNameUrl = "/get/" + fd.getIndex() + "/" + URLEncoder.encode(fileName, "UTF-8");
+        
+        fd = fileManager.getFileDescForFile(new File(_sharedDir, otherFileName));
+        assertNotNull("File not loaded", fd);
+        otherFileNameUrl = "/get/" + fd.getIndex() + "/" + URLEncoder.encode(otherFileName, "UTF-8");
         
         // add incomplete file to file manager
         File incFile = new File(_incompleteDir, incName);
@@ -168,18 +168,27 @@ public class UploadTest extends LimeTestCase {
         urns.add(urn);
         vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(252450);
         fileManager.addIncompleteFile(incFile, urns, incName, 1981, vf);
+
         assertEquals(1, fileManager.getNumIncompleteFiles());
         assertEquals(2, fileManager.getNumFiles());
-
         assertEquals("Unexpected uploads in progress", 0, uploadManager.uploadsInProgress());
         assertEquals("Unexpected queued uploads", 0, uploadManager.getNumQueuedUploads());
 
-        client = HttpClientManager.getNewClient();
         hostConfig = new HostConfiguration();
         hostConfig.setHost("localhost", PORT, protocol);
+
+        client = HttpClientManager.getNewClient();
         client.setConnectionTimeout(500);
         client.setTimeout(2000);
         client.setHostConfiguration(hostConfig);
+        // make sure no connections are reused from the previous test case
+        client.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        stopServices();
+        LimeTestUtils.waitForNIO();
     }
 
     private void doSettings() throws UnknownHostException {
@@ -205,12 +214,35 @@ public class UploadTest extends LimeTestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        lifeCycleManager.shutdown();
+    private void startServices(Injector injector) throws Exception {
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
+        
+        HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
+        httpAcceptor.start();
+        
+        uploadManager = injector.getInstance(UploadManager.class);
+        uploadManager.start();
+        
+        // make sure the FileDesc objects in file manager are up-to-date
+        fileManager = injector.getInstance(FileManager.class);
+        fileManager.startAndWait(2000);
+        
+        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
+        
+        Acceptor acceptor = injector.getInstance(Acceptor.class);        
+        acceptor.setListeningPort(PORT);
+        acceptor.start();
+        
         LimeTestUtils.waitForNIO();
     }
 
+    private void stopServices() throws Exception {
+        Acceptor acceptor = injector.getInstance(Acceptor.class);
+        acceptor.setListeningPort(0);
+        acceptor.shutdown();
+    }    
+    
     public void testHTTP10Download() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.setHttp11(false);

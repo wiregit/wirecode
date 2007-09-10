@@ -15,7 +15,6 @@ import org.apache.http.nio.NHttpConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
-import org.limewire.concurrent.Providers;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
@@ -51,7 +50,8 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
         ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl();
         socketAcceptor = new SocketAcceptor(connectionDispatcher);
-        httpAcceptor = new HTTPAcceptor(Providers.of(connectionDispatcher));
+        httpAcceptor = new HTTPAcceptor();
+        connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
         
         socketAcceptor.bind(PORT);
         

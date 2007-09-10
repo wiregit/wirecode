@@ -440,14 +440,16 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         if (fd == null) {
-            // if (LOG.isDebugEnabled())
-            // LOG.debug(uploader + " fd is null");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid index in request does not map to file descriptor: " + request);
+            }
             return null;
         }
 
         if (!request.filename.equals(fd.getFileName())) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Wrong file name in request: " + request + ", expected: " + fd.getFileName());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid file name in request: " + request + ", expected: " + fd.getFileName());
+            }
             return null;
         }
 
@@ -461,13 +463,17 @@ public class FileRequestHandler implements HttpRequestHandler {
         // If it's the wrong URN, File Not Found it.
         URN urn = uploader.getRequestedURN();
         if (urn != null && !fd.containsUrn(urn)) {
-            if (LOG.isDebugEnabled())
-                LOG.debug(uploader + " wrong content urn");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid content urn: " + uploader);
+            }
             return false;
         }
 
         // handling THEX Requests
         if (thexRequest && tigerTreeCache.get().getHashTree(fd) == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Requested thex tree is not available: " + uploader);
+            }
             return false;
         }
 
@@ -475,6 +481,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         if (fd instanceof IncompleteFileDesc) {
             // Check to see if we're allowing PFSP.
             if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Sharing of partial files is diabled: " + uploader);
+                }
                 return false;
             }
 
@@ -484,10 +493,11 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
         } else {
             // check if fd is up-to-date
-            if (fd.getFile().lastModified() != fd.lastModified()) {
-                File file = fd.getFile();
-                if (LOG.isDebugEnabled())
+            File file = fd.getFile();
+            if (file.lastModified() != fd.lastModified()) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
+                }
                 fileManager.removeFileIfShared(file);
                 fileManager.addFileIfShared(file);
                 return false;

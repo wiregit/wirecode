@@ -39,8 +39,6 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 
-import com.google.inject.Provider;
-
 /**
  * Processes HTTP requests which are forwarded to {@link HttpRequestHandler}
  * objects that can be registered for a URL pattern.
@@ -49,15 +47,13 @@ import com.google.inject.Provider;
  * handling. <code>BasicHttpAcceptor</code> needs to be started by invoking
  * {@link #start(ConnectionDispatcher)} in order to accept connection.
  */
-public class BasicHttpAcceptor {
+public class BasicHttpAcceptor implements ConnectionAcceptor {
 
     private static final Log LOG = LogFactory.getLog(BasicHttpAcceptor.class);
 
     public static final String[] DEFAULT_METHODS = new String[] { "GET",
             "HEAD", "POST", };
 
-    private final boolean localOnly; 
-    
     private final String[] supportedMethods;
 
     private final HttpRequestHandlerRegistry registry;
@@ -76,11 +72,7 @@ public class BasicHttpAcceptor {
 
     private AtomicBoolean started = new AtomicBoolean();
 
-    private Provider<ConnectionDispatcher> dispatcher;
-
-    public BasicHttpAcceptor(Provider<ConnectionDispatcher> dispatcher, boolean localOnly, HttpParams params, String... supportedMethods) {
-        this.dispatcher = dispatcher;
-        this.localOnly = localOnly;
+    public BasicHttpAcceptor(HttpParams params, String... supportedMethods) {
         this.params = params;
         this.supportedMethods = supportedMethods;
         
@@ -142,6 +134,21 @@ public class BasicHttpAcceptor {
         }
     }
 
+    public void acceptConnection(String word, Socket socket) {
+        reactor.acceptConnection(word + " ", socket);
+    }
+
+    public boolean isBlocking() {
+        return false;
+    }
+
+    /**
+     * Returns the supported HTTP methods, e.g. "GET" or "HEAD".
+     */
+    public String[] getHttpMethods() {
+        return supportedMethods;
+    }
+    
     /**
      * Adds a listener for acceptor events.
      */
@@ -262,8 +269,9 @@ public class BasicHttpAcceptor {
     }
 
     /**
-     * Registers the acceptor at <code>dispatcher</code> for incoming
-     * connections.
+     * Initializes the reactor.
+     * 
+     * @see #stop()
      */
     public void start() {
         if (started.getAndSet(true)) {
@@ -289,29 +297,15 @@ public class BasicHttpAcceptor {
         } catch (ExecutionException e) {
             ErrorService.error(e);
         }
-
-        dispatcher.get().addConnectionAcceptor(new ConnectionAcceptor() {
-            public void acceptConnection(String word, Socket socket) {
-                reactor.acceptConnection(word + " ", socket);
-            }
-            public boolean isBlocking() {
-                return false;
-            }
-        }, localOnly, supportedMethods);
     }
 
     /**
-     * Unregisters the acceptor at <code>dispatcher</code>.
-     * 
-     * @see #start(ConnectionDispatcher)
+     * @see #start()
      */
     public void stop() {
         if (!started.getAndSet(false)) {
             throw new IllegalStateException();
         }
-        
-        dispatcher.get().removeConnectionAcceptor(supportedMethods);
-        dispatcher = null;
     }
 
     /**

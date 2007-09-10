@@ -316,6 +316,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         LOG.trace("START HTTPUploadAcceptor");
         httpUploadAcceptor.get().start(); 
+        connectionDispatcher.get().addConnectionAcceptor(httpUploadAcceptor.get(), false, httpUploadAcceptor.get().getHttpMethods());
         LOG.trace("STOP HTTPUploadAcceptor");
 
         LOG.trace("START Acceptor");
@@ -388,6 +389,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		LOG.trace("START LocalHTTPAcceptor");
 		activityCallback.get().componentLoading(I18n.marktr("Loading Magnet Listener..."));
         localHttpAcceptor.get().start();
+        localConnectionDispatcher.get().addConnectionAcceptor(localHttpAcceptor.get(), true, localHttpAcceptor.get().getHttpMethods());
         LOG.trace("STOP LocalHTTPAcceptor");
 
         LOG.trace("START LocalAcceptor");

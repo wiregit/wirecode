@@ -12,7 +12,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.http.HttpStatus;
-import org.limewire.concurrent.Providers;
 import org.limewire.http.handler.BasicMimeTypeProvider;
 import org.limewire.http.handler.FileRequestHandler;
 import org.limewire.net.ConnectionDispatcher;
@@ -69,9 +68,11 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
         acceptor = new SocketAcceptor(connectionDispatcher);
         acceptor.bind(PORT);
 
-        httpAcceptor = new BasicHttpAcceptor(Providers.of(connectionDispatcher), true, BasicHttpAcceptor
+        httpAcceptor = new BasicHttpAcceptor(BasicHttpAcceptor
                 .createDefaultParams("agent", timeout), methods);
         httpAcceptor.start();
+        
+        connectionDispatcher.addConnectionAcceptor(httpAcceptor, true, httpAcceptor.getHttpMethods());
     }
     
     private void stopAcceptor() throws Exception {
