@@ -22,16 +22,6 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-/*
- * import statements for the createReply methods - will delete once ClientSideWhatisNewSearchTest is refactored
- */
-import java.io.UnsupportedEncodingException;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
-
 
 /**
  * Unit tests for KeywordFilter
@@ -222,40 +212,4 @@ public class KeywordFilterTest extends BaseTestCase {
         }});  
     
     }
-    
-    /*
-     * 
-     * temporary methods for ClientSideWhatIsNewSearchTest - will delete later when test is refactored
-     * 
-    
-     * 
-     */
-    protected QueryReply createReply(String response) {
-        return createReply(ProviderHacks.getResponseFactory().createResponse(5, 5, response), new GUID(), 5555, address); 
-    }
-    
-    public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {
-        String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(new Response [] { resp } );
-        if (xmlCollectionString == null)
-            xmlCollectionString = "";
-
-        byte[] xmlBytes = null;
-        try {
-            xmlBytes = xmlCollectionString.getBytes("UTF-8");
-        } catch(UnsupportedEncodingException ueex) {//no support for utf-8?? 
-        }
-        byte[] xmlCompressed = null;
-        if (!xmlCollectionString.equals(""))
-            xmlCompressed = LimeXMLUtils.compress(xmlBytes);
-        else //there is no XML
-            xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
-        
-        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid.bytes(), (byte)1,
-                port, address, 0, new Response[] { resp }, GUID.makeGuid(), xmlCompressed, false,
-                false, true, true, true, false);
-    }
-    
-    
-    
-    
 }
