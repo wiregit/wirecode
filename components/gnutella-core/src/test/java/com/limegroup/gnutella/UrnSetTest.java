@@ -12,12 +12,12 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.BaseTestCase;
 
 /**
  * Tests the public methods of the UrnCache class.
  */
-public final class UrnSetTest extends LimeTestCase {
+public final class UrnSetTest extends BaseTestCase {
     
     private static final Random RND = new Random();
     
