@@ -1343,7 +1343,7 @@ public class FileManagerTest extends LimeTestCase {
     protected FileManagerEvent renameIfShared(File f1, File f2) throws Exception {
         Listener fel = new Listener();
         synchronized(fel) {
-            fman.renameFileIfShared(f1, f2, fel);
+            fman.renameFile(f1, f2, fel);
             fel.wait(5000);
         }
         return fel.evt;

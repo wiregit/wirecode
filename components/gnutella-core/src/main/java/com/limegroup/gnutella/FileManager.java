@@ -1875,6 +1875,86 @@ public abstract class FileManager {
         return fd;
     }
     
+    protected synchronized FileDesc removeStoreFile(File f, boolean notify){
+        //Take care of case, etc.
+        try {
+            f = FileUtils.getCanonicalFile(f);
+        } catch (IOException e) {
+            return null;
+        }        
+
+        // Look for matching file ...         
+        FileDesc fd = _storeToFileDescMap.get(f);
+        if (fd == null)
+            return null;
+
+        int i = fd.getIndex();
+//        assert _files.get(i).getFile().equals(f) : "invariant broken!";
+        
+//        _files.set(i, null);
+//        _fileToFileDescMap.remove(f);
+        _storeToFileDescMap.remove(f);
+        _needRebuild = true;
+
+        // If it's an incomplete file, the only reference we 
+        // have is the URN, so remove that and be done.
+        // We also return false, because the file was never really
+        // "shared" to begin with.
+        if (fd instanceof IncompleteFileDesc) {
+            removeUrnIndex(fd);
+            _numIncompleteFiles--;
+            boolean removed = _incompletesShared.remove(i);
+            assert removed : "File "+i+" not found in " + _incompletesShared;
+
+            // Notify the GUI...
+            if (notify) {
+                FileManagerEvent evt = new FileManagerEvent(this, Type.REMOVE_STORE_FILE, fd);                                               
+                dispatchFileEvent(evt);
+            }
+            return fd;
+        }
+
+//        _numFiles--;
+        _filesSize -= fd.getFileSize();
+
+        //Remove references to this from directory listing
+//        File parent = f.getParentFile();
+//        IntSet siblings = _sharedDirectories.get(parent);
+//        assert siblings != null : "Removed file's directory \""+parent+"\" not in "+_sharedDirectories;
+//        boolean removed = siblings.remove(i);
+//        assert removed : "File "+i+" not found in "+siblings;
+
+        // files that are forcibly shared over the network aren't counted
+//        if(isForcedShareDirectory(parent)) {
+//            notify = false;
+//            _numForcedFiles--;
+//        }
+
+//        //Remove references to this from index.
+//        String[] keywords = extractKeywords(fd);
+//        for (int j = 0; j < keywords.length; j++) {
+//            String keyword = keywords[j];
+//            IntSet indices = _keywordTrie.get(keyword);
+//            if (indices != null) {
+//                indices.remove(i);
+//                if (indices.size() == 0)
+//                    _keywordTrie.remove(keyword);
+//            }
+//        }
+
+        //Remove hash information.
+//        removeUrnIndex(fd);
+  
+        // Notify the GUI...
+        if (notify) {
+            FileManagerEvent evt = new FileManagerEvent(this, Type.REMOVE_STORE_FILE, fd);
+                                            
+            dispatchFileEvent(evt);
+        }
+        
+        return fd;
+    }
+    
     /**
      * Adds an incomplete file to be used for partial file sharing.
      *
@@ -2020,7 +2100,7 @@ public abstract class FileManager {
      * Renames a from from 'oldName' to 'newName'.
      */
     public void renameFileIfShared(File oldName, File newName) {
-        renameFileIfShared(oldName, newName, null);
+        renameFile(oldName, newName, null);
     }
 
     /** 
@@ -2031,7 +2111,7 @@ public abstract class FileManager {
      * This assumes that oldName has been deleted & newName exists now.
      * @modifies this 
      */
-    public synchronized void renameFileIfShared(File oldName, final File newName, final FileEventListener callback) {
+    public synchronized void renameFile(File oldName, final File newName, final FileEventListener callback) {
         FileDesc toRemove = getFileDescForFile(oldName);
         if (toRemove == null) {
             FileManagerEvent evt = new FileManagerEvent(this, Type.ADD_FAILED_FILE, oldName);
@@ -2045,7 +2125,7 @@ public abstract class FileManager {
             LOG.debug("Attempting to rename: " + oldName + " to: "  + newName);
             
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
-        if( _files.contains(oldName)) {
+        if( _fileToFileDescMap.containsKey(oldName)) {
     		final FileDesc removed = removeFileIfShared(oldName, false);
             assert removed == toRemove : "invariant broken.";
     		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
@@ -2074,22 +2154,22 @@ public abstract class FileManager {
             });
         }
         else {
-            final FileDesc removed = removeFileIfShared(oldName, false);
-//            assert removed == toRemove : "invariant broken.";
-//            if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
-//                _data.SPECIAL_FILES_TO_SHARE.add(newName);
-    
-            // Prepopulate the cache with new URNs.
-//            fileManagerController.addUrns(newName, removed.getUrns());
+            final FileDesc removed = removeStoreFile(oldName, false);
+            assert removed == toRemove : "invariant broken.";
+            if (_data.SPECIAL_STORE_FILES.remove(oldName)) 
+                _data.SPECIAL_STORE_FILES.add(newName);
+//            // Prepopulate the cache with new URNs.
+            fileManagerController.addUrns(newName, removed.getUrns());
     
             addStoreFile(newName, xmlDocs, false, _revision, new FileEventListener() {
                 public void handleFileEvent(FileManagerEvent evt) {
+                    System.out.println("adding " + evt.getType());
                     FileManagerEvent newEvt = null;
-                  if(evt.isAddEvent()) {
+                  if(evt.isAddStoreEvent()) {
                       FileDesc fd = evt.getFileDescs()[0];
                       newEvt = new FileManagerEvent(FileManager.this, Type.RENAME_FILE, removed, fd);
                   } else {
-//                      newEvt = new FileManagerEvent(FileManager.this, Type.REMOVE_FILE, removed);
+                      newEvt = new FileManagerEvent(FileManager.this, Type.REMOVE_STORE_FILE, removed);
                   }
                   dispatchFileEvent(newEvt);
                   if(callback != null)

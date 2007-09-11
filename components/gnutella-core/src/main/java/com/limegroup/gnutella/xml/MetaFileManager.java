@@ -123,7 +123,6 @@ public class MetaFileManager extends FileManager {
     public void fileChanged(File f) { 
         if (LOG.isTraceEnabled())
             LOG.debug("File Changed: " + f);
-
         FileDesc fd = getFileDescForFile(f);
         if (fd == null)
             return;
