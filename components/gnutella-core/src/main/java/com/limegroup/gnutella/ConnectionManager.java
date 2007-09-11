@@ -2597,7 +2597,7 @@ class LegacyConnectionStats implements Inspectable {
         Map<String,Object> ret = new HashMap<String,Object>(conns.size()*2);
         for(ManagedConnection mc : conns) {
             if (RouterService.getConnectionManager().isSupernode()) {
-                if (leaf && mc.isSupernodeSupernodeConnection())
+                if (leaf && mc.isSupernodeConnection())
                     continue;
                 if (!leaf && mc.isSupernodeClientConnection())
                     continue;
