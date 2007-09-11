@@ -100,7 +100,7 @@ public class LibraryData extends AbstractSettingsGroup {
 	 * Cleans special file sharing settings by removing references to files that
 	 * no longer exist.
 	 */
-	public final void clean() { System.out.println("cleaning");
+	public final void clean() { 
 		SharingSettings.DIRECTORIES_TO_SHARE.clean();
 		Set<File> parents = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
 		clean(DIRECTORIES_NOT_TO_SHARE, parents);

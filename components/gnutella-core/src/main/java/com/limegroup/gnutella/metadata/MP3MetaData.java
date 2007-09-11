@@ -46,6 +46,10 @@ public class MP3MetaData extends AudioMetaData {
         
         parseID3v1Data(file);
         
+        if( getEncoder() == LWS ) {
+            setLicenseType(MAGIC_KEY);
+        }
+        
     }
 
     /**
@@ -172,7 +176,7 @@ public class MP3MetaData extends AudioMetaData {
             }
 
             // need to check is PRIV field here since frameContent may be null in ISO_LATIN format
-            //  but not UTF-8 format
+            //  but not in UTF-8 format
             if( (frameContent == null || frameContent.trim().equals("")) &&
                     !MP3DataEditor.PRIV_ID.equals(frameID)){
                 continue;
