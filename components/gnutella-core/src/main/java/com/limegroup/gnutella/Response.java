@@ -98,7 +98,7 @@ public class Response {
 	 *        that will have this file
 	 * @param extensions The raw unparsed extension bytes.
      */
-    Response(long index, long size, String name,
+    public Response(long index, long size, String name,
 					 Set<? extends URN> urns, LimeXMLDocument doc, 
 					 Set<? extends IpPort> alternateLocations,
 					 long creationTime,
