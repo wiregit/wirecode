@@ -4,7 +4,6 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.messages.QueryReply;
@@ -14,7 +13,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 /**
  * Unit tests for SpamReplyFilter
  */
-@SuppressWarnings( { "unchecked", "cast" } )
 public class SpamReplyFilterTest extends BaseTestCase {
           
     private SpamReplyFilter _filter = new SpamReplyFilter();
