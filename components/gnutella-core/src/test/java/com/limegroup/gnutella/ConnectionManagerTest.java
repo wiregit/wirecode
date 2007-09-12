@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
