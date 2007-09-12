@@ -41,7 +41,7 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.stubs.MockNetworkManager;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -58,7 +58,7 @@ public class HeadTest extends LimeTestCase {
 	 */
 	private FileManagerStub _fm;
     private UploadManagerStub _um;
-    private MockNetworkManager networkManager;
+    private NetworkManagerStub networkManager;
     private HeadPongFactory headPongFactory;
 	
 	/**
@@ -186,7 +186,7 @@ public class HeadTest extends LimeTestCase {
         
         _um = new UploadManagerStub();
         _fm = new FileManagerStub(urns,descs);
-        networkManager = new MockNetworkManager();
+        networkManager = new NetworkManagerStub();
         headPongFactory = new HeadPongFactoryImpl(networkManager, Providers.of((UploadManager) _um), Providers.of((FileManager) _fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
         
         assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
