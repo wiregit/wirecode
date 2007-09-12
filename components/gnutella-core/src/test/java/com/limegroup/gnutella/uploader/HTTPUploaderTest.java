@@ -11,12 +11,16 @@ import junit.framework.Test;
 
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
+import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
@@ -96,10 +100,15 @@ public class HTTPUploaderTest extends LimeTestCase {
         httpAcceptor.start();
         uploadManager.start();
 
-        client = new HttpClient();
+        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
+        
         HostConfiguration config = new HostConfiguration();
         config.setHost("localhost", PORT);
+
+        client = new HttpClient();
         client.setHostConfiguration(config);
+        client.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
     }
 
     @Override
