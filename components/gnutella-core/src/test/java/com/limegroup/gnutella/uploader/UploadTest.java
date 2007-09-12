@@ -148,7 +148,7 @@ public class UploadTest extends LimeTestCase {
         // initialize services
         injector = LimeTestUtils.createInjector();
         
-        startServices(injector);
+        startServices();
 
         // get urls from file manager
         FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
@@ -214,7 +214,7 @@ public class UploadTest extends LimeTestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
     }
 
-    private void startServices(Injector injector) throws Exception {
+    private void startServices() throws Exception {
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
         
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
