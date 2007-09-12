@@ -64,6 +64,7 @@ import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.licenses.LicenseVerifier;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -713,6 +714,10 @@ public class LimeWireCore {
 
     public LimeCoreGlue getLimeCoreGlue() {
         return injector.getInstance(LimeCoreGlue.class);
+    }
+
+    public LicenseVerifier getLicenseVerifier() {
+        return injector.getInstance(LicenseVerifier.class);
     }
     
 }

@@ -52,8 +52,8 @@ class WeedLicense extends AbstractLicense {
     /**
      * Constructs a new WeedLicense.
      */
-    WeedLicense(URI uri, LicenseCache licenseCache) {
-        super(uri, licenseCache);
+    WeedLicense(URI uri) {
+        super(uri);
     }
     
     /** There is no explicit license text for Weed files. */
@@ -135,7 +135,7 @@ class WeedLicense extends AbstractLicense {
 	 *       <Price>1.2500</Price>
      *  </WeedVerifyData>
      */
-    protected void parseDocumentNode(Node doc, boolean liveData) {
+    protected void parseDocumentNode(Node doc, LicenseCache licenseCache) {
         if(!doc.getNodeName().equals("WeedVerifyData"))
             return;
         

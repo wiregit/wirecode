@@ -8,15 +8,17 @@ import java.io.ObjectOutputStream;
 import junit.framework.Test;
 
 import org.apache.commons.httpclient.URI;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
-import com.limegroup.gnutella.util.LimeTestCase;
 
-public final class WeedLicenseTest extends LimeTestCase {
+public class WeedLicenseTest extends BaseTestCase {
     
-	public WeedLicenseTest(String name) {
+    private LicenseCache licenseCache;
+
+    public WeedLicenseTest(String name) {
 		super(name);
 	}
 
@@ -24,23 +26,22 @@ public final class WeedLicenseTest extends LimeTestCase {
 		return buildTestSuite(WeedLicenseTest.class);
 	}
 
-	/**
-	 * Runs this test individually.
-	 */
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+	@Override
+	protected void setUp() throws Exception {
+	    licenseCache = new LicenseCache();
+	}
 	
 	public void testBasicParsingXMLWorks() throws Exception {
-	    License l = new StubWeedLicense("", "", xml(true, "An Artist", "A Title", "The Price"));
-	    Callback c = new Callback();
-	    assertFalse(c.completed);
+	    AbstractLicense l = new StubWeedLicense("", "", xml(true, "An Artist", "A Title", "The Price"));
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isVerifying());
-	    l.verify(c);
+	    l.verify(licenseCache);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
-	    assertTrue(c.completed);
 	    assertEquals("http://weedshare.com/company/policies/summary_usage_rights.aspx",
 	                 l.getLicenseDeed(null).toExternalForm());
         String desc = "Artist: An Artist\nTitle: A Title\nPrice: The Price";
@@ -85,7 +86,7 @@ public final class WeedLicenseTest extends LimeTestCase {
         
         // Now try with a full out parsed License.
 	    l = new StubWeedLicense("3", "4", xml(true, "Sammy B", "Blues In G", "$4.20"));
-	    l.verify(null);
+	    l.verify(licenseCache);
 	    assertEquals(null, l.getLicense());
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
@@ -124,13 +125,13 @@ public final class WeedLicenseTest extends LimeTestCase {
 	            "<Price>Free</Price>" +
 	            "<Other>As In Beer</Other>" +
                 "</WeedVerifyData>");
-	    l.verify(null);
+        l.verify(licenseCache);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertEquals("Artist: Sam\nTitle: Codes\nPrice: Free", l.getLicenseDescription(null));
 	    
 	    l = new StubWeedLicense("<WeedVerifyData/>");
-	    l.verify(null);
+	    l.verify(licenseCache);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 
@@ -142,7 +143,7 @@ public final class WeedLicenseTest extends LimeTestCase {
 	            "<Price>Free</Price>" +
 	            "<Other>As In Beer</Other>" +
 	            "</NotWeedData>");
-	    l.verify(null);
+	    l.verify(licenseCache);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
@@ -153,7 +154,7 @@ public final class WeedLicenseTest extends LimeTestCase {
 	            "<Price>Free</Price>" +
 	            "<Other>As In Beer</Other>" +
                 "</WeedVerifyData>");
-	    l.verify(null);
+        l.verify(licenseCache);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null)); // no Status element
 	    assertEquals("Artist: Sam\nTitle: Codes\nPrice: Free", l.getLicenseDescription(null));
@@ -165,7 +166,7 @@ public final class WeedLicenseTest extends LimeTestCase {
 	            "<Title>Codes</Title>" +
 	            "<Price>Free</Price>" +
                 "</WeedVerifyData>");
-	    l.verify(null);
+        l.verify(licenseCache);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null)); // status isn't verified
 	    assertEquals("Artist: Sam\nTitle: Codes\nPrice: Free", l.getLicenseDescription(null));
@@ -177,8 +178,7 @@ public final class WeedLicenseTest extends LimeTestCase {
             server.setResponseData(xml(true, "A", "B", "Free"));
             setLookupPage("http://127.0.0.1:20181/");
             License l = ProviderHacks.getLicenseFactory().create("http://www.shmedlic.com/license/3play.aspx cid: 34 vid: 78");
-            l.verify(null);
-            Thread.sleep(1000);
+            l.verify(licenseCache);
             assertTrue(l.isVerified());
     	    assertTrue(l.isValid(null));
     	    String desc = "Artist: A\nTitle: B\nPrice: Free";

@@ -61,20 +61,21 @@ public final class LicenseFactoryImpl implements LicenseFactory {
         if(license == null) {
             if(isCCLicense(licenseString)) {
                 if(uri != null)
-                    license = new CCLicense(licenseString, uri, licenseCache.get());
+                    license = new CCLicense(licenseString, uri);
                 else
                     license = new BadCCLicense(licenseString);
             } else if(isWeedLicense(licenseString) && uri != null) {
-                license = new WeedLicense(uri, licenseCache.get());
+                license = new WeedLicense(uri);
             } else if(isUnknownLicense(licenseString)) {
                 license = new UnknownLicense();
             }
         }
         
-        // If we managed to get one, and it's a NamedLicense, try and set its name.
-        if(license != null && license instanceof NamedLicense)
-            ((NamedLicense)license).setLicenseName(getLicenseName(licenseString));
-
+        // set additional properties
+        if (license instanceof MutableLicense) {
+            ((MutableLicense)license).setLicenseName(getLicenseName(licenseString));
+        }
+        
         return license;
     }
     

@@ -39,8 +39,9 @@ class CCLicense extends AbstractLicense {
     /**
      * Constructs a new CCLicense.
      */
-    CCLicense(String license, URI uri, LicenseCache licenseCache) {
-        super(uri, licenseCache);
+    CCLicense(String license, URI uri) {
+        super(uri);
+        
         this.license = license;
     }
     
@@ -301,11 +302,11 @@ class CCLicense extends AbstractLicense {
      * Parses through the XML.  If this is live data, we look for works.
      * Otherwise (it isn't from the verifier), we only look for licenses.
      */
-    protected void parseDocumentNode(Node doc, boolean liveData) {
+    protected void parseDocumentNode(Node doc, LicenseCache licenseCache) {
         NodeList children = doc.getChildNodes();
         
         // Do a first pass for Work elements.
-        if(liveData) {
+        if(licenseCache != null) {
             for(int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
                 if(child.getNodeName().equals("Work"))
@@ -322,8 +323,9 @@ class CCLicense extends AbstractLicense {
         
         // If this was from the verifier, see if we need to get any more
         // license details.
-        if(liveData)
-            updateLicenseDetails();
+        if (licenseCache != null) {
+            updateLicenseDetails(licenseCache);
+        }
             
         return;
     }
@@ -454,7 +456,7 @@ class CCLicense extends AbstractLicense {
      * Updates the license details, potentially retrieving information
      * from the licenseURL in each Details.
      */
-    private void updateLicenseDetails() {
+    private void updateLicenseDetails(LicenseCache licenseCache) {
         if(allWorks == null)
             return;
         
@@ -482,7 +484,7 @@ class CCLicense extends AbstractLicense {
                 // parsing MUST NOT alter allWorks,
                 // otherwise a ConcurrentMod will happen
                 if(body != null)
-                    parseXML(body, false);
+                    parseXML(body, null);
              }
         }
     }

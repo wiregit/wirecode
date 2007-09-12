@@ -102,7 +102,6 @@ import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.licenses.AbstractLicense;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.messages.LocalPongInfo;
@@ -284,7 +283,6 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(AutoDownloadDetails.class);
         requestStaticInjection(HttpClientManager.class);
         requestStaticInjection(LimeXMLDocument.class);
-        requestStaticInjection(AbstractLicense.class);
                         
         // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();

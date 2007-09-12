@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.util.concurrent.ExecutorService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,27 +14,20 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.google.inject.Inject;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A base license class, implementing common functionality.
  */
-public abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable {
+public abstract class AbstractLicense implements MutableLicense, Serializable, Cloneable {
     
     private static final Log LOG = LogFactory.getLog(AbstractLicense.class);
-    
-    /**
-     * The queue that all license verification attempts are processed in.
-     */
-    private static final ExecutorService VQUEUE = ExecutorsHelper.newProcessingQueue("LicenseVerifier");
     
     private static final long serialVersionUID = 6508972367931096578L;
     
@@ -51,15 +43,9 @@ public abstract class AbstractLicense implements NamedLicense, Serializable, Clo
     /** The last time this license was verified. */
     private long lastVerifiedTime;
 
-    protected transient LicenseCache licenseCache;
-    
-    @Inject
-    private static LicenseCache globalLicenseCache;
-    
     /** Constructs a new AbstractLicense. */
-    AbstractLicense(URI uri, LicenseCache licenseCache) {
+    AbstractLicense(URI uri) {
         this.licenseLocation = uri;
-        this.licenseCache = licenseCache;
     }
     
     public void setLicenseName(String name) { this.licenseName = name; }
@@ -70,6 +56,14 @@ public abstract class AbstractLicense implements NamedLicense, Serializable, Clo
     public URI getLicenseURI() { return licenseLocation; }
     public long getLastVerifiedTime() { return lastVerifiedTime; }
     
+    void setVerified(int verified) {
+        this.verified = verified;
+    }
+    
+    void setLastVerifiedTime(long lastVerifiedTime) {
+        this.lastVerifiedTime = lastVerifiedTime;
+    }
+    
     /**
      * Assume that all serialized licenses were verified.
      * (Otherwise they wouldn't have been serialized.
@@ -77,24 +71,12 @@ public abstract class AbstractLicense implements NamedLicense, Serializable, Clo
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         verified = VERIFIED;
-        licenseCache = globalLicenseCache;
     }
     
     /**
      * Clears all internal state that could be set while verifying.
      */
     protected abstract void clear();
-    
-    /**
-     * Starts verification of the license.
-     *
-     * The listener is notified when verification is finished.
-     */
-    public void verify(VerificationListener listener) {
-        verified = VERIFYING;
-        clear();
-        VQUEUE.execute(new Verifier(listener));
-    }
     
     /**
      * Retrieves the body of a URL from a webserver.
@@ -128,7 +110,7 @@ public abstract class AbstractLicense implements NamedLicense, Serializable, Clo
     }
     
     /** Parses the document node of the XML. */
-    protected abstract void parseDocumentNode(Node node, boolean liveData);
+    protected abstract void parseDocumentNode(Node node, LicenseCache licenseCache);
     
     /**
      * Attempts to parse the given XML.
@@ -138,7 +120,7 @@ public abstract class AbstractLicense implements NamedLicense, Serializable, Clo
      * If this is a request directly from our Verifier, 'liveData' is true.
      * Subclasses may use this to know where the XML data is coming from.
      */
-    protected void parseXML(String xml, boolean liveData) {
+    protected void parseXML(String xml, LicenseCache licenseCache) {
         if(xml == null)
             return;
         
@@ -161,29 +143,19 @@ public abstract class AbstractLicense implements NamedLicense, Serializable, Clo
         	return;
         }
         
-        parseDocumentNode(d.getDocumentElement(), liveData);
+        parseDocumentNode(d.getDocumentElement(), licenseCache);
+    }
+
+    public void verify(LicenseCache licenseCache) {
+        setVerified(AbstractLicense.VERIFYING);
+        clear();
+
+        String body = getBody(getLicenseURI().toString());
+        parseXML(body, licenseCache);
+        setLastVerifiedTime(System.currentTimeMillis());
+        setVerified(AbstractLicense.VERIFIED);
+        
+        licenseCache.addVerifiedLicense(this);
     }
     
-    /**
-     * Runnable that actually does the verification.
-     * This will retrieve the body of a webpage from the licenseURI,
-     * parse it, set the last verified time, and cache it in the LicenseCache.
-     */
-    private class Verifier implements Runnable {
-        private final VerificationListener vc;
-        
-        Verifier(VerificationListener listener) {
-            vc = listener;
-        }
-        
-        public void run() {
-            String body = getBody(getLicenseURI().toString());
-            parseXML(body, true);
-            lastVerifiedTime = System.currentTimeMillis();
-            verified = VERIFIED;
-            licenseCache.addVerifiedLicense(AbstractLicense.this);
-            if(vc != null)
-                vc.licenseVerified(AbstractLicense.this);
-        }
-    }
 }
