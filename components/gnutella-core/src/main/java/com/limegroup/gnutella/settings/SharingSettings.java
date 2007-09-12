@@ -48,8 +48,7 @@ public class SharingSettings extends LimeProps {
         new File(CommonUtils.getUserHomeDir(), "Shared");
     
     /**
-     * Default directory for songs purchased from LWS, this should always
-     * be different than the shared folder.
+     * Default directory for songs purchased from LWS
      */
     public static final File DEFAULT_SAVE_LWS_DIR = 
         new File(CommonUtils.getUserHomeDir(), "LimeWireStore");
@@ -280,11 +279,11 @@ public class SharingSettings extends LimeProps {
                 final Map<String, String> subs = new HashMap<String, String>();
                 String artist = data.getArtist();
                 if (artist == null) {
-                    artist = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ARTIST");
+                    artist = GUIMediator.getStringResource("Unknown Artist");
                 }
                 String album = data.getAlbum();
                 if (album == null) {
-                    album = GUIMediator.getStringResource("STORE_DOWNLOADER_UNKNOWN_ALBUM");
+                    album = GUIMediator.getStringResource("Unknown Album");
                 }
                 subs.put(StoreSaveTemplateProcessor.ARTIST_LABEL, artist);
                 subs.put(StoreSaveTemplateProcessor.ALBUM_LABEL, album);
@@ -293,7 +292,7 @@ public class SharingSettings extends LimeProps {
                 try {
                     outDir = new StoreSaveTemplateProcessor().getOutputDirectory(template, subs, f);
                 } catch (IllegalTemplateException e) {
-                    GUIMediator.showError("STORE_DOWNLOADER_INVALID_TEMPLATE", System.getProperty("line.separator") + e.getMessage());
+                    GUIMediator.showError("Invalid Template", System.getProperty("line.separator") + e.getMessage());
                 }
                 if (outDir != null) {
                 	FileUtils.setWriteable(outDir);

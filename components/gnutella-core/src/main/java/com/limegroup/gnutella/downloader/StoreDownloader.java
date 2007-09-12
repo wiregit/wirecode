@@ -116,8 +116,6 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
         
         URI uri = new URI(url);
 
-        
-        //TODO: filename needs to get cleaned up here and a check on file size
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,

@@ -49,7 +49,6 @@ public class MP3MetaData extends AudioMetaData {
         if( getEncoder() == LWS ) {
             setLicenseType(MAGIC_KEY);
         }
-        
     }
 
     /**
@@ -116,8 +115,6 @@ public class MP3MetaData extends AudioMetaData {
                 try {
                     randomAccessFile.close();
                 } catch(IOException ignored) {}
-            if( getEncoder() == AudioMetaData.LWS )
-                setLicenseType( AudioMetaData.MAGIC_KEY);
         }
         
     }

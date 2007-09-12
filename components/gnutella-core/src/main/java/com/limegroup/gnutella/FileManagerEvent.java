@@ -26,8 +26,6 @@ public class FileManagerEvent extends EventObject {
         ADD_STORE_FILE,
         ADD_STORE_FAILED_FILE,
         REMOVE_STORE_FILE,
-    //    RENAME_STORE_FILE,
-    //    CHANGE_STORE_FILE,
         ADD_STORE_FOLDER,
         REMOVE_STORE_FOLDER;
     }
@@ -103,6 +101,9 @@ public class FileManagerEvent extends EventObject {
         return (type.equals(Type.ADD_FILE));
     }
     
+    /**
+	 * Returns true if this event is an ADD_STORE_FILE event
+	 */
     public boolean isAddStoreEvent() {
         return (type.equals(Type.ADD_STORE_FILE));
     }
