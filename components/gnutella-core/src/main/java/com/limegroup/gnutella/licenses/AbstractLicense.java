@@ -127,6 +127,7 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
         if(LOG.isTraceEnabled())
             LOG.trace("Attempting to parse: " + xml);
 
+        // TODO propagate exceptions and handle in LicenseVerifier
         Document d;
         try {
         	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
