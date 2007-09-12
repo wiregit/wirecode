@@ -2,7 +2,7 @@ package com.limegroup.gnutella.licenses;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.URN;

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.net.Socket;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;

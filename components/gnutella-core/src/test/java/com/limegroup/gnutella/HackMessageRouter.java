@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 public class HackMessageRouter extends StandardMessageRouter {
 

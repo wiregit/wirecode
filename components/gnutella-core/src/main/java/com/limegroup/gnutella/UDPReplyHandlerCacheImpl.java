@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 
 import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ProviderHacks;

@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.ProviderHacks;

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;

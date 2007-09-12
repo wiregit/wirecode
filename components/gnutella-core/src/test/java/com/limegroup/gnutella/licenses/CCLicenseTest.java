@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import junit.framework.Test;
 
 import org.apache.commons.httpclient.URI;
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;

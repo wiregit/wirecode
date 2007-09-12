@@ -15,8 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.concurrent.Providers;
-import org.limewire.concurrent.SimpleProvider;
+import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -188,7 +187,7 @@ public class HeadTest extends LimeTestCase {
         _um = new UploadManagerStub();
         _fm = new FileManagerStub(urns,descs);
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(_um), new SimpleProvider<FileManager>(_fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
+        headPongFactory = new HeadPongFactoryImpl(networkManager, Providers.of((UploadManager) _um), Providers.of((FileManager) _fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
         
         assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
         assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));

@@ -17,7 +17,7 @@ import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HttpExecutionContext;
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.util.PrivilegedAccessor;

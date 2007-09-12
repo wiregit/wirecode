@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 

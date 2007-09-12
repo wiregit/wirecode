@@ -24,7 +24,7 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.Range;
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;

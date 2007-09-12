@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;

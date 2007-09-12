@@ -16,7 +16,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedsizePriorityQueue;
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;

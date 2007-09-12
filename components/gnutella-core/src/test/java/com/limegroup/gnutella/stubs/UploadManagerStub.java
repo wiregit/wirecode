@@ -1,7 +1,7 @@
 
 package com.limegroup.gnutella.stubs;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.ProviderHacks;

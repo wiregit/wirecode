@@ -14,8 +14,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Range;
-import org.limewire.concurrent.Providers;
-import org.limewire.concurrent.SimpleProvider;
+import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -69,7 +68,7 @@ public class HeadPongTest extends LimeTestCase {
         fileManager = new FileManagerStub();
         uploadManager = new UploadManagerStub();
         networkManager = new MockNetworkManager();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, new SimpleProvider<UploadManager>(uploadManager), new SimpleProvider<FileManager>(fileManager), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
+        headPongFactory = new HeadPongFactoryImpl(networkManager, Providers.of((UploadManager) uploadManager), Providers.of((FileManager) fileManager), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
         
         SSLSettings.TLS_INCOMING.setValue(false);
         ProviderHacks.getAltLocManager().purge();

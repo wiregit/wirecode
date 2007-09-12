@@ -17,7 +17,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.Providers;
+import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
