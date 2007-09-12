@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.filters;
 
-import java.net.InetAddress;
-
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -10,16 +8,15 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-
 import org.limewire.io.IpPort;
 import org.limewire.util.BaseTestCase;
 
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
@@ -35,7 +32,7 @@ public class KeywordFilterTest extends BaseTestCase {
     PingRequest pingRequestMock = null;
     Mockery context;
     
-    protected byte[] address;
+    
     
 	public KeywordFilterTest(String name) {
 		super(name);
@@ -51,7 +48,7 @@ public class KeywordFilterTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        address = InetAddress.getLocalHost().getAddress();
+        
         
         context = new Mockery();
                 
