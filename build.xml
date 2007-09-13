@@ -138,17 +138,15 @@
     <gettext-merge keysFile="limewire.pot" poDirectory="lib/messagebundles"/>
     </target>
 
-    <target name="lw-gettext-default" description="Creates the English default bundle" depends="init.gettext">
-	<gettext-generate-default targetBundle="org.limewire.i18n.Messages"
-     outputDirectory="lib/messagebundles" potfile="lib/messagebundles/limewire.pot"/>
-    </target>
-
     <!-- generate two jars, one with almost complete translations, and a
     remaining one -->
     <target name="lw-bundle-messages" description="Rebuilds messages and
-    bundles them" depends="lw-gettext-default">
+    bundles them" depends="init.gettext">
     <!-- clean up -->
     <delete dir="lib/messagebundles/org"/>
+    <!-- generate default bundle for complete messages -->
+    <gettext-generate-default targetBundle="org.limewire.i18n.Messages"
+     outputDirectory="lib/messagebundles" potfile="lib/messagebundles/limewire.pot"/>
     <!-- generate complete bundles -->
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
      poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"
