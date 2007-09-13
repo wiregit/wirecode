@@ -30,6 +30,8 @@ public class IPFilterTest extends LimeTestCase {
     PingReply pingReply;
     QueryReply queryReply;
     QueryRequest queryRequest;
+    
+    IPFilter filter;
 
     public IPFilterTest(String name) {
         super(name);
@@ -64,6 +66,8 @@ public class IPFilterTest extends LimeTestCase {
         pingReply    = context.mock(PingReply.class);
         queryReply   = context.mock(QueryReply.class);
         queryRequest = context.mock(QueryRequest.class);
+        
+        filter = new IPFilter();
     }
 
     
@@ -90,7 +94,7 @@ public class IPFilterTest extends LimeTestCase {
         assertTrue(filter.allow("13.0.0.1"));
     }
 
-    public void testFilterByPingReply_WhiteListed() {
+    public void testFilterByPingReplyWhiteListed() {
         IPFilter filter = new IPFilter();
      
         context.checking(new Expectations()
@@ -108,7 +112,7 @@ public class IPFilterTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
     
-    public void testFilterByPingReply_BlackListed() {
+    public void testFilterByPingReplyBlackListed() {
         IPFilter filter = new IPFilter();
         
         context.checking(new Expectations()
@@ -126,9 +130,22 @@ public class IPFilterTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
 
+    /** 
+     *  Ensure that the message is ignored as
+     *   QueryRequests should always pass through the
+     *   filter.
+     */
+    public void testFilterByQueryRequest() {
+        context.checking(new Expectations()
+        {{ never(queryRequest);
+        }});
+        
+        assertTrue(filter.allow(queryRequest));
+        context.assertIsSatisfied();
+    }
+    
     public void testFilterByQuery() {
-        IPFilter filter = new IPFilter();
-
+        
         context.checking(new Expectations()
         {{ allowing (queryReply).getTTL();
            will(returnValue(3));
@@ -144,27 +161,17 @@ public class IPFilterTest extends LimeTestCase {
                 
         assertFalse(filter.allow(queryReply));
         context.assertIsSatisfied();
-        
-        // Ensure that the message is ignored as 
-        //  QueryRequests should always pass through the 
-        //  filter.
-        context.checking(new Expectations()
-        {{ never(queryRequest);
-        }});
-        
-        assertTrue(filter.allow(queryRequest));
-        context.assertIsSatisfied();
     }
 
     public void testFilterByPushRequest() {
-        IPFilter filter = new IPFilter();
+
         PushRequest push1 = new PushRequest(new byte[16], (byte) 3,
                 new byte[16], 0l, whiteListedAddress, 6346);
         assertTrue(filter.allow(push1));
 
         PushRequest push2 = new PushRequest(new byte[16], (byte) 3,
                 new byte[16], 0l, blackListedAddress, 6346);
-        assertTrue(!filter.allow(push2));
+        assertFalse(filter.allow(push2));
     }
         
 }
