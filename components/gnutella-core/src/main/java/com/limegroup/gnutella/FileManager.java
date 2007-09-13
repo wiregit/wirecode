@@ -764,7 +764,7 @@ public abstract class FileManager {
     /**
      * Loads the FileManager with a new list of directories.
      */
-    public void loadWithNewDirectories(Set<? extends File> shared, Set<File> blackListSet) { System.out.println("here");
+    public void loadWithNewDirectories(Set<? extends File> shared, Set<File> blackListSet) { 
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(shared);
         synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
@@ -896,12 +896,15 @@ public abstract class FileManager {
         File storeDir = SharingSettings.getSaveLWSDirectory();
         updateStoreDirectories(storeDir.getAbsoluteFile(), null, revision);
         
+        // Optain the list of lws files found in shared directories
         Collection<File> specialStoreFiles = _data.SPECIAL_STORE_FILES;
         ArrayList<File> storeList;
         synchronized (specialStoreFiles) {
             storeList = new ArrayList<File>(specialStoreFiles);
         }
         
+        // list lws files found in shared directories in the special
+        //	store files node
         for(File file: storeList) {
             if(_revision != revision)
                 break;
@@ -1162,7 +1165,8 @@ public abstract class FileManager {
                         if(removeFileIfShared(f) == null)
                             fileManagerController.clearPendingShare(f);
                         if(displayInStore(f)) {
-                            _data.SPECIAL_STORE_FILES.remove(f);
+                            _data.SPECIAL_STORE_FILES.remove(f);	
+                            _data.FILES_NOT_TO_SHARE.remove(f);
                             _storeToFileDescMap.remove(f);
                         }
                     }
@@ -1749,8 +1753,6 @@ public abstract class FileManager {
         
         _files.set(i, null);
         _fileToFileDescMap.remove(f);
-//        _data.SPECIAL_STORE_FILES.remove(f);
-//        _storeToFileDescMap.remove(f); System.out.println("removing store");
         _needRebuild = true;
 
         // If it's an incomplete file, the only reference we 
@@ -1830,6 +1832,7 @@ public abstract class FileManager {
 
         _data.SPECIAL_STORE_FILES.remove(f);
         _storeToFileDescMap.remove(f);
+        _data.FILES_NOT_TO_SHARE.remove(f);
         _needRebuild = true;
 
         // If it's an incomplete file, the only reference we 
@@ -2028,6 +2031,7 @@ public abstract class FileManager {
             LOG.debug("Attempting to rename: " + oldName + " to: "  + newName);
             
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
+        // if its a shared file
         if( _fileToFileDescMap.containsKey(oldName)) {
     		final FileDesc removed = removeFileIfShared(oldName, false);
             assert removed == toRemove : "invariant broken.";
@@ -2056,6 +2060,7 @@ public abstract class FileManager {
                 }
             });
         }
+        // its a store files
         else {
             final FileDesc removed = removeStoreFile(oldName, false);
             assert removed == toRemove : "invariant broken.";
@@ -2214,23 +2219,23 @@ public abstract class FileManager {
         return _sharedDirectories.containsKey(f);
     }
     
-    /**
-	 *	
-	 */
-    public boolean isFolderStore(File f) {
-        if( f == null )
-            return true;
-        File storeFolder = SharingSettings.getSaveLWSDirectory();
-        while( f.getParent() != null ) {
-            try {
-                if( f.getCanonicalPath().equals(storeFolder.getCanonicalPath()))
-                    return true;
-            } catch (IOException e) {
-            }
-            f = f.getParentFile();
-        }
-        return false;
-    }
+//    /**
+//	 *	
+//	 */
+//    public boolean isFolderStore(File f) {
+//        if( f == null )
+//            return true;
+//        File storeFolder = SharingSettings.getSaveLWSDirectory();
+//        while( f.getParent() != null ) {
+//            try {
+//                if( f.getCanonicalPath().equals(storeFolder.getCanonicalPath()))
+//                    return true;
+//            } catch (IOException e) {
+//            }
+//            f = f.getParentFile();
+//        }
+//        return false;
+//    }
     
     /**
      * Cleans all stale entries from the Set of individual files.
@@ -2352,7 +2357,7 @@ public abstract class FileManager {
             try {
                 AudioMetaData amd = AudioMetaData.parseAudioFile(file);
                 if( amd.getLicenseType() != null && (amd.getLicenseType().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString() )
-                        || amd.getEncoder() == 1) ) {
+                        || amd.getEncoder() == AudioMetaData.LWS) ) {
                     
                     return true;
                 }

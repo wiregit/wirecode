@@ -58,13 +58,6 @@ public class LibraryData extends AbstractSettingsGroup {
      */
     public LibraryData() {
         SettingsGroupManager.instance().addSettingsGroup(this);
-        System.out.println("library");
-        System.out.println(DIRECTORIES_NOT_TO_SHARE.toString());
-        System.out.println(SENSITIVE_DIRECTORIES_VALIDATED.toString());
-        System.out.println(SENSITIVE_DIRECTORIES_NOT_TO_SHARE.toString());
-        System.out.println(SPECIAL_FILES_TO_SHARE.toString());
-        System.out.println(FILES_NOT_TO_SHARE.toString());
-        System.out.println(SPECIAL_STORE_FILES.toString());
     }
     
     /**

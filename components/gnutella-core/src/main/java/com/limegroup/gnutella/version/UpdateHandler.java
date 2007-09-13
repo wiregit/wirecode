@@ -716,7 +716,8 @@ public class UpdateHandler implements HttpClientListener {
         if (updates == null)
             return;
         
-        if (!downloadManager.get().hasInNetworkDownload() && !downloadManager.get().hasStoreDownload())
+        if (!downloadManager.get().hasInNetworkDownload() 
+        	&& !downloadManager.get().hasStoreDownload())
             return;
         
         long now = clock.now();
