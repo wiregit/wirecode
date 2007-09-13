@@ -12,45 +12,56 @@ import java.util.Set;
 
 
 /**
- * A throttle that can be applied to non-blocking reads & writes.
- *
- * Throttles work by giving amounts to interested parties in a FIFO
- * queue, ensuring that no one party uses all of the available bandwidth
- * on every tick.
- *
- * Listeners must adhere to the following contract in order for the Throttle to be effective.
- 
- * In order:
- * 1) When a listener wants to write, it must interest ONLY the Throttle.
- *    Call: Throttle.interest(listener)
- *
- * 2) When the throttle informs the listener that bandwidth is available, it must interest
- *    the next party in the chain (ultimately the Socket).
- *    Callback: ThrottleListener.bandwidthAvailable()
- *
- * 3) The listener must request data prior to writing (in response to requestBandwidth), 
- *    and write out only the amount that it requested.
- *    Callback: ThrottleListener.requestBandwidth
+ * A throttle that can be applied to non-blocking reads and writes.
+ * <p>
+ * Throttles work by giving amounts to interested parties in a First in, First 
+ * out (FIFO) queue, ensuring that no one party uses all of the available 
+ * bandwidth on every tick.
+ * <p>
+ * Listeners must adhere to the following contract in order for the 
+ * <code>Throttle</code> to be effective.
+  <p>
+ * In order: 
+ <ol>
+ * <li>When a listener wants to write, it must interest ONLY the Throttle.</li>
+ *<p>
+ *    Call: Throttle.interest(ThrottleListener)
+ *<p>
+ * <li>When the Throttle informs the listener that bandwidth is available, it must interest
+ *    the next party in the chain (ultimately the Socket).</li>
+ *<p>
+ *    Callback: {@link ThrottleListener#bandwidthAvailable()}
+ *<p>
+ * <li>The listener must request data prior to writing (in response to requestBandwidth), 
+ *    and write out only the amount that it requested.</li>
+ *<p>    
+ *    Callback: ThrottleListener.requestBandwidth<br>
  *    Call: Throttle.request()
- *
- * 4) The listener must release data (in response to releaseBandwidth) that it was given
- *    from a request but did not write.
- *    Callback: ThrottleListener.releaseBandwidth
+ *<p>
+ * <li>The listener must release data (in response to releaseBandwidth) that it was given
+ *    from a request but did not write.</li>
+ *<p>
+ *    Callback: ThrottleListener.releaseBandwidth<br>
  *    Call: Throttle.release(amount)
+ *<p>    
+ *</ol>
+ * <b>Extraneous</b>: The ThrottleListener must have an 'attachment' set that 
+ * is the same attachment as the one used on the {@link SelectionKey} for the 
+ * {@link SelectableChannel}. This is necessary so that <code>Throttle</code> 
+ * can match up <code>SelectionKey</code> ready events with 
+ * <code>ThrottleListener</code> interest.
+ *             
+ * The flow of a <code>Throttle</code> works like:
+<pre>
+ * 
+ *      <b>Throttle</b>                           <b>ThrottleListener</b>                   <b>NIODispatcher</b>
  *
- * Extraneous: The ThrottleListener must have an 'attachment' set that is the same attachment
- *             as the one used on the SelectionKey for the SelectableChannel.  This is
- *             necessary so that Throttle can match up SelectionKey ready events
- *             with ThrottleListener interest.
- *
- * The flow of a Throttle  works like:
- *      Throttle                            ThrottleListener                   NIODispatcher
- * 1)                                       Throttle.interest               
- * 2)   <adds to request list>
+ * 1)                                      Throttle.interest               
+ * 2)  &lt;adds to request list&gt;
  * 3)                                                                         Throttle.tick
  * 4)  ThrottleListener.bandwidthAvailable
  * 5)                                      SocketChannel.interest
- * 6)  <moves from request to interest list>
+ * 6)  &lt;moves from request to interest list&gt;
  * 7)                                                                         Selector.select
  * 8)                                                                         Throttle.selectableKeys 
  * 9)  ThrottleListener.requestBandwidth
@@ -58,16 +69,17 @@ import java.util.Set;
  * 11)                                     SocketChannel.write [or SocketChannel.read]
  * 12) ThrottleListener.releaseBandwidth
  * 13)                                     Throttle.release
- * 14) <remove from interest>
- *
- * If there are multiple listeners, steps 4 & 5 are repeated for each request, and steps 9 through 14
- * are performed on interested parties until there is no bandwidth available.  Another tick will
+ * 14) &lt;remove from interest&gt;
+ </pre>
+ * If there are multiple listeners, steps 4 and 5 are repeated for each request, and steps 9 through 14
+ * are performed on interested parties until there is no bandwidth available. Another tick will
  * generate more bandwidth, which will allow previously interested parties to request/write/release.
- * Because interested parties are processed in FIFO order, all parties will receive equal access to
+ * Because interested parties are processed in FIFO order, all parties receive equal access to
  * the bandwidth.
- *
- * Note that due to the nature of Throttle & NIODispatcher, ready parties may be told to handleWrite
- * twice during each selection event.  The latter will always return 0 to a request.
+ * <p>
+ * Note that due to the nature of <code>Throttle</code> and {@link NIODispatcher},
+ * ready parties may be told to <code>WriteObserver.handleWrite()</code> twice during each 
+ * selection event. The latter will always return 0 to a request.
  */
 public class NBThrottle implements Throttle {
     
@@ -131,20 +143,23 @@ public class NBThrottle implements Throttle {
     private boolean _active = false;
     
     /**
-     * Constructs a throttle using the default values for latency & availability.
+     * Constructs a throttle using the default values for latency and availability.
      */
     public NBThrottle(boolean forWriting, float bytesPerSecond) {
         this(forWriting, bytesPerSecond, true, DEFAULT_TICK_TIME);
     }
 
     /**
-     * Constructs a throttle that is either for reading or reading with the maximum bytesPerSecond.
-     *
-     * The Throttle is tuned to expect 'maxRequestors' requesting data, allowing only the 'maxLatency'
-     * delay between serviced requests for any given requestor.
-     *
-     * The values are only recommendations and may be ignored (within limits) by the Throttle
-     * in order to ensure that the Throttle behaves correctly.
+     * Constructs a throttle that is either for reading or reading with the 
+     * maximum <code>bytesPerSecond</code>.
+     * <p>
+     * The <code>Throttle</code> is tuned to expect 'maxRequestors' requesting 
+     * data, allowing only the 'maxLatency' delay between serviced requests 
+     * for any given requestor.
+     * <p>
+     * The values are only recommendations and may be ignored (within limits) by the 
+     * <code>Throttle</code> in order to ensure that the <code>Throttle</code> 
+     * behaves correctly.
      */
     public NBThrottle(boolean forWriting, float bytesPerSecond, int maxRequestors, int maxLatency) {
         this(forWriting, bytesPerSecond, true,  maxRequestors == 0 ? DEFAULT_TICK_TIME : maxLatency / maxRequestors);
@@ -237,7 +252,8 @@ public class NBThrottle implements Throttle {
     }
     
     /**
-     * Interests this ThrottleListener in being notified when bandwidth is available.
+     * Interests this <code>ThrottleListener</code> in being notified when 
+     * bandwidth is available.
      */
     public void interest(ThrottleListener writer) {
         boolean wakeup;
@@ -272,7 +288,7 @@ public class NBThrottle implements Throttle {
     }
     
 	/**
-	 * Set the number of bytes to write per second
+	 * Set the number of bytes to write per second.
 	 * 
 	 * @param bytesPerSecond
 	 */
@@ -281,10 +297,11 @@ public class NBThrottle implements Throttle {
 	}
     
     /**
-     * Notification from NIODispatcher that some time has passed.
-     *
-     * Returns true if all requests were satisifed.  Returns false if there are
-     * still some requests that require further tick notifications.
+     * Notification from <code>NIODispatcher</code> that some time has passed.
+     * <p>
+     * Returns <code>true</code> if all requests were satisfied. Returns 
+     * <code>false</code> if there are still some requests that require further 
+     * tick notifications.
      */
     void tick(long currentTime) {
         if(currentTime >= _nextTickTime) {

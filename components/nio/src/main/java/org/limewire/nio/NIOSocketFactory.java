@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/** An NBSocketFactory that returns NIOSockets. */
+/** An <code>NBSocketFactory</code> that returns <code>NIOSockets</code>. */
 public class NIOSocketFactory extends NBSocketFactory {
 
     @Override

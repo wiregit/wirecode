@@ -6,12 +6,13 @@ import java.net.ServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
 
 /**
- * A factory that will return new ServerSockets or NBSockets.
+ * Returns new sockets. The socket can be an unconnected <code>NBSocket</code>
+ * or a {@link ServerSocket} which is either bound, or not bound.
  */
 public class SocketFactory {
 
     /**
-     * Returns an unconnected NBSocket.
+     * Returns an unconnected <code>NBSocket</code>.
      */
     public static NBSocket newSocket() throws IOException {
         return new NIOSocket(); // based on NIO
@@ -19,7 +20,7 @@ public class SocketFactory {
     }
     
     /**
-     * Returns a new ServerSocket.
+     * Returns a new <code>ServerSocket</code>.
      */
     public static ServerSocket newServerSocket(int port, AcceptObserver observer) throws IOException {
         return new NIOServerSocket(port, observer); // based on NIO
@@ -27,7 +28,7 @@ public class SocketFactory {
     }
     
     /**
-     * Returns a new ServerSocket with the observer.
+     * Returns a new <code>ServerSocket</code> with the observer.
      * The socket is NOT BOUND.
      */
     public static ServerSocket newServerSocket(AcceptObserver observer) throws IOException {

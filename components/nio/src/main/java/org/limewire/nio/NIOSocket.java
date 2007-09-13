@@ -15,11 +15,15 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.ConnectObserver;
 
 /**
- * A Socket that does all of its connecting/reading/writing using NIO.
- * 
- * Input/OutputStreams are provided to be used for blocking I/O (although internally non-blocking I/O is used). To
- * switch to using event-based reads, setReadObserver can be used, and read-events will be passed to the ReadObserver. A
- * ChannelReadObserver must be used so that the Socket can set the appropriate underlying channel.
+ * A {@link Socket} that does all of its connecting/reading/writing using NIO.
+ * <p>
+ * Input/OutputStreams are provided for blocking I/O (although 
+ * internally non-blocking I/O is used). To use event-based reads,
+ * use {@link #setReadObserver(org.limewire.nio.channel.ChannelReadObserver)} 
+ * and read-events are passed to the {@link ReadObserver}. 
+ * <p>
+ * A {@link ChannelReadObserver} must be used so the <code>Socket</code> can
+ * set the appropriate underlying channel.
  */
 public class NIOSocket extends AbstractNBSocket {
 
@@ -33,8 +37,8 @@ public class NIOSocket extends AbstractNBSocket {
     private volatile SocketAddress remoteSocketAddress;
 
     /**
-     * Constructs an NIOSocket using a pre-existing Socket.
-     * To be used by NIOServerSocket while accepting incoming connections.
+     * Constructs an <code>NIOSocket</code> using a pre-existing <code>Socket</code>.
+     * To be used by <code>NIOServerSocket</code> while accepting incoming connections.
      */
     protected NIOSocket(Socket s) {
         channel = s.getChannel();
@@ -46,7 +50,7 @@ public class NIOSocket extends AbstractNBSocket {
         NIODispatcher.instance().register(channel, this);
     }
 
-    /** Creates an unconnected NIOSocket. */
+    /** Creates an unconnected <code>NIOSocket</code>. */
     public NIOSocket() throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
@@ -55,7 +59,7 @@ public class NIOSocket extends AbstractNBSocket {
         setInitialWriter();
     }
 
-    /** Creates an NIOSocket and connects (with no timeout) to addr/port */
+    /** Creates an <code>NIOSocket</code> and connects (with no timeout) to addr/port. */
     public NIOSocket(InetAddress addr, int port) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
@@ -65,7 +69,9 @@ public class NIOSocket extends AbstractNBSocket {
         connect(new InetSocketAddress(addr, port));
     }
 
-    /** Creates an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
+    /** Creates an <code>NIOSocket</code> locally bound to localAddr/localPort 
+     * and connects (with no timeout) to addr/port.
+     */
     public NIOSocket(InetAddress addr, int port, InetAddress localAddr, int localPort) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
@@ -76,27 +82,30 @@ public class NIOSocket extends AbstractNBSocket {
         connect(new InetSocketAddress(addr, port));
     }
 
-    /** Creates an NIOSocket and connects (with no timeout) to addr/port */
+    /** Creates an <code>NIOSocket</code> and connects (with no timeout) to addr/port. */
     public NIOSocket(String addr, int port) throws UnknownHostException, IOException {
         this(InetAddress.getByName(addr), port);
     }
 
-    /** Creates an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
+    /** Creates an <code>NIOSocket</code> locally bound to localAddr/localPort 
+     * and connects (with no timeout) to addr/port. 
+     */
     public NIOSocket(String addr, int port, InetAddress localAddr, int localPort) throws IOException {
         this(InetAddress.getByName(addr), port, localAddr, localPort);
     }
     
-    /** Performs initialization for an incoming Socket.  Does nothing right now. */
+    /** Performs initialization for an incoming Socket. Doesn't do anything right now. */
     protected void initIncomingSocket() {
         
     }
 
-    /** Performs initialization for this NIOSocket. Currently just makes the channel non-blocking. */
+    /** Performs initialization for this <code>NIOSocket</code>. Currently just 
+     * makes the channel non-blocking. */
     protected void initOutgoingSocket() throws IOException {
         channel.configureBlocking(false);
     }
 
-    /** Binds the socket to the SocketAddress */
+    /** Binds the socket to the <code>SocketAddress</code>. */
     @Override
     public void bind(SocketAddress endpoint) throws IOException {
         socket.bind(endpoint);
@@ -146,7 +155,7 @@ public class NIOSocket extends AbstractNBSocket {
         return new SocketInterestWriteAdapter(channel);
     }
 
-    /** Shuts down input, output & the socket. */
+    /** Shuts down input, output and the socket. */
     @Override
     protected void shutdownImpl() {
         try {

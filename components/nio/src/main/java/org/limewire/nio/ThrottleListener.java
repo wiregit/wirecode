@@ -1,23 +1,28 @@
 package org.limewire.nio;
 
 /**
- * Something that interfaces with a Throttle.
+ * Defines the interface to interact with a {@link Throttle}. The listener 
+ * hears/observes throttles which decouples the throttle from the listener.
+ * Therefore, the listener knows when the throttle bandwidth availability 
+ * changes.
+ * 
  */
 public interface ThrottleListener {
     
-    /** Sets the attachment that the Throttle recognizes from this listener */
+    /** Sets the attachment that the <code>Throttle</code> recognizes from this 
+     * listener */
     void setAttachment(Object attachment);
     
-    /** Gets the attachment for the Throttle to recognize */
+    /** Gets the attachment for the <code>Throttle</code> to recognize */
     Object getAttachment();
     
-    /** Notifies the listener that bandwidth is available & interest should be registered */
+    /** Notifies the listener that bandwidth is available and interest should be registered */
     boolean bandwidthAvailable();
     
     /** Notifies the listener that bandwidth should be requested. */
     void requestBandwidth();
     
-    /** Notifies that listener that bandwidth should be released. */
+    /** Notifies the listener that bandwidth should be released. */
     void releaseBandwidth();
     
     /** Determines if the listener is still open. */

@@ -15,12 +15,12 @@ import org.limewire.nio.observer.AcceptObserver;
 
 
 /**
- * A ServerSocket that allows asynchronous accepts but is backed
- * by a legacy I/O ServerSocket.
- * 
- * This is intended primarily for ease-of-use debugging in swapping out
- * an NIOServerSocket with a BlockingServerSocketAdapter, so that NIO code can be
- * compared to regular I/O code.
+ * A <code>ServerSocket</code> that allows asynchronous accepts but is backed
+ * by a legacy I/O <code>ServerSocket</code>.
+ * <p>
+ * This is intended primarily for ease of use debugging via swapping out
+ * an {@link NIOServerSocket} with a <code>BlockingServerSocketAdapter</code>, so 
+ * NIO code can be compared to regular I/O code.
  */
 public class BlockingServerSocketAdapter extends ServerSocket {
     
