@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -731,5 +732,34 @@ public class FileUtils {
         
         throw iox;
     }
+
+    public static File getJarFromClasspath(String markerFile) {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        if (classLoader == null) {
+            classLoader = FileUtils.class.getClassLoader();
+        }
+        if (classLoader == null) {
+            return null;
+        }
+        return getJarFromClasspath(classLoader, markerFile);
+    }
     
+    public static File getJarFromClasspath(ClassLoader classLoader, String markerFile) {
+        if (classLoader == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        URL messagesURL = classLoader.getResource(markerFile);
+        if (messagesURL != null) {
+            String url = messagesURL.toExternalForm();
+            if (url != null && url.startsWith("jar:file:")) {
+                url = url.substring("jar:file:".length(), url.length());
+                url = url.substring(0, url.length() - markerFile.length() - "!/".length());
+                return new File(url);
+            }
+        }
+
+        return null;
+    }
+
 }

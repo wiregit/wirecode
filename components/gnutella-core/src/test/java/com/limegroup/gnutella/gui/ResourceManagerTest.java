@@ -2,14 +2,19 @@ package com.limegroup.gnutella.gui;
 
 import java.util.Locale;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
+import junit.framework.Test;
 
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 public class ResourceManagerTest extends GUIBaseTestCase {
 
 	public ResourceManagerTest(String name) {
 		super(name);
 	}
+	
+    public static Test suite() {
+        return buildTestSuite(ResourceManagerTest.class);
+    }
 	
 	public void testResetLocaleOptions() {
 		setLocaleSettings(Locale.US);

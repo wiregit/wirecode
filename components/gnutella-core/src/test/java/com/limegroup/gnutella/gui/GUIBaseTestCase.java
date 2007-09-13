@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * Base class for gui tests that rely on the "gui" folder to be the
  * working directory.
  */
-public class GUIBaseTestCase extends LimeTestCase {
+public abstract class GUIBaseTestCase extends LimeTestCase {
 
 	private static String savedWorkingDir;
 	
