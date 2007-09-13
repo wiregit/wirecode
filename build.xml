@@ -125,7 +125,7 @@
     <target name="lw-gettext-extract"
      description="Extracts message keys from the source code"
      depends="init.gettext">
-    <gettext-extract keysFile="limewire.pot" poDirectory="lib/messagebundles">
+    <gettext-extract keysFile="limewire.pot" poDirectory="lib/messagebundles" keywords="-kgetStringResource -kgetFormattedStringResource -ktrc -ktr -kmarktr -ktrn:1,2 -ktrl">
       <fileset dir="components" includes="**/*.java"/>
       <fileset dir="core" includes="**/*.java"/>
       <fileset dir="gui" includes="**/*.java"/>
