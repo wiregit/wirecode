@@ -165,6 +165,8 @@
     <!-- jar them -->
     <jar destfile="lib/jars/compile/messages.jar" basedir="lib/messagebundles"
     includes="org/**"/>
+   	<!-- clean up -->
+    <delete dir="lib/messagebundles/org"/>
     </target>
    
     <!-- mask imported targets -->
