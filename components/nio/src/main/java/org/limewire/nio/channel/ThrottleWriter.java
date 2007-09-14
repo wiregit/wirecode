@@ -11,10 +11,13 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 
 /**
- * A writer that throttles data according to a throttle.
- *
- * To work with the Throttle, this uses an attachment (which must be the same as the
- * attachment of the SelectionKey associated with the socket this is using).
+ * Writes data to a channel. The data writes are controlled by a {@link 
+ * Throttle}.
+ * <p>
+ * To work with the <code>Throttle</code>, <code>ThrottleWriter</code>
+ * uses an attachment. This attachment must be the same as the 
+ * <code>SelectionKey</code> attachment associated with the socket 
+ * <code>ThrottleWriter</code> uses.
  */
 public class ThrottleWriter implements ChannelWriter, InterestWritableByteChannel, ThrottleListener {
     
@@ -34,23 +37,25 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     private boolean channelInterested;
     
     /**
-     * Constructs a ThrottleWriter with the given Throttle.
-     *
-     * You MUST call setWriteChannel prior to using this.
+     * Constructs a <code>ThrottleWriter</code> with the given <code>Throttle</code>.
+     * <p>
+     * You MUST call {@link #setWriteChannel(InterestWritableByteChannel)}
+     * prior to using <code>ThrottleWriter</code>.
      */
     public ThrottleWriter(Throttle throttle) {
         this(throttle, null);
     }
     
     /**
-     * Constructs a new ThrottleWriter with the given throttle & channel.
+     * Constructs a new <code>ThrottleWriter</code> with the given throttle 
+     * and channel.
      */
     public ThrottleWriter(Throttle throttle, InterestWritableByteChannel channel) {
         this.throttle = throttle;
         this.channel = channel;
     }
     
-    /** Retreives the sink. */
+    /** Retrieves the sink. */
     public InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
@@ -66,7 +71,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         }
     }
     
-    /** Sets the attachment that the Throttle will recognize for this Writer. */
+    /** Sets the attachment that the <code>Throttle</code> will recognize for this Writer. */
     public void setAttachment(Object att) {
         attachment = att;
     }
@@ -77,8 +82,8 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     }
     
     /**
-     * Tells the Throttle that we're interested in receiving bandwidthAvailable
-     * events at some point in time.
+     * Tells the <code>Throttle</code> that we're interested in receiving 
+     * bandwidthAvailable events at some point in time.
      */
     public void interestWrite(WriteObserver observer, boolean status) {
         if(status) {
@@ -96,9 +101,9 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     }
     
     /**
-     * Notification from the Throttle that bandwidth is available.
-     * Returns false if this no longer is open & will not be interested
-     * ever again.
+     * Notification from the <code>Throttle</code> that bandwidth is available.
+     * Returns <code>false</code> if this no longer is open and will not be 
+     * interested ever again.
      */
     public boolean bandwidthAvailable() {
         if(channel.isOpen()) {
@@ -156,7 +161,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     }
     
     /**
-     * Requests some bandiwdth from the throttle.
+     * Requests some bandwidth from the throttle.
      */
     public void requestBandwidth() {
         if (throttle != null) {

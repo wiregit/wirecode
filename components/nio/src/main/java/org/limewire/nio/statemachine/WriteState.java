@@ -5,6 +5,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.WritableByteChannel;
 
+/**
+ * Abstract class that represents a write state and declares that reading
+ * is not taking place.
+ */
 public abstract class WriteState implements IOState {
 
     public final boolean isWriting() {

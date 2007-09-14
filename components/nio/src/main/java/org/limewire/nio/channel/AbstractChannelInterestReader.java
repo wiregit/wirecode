@@ -5,6 +5,11 @@ import java.nio.ByteBuffer;
 
 import org.limewire.util.BufferUtils;
 
+/**
+ * Reads bytes in a sequence of buffers from a channel.
+ * Additionally, <code>AbstractChannelInterestReader</code> provides accessor 
+ * methods to get a channel and storing the interest status to read. 
+ */
 public abstract class AbstractChannelInterestReader implements ChannelReadObserver, InterestScatteringByteChannel {
     
     protected ByteBuffer buffer;

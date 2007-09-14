@@ -16,7 +16,7 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.util.BufferUtils;
 
 /**
- * State machine for reading & writing.
+ * State machine for reading and writing.
  */
 public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestScatteringByteChannel {
     
@@ -100,9 +100,9 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     }    
     
     /**
-     * Notification that a read can be performed.  If our current state is for writing,
-     * we'll turn off future interest events.  Otherwise we'll tell the current state
-     * to process.
+     * Notification that a read can be performed. If the current state is for writing,
+     * <code>handleRead</code> turns off future interest events. Otherwise 
+     * the current state is told to process.
      */
     public void handleRead() {
         if(currentState != null) {
@@ -121,8 +121,9 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     }
     
     /**
-     * Notification that a write can be performed.  If our current state is for reading,
-     * we'll turn off future interest events.  Otherwise we'll tell the current state to process.
+     * Notification that a write can be performed. If the current state is for reading,
+     * <code>handleWrite</code> turns off future interest events. Otherwise 
+     * the current state is told to process.
      */
     public boolean handleWrite() {
         if(currentState != null) {
@@ -141,7 +142,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     }
     
     /**
-     * Process the current state.  If any exceptions occur while procesing,
+     * Process the current state.  If any exceptions occur while processing,
      * we'll notify the observer of them.  If the state indicated it needs to be
      * processed again, we do not move to the next state.  Otherwise, if the state
      * indicated that it's done, we move to the next state.
@@ -301,7 +302,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
 
     /**
      * Allows another channel to read from this, passing any unread bytes to that channel.
-     * This is typically used for the MessageReader to read any bytes that this AsyncHandshaker
+     * This is typically used for the <code>MessageReader</code> to read any bytes that this AsyncHandshaker
      * read from the network but did not process during handshaking.
      */
     public int read(ByteBuffer toBuffer) throws ClosedChannelException {

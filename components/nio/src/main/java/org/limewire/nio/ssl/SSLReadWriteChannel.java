@@ -30,7 +30,7 @@ import org.limewire.util.FileUtils;
 
 /**
  * An SSL-capable layer that can transform incoming and outgoing
- * data according to the specified SSLContext and cipher suite.
+ * data according to the specified <code>SSLContext</code> and cipher suite.
  */
 class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritableByteChannel,
                                  ChannelReader, ChannelWriter {
@@ -72,7 +72,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     
     /**
      * Whether or not this has been shutdown.
-     * Shutting down must be atomic wrt initializing, so that
+     * Shutting down must be atomic with regard to initializing, so that
      * we can guarantee all allocated buffers are released
      * properly.
      * 
@@ -101,7 +101,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     private volatile boolean taskScheduled = false;
     
     /**
-     * The last state of who interested us in readinng must be kept,
+     * The last state of who interested us in reading must be kept,
      * so that after handshaking finishes, we can put reading into
      * the correct interest state.  otherwise, our options are:
      *  1) leave interest on, which could potentially loop forever
@@ -110,7 +110,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      *     had wanted to read data.
      * 
      * Note that we don't have to do this for writing because writing
-     * can succesfully turn itself off.
+     * can successfully turn itself off.
      */
     private boolean readInterest = false;
     private final Object readInterestLock = new Object();

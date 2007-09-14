@@ -11,10 +11,14 @@ import org.limewire.util.BufferUtils;
 
 
 /**
- * A reader that throttles data according to a throttle.
- *
- * To work with the Throttle, this uses an attachment (which must be the same as the
- * attachment of the SelectionKey associated with the socket this is using).
+ * Reads data from a channel. The data is controlled by a {@link Throttle}; to 
+ * work with the <code>Throttle</code>, <code>ThrottleReader</code> uses an 
+ * attachment.
+ * <p>
+ * The attachment must be the same as the attachment of the 
+ * <code>SelectionKey</code> associated with the socket 
+ * <code>ThrottleReader</code> uses.
+ * 
  */
 public class ThrottleReader implements InterestReadableByteChannel, ChannelReader, ThrottleListener {
     
@@ -32,34 +36,38 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
     private volatile boolean lastInterestState;
     
     /**
-     * Constructs a ThrottleReader with the given Throttle.
-     *
-     * You MUST call setWriteChannel prior to using this.
+     * Constructs a <code>ThrottleReader</code> with the given 
+     * <code>Throttle</code>.
+     * <p>
+     * You MUST call 
+     * {@link #setReadChannel(InterestReadableByteChannel) setReadChannel(InterestReadableByteChannel)}
+     * prior to using <code>ThrottleReader</code>.
      */
     public ThrottleReader(Throttle throttle) {
         this(throttle, null);
     }
     
     /**
-     * Constructs a new ThrottleWriter with the given throttle & channel.
+     * Constructs a new <code>ThrottleReader</code> with the given throttle and 
+     * channel.
      */
     public ThrottleReader(Throttle throttle, InterestReadableByteChannel channel) {
         this.throttle = throttle;
         this.channel = channel;
     }
     
-    /** Retreives the sink. */
+    /** Retrieves the channel. */
     public InterestReadableByteChannel getReadChannel() {
         return channel;
     }
     
-    /** Sets the sink. */
+    /** Sets the channel. */
     public void setReadChannel(InterestReadableByteChannel channel) {
         this.channel = channel;
         throttle.interest(this);
     }
     
-    /** Sets the attachment that the Throttle will recognize for this Writer. */
+    /** Sets the attachment that the <code>Throttle</code> will recognize for this Writer. */
     public void setAttachment(Object att) {
         attachment = att;
     }
@@ -70,8 +78,8 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
     }
     
     /**
-     * Tells the Throttle that we're interested in receiving bandwidthAvailable
-     * events at some point in time.
+     * Tells the <code>Throttle</code> that we're interested in receiving 
+     * bandwidthAvailable events at some point in time.
      */
     public void interestRead(boolean status) {
         lastInterestState = status;
@@ -84,9 +92,9 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
     }
     
     /**
-     * Notification from the Throttle that bandwidth is available.
-     * Returns false if this no longer is open & will not be interested
-     * ever again.
+     * Notification from the <code>Throttle</code> that bandwidth is available.
+     * Returns <code>false</code> if the channel no longer is open and will not 
+     * be interested again.
      */
     public boolean bandwidthAvailable() {
         if(channel.isOpen() && lastInterestState) {

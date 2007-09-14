@@ -18,10 +18,12 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.FileUtils;
 
 /**
- * An alternative to IOStateMachine that will block until the machine
- * has finished.  This is useful if you want to use the same state
- * code from an NIO portion where only OutputStreams & InputStreams
- * are available.
+ * Blocks until the state machine finishes; use <code>BlockingStateMachine</code> 
+ * as an alternative to {@link IOStateMachine}. 
+ * <p>
+ * <code>BlockingStateMachine</code> is useful if you want to use the same state
+ * code from an NIO portion where only <code>OutputStreams</code> and 
+ * <code>InputStreams</code> are available.
  */
 public class BlockingStateMachine implements Closeable, Shutdownable {
     
@@ -50,7 +52,7 @@ public class BlockingStateMachine implements Closeable, Shutdownable {
     /**
      * Adds a new state to process.
      * 
-     * @param state
+     * @param newState
      */
     public void addState(final IOState newState) {
         if(LOG.isDebugEnabled())

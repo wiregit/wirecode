@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 
 /**
- * Keeps track of a bunch of things that want to be timed out.
+ * Keeps track of {@link Timeoutable Timeoutables}.
  */
 public class TimeoutController {
     
@@ -24,7 +24,7 @@ public class TimeoutController {
         return items.size();
     }
     
-    /** Adds a timeoutable to be timed out at timeout + now. */
+    /** Adds a <code>Timeoutable</code> to be timed out at timeout + now. */
     public synchronized void addTimeout(Timeoutable t, long now, long timeout) {
         if(LOG.isDebugEnabled())
             LOG.debug("Adding timeoutable: " + t + ", now: " + now + ", timeout: " + timeout);
@@ -58,7 +58,7 @@ public class TimeoutController {
         timedout.clear();
     }
     
-    /** Gets the time the next timeoutable expires. -1 for never. */
+    /** Gets the time the next <code>Timeoutable</code> expires or -1 for never. */
     public synchronized long getNextExpireTime() {
         if(items.isEmpty())
             return -1;
@@ -66,7 +66,7 @@ public class TimeoutController {
             return items.peek().expireTime;
     }
     
-    /** Keep an expireTime & timeoutable together as one happy couple. */
+    /** Keep an <code>expireTime</code> and <code>timeoutable</code> together as one happy couple. */
     private static class Timeout implements Comparable<Timeout> {
         private final long expireTime;
         private final Timeoutable timeoutable;

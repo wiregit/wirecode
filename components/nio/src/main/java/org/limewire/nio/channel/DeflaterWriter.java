@@ -11,8 +11,8 @@ import org.limewire.nio.observer.WriteObserver;
 
 
 /**
- * A channel that deflates data written to it & writes the deflated
- * data to another sink.
+ * Deflates data written to this channel and writes the deflated
+ * data to another channel sink.
  */
 public class DeflaterWriter implements ChannelWriter, InterestWritableByteChannel {
     
@@ -34,15 +34,17 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
     private static final byte[] EMPTY = new byte[0];
         
     /**
-     * Constructs a new DeflaterWriter with the given deflater.
-     * You MUST call setWriteChannel prior to handleWrite.
+     * Constructs a new <code>DeflaterWriter</code> with the given deflater.
+     * <p>
+     * You MUST call <code>setWriteChannel</code> prior to <code>handleWrite</code>.
      */
     public DeflaterWriter(Deflater deflater) {
         this(deflater, null);
     }
     
     /**
-     * Constructs a new DeflaterWriter with the given deflater & channel.
+     * Constructs a new <code>DeflaterWriter</code> with the given deflater 
+     * and channel.
      */
     public DeflaterWriter(Deflater deflater, InterestWritableByteChannel channel) {
         this.deflater = deflater;
@@ -52,7 +54,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
         this.channel = channel;
     }
     
-    /** Retreives the sink. */
+    /** Retrieves the sink. */
     public InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
@@ -66,7 +68,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
     /**
      * Used by an observer to interest themselves in when something can
      * write to this.
-     *
+     * <p>
      * We must synchronize interest setting so that in the writing loop
      * we can ensure that interest isn't turned on between the time we
      * get the interested party, check for null, and turn off interest

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 /**
- * Allows connect events to be received.
+ * Defines an interface that allows connect events to be received.
  */
 public interface ConnectObserver extends IOErrorObserver {
     
