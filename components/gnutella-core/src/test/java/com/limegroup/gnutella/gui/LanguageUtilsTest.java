@@ -14,12 +14,24 @@ import org.limewire.util.FileUtils;
 
 public class LanguageUtilsTest extends BaseTestCase {
 
+    private Locale defaultLocale;
+
     public LanguageUtilsTest(String name) {
         super(name);
     }
 
     public static Test suite() {
         return buildTestSuite(LanguageUtilsTest.class);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        defaultLocale = Locale.getDefault();
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        Locale.setDefault(defaultLocale);
     }
     
     public void testAddLocalesFromJar() {
@@ -39,4 +51,34 @@ public class LanguageUtilsTest extends BaseTestCase {
         assertTrue(locales.indexOf(Locale.GERMAN) != -1);
     }
 
+    public void testMatchingScore() {
+        assertEquals(3, LanguageUtils.getMatchScore(Locale.ENGLISH, Locale.ENGLISH));
+        assertEquals(-1, LanguageUtils.getMatchScore(Locale.ENGLISH, Locale.GERMAN));
+        assertEquals(2, LanguageUtils.getMatchScore(Locale.US, Locale.ENGLISH));
+        assertEquals(2, LanguageUtils.getMatchScore(new Locale("en", "", "Latn"), Locale.ENGLISH));
+        assertEquals(2, LanguageUtils.getMatchScore(new Locale("en", "US", "Latn"), Locale.US));
+        assertEquals(1, LanguageUtils.getMatchScore(new Locale("en", "US", "Latn"), Locale.ENGLISH));
+    }
+
+    public void testMatchesDefaultLocale() {
+        Locale.setDefault(Locale.US);
+        assertTrue(LanguageUtils.matchesDefaultLocale(Locale.ENGLISH));
+        assertTrue(LanguageUtils.matchesDefaultLocale(Locale.US));
+        assertFalse(LanguageUtils.matchesDefaultLocale(new Locale("en", "", "Latn")));
+        assertFalse(LanguageUtils.matchesDefaultLocale(Locale.GERMAN));
+        
+        Locale.setDefault(new Locale("en", "US", "Latn"));
+        assertTrue(LanguageUtils.matchesDefaultLocale(Locale.ENGLISH));
+        assertTrue(LanguageUtils.matchesDefaultLocale(Locale.US));
+        assertTrue(LanguageUtils.matchesDefaultLocale(new Locale("en", "US", "Latn")));
+    }
+    
+    public void testIsEnglishLocale() {
+        assertTrue(LanguageUtils.isEnglishLocale(Locale.ENGLISH));
+        assertTrue(LanguageUtils.isEnglishLocale(Locale.CANADA));
+        assertTrue(LanguageUtils.isEnglishLocale(Locale.US));
+        assertTrue(LanguageUtils.isEnglishLocale(Locale.UK));
+        assertFalse(LanguageUtils.isEnglishLocale(Locale.GERMAN));
+    }
+    
 }
