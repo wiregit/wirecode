@@ -93,7 +93,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         this.limeXMLDocumentHelper = limeXMLDocumentHelper;
     	    
 	    //Clear push requests every 30 seconds.
-        //DPINJ: move to initializer
+        //TODO: move to initializer
 	    this.backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
 	        public void run() {
 	            PUSH_REQUESTS.clear();

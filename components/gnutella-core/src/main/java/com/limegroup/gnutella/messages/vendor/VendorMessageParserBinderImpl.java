@@ -70,7 +70,6 @@ public class VendorMessageParserBinderImpl implements VendorMessageParserBinder 
     private class ReplyNumberVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, Network network) throws BadPacketException {
-            // DPINJ: Use a passed in RPVMF !!!
             return replyNumberVendorMessageFactory.createFromNetwork(guid, ttl,
                     hops, version, restOf);
         }

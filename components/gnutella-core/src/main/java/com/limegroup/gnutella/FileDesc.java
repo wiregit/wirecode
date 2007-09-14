@@ -438,7 +438,9 @@ public class FileDesc implements StringLookup {
         else if (key.startsWith("xml_") && getXMLDocument() != null) {
             key = key.substring(4,key.length());
             return getXMLDocument().lookup(key);
-        // DPINJ: Removed 'firewalled' check -- might not be necessary, but should see if other ways to re-add can be done.
+            
+        // Note: Removed 'firewalled' check -- might not be necessary, but
+        // should see if other ways to re-add can be done.
         }
         return null;
     }

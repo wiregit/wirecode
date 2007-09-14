@@ -761,7 +761,6 @@ public class DownloadWorker {
                         + type + " to: " + _rfd);
             _connectObserver = observer;
             try {
-                // DPINJ: Change to using passed-in SocketsManager!!!
                 Socket socket = socketsManager.connect(
                         new InetSocketAddress(_rfd.getHost(), _rfd.getPort()),
                         NORMAL_CONNECT_TIME, observer, type);

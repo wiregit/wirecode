@@ -273,7 +273,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
         bind(UDPPinger.class).to(UDPPingerImpl.class);
         
-        // DPINJ: statically injecting this for now...
+        // TODO: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
         requestStaticInjection(AddressToken.class);
@@ -284,11 +284,11 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(HttpClientManager.class);
         requestStaticInjection(LimeXMLDocument.class);
                         
-        // DPINJ: This is odd -- move to initialize & LifecycleManager?
+        // TODO: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
         bind(Statistics.class).asEagerSingleton();
         
-        // DPINJ: Need to add interface to these classes
+        // TODO: Need to add interface to these classes
         //----------------------------------------------
         //bind(UDPService.class)
         //bind(Acceptor.class);
@@ -360,7 +360,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(ControlRequestAcceptor.class);
         //bind(PushDownloadManager.class);
         
-        //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
+        //TODO: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);
         //bind(FileRequestHandler.class);
         //bind(FreeLoaderRequestHandler.class);
@@ -375,12 +375,12 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class);
                 
         
-        // DPINJ: Could delay instantiation...
+        // TODO: Could delay instantiation...
         //----------------------------------------------
         bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
  
         
-        // DPINJ: only needed in tests, so move there eventually
+        // TODO: only needed in tests, so move there eventually
         bind(ConnectionFactory.class).to(ConnectionFactoryImpl.class);
     }    
     

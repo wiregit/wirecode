@@ -324,7 +324,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * Creates a MessageRouter. Must call initialize before using.
      */
     @Inject
-    // DPINJ: Create a MessageRouterController instead of passing all of these...
+    // TODO: Create a MessageRouterController,
+    //       or split MessageRouter into a number of different classes,
+    //       instead of passing all of these...
     protected MessageRouterImpl(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             QueryHandlerFactory queryHandlerFactory,
@@ -1389,7 +1391,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
             public void run() {
                 Socket sock = null;
                 try {
-                    // DPINJ: Change to using passed-in SocketsManager!!!
                     sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000);
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());

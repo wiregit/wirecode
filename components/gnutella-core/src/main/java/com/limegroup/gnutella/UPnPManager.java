@@ -129,12 +129,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
     
     public boolean start() {
 	    LOG.debug("Starting UPnP Manager.");
-	    
-	    //DPINJ: move from constructor to start, since it's constructed now
-	    //       even if DISABLE_UPNP is turned off -- is this right?
-        addDeviceChangeListener(this);
-	    
-        synchronized(DEVICE_LOCK) {
+
+	    addDeviceChangeListener(this);
+        
+	    synchronized(DEVICE_LOCK) {
             try {
     	        return super.start();
     	    } catch(Exception bad) {

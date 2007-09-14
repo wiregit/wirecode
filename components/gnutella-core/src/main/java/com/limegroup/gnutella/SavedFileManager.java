@@ -40,7 +40,7 @@ public final class SavedFileManager implements Runnable {
                      @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.urnCache = urnCache;
         
-        // DPINJ: move to an initialize method!
+        // TODO: move to an initialize method!
         // Run the task every three minutes, starting in 10 seconds.
         backgroundExecutor.scheduleWithFixedDelay(this, 10 * 1000, 3 * 60 * 1000, TimeUnit.MILLISECONDS);
     }

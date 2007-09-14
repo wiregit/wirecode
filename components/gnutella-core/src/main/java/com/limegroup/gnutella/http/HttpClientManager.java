@@ -236,17 +236,14 @@ public class HttpClientManager {
 
         public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
           throws IOException, UnknownHostException {
-            // DPINJ: Change to using passed-in SocketsManager!!!
             return socketsManager.connect(new InetSocketAddress(host,port),0, type);
         }
 
         public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-            // DPINJ: Change to using passed-in SocketsManager!!!
             return socketsManager.connect(new InetSocketAddress(host,port),0, type);
         }
         
         public Socket createSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
-            // DPINJ: Change to using passed-in SocketsManager!!!
             return socketsManager.connect(new InetSocketAddress(host,port), timeout, type);
         }
         

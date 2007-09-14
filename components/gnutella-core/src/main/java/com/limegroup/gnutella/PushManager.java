@@ -117,7 +117,6 @@ public final class PushManager {
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
                 ConnectType type = tlsCapable && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
-                // DPINJ: Change to using passed-in SocketsManager!!!
                 socketsManager.get().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false, httpAcceptor.get()), type);
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();

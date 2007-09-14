@@ -56,7 +56,6 @@ public class NetworkManagerImpl implements NetworkManager {
      * @see com.limegroup.gnutella.NetworkManager#isOOBCapable()
      */
     public boolean isOOBCapable() {
-        // DPINJ: Settings should be passed in instead of statics
         return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
                !NetworkUtils.isPrivate() &&
                SearchSettings.OOB_ENABLED.getValue() &&

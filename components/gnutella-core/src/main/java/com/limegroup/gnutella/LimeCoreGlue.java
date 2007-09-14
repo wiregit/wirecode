@@ -111,7 +111,6 @@ public class LimeCoreGlue {
         // be the LocalSocketAddressProvider.
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {
-                // DPINJ: make this work :/
                 return networkManager.getAddress();
             }
 

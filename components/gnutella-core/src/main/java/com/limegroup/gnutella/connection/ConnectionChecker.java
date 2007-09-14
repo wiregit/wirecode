@@ -284,7 +284,6 @@ public final class ConnectionChecker implements Runnable {
         	InetAddress.getByName(host); // die fast if unresolvable
             Observer observer = new Observer();
             synchronized(observer) {
-                // DPINJ: Change to using passed-in SocketsManager!!!
                 Socket s = socketsManager.connect(new InetSocketAddress(host, 80), 6000, observer);
                 LOG.debug("Waiting for callback...");
                 try {

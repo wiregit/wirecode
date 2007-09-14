@@ -169,7 +169,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 		return getSaveFile().equals(saveFile);
 	}
 	
-	// DPINJ: See: CORE-306
+	// TODO: See: CORE-306
 	public abstract void initialize(DownloadReferences downloadReferences);
 
 	/**

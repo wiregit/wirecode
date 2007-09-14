@@ -55,7 +55,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     public static final int DEFAULT_PACKET_SIZE = 1380;
 
     /** The packet size used by this class -- non-final for testing. */
-    // DPINJ: Should either be a parameter in the constructor, or changed by a setter
+    // TODO: Should either be a parameter in the constructor, or changed by a setter
     private static /*final*/ int PACKET_SIZE = DEFAULT_PACKET_SIZE;
 
     private final Provider<DownloadManager> downloadManager;

@@ -481,7 +481,6 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * will point to the most recent known set.
 	 */
 	public synchronized void updateProxies(boolean good) {
-        //DPINJ: needed to move setting of _proxies outside of GUID_MAP lock -- should be OK
         _guid = pushEndpointCache.updateProxiesFor(_guid, this, good);
         _proxies = null;
     }
