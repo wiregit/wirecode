@@ -8,11 +8,7 @@ package org.limewire.nio;
  * 
  */
 public interface ThrottleListener {
-    
-    /** Sets the attachment that the <code>Throttle</code> recognizes from this 
-     * listener */
-    void setAttachment(Object attachment);
-    
+        
     /** Gets the attachment for the <code>Throttle</code> to recognize */
     Object getAttachment();
     

@@ -162,8 +162,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     while(lastChannel.getReadChannel() instanceof ChannelReader)
                         lastChannel = (ChannelReader)lastChannel.getReadChannel();
                     
-                    if(lastChannel instanceof ThrottleListener)
-                    	((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
+                    if(lastChannel instanceof RequiresSelectionKeyAttachment)
+                    	((RequiresSelectionKeyAttachment)lastChannel).setAttachment(AbstractNBSocket.this);
                     
                     if(oldReader instanceof InterestReadableByteChannel && oldReader != newReader) {
                         lastChannel.setReadChannel((InterestReadableByteChannel)oldReader);
@@ -217,8 +217,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     ChannelWriter lastChannel = newWriter;
                     while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
                         lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
-                        if(lastChannel instanceof ThrottleListener)
-                            ((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
+                        if(lastChannel instanceof RequiresSelectionKeyAttachment)
+                            ((RequiresSelectionKeyAttachment)lastChannel).setAttachment(AbstractNBSocket.this);
                     }
 
                     InterestWritableByteChannel source = getBaseWriteChannel();

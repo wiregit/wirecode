@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
+import org.limewire.nio.RequiresSelectionKeyAttachment;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;
 import org.limewire.util.BufferUtils;
@@ -20,7 +21,7 @@ import org.limewire.util.BufferUtils;
  * <code>ThrottleReader</code> uses.
  * 
  */
-public class ThrottleReader implements InterestReadableByteChannel, ChannelReader {
+public class ThrottleReader implements InterestReadableByteChannel, ChannelReader, RequiresSelectionKeyAttachment {
     
     //private static final Log LOG = LogFactory.getLog(ThrottleReader.class);
     
@@ -34,7 +35,7 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
     /** The last interest state, to interact well with the Throttle. */
     private volatile boolean lastInterestState;
     
-    private final ThrottleListener throttleListener;
+    private final Listener throttleListener;
     
     /**
      * Constructs a <code>ThrottleReader</code> with the given 
@@ -134,6 +135,10 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
     public boolean isOpen() {
         Channel source = channel;
         return source != null ? source.isOpen() : false;
+    }
+    
+    public void setAttachment(Object o) {
+        throttleListener.setAttachment(o);
     }
     
     private final class Listener implements ThrottleListener {

@@ -330,7 +330,7 @@ public class NBThrottle implements Throttle {
                 for(ThrottleListener req : _requests) {
                     Object attachment = req.getAttachment();
                     if(attachment == null)
-                        throw new IllegalStateException("must have an attachment");
+                        throw new IllegalStateException("must have an attachment - listener: " + req);
                     
                     //LOG.debug("Moving: " + attachment + " from rquests to interested");
                     if(req.bandwidthAvailable())

@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
 import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.RequiresSelectionKeyAttachment;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;
 import org.limewire.nio.observer.Shutdownable;
@@ -19,7 +20,7 @@ import org.limewire.nio.observer.WriteObserver;
  * <code>SelectionKey</code> attachment associated with the socket 
  * <code>ThrottleWriter</code> uses.
  */
-public class ThrottleWriter implements ChannelWriter, InterestWritableByteChannel {
+public class ThrottleWriter implements ChannelWriter, InterestWritableByteChannel, RequiresSelectionKeyAttachment {
     
     //private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
     
@@ -35,7 +36,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     /** Whether we interested the channel last time */
     private boolean channelInterested;
     
-    private final ThrottleListener throttleListener;
+    private final Listener throttleListener;
     
     /**
      * Constructs a <code>ThrottleWriter</code> with the given <code>Throttle</code>.
@@ -199,6 +200,10 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         } else if (channel != null) {
             channel.interestWrite(this, true);
         }
+    }
+    
+    public void setAttachment(Object o) {
+        throttleListener.setAttachment(o);
     }
     
     private final class Listener implements ThrottleListener {        
