@@ -14,7 +14,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
 
 /**
- * Utility class keeps track of class C networks and an associated count.
+ * Utility class keeps track of masked ip ranges and an associated count.
  */
 public class ClassCNetworks {
     private Map<Integer, Integer> counts = new HashMap<Integer,Integer>();
@@ -27,17 +27,27 @@ public class ClassCNetworks {
         }
     };
     
+    private final int mask;
+    
+    public ClassCNetworks() {
+        this(NetworkUtils.getHexMask(24));
+    }
+    
+    public ClassCNetworks(int mask) {
+        this.mask = mask;
+    }
+    
     public void addAll(Collection<? extends IpPort> c) {
         for (IpPort ip : c)
             add(ip.getInetAddress(), 1);
     }
     
     public void add(InetAddress addr, int count) {
-        add(NetworkUtils.getClassC(addr), count);
+        add(NetworkUtils.getMaskedIP(addr, mask), count);
     }
     
     public void add(int masked, int count) {
-        masked &= NetworkUtils.CLASS_C_NETMASK;
+        masked &= mask;
         Integer num = counts.get(masked);
         if (num == null) {
             num = Integer.valueOf(0);

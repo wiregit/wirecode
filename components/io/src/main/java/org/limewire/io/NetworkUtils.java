@@ -593,6 +593,18 @@ public final class NetworkUtils {
     }
     
     /**
+     * @param decMask a netmask in decimal, like /24
+     * @return an integer that can be and-ed for masking
+     */
+    public static int getHexMask(int decMask) {
+        if (decMask < 0 || decMask > 32)
+            throw new IllegalArgumentException("bad mask "+decMask);
+        if (decMask == 0)
+            return 0;
+        return 0xFFFFFFFF << (32 - decMask);
+    }
+    
+    /**
      * @return A non-loopback IPv4 address of a network interface on the local
      *         host.
      * @throws UnknownHostException

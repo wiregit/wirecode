@@ -1575,42 +1575,11 @@ public class HostCatcher {
     
     private class HCInspectables {
         
-        public final Inspectable top10classC = new Inspectable() {
-            public Object inspect() {
-                Map<String, Object> ret = new HashMap<String, Object>();
-                ret.put("ver",1);
-                ClassCNetworks permanent = new ClassCNetworks();
-                ClassCNetworks restored = new ClassCNetworks();
-                ClassCNetworks freeLeaf = new ClassCNetworks();
-                ClassCNetworks freeUp = new ClassCNetworks();
-                ClassCNetworks all = new ClassCNetworks();
-                synchronized(HostCatcher.this) {
-                    IpPortSet everybody = new IpPortSet();
-                    everybody.addAll(permanentHostsSet);
-                    everybody.addAll(restoredHosts);
-                    everybody.addAll(FREE_LEAF_SLOTS_SET.keySet());
-                    everybody.addAll(FREE_ULTRAPEER_SLOTS_SET.keySet());
-                    everybody.addAll(ENDPOINT_SET.keySet());
-                    for(IpPort ip : permanentHostsSet) 
-                        permanent.add(ip.getInetAddress(), 1);
-                    for(IpPort ip : restoredHosts) 
-                        restored.add(ip.getInetAddress(), 1);
-                    for(IpPort ip : FREE_LEAF_SLOTS_SET.keySet()) 
-                        freeLeaf.add(ip.getInetAddress(), 1);
-                    for(IpPort ip : FREE_ULTRAPEER_SLOTS_SET.keySet()) 
-                        freeUp.add(ip.getInetAddress(), 1);
-                    for(IpPort ip : everybody) 
-                        all.add(ip.getInetAddress(), 1);
-                }
-                
-                ret.put("perm", permanent.getTopInspectable(10));
-                ret.put("rest", restored.getTopInspectable(10));
-                ret.put("fl", freeLeaf.getTopInspectable(10));
-                ret.put("fu", freeUp.getTopInspectable(10));
-                ret.put("all", all.getTopInspectable(10));
-                return ret;
-            }
-        };
+        /** IP Distribution inspectables */
+        public final Inspectable top10classC = new Top10(24);
+        public final Inspectable top10class20 = new Top10(20);
+        public final Inspectable top10class16 = new Top10(16);
+        public final Inspectable top10class12 = new Top10(12);
         
         /** Inspectable with some tls stats */
         public final Inspectable tlsStats = new Inspectable() {
@@ -1685,5 +1654,45 @@ public class HostCatcher {
                 return ret;
             }
         };
+    }
+    private class Top10 implements Inspectable {
+        private int mask;
+        Top10(int mask) {
+            this.mask = mask;
+        }
+        public Object inspect() {
+            Map<String, Object> ret = new HashMap<String, Object>();
+            ret.put("ver",1);
+            ClassCNetworks permanent = new ClassCNetworks(mask);
+            ClassCNetworks restored = new ClassCNetworks(mask);
+            ClassCNetworks freeLeaf = new ClassCNetworks(mask);
+            ClassCNetworks freeUp = new ClassCNetworks(mask);
+            ClassCNetworks all = new ClassCNetworks(mask);
+            synchronized(HostCatcher.this) {
+                IpPortSet everybody = new IpPortSet();
+                everybody.addAll(permanentHostsSet);
+                everybody.addAll(restoredHosts);
+                everybody.addAll(FREE_LEAF_SLOTS_SET.keySet());
+                everybody.addAll(FREE_ULTRAPEER_SLOTS_SET.keySet());
+                everybody.addAll(ENDPOINT_SET.keySet());
+                for(IpPort ip : permanentHostsSet) 
+                    permanent.add(ip.getInetAddress(), 1);
+                for(IpPort ip : restoredHosts) 
+                    restored.add(ip.getInetAddress(), 1);
+                for(IpPort ip : FREE_LEAF_SLOTS_SET.keySet()) 
+                    freeLeaf.add(ip.getInetAddress(), 1);
+                for(IpPort ip : FREE_ULTRAPEER_SLOTS_SET.keySet()) 
+                    freeUp.add(ip.getInetAddress(), 1);
+                for(IpPort ip : everybody) 
+                    all.add(ip.getInetAddress(), 1);
+            }
+            
+            ret.put("perm", permanent.getTopInspectable(10));
+            ret.put("rest", restored.getTopInspectable(10));
+            ret.put("fl", freeLeaf.getTopInspectable(10));
+            ret.put("fu", freeUp.getTopInspectable(10));
+            ret.put("all", all.getTopInspectable(10));
+            return ret;
+        }
     }
 }

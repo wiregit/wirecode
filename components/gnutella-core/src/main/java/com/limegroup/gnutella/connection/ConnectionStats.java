@@ -1,7 +1,14 @@
 package com.limegroup.gnutella.connection;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.limewire.collection.Buffer;
+import org.limewire.statistic.StatsUtils;
+
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -50,6 +57,10 @@ public class ConnectionStats {
     private volatile int _lastSent;
     private volatile int _lastSentDropped;
     
+    private final Buffer<Integer> responsesPerReply = new Buffer<Integer>(200);
+    private final Buffer<Integer> altsPerResponse = new Buffer<Integer>(200);
+    private final Buffer<Integer> altsPerReply = new Buffer<Integer>(200);
+    
     // Getters.
     public int getSent()  { return _numMessagesSent; }
     public int getReceived() { return _numMessagesReceived; }
@@ -81,8 +92,27 @@ public class ConnectionStats {
         _numMessagesReceived++;
     }
     
-    public void replyReceived() {
-        repliesReceived++;
+    public void replyReceived(QueryReply r) {
+        // parse reply outside of lock
+        int count = r.getUniqueResultCount();
+        List<Response> responses;
+        try {
+            responses = r.getResultsAsList();
+        } catch (BadPacketException ignore){
+            return;
+        }
+        
+        synchronized(this) {
+            responsesPerReply.add(count);
+            int total = 0;
+            for (Response resp : responses) {
+                int resps = resp.getLocations().size();
+                altsPerResponse.add(resps);
+                total += resps;
+            }
+            altsPerReply.add(total);
+            repliesReceived++;
+        }
     }
     public void queryReceived() {
         queriesReceived++;
@@ -122,9 +152,23 @@ public class ConnectionStats {
     }
     
     public void addStats(Map<String,Object> m) {
-        m.put("nqr",repliesReceived);
         m.put("nqs",repliesSent);
         m.put("npr",queriesReceived);
         m.put("nps",queriesSent);
+        synchronized(this) {
+            m.put("nqr",repliesReceived);
+            List<Double> resps = new ArrayList<Double>(responsesPerReply.size());
+            List<Double> alts = new ArrayList<Double>(altsPerResponse.size());
+            List<Double> altsReply = new ArrayList<Double>(altsPerReply.size());
+            for (int i : responsesPerReply)
+                resps.add((double)i);
+            for (int i : altsPerResponse)
+                alts.add((double)i);
+            for (int i : altsPerReply)
+                altsReply.add((double)i);
+            m.put("respreply", StatsUtils.quickStatsDouble(resps).getMap());
+            m.put("altresp", StatsUtils.quickStatsDouble(alts).getMap());
+            m.put("altreply", StatsUtils.quickStatsDouble(altsReply).getMap());
+        }
     }
 }
