@@ -30,11 +30,11 @@ public class ClassCNetworks {
     private final int mask;
     
     public ClassCNetworks() {
-        this(NetworkUtils.getHexMask(24));
+        this(24);
     }
     
     public ClassCNetworks(int mask) {
-        this.mask = mask;
+        this.mask = NetworkUtils.getHexMask(mask);
     }
     
     public void addAll(Collection<? extends IpPort> c) {

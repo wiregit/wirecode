@@ -87,4 +87,18 @@ public class ClassCNetworksTest extends LimeTestCase {
         assertEquals(0x01020300,ByteOrder.beb2int(b, 8));
         assertEquals(3,ByteOrder.beb2int(b, 12));
     }
+    
+    public void testMask() throws Exception {
+        ClassCNetworks cnc = new ClassCNetworks(16);
+        cnc.add(InetAddress.getByName("1.2.3.4"),1);
+        cnc.add(InetAddress.getByName("1.2.3.5"),2);
+        cnc.add(InetAddress.getByName("1.2.4.5"),1);
+        cnc.add(InetAddress.getByName("1.3.5.6"),4);
+        List<Map.Entry<Integer,Integer>> top = cnc.getTop();
+        assertEquals(0x01020000, top.get(0).getKey().intValue());
+        assertEquals(0x01030000, top.get(1).getKey().intValue());
+        assertEquals(4, top.get(0).getValue().intValue());
+        assertEquals(4, top.get(1).getValue().intValue());
+        assertEquals(2,top.size());
+    }
 }
