@@ -189,9 +189,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             }
 
             int read = -1;
+            int oldPosition = readIncoming.position();
             while(readIncoming.hasRemaining() && (read = readSink.read(readIncoming)) > 0);
             // if we last read EOF & nothing was put in sourceBuffer, EOF
-            if(read == -1 && readIncoming.position() == 0) {
+            if(read == -1 && readIncoming.position() == oldPosition) {
                 LOG.debug("Read EOF, no data to transfer.  Connection finished");
                 return -1;
             }
