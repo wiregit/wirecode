@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.limewire.io.NetworkUtils;
+import org.limewire.rudp.UDPConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -206,5 +207,10 @@ public class NetworkManagerImpl implements NetworkManager {
 
     public GUID getSolicitedGUID() {
         return udpService.get().getSolicitedGUID();
+    }
+
+
+    public int supportsFWTVersion() {
+        return udpService.get().canDoFWT() ? UDPConnection.VERSION : 0;
     }
 }

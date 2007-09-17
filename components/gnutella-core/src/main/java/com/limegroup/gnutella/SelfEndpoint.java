@@ -52,7 +52,7 @@ public class SelfEndpoint extends PushEndpoint {
      */
     @Override
     public int supportsFWTVersion() {
-        return networkManager.canDoFWT() ? UDPConnection.VERSION : 0;
+        return networkManager.supportsFWTVersion();
     }
 
     /**

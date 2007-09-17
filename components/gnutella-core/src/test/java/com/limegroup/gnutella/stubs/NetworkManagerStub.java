@@ -99,4 +99,9 @@ public class NetworkManagerStub implements NetworkManager {
         return null;
     }
 
+    public int supportsFWTVersion() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

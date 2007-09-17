@@ -101,15 +101,38 @@ public final class HostData {
     private final int FWT_VERSION;
 
     /** If the host supports TLS connections. */
-    private final boolean TLS_CAPABLE; 
+    private final boolean TLS_CAPABLE;
     
+    /** Constructs a HostData with all the given fields. */
+    public HostData(byte[] clientGuid, byte[] messageGuid, int speed, boolean firewalled,
+            boolean busy, boolean multicast, boolean chatEnabled, boolean browseHostEnabled,
+            boolean measuredSpeed, String ip, int port, int quality, String vendorCode,
+            Set<? extends IpPort> proxies, boolean canDoFw2Fw, int fwtVersion, boolean tlsCapable) {
+        this.CLIENT_GUID = clientGuid;
+        this.MESSAGE_GUID = messageGuid;
+        this.SPEED = speed;
+        this.FIREWALLED = firewalled;
+        this.BUSY = busy;
+        this.MULTICAST = multicast;
+        this.CHAT_ENABLED = chatEnabled;
+        this.BROWSE_HOST_ENABLED = browseHostEnabled;
+        this.MEASURED_SPEED = measuredSpeed;
+        this.IP = ip;
+        this.PORT = port;
+        this.QUALITY = quality;
+        this.VENDOR_CODE = vendorCode;
+        this.PROXIES = proxies;
+        this.CAN_DO_FWTRANSFER = canDoFw2Fw;
+        this.FWT_VERSION = fwtVersion;
+        this.TLS_CAPABLE = tlsCapable;
+    }
+         
 	/**
-	 * Constructs a new <tt>HostData</tt> instance from a 
-	 * <tt>QueryReply</tt>.
-	 *
-	 * @param reply the <tt>QueryReply</tt> instance from which
-	 *  host data should be extracted.
-	 */
+     * Constructs a new <tt>HostData</tt> instance from a <tt>QueryReply</tt>.
+     * 
+     * @param reply the <tt>QueryReply</tt> instance from which host data
+     *        should be extracted.
+     */
 	protected HostData(QueryReply reply, NetworkManager networkManager) {
 		CLIENT_GUID = reply.getClientGUID();
 		MESSAGE_GUID = reply.getGUID();
