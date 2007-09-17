@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.NIOSocket;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
@@ -74,14 +75,14 @@ public class TLSNIOSocket extends NIOSocket {
     @Override
     protected void initIncomingSocket() {
         super.initIncomingSocket();
-        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
+        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor(), NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
         tlsLayer.initialize(getRemoteSocketAddress(), SSLUtils.getTLSCipherSuites(), false, false);
     }
 
     @Override
     protected void initOutgoingSocket() throws IOException {
         super.initOutgoingSocket();
-        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
+        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor(), NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
     }
     
     
