@@ -85,7 +85,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private Object loaded = new Object();
     
     private SecurityToken _token; 
-
+   
 	/**
 	 * Constructs a new test instance for query replies.
 	 */
@@ -1417,6 +1417,51 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         }
     }        
     
+    /*
+     * a test to see if converting invalid characters from byte array to string and back would work
+     */
+    public void conversionTest() throws Exception {
+        
+        byte[] testByte = new byte[]{0x72,0x69,0x63,0x6B,0x20,0x72,0x6F,0x73,0x73,0x20,
+        (byte)0x96,0x20,0x61,0x6C,0x6C,0x20,0x77,0x68,0x69,
+        0x74,0x65,0x20,0x35,0x32,0x2E,0x77,0x6D,0x61};
+        
+        String name = new String(testByte, "UTF-8");
+        assertNotEquals(testByte.length, name.getBytes("UTF-8").length);
+        
+    }
+    
+    public void testParseResults() throws Exception{
+        
+        /*
+         * a test to see if converting invalid characters from byte array to string and back would work
+         */
+        conversionTest();
+        
+        byte[] payload = {1, // number of responses
+                          0x12, 0x12, //port
+                          0x12, 0x12, 0x12, 0x12, //ip address
+                          0x12, 0x12, 0x12, 0x12, //speed
+                          0x12, 0x12, 0x12, 0x12, //file index
+                          0x12, 0x12, 0x12, 0x12, //file size
+                          0x72,0x69,0x63,0x6B,0x20,0x72,0x6F,0x73,0x73,0x20,
+                          (byte)0x96,0x20,0x61,0x6C,0x6C,0x20,0x77,0x68,0x69,
+                          0x74,0x65,0x20,0x35,0x32,0x2E,0x77,0x6D,0x61, 0x00, //file name - zero terminated
+                          0x00,
+                          0x72,0x69,0x63,0x6B,0x20,0x72,0x6F,0x73,0x72,0x69,0x63,0x6B,0x20,0x72,0x6F,0x73 // servant GUID
+                };
+      
+        QueryReply newReply = ProviderHacks.getQueryReplyFactory().createFromNetwork(new byte[16], (byte)1,
+                (byte)1, payload);
+               
+        assertEquals(1, newReply.getResultCount());
+        assertEquals(1, newReply.getUniqueResultCount());
+        
+        Response response = newReply.getResultsArray()[0];
+        assertEquals(28 /* length of invalid unicode */ + 2 /* zero bytes */ + 8 /* index + size */, response.getIncomingLength());
+        assertNotEquals(28, response.getName().getBytes("UTF-8").length);
+    }
+  
     @SuppressWarnings("all") // DPINJ: textfix
     private class FManCallback extends ActivityCallbackStub {
         public void fileManagerLoaded() {

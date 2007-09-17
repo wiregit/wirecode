@@ -23,7 +23,7 @@ public interface ResponseFactory {
      */
     public Response createResponse(long index, long size, String name,
             LimeXMLDocument doc);
-
+    
     /**
      * Constructs a new <tt>Response</tt> instance from the data in the
      * specified <tt>FileDesc</tt>.

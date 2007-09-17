@@ -662,12 +662,12 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         short uniqueURNs = 0;
         try {
             InputStream bais = 
-                new ByteArrayInputStream(_payload,i,_payload.length-i);
+                new ByteArrayInputStream(_payload,i,_payload.length-i);             
             //For each record...
             for ( ; left > 0; left--) {
                 Response r = responseFactory.createFromStream(bais);
                 responses[responses.length-left] = r;
-                i+=r.getLength();
+                i+=r.getIncomingLength();
                 
                 if (r.getUrns().isEmpty())
                     uniqueURNs++;
