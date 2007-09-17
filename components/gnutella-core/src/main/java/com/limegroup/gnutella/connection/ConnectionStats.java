@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.connection;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.limewire.collection.Buffer;
-import org.limewire.statistic.StatsUtils;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -57,9 +56,9 @@ public class ConnectionStats {
     private volatile int _lastSent;
     private volatile int _lastSentDropped;
     
-    private final Buffer<Integer> responsesPerReply = new Buffer<Integer>(200);
-    private final Buffer<Integer> altsPerResponse = new Buffer<Integer>(200);
-    private final Buffer<Integer> altsPerReply = new Buffer<Integer>(200);
+    private final Buffer<Byte> responsesPerReply = new Buffer<Byte>(50);
+    private final Buffer<Byte> altsPerResponse = new Buffer<Byte>(50);
+    private final Buffer<Short> altsPerReply = new Buffer<Short>(50);
     
     // Getters.
     public int getSent()  { return _numMessagesSent; }
@@ -94,7 +93,7 @@ public class ConnectionStats {
     
     public void replyReceived(QueryReply r) {
         // parse reply outside of lock
-        int count = r.getUniqueResultCount();
+        byte count = (byte) r.getUniqueResultCount();
         List<Response> responses;
         try {
             responses = r.getResultsAsList();
@@ -104,9 +103,9 @@ public class ConnectionStats {
         
         synchronized(this) {
             responsesPerReply.add(count);
-            int total = 0;
+            short total = 0;
             for (Response resp : responses) {
-                int resps = resp.getLocations().size();
+                byte resps = (byte) resp.getLocations().size();
                 altsPerResponse.add(resps);
                 total += resps;
             }
@@ -157,18 +156,19 @@ public class ConnectionStats {
         m.put("nps",queriesSent);
         synchronized(this) {
             m.put("nqr",repliesReceived);
-            List<Double> resps = new ArrayList<Double>(responsesPerReply.size());
-            List<Double> alts = new ArrayList<Double>(altsPerResponse.size());
-            List<Double> altsReply = new ArrayList<Double>(altsPerReply.size());
-            for (int i : responsesPerReply)
-                resps.add((double)i);
-            for (int i : altsPerResponse)
-                alts.add((double)i);
-            for (int i : altsPerReply)
-                altsReply.add((double)i);
-            m.put("respreply", StatsUtils.quickStatsDouble(resps).getMap());
-            m.put("altresp", StatsUtils.quickStatsDouble(alts).getMap());
-            m.put("altreply", StatsUtils.quickStatsDouble(altsReply).getMap());
+            byte [] resps = new byte[responsesPerReply.size()];
+            byte [] alts = new byte[altsPerResponse.size()];
+            byte [] altsReply = new byte[altsPerReply.size() * 2];
+            for (int i = 0; i < responsesPerReply.size(); i++)
+                resps[i] = responsesPerReply.get(i);
+            for (int i = 0; i < altsPerResponse.size(); i++)
+                alts[i] = altsPerResponse.get(i);
+            for (int i = 0; i < altsPerReply.size(); i++)
+                ByteOrder.short2leb(altsPerReply.get(i), altsReply, i * 2);
+            
+            m.put("respreply", responsesPerReply); // 50 bytes 
+            m.put("altresp", altsPerResponse); // 50 bytes
+            m.put("altreply", altsPerReply); // 100 bytes
         }
     }
 }
