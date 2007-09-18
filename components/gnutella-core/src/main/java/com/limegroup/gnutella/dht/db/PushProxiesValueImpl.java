@@ -78,8 +78,8 @@ class PushProxiesValueImpl extends AbstractPushProxiesValue {
         this.fwtVersion = fwtVersion;
         this.port = port;
         this.proxies = proxies;
-        this.data = AbstractPushProxiesValue.serialize(this);
         this.tlsInfo = AbstractPushProxiesValue.getNumbersFromProxies(proxies);
+        this.data = AbstractPushProxiesValue.serialize(this);
     }
     
     public PushProxiesValueImpl(Version version, byte[] data) throws DHTValueException {
