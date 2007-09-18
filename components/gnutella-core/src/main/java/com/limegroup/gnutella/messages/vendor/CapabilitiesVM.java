@@ -202,7 +202,7 @@ public final class CapabilitiesVM extends VendorMessage {
 
     /** Container for vector elements.
      */  
-    static class SupportedMessageBlock {
+    public static class SupportedMessageBlock {
         final byte[] _capabilityName;
         final int _version;
         final int _hashCode;

@@ -50,7 +50,8 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
     /**
      * Adds all supported capabilities to the given set.
      */
-    private Set<CapabilitiesVM.SupportedMessageBlock> getSupportedMessages() {
+    // protected for testing
+    protected Set<CapabilitiesVM.SupportedMessageBlock> getSupportedMessages() {
         Set<CapabilitiesVM.SupportedMessageBlock> supported = new HashSet<CapabilitiesVM.SupportedMessageBlock>();
 
         CapabilitiesVM.SupportedMessageBlock smb = null;
