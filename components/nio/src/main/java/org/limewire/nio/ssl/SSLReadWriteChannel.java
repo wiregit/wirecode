@@ -194,10 +194,9 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             }
 
             int read = -1;
-            int oldPosition = readIncoming.position();
             while(readIncoming.hasRemaining() && (read = readSink.read(readIncoming)) > 0);
             // if we last read EOF & nothing was put in sourceBuffer, EOF
-            if(read == -1 && readIncoming.position() == oldPosition) {
+            if(read == -1 && readIncoming.position() == 0) {
                 LOG.debug("Read EOF, no data to transfer.  Connection finished");
                 return -1;
             }
@@ -254,7 +253,12 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             // If we were unable to interpret this packet because not enough was
             // read, then we must exit and wait for more to be read later.
             if(status == Status.BUFFER_UNDERFLOW) {
-                return transferred;
+                if(transferred == 0 && read == -1) {
+                    LOG.debug("Read EOF & underflow when unwrapping.  Connection finished");
+                    return -1;
+                } else {
+                    return transferred;
+                }
             }
             
             // If the engine is closed and nothing was transferred,
