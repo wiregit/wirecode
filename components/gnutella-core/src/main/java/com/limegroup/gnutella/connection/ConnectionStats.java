@@ -166,9 +166,9 @@ public class ConnectionStats {
             for (int i = 0; i < altsPerReply.size(); i++)
                 ByteOrder.short2leb(altsPerReply.get(i), altsReply, i * 2);
             
-            m.put("respreply", responsesPerReply); // 50 bytes 
-            m.put("altresp", altsPerResponse); // 50 bytes
-            m.put("altreply", altsPerReply); // 100 bytes
+            m.put("respreply", resps); // 50 bytes 
+            m.put("altresp", alts); // 50 bytes
+            m.put("altreply", altsReply); // 100 bytes
         }
     }
 }
