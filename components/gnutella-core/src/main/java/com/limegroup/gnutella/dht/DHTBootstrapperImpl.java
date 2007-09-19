@@ -283,13 +283,13 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     }
 
     /**
-     * Gets the SIMPP host responsible for the keyspace containing the local node ID
+     * Gets the SIMPP host responsible for the keyspace containing the local node ID.
      * 
-     * package access for testing only
+     * Non-private for testing.
      * 
      * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
-    SocketAddress getSimppHost(){
+    SocketAddress getSimppHost() {
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
         List<SocketAddress> list = new ArrayList<SocketAddress>(simppHosts.length);
 
@@ -326,6 +326,21 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         //now map to hostlist size
         int index = (int)((list.size()/16f) * localPrefix);
         return list.get(index);
+    }
+    
+    /** For testing. */
+    boolean isBootstrappingFromRouteTable() {
+        return fromRouteTable;
+    }
+    
+    /** For testing. */
+    DHTFuture<PingResult> getPingFuture() {
+        return pingFuture;
+    }
+    
+    /** For testing */
+    DHTFuture<BootstrapResult> getBootstrapFuture() {
+        return bootstrapFuture;
     }
     
     /**

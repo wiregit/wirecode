@@ -16,7 +16,8 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -42,7 +43,11 @@ public class DHTBootstrapperTest extends DHTTestCase {
     protected void setUp() throws Exception {
         setSettings();
         MojitoDHT dht = MojitoFactory.createDHT();
-        bootstrapper = (DHTBootstrapperImpl)ProviderHacks.getDHTBootstrapperFactory().createBootstrapper(new DHTControllerStub(dht, DHTMode.ACTIVE));
+        
+        Injector injector = LimeTestUtils.createInjector();
+        
+        DHTBootstrapperFactory dhtBootstrapperFactory = injector.getInstance(DHTBootstrapperFactory.class);
+        bootstrapper = (DHTBootstrapperImpl)dhtBootstrapperFactory.createBootstrapper(new DHTControllerStub(dht, DHTMode.ACTIVE));
         dhtContext = (Context)dht;
         dhtContext.bind(new InetSocketAddress(2000));
         dhtContext.start();
@@ -59,17 +64,18 @@ public class DHTBootstrapperTest extends DHTTestCase {
         fillRoutingTable(dhtContext.getRouteTable(), 2);
         //should be bootstrapping from routing table
         bootstrapper.bootstrap();
-        DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
+        DHTFuture future = bootstrapper.getPingFuture();
         Thread.sleep(300);
-        assertTrue((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
+        assertTrue(bootstrapper.isBootstrappingFromRouteTable());
         
         // Now emulate reception of a DHT node from the Gnutella network
         bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertTrue("ping future should be cancelled", future.isCancelled());
         
         Thread.sleep(200);
-        future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
+        future = bootstrapper.getBootstrapFuture();
         assertFalse("Should not be waiting", bootstrapper.isWaitingForNodes());
+        assertNotNull(future);
         
         //should be bootstrapping
         assertTrue(dhtContext.isBootstrapping() || dhtContext.isBootstrapped());
@@ -92,9 +98,9 @@ public class DHTBootstrapperTest extends DHTTestCase {
         Thread.sleep(100);
         assertTrue("Should be waiting", bootstrapper.isWaitingForNodes());
         bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",5000));
-        Future future = (Future)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
+        Future future = bootstrapper.getPingFuture();
         assertNotNull("Should be pinging", future);
-        assertFalse((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
+        assertFalse(bootstrapper.isBootstrappingFromRouteTable());
         Thread.sleep(100);
         //now add other host: it should not cancel the previous attempt
         bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",6000));
