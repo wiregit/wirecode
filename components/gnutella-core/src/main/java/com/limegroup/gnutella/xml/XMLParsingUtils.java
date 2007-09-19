@@ -7,7 +7,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,9 +22,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 
 
 /**
@@ -166,6 +167,10 @@ public class XMLParsingUtils {
             } 
             
             int attributesLength = attributes.getLength();
+            
+            //convert prefix to lower case to prevent capitalized tags from appearing
+            _result.canonicalKeyPrefix = _result.canonicalKeyPrefix.toLowerCase(Locale.US);
+            
             if(attributesLength > 0) {
                 Map<String, String> attributeMap = new HashMap<String, String>(attributesLength);
                 for(int i = 0; i < attributesLength; i++) {
