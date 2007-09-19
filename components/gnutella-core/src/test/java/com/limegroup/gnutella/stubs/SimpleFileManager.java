@@ -2,6 +2,8 @@ package com.limegroup.gnutella.stubs;
 
 import java.io.File;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerController;
@@ -13,8 +15,10 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A file manager that behaves exactly like FileManager would if
  * MetaFileManager didn't exist.
  */
+@Singleton
 public class SimpleFileManager extends FileManager {
     
+    @Inject
     public SimpleFileManager(FileManagerController fileManagerController) {
         super(fileManagerController);
     }
