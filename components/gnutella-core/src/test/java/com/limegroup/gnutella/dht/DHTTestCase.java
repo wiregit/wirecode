@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -16,7 +14,6 @@ import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
 import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -25,13 +22,13 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public abstract class DHTTestCase extends LimeTestCase {
     
-    protected static final int PORT = 6667;
-    
-    protected static MojitoDHT BOOTSTRAP_DHT;
-    
     protected static final int BOOTSTRAP_DHT_PORT = 3000;
     
-    protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
+    protected static final int PORT = 6667;
+    
+    private boolean bootstrapped = false;
+    
+    //protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
 
     // DPINJ: remove
     protected static boolean startDHT = true;
@@ -40,18 +37,20 @@ public abstract class DHTTestCase extends LimeTestCase {
         super(name);
     }
     
-    public static void globalSetUp() throws Exception {
-        if (startDHT) {
-            startServices(ProviderHacks.getLifecycleManager());
-        }
-    }
+//    public static void globalSetUp() throws Exception {
+//        if (startDHT) {
+//            startServices(ProviderHacks.getLifecycleManager());
+//        }
+//    }
     
-    protected static void startServices(LifecycleManager lifeCycleManager) throws Exception {
+    protected MojitoDHT startBootstrapDHT(LifecycleManager lifeCycleManager) throws Exception {
+        assertFalse("bootstrap DHT already started", bootstrapped);
+        bootstrapped = true;
+        
         // setup bootstrap node
-        BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
-        BOOTSTRAP_DHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
-        BOOTSTRAP_DHT.start();
-        DHT_LIST.add(BOOTSTRAP_DHT);
+        MojitoDHT bootstrapDHT = MojitoFactory.createDHT("bootstrapNode");
+        bootstrapDHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
+        bootstrapDHT.start();
         
         ConnectionSettings.PORT.setValue(PORT);
         ConnectionSettings.FORCED_PORT.setValue(PORT);
@@ -60,6 +59,8 @@ public abstract class DHTTestCase extends LimeTestCase {
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         lifeCycleManager.start();
+        
+        return bootstrapDHT;
     }
     
     protected void setSettings() {
@@ -94,14 +95,14 @@ public abstract class DHTTestCase extends LimeTestCase {
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
     }
     
-    public static void globalTearDown() throws Exception {
-        if (startDHT) {
-            close(DHT_LIST);
-        }
-        
-        DHT_LIST.clear();
-        BOOTSTRAP_DHT = null;
-    }
+//    public static void globalTearDown() throws Exception {
+//        if (startDHT) {
+//            close(DHT_LIST);
+//        }
+//        
+//        DHT_LIST.clear();
+//        BOOTSTRAP_DHT = null;
+//    }
 
     protected void fillRoutingTable(RouteTable rt, int numNodes) {
         for(int i = 0; i < numNodes; i++) {

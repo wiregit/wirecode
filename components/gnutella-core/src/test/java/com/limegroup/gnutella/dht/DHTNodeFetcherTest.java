@@ -17,6 +17,7 @@ import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -52,11 +53,8 @@ public class DHTNodeFetcherTest extends DHTTestCase {
 
     private MessageFactory messageFactory;
 
-    // DPINJ: remove
-    static {
-        startDHT = false;
-    }
-    
+    private MojitoDHT bootstrapDHT;
+
     public DHTNodeFetcherTest(String name) {
         super(name);
     }
@@ -96,14 +94,12 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         dhtNodeFetcherFactory = injector.getInstance(DHTNodeFetcherFactory.class);        
         messageFactory = injector.getInstance(MessageFactory.class);
         
-        startServices(injector.getInstance(LifecycleManager.class));
+        bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
     }
 
     @Override
     protected void tearDown() throws Exception {
-        if (BOOTSTRAP_DHT != null) {
-            BOOTSTRAP_DHT.close();
-        }
+        bootstrapDHT.close();
         LimeTestUtils.waitForNIO();
     }
     

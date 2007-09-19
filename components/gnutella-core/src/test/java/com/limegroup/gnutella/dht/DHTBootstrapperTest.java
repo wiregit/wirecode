@@ -17,6 +17,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -26,6 +27,8 @@ public class DHTBootstrapperTest extends DHTTestCase {
     private static Context dhtContext;
     
     private DHTBootstrapperImpl bootstrapper;
+
+    private MojitoDHT bootstrapDHT;
     
     public DHTBootstrapperTest(String name) {
         super(name);
@@ -45,6 +48,8 @@ public class DHTBootstrapperTest extends DHTTestCase {
         MojitoDHT dht = MojitoFactory.createDHT();
         
         Injector injector = LimeTestUtils.createInjector();
+
+        bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
         
         DHTBootstrapperFactory dhtBootstrapperFactory = injector.getInstance(DHTBootstrapperFactory.class);
         bootstrapper = (DHTBootstrapperImpl)dhtBootstrapperFactory.createBootstrapper(new DHTControllerStub(dht, DHTMode.ACTIVE));
@@ -58,6 +63,8 @@ public class DHTBootstrapperTest extends DHTTestCase {
         bootstrapper.stop();
         dhtContext.getRouteTable().clear();
         dhtContext.close();
+        
+        bootstrapDHT.close();
     }
     
     public void testAddBootstrapHost() throws Exception{
@@ -69,7 +76,7 @@ public class DHTBootstrapperTest extends DHTTestCase {
         assertTrue(bootstrapper.isBootstrappingFromRouteTable());
         
         // Now emulate reception of a DHT node from the Gnutella network
-        bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
+        bootstrapper.addBootstrapHost(bootstrapDHT.getContactAddress());
         assertTrue("ping future should be cancelled", future.isCancelled());
         
         Thread.sleep(200);

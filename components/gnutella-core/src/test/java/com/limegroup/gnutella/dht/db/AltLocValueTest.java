@@ -1,22 +1,22 @@
 package com.limegroup.gnutella.dht.db;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.security.TigerTree;
 
-@SuppressWarnings("null")
 public class AltLocValueTest extends DHTTestCase {
     
+    private AltLocValueFactoryImpl altLocValueFactory;
+
     public AltLocValueTest(String name) {
         super(name);
     }
@@ -29,13 +29,19 @@ public class AltLocValueTest extends DHTTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void testSerializationVersionZero() {
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        altLocValueFactory = (AltLocValueFactoryImpl) injector.getInstance(AltLocValueFactory.class);
+    }
+    
+    
+    public void testSerializationVersionZero() throws Exception {
         byte[] guid = GUID.makeGuid();
         int port = 1234;
         boolean firewalled = true;
         
-        AltLocValue value1 = new AltLocValueFactoryImpl(ProviderHacks.getNetworkManager(), ProviderHacks.getApplicationServices()).createAltLocValue(
-                Version.ZERO, guid, port, -1L, null, firewalled);
+        AltLocValue value1 = altLocValueFactory.createAltLocValue(Version.ZERO, guid, port, -1L, null, firewalled);
         
         assertEquals(guid, value1.getGUID());
         assertEquals(port, value1.getPort());
@@ -43,22 +49,13 @@ public class AltLocValueTest extends DHTTestCase {
         
         // Serialize it
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            value1.write(baos);
-        } catch (IOException err) {
-            fail("IOException", err);
-        }
+        value1.write(baos);
         
         // Get the raw bytes
         byte[] serialized = baos.toByteArray();
         
         // De-serialize it
-        AltLocValue value2 = null;
-        try {
-            value2 = ProviderHacks.getAltLocValueFactory().createFromData(Version.ZERO, serialized);
-        } catch (DHTValueException err) {
-            fail("DHTValueException", err);
-        }
+        AltLocValue value2 = altLocValueFactory.createFromData(Version.ZERO, serialized);
         
         // Should be the same
         assertEquals(value1.getGUID(), value2.getGUID());
@@ -68,7 +65,7 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(value1.isFirewalled(), value2.isFirewalled());
     }
     
-    public void testSerializationVersionOne() {
+    public void testSerializationVersionOne() throws Exception {
         byte[] guid = GUID.makeGuid();
         int port = 1234;
         long fileSize = 334455;
@@ -78,7 +75,7 @@ public class AltLocValueTest extends DHTTestCase {
         Random random = new Random();
         random.nextBytes(ttroot);
         
-        AltLocValue value1 = new AltLocValueFactoryImpl(ProviderHacks.getNetworkManager(), ProviderHacks.getApplicationServices()).createAltLocValue(
+        AltLocValue value1 = altLocValueFactory.createAltLocValue(
             AbstractAltLocValue.VERSION_ONE, guid, port, fileSize, ttroot, firewalled);
         
         assertEquals(guid, value1.getGUID());
@@ -87,22 +84,13 @@ public class AltLocValueTest extends DHTTestCase {
         
         // Serialize it
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            value1.write(baos);
-        } catch (IOException err) {
-            fail("IOException", err);
-        }
+        value1.write(baos);
         
         // Get the raw bytes
         byte[] serialized = baos.toByteArray();
         
         // De-serialize it
-        AltLocValue value2 = null;
-        try {
-            value2 = ProviderHacks.getAltLocValueFactory().createFromData(AbstractAltLocValue.VERSION_ONE, serialized);
-        } catch (DHTValueException err) {
-            fail("DHTValueException", err);
-        }
+        AltLocValue value2 = altLocValueFactory.createFromData(AbstractAltLocValue.VERSION_ONE, serialized);
         
         // Should be the same
         assertEquals(value1.getGUID(), value2.getGUID());
@@ -113,12 +101,7 @@ public class AltLocValueTest extends DHTTestCase {
         
         // De-serialize it but do as if it's a Version 0 value!
         // The File size and TigerTree root hash should be missing!
-        AltLocValue value3 = null;
-        try {
-            value3 = ProviderHacks.getAltLocValueFactory().createFromData(Version.ZERO, serialized);
-        } catch (DHTValueException err) {
-            fail("DHTValueException", err);
-        }
+        AltLocValue value3 = altLocValueFactory.createFromData(Version.ZERO, serialized);
         
         // Should be the same
         assertEquals(value1.getGUID(), value3.getGUID());
