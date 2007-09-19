@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
@@ -20,11 +23,17 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A simple FileManager that shares one file of (near) infinite length.
  */
 @SuppressWarnings("unchecked")
+@Singleton
 public class FileManagerStub extends FileManager {
 
 	private Map _urns,_files;
     private List _descs;
     private FileDescStub fdStub = new FileDescStub();
+    
+    @Inject
+    public FileManagerStub(FileManagerController fileManagerController) {
+        super(fileManagerController);
+    }
     
     public final static URN NOT_HAVE;
     
@@ -75,6 +84,14 @@ public class FileManagerStub extends FileManager {
     
     public boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
         return true;
+    }
+    
+    public void setUrns(Map urns) {
+        this._urns = urns;
+    }
+    
+    public void setDescs(List descs) {
+        this._descs = descs;
     }
     
     public FileManagerStub(Map urns,List descs) {

@@ -1,12 +1,14 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.inject.Providers;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.TorrentManager;
@@ -19,8 +21,10 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 
+@Singleton
 public class DownloadManagerStub extends DownloadManager {
     
+
     // DPINJ: remove me
     public DownloadManagerStub() {
         super(ProviderHacks.getNetworkManager(), ProviderHacks
@@ -97,5 +101,18 @@ public class DownloadManagerStub extends DownloadManager {
         synchronized(pump) {
             pump.notifyAll();
         }
+    }
+    
+    private Set<URN> activelyDownloadingSet;
+    public void setActivelyDownloadingSet(Set<URN> activelyDownloadingSet) {
+        this.activelyDownloadingSet = activelyDownloadingSet;
+    }
+
+    @Override
+    public boolean isActivelyDownloading(URN urn) {
+        if(activelyDownloadingSet != null)
+            return activelyDownloadingSet.contains(urn);
+        else
+            return super.isActivelyDownloading(urn);
     }
 }

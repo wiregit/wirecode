@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.limewire.security.SecurityToken;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HackMessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
@@ -15,6 +16,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 /** A stub for MessageRouter that does nothing. */
 @SuppressWarnings("unchecked")
+@Singleton
 public class MessageRouterStub extends HackMessageRouter {
     
     

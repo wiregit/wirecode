@@ -2,9 +2,11 @@ package com.limegroup.gnutella.stubs;
 
 import java.io.IOException;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 
+@Singleton
 public class NetworkManagerStub implements NetworkManager {
     private boolean acceptedIncomingConnection;    
 

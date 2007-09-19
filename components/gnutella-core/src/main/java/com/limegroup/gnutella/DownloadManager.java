@@ -80,6 +80,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
  * serialized.  
  */
 @Singleton
+// TODO: make a DownloadManager interface, for easier testing
 public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);

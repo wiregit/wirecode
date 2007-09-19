@@ -4,6 +4,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,25 +16,36 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.ManagedConnectionStub;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.PushEndpointCacheImpl;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -53,34 +65,30 @@ import de.vdheide.mp3.ByteOrder;
 @SuppressWarnings({"unchecked", "unused", "null"})
 public class HeadTest extends LimeTestCase {
 
-	/**
-	 * keep a file manager which shares one complete file and one incomplete file
-	 */
-	private FileManagerStub _fm;
-    private UploadManagerStub _um;
-    private NetworkManagerStub networkManager;
-    private HeadPongFactory headPongFactory;
 	
 	/**
 	 * URNs for the 3 files that will be requested
 	 */
-    private static URN _haveFull,_notHave,_havePartial, _tlsURN, _largeURN;
+    private  URN _haveFull,_notHave,_havePartial, _tlsURN, _largeURN;
 	
 	/**
 	 * file descs for the partial and complete files
 	 */
-    private static IncompleteFileDescStub _partial, _partialLarge;
-    private static FileDescStub _complete;
+    private IncompleteFileDescStub _partial, _partialLarge;
+    private FileDescStub _complete;
 	/**
 	 * an interval that can fit in a packet, and one that can't
 	 */
-    private static IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig, _rangesLarge, _rangesOnlyLarge;
+    private IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig, _rangesLarge, _rangesOnlyLarge;
 	
-    private static PushEndpoint pushCollectionPE, tlsCollectionPE;
+    private PushEndpoint pushCollectionPE, tlsCollectionPE;
     
-    private static RemoteFileDesc blankRFD;
+    private RemoteFileDesc blankRFD;
 	
+    private HeadPongFactory headPongFactory;
 	
+    private Injector injector;
+    
 	public HeadTest(String name) {
 		super(name);
 	}
@@ -89,37 +97,31 @@ public class HeadTest extends LimeTestCase {
 		return buildTestSuite(HeadTest.class);
 	}
 	
-	/**
-	 * sets up the testing environment for the UDPHeadPong.
-	 * two files are shared - _complete and _incomplete
-	 * _complete has altlocs _altlocCollectionComplete
-	 * _incomplete has altlocs _altlocCollectionIncomplete
-	 * _incomplete has available ranges _ranges
-	 * 
-	 * @throws Exception
-	 */
-	public static void globalSetUp() throws Exception{
-	    
+	
+	public void setUp() throws Exception {
 	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 	    
-	    MessageRouterStub mrStub = new MessageRouterStub();
+	    injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(MessageRouter.class).to(MessageRouterStub.class);
+                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+                bind(NetworkManager.class).to(NetworkManagerStub.class);
+                bind(UploadManager.class).to(UploadManagerStub.class);
+                bind(FileManager.class).to(FileManagerStub.class);
+                bind(DownloadManager.class).to(DownloadManagerStub.class);
+            }
+	    });
 	    
-	   // PrivilegedAccessor.setValue(RouterService.class,"messageRouter",mrStub);
+	    headPongFactory = injector.getInstance(HeadPongFactory.class);
 	    
-	    ManagedConnectionStub mStub = new ManagedConnectionStub();
-	    final Set conns = new HashSet();
-	    conns.add(mStub);
+	    NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+	    networkManager.setAcceptedIncomingConnection(true);
 	    
-	    ConnectionManagerStub cmStub = new ConnectionManagerStub() {
-	        public Set getPushProxies() {
-	            return conns;
-	        }
-	    };
+	    ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
+	    connectionManager.setPushProxies(new HashSet<Connectable>(Collections.singletonList(new ConnectableImpl("1.2.3.4", 6346, false))));
 	    
-	  //  PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-		//PrivilegedAccessor.setValue(RouterService.class,"acceptor", new AcceptorStub());
-		
-		int base=0;
+	    int base=0;
 		_ranges = new IntervalSet();
 		for (int i=2;i<10;i++) {
 			int low = base;
@@ -171,10 +173,8 @@ public class HeadTest extends LimeTestCase {
             }
         };
         _partialLarge.setRangesByte(_rangesLarge.toBytes());
-		_complete = new FileDescStub("complete",_haveFull,2);		
-    }
-    
-    public void setUp() throws Exception {
+		_complete = new FileDescStub("complete",_haveFull,2);
+		
         Map urns = new HashMap();
         urns.put(_havePartial,_partial);
         urns.put(_haveFull,_complete);
@@ -184,14 +184,13 @@ public class HeadTest extends LimeTestCase {
         descs.add(_complete);
         descs.add(_partialLarge);
         
-        _um = new UploadManagerStub();
-        _fm = new FileManagerStub(urns,descs);
-        networkManager = new NetworkManagerStub();
-        headPongFactory = new HeadPongFactoryImpl(networkManager, Providers.of((UploadManager) _um), Providers.of((FileManager) _fm), Providers.of(ProviderHacks.getAltLocManager()), ProviderHacks.getPushEndpointFactory(), Providers.of(ProviderHacks.getDownloadManager()));
+        FileManagerStub fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
+        fileManager.setUrns(urns);
+        fileManager.setDescs(descs);
         
-        assertEquals(_partial,_fm.getFileDescForUrn(_havePartial));
-        assertEquals(_partialLarge,_fm.getFileDescForUrn(_largeURN));
-        assertEquals(_complete,_fm.getFileDescForUrn(_haveFull));
+        assertEquals(_partial,fileManager.getFileDescForUrn(_havePartial));
+        assertEquals(_partialLarge,fileManager.getFileDescForUrn(_largeURN));
+        assertEquals(_complete,fileManager.getFileDescForUrn(_haveFull));
         
         
         blankRFD = new RemoteFileDesc("1.1.1.1", 1, 1, "file", 1, new byte[16], 1, false, -1, false, null, null, false, false, null, null, -1, false);
@@ -207,16 +206,14 @@ public class HeadTest extends LimeTestCase {
         assertEquals(0, blankRFD.getPushProxies().size());
         assertEquals(Integer.MAX_VALUE, blankRFD.getQueueStatus());
         
-        // Get a fresh environment for each test
-        ((Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP")).clear();
-        ProviderHacks.getAltLocManager().purge();
         createCollections();
         
         PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", HeadPongFactoryImpl.DEFAULT_PACKET_SIZE);
     }
     
     private void clearStoredProxies() throws Exception {
-        ((Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP")).clear();
+        PushEndpointCache pushEndpointCache = injector.getInstance(PushEndpointCache.class);
+        pushEndpointCache.clear();
     }
     
 	/**
@@ -257,8 +254,8 @@ public class HeadTest extends LimeTestCase {
 	 * behind firewall or open.
 	 */
 	public void testFirewalledNoAcceptedIncoming() throws Exception {
+	    NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
 	    networkManager.setAcceptedIncomingConnection(false);
-		assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 		
 		HeadPing ping = new HeadPing(_haveFull);
 		HeadPing pingi = new HeadPing(_havePartial);
@@ -285,8 +282,8 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testFirewalledAcceptedIncoming() throws Exception {
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         networkManager.setAcceptedIncomingConnection(true);
-		assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 		
 		HeadPing ping = new HeadPing(_haveFull);
         HeadPing pingi = new HeadPing(_havePartial);
@@ -316,8 +313,8 @@ public class HeadTest extends LimeTestCase {
 	 * tests whether the downloading flag is set properly.
 	 */
 	public void testActivelyDownloading() throws Exception {
-	    // DPINJ this was moved to DownloadManager
-		//_partial.setActivelyDownloading(true);
+	    DownloadManagerStub downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+	    downloadManager.setActivelyDownloadingSet(_partial.getUrns());
 		HeadPing ping = new HeadPing(_havePartial);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
@@ -326,8 +323,8 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testNotActivelyDownloading() throws Exception {
-        // DPINJ this was moved to DownloadManager
-		//_partial.setActivelyDownloading(false);
+        DownloadManagerStub downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+        downloadManager.setActivelyDownloadingSet(URN.NO_URN_SET);
         HeadPing ping = new HeadPing(_havePartial);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
@@ -416,8 +413,9 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testQueueStatusSomeTaken() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);     
-        _um.setUploadsInProgress(10);
+        uploadManager.setUploadsInProgress(10);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
@@ -428,8 +426,9 @@ public class HeadTest extends LimeTestCase {
     }
 		
     public void testQueueStatusSomeQueued() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);
-        _um.setNumQueuedUploads(5);
+        uploadManager.setNumQueuedUploads(5);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);
@@ -440,9 +439,10 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testQueueStatusAllTakenNoneQueued() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);
-        _um.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
-        _um.setNumQueuedUploads(0);
+        uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
+        uploadManager.setNumQueuedUploads(0);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);    
@@ -453,14 +453,15 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testQueueStatusBusy() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);
-        _um.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
-        _um.setNumQueuedUploads(0);
+        uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
+        uploadManager.setNumQueuedUploads(0);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
         pong = reparse(pong);  
 		
-		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+		uploadManager.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		pong = reparse(headPongFactory.create(ping));
 		assertGreaterThanOrEquals(0x7F,pong.getQueueStatus());
         pong.updateRFD(blankRFD);
@@ -695,55 +696,59 @@ public class HeadTest extends LimeTestCase {
     }
 	
 	private HeadPong reparse(HeadPong original) throws Exception{
+	    MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		original.write(baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		return (HeadPong) ProviderHacks.getMessageFactory().read(bais);
+		return (HeadPong) messageFactory.read(bais);
 	}
     
     /** Constructs a new HeadPing exactly the same, but with a different version. */
     private HeadPing reversion(HeadPing ping, short version) throws Exception {
+        MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ping.write(baos);
         byte[] out = baos.toByteArray();
         ByteOrder.short2leb(version, out, 29); // location of the version of a VM
-        HeadPing p2 = (HeadPing)ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(out));
+        HeadPing p2 = (HeadPing)messageFactory.read(new ByteArrayInputStream(out));
         assertEquals(version, p2.getVersion());
         return p2;
     }
 	
 	private void  createCollections() throws Exception{
+	    AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+	    AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 		for(int i=0;i<10;i++ ) {
-            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234",_haveFull);
-            ProviderHacks.getAltLocManager().add(al, null);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234",_haveFull);
+            altLocManager.add(al, null);
 		}
-        AlternateLocationCollection col = ProviderHacks.getAltLocManager().getDirect(_haveFull);
+        AlternateLocationCollection col = altLocManager.getDirect(_haveFull);
         assertEquals("failed to set test up", 10, col.getAltLocsSize());
         
 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3."+i+":1234",_havePartial);
-            ProviderHacks.getAltLocManager().add(al, null);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234",_havePartial);
+            altLocManager.add(al, null);
 		}
-        col = ProviderHacks.getAltLocManager().getDirect(_havePartial);
+        col = altLocManager.getDirect(_havePartial);
         assertEquals("failed to set test up", 10, col.getAltLocsSize());
         
         
         //add some push altlocs to the incomplete collection        
         GUID guid = new GUID(GUID.makeGuid());		
-        PushAltLoc firewalled = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(guid.toHexString()+";1.2.3.4:5",_havePartial);
+        PushAltLoc firewalled = (PushAltLoc)alternateLocationFactory.create(guid.toHexString()+";1.2.3.4:5",_havePartial);
         firewalled.updateProxies(true);
 		pushCollectionPE = firewalled.getPushAddress();
-        ProviderHacks.getAltLocManager().add(firewalled, null);
-        col = ProviderHacks.getAltLocManager().getPushNoFWT(_havePartial);
+		altLocManager.add(firewalled, null);
+        col = altLocManager.getPushNoFWT(_havePartial);
         assertEquals(1, col.getAltLocsSize());
         
         GUID g = new GUID();
-        PushAltLoc tls = (PushAltLoc)ProviderHacks.getAlternateLocationFactory().create(g.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", _tlsURN);
+        PushAltLoc tls = (PushAltLoc)alternateLocationFactory.create(g.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", _tlsURN);
         tls.updateProxies(true);
         tlsCollectionPE = tls.getPushAddress();
-        ProviderHacks.getAltLocManager().add(tls, null);
-        col = ProviderHacks.getAltLocManager().getPushNoFWT(_tlsURN);
+        altLocManager.add(tls, null);
+        col = altLocManager.getPushNoFWT(_tlsURN);
         assertEquals(1, col.getAltLocsSize());
 	}
 	

@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.stubs;
 
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.inject.Providers;
+import org.limewire.io.Connectable;
 import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.Inject;
@@ -35,6 +37,8 @@ public class ConnectionManagerStub extends ConnectionManager {
     boolean enableRemove = false;
 
     private boolean alwaysConnected;
+    
+    private Set<? extends Connectable> pushProxies;
 
     @Inject
     public ConnectionManagerStub(NetworkManager networkManager, Provider<HostCatcher> hostCatcher,
@@ -68,6 +72,7 @@ public class ConnectionManagerStub extends ConnectionManager {
     }
 
     /** Calls c.close iff enableRemove */
+    @Override
     public void remove(ManagedConnection c) {
         if (enableRemove)
             c.close();
@@ -78,14 +83,17 @@ public class ConnectionManagerStub extends ConnectionManager {
         return (alwaysConnected) ? true : super.isConnected();
     }
 
+    @Override
     public boolean isSupernode() {
         return true;
     }
 
+    @Override
     public HandshakeStatus allowConnection(HandshakeResponse hr) {
         return HandshakeStatus.OK;
     }
 
+    @Override
     public String toString() {
         return "ConnectionManagerStub";
     }
@@ -96,6 +104,18 @@ public class ConnectionManagerStub extends ConnectionManager {
 
     public void setAlwaysConnected(boolean alwaysConnected) {
         this.alwaysConnected = alwaysConnected;
+    }
+    
+    public void setPushProxies(Set<? extends Connectable> pushProxies) {
+        this.pushProxies = pushProxies;
+    }
+    
+    @Override
+    public Set<? extends Connectable> getPushProxies() {
+        if(pushProxies != null)
+            return pushProxies;
+        else
+            return super.getPushProxies();
     }
 
 }
