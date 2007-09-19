@@ -244,8 +244,8 @@ public abstract class PushProxiesValue implements DHTValue, Serializable {
             this.fwtVersion = fwtVersion;
             this.port = port;
             this.proxies = new CopyOnWriteArraySet<IpPort>(proxies);
-            this.data = serialize(this);
             this.tlsInfo = getNumbersFromProxies(proxies);
+            this.data = serialize(this);
         }
         
         public PushProxiesValueImpl(Version version, byte[] data) throws DHTValueException {
