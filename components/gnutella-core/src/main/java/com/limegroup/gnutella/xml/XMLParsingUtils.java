@@ -154,6 +154,10 @@ public class XMLParsingUtils {
         
         public void startElement(String namespaceUri, String localName, 
                                  String qualifiedName, Attributes attributes) {
+            
+            int attributesLength;
+            String qName;
+            
             if(_isFirstElement) {
                 _isFirstElement=false; 
                 _result.canonicalKeyPrefix = qualifiedName;
@@ -166,7 +170,7 @@ public class XMLParsingUtils {
                 _result.canonicalKeyPrefix += "__"+qualifiedName+"__";
             } 
             
-            int attributesLength = attributes.getLength();
+            attributesLength = attributes.getLength();            
             
             //convert prefix to lower case to prevent capitalized tags from appearing
             _result.canonicalKeyPrefix = _result.canonicalKeyPrefix.toLowerCase(Locale.US);
@@ -174,8 +178,11 @@ public class XMLParsingUtils {
             if(attributesLength > 0) {
                 Map<String, String> attributeMap = new HashMap<String, String>(attributesLength);
                 for(int i = 0; i < attributesLength; i++) {
+                    //everything goes to lowercase
+                    qName = attributes.getQName(i).toLowerCase(Locale.US); 
+                                        
                     attributeMap.put(_result.canonicalKeyPrefix + 
-                                     attributes.getQName(i) + "__",
+                                     qName + "__",
                                      attributes.getValue(i).trim());
                 }
                 _result.add(attributeMap);
