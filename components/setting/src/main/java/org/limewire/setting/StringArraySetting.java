@@ -62,7 +62,7 @@ public class StringArraySetting extends Setting {
     /**
      * Splits the string into an Array
      */
-    private static final String[] encode(String src) {
+    public static final String[] encode(String src) {
         
         if (src == null || src.length()==0) {
             return (new String[0]);
@@ -74,7 +74,7 @@ public class StringArraySetting extends Setting {
     /**
      * Separates each field of the array by a semicolon
      */
-    private static final String decode(String[] src) {
+    public static final String decode(String[] src) {
         
         if (src == null || src.length==0) {
             return "";

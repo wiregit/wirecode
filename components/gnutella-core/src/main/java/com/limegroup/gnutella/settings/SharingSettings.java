@@ -211,7 +211,12 @@ public class SharingSettings extends LimeProps {
 		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4a;idx;bz2;sea;pf;arc;arj;"+
 		"bz;tbz;mime;taz;ua;toast;lit;rpm;deb;pkg;sxw;l6t;srt;sub;idx;mkv;"+
 		"ogm;shn;flac;fla;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
-		"pyo;pyz";
+		"pyo;pyz;testing";
+    
+    public static final String[] getDefaultExtensions() {
+        
+        return StringArraySetting.encode(DEFAULT_EXTENSIONS_TO_SHARE); 
+    }
     
     /**
 	 * The shared directories. 
