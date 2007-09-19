@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -20,9 +19,9 @@ public class StoreSaveTemplateProcessorTest extends LimeTestCase {
     }
     
     private final static Map<String,String> SUBSTITUTIONS = new HashMap<String,String>();
-    private static final String ALBUM       = "*album*";
-    private static final String ARTIST      = "*artist*";
-    private static final String HOME        = "*home*";
+    private static final String ALBUM       = "album";
+    private static final String ARTIST      = "artist";
+    private static final String HOME        = "home";
     private static final String ALBUM_VAR   = "${" + StoreSaveTemplateProcessor.ALBUM_LABEL +   "}";
     private static final String ARTIST_VAR  = "${" + StoreSaveTemplateProcessor.ARTIST_LABEL +  "}";
     private static final String HOME_VAR    = "${" + StoreSaveTemplateProcessor.HOME_LABEL +    "}";
@@ -54,7 +53,7 @@ public class StoreSaveTemplateProcessorTest extends LimeTestCase {
         runTest("a/b", new File(OUTDIR,"a/b"));
     }
     
-    public void testArtistSub() {
+    public void testArtistSub() { 
         runTest(ARTIST_VAR, new File(OUTDIR,ARTIST));
     }
     
@@ -82,15 +81,17 @@ public class StoreSaveTemplateProcessorTest extends LimeTestCase {
         //
         // Put whitespace around the braces
         //
-        runTestInternal(template.replace("{", "{ "), want);
-        runTestInternal(template.replace("{", " {"), want);
-        runTestInternal(template.replace("}", " }"), want);
-        runTestInternal(template.replace("}", "} "), want);
+        if( template != null ) {
+            runTestInternal(template.replace("{", "{ "), want);
+            runTestInternal(template.replace("{", " {"), want);
+            runTestInternal(template.replace("}", " }"), want);
+        }
+        runTestInternal(template, want);
     }
 
     private void runTestInternal(final String template, final File want) {
         try {
-            final File have = new StoreSaveTemplateProcessor().getOutputDirectory(template, SUBSTITUTIONS, OUTDIR);
+            final File have = new StoreSaveTemplateProcessor().getOutputDirectory(template, SUBSTITUTIONS, OUTDIR); 
             assertEquals(template + ":" + want + " != " + have, want, have);
         } catch (StoreSaveTemplateProcessor.IllegalTemplateException e) {
             fail(e.getMessage());

@@ -9,7 +9,6 @@ import com.google.inject.Singleton;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.store.StoreDescriptor;
 
 @Singleton
 public class DownloadServicesImpl implements DownloadServices {
@@ -52,8 +51,8 @@ public class DownloadServicesImpl implements DownloadServices {
      * (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadServices#download(com.limegroup.store.StoreDescriptor, boolean, java.io.File, java.lang.String)
      */
-    public Downloader download(StoreDescriptor store, boolean overwrite, File saveDir, String fileName) throws SaveLocationException {
-        return downloadManager.get().download(store, overwrite, saveDir, fileName);
+    public Downloader download(RemoteFileDesc rfd, boolean overwrite, File saveDir, String fileName) throws SaveLocationException {
+        return downloadManager.get().download(rfd, overwrite, saveDir, fileName);
     }
 
     /* (non-Javadoc)

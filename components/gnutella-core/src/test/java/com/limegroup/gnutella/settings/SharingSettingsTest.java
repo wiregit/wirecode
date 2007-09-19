@@ -58,8 +58,7 @@ public class SharingSettingsTest extends LimeTestCase {
 		for (int i = 0; i < types.length; i++) {
 			SharingSettings.getFileSettingForMediaType(types[i]).setValue(dir);
 		}
-        // test the lws directory
-        SharingSettings.setSaveLWSDirectory(dir);
+
 		
 		// test if they are all set
 		for (int i = 0; i < types.length; i++) {
@@ -67,16 +66,12 @@ public class SharingSettingsTest extends LimeTestCase {
 					dir,
 					SharingSettings.getFileSettingForMediaType(types[i]).getValue());
 		}
-        assertEquals("Should be the set directory", 
-                     dir.getCanonicalPath(),
-                     SharingSettings.getSaveLWSDirectory().getCanonicalPath());
 		
 		// revert them
 		for (int i = 0; i < types.length; i++) {
 			SharingSettings.getFileSettingForMediaType(types[i]).revertToDefault();
 		}
-        SharingSettings.setSaveLWSDirectory(SharingSettings.DEFAULT_SAVE_LWS_DIR);
-		
+       		
 		// check if they are reverted
 		for (int i = 0; i < types.length; i++) {
 			assertTrue("Should be default", 
@@ -86,10 +81,29 @@ public class SharingSettingsTest extends LimeTestCase {
 					SharingSettings.getSaveDirectory(null),
 					SharingSettings.getFileSettingForMediaType(types[i]).getValue());
 		}
+	}
+    
+    public void testSetStoreDirectory() throws Exception {
+        
+        File tmpFile = File.createTempFile("prefix", "postfix");
+        tmpFile.deleteOnExit();
+        File dir = new File(tmpFile.getParentFile(), "subdir");
+        dir.mkdir();
+        dir.deleteOnExit();
+        
+        // test the lws directory
+        SharingSettings.setSaveLWSDirectory(dir);
+        
+        assertEquals("Should be the set directory", 
+                dir.getCanonicalPath(),
+                SharingSettings.getSaveLWSDirectory().getCanonicalPath());
+        
+        SharingSettings.setSaveLWSDirectory(SharingSettings.DEFAULT_SAVE_LWS_DIR);
+        
         assertEquals("Should be the save directory", 
                 SharingSettings.getSaveLWSDirectory(),
                 SharingSettings.DEFAULT_SAVE_LWS_DIR);
-	}
+    }
 	
 	public void testGetSaveDirectoryForNoFilenameLabel() {
 		assertEquals(SharingSettings.getSaveDirectory(null), SharingSettings.getSaveDirectory("No Filename"));

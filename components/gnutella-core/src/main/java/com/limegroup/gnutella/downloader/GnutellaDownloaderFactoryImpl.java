@@ -11,7 +11,6 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.version.DownloadInformation;
-import com.limegroup.store.StoreDescriptor;
 
 @Singleton
 public class GnutellaDownloaderFactoryImpl implements GnutellaDownloaderFactory {
@@ -58,9 +57,9 @@ public class GnutellaDownloaderFactoryImpl implements GnutellaDownloaderFactory 
                 name, size, saveLocationManager.get());
     }
 
-    public StoreDownloader createStoreDownloader(StoreDescriptor store, IncompleteFileManager ifm, 
+    public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, IncompleteFileManager ifm, 
             File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
-        return new StoreDownloader(store, ifm, saveDirectory, fileName, 
+        return new StoreDownloader(rfd, ifm, saveDirectory, fileName, 
                 overwrite, saveLocationManager.get());
     }
 

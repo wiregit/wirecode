@@ -7,12 +7,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.Set;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,9 +18,7 @@ import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.QueryUtils;
 
 /**
@@ -195,7 +188,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 port,
                 0l,             //index--doesn't matter since we won't push
                 filename != null ? filename : MagnetOptions.extractFileName(uri),
-                contentLength(url),
+                HTTPUtils.contentLength(url),
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
                 false,          //no chat support
@@ -209,39 +202,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 null,           //no push proxies
                 0);         //assume no firewall transfer
     } 
-
-    /** Returns the length of the content at the given URL. 
-     *  @exception IOException couldn't find the length for some reason */
-    private static long contentLength(URL url) throws IOException {
-        try {
-            // Verify that the URL is valid.
-            new URI(url.toExternalForm().toCharArray());
-        } catch(URIException e) {
-            //invalid URI, don't allow this URL.
-            throw new IOException("invalid url: " + url);
-        }
-
-        HttpClient client = HttpClientManager.getNewClient();
-        HttpMethod head = new HeadMethod(url.toExternalForm());
-        head.addRequestHeader("User-Agent",
-                              LimeWireUtils.getHttpServer());
-        try {
-            client.executeMethod(head);
-            //Extract Content-length, but only if the response was 200 OK.
-            //Generally speaking any 2xx response is ok, but in this situation
-            //we expect only 200.
-            if (head.getStatusCode() != HttpStatus.SC_OK)
-                throw new IOException("Got " + head.getStatusCode() +
-                                      " instead of 200");
-            
-            long length = head.getResponseContentLength();
-            if (length<0)
-                throw new IOException("No content length");
-            return length;
-        } finally {
-            head.releaseConnection();
-        }
-    }
 
     ////////////////////////////// Requery Logic ///////////////////////////
 

@@ -347,22 +347,28 @@ public abstract class FileManager {
      * Whether the FileManager has been shutdown.
      */
     protected volatile boolean shutdown;
-//    
-//    /**
-//     * The filter object to use to discern shareable files.
-//     */
-//    private final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
-//        public boolean accept(File f) {
-//            return isFileShareable(f);
-//        }
-//    };    
+    
+    /**
+     * The filter object to use to discern shareable files.
+     */
+    private final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
+        public boolean accept(File f) {
+            if( isStoreFileDeepSearch(f)) {
+                stopSharingFile(f);
+                _data.SPECIAL_STORE_FILES.add(f);
+                _data.FILES_NOT_TO_SHARE.add(f);
+                return false;
+            }
+            return true;
+        }
+    };    
     
     /**
 	 *	The filter object to use to disercn LWS files
 	 */
     private final FileFilter LWS_FILE_FILTER = new FileFilter(){
         public boolean accept(File f) {
-            return isStoreFile(f);
+            return isStoreFileDeepSearch(f);
         }
     };
     
@@ -997,7 +1003,7 @@ public abstract class FileManager {
         }
         // STEP 2:
         // Scan subdirectory for the amount of shared files.
-        File[] file_list = directory.listFiles();//SHAREABLE_FILE_FILTER);
+        File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);//directory.listFiles();//SHAREABLE_FILE_FILTER);
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
@@ -1164,7 +1170,7 @@ public abstract class FileManager {
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfShared(f) == null)
                             fileManagerController.clearPendingShare(f);
-                        if(displayInStore(f)) {
+                        if(isStoreFile(f)) {
                             _data.SPECIAL_STORE_FILES.remove(f);	
                             _data.FILES_NOT_TO_SHARE.remove(f);
                             _storeToFileDescMap.remove(f);
@@ -1343,7 +1349,7 @@ public abstract class FileManager {
     protected void addFileIfShared(File file, List<? extends LimeXMLDocument> metadata, boolean notify,
                                    int revision, FileEventListener callback) {
         // test the license type to see if it can be shared
-        if( !isShareable(metadata, file) ) {
+        if( isStoreFileDeepSearch(file) ) {
             stopSharingFile(file);
             // add it to the list of files store files to display
             _data.SPECIAL_STORE_FILES.add(file);
@@ -1432,21 +1438,6 @@ public abstract class FileManager {
         fileManagerController.calculateAndCacheUrns(file, getNewStoreCallback(file, metadata, notify, revision, callback));
     }
     
-    public boolean isShareable(final List<? extends LimeXMLDocument> metadata, File file ) { 
-        if( file == null )
-            throw new IllegalArgumentException("File can't be null");
-        if( metadata == null )
-            return true;
-        if( isStoreFile(file) )
-                return false;
-        for( LimeXMLDocument doc : metadata ) {
-            if( doc != null && doc.getLicenseString() != null && 
-                    (doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString()) ))  {
-                return false;
-            }
-        }
-        return true;
-    }
     
     /**
      * Constructs a new UrnCallback that will possibly load the file with the given URNs.
@@ -1468,7 +1459,7 @@ public abstract class FileManager {
                     
                     // Only load the file if we were able to calculate URNs and
                     // the file is still shareable.
-                    if(!urns.isEmpty()&& isStoreFile(file)) {
+                    if(!urns.isEmpty()&& isStoreFileDeepSearch(file)) {
                         fd = addStoreFile(file, urns);
                     }
                     else {
@@ -1540,9 +1531,7 @@ public abstract class FileManager {
                     loadFile(fd, file, metadata, urns);
 
                     // test the license type to see if it can be shared
-                    boolean shareable = isShareable(fd.getLimeXMLDocuments(), file);
-
-                    if( !shareable ) {
+                    if( isStoreFileDeepSearch(file) ) {
                         stopSharingFile(file);
                         // add it to the list of files store files to display
                         _data.SPECIAL_STORE_FILES.add(file);
@@ -1913,7 +1902,7 @@ public abstract class FileManager {
             }
         }
 
-        boolean share = !isStoreFile(incompleteFile);
+        boolean share = !isStoreFileDeepSearch(incompleteFile);
         
         // no indices were found for any URN associated with this
         // IncompleteFileDesc... add it.
@@ -2303,7 +2292,23 @@ public abstract class FileManager {
 			return _completelySharedDirectories.contains(dir);
 		}
 	}
-
+    
+    /**
+     * @return true if this file is a song purchased from the LWS, false otherwise
+     * 
+     * NOTE: unlike isStoreFileDeepSearch, this does a simple lookup in the lists of store
+     * files and returns true if that file is found in a store list and false otherwise. This
+     * method assumes all files have already had there ID3 information examined and placed in
+     * one of these lists when appropriate
+     */
+    public boolean isStoreFile(File file) {
+        if(_data.SPECIAL_STORE_FILES.contains(file) || _storeToFileDescMap.containsKey(file) || 
+                _storeDirectories.contains(file)) {
+                return true;
+        }
+        return false;
+    }
+    
 	/**
 	 * Returns true if the given file is in a completely shared directory
 	 * or if it is specially shared.
@@ -2315,7 +2320,7 @@ public abstract class FileManager {
 			return true;
 		if (_data.FILES_NOT_TO_SHARE.contains(file))
 			return false;
-        if (isStoreFile(file))
+        if (isStoreFileDeepSearch(file))
             return false;
 		if (isFileInCompletelySharedDirectory(file)) {
 	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
@@ -2329,29 +2334,19 @@ public abstract class FileManager {
 	}
     
     /**
-     * @return true if this file is a song purchased from the LWS, false otherwise
-     * Note, unlike isStoreFile, this doesn't perform heav
-     */
-    public boolean displayInStore(File file) {
-        if(_data.SPECIAL_STORE_FILES.contains(file) || _storeToFileDescMap.containsKey(file) || 
-                _storeDirectories.contains(file)) {
-                return true;
-        }
-        return false;
-    }
-    
-    /**
      * Determines if this file has been purchased from LWS. First check if this file is added to the list
      * of already checked files, if not try and lookup the ID3 tag and see if it was purchased from LWS.
      * 
+     * NOTE: unlike isStoreFile, this performs a search of the ID3 information. This method should not be called
+     * from any code that is being performed on the swing thread.
      * 
      * @param file
-     * @return
+     * @return true if this file was purchased from the LWS, false otherwise
      */
-    private boolean isStoreFile(File file) {
+    private boolean isStoreFileDeepSearch(File file) {
         if( file == null || file.isDirectory() )
             return false;
-        if( displayInStore(file) )
+        if( isStoreFile(file) )
             return true;
         else if( FileUtils.getFileExtension(file).toLowerCase().equals("mp3")) 
             try {

@@ -149,6 +149,7 @@ public abstract class AudioMetaData extends MetaData {
         add(list, bitrate, LimeXMLNames.AUDIO_BITRATE);
         add(list, length, LimeXMLNames.AUDIO_SECONDS);
         add(list, license, LimeXMLNames.AUDIO_LICENSE);
+        // place the value in the licensetype when generating xml docs
         if( getEncoder() == LWS ) 
             add(list, MAGIC_KEY, LimeXMLNames.AUDIO_LICENSETYPE);
         else

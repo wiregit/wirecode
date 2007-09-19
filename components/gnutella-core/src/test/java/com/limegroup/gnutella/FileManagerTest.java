@@ -53,6 +53,10 @@ public class FileManagerTest extends LimeTestCase {
     private File f4 = null;
     private File f5 = null;
     private File f6 = null;
+    
+    private File store1 = null;
+    private File store2 = null;
+    
     //changed to protected so that MetaFileManagerTest can
     //use these variables as well.
     protected volatile FileManager fman = null;
@@ -96,6 +100,9 @@ public class FileManagerTest extends LimeTestCase {
         if (f4!=null) f4.delete();
         if (f5!=null) f5.delete();
         if (f6!=null) f6.delete();	    
+        
+        if(store1!=null) store1.delete();
+        if(store2!=null) store2.delete();
     }
     
     public void testGetParentFile() throws Exception {
@@ -1119,6 +1126,77 @@ public class FileManagerTest extends LimeTestCase {
             //  revert the os.name system property back to normal 
             setOSName(realOS);
         }
+    }
+    
+    //TODO: tests adding a new store file to the a store folder
+    public void testAddOneStoreFile() throws Exception {
+        
+    }
+    
+    //TODO: tests removing a store file 
+    public void testRemoveOneStoreFile() throws Exception {
+        
+    }
+    
+    //TODO: tests renaming a store file
+    public void testRenameStoreFile() throws Exception {
+        
+    }
+    
+    //TODO: tests adding incomplete store file, should not be shared
+    public void testAddIncompleteStoreFile() throws Exception {
+        
+    }
+    
+    //TODO: tests removing a store file from incomplete directory
+    public void testRemoveIncompleteStoreFile() throws Exception {
+        
+    }
+    
+    //TODO: tests retrieving a urn from a store file
+    public void testGetStoreURN() throws Exception {
+        
+    }
+    
+    public void testFileManagerQRPStoreFile() throws Exception {
+        
+    }
+    
+    //TODO: tests that only store files in a store folder are extracted
+    public void testNonSharedStoreFolder() throws Exception {
+        
+    }
+    
+    //TODO: tests a shared folder containing store files but is not a store directory
+    public void testSharedFolderWithStoreFiles() throws Exception {
+        
+    }
+    
+    //TODO: tests a shared folder that is also the store folder
+    public void testSharedFolderAlsoStoreFolder() throws Exception {
+        
+    }
+    
+    //TODO: tests what happens when a new store directory is chosen
+    public void testChangeStoreFolder() throws Exception {
+        
+    }
+    
+    //TODO: tests what happens to store files that are contained in a shared directory
+    //      when they are no longer shared
+    public void testUnshareFolderContainingStoreFiles() throws Exception {
+        
+    }
+    
+    // TODO: tests what happens to store file when trying to share it
+    public void testAddFileIsSharedStoreFile() throws Exception {
+        
+    }
+    
+    //TODO: tests what happens to store file when explicitly trying to 
+    //  share it
+    public void testAddFileAlwaysStoreFile() throws Exception {
+        
     }
     
     public void testIsSharableFolder() throws Exception {

@@ -7,7 +7,6 @@ import java.util.List;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.store.StoreDescriptor;
 
 public interface DownloadServices {
 
@@ -63,7 +62,7 @@ public interface DownloadServices {
      * @return
      * @throws SaveLocationException
      */
-    public Downloader download(StoreDescriptor store, boolean overwrite,
+    public Downloader download(RemoteFileDesc rfd, boolean overwrite,
             File saveDir, String fileName) throws SaveLocationException;
 
     public Downloader download(RemoteFileDesc[] files, boolean overwrite,

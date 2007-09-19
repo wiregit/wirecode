@@ -2216,6 +2216,12 @@ public class ManagedDownloader extends AbstractDownloader
         //   If move is successful, we should remove the corresponding blocks
         //from the IncompleteFileManager, though this is not strictly necessary
         //because IFM.purge() is called frequently in DownloadManager.
+
+        try {
+            saveFile = alternateFileCreation(saveFile);
+        } catch (IOException e) {
+            return DownloadStatus.DISK_PROBLEM;
+        }
         
         // First attempt to rename it.
         boolean success = FileUtils.forceRename(incompleteFile,saveFile);
@@ -2228,15 +2234,40 @@ public class ManagedDownloader extends AbstractDownloader
                     " -> "+ saveFile);
             return DownloadStatus.DISK_PROBLEM;
         }
-            
+
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
             fileManager.removeFileIfShared(saveFile);
 
-        //Add the URN of this file to the cache so that it won't
-        //be hashed again when added to the library -- reduces
-        //the time of the 'Saving File' state.
+        // add file hash to manager for fast lookup
+        addFileHash(fileHash, saveFile);
+
+        // determine where and how to share the file
+        shareSavedFile();
+
+		return DownloadStatus.COMPLETE;
+    }
+    
+    /**
+     * Provides alternate file location based on new data obtained after downloading the file.
+     * For example, could create a folder substructure and use a template based on ID3 information
+     * for music. 
+     * 
+     * @param saveFile
+     * @return
+     * @throws IOException
+     */
+    protected File alternateFileCreation(File saveFile) throws IOException{
+        return saveFile;
+    }
+    
+    /**
+     *  Add the URN of this file to the cache so that it won't
+     *  be hashed again when added to the library -- reduces
+     *  the time of the 'Saving File' state.
+     */
+    protected void addFileHash(URN fileHash, File saveFile){
         if(fileHash != null) {
             Set<URN> urns = new UrnSet(fileHash);
             File file = saveFile;
@@ -2249,21 +2280,23 @@ public class ManagedDownloader extends AbstractDownloader
             // Notify the SavedFileManager that there is a new saved
             // file.
             savedFileManager.addSavedFile(file, urns);
-            
+            //TODO: dont need the saved trees for store
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
                 tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }
-
-        
-		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
-			fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
-		else
-		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
-
-		return DownloadStatus.COMPLETE;
+    }
+    
+    /**
+     * Determine where to share the fle 
+     */
+    protected void shareSavedFile(){
+        if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
+            fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
+        else
+            fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 

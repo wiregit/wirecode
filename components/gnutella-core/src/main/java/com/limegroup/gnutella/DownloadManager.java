@@ -62,7 +62,6 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
-import com.limegroup.store.StoreDescriptor;
 
 
 /** 
@@ -773,7 +772,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      * @throws IllegalArgumentException
      * @throws SaveLocationException
      */
-    public synchronized Downloader download(StoreDescriptor store, 
+    public synchronized Downloader download( RemoteFileDesc rfd,
             boolean overwrite,
             File saveDir,
             String fileName)
@@ -787,10 +786,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         //worth it.
         incompleteFileManager.purge();
         
-        if (fileName == null) {
-            fileName = store.getFileName();
-        }
-        if (conflicts(store.getSHA1Urn(), 0, new File(saveDir,fileName))) {
+        if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir,fileName))) {
             throw new SaveLocationException
             (SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
@@ -798,7 +794,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         StoreDownloader downloader =
-            gnutellaDownloaderFactory.createStoreDownloader(store, incompleteFileManager, 
+            gnutellaDownloaderFactory.createStoreDownloader(rfd, incompleteFileManager, 
                                   saveDir, fileName, overwrite);
 
         initializeDownload(downloader);
@@ -1123,10 +1119,11 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      */
     public synchronized void remove(AbstractDownloader downloader, 
                                     boolean completed) {
-        active.remove(downloader);
+        boolean isRemoved = active.remove(downloader);
         if(downloader instanceof InNetworkDownloader)
             innetworkCount--;
-        if(downloader instanceof StoreDownloader)
+        // make sure an active download was removed prior to decrementing this index
+        if(downloader instanceof StoreDownloader && isRemoved)
             storeDownloadCount--;
         
         waiting.remove(downloader);

@@ -230,9 +230,9 @@ public class SharingSettings extends LimeProps {
     /**
      * Sets the directory to save the purchased songs from the LWS
      *  
-     * @param   saveDir  A <tt>File</tt> instance denoting the
+     * @param   storeDir  A <tt>File</tt> instance denoting the
      *                   abstract pathname of the directory for
-     *                   saving files.
+     *                   store files.
      *
      * @throws  <tt>IOException</tt>
      *          If the directory denoted by the directory pathname

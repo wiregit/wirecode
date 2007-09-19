@@ -6,8 +6,6 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.limewire.util.ByteOrder;
 
@@ -45,10 +43,6 @@ public class MP3MetaData extends AudioMetaData {
         setLength((int)mp3Info.getLengthInSeconds());
         
         parseID3v1Data(file);
-        
-        if( getEncoder() == LWS ) {
-            setLicenseType(MAGIC_KEY);
-        }
     }
 
     /**
@@ -134,6 +128,7 @@ public class MP3MetaData extends AudioMetaData {
     /**
      * Generates ID3Data from id3v2 data in the file.
      */
+    @SuppressWarnings("null")
     private void parseID3v2Data(File file) {
         ID3v2 id3v2Parser = null;
         try {
@@ -174,8 +169,15 @@ public class MP3MetaData extends AudioMetaData {
 
             // need to check is PRIV field here since frameContent may be null in ISO_LATIN format
             //  but not in UTF-8 format
-            if( (frameContent == null || frameContent.trim().equals("")) &&
-                    !MP3DataEditor.PRIV_ID.equals(frameID)){
+            if( (frameContent == null || frameContent.trim().equals("")) ) {
+                // PRIV fields in LWS songs are encoded in UTF-8 format
+                if (MP3DataEditor.PRIV_ID.equals(frameID)) {
+                    try {
+                        String content = new String(contentBytes,"UTF-8");
+                        checkLWS(content);
+                    } catch (UnsupportedEncodingException e) {
+                    }
+                }
                 continue;
             }
             //check which tag we are looking at
@@ -212,8 +214,6 @@ public class MP3MetaData extends AudioMetaData {
                 } catch (NumberFormatException ignored) {} 
             }
             else if(MP3DataEditor.GENRE_ID.equals(frameID)) {
-                if( frameContent == null )
-                    continue;
                 //ID3v2 frame for genre has the byte used in ID3v1 encoded
                 //within it -- we need to parse that out
                 int startIndex = frameContent.indexOf("(");
@@ -251,14 +251,6 @@ public class MP3MetaData extends AudioMetaData {
                 setLicense(frameContent);
                 checkLWS(frameContent );
             }
-            // PRIV fields in LWS songs are encoded in UTF-8 format
-            else if (MP3DataEditor.PRIV_ID.equals(frameID)) {
-                try {
-                    String content = new String(contentBytes,"UTF-8");
-                    checkLWS(content);
-                } catch (UnsupportedEncodingException e) {
-                }
-            }
             // another key we don't care about except for searching for 
             //  protected content
             else {
@@ -274,25 +266,10 @@ public class MP3MetaData extends AudioMetaData {
      */
     private void checkLWS(String content) {
         if( getEncoder() != LWS) {
-            if( containsKey(content, MAGIC_KEY) ) {
-                setEncoder(LWS);
+            //search for the substring MAGIC_KEY
+            if( content.indexOf(MAGIC_KEY) != -1)
+                setEncoder(LWS); 
             }
-       }
-    }
-
-    /**
-     * Determines if a substring exists in the file
-     * @param file - string to search
-     * @param key - substring to search for
-     * 
-     * @return - return true if the substring is contained at least once in the string
-     */
-    private static boolean containsKey(String file, String key) {
-        if( file == null || key == null || file.length() == 0 )
-            return false;
-        Pattern pattern  = Pattern.compile(key);
-        Matcher matcher = pattern.matcher(file);
-        return matcher.find();
     }
 
 	/**
