@@ -39,6 +39,7 @@ import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /// note -- mock ManagedDownloader
 public class RequeryBehaviorTest extends LimeTestCase {
@@ -67,6 +68,10 @@ public class RequeryBehaviorTest extends LimeTestCase {
     static MyDHTManager myDHTManager;
     static Runnable pump;
     public void setUp() throws Exception {
+      DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
+      DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
+      DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
+        RequeryManager.TIME_BETWEEN_REQUERIES = 5000;
         Module m = new AbstractModule() {
             @Override
             protected void configure() {
@@ -92,18 +97,14 @@ public class RequeryBehaviorTest extends LimeTestCase {
      * fall back into the appropriate state.
      */
     public void testWaitingForResults() throws Exception {
-        DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
-        DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
-        DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
         
-        Downloader downloader = downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
+        ManagedDownloader downloader = (ManagedDownloader)
+            downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
         LOG.debug("starting downloader");
         assertSame(DownloadStatus.QUEUED, downloader.getState());
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
-        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
-        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
         
         // click resume, launch a dht query
@@ -114,11 +115,231 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
-        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
-        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+        
+        // while we're querying the dht, a search result arrives
+        LOG.debug("adding source");
+        downloader.addDownload(fakeRFD(), false);
+        waitForStateToEnd(DownloadStatus.QUERYING_DHT, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        
+        // after the result fails, we should fall back in querying state
+        assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+        
+        LOG.debug("dht query fails");
+        myAltFinder.listener.handleAltLocSearchDone(false);
+        assertSame(DownloadStatus.GAVE_UP,downloader.getState());
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+        assertSame(DownloadStatus.QUEUED,downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING,downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+         
+        // now we should try a gnet query after a pump
+        pump.run();
+        Thread.sleep(100);
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+        
+        // another result arrives
+        LOG.debug("adding another source");
+        downloader.addDownload(fakeRFD(), false);
+        waitForStateToEnd(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        
+        // should be waiting for sources again
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
     }   
     
+    /**
+     * Tests the following scenario:
+     * 1. a downloader starts and fails
+     * 2. dht is off, so downloader stays in NMS state 
+     * 3. dht comes on, downloader stays in NMS state
+     * 5. user clicks FMS, downloader queries DHT
+     * 6. DHT doesn't find anything, downloader goes to QUEUED->GNET
+     * 7. gnet doesn't find anything, goes to AWS
+     * 8. stays there until timeout expires
+     * 8. after that happens it does a dht query.
+     * 9. after the dht query expires it goes back to AWS.
+     * 
+     * Prior to a dht or gnet query it goes to QUEUED and very quickly to CONNECTED.
+     */
+    public void testBasicRequeryBehavior() throws Exception {
+        
+        ManagedDownloader downloader = (ManagedDownloader)
+        downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
+        LOG.debug("starting downloader");
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        LOG.debug("waiting for a few handleInactivity() calls");
+        pump.run();pump.run();pump.run();
+        // should still be waiting for user
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        // now turn dht on 
+        myDHTManager.on = true;
+        
+        // a few pumps go by but we're still waiting for user
+        pump.run();
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        pump.run();
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        // user hits FMS
+        LOG.debug("hit resume");
+        downloader.resume();
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+        
+        // few pumps, still querying dht
+        pump.run();pump.run();pump.run();
+        assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+        
+        // now tell them the dht query failed
+        LOG.debug("dht query fails");
+        assertNotNull(myAltFinder.listener);
+        myAltFinder.listener.handleAltLocSearchDone(false);
+        assertSame(DownloadStatus.GAVE_UP,downloader.getState());
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+        assertSame(DownloadStatus.QUEUED,downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING,downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        
+        // now we should try a gnet query
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+        
+        // wait for gnet to return fail
+        waitForStateToEnd(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader);
+        // should have given up
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        
+        // stays given up for a while
+        pump.run();
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        pump.run();
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+        // eventually we can query the dht again
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+        
+        // lets say this query times out instead of receiving callback
+        waitForStateToEnd(DownloadStatus.QUERYING_DHT, downloader);
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        
+        // back to awaiting sources
+        pump.run();
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        pump.run();
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        
+        // we stay there for good.
+    }
+    
+    
+    /**
+     * Tests the following scenario:
+     * 1. a downloader starts and fails
+     * 2. dht is off, so downloader stays in NMS state 
+     * 3. dht comes on, downloader goes looking for sources
+     * 4. it doesn't find anything, goes back to NMS
+     * 5. user clicks FMS, downloader goes to WFS
+     * 6. FMS doesn't find anything, downloader goes to AWS
+     * 7. it stays there until the timeout for a dht query elapses
+     * 8. after that happens it does a dht query.
+     * 
+     * Prior to a dht or gnet query it goes to QUEUED and very quickly to CONNECTED.
+     */
+    public void testProRequeryBehavior() throws Exception {
+        PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.TRUE);
+        assertTrue(LimeWireUtils.isPro());
+        
+        ManagedDownloader downloader = (ManagedDownloader)
+        downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
+        LOG.debug("starting downloader");
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        LOG.debug("waiting for a few handleInactivity() calls");
+        pump.run();pump.run();
+        // should still be waiting for user
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        // now turn dht on 
+        LOG.debug("turning dht on");
+        myDHTManager.on = true;
+        
+        // in another pump or two we should be looking for sources
+        pump.run();
+        Thread.sleep(100);
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+        
+        // now tell them the dht query failed
+        LOG.debug("dht query fails");
+        assertNotNull(myAltFinder.listener);
+        myAltFinder.listener.handleAltLocSearchDone(false);
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        pump.run();pump.run(); // few more pumps
+        // should still be waiting for user
+        assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        // hit resume()
+        LOG.debug("hitting resume");
+        downloader.resume();
+        
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader); 
+        assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+        
+        // if we find nothing, we give up
+        waitForStateToEnd(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader);
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        
+        // we stay given up for a while but eventually launch another DHT_QUERY
+        pump.run();
+        Thread.sleep(100);
+        pump.run();
+        Thread.sleep(100);
+        assertSame(DownloadStatus.GAVE_UP, downloader.getState());
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
+        
+        // we should be making another dht attempt now
+        assertSame(DownloadStatus.QUEUED, downloader.getState());
+        waitForStateToEnd(DownloadStatus.QUEUED, downloader);
+        assertSame(DownloadStatus.CONNECTING, downloader.getState());
+        waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
+        
+    }
     
     private static RemoteFileDesc fakeRFD() {
         return new RemoteFileDesc("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), 13l,
@@ -133,6 +354,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         int pumps = 0;
         // causes busy-loop but this is a test so its ok.
         while(downloader.getState() == status) {
+            Thread.sleep(100);
             pump.run();
             pumps++;
             LOG.debug("pump "+pumps);
