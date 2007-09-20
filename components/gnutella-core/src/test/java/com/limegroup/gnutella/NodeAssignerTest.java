@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,34 +8,36 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
-import org.limewire.service.ErrorService;
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NodeAssignerTest extends LimeTestCase {
     
-    private static NodeAssigner ASSIGNER;
+    private final int TEST_PORT = 6667;
     
-   // private static RouterService ROUTER_SERVICE;
-    
-    private static TestUltrapeer ULTRAPEER = new TestUltrapeer();
-    
-    private static Thread upThread = new Thread(ULTRAPEER);
-    
-    private static int TEST_PORT = 6667;
-    
-    private static final TestBandwidthTracker BW = new TestBandwidthTracker();
+    private TestAcceptor testAcceptor;
+    private Injector injector;
+    private NodeAssigner nodeAssigner;
+    private TestBandwidthTracker bandwidthTracker;
 
     public NodeAssignerTest(String name) {
         super(name);
@@ -47,31 +50,31 @@ public class NodeAssignerTest extends LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    
-    public static void globalSetUp() throws Exception {
-        
-        setSettings();
-        launchAllBackends();
-        
-        //start the listening ultrapeer
-        upThread.start();
-
-    }
 
     protected void setUp() throws Exception {
         setSettings();
-        ASSIGNER = new NodeAssigner(Providers.of((BandwidthTracker) BW),
-                Providers.of((BandwidthTracker) BW), Providers.of(ProviderHacks
-                        .getConnectionManager()), ProviderHacks
-                        .getNetworkManager(),
-                ProviderHacks.getSearchServices(), Providers.of(ProviderHacks
-                        .getDHTManager()), ProviderHacks
-                        .getBackgroundExecutor(), ProviderHacks
-                        .getConnectionServices(), Providers.of(ProviderHacks.getUdpService()));
-
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(TestBandwidthTracker.class);
+                bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(TestBandwidthTracker.class);
+                bind(NetworkManager.class).to(NetworkManagerStub.class);
+            } 
+        });
+        nodeAssigner = injector.getInstance(NodeAssigner.class);
+        bandwidthTracker = (TestBandwidthTracker)injector.getInstance(Key.get(BandwidthTracker.class, Names.named("uploadTracker")));
+        assertSame(bandwidthTracker, injector.getInstance(Key.get(BandwidthTracker.class, Names.named("downloadTracker"))));
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        networkManager.setAddress(new byte[] { 127, 0, 0, 1 } );
+        networkManager.setPort(6346);
+        networkManager.setSolicitedGUID(new GUID());
+        
+        testAcceptor = new TestAcceptor();
+        new ManagedThread(testAcceptor, "TestAcceptor").start();    
     }
     
-    private static void setSettings() throws Exception {
+    
+    private void setSettings() throws Exception {
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         //Set the local host to not be banned so pushes can go through
@@ -96,19 +99,11 @@ public class NodeAssignerTest extends LimeTestCase {
     }
 
     protected void tearDown() throws Exception {
-        ULTRAPEER.shutdown();
-        ProviderHacks.getConnectionServices().disconnect();
-        sleep();
+        testAcceptor.shutdown();
+        injector.getInstance(ConnectionServices.class).disconnect();
+        Thread.sleep(1000);
     }
-    
-    private void sleep() {
-        try {Thread.sleep(1000);}catch(InterruptedException e) {}
-    }
-    
-    private void sleep(long millis) {
-        try {Thread.sleep(millis);}catch(InterruptedException e) {}
-    }
-    
+        
     private void setUltrapeerCapabilities() throws Exception{
         setHardcoreCapabilities();
         ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue());
@@ -118,91 +113,104 @@ public class NodeAssignerTest extends LimeTestCase {
     private void setDHTCapabilities() throws Exception{
         setHardcoreCapabilities();
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue());
-        PrivilegedAccessor.setValue(ASSIGNER,"_currentUptime",
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",
                                     new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
     }
     
     private void setHardcoreCapabilities() throws Exception{
-        BW.setIsGoodBandwidth(true);
+        bandwidthTracker.setIsGoodBandwidth(true);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.MODEM_SPEED_INT + 1);
-        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming",new Boolean(true));
-        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedUnsolicitedIncoming",new Boolean(true));
-       
-    //    PrivilegedAccessor.setValue(ROUTER_SERVICE,"nodeAssigner",ASSIGNER);
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        networkManager.setGuessCapable(true);
     }
     
     public void connect() throws Exception {
-        //now try to connect
-        LimeTestUtils.clearHostCatcher();
-        ProviderHacks.getConnectionServices().connect();
-        assertFalse("should not be connected", ProviderHacks.getConnectionServices().isConnected());
-        ProviderHacks.getHostCatcher().add(new Endpoint("localhost", TEST_PORT + 1), true);
-        sleep();
-        sleep();
-        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
+        ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
+        HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
+        hostCatcher.clear();
+        connectionServices.connect();
+        assertFalse("should not be connected", connectionServices.isConnected());
+        hostCatcher.add(new Endpoint("localhost", TEST_PORT + 1), true);
+        Thread.sleep(2000);
+        assertTrue("should be connected", connectionServices.isConnected());
     }
     
     public void testUltrapeerConnection() throws Exception{
+        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        ConnectionManager connectionManager = injector.getInstance(ConnectionManager.class);
+        DHTManager dhtManager = injector.getInstance(DHTManager.class);
+        
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         //set up an ultrapeer capable host:
         setUltrapeerCapabilities();
-        ProviderHacks.getLifecycleManager().start();
-        sleep();
+        lifecycleManager.start();
+        Thread.sleep(1000);
         //the node assigner should have worked it's magic
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        ULTRAPEER.setAcceptsUltrapeers(true);
+        testAcceptor.setAcceptsUltrapeers(true);
         connect();
-        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionManager().isActiveSupernode());
-        assertTrue("should be passively connected to the DHT", ProviderHacks.getDHTManager().isRunning() 
-                && (ProviderHacks.getDHTManager().getDHTMode() != DHTMode.ACTIVE));
+        assertTrue("should be an ultrapeer", connectionManager.isActiveSupernode());
+        assertTrue("should be passively connected to the DHT", dhtManager.isRunning() 
+                && (dhtManager.getDHTMode() != DHTMode.ACTIVE));
         
         //make sure you can't be an active DHT node at the same time
         setDHTCapabilities();
-        sleep(200);
-        assertNotEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
+        Thread.sleep(200);
+        assertNotEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
-          ProviderHacks.getLifecycleManager().start();
+        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        ConnectionManager connectionManager = injector.getInstance(ConnectionManager.class);
+        DHTManager dhtManager = injector.getInstance(DHTManager.class);
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        
+        lifecycleManager.start();
         connect();
-        assertFalse("should be not be an ultrapeer", ProviderHacks.getConnectionServices().isSupernode());
-        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        assertFalse("should be not be an ultrapeer", connectionManager.isSupernode());
+        networkManager.setAcceptedIncomingConnection(true);
         setUltrapeerCapabilities();
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
-        ULTRAPEER.setAcceptsUltrapeers(true);
-        PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
+        testAcceptor.setAcceptsUltrapeers(true);
+        PrivilegedAccessor.setValue(nodeAssigner, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24L*60L*60L*1000L));
         
-        sleep(2 * NodeAssigner.TIMER_DELAY);
+        Thread.sleep(2 * NodeAssigner.TIMER_DELAY);
         
-        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionManager().isActiveSupernode());
-        assertNotEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
+        assertTrue("should be an ultrapeer", connectionManager.isActiveSupernode());
+        assertNotEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
     }
     
     public void testDHTtoUltrapeerSwitch() throws Exception{
+        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        DHTManager dhtManager = injector.getInstance(DHTManager.class);
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
+        
         setDHTCapabilities();
-        ProviderHacks.getLifecycleManager().start();
-        sleep();
+        lifecycleManager.start();
+        Thread.sleep(1000);
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(0);
-        ULTRAPEER.setAcceptsUltrapeers(false);
+        testAcceptor.setAcceptsUltrapeers(false);
         connect();
-        sleep();
-        assertFalse("should not be an ultrapeer", ProviderHacks.getConnectionServices().isSupernode());
-        assertEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
-        ULTRAPEER.setAcceptsUltrapeers(true);
+        Thread.sleep(1000);
+        assertFalse("should not be an ultrapeer", connectionServices.isSupernode());
+        assertEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
+        testAcceptor.setAcceptsUltrapeers(true);
         setUltrapeerCapabilities();
-        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        networkManager.setAcceptedIncomingConnection(true);
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
-        PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
+        PrivilegedAccessor.setValue(nodeAssigner, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24L*60L*60L*1000L));
         
-        sleep(2 * NodeAssigner.TIMER_DELAY);
+        Thread.sleep(2 * NodeAssigner.TIMER_DELAY);
         
-        assertNotEquals(DHTMode.ACTIVE, ProviderHacks.getDHTManager().getDHTMode());
-        assertTrue("should be an ultrapeer", ProviderHacks.getConnectionServices().isSupernode());
+        assertNotEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
+        assertTrue("should be an ultrapeer", connectionServices.isSupernode());
     }
     
+    @Singleton
     private static class TestBandwidthTracker implements BandwidthTracker {
         
         private boolean isGoodBandwidth;
@@ -228,10 +236,10 @@ public class NodeAssignerTest extends LimeTestCase {
         }
     }
     
-    private static class UltrapeerResponder implements HandshakeResponder {
+    private class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"); 
+            Properties props = injector.getInstance(HeadersFactory.class).createUltrapeerHeaders("localhost"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
@@ -239,10 +247,10 @@ public class NodeAssignerTest extends LimeTestCase {
         public void setLocalePreferencing(boolean b) {}
     }
     
-    private static class NoUltrapeerResponder implements HandshakeResponder {
+    private class NoUltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props= ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost");
+            Properties props= injector.getInstance(HeadersFactory.class).createUltrapeerHeaders("localhost");
             props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
             return HandshakeResponse.createResponse(props);
         }
@@ -250,29 +258,30 @@ public class NodeAssignerTest extends LimeTestCase {
         public void setLocalePreferencing(boolean b) {}
     }
     
-    private static class TestUltrapeer implements Runnable{
-    
-        private boolean acceptsUltrapeers = true;
-        
-        Connection UP;
-        
-        private Socket socket;
+    private class TestAcceptor implements Runnable {
+        private volatile boolean acceptsUltrapeers = true;        
+        private volatile Connection incomingConnection;
+        private volatile boolean keepRunning = true;
+        private volatile ServerSocket serverSocket;
         
         public void run(){
-            while(true) {
+            while(keepRunning) {
                 try {
-                    ServerSocket ss=new ServerSocket(TEST_PORT+1);
-                    socket = ss.accept();
-                    ss.close();
+                    serverSocket=new ServerSocket(TEST_PORT+1);
+                    serverSocket.setSoTimeout(10000);
+                    Socket socket = serverSocket.accept();
+                    serverSocket.close();
+                    serverSocket = null;
                     socket.setSoTimeout(1000);
-                    UP = ProviderHacks.getConnectionFactory().createConnection(socket);
+                    incomingConnection = injector.getInstance(ConnectionFactory.class).createConnection(socket);
                     if(acceptsUltrapeers) {
-                        UP.initialize(null, new UltrapeerResponder());
+                        incomingConnection.initialize(null, new UltrapeerResponder());
                     } else {
-                        UP.initialize(null, new NoUltrapeerResponder());
+                        incomingConnection.initialize(null, new NoUltrapeerResponder());
                     }
-                } catch (Exception e) {
-                    ErrorService.error(e);
+                } catch (IOException e) {
+                    if(keepRunning)
+                        throw new RuntimeException(e);
                 }
             }
         }
@@ -281,10 +290,12 @@ public class NodeAssignerTest extends LimeTestCase {
             this.acceptsUltrapeers = acceptsUltrapeers;
         }
         
-        public void shutdown() throws Exception{
-            if(UP != null){
-                UP.close();
-            }
+        public void shutdown() throws Exception {
+            keepRunning = false;
+            if(serverSocket != null)
+                serverSocket.close();
+            if(incomingConnection != null)
+                incomingConnection.close();
         }
         
     }

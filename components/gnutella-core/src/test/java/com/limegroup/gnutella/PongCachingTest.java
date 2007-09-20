@@ -131,7 +131,7 @@ public final class PongCachingTest extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
 
         ProviderHacks.getLifecycleManager().start();
-		LimeTestUtils.clearHostCatcher();
+		ProviderHacks.getHostCatcher().clear();
 		ProviderHacks.getConnectionServices().connect();
         
 		connect();

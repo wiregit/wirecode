@@ -132,7 +132,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         
         ProviderHacks.getNetworkManager().setListeningPort(PORT);
 		ProviderHacks.getLifecycleManager().start();
-        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getHostCatcher().clear();
         ProviderHacks.getConnectionServices().connect();	
 		connect();
         assertEquals("unexpected port", PORT, 

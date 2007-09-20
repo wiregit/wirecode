@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
-import org.limewire.service.ErrorService;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -154,18 +153,13 @@ public class NodeAssigner {
     public void start() {
         Runnable task=new Runnable() {
             public void run() {
-                try {
-                    collectBandwidthData();
-                    //check if became Hardcore capable
-                    setHardcoreCapable();
-                    //check if became ultrapeer capable
-                    assignUltrapeerNode();
-                    //check if became DHT capable
-                    assignDHTMode();
-                    
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+                collectBandwidthData();
+                //check if became Hardcore capable
+                setHardcoreCapable();
+                //check if became ultrapeer capable
+                assignUltrapeerNode();
+                //check if became DHT capable
+                assignDHTMode();
             }
         };            
         timer = backgroundExecutor.scheduleWithFixedDelay(task, 0, TIMER_DELAY, TimeUnit.MILLISECONDS);
@@ -251,26 +245,27 @@ public class NodeAssigner {
      */
     private void assignUltrapeerNode() {
         if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
+            LOG.debug("Ultrapeer mode disabled");
             UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
         }
         
         // If we're already an Ultrapeer then don't bother
         if (connectionServices.isSupernode()) {
+            LOG.debug("Already an ultrapeer, exiting");
             return;
         }
         
-        boolean isUltrapeerCapable = 
-            (_isHardcoreCapable &&
-            //AND is my average uptime OR current uptime high enough?
-                    //TODO: GET Average connection uptime here! 
-            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
-             _currentUptime >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue())
-             //AND I have accepted incoming messages over UDP
-             && networkManager.isGUESSCapable());
+        boolean avgUptimePasses = ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue();
+        boolean curUptimePasses = _currentUptime >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue();
+        boolean uptimePasses = avgUptimePasses | curUptimePasses;
         
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Node is "+(isUltrapeerCapable?"":"NOT")+" ultrapeer capable");
+        boolean isUltrapeerCapable = _isHardcoreCapable && uptimePasses && networkManager.isGUESSCapable();
+        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Node is ultrapeer capable: " + isUltrapeerCapable + "(hc: "
+                    + _isHardcoreCapable + ", up: " + uptimePasses + ", gc: "
+                    + networkManager.isGUESSCapable());
         }
 
         long curTime = System.currentTimeMillis();

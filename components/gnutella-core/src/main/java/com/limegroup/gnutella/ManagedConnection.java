@@ -1276,7 +1276,7 @@ public class ManagedConnection extends Connection
             }
 
             // do i need to send any ConnectBack messages????
-            if (!udpService.canReceiveUnsolicited() &&
+            if (!networkManager.canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPRedirect() > -1)) {
                 GUID connectBackGUID = networkManager.getUDPConnectBackGUID();

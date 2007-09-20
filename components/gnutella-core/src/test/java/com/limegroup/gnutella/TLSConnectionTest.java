@@ -57,7 +57,7 @@ public class TLSConnectionTest extends LimeTestCase {
     
     public void setUp() throws Exception {
         setSettings();
-        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getHostCatcher().clear();
         ProviderHacks.getConnectionManager().disconnect(false);
         ProviderHacks.getConnectionManager().connect();
     }

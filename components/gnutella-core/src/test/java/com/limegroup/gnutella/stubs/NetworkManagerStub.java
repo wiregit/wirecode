@@ -13,6 +13,9 @@ public class NetworkManagerStub implements NetworkManager {
     private int port;
     private boolean ipPortValid;
     private GUID solicitedGUID;    
+    private boolean canReceiveSolicited;
+    private boolean canReceiveUnsolicited;
+    private boolean guessCapable;
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -33,13 +36,11 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public boolean canReceiveSolicited() {
-        // TODO Auto-generated method stub
-        return false;
+        return canReceiveSolicited;
     }
 
     public boolean canReceiveUnsolicited() {
-        // TODO Auto-generated method stub
-        return false;
+        return canReceiveUnsolicited;
     }
 
     public void setAddress(byte[] address) {
@@ -84,8 +85,7 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public boolean isGUESSCapable() {
-        // TODO Auto-generated method stub
-        return false;
+        return guessCapable;
     }
 
     public boolean isIpPortValid() {
@@ -121,6 +121,19 @@ public class NetworkManagerStub implements NetworkManager {
     public int supportsFWTVersion() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    public void setCanReceiveSolicited(boolean canReceiveSolicited) {
+        this.canReceiveSolicited = canReceiveSolicited;
+    }
+
+
+    public void setCanReceiveUnsolicited(boolean canReceiveUnsolicited) {
+        this.canReceiveUnsolicited = canReceiveUnsolicited;
+    }
+
+    public void setGuessCapable(boolean b) {
+        guessCapable = b;
     }
 
 }

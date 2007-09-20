@@ -126,13 +126,6 @@ public class LimeTestUtils {
 	}
 
     /**
-     * Clears the hostcatcher.
-     */
-    public static void clearHostCatcher() {
-        ProviderHacks.getHostCatcher().clear();
-    }
-
-    /**
      * Creates the Guice injector with the limewire default modules and the 
      * test module that can override bindings in the former modules.
      * 
@@ -147,7 +140,7 @@ public class LimeTestUtils {
         list.add(new ModuleHacks());
         Injector injector = Guice.createInjector(list);
         
-        ProviderHacks.setLimeWireCore(injector.getInstance(LimeWireCore.class));        
+        ProviderHacks.markUnusable();        
         
         return injector;
     }

@@ -115,7 +115,7 @@ public class CreationTimeCacheTest
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
         ProviderHacks.getLifecycleManager().start();
-        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getHostCatcher().clear();
         ProviderHacks.getConnectionServices().connect();
         Thread.sleep(1000);
         assertEquals("unexpected port",

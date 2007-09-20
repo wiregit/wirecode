@@ -101,7 +101,7 @@ public class LeafRoutingTest extends LimeTestCase {
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         ProviderHacks.getLifecycleManager().start();
         ProviderHacks.getConnectionServices().connect();
-        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getHostCatcher().clear();
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         connect();

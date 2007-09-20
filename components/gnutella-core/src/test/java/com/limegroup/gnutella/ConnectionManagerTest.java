@@ -72,7 +72,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                                     "_catcher",CATCHER);
              
         ProviderHacks.getLifecycleManager().start();
-        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getHostCatcher().clear();
     }
 
     public void setUp() throws Exception {
@@ -103,7 +103,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     public void tearDown() throws Exception {
         //Kill all connections
         ProviderHacks.getConnectionServices().disconnect();
-        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getHostCatcher().clear();
         Thread.sleep(500);
     }
     

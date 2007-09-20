@@ -106,7 +106,7 @@ public abstract class ClientSideTestCase
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         ProviderHacks.getLifecycleManager().start();
-        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getHostCatcher().clear();
         ProviderHacks.getConnectionServices().connect();
         //Thread.sleep(2000);
         assertEquals("unexpected port",

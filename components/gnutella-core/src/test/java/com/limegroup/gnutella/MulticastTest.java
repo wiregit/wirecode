@@ -97,7 +97,7 @@ public class MulticastTest extends LimeTestCase {
         setSettings();
                 
         ProviderHacks.getLifecycleManager().start();
-		LimeTestUtils.clearHostCatcher();
+		ProviderHacks.getHostCatcher().clear();
 		ProviderHacks.getConnectionServices().connect();
         
         // MUST SLEEP TO LET THE FILE MANAGER INITIALIZE
