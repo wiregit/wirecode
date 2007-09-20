@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.ConnectionDispatcher;
@@ -105,7 +103,7 @@ public class ProviderHacks {
     
     public static void markUnusable() {
         if(used)
-            throw new IllegalStateException("already init'd/used", initializedSource);
+            throw new IllegalStateException("already used", initializedSource);
         unusable = true;
         initializedSource = new Exception();
     }

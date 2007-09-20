@@ -99,8 +99,10 @@ public class NodeAssignerTest extends LimeTestCase {
     }
 
     protected void tearDown() throws Exception {
-        testAcceptor.shutdown();
-        injector.getInstance(ConnectionServices.class).disconnect();
+        if(testAcceptor != null)
+            testAcceptor.shutdown();
+        if(injector != null)
+            injector.getInstance(ConnectionServices.class).disconnect();
         Thread.sleep(1000);
     }
         
