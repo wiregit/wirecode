@@ -17,11 +17,12 @@ import org.limewire.io.IpPortSet;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.helpers.AlternateLocationHelper;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -53,6 +54,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
         "172.31.40.24:6352",
     };
     
+    private AlternateLocationHelper alternateLocationHelper;
 
     private static String HASH = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
 
@@ -74,6 +76,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
     
     public void setUp() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
+        alternateLocationHelper = new AlternateLocationHelper(ProviderHacks.getAlternateLocationFactory());
     }
 
 	/**
@@ -81,12 +84,12 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 	 * file desc.
 	 */
 	public void testRemoteFileDescConstructor() throws Exception {
-		for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+		for(int i=0; i<UrnHelper.URNS.length; i++) {
 			RemoteFileDesc rfd = 
 				new RemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
-								   HugeTestUtils.URNS[i].httpStringValue(), 10, 
+								   UrnHelper.URNS[i].httpStringValue(), 10, 
 								   GUID.makeGuid(), 10, true, 2, true, null, 
-								   HugeTestUtils.URN_SETS[i],
+								   UrnHelper.URN_SETS[i],
                                    false,false,"",null, -1, false);
 
             // just make sure this doesn't throw an exception
@@ -97,9 +100,9 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 
         RemoteFileDesc rfd = 
             new RemoteFileDesc("127.0.2.1", 6346, 10, HTTPConstants.URI_RES_N2R+
-                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   UrnHelper.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
-                                   HugeTestUtils.URN_SETS[0],
+                                   UrnHelper.URN_SETS[0],
                                    false,false,"",null, -1, false);
 
         ProviderHacks.getAlternateLocationFactory().create(rfd);
@@ -118,9 +121,9 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
         ProviderHacks.getPushEndpointFactory().createPushEndpoint(GUID.makeGuid(), proxies);
         //test an rfd with push proxies
         RemoteFileDesc fwalled = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
-                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   UrnHelper.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
-                                   HugeTestUtils.URN_SETS[0],
+                                   UrnHelper.URN_SETS[0],
                                    false,true,"",proxies,-1, false);
         
         AlternateLocation loc = ProviderHacks.getAlternateLocationFactory().create(fwalled);
@@ -132,9 +135,9 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
         
         // test rfd with push proxies, external address that can do FWT
         RemoteFileDesc FWTed = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
-                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   UrnHelper.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
-                                   HugeTestUtils.URN_SETS[0],
+                                   UrnHelper.URN_SETS[0],
                                    false,true,"",proxies,-1,1, false);
         
         loc = ProviderHacks.getAlternateLocationFactory().create(FWTed);
@@ -154,8 +157,8 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 	 * location.
 	 */
 	public void testCreateRemoteFileDesc() throws Exception{
-		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
-			DirectAltLoc al = (DirectAltLoc) HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i];
+		for(int i=0; i<alternateLocationHelper.UNEQUAL_SHA1_LOCATIONS.length; i++) {
+			DirectAltLoc al = (DirectAltLoc) alternateLocationHelper.UNEQUAL_SHA1_LOCATIONS[i];
 			RemoteFileDesc rfd = al.createRemoteFileDesc(10);
 			assertEquals("SHA1s should be equal", al.getSHA1Urn(), rfd.getSHA1Urn());
 			assertEquals("hosts should be equals",al.getHost().getAddress(),
@@ -171,9 +174,9 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
         ProviderHacks.getPushEndpointFactory().createPushEndpoint(GUID.makeGuid(), proxies);
         //test an rfd with push proxies
         RemoteFileDesc fwalled = new RemoteFileDesc("1.2.3.4",5,10,HTTPConstants.URI_RES_N2R+
-                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   UrnHelper.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
-                                   HugeTestUtils.URN_SETS[0],
+                                   UrnHelper.URN_SETS[0],
                                    false,true,"",proxies,-1, false);
         
         AlternateLocation loc = ProviderHacks.getAlternateLocationFactory().create(fwalled);
@@ -195,9 +198,9 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
         ProviderHacks.getPushEndpointFactory().createPushEndpoint(GUID.makeGuid(), proxies);
         //test an rfd with push proxies
         RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
-                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   UrnHelper.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
-                                   HugeTestUtils.URN_SETS[0],
+                                   UrnHelper.URN_SETS[0],
                                    false,true,"",proxies,-1, false);
 
         AlternateLocation loc = ProviderHacks.getAlternateLocationFactory().create(fwalled);
@@ -421,26 +424,26 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
      * firewalled locations and accepting non-firewalled locations.
      */
     public void testAlternateLocationToMakeSureItDisallowsFirewalledHosts() throws Exception {
-        for(int i=0; i<HugeTestUtils.FIREWALLED_IPS.length; i++) {
-            String loc = HugeTestUtils.FIREWALLED_IPS[i];
+        for(int i=0; i<AlternateLocationTest.FIREWALLED_LOCS.length; i++) {
+            String loc = AlternateLocationTest.FIREWALLED_LOCS[i];
             try {
-                ProviderHacks.getAlternateLocationFactory().create(loc, HugeTestUtils.URNS[0]);
+                ProviderHacks.getAlternateLocationFactory().create(loc, UrnHelper.URNS[0]);
                 fail("alt loc should not have accepted firewalled loc: "+loc);
             } catch(IOException e) {
                 // this is expected 
             }
         }
 
-        for(int i=0; i<HugeTestUtils.SOME_IPS.length; i++) {
-            String loc = HugeTestUtils.SOME_IPS[i];
-            ProviderHacks.getAlternateLocationFactory().create(loc, HugeTestUtils.URNS[0]);
+        for(int i=0; i<alternateLocationHelper.SOME_IPS.length; i++) {
+            String loc = alternateLocationHelper.SOME_IPS[i];
+            ProviderHacks.getAlternateLocationFactory().create(loc, UrnHelper.URNS[0]);
         }
     }
     
     public void testAlternateLocationKeepsTLSInfo() throws Exception {
-        for(int i = 0; i < HugeTestUtils.SOME_IPS.length; i++) {
-            AlternateLocation nonTLS = ProviderHacks.getAlternateLocationFactory().create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.SHA1, false);
-            AlternateLocation tls = ProviderHacks.getAlternateLocationFactory().create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.SHA1, true);
+        for(int i = 0; i < alternateLocationHelper.SOME_IPS.length; i++) {
+            AlternateLocation nonTLS = ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[i], UrnHelper.SHA1, false);
+            AlternateLocation tls = ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[i], UrnHelper.SHA1, true);
             
             DirectAltLoc d1 = (DirectAltLoc)nonTLS;
             DirectAltLoc d2 = (DirectAltLoc)tls;

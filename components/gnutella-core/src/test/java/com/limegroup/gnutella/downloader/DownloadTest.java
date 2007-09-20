@@ -42,7 +42,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.ProviderHacks;
@@ -55,6 +54,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.helpers.AlternateLocationHelper;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -169,7 +170,7 @@ public class DownloadTest extends LimeTestCase {
                 dm.measureBandwidth();
             }
         };
-
+        
         ProviderHacks.getBackgroundExecutor().scheduleWithFixedDelay(click,0,NodeAssigner.TIMER_DELAY, TimeUnit.MILLISECONDS);
         ProviderHacks.getLifecycleManager().start();
     } 
@@ -1674,6 +1675,8 @@ public class DownloadTest extends LimeTestCase {
 
     public void testWeirdAlternateLocations() throws Exception {  
         LOG.info("-Testing AlternateLocation weird...");
+        AlternateLocationHelper alternateLocationHelper =
+            new AlternateLocationHelper(ProviderHacks.getAlternateLocationFactory());
         
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1,TestFile.hash().toString(), false);
         RemoteFileDesc[] rfds = {rfd1};
@@ -1682,12 +1685,12 @@ public class DownloadTest extends LimeTestCase {
         //Prebuild some uploader alts
         AlternateLocationCollection ualt = 
             AlternateLocationCollection.create(
-                HugeTestUtils.EQUAL_SHA1_LOCATIONS[0].getSHA1Urn());
+                    alternateLocationHelper.EQUAL_SHA1_LOCATIONS[0].getSHA1Urn());
 
-        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
-        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
-        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
-        ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
+        ualt.add(alternateLocationHelper.EQUAL_SHA1_LOCATIONS[0]);
+        ualt.add(alternateLocationHelper.EQUAL_SHA1_LOCATIONS[1]);
+        ualt.add(alternateLocationHelper.EQUAL_SHA1_LOCATIONS[2]);
+        ualt.add(alternateLocationHelper.EQUAL_SHA1_LOCATIONS[3]);
         uploader1.setGoodAlternateLocations(ualt);
 
         saveAltLocs = true;
@@ -1699,9 +1702,9 @@ public class DownloadTest extends LimeTestCase {
         
         AlternateLocation agood = ProviderHacks.getAlternateLocationFactory().create(rfd1);
         assertTrue(validAlts.contains(agood)); 
-        assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0])); 
-        assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1])); 
-        assertFalse(validAlts.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
+        assertFalse(validAlts.contains(alternateLocationHelper.EQUAL_SHA1_LOCATIONS[0])); 
+        assertFalse(validAlts.contains(alternateLocationHelper.EQUAL_SHA1_LOCATIONS[1])); 
+        assertFalse(validAlts.contains(alternateLocationHelper.EQUAL_SHA1_LOCATIONS[2]));
         
         // ManagedDownloader clears validAlts and invalidAlts after completion
         assertEquals(DownloadStatus.COMPLETE, DOWNLOADER.getState());
@@ -2869,7 +2872,7 @@ public class DownloadTest extends LimeTestCase {
         }
         
         private void handleNoFile(SocketAddress from,GUID g) {
-            HeadPing ping = new HeadPing(g,HugeTestUtils.SHA1,0);
+            HeadPing ping = new HeadPing(g,UrnHelper.SHA1,0);
             HeadPong pong = ProviderHacks.getHeadPongFactory().create(ping);
             assertFalse(pong.hasFile());
             try {

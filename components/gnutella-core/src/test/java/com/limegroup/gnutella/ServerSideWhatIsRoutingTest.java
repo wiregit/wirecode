@@ -10,6 +10,7 @@ import junit.framework.Test;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -202,7 +203,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF.send((RouteTableMessage)iter.next());
 			LEAF.flush();

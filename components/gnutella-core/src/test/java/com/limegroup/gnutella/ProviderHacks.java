@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.ConnectionDispatcher;
@@ -93,26 +95,41 @@ public class ProviderHacks {
     
     private static volatile boolean initialized = false;
     private static volatile boolean initializing = false;
+    private static volatile boolean used = false;
+    
+    private static volatile Object initializedSource;
+    private static volatile Object usedSource;
     
     private static LimeWireCore aReallyLongNameThatYouDontWantToTypeALot;
     
     public static void setLimeWireCore(LimeWireCore core) {
-        if(initialized || initializing)
-            throw new IllegalStateException("already initialized, or initializing!");
+        if(used)
+            throw new IllegalStateException("already initialized, or initializing!  last init'd by: " + initializedSource + ", last used by: " + usedSource);
         ProviderHacks.aReallyLongNameThatYouDontWantToTypeALot = core;
+        initializedSource = getSourceFromException(new Exception(), "install");
         initialized = true;
     }
     
+    private static String getSourceFromException(Throwable t, String type) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        pw.flush();
+        return "\n\t" + sw.toString() + "\t<<end of " + type + " trace>>";
+    }
+    
     private static LimeWireCore i() {
-        if(initialized)
+        used = true;        
+        if(initialized) {
+            usedSource = getSourceFromException(new Exception(), "use");
             return aReallyLongNameThatYouDontWantToTypeALot;
+        }
         if(initializing)
             throw new IllegalStateException("already initializing!");
         initializing = true;
-        aReallyLongNameThatYouDontWantToTypeALot = 
-            Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class), new ModuleHacks()).getInstance(LimeWireCore.class);
+        aReallyLongNameThatYouDontWantToTypeALot = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class), new ModuleHacks()).getInstance(LimeWireCore.class);
+        initializedSource = getSourceFromException(new Exception(), "install");
         initializing = false;
-        initialized = true;
         return aReallyLongNameThatYouDontWantToTypeALot;
     }
     

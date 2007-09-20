@@ -16,6 +16,7 @@ import junit.framework.Test;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
 
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -113,7 +114,7 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[0].send((RouteTableMessage)iter.next());
 			LEAF[0].flush();

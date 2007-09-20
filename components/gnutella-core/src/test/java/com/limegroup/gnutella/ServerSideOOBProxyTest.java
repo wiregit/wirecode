@@ -17,6 +17,7 @@ import junit.framework.Test;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -95,7 +96,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("stanford");
         qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[0].send((RouteTableMessage)iter.next());
 			LEAF[0].flush();
@@ -103,7 +104,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         qrt = new QueryRouteTable();
         qrt.add("stanford");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[1].send((RouteTableMessage)iter.next());
 			LEAF[1].flush();

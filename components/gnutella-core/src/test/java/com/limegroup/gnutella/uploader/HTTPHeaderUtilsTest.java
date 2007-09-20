@@ -18,11 +18,11 @@ import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.HackConnectionManager;
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.StrictIpPortSet;
@@ -164,7 +164,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
                 tls = true;
                 loc = loc.substring(1);
             }
-            alts.add((DirectAltLoc)ProviderHacks.getAlternateLocationFactory().create(loc, HugeTestUtils.SHA1, tls));
+            alts.add((DirectAltLoc)ProviderHacks.getAlternateLocationFactory().create(loc, UrnHelper.SHA1, tls));
         }
         return alts;
     }

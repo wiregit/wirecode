@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -204,7 +205,7 @@ public final class PongCachingTest extends LimeTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("test");
         qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF.send((RouteTableMessage)iter.next());
 			LEAF.flush();

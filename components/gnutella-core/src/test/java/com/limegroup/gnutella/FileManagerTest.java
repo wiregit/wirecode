@@ -26,6 +26,7 @@ import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
@@ -361,7 +362,7 @@ public class FileManagerTest extends LimeTestCase {
         
         // add one incomplete file and make sure the numbers go up.
         Set<URN> urns = new UrnSet();
-        urns.add( HugeTestUtils.URNS[0] );
+        urns.add( UrnHelper.URNS[0] );
         fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
@@ -378,7 +379,7 @@ public class FileManagerTest extends LimeTestCase {
             
         // add another incomplete file with another hash, it should be added.
         urns = new UrnSet();
-        urns.add( HugeTestUtils.URNS[1] );
+        urns.add( UrnHelper.URNS[1] );
         fman.addIncompleteFile(new File("c"), urns, "c", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
@@ -395,10 +396,10 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         Set<URN> urns = new UrnSet();
-        urns.add( HugeTestUtils.URNS[0] );
+        urns.add( UrnHelper.URNS[0] );
         fman.addIncompleteFile(new File("a"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         urns = new UrnSet();
-        urns.add( HugeTestUtils.URNS[1] );
+        urns.add( UrnHelper.URNS[1] );
         fman.addIncompleteFile(new File("b"), urns, "b", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
             
@@ -421,7 +422,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         Set<URN> urns = new UrnSet();
-        URN urn = HugeTestUtils.URNS[0];
+        URN urn = UrnHelper.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(new File("sambe"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());            
@@ -444,7 +445,7 @@ public class FileManagerTest extends LimeTestCase {
             0, fman.getNumPendingFiles());
             
         Set<URN> urns = new UrnSet();
-        URN urn = HugeTestUtils.URNS[0];
+        URN urn = UrnHelper.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(new File("sambe"), urns, "a", 0, ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());

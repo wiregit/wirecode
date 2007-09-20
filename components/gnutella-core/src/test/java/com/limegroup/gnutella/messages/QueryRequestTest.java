@@ -18,10 +18,10 @@ import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.QueryRequestImpl.QueryRequestPayloadParser;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -38,6 +38,27 @@ public final class QueryRequestTest extends LimeTestCase {
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
             "<audio title=\"xml\" artist=\"bloat\"/></audios>";
+
+    private static final String[] QUERY_STRINGS = {
+    	"try this",
+    	"file",
+    	"different file",
+    	"file.mp3",
+    	"urn",
+    	"urnsha1",
+    	"good file",
+    	"maybe this",
+    	"this one too",
+    	"how about this one",
+    	"file.file",
+    	"the best file ever",
+    	"big file",
+    	"little file",
+    	"random file",
+    	"first file",
+    	"old file",
+    	"new file"
+    };
 	
 	/**
 	 * Constructs a new test instance for query requests.
@@ -72,12 +93,12 @@ public final class QueryRequestTest extends LimeTestCase {
 	public void testQueriesFromNetworkWithGGEP() {
 		try {
 			ByteArrayOutputStream[] baos = 
-			    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
-			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+			    new ByteArrayOutputStream[UrnHelper.URNS.length];
+			for(int i=0; i<UrnHelper.URNS.length; i++) {
 				baos[i] = new ByteArrayOutputStream();
 				baos[i].write(0);
 				baos[i].write(0);
-				baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
+				baos[i].write(QueryRequestTest.QUERY_STRINGS[i].getBytes());
 				baos[i].write(0);
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
@@ -102,7 +123,7 @@ public final class QueryRequestTest extends LimeTestCase {
 				}
 				assertEquals("speeds should be equal", 0, qr.getMinSpeed());
 				assertEquals("queries should be equal", 
-							 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
+							 QueryRequestTest.QUERY_STRINGS[i], qr.getQuery());
 				Set queryUrns = qr.getQueryUrns();
                 assertEquals("should not have any URNs", 0, queryUrns.size());
 
@@ -212,18 +233,18 @@ public final class QueryRequestTest extends LimeTestCase {
 		} catch(IllegalArgumentException e) {}
 
 		try {
-			ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)-1);
+			ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1, (byte)-1);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 		try {
-			ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)8);
+			ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1, (byte)8);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 
 	    ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);
-		ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)1);
+		ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1, (byte)1);
 		ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)3);
-		ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)3);
+		ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1, (byte)3);
 
 	}
 
@@ -247,7 +268,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		baos.write(0); // first null
 		
 		// no encoding problems in english
-		baos.write(HugeTestUtils.URNS[0].toString().getBytes()); 		
+		baos.write(UrnHelper.URNS[0].toString().getBytes()); 		
 		baos.write(0); // last null
 
 		ProviderHacks.getQueryRequestFactory().createNetworkQuery(
@@ -302,18 +323,18 @@ public final class QueryRequestTest extends LimeTestCase {
      */
 	public void testThatNetworkQueriesWithURNsAreAccepted() throws Exception {
 		ByteArrayOutputStream[] URN_BYTES = 
-		    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
-		for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+		    new ByteArrayOutputStream[UrnHelper.URNS.length];
+		for(int i=0; i<UrnHelper.URNS.length; i++) {
 			URN_BYTES[i] = new ByteArrayOutputStream();
 			URN_BYTES[i].write(0);
 			URN_BYTES[i].write(0);
-			URN_BYTES[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
+			URN_BYTES[i].write(QueryRequestTest.QUERY_STRINGS[i].getBytes());
 			URN_BYTES[i].write(0);
 			Set curUrnSet = new HashSet();
-			for(int j=i; j<HugeTestUtils.URNS.length; j++) {
-				URN_BYTES[i].write(HugeTestUtils.URNS[j].toString().getBytes());
-				curUrnSet.add(HugeTestUtils.URNS[j]);
-				if((j+1) != HugeTestUtils.URNS.length) {
+			for(int j=i; j<UrnHelper.URNS.length; j++) {
+				URN_BYTES[i].write(UrnHelper.URNS[j].toString().getBytes());
+				curUrnSet.add(UrnHelper.URNS[j]);
+				if((j+1) != UrnHelper.URNS.length) {
 					URN_BYTES[i].write(0x1c);
 				}
 			}
@@ -323,7 +344,7 @@ public final class QueryRequestTest extends LimeTestCase {
         byte ttl = 4;
         byte hops = 2;
 
-        for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+        for(int i=0; i<UrnHelper.URNS.length; i++) {
             try {
                 ProviderHacks.getQueryRequestFactory().createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     URN_BYTES[i].toByteArray(), 
@@ -336,7 +357,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
 
     public void testQueriesWithOnlyURNsAreAccepted() throws Exception {
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.SHA1);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(UrnHelper.SHA1);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         qr.write(baos);
 
@@ -351,15 +372,15 @@ public final class QueryRequestTest extends LimeTestCase {
      */
 	public void testThatWellFormedNetworkQueriesAreAccepted() throws Exception {
 		ByteArrayOutputStream[] baos = 
-		    new ByteArrayOutputStream[HugeTestUtils.QUERY_STRINGS.length];
+		    new ByteArrayOutputStream[QueryRequestTest.QUERY_STRINGS.length];
 
         byte ttl = 4;
         byte hops = 2;
-		for(int i=0; i<HugeTestUtils.QUERY_STRINGS.length; i++) {
+		for(int i=0; i<QueryRequestTest.QUERY_STRINGS.length; i++) {
 			baos[i] = new ByteArrayOutputStream();
 			baos[i].write(0);
 			baos[i].write(0);
-			baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
+			baos[i].write(QueryRequestTest.QUERY_STRINGS[i].getBytes());
 			baos[i].write(0);
 			baos[i].write(0);
 			QueryRequest qr = ProviderHacks.getQueryRequestFactory().createNetworkQuery(
@@ -370,7 +391,7 @@ public final class QueryRequestTest extends LimeTestCase {
             assertEquals("incorrect ttl", ttl, qr.getTTL());
 			assertEquals("speeds should be equal", 0, qr.getMinSpeed());
 			assertEquals("queries should be equal", 
-						 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
+						 QueryRequestTest.QUERY_STRINGS[i], qr.getQuery());
 
             // we don't currently verify this -- should we accept queries
             // that don't ask for URNs??
@@ -423,19 +444,19 @@ public final class QueryRequestTest extends LimeTestCase {
 	 */
 	public void testUrnQueryConstructors() {
 		Set urnSet = new HashSet();
-		urnSet.add(HugeTestUtils.SHA1);
-		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1);
+		urnSet.add(UrnHelper.SHA1);
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1);
 
 		runStandardChecks(qr, qr.getQueryUrns());
 		runRequeryChecks(qr);
 
 
-		qr = ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)4);
+		qr = ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1, (byte)4);
 		runStandardChecks(qr, qr.getQueryUrns());
 		runRequeryChecks(qr);
 		assertEquals("TTLs should be equal", (byte)4, qr.getTTL());
 
-		qr = ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.SHA1);
+		qr = ProviderHacks.getQueryRequestFactory().createQuery(UrnHelper.SHA1);
 		runStandardChecks(qr, qr.getQueryUrns());
 		runNonRequeryChecks(qr);
 	}

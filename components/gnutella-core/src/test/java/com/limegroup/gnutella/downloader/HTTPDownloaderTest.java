@@ -32,11 +32,11 @@ import org.limewire.io.IpPortSet;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
@@ -75,10 +75,10 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                         boolean failed = false;
                         AlternateLocation loc;            
                         if(i == 25 || i == 30 || Math.random() < 0.5) {
-                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, HugeTestUtils.URNS[0], true);
+                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, UrnHelper.URNS[0], true);
                             tls = true;
                         } else {
-                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, HugeTestUtils.URNS[0], false);
+                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, UrnHelper.URNS[0], false);
                         }
                         
                         if(i != 30 && (i == 25 || Math.random() < 0.5)) {
@@ -362,7 +362,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 1,
                                                 false,
                                                 null,
-                                                HugeTestUtils.URN_SETS[0],
+                                                UrnHelper.URN_SETS[0],
                                                 false,
                                                 false,
                                                 "TEST",
@@ -390,14 +390,14 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         assertGreaterThan(0, amtRead);
         
         String headers = new String(read, 0, amtRead);
-        return parseHeaders(headers, "GET /uri-res/N2R?" + HugeTestUtils.URNS[0].httpStringValue() + " HTTP/1.1");
+        return parseHeaders(headers, "GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue() + " HTTP/1.1");
     }
     
     private Map<String, String> parseHeaders(String headers, String firstLine) throws Exception {
         BufferedReader reader = new BufferedReader(new StringReader(headers));
         String line = reader.readLine();
         Map map = new HashMap();
-        assertEquals("GET /uri-res/N2R?" + HugeTestUtils.URNS[0].httpStringValue() + " HTTP/1.1", line);
+        assertEquals("GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue() + " HTTP/1.1", line);
         while( (line = reader.readLine()) != null && line.length() != 0) {
             int colon = line.indexOf(":");
             assertNotEquals("couldn't find colon, line is: " + line, -1, colon);
@@ -422,7 +422,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 1,
                                                 false,
                                                 null,
-                                                HugeTestUtils.URN_SETS[0],
+                                                UrnHelper.URN_SETS[0],
                                                 false,
                                                 false,
                                                 "TEST",

@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -195,7 +196,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("test");
         qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF.send((RouteTableMessage)iter.next());
 			LEAF.flush();
@@ -361,7 +362,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 
 	public void testUrnQueryToLeaf() throws Exception {
 		QueryRequest qr = 
-			ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.UNIQUE_SHA1);
+			ProviderHacks.getQueryRequestFactory().createQuery(UrnHelper.UNIQUE_SHA1);
 
 		ULTRAPEER_2.send(qr);
 		ULTRAPEER_2.flush();
@@ -486,7 +487,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 	public void testThatURNOnlyQueryDoesNotGetImproperlyForwarded() 
 		throws Exception {
 		QueryRequest qr = 
-			ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1);
+			ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1);
 
 		ULTRAPEER_1.send(qr);
 		ULTRAPEER_1.flush();
@@ -503,7 +504,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 
 		// now test to make sure that query routing on the last hop
 		// is working correctly for URN queries
-		qr = ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1, (byte)2);
+		qr = ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1, (byte)2);
 
 		ULTRAPEER_1.send(qr);
 		ULTRAPEER_1.flush();
@@ -518,7 +519,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 	 */
 	public void testUrnQueryFromLeaf() throws Exception {
 		QueryRequest qr = 
-			ProviderHacks.getQueryRequestFactory().createRequery(HugeTestUtils.SHA1);
+			ProviderHacks.getQueryRequestFactory().createRequery(UrnHelper.SHA1);
 
 		LEAF.send(qr);
 		LEAF.flush();

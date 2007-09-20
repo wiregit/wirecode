@@ -145,7 +145,11 @@ public class LimeTestUtils {
         list.addAll(Arrays.asList(modules));
         list.add(new LimeWireCoreModule(callbackClass));
         list.add(new ModuleHacks());
-        return Guice.createInjector(list);
+        Injector injector = Guice.createInjector(list);
+        
+        ProviderHacks.setLimeWireCore(injector.getInstance(LimeWireCore.class));        
+        
+        return injector;
     }
 
     /**

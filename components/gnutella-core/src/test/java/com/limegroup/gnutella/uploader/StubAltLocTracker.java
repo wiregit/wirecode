@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.AltLocTracker;
 
 class StubAltLocTracker extends AltLocTracker {
@@ -19,7 +19,7 @@ class StubAltLocTracker extends AltLocTracker {
     private Collection<PushAltLoc> nextSetOfPushAltsToSend = null;
 
     public StubAltLocTracker() {
-        super(HugeTestUtils.SHA1);
+        super(UrnHelper.SHA1);
     }
     
     public StubAltLocTracker(URN urn) {

@@ -11,8 +11,8 @@ import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -169,8 +169,8 @@ public class DuplicateFilterTest extends LimeTestCase {
         
     public void testURNDuplicate() throws Exception  {
         context.checking(new Expectations() {{
-            exactly(2).of(qr).getQueryUrns(); will(returnValue(Collections.singleton(HugeTestUtils.SHA1)));
-            exactly(3).of(qr).getQueryUrns(); will(returnValue(Collections.singleton(HugeTestUtils.UNIQUE_SHA1)));
+            exactly(2).of(qr).getQueryUrns(); will(returnValue(Collections.singleton(UrnHelper.SHA1)));
+            exactly(3).of(qr).getQueryUrns(); will(returnValue(Collections.singleton(UrnHelper.UNIQUE_SHA1)));
         }});
         addDefaultReturnValues();
         

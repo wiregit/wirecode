@@ -30,7 +30,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
@@ -45,6 +44,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -543,7 +543,7 @@ public class HeadTest extends LimeTestCase {
 		RemoteFileDesc dummy = 
 			new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
 			        		10, GUID.makeGuid(), 10, true, 2, true, null, 
-							   HugeTestUtils.URN_SETS[1],
+							   UrnHelper.URN_SETS[1],
                                false,false,"",null, -1, false);
 		
 		Set received = pong1.getAllLocsRFD(dummy);
@@ -598,7 +598,7 @@ public class HeadTest extends LimeTestCase {
         RemoteFileDesc dummy = 
             new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
                             10, GUID.makeGuid(), 10, true, 2, true, null, 
-                               HugeTestUtils.URN_SETS[1],
+                               UrnHelper.URN_SETS[1],
                                false,false,"",null, -1, false);
         
         Set rfds = pong.getAllLocsRFD(dummy);
@@ -645,7 +645,7 @@ public class HeadTest extends LimeTestCase {
         RemoteFileDesc dummy = 
             new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
                             10, GUID.makeGuid(), 10, true, 2, true, null, 
-                               HugeTestUtils.URN_SETS[1],
+                               UrnHelper.URN_SETS[1],
                                false,false,"",null, -1, false);
         
         Set rfds = pong.getAllLocsRFD(dummy);

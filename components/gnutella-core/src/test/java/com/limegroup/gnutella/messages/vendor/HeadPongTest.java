@@ -25,7 +25,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
@@ -35,6 +34,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -514,13 +514,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         SSLSettings.TLS_INCOMING.setValue(false);
         networkManager.setAcceptedIncomingConnection(true);
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -551,13 +551,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         SSLSettings.TLS_INCOMING.setValue(true);
         networkManager.setAcceptedIncomingConnection(true);
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -589,13 +589,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         SSLSettings.TLS_INCOMING.setValue(true);
         networkManager.setAcceptedIncomingConnection(false);
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -655,11 +655,11 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -690,13 +690,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         // DPINJ this was moved to DownloadManager 
         //fd.setActivelyDownloading(true);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -727,11 +727,11 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         uploadManager.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
         
         HeadPong pong = headPongFactory.create(req);
@@ -762,11 +762,11 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         uploadManager.setNumQueuedUploads(3);
         
         HeadPong pong = headPongFactory.create(req);
@@ -797,11 +797,11 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue()-5);
         
         HeadPong pong = headPongFactory.create(req);
@@ -832,13 +832,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -877,13 +877,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -942,13 +942,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -979,13 +979,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         
         HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -1015,13 +1015,13 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -1056,27 +1056,27 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         GUID peGUID = new GUID(GUID.makeGuid());      
-        PushAltLoc firewalled = (PushAltLoc) alternateLocationFactory.create(peGUID.toHexString()+";1.2.3.4:5", HugeTestUtils.SHA1);
+        PushAltLoc firewalled = (PushAltLoc) alternateLocationFactory.create(peGUID.toHexString()+";1.2.3.4:5", UrnHelper.SHA1);
         firewalled.updateProxies(true);
         altLocManager.add(firewalled, null);
         
         GUID peTlsGUID = new GUID();
-        PushAltLoc tls = (PushAltLoc) alternateLocationFactory.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc tls = (PushAltLoc) alternateLocationFactory.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         tls.updateProxies(true);
         altLocManager.add(tls, null);
         
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
         altLocManager.add(fwt, null);
         
@@ -1195,28 +1195,28 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(true);
         req.setRequestsFWTOnlyPushLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         GUID peGUID = new GUID(GUID.makeGuid());      
-        PushAltLoc firewalled = (PushAltLoc)alternateLocationFactory.create(peGUID.toHexString()+";1.2.3.4:5", HugeTestUtils.SHA1);
+        PushAltLoc firewalled = (PushAltLoc)alternateLocationFactory.create(peGUID.toHexString()+";1.2.3.4:5", UrnHelper.SHA1);
         firewalled.updateProxies(true);
         altLocManager.add(firewalled, null);
         
         GUID peTlsGUID = new GUID();
-        PushAltLoc tls = (PushAltLoc)alternateLocationFactory.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc tls = (PushAltLoc)alternateLocationFactory.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         tls.updateProxies(true);
         altLocManager.add(tls, null);
         
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
         altLocManager.add(fwt, null);
         
@@ -1284,17 +1284,17 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
         altLocManager.add(fwt, null);
         
@@ -1330,18 +1330,18 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(false);
         req.setRequestsFWTOnlyPushLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
         altLocManager.add(fwt, null);
         
@@ -1377,17 +1377,17 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsAltLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", HugeTestUtils.SHA1);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", UrnHelper.SHA1);
             altLocManager.add(al, null);
         }
         
@@ -1445,17 +1445,17 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsAltLocs(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", HugeTestUtils.SHA1);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", UrnHelper.SHA1);
             altLocManager.add(al, null);
         }
         
@@ -1491,17 +1491,17 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsAltLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", HugeTestUtils.SHA1, i % 2 == 0);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", UrnHelper.SHA1, i % 2 == 0);
             altLocManager.add(al, null);
         }
         
