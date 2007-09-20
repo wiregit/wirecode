@@ -177,11 +177,14 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         if(!networkManager.acceptedIncomingConnection()) {
             code = HeadPong.FIREWALLED;
         }
+        
         if(fd instanceof IncompleteFileDesc) {
             code |= HeadPong.PARTIAL_FILE;
             
-            if (downloadManager.get().isActivelyDownloading(fd.getSHA1Urn()))
+            if (downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
                 code |= HeadPong.DOWNLOADING;
+            }
+            
         } else {
             code |= HeadPong.COMPLETE_FILE;
         }

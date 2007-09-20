@@ -23,6 +23,8 @@ import org.limewire.util.ByteOrder;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -50,10 +52,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public class HeadPongTest extends LimeTestCase {
         
-    private NetworkManagerStub networkManager;
     private FileManagerStub fileManager;
-    private UploadManagerStub uploadManager;
-    
     private HeadPongFactory headPongFactory;
     private Injector injector;
         
@@ -71,21 +70,21 @@ public class HeadPongTest extends LimeTestCase {
 
     public void setUp() throws Exception {
         SSLSettings.TLS_INCOMING.setValue(false);
-        
-        fileManager = new FileManagerStub();
-        uploadManager = new UploadManagerStub();
-        networkManager = new NetworkManagerStub();
-        
+                
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).toInstance(fileManager);
-                bind(UploadManager.class).toInstance(uploadManager);
-                bind(NetworkManager.class).toInstance(networkManager);
+                bind(FileManager.class).to(FileManagerStub.class);
+                bind(UploadManager.class).to(UploadManagerStub.class);
+                bind(NetworkManager.class).to(NetworkManagerStub.class);
+                bind(DownloadManager.class).to(DownloadManagerStub.class);
             }
         });
         
-        headPongFactory = injector.getInstance(HeadPongFactory.class);        
+        headPongFactory = injector.getInstance(HeadPongFactory.class);       
+        fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        networkManager.setAcceptedIncomingConnection(true);
 
         //altLocManager.purge();
     }
@@ -508,6 +507,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteBasicGGEPHeadPong() throws Exception {
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
@@ -545,6 +545,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteTLS() throws Exception {
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
@@ -583,6 +584,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testFirewalledBitAndDoesntWriteTLSIfFirewalled() throws Exception {
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
@@ -694,8 +696,8 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        // DPINJ this was moved to DownloadManager 
-        //fd.setActivelyDownloading(true);
+        DownloadManagerStub downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+        downloadManager.setActivelyDownloadingSet(fd.getUrns());
         fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
@@ -721,6 +723,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteBusyQueueStatus() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
@@ -756,6 +759,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteCorrectQueueStatus() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
@@ -791,6 +795,7 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteCorrectUploadsInProgressQueueStatus() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
