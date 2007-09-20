@@ -342,7 +342,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(IncomingConnectionHandler.class);
         //bind(ConnectionWatchdog.class);
         //bind(Pinger.class);
-        //bind(PongCacher.class);
+        bind(PongCacher.class).to(PongCacherImpl.class);
         //bind(UPnPManager.class);
         //bind(MutableGUIDFilter.class);
         //bind(LicenseCache.class);

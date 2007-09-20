@@ -1,9 +1,11 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -14,26 +16,46 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
 
-import org.limewire.collection.NameValue;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.io.IpPort;
-import org.limewire.security.SecurityToken;
+import org.limewire.io.IpPortImpl;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.messages.GGEP;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -53,8 +75,12 @@ public final class MessageRouterImplTest extends LimeTestCase {
     /**
      * Handle to the <tt>MessageRouter</tt> for all tests to use
      */
-    private static MessageRouter ROUTER;
+    private MessageRouterImpl messageRouterImpl;
+    
+    private TestConnectionManager connectionManager;
 
+    private Mockery context;
+    
     private static final int NUM_CONNECTIONS = 20;
 
     /**
@@ -75,56 +101,76 @@ public final class MessageRouterImplTest extends LimeTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}  
+	
+	@Override
+	protected void setUp() throws Exception {
+	    context = new Mockery();
+	}
 
-    public static void globalSetUp() throws Exception {
-        ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());
-        //TestConnectionManager tcm = new TestConnectionManager(4);
-        //PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        ROUTER = ProviderHacks.getMessageRouter();
-        ROUTER.initialize();
-        Thread.sleep(5000);
+	/**
+     * Helper method to configure the injector and return it. It also sets 
+     * 
+     * Neeeded as each test method needs its own participants. 
+     */
+    private Injector createInjectorAndInitialize(Module... modules) {
+        Injector injector = LimeTestUtils.createInjector(modules);
+        messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
+        messageRouterImpl.initialize();
+        return injector;
     }
-
-
+    
+    /**
+     * Calls {@link #createInjectorAndInitialize(Module...)} and with a module
+     * that sets up the TestConnectionManager. 
+     */
+    private Injector createDefaultInjector(Module... modules) {
+        Module m = new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ConnectionManager.class).to(TestConnectionManager.class);
+            }
+        };
+        List<Module> list = new ArrayList<Module>();
+        list.addAll(Arrays.asList(modules));
+        list.add(m);
+        Injector injector = createInjectorAndInitialize(list.toArray(new Module[0]));
+        connectionManager = (TestConnectionManager)injector.getInstance(ConnectionManager.class);
+        return injector;
+    }
+    
     /**
      * Tests the method for forwarding queries to leaves.
      * 
      * @throws Exception if any error in the test occurs
      */
     public void testForwardQueryRequestToLeaves() throws Exception  {
-        TestConnectionManager tcm = 
-            TestConnectionManager.createManagerWithVariedLeaves();
-      //  PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] paramTypes = new Class[] {
-            QueryRequest.class,
-            ReplyHandler.class,
-        };
-
-        Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                "forwardQueryRequestToLeaves",
-                paramTypes);
         
-        QueryRequest qr = 
-            ProviderHacks.getQueryRequestFactory().createQuery(LeafConnection.ALT_LEAF_KEYWORD);
-        ReplyHandler rh = ProviderHacks.getManagedConnectionFactory().createManagedConnection("localhost", 6346);
-        Object[] params = new Object[]  {qr, rh};
-        m.invoke(ROUTER, params);
+        Injector injector = createDefaultInjector();
+
+        TestConnectionManager tcm = (TestConnectionManager)injector.getInstance(ConnectionManager.class);
+        tcm.configureManagerWithVariedLeafs();
+        tcm.resetAndInitialize();
+        
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        ManagedConnectionFactory connectionFactory = injector.getInstance(ManagedConnectionFactory.class);
+        
+        QueryRequest qr = queryRequestFactory.createQuery(LeafConnection.ALT_LEAF_KEYWORD);
+        ReplyHandler rh = connectionFactory.createManagedConnection("localhost", 6346);
+        
+        messageRouterImpl.forwardQueryRequestToLeaves(qr, rh);
+        
         int numQueries = tcm.getNumLeafQueries();
         assertEquals("unexpected number of queries received by leaves", 
             UltrapeerSettings.MAX_LEAVES.getValue()/2, numQueries);
 
-        tcm = TestConnectionManager.createManager();
-  //      PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-
-        m = PrivilegedAccessor.getMethod(ROUTER, 
-                    "forwardQueryRequestToLeaves",
-                    paramTypes);
-        qr = ProviderHacks.getQueryRequestFactory().createQuery(LeafConnection.LEAF_KEYWORD);
-        params[0] = qr;
-        m.invoke(ROUTER, params);
+        // reconfigre connection manager for a popular query
+        tcm.configureDefaultManager();
+        tcm.resetAndInitialize();
+        
+        qr = queryRequestFactory.createQuery(LeafConnection.LEAF_KEYWORD);
+        
+        messageRouterImpl.forwardQueryRequestToLeaves(qr, rh);
+        
         numQueries = tcm.getNumLeafQueries();
         assertEquals("unexpected number of queries received by leaves", 
             UltrapeerSettings.MAX_LEAVES.getValue()/4, numQueries); 
@@ -135,40 +181,36 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * Tests the method for creating <tt>QueryReply</tt> instances from
      * <tt>Response</tt> arrays.
      */
-    @SuppressWarnings("unused")
+    // TODO refactor to unit test case and move to different class
     public void testResponsesToQueryReplies() throws Exception {
-        ConnectionSettings.LAST_FWT_STATE.setValue(true); 
+        ConnectionSettings.LAST_FWT_STATE.setValue(true);
+        
+        // needs valid address && port
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setAddress(new byte[] { (byte) 192, (byte) 168, 0, 1 });
+        networkManagerStub.setPort(5555);
+        
+        Injector injector = createInjectorAndInitialize(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        UploadManager uploadManager = injector.getInstance(UploadManager.class);
 
-        // needed to avoid NullPointerException in HTTPUploadManager.mayBeServiceable() which is invoked by
-        // MessageRouter.responsesToQueryReplies()
-        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-        ProviderHacks.getUploadManager().start();
+        uploadManager.start();
         try {
-            Class[] paramTypes = new Class[] {
-                    Response[].class, 
-                    QueryRequest.class,
-                    Integer.TYPE,
-                    SecurityToken.class
-            };
-
-            Method m = 
-                PrivilegedAccessor.getMethod(ROUTER, 
-                        "responsesToQueryReplies",
-                        paramTypes);
             Response[] res = new Response[20];
-            Arrays.fill(res, ProviderHacks.getResponseFactory().createResponse(
+            Arrays.fill(res, responseFactory.createResponse(
                     (long) 0, (long) 10, "test"));
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test");
-            Object[] params = new Object[] {
-                    res,
-                    query,
-                    new Integer(10),
-                    null
-            };
-
-            Iterable iter = (Iterable)m.invoke(ROUTER, params);
+            QueryRequest query = queryRequestFactory.createQuery("test");
+            
+            Iterable iter = messageRouterImpl.responsesToQueryReplies(res, query, 10, null); 
             int size = 0;
-            for(Object o : iter)
+            
+            for(@SuppressWarnings("unused") Object o : iter)
                 size++;
 
             assertEquals("responses should have been put in 2 hits", 2, size);
@@ -178,24 +220,23 @@ public final class MessageRouterImplTest extends LimeTestCase {
             query.hop();
             query.hop();
 
-            iter = (Iterable)m.invoke(ROUTER, params);
+            iter = messageRouterImpl.responsesToQueryReplies(res, query, 10, null);
             size = 0;
-            for(Object o : iter) {
+            for(@SuppressWarnings("unused") Object o : iter) {
                 size++;
             }
 
             assertEquals("responses should have been put in 1 hits", 1, size);
 
-            params[2] = new Integer(1);
-            iter = (Iterable)m.invoke(ROUTER, params);
+            iter = (Iterable) messageRouterImpl.responsesToQueryReplies(res, query, 1, null);
             size = 0;
-            for(Object o : iter) {
+            for(@SuppressWarnings("unused") Object o : iter) {
                 size++;
             }
 
             assertEquals("responses should have been put in 20 hits", 20, size);
         } finally {
-            ProviderHacks.getUploadManager().stop();
+            uploadManager.stop();
         }
     }
 
@@ -204,17 +245,20 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * between Ultrapeers.
      */
     public void testIntraUltrapeerForwardQueryRouteTables() throws Exception {
-        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
-        FileManager fm = new TestFileManager();
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        PrivilegedAccessor.setValue(MessageRouter.class, "_fileManager", fm);
-        Class[] params = new Class[] {};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardQueryRouteTables",
-                                         params);        
-        m.invoke(ROUTER, new Object[]{});
+        
+        Injector injector = createInjectorAndInitialize(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ConnectionManager.class).to(TestConnectionManager.class);
+                bind(FileManager.class).to(TestFileManager.class);
+            }
+        });
+        
+        // use connection manager with default configuration
+        TestConnectionManager tcm = (TestConnectionManager)injector.getInstance(ConnectionManager.class);
+        tcm.resetAndInitialize();
+
+        messageRouterImpl.forwardQueryRouteTables();
         
         List connections = tcm.getInitializedConnections();
         Iterator iter = connections.iterator();
@@ -231,25 +275,23 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * to other hosts is working correctly.
      */
     public void testForwardLimitedQueryToUltrapeers() throws Exception {
-        TestConnectionManager tcm = new TestConnectionManager(4);
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardLimitedQueryToUltrapeers",
-                                         params);        
-
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
+        
+        Injector injector = createDefaultInjector();
+        connectionManager.setNumNewConnections(4);
+        connectionManager.resetAndInitialize();
+        
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        QueryRequest qr = queryRequestFactory.createQuery("test");      
         ReplyHandler rh = new OldConnection(10);
         
-        m.invoke(ROUTER, new Object[] {qr, rh});
+        messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumUltrapeerQueries());
+                     connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries old sent", 15, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries new sent", 0, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
     }
 
 
@@ -259,19 +301,19 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * we're an Ultrapeer.
      */
     public void testCreateRouteTable() throws Exception {
-        TestConnectionManager tcm = 
-            new TestConnectionManager(NUM_CONNECTIONS);
-        FileManager fm = new TestFileManager();
-    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);        
-        PrivilegedAccessor.setValue(MessageRouter.class, "_fileManager", fm);
-        Class[] params = new Class[] {};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "createRouteTable",
-                                         params);             
-        QueryRouteTable qrt = 
-            (QueryRouteTable)m.invoke(ROUTER, new Object[] {});
+        Injector injector = createInjectorAndInitialize(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ConnectionManager.class).to(TestConnectionManager.class);
+                bind(FileManager.class).to(TestFileManager.class);
+            }
+        });
+        
+        // use connection manager with default configuration
+        TestConnectionManager tcm = (TestConnectionManager)injector.getInstance(ConnectionManager.class);
+        tcm.resetAndInitialize();
+
+		QueryRouteTable qrt = messageRouterImpl.createRouteTable(); 
         tcm.runQRPMatch(qrt);
     }
 
@@ -281,25 +323,23 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * to new connections if only new connections are available.
      */
     public void testForwardOldQueriesToNewConnections() throws Exception {
-        // reset the connection manager
-        TestConnectionManager tcm = 
-            new TestConnectionManager(NUM_CONNECTIONS);
-    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardLimitedQueryToUltrapeers",
-                                         params);        
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
+
+        Injector injector = createDefaultInjector();
+        connectionManager.resetAndInitialize();
+
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+
+        QueryRequest qr = queryRequestFactory.createQuery("test");      
         ReplyHandler rh = new OldConnection(10);
-        m.invoke(ROUTER, new Object[] {qr, rh});
+        
+        messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
+        
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumUltrapeerQueries());
+                connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumOldConnectionQueries());
+                connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumNewConnectionQueries());
+                connectionManager.getNumNewConnectionQueries());
     }
 
     /** 
@@ -313,24 +353,18 @@ public final class MessageRouterImplTest extends LimeTestCase {
         // make sure we send a query from an old connection to new 
         // connections if new connections are available.
 
-        // reset the connection manager
-        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardLimitedQueryToUltrapeers",
-                                         params);        
-
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
+        Injector injector = createDefaultInjector();
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);      
         ReplyHandler rh = new OldConnection(10);
-        m.invoke(ROUTER, new Object[] {qr, rh});
-        assertEquals("unexpected number of queries sent", 0, tcm.getNumUltrapeerQueries());
+
+        messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
+        assertEquals("unexpected number of queries sent", 0, connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
     }
 
     /** 
@@ -342,28 +376,24 @@ public final class MessageRouterImplTest extends LimeTestCase {
         throws Exception {
         // make sure we send a query from an old connection to new 
         // connections if new connections are available.
-
-        // reset the connection manager
-        TestConnectionManager tcm = new TestConnectionManager(0);
-      //  PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardLimitedQueryToUltrapeers",
-                                         params);        
-
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
+        
+        Injector injector = createDefaultInjector();
+        connectionManager.setNumNewConnections(0);
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);
         ReplyHandler rh = new OldConnection(10);
-        m.invoke(ROUTER, new Object[] {qr, rh});
+        
+        messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
         // make sure we send a query from an old connection to old 
         // connections even when it's the last hop
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumUltrapeerQueries());
+                     connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
     }
 
     /**
@@ -372,25 +402,21 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * correctly when only some of the connections are new.
      */
     public void testForwardQueryToUltrapeers() throws Exception {
-        TestConnectionManager tcm = new TestConnectionManager(4);
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardQueryToUltrapeers",
-                                         params);        
-
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
+        Injector injector = createDefaultInjector();
+        connectionManager.setNumNewConnections(4);
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        QueryRequest qr = queryRequestFactory.createQuery("test");
         ReplyHandler rh = NewConnection.createConnection(10);
         
-        m.invoke(ROUTER, new Object[] {qr, rh});
+        messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumUltrapeerQueries());
+                     connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS-4, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 4, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
     }
 
     /**
@@ -399,25 +425,22 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * correctly when all of the connections are new
      */
     public void testForwardQueryToAllNewUltrapeers() throws Exception {
-        // reset the connection manager using all new connections
-        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardQueryToUltrapeers",
-                                         params);        
-
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
+        Injector injector = createDefaultInjector();
+        connectionManager.setNumNewConnections(NUM_CONNECTIONS);
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        QueryRequest qr = queryRequestFactory.createQuery("test");      
         ReplyHandler rh = NewConnection.createConnection(10);
-        m.invoke(ROUTER, new Object[] {qr, rh});
+        
+        messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
+        
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumUltrapeerQueries());
+                     connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
     }
 
     /**
@@ -426,25 +449,22 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * correctly when none of the connections are new.
      */
     public void testForwardQueryToNoNewUltrapeers() throws Exception {
-        // reset the connection manager using all old connections
-        TestConnectionManager tcm = new TestConnectionManager(0);
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardQueryToUltrapeers",
-                                         params);        
-
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
+        Injector injector = createDefaultInjector();
+        connectionManager.setNumNewConnections(0);
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        QueryRequest qr = queryRequestFactory.createQuery("test");      
         ReplyHandler rh = NewConnection.createConnection(10);
-        m.invoke(ROUTER, new Object[] {qr, rh});
+        
+        messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
+        
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumUltrapeerQueries());
+                     connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
 
     }
 
@@ -454,27 +474,23 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * correctly when the request is on its last hop
      */
     public void testForwardQueryToNewUltrapeersOnLastHop() throws Exception {
-        // reset the connection manager using all new connections
-        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
-    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardQueryToUltrapeers",
-                                         params);        
+        Injector injector = createDefaultInjector();
+        connectionManager.setNumNewConnections(NUM_CONNECTIONS);
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
+        QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);      
         ReplyHandler rh = NewConnection.createConnection(10);
-        m.invoke(ROUTER, new Object[] {qr, rh});
+
+        messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
 
         // the query should not have been sent along any of the connections,
         // as none of them should have Ultrapeer routing tables.
-        assertEquals("unexpected number of queries sent", 0, tcm.getNumUltrapeerQueries());
+        assertEquals("unexpected number of queries sent", 0, connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
 
     }
 
@@ -485,65 +501,62 @@ public final class MessageRouterImplTest extends LimeTestCase {
      * is on the last hop.
      */
     public void testForwardQueryToOldUltrapeersOnLastHop() throws Exception {
-        // reset the connection manager using all new connections
-        TestConnectionManager tcm = new TestConnectionManager(0);
-    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardQueryToUltrapeers",
-                                         params);        
+        Injector injector = createDefaultInjector();
+        connectionManager.setNumNewConnections(0);
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)1);      
+        QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);      
         ReplyHandler rh = NewConnection.createConnection(10);
-        m.invoke(ROUTER, new Object[] {qr, rh});
+        
+        messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
 
         // the query should not have been sent along any of the connections,
         // as none of them should have Ultrapeer routing tables.
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumUltrapeerQueries());
+                     connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumOldConnectionQueries());
+                     connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumNewConnectionQueries());
+                     connectionManager.getNumNewConnectionQueries());
     }
 
     /**
      * Tests the method for originating queries from leaves.
      */
     public void testOriginateLeafQuery() throws Exception {
-        Class[] params = new Class[]{QueryRequest.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "originateLeafQuery",
-                                         params);        
-
+        Injector injector = createDefaultInjector();
         // make sure that queries from leaves are simply sent to
         // the first three hosts
-        TestConnectionManager tcm = new TestConnectionManager(2, false);
-    //    PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");      
-
+        connectionManager.setNumNewConnections(2);
+        connectionManager.setUltraPeer(false);
+        connectionManager.resetAndInitialize();
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
-        m.invoke(ROUTER, new Object[] {qr});
+        QueryRequest qr = queryRequestFactory.createQuery("test");      
+
+        messageRouterImpl.originateLeafQuery(qr);
         assertEquals("unexpected number of queries sent", 3, 
-                     tcm.getNumUltrapeerQueries());
+                     connectionManager.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 1, 
-                    tcm.getNumOldConnectionQueries());
+                    connectionManager.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 2, 
-                     tcm.getNumNewConnectionQueries());        
+                     connectionManager.getNumNewConnectionQueries());        
 
     }
     
     public void testLimeReply() throws Exception {
-        PrivilegedAccessor.setValue(ROUTER, "_callback", new ActivityCallbackStub());
         
-        ProviderHacks.getStaticMessages().initialize();
-        QueryReply limeReply = ProviderHacks.getStaticMessages().getLimeReply();
+        Injector injector = createInjectorAndInitialize();
+        StaticMessages staticMessages = injector.getInstance(StaticMessages.class);
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("limewire pro");
+        
+        staticMessages.initialize();
+        
+        QueryReply limeReply = staticMessages.getLimeReply();
+        
+        QueryRequest qr = queryRequestFactory.createQuery("limewire pro");
         assertTrue(qr.isQueryForLW());
         
         final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
@@ -552,7 +565,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 replyRef.set(reply);
             }
         };
-        ROUTER.handleMessage(qr, mc);
+        
+        messageRouterImpl.handleMessage(qr, mc);
         
         QueryReply sent = replyRef.get();
         // sig & xml payload should be enough
@@ -560,229 +574,374 @@ public final class MessageRouterImplTest extends LimeTestCase {
         assertEquals(limeReply.getXMLBytes(), sent.getXMLBytes());
     }
     
+    // TODO make this a unit test with mocks, stub out connection manager and connection services if possible
     public void testUDPPingReplies() throws Exception {
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
-        ConnectionManager cm = new HackConnectionManager();
-        cm.initialize();
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         
-        StubRouter stub = new StubRouter();
+        // to have a valid address and port
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setAddress(new byte[] { (byte) 192, (byte) 168, 0, 1 });
+        networkManagerStub.setPort(5555);
+        networkManagerStub.setIpPortValid(true);
+        networkManagerStub.setSolicitedGUID(new GUID());
+                
+        Injector injector = createInjectorAndInitialize(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        
+        ConnectionManager cm = injector.getInstance(ConnectionManager.class);
+        cm.initialize();
+        ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
+        PingRequestFactory pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
+
+        final ReplyHandler replyHandler = context.mock(ReplyHandler.class);
+        
         // send a PR that doesn't have SCP in it.
-        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        PingRequest pr = pingRequestFactory.createPingRequest((byte)1);
         assertFalse(pr.supportsCachedPongs());
         assertFalse(pr.requestsIP());
         assertFalse(pr.requestsDHTIPP());
         
         InetSocketAddress addr = new InetSocketAddress(InetAddress.getLocalHost(), 1);
         
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        PingReply reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(0, reply.getPackedIPPorts().size());
-        assertNull(reply.getMyInetAddress());
-        assertEquals(0, reply.getMyPort());
+        context.checking(new Expectations() {{ 
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(0, reply.getPackedIPPorts().size());
+                    assertNull(reply.getMyInetAddress());
+                    assertEquals(0, reply.getMyPort());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
         
         // send a PR that does have SCP in it.
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
-        assertFalse(ProviderHacks.getConnectionServices().isSupernode());
-        Collection hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,10);
+        
+        assertFalse(connectionServices.isSupernode());
+        Collection hosts = connectionServices.getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 0, hosts.size());
-        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
+        pr = pingRequestFactory.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
         assertTrue(pr.requestsIP());
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(InetAddress.getLocalHost(), reply.getMyInetAddress());
-        assertEquals(1, reply.getMyPort());
-        assertEquals(0, reply.getPackedIPPorts().size());
+        
+        final InetAddress expectedAddress = InetAddress.getLocalHost(); 
+        
+        context.checking(new Expectations() {{
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(expectedAddress, reply.getMyInetAddress());
+                    assertEquals(1, reply.getMyPort());
+                    assertEquals(0, reply.getPackedIPPorts().size());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
         
         // add some hosts with free leaf slots (just 3), make sure we get'm back.
-        addFreeLeafSlotHosts(3); // these 3 will be returned as 1
-        addFreeLeafSlotHostsClassB(2);
-        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,10);
+        addFreeLeafSlotHosts(hostCatcher, 3); // these 3 will be returned as 1
+        addFreeLeafSlotHostsClassB(hostCatcher, 2);
+        hosts = connectionServices.getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 3, hosts.size());
-        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
+        pr = pingRequestFactory.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(3, reply.getPackedIPPorts().size());
+
+        context.checking(new Expectations() {{
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(3, reply.getPackedIPPorts().size());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
         
         // add 20 more free leaf slots, make sure we only get as many we request.
-        int requested = 10;
-        addFreeLeafSlotHostsClassB(20);
-        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(false, null,requested);
+        final int requested = 10;
+        addFreeLeafSlotHostsClassB(hostCatcher, 20);
+        hosts = connectionServices.getPreferencedHosts(false, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
-        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
+        pr = pingRequestFactory.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x0, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(requested, reply.getPackedIPPorts().size());
         
-        clearFreeLeafSlotHosts();
-        addFreeLeafSlotHostsClassB(2); // odd number, to make sure it isn't impacting other tests.
+        context.checking(new Expectations() {{
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(requested, reply.getPackedIPPorts().size());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
+        
+        clearFreeLeafSlotHosts(hostCatcher);
+        addFreeLeafSlotHostsClassB(hostCatcher, 2); // odd number, to make sure it isn't impacting other tests.
         
         // now test if we're an ultrapeer.
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        assertTrue(ProviderHacks.getConnectionServices().isSupernode());
-        addFreeUltrapeerSlotHostsClassB(4);
-        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(true, null,10);
+        assertTrue(connectionServices.isSupernode());
+        addFreeUltrapeerSlotHostsClassB(hostCatcher, 4);
+        hosts = connectionServices.getPreferencedHosts(true, null,10);
         assertEquals(hosts.toString(), 4, hosts.size());
-        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
+        pr = pingRequestFactory.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(4, reply.getPackedIPPorts().size());
+
+        context.checking(new Expectations() {{
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(4, reply.getPackedIPPorts().size());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
         
         // and add a lot again, make sure we only get as many we reqeust.
-        addFreeUltrapeerSlotHostsClassB(20);
-        requested = 15;
+        addFreeUltrapeerSlotHostsClassB(hostCatcher, 20);
+        final int requestedIPs = 15;
         int original = ConnectionSettings.NUM_RETURN_PONGS.getValue();
-        ConnectionSettings.NUM_RETURN_PONGS.setValue(requested);
-        hosts = ProviderHacks.getConnectionServices().getPreferencedHosts(true, null,requested);
-        assertEquals(hosts.toString(), requested, hosts.size());
-        pr = ProviderHacks.getPingRequestFactory().createUDPPing();
+        ConnectionSettings.NUM_RETURN_PONGS.setValue(requestedIPs);
+        hosts = connectionServices.getPreferencedHosts(true, null,requestedIPs);
+        assertEquals(hosts.toString(), requestedIPs, hosts.size());
+        pr = pingRequestFactory.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         assertEquals(0x1, pr.getSupportsCachedPongData()[0] & 0x1);
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(requested, reply.getPackedIPPorts().size());
+
+        context.checking(new Expectations() {{
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(requestedIPs, reply.getPackedIPPorts().size());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
+        
         ConnectionSettings.NUM_RETURN_PONGS.setValue(original);
         
         // Now try again, without an SCP request, and make sure we got none.
-        pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        pr = pingRequestFactory.createPingRequest((byte)1);
         assertFalse(pr.supportsCachedPongs());
         assertFalse(pr.requestsIP());
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(0, reply.getPackedIPPorts().size());
-        assertNull(reply.getMyInetAddress());
-        assertEquals(0, reply.getMyPort());        
+        
+        context.checking(new Expectations() {{
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(0, reply.getPackedIPPorts().size());
+                    assertNull(reply.getMyInetAddress());
+                    assertEquals(0, reply.getMyPort());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
     }
     
+    // TODO this is actually StandardMessageRouter test, move it there
     public void testUDPPingReplyWithDHTIPPs() throws Exception{
-        ConnectionManager cm = new HackConnectionManager();
-        cm.initialize();
-     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+        // to have a valid address and port
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setAddress(new byte[] { (byte) 192, (byte) 168, 0, 1 });
+        networkManagerStub.setPort(5555);
+        networkManagerStub.setIpPortValid(true);
+        networkManagerStub.setSolicitedGUID(new GUID());
         
-        StubRouter stub = new StubRouter();
+        final TestDHTManager testDHTManager = new TestDHTManager();
+        
+        Injector injector = createInjectorAndInitialize(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+                bind(DHTManager.class).toInstance(testDHTManager);
+            }
+        });
+        
+        ConnectionManager cm = injector.getInstance(ConnectionManager.class);
+        cm.initialize();
+        PingRequestFactory pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
+
+        final ReplyHandler replyHandler = context.mock(ReplyHandler.class);
+        
         //first set up a DHT node and add it to the manager
         //remove any previous data
         File mojitoFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
-        if(mojitoFile.exists()) {
-            mojitoFile.delete();
-        }
+        mojitoFile.deleteOnExit();
+        assertFalse(mojitoFile.exists());
         
         //now start the router service
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        if(true)throw new RuntimeException("fix me");
-     //   RouterService rs = new RouterService(new ActivityCallbackStub());
-       // AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
-      //          rs, "DHT_MANAGER_REFERENCE");
-     //   PrivilegedAccessor.setValue(ref, "obj", new TestDHTManager());
-        ProviderHacks.getLifecycleManager().start();
         
-        Thread.sleep(300);
         //create the request
-        PingRequest pr = ProviderHacks.getPingRequestFactory().createUDPingWithDHTIPPRequest();
+        PingRequest pr = pingRequestFactory.createUDPingWithDHTIPPRequest();
         InetSocketAddress addr = new InetSocketAddress(InetAddress.getLocalHost(), 1);
         assertTrue(pr.requestsDHTIPP());
         assertFalse(pr.supportsCachedPongs());
         assertFalse(pr.requestsIP());
-        //test the reply
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        PingReply reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), reply.getPackedDHTIPPorts().size());
-        IpPort ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
-        assertEquals(3009, ipp.getPort());
+
+        // test the reply
+        
+        context.checking(new Expectations() {{
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), reply.getPackedDHTIPPorts().size());
+                    IpPort ipp = reply.getPackedDHTIPPorts().get(0);
+                    assertEquals(3009, ipp.getPort());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
         
         //try requesting other IPP too -- this should not change anything
-        GUID guid = new GUID();
-        ProviderHacks.getHostCatcher().clear();
-        List<NameValue> l = new LinkedList<NameValue>();
-        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] { PingRequest.SCP_LEAF}));
-        l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
-        Object[] args = new Object[] {guid.bytes(), (byte)1, l};
-        Class[] types = new Class[] {byte[].class, byte.class, List.class}; 
-        pr = (PingRequest) PrivilegedAccessor.invokeConstructor(PingRequest.class, args, types);
-        assertTrue(pr.requestsDHTIPP());
-        assertTrue(pr.supportsCachedPongs());
-        assertFalse(pr.requestsIP());
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), reply.getPackedDHTIPPorts().size());
-        assertEquals(0, reply.getPackedIPPorts().size());
-        ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
-        assertEquals(3009, ipp.getPort());
+        hostCatcher.clear();
         
-        //now try adding some gnutella IPPs
+        final GUID guid = new GUID();
+        final PingRequest pingRequest = context.mock(PingRequest.class);
+        
+        context.checking(new Expectations() {{
+            // stub part 
+            allowing(pingRequest).getGUID();
+            will(returnValue(guid.bytes()));
+            allowing(pingRequest).getLocale();
+            will(returnValue("en"));
+            allowing(pingRequest).getSupportsCachedPongData();
+            will(returnValue(new byte[] { PingRequest.SCP_LEAF } ));
+            allowing(pingRequest).requestsIP();
+            will(returnValue(false));
+            
+            // mock part
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), reply.getPackedDHTIPPorts().size());
+                    assertEquals(0, reply.getPackedIPPorts().size());
+                    IpPort ipp = reply.getPackedDHTIPPorts().get(0);
+                    assertEquals(3009, ipp.getPort());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+            
+        }});
+
+        messageRouterImpl.respondToUDPPingRequest(pr, addr, replyHandler);
+        context.assertIsSatisfied();
+        
+        // now try adding some gnutella IPPs
         ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.setValue(60);
-        addFreeLeafSlotHosts(20); // filtered - class C
-        addFreeLeafSlotHostsClassB(20);
-        guid = new GUID();
-        l = new LinkedList<NameValue>();
-        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] {PingRequest.SCP_LEAF}));
-        l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
-        args = new Object[] {guid.bytes(), (byte)1, l};
-        types = new Class[] {byte[].class, byte.class, List.class}; 
-        pr = (PingRequest) PrivilegedAccessor.invokeConstructor(PingRequest.class, args, types);
-        assertTrue(pr.requestsDHTIPP());
-        assertTrue(pr.supportsCachedPongs());
-        assertFalse(pr.requestsIP());
-        stub.respondToUDPPingRequest(pr, addr, null);
-        assertEquals(1, stub.sentPongs.size());
-        reply = (PingReply)stub.sentPongs.get(0);
-        stub.sentPongs.clear();
-        assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), 
-                     reply.getPackedDHTIPPorts().size() + reply.getPackedIPPorts().size());
-        assertEquals(4, reply.getPackedIPPorts().size());
-        assertEquals(6, reply.getPackedDHTIPPorts().size());
-        ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
-        assertEquals(3009, ipp.getPort());
+        addFreeLeafSlotHosts(hostCatcher, 20); // filtered - class C
+        addFreeLeafSlotHostsClassB(hostCatcher, 20);
+        final GUID guid2 = new GUID();
+        
+        context.checking(new Expectations() {{
+            // stub part 
+            allowing(pingRequest).getGUID();
+            will(returnValue(guid2.bytes()));
+            allowing(pingRequest).getLocale();
+            will(returnValue("en"));
+            allowing(pingRequest).getSupportsCachedPongData();
+            will(returnValue(new byte[] { PingRequest.SCP_LEAF } ));
+            allowing(pingRequest).requestsIP();
+            will(returnValue(false));
+            allowing(pingRequest).requestsDHTIPP();
+            will(returnValue(true));
+            
+            // mock part
+            one(replyHandler).handlePingReply(with(new TypeSafeMatcher<PingReply>() {
+                @Override
+                public boolean matchesSafely(PingReply reply) {
+                    assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), 
+                            reply.getPackedDHTIPPorts().size() + reply.getPackedIPPorts().size());
+                    assertEquals(4, reply.getPackedIPPorts().size());
+                    assertEquals(6, reply.getPackedDHTIPPorts().size());
+                    IpPort ipp = reply.getPackedDHTIPPorts().get(0);
+                    assertEquals(3009, ipp.getPort());
+                    return true;
+                }
+                public void describeTo(Description description) {
+                }
+            }), with(aNull(ReplyHandler.class)));
+        }});
+        
+        messageRouterImpl.respondToUDPPingRequest(pingRequest, addr, replyHandler);
+        context.assertIsSatisfied();
     }
     
     public void testHeadPingForwarding() throws Exception {
+        createInjectorAndInitialize();
+        
     	HeadListener pingee = new HeadListener();
     	
     	GUID clientGUID = new GUID(GUID.makeGuid());
     	
     	//make sure our routing table contains an entry for the pingee
-    	RouteTable pushRt = (RouteTable) PrivilegedAccessor.getValue(ROUTER,"_pushRouteTable");
-    	
+    	RouteTable pushRt = messageRouterImpl.getPushRouteTable();
     	pushRt.routeReply(clientGUID.bytes(),pingee);
     	
     	// try a HeadPing 
     	URN urn = FileDescStub.DEFAULT_SHA1;
-    	HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),urn, clientGUID, 0xFF);
+    	HeadPing ping = new HeadPing(new GUID(),urn, clientGUID, 0xFF);
     	
-    	ROUTER.handleUDPMessage(ping, new InetSocketAddress(InetAddress.getLocalHost(), 10));
+    	messageRouterImpl.handleUDPMessage(ping, new InetSocketAddress(InetAddress.getLocalHost(), 10));
     	
     	// the pingee should have received it
     	assertNotNull(pingee._lastSent);
@@ -790,7 +949,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	assertTrue(pingee._lastSent instanceof HeadPing);
     	
     	// we should have an entry in the routing table
-    	RouteTable headRt =(RouteTable) PrivilegedAccessor.getValue(ROUTER,"_headPongRouteTable");
+    	RouteTable headRt = messageRouterImpl.getHeadPongRouteTable();
     	
     	ReplyHandler r = headRt.getReplyHandler(ping.getGUID());
     	assertEquals(InetAddress.getLocalHost(),InetAddress.getByName(r.getAddress()));
@@ -798,19 +957,22 @@ public final class MessageRouterImplTest extends LimeTestCase {
     }
     
     public void testHeadPongForwarding() throws Exception {
+        
+        Injector injector = createInjectorAndInitialize();
+        HeadPongFactory headPongFactory = injector.getInstance(HeadPongFactory.class);
+        
     	HeadListener pinger = new HeadListener();
     	
     	//make sure our routing table contains an entry for the pinger
-    	RouteTable headRt = (RouteTable) PrivilegedAccessor.getValue(ROUTER,"_headPongRouteTable");
-    	
+    	RouteTable headRt = messageRouterImpl.getHeadPongRouteTable();
     	
     	//try a headpong
     	URN urn = FileDescStub.DEFAULT_SHA1;
     	HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),urn, 0xFF);
     	headRt.routeReply(ping.getGUID(),pinger);
-    	HeadPong pong = ProviderHacks.getHeadPongFactory().create(ping);
+    	HeadPong pong = headPongFactory.create(ping);
     	
-    	ROUTER.handleMessage(pong, new ManagedConnectionStub());
+    	messageRouterImpl.handleMessage(pong, new ManagedConnectionStub());
     	
     	//the pinger should have gotten the identical object
     	assertNotNull(pinger._lastSent);
@@ -821,36 +983,32 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	assertNull(r);
     }
     
-    private void addFreeLeafSlotHosts(int num) throws Exception {
-        HostCatcher hc = ProviderHacks.getHostCatcher();
-        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+    private void addFreeLeafSlotHosts(HostCatcher hostCatcher, int num) throws Exception {
+        Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_LEAF_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e =new ExtendedEndpoint("1.2.3." + i, i+1);
             set.put(e, e);
         }
     }
     
-    private void addFreeLeafSlotHostsClassB(int num) throws Exception {
-        HostCatcher hc = ProviderHacks.getHostCatcher();
-        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+    private void addFreeLeafSlotHostsClassB(HostCatcher hostCatcher, int num) throws Exception {
+        Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_LEAF_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
            set.put(e, e);
         }
     }
     
-    private void addFreeUltrapeerSlotHostsClassB(int num) throws Exception {
-        HostCatcher hc = ProviderHacks.getHostCatcher();
-        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
+    private void addFreeUltrapeerSlotHostsClassB(HostCatcher hostCatcher, int num) throws Exception {
+        Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_ULTRAPEER_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
            set.put(e, e);
         }
     }
     
-    private void clearFreeLeafSlotHosts() throws Exception {
-        HostCatcher hc = ProviderHacks.getHostCatcher();
-        Map set = (Map)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
+    private void clearFreeLeafSlotHosts(HostCatcher hostCatcher) throws Exception {
+        Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_ULTRAPEER_SLOTS_SET");
         set.clear();
     }        
         
@@ -858,13 +1016,15 @@ public final class MessageRouterImplTest extends LimeTestCase {
     /**
      * Test file manager that returns specialized keywords for QRP testing.
      */
+    @Singleton
     private static final class TestFileManager extends MetaFileManager {
         
         private final List KEYWORDS = 
             Arrays.asList(MY_KEYWORDS);
 
-        TestFileManager() {
-            super(ProviderHacks.getFileManagerController());
+        @Inject
+        TestFileManager(FileManagerController fileManagerController) {
+            super(fileManagerController);
         }
         
 
@@ -882,24 +1042,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
         }
     }
     
-    /**
-     * Stub MessageRouter that catches 'sendPingReply' pings.
-     */
-    private static final class StubRouter extends HackMessageRouter {
-        private List sentPongs = new LinkedList();
-                
-        // upp access.
-        public void respondToUDPPingRequest(PingRequest req, 
-                                            InetSocketAddress addr,
-                                            ReplyHandler handler) {
-            super.respondToUDPPingRequest(req, addr, handler);
-        }
-        
-        protected void sendPingReply(PingReply pong, ReplyHandler handler) {
-            sentPongs.add(pong);
-        }
-    }
-    
     private static class HeadListener extends ReplyHandlerStub {
     	Message _lastSent;
     	public void reply(Message m) {
@@ -908,81 +1050,82 @@ public final class MessageRouterImplTest extends LimeTestCase {
     }
     
     // DPINJ - testfix
-//    private static class TestDHTManager implements DHTManager {
-//
-//        public List<IpPort> getActiveDHTNodes(int maxNodes){
-//            LinkedList<IpPort> ipps = new LinkedList<IpPort>();
-//            for(int i = 0; i < maxNodes; i++) {
-//                IpPort ipp;
-//                try {
-//                    ipp = new IpPortImpl("localhost", 3000+i);
-//                    ipps.addFirst(ipp);
-//                } catch (UnknownHostException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            return ipps;
-//        }
-//
-//        public void addActiveDHTNode(SocketAddress hostAddress) {}
-//        
-//        public void addPassiveDHTNode(SocketAddress hostAddress) {}
-//
-//        public void addressChanged() {}
-//        
-//        public boolean isWaitingForNodes() {
-//            return false;
-//        }
-//
-//        public MojitoDHT getMojitoDHT() { return null; }
-//
-//        public DHTMode getDHTMode() { 
-//            return DHTMode.INACTIVE; 
-//        }
-//
-//        public boolean isRunning() { 
-//            return true; 
-//        }
-//
-//        public void stop() {}
-//
-//        public void start(DHTMode mode) {}
-//        
-//        public boolean isBootstrapped() {
-//            return false;
-//        }
-//
-//        public boolean isMemberOfDHT() {
-//            return isRunning() && isBootstrapped();
-//        }
-//
-//        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
-//        
-//        public Vendor getVendor() {
-//            return Vendor.UNKNOWN;
-//        }
-//        
-//        public Version getVersion() {
-//            return Version.ZERO;
-//        }
-//
-//        public void addEventListener(DHTEventListener listener) {
-//        }
-//
-//        public void dispatchEvent(DHTEvent event) {
-//        }
-//
-//        public void removeEventListener(DHTEventListener listener) {
-//        }
-//
-//        public void handleDHTContactsMessage(DHTContactsMessage msg) {
-//        }
-//
-//        public boolean isEnabled() {
-//            return true;
-//        }
-//
-//        public void setEnabled(boolean enabled) {
-//        }
-//    }
+    private static class TestDHTManager implements DHTManager {
+
+        public List<IpPort> getActiveDHTNodes(int maxNodes){
+            LinkedList<IpPort> ipps = new LinkedList<IpPort>();
+            for(int i = 0; i < maxNodes; i++) {
+                IpPort ipp;
+                try {
+                    ipp = new IpPortImpl("localhost", 3000+i);
+                    ipps.addFirst(ipp);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
+            return ipps;
+        }
+
+        public void addActiveDHTNode(SocketAddress hostAddress) {}
+        
+        public void addPassiveDHTNode(SocketAddress hostAddress) {}
+
+        public void addressChanged() {}
+        
+        public boolean isWaitingForNodes() {
+            return false;
+        }
+
+        public MojitoDHT getMojitoDHT() { return null; }
+
+        public DHTMode getDHTMode() { 
+            return DHTMode.INACTIVE; 
+        }
+
+        public boolean isRunning() { 
+            return true; 
+        }
+
+        public void stop() {}
+
+        public void start(DHTMode mode) {}
+        
+        public boolean isBootstrapped() {
+            return false;
+        }
+
+        public boolean isMemberOfDHT() {
+            return isRunning() && isBootstrapped();
+        }
+
+        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
+        
+        public Vendor getVendor() {
+            return Vendor.UNKNOWN;
+        }
+        
+        public Version getVersion() {
+            return Version.ZERO;
+        }
+
+        public void addEventListener(DHTEventListener listener) {
+        }
+
+        public void dispatchEvent(DHTEvent event) {
+        }
+
+        public void removeEventListener(DHTEventListener listener) {
+        }
+
+        public void handleDHTContactsMessage(DHTContactsMessage msg) {
+        }
+
+        public boolean isEnabled() {
+            return true;
+        }
+
+        public void setEnabled(boolean enabled) {
+        }
+    }
+
 }

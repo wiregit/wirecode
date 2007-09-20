@@ -488,8 +488,10 @@ public class HandshakeResponse {
      * @param iter a <tt>Collection</tt> of <tt>IpPort</tt> instances
      * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
+     *  
+     *  Default access for testing.
      */
-    private static String createEndpointString(Collection<? extends IpPort> hosts) {
+    static String createEndpointString(Collection<? extends IpPort> hosts) {
         return createEndpointString(hosts, NUM_X_TRY_ULTRAPEER_HOSTS);
     }
     
@@ -502,8 +504,9 @@ public class HandshakeResponse {
      * @param iter a <tt>Collection</tt> of <tt>IpPort</tt> instances
 	 * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
-	 */
-	private static String createEndpointString(Collection<? extends IpPort> hosts, int limit) {
+     *  Default access for testing.
+     */
+	static String createEndpointString(Collection<? extends IpPort> hosts, int limit) {
         StringBuilder sb = new StringBuilder();
         int i = 0;
         Iterator<? extends IpPort> iter = hosts.iterator();
@@ -528,8 +531,10 @@ public class HandshakeResponse {
      * @param line the full connection string, such as "200 OK."
      * @return the status code for the connection string, or -1 if the code
      *  could not be parsed
+     *  
+     *  Default access for testing.
      */
-    private static int extractCode(String line) {
+    static int extractCode(String line) {
         //get the status code and message out of the status line
         int statusMessageIndex = line.indexOf(" ");
         if(statusMessageIndex == -1) return -1;
@@ -546,8 +551,10 @@ public class HandshakeResponse {
      *
      * @param line the full connection string, such as "200 OK."
      * @return the status message for the connection string
+     * 
+     * Default access for testing.
      */
-    private static String extractMessage(String line) {
+    static String extractMessage(String line) {
         //get the status code and message out of the status line
         int statusMessageIndex = line.indexOf(" ");
         if(statusMessageIndex == -1) return null;
@@ -561,8 +568,10 @@ public class HandshakeResponse {
      * @param hr the <tt>HandshakeResponse</tt> of the incoming request
      * @return a new <tt>Properties</tt> instance with the X-Try-Ultrapeers
      *  header set according to the incoming headers from the remote host
+     *  
+     *  Default access for testing.
      */
-    private static Properties addXTryHeader(HandshakeResponse hr, Properties headers, ConnectionServices connectionServices) {
+    static Properties addXTryHeader(HandshakeResponse hr, Properties headers, ConnectionServices connectionServices) {
         Collection<IpPort> hosts = connectionServices.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;

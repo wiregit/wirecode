@@ -1711,7 +1711,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * as desired.  If you do, note that receivingConnection may be null (for
      * requests originating here).
      */
-    private void forwardQueryToUltrapeers(QueryRequest query,
+    // default access for testing
+    void forwardQueryToUltrapeers(QueryRequest query,
                                           ReplyHandler handler) {
 		// Note the use of initializedConnections only.
 		// Note that we have zero allocations here.
@@ -1739,7 +1740,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param handler the <tt>ReplyHandler</tt> from which we received
      *  the query
      */
-    private void forwardLimitedQueryToUltrapeers(QueryRequest query,
+    // default access for testing
+    void forwardLimitedQueryToUltrapeers(QueryRequest query,
                                                  ReplyHandler handler) {
 		//Broadcast the query to other connected nodes (ultrapeers or older
 		//nodes), but DON'T forward any queries not originating from me 
@@ -1783,7 +1785,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param handler the <tt>ReplyHandler</tt> that sent the query
      * @param ultrapeer the Ultrapeer to send the query to
      */
-    private void forwardQueryToUltrapeer(QueryRequest query, 
+    // default access for testing
+    void forwardQueryToUltrapeer(QueryRequest query, 
                                          ReplyHandler handler,
                                          ManagedConnection ultrapeer) {    
         // don't send a query back to the guy who sent it
@@ -1822,7 +1825,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      *
      * @param qr the <tt>QueryRequest</tt> to send
      */
-    private void originateLeafQuery(QueryRequest qr) {
+    // default access for testing
+    void originateLeafQuery(QueryRequest qr) {
 		List<ManagedConnection> list = connectionManager.getInitializedConnections();
 
         // only send to at most 4 Ultrapeers, as we could have more
@@ -2270,7 +2274,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param security token might be null
      * @return Iterable of QueryReply
      */
-    private Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+    // default access for testing
+    Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
                                              final int REPLY_LIMIT, SecurityToken securityToken) {
 
@@ -2525,8 +2530,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * been updated in a while.  You can call this method as often as you want;
      * it takes care of throttling.
      *     @modifies connections
-     */    
-    private void forwardQueryRouteTables() {
+     */
+    // default access for testing
+    void forwardQueryRouteTables() {
 		//Check the time to decide if it needs an update.
 		long time = System.currentTimeMillis();
 
@@ -2617,7 +2623,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * This will not include information from c.
      *     @requires queryUpdateLock held
      */
-    private QueryRouteTable createRouteTable() {
+    //default access for testing
+    QueryRouteTable createRouteTable() {
         QueryRouteTable ret = fileManager.getQRT();
         
         // Add leaves' files if we're an Ultrapeer.
@@ -2788,6 +2795,17 @@ public abstract class MessageRouterImpl implements MessageRouter {
             if (mc.remoteHostSupportsInspections() >= ir.getVersion())
                 mc.send(ir);
         }
+    }
+    
+    /**
+     * Should only be used for testing.
+     */
+    RouteTable getPushRouteTable() {
+        return _pushRouteTable;
+    }
+    
+    RouteTable getHeadPongRouteTable() {
+        return _headPongRouteTable;
     }
     
     private static class QueryResponseBundle {

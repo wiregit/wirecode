@@ -8,7 +8,11 @@ import com.limegroup.gnutella.NetworkManager;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
-    private boolean acceptedIncomingConnection;    
+    private boolean acceptedIncomingConnection;
+    private byte[] address;
+    private int port;
+    private boolean ipPortValid;
+    private GUID solicitedGUID;    
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -38,9 +42,12 @@ public class NetworkManagerStub implements NetworkManager {
         return false;
     }
 
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+    
     public byte[] getAddress() {
-        // TODO Auto-generated method stub
-        return null;
+        return address;
     }
 
     public byte[] getExternalAddress() {
@@ -58,9 +65,12 @@ public class NetworkManagerStub implements NetworkManager {
         return 0;
     }
 
+    public void setPort(int port) {
+        this.port = port;
+    }
+    
     public int getPort() {
-        // TODO Auto-generated method stub
-        return 0;
+        return port;
     }
 
     public GUID getUDPConnectBackGUID() {
@@ -79,8 +89,11 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public boolean isIpPortValid() {
-        // TODO Auto-generated method stub
-        return false;
+        return ipPortValid;
+    }
+    
+    public void setIpPortValid(boolean ipPortValid) {
+        this.ipPortValid = ipPortValid;
     }
 
     public boolean isOOBCapable() {
@@ -98,7 +111,11 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public GUID getSolicitedGUID() {
-        return null;
+        return solicitedGUID;
+    }
+    
+    public void setSolicitedGUID(GUID solicitedGUID) {
+        this.solicitedGUID = solicitedGUID;
     }
 
     public int supportsFWTVersion() {
