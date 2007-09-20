@@ -30,6 +30,12 @@ public class LimeCoreGlue {
     private static AtomicBoolean preinstalled = new AtomicBoolean(false);
     private static AtomicBoolean installed = new AtomicBoolean(false);
     
+    /** Uninstalls the glue. */
+    static void uninstall() {
+        preinstalled.set(false);
+        installed.set(false);
+    }
+    
     
     /**
      * Wires initial pieces together that are required for nearly everything.
