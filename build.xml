@@ -142,15 +142,26 @@
     remaining one -->
     <target name="lw-bundle-messages" description="Rebuilds messages and
     bundles them" depends="init.gettext">
+
     <!-- clean up -->
     <delete dir="lib/messagebundles/org"/>
+
     <!-- generate default bundle for complete messages -->
     <gettext-generate-default targetBundle="org.limewire.i18n.Messages"
-     outputDirectory="lib/messagebundles" potfile="lib/messagebundles/limewire.pot"/>
+     outputDirectory="lib/messagebundles" 
+     potfile="lib/messagebundles/limewire.pot"/>
+
     <!-- generate complete bundles -->
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
      poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"
     percentage="65"/>
+
+    <!-- generate the empty en.po file without percentage  -->
+    <gettext-dist targetBundle="org.limewire.i18n.Messages"
+	outputDirectory="lib/messagebundles">
+	 <fileset dir="lib/messagebundles" includes="en.po"/>
+    </gettext-dist>
+    
     <!-- jar them -->
     <jar destfile="lib/jars/messages.jar" basedir="lib/messagebundles"
     includes="org/**"/>
@@ -160,13 +171,18 @@
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
      poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"
     percentage="65" moreOrLess="less"/>
+
+    <delete>
+    <fileset dir="lib/messagebundles/org/limewire/i18n/" includes="**/Messages_en*"/>
+    </delete>
+
     <!-- jar them -->
     <jar destfile="lib/jars/compile/messages.jar" basedir="lib/messagebundles"
     includes="org/**"/>
-   	<!-- clean up -->
+   <!-- clean up -->
     <delete dir="lib/messagebundles/org"/>
     </target>
-   
+
     <!-- mask imported targets -->
     <target name="test"/>
     <target name="test-package"/>
