@@ -93,13 +93,15 @@ public class FileManagerStub extends FileManager {
     public void setDescs(List descs) {
         this._descs = descs;
     }
-    
+
+    @Deprecated
     public FileManagerStub(Map urns,List descs) {
     	super(ProviderHacks.getFileManagerController());
         _urns = urns;
         _descs = descs;
     }
     
+    @Deprecated
     public FileManagerStub(){
     	super(ProviderHacks.getFileManagerController());
         _urns = new HashMap();

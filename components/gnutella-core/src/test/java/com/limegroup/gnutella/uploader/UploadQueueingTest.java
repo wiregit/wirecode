@@ -61,7 +61,7 @@ public class UploadQueueingTest extends BaseTestCase {
 
     private HTTPUploadManager uploadManager;
 
-    private FileManager fm;
+    private FileManagerStub fm;
 
     private RemoteFileDesc rfd1;
 
@@ -106,15 +106,16 @@ public class UploadQueueingTest extends BaseTestCase {
         savedNIOWatchdogDelay = (int) StalledUploadWatchdog.DELAY_TIME;
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
 
-        initializeFileManager();
-
         injector = LimeTestUtils.createInjector(MyActivitCallback.class,
                 new AbstractModule() {
                     @Override
                     protected void configure() {
-                        bind(FileManager.class).toInstance(fm);
+                        bind(FileManager.class).to(FileManagerStub.class);
                     }
                 });
+
+        fm = (FileManagerStub) injector.getInstance(FileManager.class);
+        initializeFileManager();
 
         // start services
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
@@ -174,7 +175,8 @@ public class UploadQueueingTest extends BaseTestCase {
                 FileDescStub.DEFAULT_SIZE, new byte[16], 56, false, 3, false,
                 null, descStub.getUrns(), false, false, "", null, -1, false);
 
-        fm = new FileManagerStub(urns, descs);
+        fm.setUrns(urns);
+        fm.setDescs(descs);
         fm.get(0);
     }
 
