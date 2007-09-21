@@ -11,10 +11,11 @@ import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -27,6 +28,7 @@ public class DuplicateFilterTest extends LimeTestCase {
     PingRequest pr;
     QueryRequest qr;
     private Mockery context;
+    private QueryRequestFactory queryRequestFactory;
     
 	public DuplicateFilterTest(String name) {
 		super(name);
@@ -48,6 +50,8 @@ public class DuplicateFilterTest extends LimeTestCase {
 	    context = new Mockery();
 	    qr = context.mock(QueryRequest.class);
 	    pr = context.mock(PingRequest.class);
+	    
+	    queryRequestFactory = LimeTestUtils.createInjector().getInstance(QueryRequestFactory.class);
 	}
 	
 	private void addDefaultReturnValues() {
@@ -190,13 +194,13 @@ public class DuplicateFilterTest extends LimeTestCase {
     // TODO, remove dependencies by mocking LimeXMLDocument
     public void testXMLDuplicate() throws Exception {
         // Only allowed once in the timeframe ...
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("tests");
+        qr = queryRequestFactory.createQuery("tests");
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
         // Invalid XML, considered same as plaintext.
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("tests", "<?xml");
+        qr = queryRequestFactory.createQuery("tests", "<?xml");
         assertTrue(!filter.allow(qr));
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("tests",
+        qr = queryRequestFactory.createQuery("tests",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
@@ -204,7 +208,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         // same plain-text, different XML, allowed ...
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("another test",
+        qr = queryRequestFactory.createQuery("another test",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
@@ -212,7 +216,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         // same XML, different plaint-text, allowed ...
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("another test",
+        qr = queryRequestFactory.createQuery("another test",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
@@ -220,7 +224,7 @@ public class DuplicateFilterTest extends LimeTestCase {
         // different XML, allowed ...
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));        
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("another test",
+        qr = queryRequestFactory.createQuery("another test",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
