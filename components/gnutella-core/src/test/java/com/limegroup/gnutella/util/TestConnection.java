@@ -43,8 +43,7 @@ public abstract class TestConnection extends ManagedConnection {
                 .getHandshakeResponderFactory(), ProviderHacks
                 .getQueryReplyFactory(), ProviderHacks
                 .getMessageDispatcher(), ProviderHacks
-                .getNetworkUpdateSanityChecker(), ProviderHacks
-                .getUdpService(),
+                .getNetworkUpdateSanityChecker(), 
                 ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
                 ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
                 Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),

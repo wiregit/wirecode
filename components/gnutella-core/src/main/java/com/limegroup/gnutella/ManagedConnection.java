@@ -306,7 +306,6 @@ public class ManagedConnection extends Connection
     private final QueryReplyFactory queryReplyFactory;
     private final MessageDispatcher messageDispatcher;
     private final NetworkUpdateSanityChecker networkUpdateSanityChecker;
-    private final UDPService udpService;
     private final SearchResultHandler searchResultHandler;
     private final Provider<SimppManager> simppManager;
     private final Provider<UpdateHandler> updateHandler;
@@ -337,7 +336,6 @@ public class ManagedConnection extends Connection
             QueryReplyFactory queryReplyFactory,
             MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            UDPService udService,
             SearchResultHandler searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
@@ -356,7 +354,6 @@ public class ManagedConnection extends Connection
         this.queryReplyFactory = queryReplyFactory;
         this.messageDispatcher = messageDispatcher;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
-        this.udpService = udService;
         this.searchResultHandler = searchResultHandler;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
@@ -386,7 +383,6 @@ public class ManagedConnection extends Connection
             QueryReplyFactory queryReplyFactory,
             MessageDispatcher messageDispatcher,
             NetworkUpdateSanityChecker networkUpdateSanityChecker,
-            UDPService udService,
             SearchResultHandler searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
@@ -404,7 +400,6 @@ public class ManagedConnection extends Connection
         this.queryReplyFactory = queryReplyFactory;
         this.messageDispatcher = messageDispatcher;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
-        this.udpService = udService;
         this.searchResultHandler = searchResultHandler;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;

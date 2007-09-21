@@ -60,7 +60,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerCountQRT.class);
-                bind(FileManager.class).toInstance(new FileManagerStub());
+                bind(FileManager.class).to(FileManagerStub.class);
                 bind(ManagedConnection.class).to(ManagedConnectionCountQRT.class);
             }
             
@@ -77,8 +77,6 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         
         cm.addStubOvrConnection(peer);
         cm.addStubOvrConnection(leaf);
-        
-        
         
         mr = injector.getInstance(MessageRouter.class);
         cm = (ConnectionManagerCountQRT)injector.getInstance(ConnectionManager.class);
@@ -269,7 +267,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 QueryReplyFactory queryReplyFactory,
                 MessageDispatcher messageDispatcher,
                 NetworkUpdateSanityChecker networkUpdateSanityChecker,
-                UDPService udService, SearchResultHandler searchResultHandler,
+                SearchResultHandler searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 SocketsManager socketsManager, Acceptor acceptor,
                 MessagesSupportedVendorMessage supportedVendorMessage,
@@ -283,7 +281,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 ApplicationServices applicationServices) {
             super(connectionManager, networkManager, queryRequestFactory, headersFactory,
                     handshakeResponderFactory, queryReplyFactory, messageDispatcher,
-                    networkUpdateSanityChecker, udService, searchResultHandler,
+                    networkUpdateSanityChecker, searchResultHandler,
                     capabilitiesVMFactory, socketsManager, acceptor,
                     supportedVendorMessage, simppManager, updateHandler,
                     connectionServices, guidMapManager, spamFilterFactory,
@@ -422,7 +420,6 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 QueryReplyFactory queryReplyFactory,
                 MessageDispatcher messageDispatcher,
                 NetworkUpdateSanityChecker networkUpdateSanityChecker,
-                UDPService udService,
                 SearchResultHandler searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 SocketsManager socketsManager, Acceptor acceptor,
@@ -438,7 +435,6 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                   handshakeResponderFactory,
                   queryReplyFactory, messageDispatcher,
                   networkUpdateSanityChecker,
-                  udService,
                   searchResultHandler,
                   capabilitiesVMFactory,
                   socketsManager, acceptor,
@@ -457,7 +453,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 QueryReplyFactory queryReplyFactory,
                 MessageDispatcher messageDispatcher,
                 NetworkUpdateSanityChecker networkUpdateSanityChecker,
-                UDPService udService, SearchResultHandler searchResultHandler,
+                SearchResultHandler searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory, Acceptor acceptor,
                 MessagesSupportedVendorMessage supportedVendorMessage,
                 Provider<SimppManager> simppManager,
@@ -470,7 +466,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 ApplicationServices applicationServices) {
             super(socket, connectionManager, networkManager, queryRequestFactory,
                     headersFactory, handshakeResponderFactory, queryReplyFactory,
-                    messageDispatcher, networkUpdateSanityChecker, udService,
+                    messageDispatcher, networkUpdateSanityChecker, 
                     searchResultHandler, capabilitiesVMFactory, acceptor,
                     supportedVendorMessage, simppManager, updateHandler,
                     connectionServices, guidMapManager, spamFilterFactory,

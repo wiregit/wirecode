@@ -794,8 +794,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                             .getHandshakeResponderFactory(), ProviderHacks
                             .getQueryReplyFactory(), ProviderHacks
                             .getMessageDispatcher(), ProviderHacks
-                            .getNetworkUpdateSanityChecker(), ProviderHacks
-                    .getUdpService(), 
+                            .getNetworkUpdateSanityChecker(), 
             ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
             ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
             Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
