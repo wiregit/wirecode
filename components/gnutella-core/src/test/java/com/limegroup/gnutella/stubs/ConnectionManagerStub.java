@@ -57,6 +57,7 @@ public class ConnectionManagerStub extends ConnectionManager {
                 connectionCheckerManager, pingRequestFactory);
     }
 
+    @Deprecated
     public ConnectionManagerStub() {
         super(ProviderHacks.getNetworkManager(), Providers.of(ProviderHacks.getHostCatcher()),
                 Providers.of(ProviderHacks.getConnectionDispatcher()), ProviderHacks

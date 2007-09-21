@@ -6,7 +6,7 @@ import junit.framework.Test;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.StubSocket;
+import com.limegroup.gnutella.stubs.SocketStub;
 import com.limegroup.gnutella.util.SocketsManager;
 
 public class InstantMessengerTest extends BaseTestCase {
@@ -29,7 +29,7 @@ public class InstantMessengerTest extends BaseTestCase {
         assertEquals("host", im.getHost());
         assertEquals(1234, im.getPort());
         
-        im = new InstantMessengerImpl(new StubSocket(), new ActivityCallbackStub());
+        im = new InstantMessengerImpl(new SocketStub(), new ActivityCallbackStub());
         assertFalse(im.isOutgoing());
         assertEquals("1.2.3.4", im.getHost());
         assertEquals(1234, im.getPort());

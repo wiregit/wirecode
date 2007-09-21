@@ -48,7 +48,7 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.stubs.StubIOStateObserver;
+import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -1196,7 +1196,7 @@ public class UploadQueueingTest extends BaseTestCase {
 
     private static void connectHTTP(HTTPDownloader dloader, long start,
             long stop, boolean queue) throws Exception {
-        StubIOStateObserver observer = new StubIOStateObserver();
+        IOStateObserverStub observer = new IOStateObserverStub();
         synchronized (observer) {
             dloader.connectHTTP(start, stop, queue, 0, observer);
             observer.wait();
@@ -1206,7 +1206,7 @@ public class UploadQueueingTest extends BaseTestCase {
 
     private static HashTree requestHashTree(HTTPDownloader dloader)
             throws Exception {
-        StubIOStateObserver observer = new StubIOStateObserver();
+        IOStateObserverStub observer = new IOStateObserverStub();
         synchronized (observer) {
             dloader.requestHashTree(dloader.getRemoteFileDesc().getSHA1Urn(),
                     observer);

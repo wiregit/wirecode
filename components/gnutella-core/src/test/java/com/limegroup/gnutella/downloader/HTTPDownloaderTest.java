@@ -40,7 +40,7 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
-import com.limegroup.gnutella.stubs.StubIOStateObserver;
+import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
@@ -380,7 +380,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         func.apply(dl);
         
         dl.initializeTCP();
-        StubIOStateObserver observer = new StubIOStateObserver();
+        IOStateObserverStub observer = new IOStateObserverStub();
         dl.connectHTTP(0, 500, true, observer);
         observer.waitForFinish();
         

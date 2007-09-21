@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class StubSocket extends Socket {
+public class SocketStub extends Socket {
 
     public InetAddress address;
 
@@ -15,12 +15,12 @@ public class StubSocket extends Socket {
 
     public boolean closed;
 
-    public StubSocket(InetAddress address, int port) {
+    public SocketStub(InetAddress address, int port) {
         this.address = address;
         this.port = port;
     }
 
-    public StubSocket() {
+    public SocketStub() {
     }
 
     @Override

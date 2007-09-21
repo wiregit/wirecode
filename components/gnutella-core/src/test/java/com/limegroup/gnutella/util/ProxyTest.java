@@ -18,7 +18,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.stubs.StubConnectObserver;
+import com.limegroup.gnutella.stubs.ConnectObserverStub;
 
 public class ProxyTest extends BaseTestCase {
 
@@ -246,7 +246,7 @@ public class ProxyTest extends BaseTestCase {
             if (!nb) {
                 s = socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0);
             } else {
-                StubConnectObserver o = new StubConnectObserver();
+                ConnectObserverStub o = new ConnectObserverStub();
                 s = socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
                 o.waitForResponse(5000);
                 assertEquals(s, o.getSocket());
@@ -264,7 +264,7 @@ public class ProxyTest extends BaseTestCase {
                     // Good -- expected behaviour
                 }
             } else {
-                StubConnectObserver o = new StubConnectObserver();
+                ConnectObserverStub o = new ConnectObserverStub();
                 socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
                 o.waitForResponse(5000);
                 assertNull(o.getSocket());

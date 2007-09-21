@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.limewire.nio.statemachine.IOStateObserver;
 
-public class StubIOStateObserver implements IOStateObserver {
+public class IOStateObserverStub implements IOStateObserver {
     
     private volatile boolean statesFinished;
     private volatile boolean shutdown;

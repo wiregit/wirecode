@@ -7,7 +7,7 @@ import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.SpamServices;
-import com.limegroup.gnutella.stubs.StubSocket;
+import com.limegroup.gnutella.stubs.SocketStub;
 
 public class ChatManagerTest extends BaseTestCase {
 
@@ -24,7 +24,7 @@ public class ChatManagerTest extends BaseTestCase {
     }
 
     public void testAcceptConnection() {
-        final StubSocket socket = new StubSocket(address, 5678);
+        final SocketStub socket = new SocketStub(address, 5678);
         final SpamServices spamServices = context.mock(SpamServices.class);
         final InstantMessengerFactory instantMessengerFactory = context.mock(InstantMessengerFactory.class);
         final InstantMessenger instantMessenger = context.mock(InstantMessenger.class);
@@ -46,7 +46,7 @@ public class ChatManagerTest extends BaseTestCase {
     }
 
     public void testAcceptConnectionNotAllowed() {
-        final StubSocket socket = new StubSocket(address, 5678);
+        final SocketStub socket = new SocketStub(address, 5678);
         final SpamServices spamServices = context.mock(SpamServices.class);
         final InstantMessengerFactory instantMessengerFactory = context.mock(InstantMessengerFactory.class);
         
