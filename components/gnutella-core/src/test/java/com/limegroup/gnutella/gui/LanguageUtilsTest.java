@@ -38,9 +38,10 @@ public class LanguageUtilsTest extends BaseTestCase {
         List<Locale> locales = new ArrayList<Locale>(); 
         File jar = FileUtils.getJarFromClasspath("org/limewire/i18n/Messages.class");
         LanguageUtils.addLocalesFromJar(locales, jar );
-        assertTrue(locales.contains(new Locale("sr", "", "Latn")));
-        assertTrue(locales.contains(Locale.GERMAN));
-        assertTrue(locales.contains(Locale.ENGLISH));
+        assertTrue(locales.indexOf(new Locale("sr", "", "Latn")) != -1);
+        assertTrue(locales.indexOf(Locale.GERMAN) != -1);
+        assertTrue(locales.indexOf(Locale.ENGLISH) != -1);
+        assertTrue(locales.indexOf(Locale.CANADA_FRENCH) == -1);
     }
 
     public void testGetLocales() {
@@ -49,6 +50,10 @@ public class LanguageUtilsTest extends BaseTestCase {
         assertEquals(Locale.ENGLISH, locales.get(0));
         assertTrue(locales.indexOf(new Locale("sr", "", "Latn")) != -1);
         assertTrue(locales.indexOf(Locale.GERMAN) != -1);
+        
+        // make sure English is in the list only once
+        locales.set(0, null);
+        assertEquals(-1, locales.indexOf(Locale.ENGLISH));
     }
 
     public void testMatchingScore() {
