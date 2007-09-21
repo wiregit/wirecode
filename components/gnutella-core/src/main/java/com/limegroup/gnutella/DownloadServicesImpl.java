@@ -112,4 +112,9 @@ public class DownloadServicesImpl implements DownloadServices {
         return downloadManager.get().downloadsInProgress();
     }
 
+    public boolean hasActiveDownloads() {
+        downloadManager.get().measureBandwidth();
+        return downloadManager.get().getMeasuredBandwidth() != 0;
+    }
+
 }

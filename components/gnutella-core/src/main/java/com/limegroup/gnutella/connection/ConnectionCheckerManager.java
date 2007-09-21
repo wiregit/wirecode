@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.connection;
 
+import java.util.concurrent.Future;
+
 public interface ConnectionCheckerManager {
 
     /**
@@ -9,7 +11,7 @@ public interface ConnectionCheckerManager {
      * connection, it will notify the <tt>ConnectionManager</tt> to take
      * appropriate action.
      */
-    public ConnectionChecker checkForLiveConnection();
+    public Future<Boolean> checkForLiveConnection();
 
     public int getNumWorkarounds();
 

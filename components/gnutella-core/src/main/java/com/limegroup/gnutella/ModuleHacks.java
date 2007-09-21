@@ -1,7 +1,9 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
@@ -24,6 +26,7 @@ public class ModuleHacks extends AbstractModule {
         bind(SimppManager.class).toProvider(SimppManagerProvider.class);
         bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
         bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toProvider(BackgroundTimerProvider.class);
+        bind(ExecutorService.class).annotatedWith(Names.named("unlimitedExecutor")).toProvider(UnlimitedExecutorProvider.class);
     }
     
     @Singleton
@@ -74,5 +77,12 @@ public class ModuleHacks extends AbstractModule {
             return SimpleTimer.sharedTimer();
         }
     }
-    
+
+    @Singleton
+    private static class UnlimitedExecutorProvider implements Provider<ExecutorService> {
+        public ExecutorService get() {
+            return ExecutorsHelper.newThreadPool(ExecutorsHelper.daemonThreadFactory("IdleThread"));
+        }
+    }
+
 }
