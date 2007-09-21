@@ -529,6 +529,13 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	public boolean acceptedIncoming() {
         return _acceptedIncoming;
 	}
+
+	/**
+	 * For testing.
+	 */
+	protected void setAcceptedIncoming(boolean incoming) {
+        _acceptedIncoming = incoming;
+    }
 	
 	/**
 	 * Sets the new incoming status.
