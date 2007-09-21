@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.limewire.util.CommonUtils;
 
+import com.limegroup.gnutella.helpers.UrnHelper;
+
 import junit.framework.Test;
 
 
@@ -77,7 +79,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.LimeTestCase
         });
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
-			Set urns = calculateAndCacheURN(files[i]);
+			Set urns = UrnHelper.calculateAndCacheURN(files[i], ProviderHacks.getUrnCache());
 			fileDescs[i] = new FileDesc(files[i], urns, i);
 		}				
 		return fileDescs;

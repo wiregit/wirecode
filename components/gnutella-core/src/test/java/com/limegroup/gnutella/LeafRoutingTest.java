@@ -21,6 +21,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -387,9 +388,9 @@ public class LeafRoutingTest extends LimeTestCase {
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        Iterator iter = calculateAndCacheURN(berkeley).iterator();
+        Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()).iterator();
         URN berkeleyURN = (URN) iter.next();
-        iter = calculateAndCacheURN(susheel).iterator();
+        iter = UrnHelper.calculateAndCacheURN(susheel, ProviderHacks.getUrnCache()).iterator();
         URN susheelURN = (URN) iter.next();
 
         // send a query that should hit
@@ -406,7 +407,7 @@ public class LeafRoutingTest extends LimeTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(), calculateAndCacheURN(berkeley));
+                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()));
             }
         } while (!(m instanceof QueryReply)) ;
         
@@ -424,7 +425,7 @@ public class LeafRoutingTest extends LimeTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(), calculateAndCacheURN(susheel));
+                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(susheel, ProviderHacks.getUrnCache()));
             }
         } while (!(m instanceof QueryReply)) ;
     }

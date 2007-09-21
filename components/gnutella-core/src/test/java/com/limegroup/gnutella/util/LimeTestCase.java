@@ -26,7 +26,6 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.UrnCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -332,31 +331,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         Set set = new HashSet(Arrays.asList(dirs));
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(set);
     }
-    
-    public static Set calculateAndCacheURN(File f) throws Exception {
-        final Set myUrns = new HashSet(1);
-        UrnCallback blocker = new UrnCallback() {
-            public void urnsCalculated(File file, Set urns) {
-                synchronized(myUrns) {
-                    myUrns.addAll(urns);
-                    myUrns.notify();
-                }
-            }
-            
-            public boolean isOwner(Object o) {
-                return false;
-            }
-        };
-        
-        synchronized(myUrns) {
-            ProviderHacks.getUrnCache().calculateAndCacheUrns(f, blocker);
-            if(myUrns.isEmpty()) // only wait if it didn't fill immediately.
-                myUrns.wait(3000);
-        }
-        
-        return myUrns;
-    }
-    
     
     private static final int TIMEOUT = 2000;
     

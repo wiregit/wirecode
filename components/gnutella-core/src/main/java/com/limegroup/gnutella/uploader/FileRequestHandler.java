@@ -65,7 +65,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final FileManager fileManager;
     private final HTTPHeaderUtils httpHeaderUtils;
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
-    private final CreationTimeCache creationTimeCache;
+    private final Provider<CreationTimeCache> creationTimeCache;
 
     private final FileResponseEntityFactory fileResponseEntityFactory;
 
@@ -81,7 +81,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
             FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
-            CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
+            Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
             AltLocManager altLocManager,
             AlternateLocationFactory alternateLocationFactory,
             Provider<DownloadManager> downloadManager,
@@ -301,9 +301,9 @@ public class FileRequestHandler implements HttpRequestHandler {
             // this information again.
             // it's possible t do that because we don't use the same
             // uploader for different files
-            if (creationTimeCache.getCreationTime(urn) != null) {
+            if (creationTimeCache.get().getCreationTime(urn) != null) {
                 response.addHeader(HTTPHeaderName.CREATION_TIME
-                        .create(creationTimeCache.getCreationTime(urn).toString()));
+                        .create(creationTimeCache.get().getCreationTime(urn).toString()));
             }
         }
 

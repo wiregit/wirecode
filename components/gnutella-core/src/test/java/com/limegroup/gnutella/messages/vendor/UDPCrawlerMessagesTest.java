@@ -27,7 +27,6 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CountingConnection;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.BadPacketException;

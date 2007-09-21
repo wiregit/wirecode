@@ -81,8 +81,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
         fileManager = new FileManagerStub(urns, descs);        
         requestHandler = new FileRequestHandler(sessionManager, fileManager,
                 ProviderHacks.getHTTPHeaderUtils(), ProviderHacks
-                        .getHttpRequestHandlerFactory(), ProviderHacks
-                        .getCreationTimeCache(), ProviderHacks.getFileResponseEntityFactory(),
+                        .getHttpRequestHandlerFactory(), Providers.of(ProviderHacks
+                        .getCreationTimeCache()), ProviderHacks.getFileResponseEntityFactory(),
                         ProviderHacks.getAltLocManager(),
                         ProviderHacks.getAlternateLocationFactory(),
                         Providers.of(ProviderHacks.getDownloadManager()),

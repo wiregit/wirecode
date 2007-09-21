@@ -26,6 +26,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -59,14 +60,14 @@ public class ResponseFactoryImpl implements ResponseFactory {
     private static final String KHZ = "kHz";
 
     private final AltLocManager altLocManager;
-    private final CreationTimeCache creationTimeCache;
+    private final Provider<CreationTimeCache> creationTimeCache;
     private final IPFilter ipFilter;
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
 
     @Inject
     public ResponseFactoryImpl(AltLocManager altLocManager,
-            CreationTimeCache creationTimeCache, IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
+            Provider<CreationTimeCache> creationTimeCache, IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
         this.altLocManager = altLocManager;
         this.creationTimeCache = creationTimeCache;
         this.ipFilter = ipFilter;
@@ -93,7 +94,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
      */
     public Response createResponse(FileDesc fd) {
         GGEPContainer container = new GGEPContainer(getAsIpPorts(altLocManager
-                .getDirect(fd.getSHA1Urn())), creationTimeCache
+                .getDirect(fd.getSHA1Urn())), creationTimeCache.get()
                 .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize());
 
         return createResponse(fd.getIndex(), fd.getFileSize(),
