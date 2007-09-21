@@ -25,7 +25,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 public class DownloadManagerStub extends DownloadManager {
     
 
-    // DPINJ: remove me
+    @Deprecated
     public DownloadManagerStub() {
         super(ProviderHacks.getNetworkManager(), ProviderHacks
                 .getDownloadReferencesFactory(), ProviderHacks
