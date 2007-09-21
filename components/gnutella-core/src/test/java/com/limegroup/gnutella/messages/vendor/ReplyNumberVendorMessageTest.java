@@ -4,26 +4,46 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class ReplyNumberVendorMessageTest extends BaseTestCase {
+
+    private ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
+    private MessageFactory messageFactory;
+    private NetworkManagerStub networkManagerStub;
 
     public ReplyNumberVendorMessageTest(String name) {
         super(name);
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        networkManagerStub = new NetworkManagerStub();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        replyNumberVendorMessageFactory = injector.getInstance(ReplyNumberVendorMessageFactory.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+    }
+    
     public void testNumResults() {
-        ReplyNumberVendorMessage msg = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(), 10);
+        ReplyNumberVendorMessage msg = replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(new GUID(), 10);
         assertEquals(10, msg.getNumResults());
         
         for (int illegalResultNum : new int[] { 256, 0, -1 }) {
             try { 
-                msg = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(), illegalResultNum);
+                msg = replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(new GUID(), illegalResultNum);
                 fail("Expected illegal argument exception for result: " + illegalResultNum);
             }
             catch (IllegalArgumentException iae) {
@@ -32,10 +52,10 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     }
     
     public void testVersion3AllowsLargerMessagesFromNetwork() throws BadPacketException {
-        ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+        replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                 (byte)1, (byte)1, 3, new byte[11]);
         try {
-            ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                     (byte)1, (byte)1, 2, new byte[11]);
             fail("BadPacketException expected, message too large");
         }
@@ -45,7 +65,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     
     public void testOldVersionIsNotAcceptedFromNetwork() {
         try {
-            ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                     (byte)0x01, (byte)0x01, 1, new byte[2]);
             fail("Old message versions should not be accpeted");            
         }
@@ -56,18 +76,18 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     public void testReplyNumber() throws Exception {
         try {
             GUID g = new GUID(GUID.makeGuid());
-            ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(g, 0);
+            replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(g, 0);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
         try {
             GUID g = new GUID(GUID.makeGuid());
-            ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(g, 256);
+            replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(g, 256);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
 
         for (int i = 1; i < 256; i++) {
             GUID guid = new GUID(GUID.makeGuid());
-            ReplyNumberVendorMessage vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(guid,
+            ReplyNumberVendorMessage vm = replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(guid,
                                                                        i);
             assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
             assertEquals("guids aren't equal!", guid, new GUID(vm.getGUID()));
@@ -76,7 +96,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             ReplyNumberVendorMessage vmRead = 
-                (ReplyNumberVendorMessage) ProviderHacks.getMessageFactory().read(bais);
+                (ReplyNumberVendorMessage) messageFactory.read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 
@@ -90,7 +110,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         // first test that it needs a payload of at least size 1
         payload = new byte[0];
         try {
-            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 0, payload);
             assertTrue(false);
         }
@@ -99,7 +119,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         // first test that version 1 needs a payload of only size 1
         payload = new byte[2];
         try {
-            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 1, payload);
             assertTrue(false);
         }
@@ -108,7 +128,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         //test that it can handle versions other than 1
         payload = new byte[3];
         try {
-            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 3, payload);
             assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
         }
@@ -117,29 +137,26 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         }
         
         //test un/solicited byte
-        UDPService service = ProviderHacks.getUdpService();
-        PrivilegedAccessor.setValue(
-                service,"_acceptedUnsolicitedIncoming",new Boolean(false));
+        networkManagerStub.setCanReceiveUnsolicited(false);
         
-        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        vm = replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
         assertFalse(vm.canReceiveUnsolicited());
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) messageFactory.read(bais);
         assertFalse(vm2.canReceiveUnsolicited());
         
-        PrivilegedAccessor.setValue(
-                service,"_acceptedUnsolicitedIncoming",new Boolean(true));
+        networkManagerStub.setCanReceiveUnsolicited(true);
         
-        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        vm = replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
         assertTrue(vm.canReceiveUnsolicited());
         
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        vm2 = (ReplyNumberVendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        vm2 = (ReplyNumberVendorMessage) messageFactory.read(bais);
         assertTrue(vm2.canReceiveUnsolicited());
         
         
