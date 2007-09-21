@@ -37,8 +37,9 @@ public class LocalSocketAddressProviderStub implements LocalSocketAddressProvide
         return tlsCapable;
     }
     
-    public void setTLSCapable(boolean tlsCapable) {
+    public LocalSocketAddressProviderStub setTLSCapable(boolean tlsCapable) {
         this.tlsCapable = tlsCapable;
+        return this;
     }
 
 }

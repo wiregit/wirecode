@@ -14,6 +14,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.AbstractModule;
@@ -35,6 +36,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class HTTPUploaderTest extends LimeTestCase {
@@ -79,20 +81,24 @@ public class HTTPUploaderTest extends LimeTestCase {
         urns.put(urn1, fd1);
         descs.add(fd1);
 
-        fm = new FileManagerStub(urns, descs);
-
         Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).toInstance(fm);
+                bind(FileManager.class).to(FileManagerStub.class);
             } 
-        });
-        
+        });        
+
+        fm = (FileManagerStub) injector.getInstance(FileManager.class);
+        fm.setUrns(urns);
+        fm.setDescs(descs);
+
         cb = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
 
         acceptor = injector.getInstance(Acceptor.class);
         httpAcceptor = injector.getInstance(HTTPAcceptor.class);
         uploadManager = injector.getInstance(HTTPUploadManager.class);
+
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub().setTLSCapable(true));
 
         acceptor.setListeningPort(PORT);
         acceptor.start();
@@ -115,10 +121,10 @@ public class HTTPUploaderTest extends LimeTestCase {
     protected void tearDown() throws Exception {
         uploadManager.stop();
         httpAcceptor.stop();
-        
+
         acceptor.setListeningPort(0);
         acceptor.shutdown();
-        
+
         LimeTestUtils.waitForNIO();
     }
 
