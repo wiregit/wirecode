@@ -66,7 +66,7 @@ public class HttpClientManager {
     private static final HttpConnectionManager MANAGER;
     
     @Inject
-    private static SocketsManager socketsManager; 
+    static SocketsManager socketsManager; 
     
     static {
         MANAGER = new MultiThreadedHttpConnectionManager();
