@@ -16,6 +16,7 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ssl.SSLUtils;
@@ -25,6 +26,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AcceptorTest extends LimeTestCase {
@@ -48,7 +50,7 @@ public class AcceptorTest extends LimeTestCase {
     
     @Override
     public void setUp() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub().setTLSCapable(true));
         
         Injector injector = LimeTestUtils.createInjector();
         
