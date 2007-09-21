@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.tigertree;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -7,29 +8,27 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.collection.Range;
 import org.limewire.util.Base32;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEGenerator;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.UUID;
 
 /**
  * Unit tests for HashTree
  */
-public class HashTreeTest extends LimeTestCase {
+public class HashTreeTest extends BaseTestCase {
     
     private static final String filename = 
      "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
@@ -59,10 +58,15 @@ public class HashTreeTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void testLargeFile()  throws Throwable {
+    @Override
+    protected void setUp() throws Exception {
+        HashTree.hashTreeNodeManager = new HashTreeNodeManager();
+    }
+    
+    public void testLargeFile()  throws Exception {
     	URN urn = URN.createSHA1Urn(file);
     	try {
-    		createHashTree(1780149344l,urn);
+    		HashTree.createHashTree(1780149344l, new ByteArrayInputStream(new byte[0]), urn);
     		fail("shouldn't have read whole file");
     	}catch(IOException expected){}
     }
@@ -72,12 +76,18 @@ public class HashTreeTest extends LimeTestCase {
     //These tests must all be run in the exact order they're
     //written so that they work correctly.
 
-    public void testBasicTigerTree() throws Throwable {
+    public void testBasicTigerTree() throws Exception {
         assertTrue(file.exists());
         URN urn = URN.createSHA1Urn(file);
         assertEquals(sha1, urn.toString());
                 
-        hashTree = createHashTree(file, urn);
+        InputStream in = new BufferedInputStream(new FileInputStream(file));
+        try {
+            hashTree = HashTree.createHashTree(file.length(), in, urn);
+        } finally {
+            in.close();
+        }
+
         // most important test:
         // if we get the root hash right, the rest will be working, too
         assertEquals(root32, hashTree.getRootHash());
@@ -116,7 +126,7 @@ public class HashTreeTest extends LimeTestCase {
         assertEquals(1+2+3+6+11, hashTree.getNodeCount());
     }
     
-    public void testWriteToStream() throws Throwable {
+    public void testWriteToStream() throws Exception {
         
         // Now make sure we can write this record out correctly.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -136,7 +146,7 @@ public class HashTreeTest extends LimeTestCase {
         verifyTree(treeRecord, uuid);
     }
     
-    public void testReadFromStream() throws Throwable {
+    public void testReadFromStream() throws Exception {
         
         // Make sure we can read the tree back in.
         treeFromNetwork = HashTree.createHashTree(
@@ -150,7 +160,7 @@ public class HashTreeTest extends LimeTestCase {
         
     }
 
-    public void testVerifyChunk() throws Throwable {
+    public void testVerifyChunk() throws Exception {
         File corrupt = new File("corruptFile");
         FileUtils.copy(file, corrupt);
         assertTrue(corrupt.exists());
@@ -185,7 +195,7 @@ public class HashTreeTest extends LimeTestCase {
         corrupt.delete();
     }
     
-    public void testCorruptedXMLRecord() throws Throwable {
+    public void testCorruptedXMLRecord() throws Exception {
         // Easiest way to test is to use existing DIMERecords and then
         // hack them up.
         DIMERecord corruptedXML = null;
@@ -265,7 +275,7 @@ public class HashTreeTest extends LimeTestCase {
         }
     }    
     
-    public void testCorruptedTreeData() throws Throwable {
+    public void testCorruptedTreeData() throws Exception {
         byte[] data;
         
         // data is too small to fit a root hash.
@@ -309,7 +319,7 @@ public class HashTreeTest extends LimeTestCase {
         checkTree(data, true);
     }
     
-    private void checkTree(byte[] data, boolean good) throws Throwable {
+    private void checkTree(byte[] data, boolean good) throws Exception {
         DIMERecord corrupt = null;
         corrupt = createCorruptRecord(treeRecord, data);
         try {
@@ -355,7 +365,7 @@ public class HashTreeTest extends LimeTestCase {
                                  data.getBytes());
     }
     
-    private UUID verifyXML(DIMERecord xml) throws Throwable {
+    private UUID verifyXML(DIMERecord xml) throws Exception {
         // simple tests.
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, xml.getTypeId());
         assertEquals("text/xml", xml.getTypeString());
@@ -420,7 +430,7 @@ public class HashTreeTest extends LimeTestCase {
         return uuid;
     }
 
-    private void verifyTree(DIMERecord tree, UUID uuid) throws Throwable {
+    private void verifyTree(DIMERecord tree, UUID uuid) throws Exception {
         // simple tests.
         assertEquals(DIMERecord.TYPE_ABSOLUTE_URI, tree.getTypeId());
         assertEquals("http://open-content.net/spec/thex/breadthfirst",
@@ -441,33 +451,4 @@ public class HashTreeTest extends LimeTestCase {
         assertEquals(data.length, offset);
     }
     
-    private HashTree createHashTree(File file, URN sha1) throws Throwable {
-        Object ret = null;
-        try {
-            ret = PrivilegedAccessor.invokeMethod(
-                HashTree.class, "createHashTree", 
-                new Object[] { new Long(file.length()), new FileInputStream(file),
-                            sha1 },
-                new Class[] { long.class, InputStream.class, URN.class }
-            );
-        } catch(InvocationTargetException ite) {
-            throw ite.getCause();
-        }
-        return (HashTree)ret;
-    }
-    
-    private HashTree createHashTree(long size, URN sha1) throws Throwable {
-        Object ret = null;
-        try {
-            ret = PrivilegedAccessor.invokeMethod(
-                HashTree.class, "createHashTree", 
-                new Object[] { new Long(size), new ByteArrayInputStream(new byte[0]),
-                            sha1 },
-                new Class[] { long.class, InputStream.class, URN.class }
-            );
-        } catch(InvocationTargetException ite) {
-            throw ite.getCause();
-        }
-        return (HashTree)ret;
-    }
 }

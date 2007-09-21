@@ -90,7 +90,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     private transient int _nodeSize;
     
     @Inject
-    private static HashTreeNodeManager hashTreeNodeManager;
+    static HashTreeNodeManager hashTreeNodeManager;
     
     /** Constructs an invalid HashTree. */
     private HashTree() {
@@ -190,7 +190,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Exists as a hook for tests, to create a HashTree from a File
      * when no FileDesc exists.
      */
-    private static HashTree createHashTree(long fileSize, InputStream is,
+    static HashTree createHashTree(long fileSize, InputStream is,
                                            URN sha1) throws IOException {
         // do the actual hashing
         int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));

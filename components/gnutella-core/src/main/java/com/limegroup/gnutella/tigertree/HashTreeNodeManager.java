@@ -45,6 +45,9 @@ public class HashTreeNodeManager {
      */
     private int _currentNodes = 0;
     
+    public HashTreeNodeManager() {
+    }
+    
     /**
      * Returns all intermediary nodes for the tree.
      */
