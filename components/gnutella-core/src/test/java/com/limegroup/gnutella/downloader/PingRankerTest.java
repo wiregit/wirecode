@@ -75,8 +75,6 @@ public class PingRankerTest extends LimeTestCase {
     HeadPongFactory headPongFactory;
     
     public void setUp() throws Exception {
-        
-        messageRouter = new MessageRouterStub();
         networkManager = new NetworkManagerStub();
         networkManager.setAcceptedIncomingConnection(false);
     
@@ -84,14 +82,15 @@ public class PingRankerTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(UDPPinger.class).to(MockPinger.class);
-                bind(MessageRouter.class).toInstance(messageRouter);
                 bind(NetworkManager.class).toInstance(networkManager);
+                bind(MessageRouter.class).to(MessageRouterStub.class);
             }
             
         };
         
         Injector injector = LimeTestUtils.createInjector(module);
-        
+
+        messageRouter = (MessageRouterStub) injector.getInstance(MessageRouter.class);
         udpReplyHandlerFactory = injector.getInstance(UDPReplyHandlerFactory.class);
         spamFilterFactory = injector.getInstance(SpamFilterFactory.class);
         pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);

@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import org.limewire.inject.Providers;
 
+@Deprecated
 public class HackMessageRouter extends StandardMessageRouter {
 
     public HackMessageRouter() {

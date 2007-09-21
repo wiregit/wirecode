@@ -14,6 +14,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManager;
@@ -68,6 +69,47 @@ public class RequeryDownloadTest
     private static final int PORT = 6939;
 
     static class TestMessageRouter extends MessageRouterStub {
+        
+        public TestMessageRouter() {
+            super(ProviderHacks.getNetworkManager(), ProviderHacks
+                    .getQueryRequestFactory(), ProviderHacks
+                    .getQueryHandlerFactory(),
+                    ProviderHacks.getOnDemandUnicaster(), ProviderHacks
+                            .getHeadPongFactory(), ProviderHacks
+                            .getPingReplyFactory(), ProviderHacks
+                            .getConnectionManager(), ProviderHacks
+                            .getForMeReplyHandler(), ProviderHacks
+                            .getQueryUnicaster(), ProviderHacks.getFileManager(),
+                    ProviderHacks.getContentManager(), ProviderHacks
+                            .getDHTManager(), ProviderHacks.getUploadManager(),
+                    ProviderHacks.getDownloadManager(), ProviderHacks
+                            .getUdpService(), ProviderHacks
+                            .getSearchResultHandler(), ProviderHacks
+                            .getSocketsManager(), ProviderHacks.getHostCatcher(),
+                    ProviderHacks.getQueryReplyFactory(), ProviderHacks
+                            .getStaticMessages(), Providers.of(ProviderHacks
+                            .getMessageDispatcher()), ProviderHacks
+                            .getMulticastService(), ProviderHacks
+                            .getQueryDispatcher(), Providers.of(ProviderHacks
+                            .getActivityCallback()), ProviderHacks
+                            .getConnectionServices(), ProviderHacks
+                            .getApplicationServices(), ProviderHacks
+                            .getBackgroundExecutor(), Providers
+                            .of(ProviderHacks.getPongCacher()), Providers
+                            .of(ProviderHacks.getSimppManager()), Providers
+                            .of(ProviderHacks.getUpdateHandler()),
+                            ProviderHacks.getGuidMapManager(),
+                            ProviderHacks.getUDPReplyHandlerCache(),
+                            ProviderHacks.getInspectionRequestHandlerFactory(),
+                            ProviderHacks.getUDPCrawlerPingHandlerFactory(),
+                            ProviderHacks.getAdvancedToggleHandlerFactory(),
+                            ProviderHacks.getStatistics(),
+                            ProviderHacks.getReplyNumberVendorMessageFactory(),
+                            ProviderHacks.getPingRequestFactory()
+
+            );
+        }
+        
         List /* of QueryMessage */ broadcasts=new LinkedList();
 		public void sendDynamicQuery(QueryRequest query) {
             broadcasts.add(query);
