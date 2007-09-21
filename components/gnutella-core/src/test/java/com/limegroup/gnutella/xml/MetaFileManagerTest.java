@@ -7,9 +7,9 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.util.I18NConvert;
 
-import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -21,6 +21,7 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 /**
  * Tests the MetaFileManager.  Subclass FileManagerTest so that
@@ -45,10 +46,12 @@ public class MetaFileManagerTest extends FileManagerTest {
 	protected void setUp() throws Exception {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        	
+       
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
+        
 	    cleanFiles(_sharedDir, false);
 	    
-        Injector injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector();
 
         injector.getInstance(Acceptor.class).setAddress(InetAddress.getLocalHost());
 
