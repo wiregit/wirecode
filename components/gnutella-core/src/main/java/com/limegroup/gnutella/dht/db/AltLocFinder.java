@@ -26,11 +26,15 @@ import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.nio.observer.Shutdownable;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -38,14 +42,25 @@ import com.limegroup.gnutella.settings.DHTSettings;
 /**
  * The AltLocFinder queries the DHT for Alternate Locations
  */
+@Singleton
 public class AltLocFinder {
 
     private static final Log LOG = LogFactory.getLog(AltLocFinder.class);
     
     private final DHTManager manager;
+
+    private final AlternateLocationFactory alternateLocationFactory;
+
+    private final PushEndpointFactory pushEndpointFactory;
+
+    private final AltLocManager altLocManager;
     
-    public AltLocFinder(DHTManager manager) {
+    @Inject
+    public AltLocFinder(DHTManager manager, AlternateLocationFactory alternateLocationFactory, AltLocManager altLocManager, PushEndpointFactory pushEndpointFactory) {
         this.manager = manager;
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.altLocManager = altLocManager;
+        this.pushEndpointFactory = pushEndpointFactory;
     }
     
     /**
@@ -63,7 +78,7 @@ public class AltLocFinder {
             }
             
             KUID key = KUIDUtils.toKUID(urn);
-            EntityKey lookupKey = EntityKey.createEntityKey(key, AltLocValue.ALT_LOC);
+            EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractAltLocValue.ALT_LOC);
             final DHTFuture<FindValueResult> future = dht.get(lookupKey);
             future.addDHTFutureListener(new AltLocsHandler(dht, urn, key, listener));
             return new Shutdownable() {
@@ -98,7 +113,7 @@ public class AltLocFinder {
             }
             
             KUID key = KUIDUtils.toKUID(guid);
-            EntityKey lookupKey = EntityKey.createEntityKey(key, PushProxiesValue.PUSH_PROXIES);
+            EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);
             DHTFuture<FindValueResult> future = dht.get(lookupKey);
             future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key, altLocEntity, listener));
             return true;
@@ -231,7 +246,7 @@ public class AltLocFinder {
         
         private AltLocsHandler(MojitoDHT dht, URN urn, KUID key, 
                 AltLocSearchListener listener) {
-            super(dht, urn, key, listener, AltLocValue.ALT_LOC);
+            super(dht, urn, key, listener, AbstractAltLocValue.ALT_LOC);
         }
         
         @Override
@@ -262,13 +277,13 @@ public class AltLocFinder {
                 
                 IpPort ipp = new IpPortImpl(addr, altLoc.getPort());
                 Connectable c = new ConnectableImpl(ipp, altLoc.supportsTLS());
-                
+
                 long fileSize = altLoc.getFileSize();
                 byte[] ttroot = altLoc.getRootHash();
                 try {
-                    AlternateLocation location 
-                        = AlternateLocation.createDirectDHTAltLoc(c, urn, fileSize, ttroot);
-                    AltLocManager.instance().add(location, this);
+                    AlternateLocation location = alternateLocationFactory
+                            .createDirectDHTAltLoc(c, urn, fileSize, ttroot);
+                    altLocManager.add(location, this);
                     return true;
                 } catch (IOException e) {
                     // Thrown if IpPort is an invalid address
@@ -290,10 +305,10 @@ public class AltLocFinder {
         private final GUID guid;
         
         private final DHTValueEntity altLocEntity;
-        
+
         private PushAltLocsHandler(MojitoDHT dht, GUID guid, URN urn, 
                 KUID key, DHTValueEntity altLocEntity, AltLocSearchListener listener) {
-            super(dht, urn, key, listener, PushProxiesValue.PUSH_PROXIES);
+            super(dht, urn, key, listener, AbstractPushProxiesValue.PUSH_PROXIES);
             
             this.guid = guid;
             this.altLocEntity = altLocEntity;
@@ -342,12 +357,11 @@ public class AltLocFinder {
             byte features = pushProxies.getFeatures();
             int fwtVersion = pushProxies.getFwtVersion();
             IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
-            PushEndpoint pe = new PushEndpoint(guid, proxies, features, fwtVersion, ipp);
+            PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid, proxies, features, fwtVersion, ipp);
             
             try {
-                AlternateLocation location 
-                    = AlternateLocation.createPushAltLoc(pe, urn);
-                AltLocManager.instance().add(location, this);
+                AlternateLocation location = alternateLocationFactory.createPushAltLoc(pe, urn);
+                altLocManager.add(location, this);
                 return true;
             } catch (IOException e) {
                 // Impossible. Thrown if URN or PushEndpoint is null

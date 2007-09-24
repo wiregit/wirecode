@@ -4,29 +4,24 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.inject.Singleton;
+
 
 /** 
  * Used to map schema URIs to Reply Collections.
  * 
  * @author Sumeet Thadani
  */
+@Singleton
 public class SchemaReplyCollectionMapper{
     
     private Map<String, LimeXMLReplyCollection> mapper;
-    private static SchemaReplyCollectionMapper instance;
     
     //constructor
     private SchemaReplyCollectionMapper() {
         mapper = new HashMap<String, LimeXMLReplyCollection>();
     }
 
-
-    public static synchronized SchemaReplyCollectionMapper instance() {
-        if (instance == null)
-            instance = new SchemaReplyCollectionMapper();
-        return instance;
-    }
-    
 
     /**
      * Adds the SchemaURI to a HashMap with the replyCollection.

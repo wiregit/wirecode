@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.limewire.io.IpPortImpl;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ContentSettings;
 
@@ -20,6 +21,13 @@ public class SettingsBasedContentAuthority implements ContentAuthority {
     /** RNG. */
     private Random RNG = newRandom();
 
+    private final IpPortContentAuthorityFactory ipPortContentAuthorityFactory;
+    
+    @Inject
+    public SettingsBasedContentAuthority(IpPortContentAuthorityFactory ipPortContentAuthorityFactory) {
+        this.ipPortContentAuthorityFactory = ipPortContentAuthorityFactory;
+    }
+
     /**
      * Initializes this with the proper IpPortContentAuthorities.
      */
@@ -28,7 +36,7 @@ public class SettingsBasedContentAuthority implements ContentAuthority {
         List<ContentAuthority> dns = new ArrayList<ContentAuthority>(hosts.length);
         for(int i = 0; i < hosts.length; i++) {
             try {
-                dns.add(new IpPortContentAuthority(new IpPortImpl(hosts[i])));
+                dns.add(ipPortContentAuthorityFactory.createIpPortContentAuthority(new IpPortImpl(hosts[i])));
             } catch(UnknownHostException uhe) {}
         }
         

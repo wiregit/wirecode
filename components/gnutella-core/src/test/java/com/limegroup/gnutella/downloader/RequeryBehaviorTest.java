@@ -344,7 +344,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
     private static RemoteFileDesc fakeRFD() {
         return new RemoteFileDesc("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), 13l,
                 "badger", 1024,
-                new byte[16], 56, false, 4, true, null, new HashSet<URN>(),
+                new byte[16], 56, false, 4, true, null, new HashSet(),
                 false, false,"",null, -1, false);
     }
     

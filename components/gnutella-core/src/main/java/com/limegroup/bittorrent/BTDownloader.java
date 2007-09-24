@@ -11,23 +11,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.bittorrent.Torrent.TorrentState;
-import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
+import com.limegroup.gnutella.downloader.DownloadReferences;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 
 /**
@@ -72,7 +71,7 @@ public class BTDownloader extends AbstractDownloader
 	private IncompleteFileManager ifm;
 	
 	// TODO: figure out how to init this
-	private TorrentContext context;
+	private volatile TorrentContext context;
 	
 	private volatile long startTime, stopTime;
 	
@@ -81,10 +80,17 @@ public class BTDownloader extends AbstractDownloader
     
     /** Whether finish() has been invoked on this */
     private volatile boolean finished;
-	
-	public BTDownloader(BTMetaInfo info) {
-		context = new BTContext(info);
+
+    private transient volatile Provider<TorrentManager> torrentManager;
+
+    private transient volatile BTUploaderFactory btUploaderFactory;
+
+	BTDownloader(BTMetaInfo info, BTContextFactory btContextFactory, SaveLocationManager saveLocationManager, Provider<TorrentManager> torrentManager, BTUploaderFactory btUploaderFactory) {
+	    super(saveLocationManager);
+	    
 		_info = info;
+        this.torrentManager = torrentManager;
+        this.btUploaderFactory = btUploaderFactory;
 		urn = info.getURN();
 		fileSystem = info.getFileSystem();
 		synchronized(this) {
@@ -382,7 +388,7 @@ public class BTDownloader extends AbstractDownloader
 		switch(evt.getType()) {
 		case STARTED : torrentStarted(); break;
 		case COMPLETE : torrentComplete(); break;
-		case STOPPED : torrentStopped(); break;
+		case STOPPED : torrentStopped(evt.getDescription()); break;
         
         // the below aren't handled...
         case STARTING:
@@ -403,8 +409,10 @@ public class BTDownloader extends AbstractDownloader
 		stopTime = 0;
 	}
 
-	private void torrentStopped() {
+	private void torrentStopped(String description) {
 		if (stopTime == 0) {
+            if (description != null)
+                setAttribute(CUSTOM_INACTIVITY_KEY, description);
 			averagedBandwidth.clear();
 			boolean resumable = isResumable();
 			stopTime = System.currentTimeMillis();
@@ -437,7 +445,6 @@ public class BTDownloader extends AbstractDownloader
 				String.class, Serializable.class, 
 				GenericsUtils.ScanMode.EXCEPTION);
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
-		context = new BTContext(_info);
 		urn = _info.getURN();
 		fileSystem = _info.getFileSystem();
 		if (attributes == null || _info == null)
@@ -446,22 +453,21 @@ public class BTDownloader extends AbstractDownloader
 		
 	}
 
-	public void initialize(DownloadManager manager, 
-			FileManager fm, 
-			DownloadCallback callback) {
-		this.manager = manager;
-		ifm = manager.getIncompleteFileManager();
-		TorrentManager torrentManager = RouterService.getTorrentManager();
-		_torrent = new ManagedTorrent(context, torrentManager,
-				NIODispatcher.instance().getScheduledExecutorService()); 
-		torrentManager.addEventListener(this);
-		ifm.addTorrentEntry(_info.getURN());
-	}
+	public void initialize(DownloadReferences downloadReferences) {
+	    this.saveLocationManager = downloadReferences.getDownloadManager();
+        context = downloadReferences.getBTContextFactory().createBTContext(_info);
+	    
+        this.manager = downloadReferences.getDownloadManager();
+        this.torrentManager = downloadReferences.getTorrentManager();
+        this.btUploaderFactory = downloadReferences.getBtUploaderFactory();
+        ifm = manager.getIncompleteFileManager();
+        _torrent = downloadReferences.getManagedTorrentFactory().create(context);
+        torrentManager.get().addEventListener(this);
+        ifm.addTorrentEntry(_info.getURN());
+    }
 	
 	public void startDownload() {
-		new BTUploader((ManagedTorrent)_torrent,
-				_info, 
-				RouterService.getTorrentManager());
+		btUploaderFactory.createBTUploader((ManagedTorrent)_torrent, _info);
 		_torrent.start();
 	}
 	
@@ -470,7 +476,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 	
 	public boolean shouldBeRestarted() {
-		return getState() == DownloadStatus.QUEUED && RouterService.getTorrentManager().allowNewTorrent(); 
+		return getState() == DownloadStatus.QUEUED && torrentManager.get().allowNewTorrent(); 
 	}
 	
 	public boolean isAlive() {
@@ -501,7 +507,7 @@ public class BTDownloader extends AbstractDownloader
 
 	public synchronized void finish() {
         finished = true;
-		RouterService.getTorrentManager().removeEventListener(this);
+		torrentManager.get().removeEventListener(this);
 		_torrent = new FinishedTorrentDownload(_torrent);
 		_info = null;
 		propertiesMap.remove(METAINFO);

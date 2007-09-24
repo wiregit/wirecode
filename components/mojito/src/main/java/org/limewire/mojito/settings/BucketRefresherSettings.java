@@ -44,4 +44,11 @@ public class BucketRefresherSettings extends MojitoProps {
         = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_DELAY", 1L*60L*1000L, 
                 "Mojito.BucketRefresherDelay", 1L*60L*1000L, 2L*60L*60L*1000L);
 
+    /**
+     * Whether or not to ping all k-closest Nodes. Default is off (0L) and
+     * it shouldn't be set to anything lower than say 5 minutes.
+     */
+    public static final LongSetting BUCKET_REFRESHER_PING_NEAREST
+        = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_PING_NEAREST", 0L, 
+                "Mojito.BucketRefresherPingNearest", 0L, 24L*60L*60L*1000L);
 }

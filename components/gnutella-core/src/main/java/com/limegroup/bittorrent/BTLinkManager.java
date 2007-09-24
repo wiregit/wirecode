@@ -10,23 +10,9 @@ import org.limewire.nio.observer.Shutdownable;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
-class BTLinkManagerFactory {
-	private static BTLinkManagerFactory instance;
-	public static BTLinkManagerFactory instance() {
-		if (instance == null)
-			instance = new BTLinkManagerFactory();
-		return instance;
-	}
-	protected BTLinkManagerFactory(){}
-	
-	public BTLinkManager getLinkManager() {
-		return new BTLinkManager();
-	}
-}
-
-class BTLinkManager implements Shutdownable, 
-NECallable<List<? extends Chokable>> {
-	/**
+public class BTLinkManager implements Shutdownable,
+        NECallable<List<? extends Chokable>> {
+    /**
 	 * The list of BTConnections that this torrent has.
 	 * LOCKING: this
 	 */

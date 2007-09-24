@@ -40,15 +40,15 @@ public class MediaType implements Serializable {
     public static final String SCHEMA_OTHER = "other";
     
     // These are used as resource keys to retreive descriptions in the GUI
-    public static final String ANY_TYPE = "MEDIA_ANY_TYPE";
-    public static final String CUSTOM = "MEDIA_CUSTOM";
-    public static final String DOCUMENTS = "MEDIA_DOCUMENTS";
-    public static final String PROGRAMS = "MEDIA_PROGRAMS";
-    public static final String AUDIO = "MEDIA_AUDIO";
-    public static final String VIDEO = "MEDIA_VIDEO";
-    public static final String IMAGES = "MEDIA_IMAGES";
-    public static final String OTHER = "MEDIA_OTHER";
-
+    public static final String ANY_TYPE = I18n.marktr("All Types");
+    public static final String CUSTOM = I18n.marktr("Custom");
+    public static final String DOCUMENTS = I18n.marktr("Documents");
+    public static final String PROGRAMS = I18n.marktr("Programs");
+    public static final String AUDIO = I18n.marktr("Audio");
+    public static final String VIDEO = I18n.marktr("Video");
+    public static final String IMAGES = I18n.marktr("Images");
+    public static final String OTHER = I18n.marktr("Other");
+    
     /**
      * Type for 'any file'
      */
@@ -183,7 +183,7 @@ public class MediaType implements Serializable {
     
     
     /**
-     * Type for 'images'
+     * Type for 'other'
      */
     private static final MediaType TYPE_OTHER =
         new MediaType(SCHEMA_OTHER, OTHER, null) {
@@ -202,7 +202,7 @@ public class MediaType implements Serializable {
      * All media types.
      */
     private static final MediaType[] ALL_MEDIA_TYPES =
-        new MediaType[] { TYPE_CUSTOM, TYPE_OTHER, TYPE_ANY, TYPE_DOCUMENTS, TYPE_PROGRAMS,
+        new MediaType[] { TYPE_ANY, TYPE_DOCUMENTS, TYPE_PROGRAMS,
                           TYPE_AUDIO, TYPE_VIDEO, TYPE_IMAGES };     
     
     /**
@@ -328,7 +328,6 @@ public class MediaType implements Serializable {
         return ALL_MEDIA_TYPES;
     }
     
-
     /**
      * Retrieves the media type for the specified schema's description.
      */
@@ -402,7 +401,6 @@ public class MediaType implements Serializable {
         return TYPE_OTHER;
     }
     
-    
     /**
      * Retrieves the audio media type.
      */
@@ -444,7 +442,6 @@ public class MediaType implements Serializable {
     public static MediaType getCustomMediaType() {
         return TYPE_CUSTOM;
     }
-    
 
     /** @return a MediaType.Aggregator to use for your query.  Null is a
      *  possible return value.

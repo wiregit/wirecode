@@ -58,6 +58,8 @@
  */
 package org.limewire.collection;
 
+import java.util.Map;
+
 /**
  * <p>A hash map that uses primitive longs for the key rather than objects.</p>
 <pre>

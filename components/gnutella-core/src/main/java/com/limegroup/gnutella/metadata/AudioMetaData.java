@@ -15,6 +15,7 @@ import java.util.Map;
 import org.limewire.collection.NameValue;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -218,7 +219,7 @@ public abstract class AudioMetaData extends MetaData {
     /**
      * Creates a new LimeXMLDocument without corruption.
      */
-    public static LimeXMLDocument fixCorruption(LimeXMLDocument oldDoc) {
+    public static LimeXMLDocument fixCorruption(LimeXMLDocument oldDoc, LimeXMLDocumentFactory limeXMLDocumentFactory) {
         List<NameValue<String>> info = new ArrayList<NameValue<String>>(oldDoc.getNumFields());
         for(Map.Entry<String, String> entry : oldDoc.getNameValueSet()) {
             String name = entry.getKey();
@@ -234,7 +235,7 @@ public abstract class AudioMetaData extends MetaData {
             }
             info.add(new NameValue<String>(name, value));
         }
-        return new LimeXMLDocument(info, oldDoc.getSchemaURI());
+        return limeXMLDocumentFactory.createLimeXMLDocument(info, oldDoc.getSchemaURI());
     }
 
     public static boolean isNonLimeAudioField(String fieldName) {

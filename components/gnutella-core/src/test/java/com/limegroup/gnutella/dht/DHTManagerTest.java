@@ -9,16 +9,18 @@ import junit.framework.Test;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.KUID;
-import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.NodeAssigner;
-import com.limegroup.gnutella.RouterService;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class DHTManagerTest extends DHTTestCase {
     
     
+    private Injector injector;
+    private DHTControllerFactory dhtControllerFactory;
+
     public DHTManagerTest(String name) {
         super(name);
     }
@@ -32,24 +34,18 @@ public class DHTManagerTest extends DHTTestCase {
     }
     
     protected void setUp() throws Exception {
-        //stop the nodeAssigner
-        NodeAssigner na = 
-            (NodeAssigner)PrivilegedAccessor.getValue(ROUTER_SERVICE, "nodeAssigner");
-        na.stop();
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
+        
+        injector = LimeTestUtils.createInjector();
+        dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
     }
 
-    public static void globalTearDown() throws Exception{
-        //Ensure no more threads.
-        RouterService.shutdown();
-    }
-    
     public void testLimeDHTManager() throws Exception{
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
         DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
         
         TestExecutor executor = new TestExecutor();
-        DHTManagerImpl manager = new DHTManagerImpl(executor);
+        DHTManagerImpl manager = new DHTManagerImpl(executor, dhtControllerFactory);
         
         try {
             assertFalse(manager.isRunning());
@@ -106,7 +102,7 @@ public class DHTManagerTest extends DHTTestCase {
     
     public void testStopStartLimeDHTManager() throws Exception{
         TestExecutor executor = new TestExecutor();
-        DHTManagerImpl manager = new DHTManagerImpl(executor);
+        DHTManagerImpl manager = new DHTManagerImpl(executor, dhtControllerFactory);
         try {
             manager.start(DHTMode.ACTIVE);
             manager.stop();

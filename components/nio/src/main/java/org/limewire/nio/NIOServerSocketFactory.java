@@ -5,7 +5,7 @@ import java.net.InetAddress;
 
 import org.limewire.nio.observer.AcceptObserver;
 
-/** An NBServerSocketFactory that returns NIOServerSockets. */
+/** An <code>NBServerSocketFactory</code> that returns <code>NIOServerSockets</code>. */
 public class NIOServerSocketFactory extends NBServerSocketFactory {
 
     @Override

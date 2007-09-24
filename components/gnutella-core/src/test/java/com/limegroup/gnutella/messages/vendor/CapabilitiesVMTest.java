@@ -5,22 +5,24 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 
-/** Tests the important MessagesSupportedVendorMessage.
- */
-public class CapabilitiesVMTest  extends LimeTestCase {
+public class CapabilitiesVMTest extends BaseTestCase {
+
+    private CapabilitiesVMFactory factory;
+    private MessageFactory messageFactory;
+
     public CapabilitiesVMTest(String name) {
         super(name);
     }
@@ -29,17 +31,23 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         return buildTestSuite(CapabilitiesVMTest.class);
     }
 
-
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
 
     public void setUp() throws Exception {
-        PrivilegedAccessor.setValue(CapabilitiesVM.class, "_instance", null);
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(DHTManager.class).to(DHTManagerStub.class);
+            }            
+        });
+        factory = injector.getInstance(CapabilitiesVMFactory.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
     }
     
     public void testStaticConstructor() throws Exception {
-        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        CapabilitiesVM vmp = factory.getCapabilitiesVM();
         assertGreaterThan(0, vmp.supportsFeatureQueries());
         assertTrue(vmp.supportsWhatIsNew());
         assertGreaterThan(0, vmp.supportsCapability("WHAT".getBytes()));
@@ -48,7 +56,7 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vmp.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        CapabilitiesVM vmpRead = (CapabilitiesVM) MessageFactory.read(bais);
+        CapabilitiesVM vmpRead = (CapabilitiesVM) messageFactory.read(bais);
         assertEquals(vmp, vmpRead);
 
         assertGreaterThan(0, vmpRead.supportsFeatureQueries());
@@ -58,28 +66,23 @@ public class CapabilitiesVMTest  extends LimeTestCase {
     }
     
     public void testDHTCapability() throws Exception { 
-        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        CapabilitiesVM vmp = factory.getCapabilitiesVM();
         assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
         
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        AtomicLazyReference ref = (AtomicLazyReference)PrivilegedAccessor.getValue(
-                rs, "DHT_MANAGER_REFERENCE");
-        PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
-        
-        CapabilitiesVM.reconstructInstance();
-        vmp = CapabilitiesVM.instance();
+        factory.updateCapabilities();
+        vmp = factory.getCapabilitiesVM();
         assertGreaterThan(-1, vmp.isActiveDHTNode());
     }
     
     public void testTLSCapability() throws Exception {
         SSLSettings.TLS_INCOMING.setValue(false);
-        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        CapabilitiesVM vmp = factory.getCapabilitiesVM();
         assertEquals(-1, vmp.supportsTLS());
         assertEquals(-1, vmp.supportsCapability("TLS!".getBytes()));
         
         SSLSettings.TLS_INCOMING.setValue(true);
-        CapabilitiesVM.reconstructInstance();
-        vmp = CapabilitiesVM.instance();
+        factory.updateCapabilities();
+        vmp = factory.getCapabilitiesVM();
         assertEquals(1, vmp.supportsTLS());
         assertEquals(1, vmp.supportsCapability("TLS!".getBytes()));
     }
@@ -106,8 +109,7 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         vm.write(baos);
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-        CapabilitiesVM vmp = 
-           (CapabilitiesVM) MessageFactory.read(bais);
+        CapabilitiesVM vmp = (CapabilitiesVM) messageFactory.read(bais);
         // make sure it supports everything we expect....
         assertEquals(10, vmp.supportsCapability("SUSH".getBytes()));
         assertEquals(5,  vmp.supportsCapability("NEIL".getBytes()));
@@ -129,7 +131,6 @@ public class CapabilitiesVMTest  extends LimeTestCase {
         assertEquals(vmp, vmpOther);
 
     }
-
 
     public void testBadCases() throws Exception {
         CapabilitiesVM.SupportedMessageBlock smp1 = 

@@ -5,12 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.limewire.util.AbstractI18NConverter;
-import org.limewire.util.CommonUtils;
-import org.limewire.util.I18NConvertICU;
-import org.limewire.util.StringUtils;
-
-
 import junit.framework.Test;
 
 public class I18NConvertTest extends BaseTestCase {

@@ -11,9 +11,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.Response;
 
-
+@Singleton
 public final class LimeXMLDocumentHelper{
 
     private static final Log LOG = LogFactory.getLog(LimeXMLDocumentHelper.class);
@@ -22,17 +24,22 @@ public final class LimeXMLDocumentHelper{
     public static final String XML_NAMESPACE =
         "xsi:noNamespaceSchemaLocation=\"";
 
+    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+
 	/**
 	 * Private constructor to ensure that this class can never be
 	 * instantiated.
 	 */
-	private LimeXMLDocumentHelper() {}
+    @Inject
+	public LimeXMLDocumentHelper(LimeXMLDocumentFactory limeXMLDocumentFactory) {
+        this.limeXMLDocumentFactory = limeXMLDocumentFactory;
+	}
 
     /**
      * TO be used when a Query Reply comes with a chunk of meta-data
      * we want to get LimeXMLDocuments out of it
      */
-    public static List<LimeXMLDocument[]> getDocuments(String aggregatedXML, int totalResponseCount) {
+    public List<LimeXMLDocument[]> getDocuments(String aggregatedXML, int totalResponseCount) {
         if(aggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)
             return Collections.emptyList();
         
@@ -71,9 +78,8 @@ public final class LimeXMLDocumentHelper{
                 
                 if(!attributes.isEmpty()) {
                     try {
-                        documents[index] = new LimeXMLDocument(attributes,
-                                parsingResult.schemaURI,
-                                parsingResult.canonicalKeyPrefix);
+                        documents[index] = limeXMLDocumentFactory.createLimeXMLDocument(
+                                attributes, parsingResult.schemaURI, parsingResult.canonicalKeyPrefix);
                     } catch(IOException ignored) {
                         LOG.debug("",ignored);
                     }

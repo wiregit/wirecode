@@ -5,7 +5,7 @@ import java.io.OutputStream;
 
 import org.limewire.rudp.messages.RUDPMessage;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.AbstractMessage;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -13,7 +13,7 @@ import com.limegroup.gnutella.util.DataUtils;
  * DHTMessage as a delegate argument
  */
 public abstract class AbstractLimeRUDPMessage<T extends RUDPMessage> 
-        extends Message implements RUDPMessage {
+        extends AbstractMessage implements RUDPMessage {
 
     /** 
      * An empty GUID, it's never written to Network.

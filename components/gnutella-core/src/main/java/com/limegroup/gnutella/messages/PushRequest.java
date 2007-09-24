@@ -3,7 +3,6 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Serializable;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
@@ -15,7 +14,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 
 /** A Gnutella push request, used to download files behind a firewall. */
-public class PushRequest extends Message implements Serializable {
+public class PushRequest extends AbstractMessage {
     private static final int STANDARD_PAYLOAD_SIZE=26;
 
     public static final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;

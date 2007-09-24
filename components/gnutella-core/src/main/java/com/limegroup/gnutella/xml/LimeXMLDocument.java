@@ -18,16 +18,18 @@ import org.limewire.util.RPNParser.StringLookup;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseType;
 
-
 /**
- * @author  Sumeet Thadani
  * A LimeXMLDocument is basically a hashmap that maps a
  * Names of fields to the values as per a XML document.
+ * 
+ * @author  Sumeet Thadani
  */
 public class LimeXMLDocument implements Serializable, StringLookup {
     
@@ -35,7 +37,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
 
     public static final String XML_ID_ATTRIBUTE = "identifier__";
     public static final String XML_ACTION_ATTRIBUTE = "action__";
-    public static final String XML_ACTION_INFO = "addActionDetail__";
+    public static final String XML_ACTION_INFO = "addactiondetail__";
     public static final String XML_INDEX_ATTRIBUTE = "index__";
     public static final String XML_LICENSE_ATTRIBUTE = "license__";
     public static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
@@ -102,11 +104,23 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     /** The kind of license this has. */
     private transient LicenseType licenseType = LicenseType.NO_LICENSE;
 
+    private transient volatile LicenseFactory licenseFactory;
+    
+    @Inject
+    private static LicenseFactory globalLicenseFactory;
+
+    private transient volatile Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
+
+    @Inject
+    private static Provider<LimeXMLSchemaRepository> globalLimeXMLSchemaRepository;
+    
     /**
      * Constructs a LimeXMLDocument with the given string.
      */
-    public LimeXMLDocument(String xml)
+    LimeXMLDocument(String xml, LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository)
       throws SAXException, SchemaNotFoundException, IOException {
+        this.licenseFactory = licenseFactory;
+        this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         if(xml==null || xml.equals(""))
             throw new SAXException("null or empty string");
 
@@ -133,8 +147,10 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */    
-    LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix) 
+    LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix, LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) 
       throws IOException {
+        this.licenseFactory = licenseFactory;
+        this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         if(map.isEmpty())
             throw new IllegalArgumentException("empty map");
 
@@ -156,8 +172,10 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */
-    public LimeXMLDocument(Collection<? extends Map.Entry<String, String>> nameValueList,
-                           String schemaURI) {
+    LimeXMLDocument(Collection<? extends Map.Entry<String, String>> nameValueList,
+                           String schemaURI, LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
+        this.licenseFactory = licenseFactory;
+        this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         if(nameValueList.isEmpty())
             throw new IllegalArgumentException("empty list");
 
@@ -195,6 +213,8 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      */
     private void readObject(java.io.ObjectInputStream in)
       throws IOException, ClassNotFoundException {
+        licenseFactory = globalLicenseFactory;
+        limeXMLSchemaRepository = globalLimeXMLSchemaRepository;
         in.defaultReadObject();
         scanFields();
     }
@@ -268,7 +288,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * Returns the LimeXMLSchema associated with this XML document.
      */
     public LimeXMLSchema getSchema() {
-        return LimeXMLSchemaRepository.instance().getSchema(schemaUri);
+        return limeXMLSchemaRepository.get().getSchema(schemaUri);
     }
     
     /**
@@ -394,7 +414,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     public License getLicense() {
         String license = getLicenseString();
         if(license != null)
-            return LicenseFactory.create(license);
+            return licenseFactory.create(license);
         else
             return null;
     }
@@ -620,6 +640,10 @@ public class LimeXMLDocument implements Serializable, StringLookup {
             return getValue(key);
         }
         return null;
+    }
+    
+    public LicenseFactory getLicenseFactory() {
+        return licenseFactory;
     }
 }
 

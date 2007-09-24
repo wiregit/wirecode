@@ -15,19 +15,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
+import org.limewire.inject.Providers;
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.StandardMessageRouter;
-import com.limegroup.gnutella.UDPPinger;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.UniqueHostPinger;
+import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.UDPPingerImpl;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -46,22 +43,22 @@ public class UDPHostCacheTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
-        RouterService.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
+   //     new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
+        ProviderHacks.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
         
         DatagramSocket ds = (DatagramSocket)PrivilegedAccessor.invokeMethod(
-                UDPService.instance(),
+                ProviderHacks.getUdpService(),
                 "newListeningSocket",
                 new Object[] { new Integer(7000) },
                 new Class[] { Integer.TYPE } );
                                 
         PrivilegedAccessor.invokeMethod(
-                UDPService.instance(),
+                ProviderHacks.getUdpService(),
                 "setListeningSocket",
                 new Object[] { ds } ,
                 new Class[] { DatagramSocket.class });
                 
-        RouterService.getMessageRouter().initialize();
+        ProviderHacks.getMessageRouter().initialize();
     }
         
     
@@ -308,7 +305,7 @@ public class UDPHostCacheTest extends LimeTestCase {
     
     public void testRecordingFailuresAndSuccesses() throws Exception {
         assertEquals(0, cache.getSize());
-        UDPPinger.DEFAULT_LISTEN_EXPIRE_TIME = 3 * 1000;
+        UDPPingerImpl.DEFAULT_LISTEN_EXPIRE_TIME = 3 * 1000;
         cache.doRealFetch = true;
         
         ExtendedEndpoint e1 = create("1.2.3.4");
@@ -442,10 +439,10 @@ public class UDPHostCacheTest extends LimeTestCase {
     }    
     
     private void routeFor(String host, byte[] guid) throws Exception {
-        PingReply pr = PingReply.create(guid, (byte)1);
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(guid, (byte)1);
         InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName(host), 6346);
         
-        RouterService.getMessageRouter().handleUDPMessage(pr, addr);
+        ProviderHacks.getMessageRouter().handleUDPMessage(pr, addr);
     }    
     
     private ExtendedEndpoint create(String host) {
@@ -468,7 +465,8 @@ public class UDPHostCacheTest extends LimeTestCase {
         private boolean doRealDecrement = false;
         
         public StubCache() {
-            super(EXPIRY_TIME,new UniqueHostPinger());
+            super(EXPIRY_TIME, ProviderHacks.getUniqueHostPinger(), Providers.of(ProviderHacks.getMessageRouter()), ProviderHacks.getPingRequestFactory(),
+                    ProviderHacks.getConnectionServices());
         }
         
         protected boolean fetch(Collection hosts) {

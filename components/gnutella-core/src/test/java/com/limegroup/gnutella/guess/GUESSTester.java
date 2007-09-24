@@ -12,9 +12,9 @@ import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -80,7 +80,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in);		
+                    Message message = ProviderHacks.getMessageFactory().read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryReply) {
                         synchronized (_qrLock) {
@@ -120,7 +120,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         try {
             assertTrue(testAck("10.254.0.19", 6346) > 0);
             assertNotNull(testQuery("10.254.0.19", 6346,
-									QueryRequest.createQuery("morrissey", (byte)1)));
+									ProviderHacks.getQueryRequestFactory().createQuery("morrissey", (byte)1)));
         }
         catch (Exception whatever) {
             assertTrue(false);
@@ -135,7 +135,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-		QueryRequest qr = QueryRequest.createQuery("susheel", (byte)1);
+		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("susheel", (byte)1);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         qr.write(baos);
@@ -166,7 +166,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-        PingRequest pr = new PingRequest((byte)1);
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);

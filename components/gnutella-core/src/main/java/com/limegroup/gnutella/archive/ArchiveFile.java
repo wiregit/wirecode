@@ -9,7 +9,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -154,10 +153,6 @@ class ArchiveFile {
 	
 	String getRemoteFileName() {
 		return _remoteFileName;
-	}
-	
-	FileDetails getFileDetails() {
-		return _fd;
 	}
 	
 	long getFileSize() {

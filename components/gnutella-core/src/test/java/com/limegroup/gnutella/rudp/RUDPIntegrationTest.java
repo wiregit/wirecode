@@ -15,10 +15,8 @@ import org.limewire.rudp.UDPConnectionProcessor;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.StandardMessageRouter;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
@@ -26,7 +24,6 @@ import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHelper;
 import com.limegroup.gnutella.rudp.messages.RUDPMessageHandlerHelper;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class RUDPIntegrationTest extends LimeTestCase {
@@ -63,8 +60,8 @@ public class RUDPIntegrationTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        RouterService rs = new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
-        rs.start();
+       // RouterService rs = new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
+        ProviderHacks.getLifecycleManager().start();
         Thread.sleep(1000);
     }
     
@@ -97,14 +94,14 @@ public class RUDPIntegrationTest extends LimeTestCase {
     }
     
     public void testPacketsSentToMultiplexorAndGoesToProcessor() throws Exception {
-        StubUDPConnectionProcessor stub = new StubUDPConnectionProcessor(RouterService.getUDPSelectorProvider().getContext());
+        StubUDPConnectionProcessor stub = new StubUDPConnectionProcessor(ProviderHacks.getUDPSelectorProvider().getContext());
         SelectableChannel channel = createUDPSocketChannel(stub);
         assertEquals(0, stub.id);
         // This is done only to allow the multiplexor to learn about the processor.
         NIODispatcher.instance().register(channel,  new StubIOErrorObserver());
         Thread.sleep(100);
         assertNotEquals(0, stub.id);
-        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", RouterService.getNonForcedPort());
+        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", ProviderHacks.getNetworkManager().getNonForcedPort());
         stub.addr = addr;
         stub.isConnecting = false;
         checkMessage(stub, LimeRUDPMessageHelper.getAck(stub.id));
@@ -138,7 +135,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     private void sendToUDP(Message m) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         m.write(out);
-        UDPService.instance().send(m, new InetSocketAddress("127.0.0.1", PORT));
+        ProviderHacks.getUdpService().send(m, new InetSocketAddress("127.0.0.1", PORT));
     }
     
     private void storeHandlers() throws Exception {

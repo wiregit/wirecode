@@ -20,10 +20,12 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueFactoryManager;
-import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.EvictorManager;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindValueResult;
@@ -37,6 +39,7 @@ import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.AbstractDHTController.RandomNodeAdder;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -57,7 +60,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     @Override
     protected void setUp() throws Exception {
         setSettings();
-        super.setUp();
     }
     
     public void testRandomNodeAdder() throws Exception {
@@ -66,8 +68,8 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_ADDER_DELAY, "value", 50L);
         
-        AbstractDHTController controller = new ActiveDHTNodeController(
-                Vendor.valueOf(1), Version.valueOf(1), new DHTManagerStub());
+        DHTController controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.valueOf(1),
+                Version.valueOf(1), new DHTManagerStub());
         try {
             controller.start();
             MojitoDHTStub dht = new MojitoDHTStub();
@@ -194,7 +196,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         
         public void setExternalPort(int port) {}
 
-        public MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
+        public MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory) {
             return null;
         }
 
@@ -275,5 +277,11 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public StorableModelManager getStorableModelManager() {
             return null;
         }
+
+        public EvictorManager getEvictorManager() {
+            return null;
+        }
     }
+    
+    
 }

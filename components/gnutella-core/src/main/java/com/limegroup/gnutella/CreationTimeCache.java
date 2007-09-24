@@ -17,15 +17,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -50,6 +57,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * LOCKING: Note on grabbing the FM lock - if I ever do that, I first grab that
  * lock before grabbing my lock.  Please keep doing that as you add code.
  */
+@Singleton
 public final class CreationTimeCache {
     
     private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
@@ -59,53 +67,53 @@ public final class CreationTimeCache {
      */
     private static final File CTIME_CACHE_FILE = 
         new File(CommonUtils.getUserSettingsDir(), "createtimes.cache");
-
-    /**
-     * CreationTimeCache instance variable.  
-     * LOCKING: obtain CreationTimeCache.class.
-     */
-    private static CreationTimeCache instance = new CreationTimeCache();
-
-    /**
-     * CreationTimeCache container.  LOCKING: obtain this.
-     * URN -> Creation Time (Long)
-     */
-    private final Map<URN, Long> URN_TO_TIME_MAP;
-
-    /**
-     * Alternate container.  LOCKING: obtain this.
-     * Creation Time (Long) -> Set of URNs
-     */
-    private final SortedMap<Long, Set<URN>> TIME_TO_URNSET_MAP;
     
     /**
      * Whether or not data is dirty since the last time we saved.
      */
-    private boolean dirty;
+    private volatile boolean dirty = false;
+    
+    private final ExecutorService deserializeQueue = ExecutorsHelper.newProcessingQueue("CreationTimeCacheDeserializer");
+    
+    private final FileManager fileManager;
+    
+    private final Future<Maps> deserializer;
 
-    /**
-	 * Returns the <tt>CreationTimeCache</tt> instance.
-	 *
-	 * @return the <tt>CreationTimeCache</tt> instance
-     */
-    public static synchronized CreationTimeCache instance() {
-        return instance;
-    }
-
-    /**
-     * Create and initialize urn cache.
-     */
-    private CreationTimeCache() {
-        dirty = false;
-        URN_TO_TIME_MAP = createMap();
-        // use a custom comparator to sort the map in descending order....
-        TIME_TO_URNSET_MAP = new TreeMap<Long, Set<URN>>(Comparators.inverseLongComparator());
-        constructURNMap();
+    @Inject
+    CreationTimeCache(FileManager fileManager) {
+        this.fileManager = fileManager;
+        this.deserializer = deserializeQueue.submit(new Callable<Maps>() {
+            public Maps call() throws Exception {
+                Map<URN, Long> urnToTime = createMap();
+                SortedMap<Long, Set<URN>> timeToUrn = constructURNMap(urnToTime);
+                return new Maps(urnToTime, timeToUrn);
+            }
+        });
 	}
+    
+    private Map<URN, Long> getUrnToTime() {
+        try {
+            return deserializer.get().getUrnToTime();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private SortedMap<Long, Set<URN>> getTimeToUrn() {
+        try {
+            return deserializer.get().getTimeToUrn();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     /** Returns the number of URNS stored. */
     public synchronized int getSize() {
-        return URN_TO_TIME_MAP.size();
+        return getUrnToTime().size();
     }
     
     /**
@@ -115,7 +123,7 @@ public final class CreationTimeCache {
      * there is no association.
      */
     public synchronized Long getCreationTime(URN urn) {
-		return URN_TO_TIME_MAP.get(urn);
+		return getUrnToTime().get(urn);
     }
     
     /**
@@ -136,7 +144,7 @@ public final class CreationTimeCache {
      * Removes the CreationTime that is associated with the specified URN.
      */
     public synchronized void removeTime(URN urn) {
-        Long time = URN_TO_TIME_MAP.remove(urn);
+        Long time = getUrnToTime().remove(urn);
         removeURNFromURNSet(urn, time);
         if(time != null)
             dirty = true;
@@ -151,9 +159,9 @@ public final class CreationTimeCache {
     private void pruneTimes(boolean shouldClearURNSetMap) {
         // if i'm using FM, always grab that lock first and then me.  be quick
         // about it though :)
-        synchronized (RouterService.getFileManager()) {
+        synchronized (fileManager) {
             synchronized (this) {
-                Iterator<Map.Entry<URN, Long>> iter = URN_TO_TIME_MAP.entrySet().iterator();
+                Iterator<Map.Entry<URN, Long>> iter = getUrnToTime().entrySet().iterator();
                 while (iter.hasNext()) {
                     Map.Entry<URN, Long> currEntry = iter.next();
                     URN currURN = currEntry.getKey();
@@ -162,7 +170,7 @@ public final class CreationTimeCache {
                     // check to see if file still exists
                     // NOTE: technically a URN can map to multiple FDs, but I only want
                     // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                    FileDesc fd = RouterService.getFileManager().getFileDescForUrn(currURN);
+                    FileDesc fd = fileManager.getFileDescForUrn(currURN);
                     if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                         dirty = true;
                         iter.remove();
@@ -201,10 +209,10 @@ public final class CreationTimeCache {
         Long cTime = new Long(time);
 
         // populate urn to time
-        Long existing = URN_TO_TIME_MAP.get(urn);
+        Long existing = getUrnToTime().get(urn);
         if(existing == null || !existing.equals(cTime)) {
             dirty = true;
-            URN_TO_TIME_MAP.put(urn, cTime);
+            getUrnToTime().put(urn, cTime);
         }
     }
 
@@ -221,15 +229,15 @@ public final class CreationTimeCache {
     public synchronized void commitTime(URN urn) 
         throws IllegalArgumentException {
         if (urn == null) throw new IllegalArgumentException("Null URN.");
-        Long cTime = URN_TO_TIME_MAP.get(urn);
+        Long cTime = getUrnToTime().get(urn);
         if  (cTime == null) 
             throw new IllegalArgumentException("Never added URN via addTime()");
 
         // populate time to set of urns
-        Set<URN> urnSet = TIME_TO_URNSET_MAP.get(cTime);
+        Set<URN> urnSet = getTimeToUrn().get(cTime);
         if (urnSet == null) {
             urnSet = new HashSet<URN>();
-            TIME_TO_URNSET_MAP.put(cTime, urnSet);
+            getTimeToUrn().put(cTime, urnSet);
         }
         urnSet.add(urn);
     }
@@ -258,7 +266,7 @@ public final class CreationTimeCache {
         throws IllegalArgumentException {
         // if i'm using FM, always grab that lock first and then me.  be quick
         // about it though :)
-        synchronized (RouterService.getFileManager()) {
+        synchronized (fileManager) {
             synchronized (this) {
                 if (max < 1)
                     throw new IllegalArgumentException("bad max = " + max);
@@ -271,7 +279,7 @@ public final class CreationTimeCache {
                 
                 // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the
                 // entries in descending order....
-                for(Set<URN> urns : TIME_TO_URNSET_MAP.values()) {
+                for(Set<URN> urns : getTimeToUrn().values()) {
                     if(urnList.size() >= max)
                         break;
                     
@@ -279,7 +287,7 @@ public final class CreationTimeCache {
                         if(urnList.size() >= max)
                             break;
                         
-                        FileDesc fd = RouterService.getFileManager().getFileDescForUrn(currURN);
+                        FileDesc fd = fileManager.getFileDescForUrn(currURN);
                         // unfortunately fds can turn into ifds so ignore
                         if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
                             if (toRemove == null)
@@ -328,7 +336,7 @@ public final class CreationTimeCache {
         try {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(new FileOutputStream(CTIME_CACHE_FILE)));
-            oos.writeObject(URN_TO_TIME_MAP);
+            oos.writeObject(getUrnToTime());
         } catch (IOException e) {
             LOG.error("Unable to write creation cache", e);
         } finally {
@@ -344,15 +352,15 @@ public final class CreationTimeCache {
      */
     private synchronized void removeURNFromURNSet(URN urn, Long refTime) {
         if (refTime != null) {
-            Set<URN> urnSet = TIME_TO_URNSET_MAP.get(refTime);
+            Set<URN> urnSet = getTimeToUrn().get(refTime);
             if (urnSet != null && urnSet.remove(urn))
                 if (urnSet.size() < 1)
-                    TIME_TO_URNSET_MAP.remove(refTime);
+                    getTimeToUrn().remove(refTime);
         } else { // search everything
             // find the urn in the map:
             // 1) get rid of it
             // 2) get rid of the empty set if it exists
-            for(Iterator<Set<URN>> i = TIME_TO_URNSET_MAP.values().iterator(); i.hasNext(); ) {
+            for(Iterator<Set<URN>> i = getTimeToUrn().values().iterator(); i.hasNext(); ) {
                 Set<URN> urnSet = i.next();
                 if (urnSet.contains(urn)) {
                     urnSet.remove(urn); // 1)
@@ -374,26 +382,30 @@ public final class CreationTimeCache {
      * is ever made public, called from multiple entrypoints, etc.,
      * synchronization may be needed.
      */
-    private void constructURNMap() {
-        for(Map.Entry<URN, Long> currEntry : URN_TO_TIME_MAP.entrySet()) {
+    private SortedMap<Long, Set<URN>> constructURNMap(Map<URN, Long> urnToTime) {
+        SortedMap<Long, Set<URN>> timeToUrn = new TreeMap<Long, Set<URN>>(Comparators.inverseLongComparator());
+        
+        for(Map.Entry<URN, Long> currEntry : urnToTime.entrySet()) {
             // for each entry, get the creation time and the urn....
             Long cTime = currEntry.getValue();
             URN urn = currEntry.getKey();    
             
             // don't ever add IFDs
-            if (RouterService.getFileManager().getFileDescForUrn(urn)
+            if (fileManager.getFileDescForUrn(urn)
                 instanceof IncompleteFileDesc) continue;
 
             // put the urn in a set of urns that have that creation time....
-            Set<URN> urnSet = TIME_TO_URNSET_MAP.get(cTime);
+            Set<URN> urnSet = timeToUrn.get(cTime);
             if (urnSet == null) {
                 urnSet = new HashSet<URN>();
                 // populate the reverse mapping
-                TIME_TO_URNSET_MAP.put(cTime, urnSet);
+                timeToUrn.put(cTime, urnSet);
             }
             
             urnSet.add(urn);
         }
+        
+        return timeToUrn;
     }
 
 
@@ -405,7 +417,8 @@ public final class CreationTimeCache {
 		try {
             ois = new ConverterObjectInputStream(new BufferedInputStream(
                             new FileInputStream(CTIME_CACHE_FILE)));
-            return GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, GenericsUtils.ScanMode.REMOVE);
+            Map<URN, Long> map = GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, GenericsUtils.ScanMode.REMOVE);
+            return map;
 	    } catch(Throwable t) {
             dirty = true;
 	        LOG.error("Unable to read creation time file", t);
@@ -414,4 +427,24 @@ public final class CreationTimeCache {
             IOUtils.close(ois);
         }
 	}
+    
+    private static class Maps {
+        /** URN -> Creation Time (Long) */
+       private final Map<URN, Long> urnToTime;
+       /**  Creation Time (Long) -> Set of URNs */
+       private final SortedMap<Long, Set<URN>> timeToUrn;
+       
+       Maps(Map<URN, Long> urnToTime, SortedMap<Long, Set<URN>> timeToUrn) {
+           this.urnToTime = urnToTime;
+           this.timeToUrn = timeToUrn;
+           }
+    
+        public SortedMap<Long, Set<URN>> getTimeToUrn() {
+            return timeToUrn;
+        }
+    
+        public Map<URN, Long> getUrnToTime() {
+            return urnToTime;
+        }
+    }
 }

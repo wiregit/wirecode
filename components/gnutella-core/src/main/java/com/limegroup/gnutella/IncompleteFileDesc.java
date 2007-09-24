@@ -8,7 +8,6 @@ import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * This class extends FileDesc and wraps an incomplete File, 
@@ -66,44 +65,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 		return _name;
 	}
     
-    /**
-     * Returns null, overrides super.getHashTree to prevent us from offering
-     * HashTrees for incomplete files.
-     * @return null
-     */
-    public HashTree getHashTree() {
-        return null;
-    }
-
-    private Downloader getMyDownloader() {
-        return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
-    }
-    
-	/**
-	 * Returns whether or not we are actively downloading this file.
-	 */
-	public boolean isActivelyDownloading() {
-        
-        Downloader md = getMyDownloader();
-	    
-	    if(md == null)
-	        return false;
-	        
-        switch(md.getState()) {
-        case QUEUED:
-        case BUSY:
-        case ABORTED:
-        case GAVE_UP:
-        case DISK_PROBLEM:
-        case CORRUPT_FILE:
-        case REMOTE_QUEUED:
-        case WAITING_FOR_USER:
-            return false;
-        default:
-            return true;
-        }
-    }
-    public IntervalSet.ByteIntervals getRangesAsByte() {
+	public IntervalSet.ByteIntervals getRangesAsByte() {
     	return _verifyingFile.toBytes();
     }
     /**

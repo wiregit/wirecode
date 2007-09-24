@@ -6,12 +6,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
@@ -20,22 +25,25 @@ import com.limegroup.gnutella.settings.SharingSettings;
  * Every three minutes it erases the stored data and adds new information,
  * as read from the disk.
  */
+@Singleton
 public final class SavedFileManager implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(SavedFileManager.class);
     
-    private static SavedFileManager INSTANCE = new SavedFileManager();
-    public static SavedFileManager instance() { return INSTANCE; }
-    private SavedFileManager() {
-        // Run the task every three minutes, starting in 10 seconds.
-        RouterService.schedule(this, 10 * 1000, 3 * 60 * 1000);
-    }
-    
-    /**
-     * The queue that the task runs in.
-     */
+    /** The queue that the task runs in. */
     private static final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("SavedFileLoader");
+       
+    private final UrnCache urnCache;
     
+    @Inject
+    SavedFileManager(UrnCache urnCache,
+                     @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        this.urnCache = urnCache;
+        
+        // TODO: move to an initialize method!
+        // Run the task every three minutes, starting in 10 seconds.
+        backgroundExecutor.scheduleWithFixedDelay(this, 10 * 1000, 3 * 60 * 1000, TimeUnit.MILLISECONDS);
+    }
     
     /**
      * A Set of URNs in the saved folder.
@@ -127,9 +135,9 @@ public final class SavedFileManager implements Runnable {
                 LOG.trace("Loading: " + file);
                 
             tempNames.add(file.getName());
-            Set<URN> urns = UrnCache.instance().getUrns(file);
+            Set<URN> urns = urnCache.getUrns(file);
             if(urns.isEmpty()) // if not calculated, calculate at some point.
-                UrnCache.instance().calculateAndCacheUrns(file, callback);
+                urnCache.calculateAndCacheUrns(file, callback);
             else // otherwise, add without waiting.
                 ((Collection<? super URN>)tempUrns).addAll(urns);
         }

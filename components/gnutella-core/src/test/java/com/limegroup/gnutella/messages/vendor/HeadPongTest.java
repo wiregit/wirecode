@@ -20,17 +20,23 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -40,19 +46,16 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class HeadPongTest extends LimeTestCase {
-    
-    private FileManager oldFM;
-    private UploadManager oldUM;
-    private boolean oldAccepted;
-    
+        
     private FileManagerStub fileManager;
-    private UploadManagerStub uploadManager;
-    
-    
+    private HeadPongFactory headPongFactory;
+    private Injector injector;
+        
     public HeadPongTest(String name) {
         super(name);
     }
@@ -61,34 +64,39 @@ public class HeadPongTest extends LimeTestCase {
         return buildTestSuite(HeadPongTest.class);
     }
 
-
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
 
     public void setUp() throws Exception {
-        oldFM = (FileManager)PrivilegedAccessor.getValue(HeadPong.class, "_fileManager");
-        oldUM = (UploadManager)PrivilegedAccessor.getValue(HeadPong.class, "_uploadManager");
-        oldAccepted = (Boolean)PrivilegedAccessor.getValue(RouterService.getAcceptor(), "_acceptedIncoming");
-        
-        fileManager = new FileManagerStub();
-        uploadManager = new UploadManagerStub();
-        PrivilegedAccessor.setValue(HeadPong.class, "_fileManager", fileManager);
-        PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager", uploadManager);
         SSLSettings.TLS_INCOMING.setValue(false);
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
-        AltLocManager.instance().purge();
+                
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(FileManager.class).to(FileManagerStub.class);
+                bind(UploadManager.class).to(UploadManagerStub.class);
+                bind(NetworkManager.class).to(NetworkManagerStub.class);
+                bind(DownloadManager.class).to(DownloadManagerStub.class);
+            }
+        });
+        
+        headPongFactory = injector.getInstance(HeadPongFactory.class);       
+        fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        networkManager.setAcceptedIncomingConnection(true);
+
+        //altLocManager.purge();
     }
     
     public void tearDown() throws Exception {
-        PrivilegedAccessor.setValue(HeadPong.class, "_fileManager", oldFM);
-        PrivilegedAccessor.setValue(HeadPong.class, "_uploadManager", oldUM);
         SSLSettings.TLS_INCOMING.revertToDefault();
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", oldAccepted);
-        AltLocManager.instance().purge();
+        //altLocManager.purge();
     }
     
     public void testReadBinary() throws Exception {
+        PushEndpointFactory pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         
         out.write(0x1 | 0x2 | 0x4 | 0x8);              // features (intervals, alt locs, push alt locs, fwt alt locs)        
@@ -107,11 +115,11 @@ public class HeadPongTest extends LimeTestCase {
         Random random = new Random();
         byte[] g1 = new byte[16];
         random.nextBytes(g1);
-        PushEndpoint p1 = new PushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p1 = pushEndpointFactory.createPushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
         byte[] p1b = p1.toBytes(false);
         byte[] g2 = new byte[16];
         random.nextBytes(g2);
-        PushEndpoint p2 = new PushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p2 = pushEndpointFactory.createPushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
         byte[] p2b = p2.toBytes(false);
         ByteOrder.short2beb((short)(p1b.length + p2b.length), out); // length of forthcoming push locations.
         out.write(p1b);                                // push locations...
@@ -120,7 +128,8 @@ public class HeadPongTest extends LimeTestCase {
         ByteOrder.short2beb((short)18, out);           // length of forthcoming alternate locations.
         out.write(new byte[] { 4, 5, 6, 7, 8, 0, 5, 6, 7, 8, 9, 0, 6, 7, 8, 9, 10, 0 } ); // alternate locations
         
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 1, out.toByteArray());
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 1, out.toByteArray());
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
         Iterator<Range> iterator = pong.getRanges().iterator();
@@ -161,7 +170,8 @@ public class HeadPongTest extends LimeTestCase {
         // Just a quick test, since we already have the outputstream built up, to make
         // sure binary won't work if version != 1
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 2, out.toByteArray());
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 2, out.toByteArray());
             fail("expected bpe!");
         } catch(BadPacketException bpe) {
             assertInstanceof(BadGGEPBlockException.class, bpe.getCause());
@@ -169,6 +179,8 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testReadGGEP() throws Exception {
+        PushEndpointFactory pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        
         GGEP ggep = new GGEP();
         ggep.put("F", (byte)0x1);                               // TLS capable.
         ggep.put("C", (byte)0x2 | 0x8);                         // response code (partial, downloading)
@@ -187,11 +199,11 @@ public class HeadPongTest extends LimeTestCase {
         Random random = new Random();
         byte[] g1 = new byte[16];
         random.nextBytes(g1);
-        PushEndpoint p1 = new PushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p1 = pushEndpointFactory.createPushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
         byte[] p1b = p1.toBytes(false);
         byte[] g2 = new byte[16];
         random.nextBytes(g2);
-        PushEndpoint p2 = new PushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p2 = pushEndpointFactory.createPushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
         byte[] p2b = p2.toBytes(false);
         byte[] pushbytes = new byte[p1b.length + p2b.length];
         System.arraycopy(p1b, 0, pushbytes, 0, p1b.length);
@@ -204,7 +216,8 @@ public class HeadPongTest extends LimeTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);
         
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 2, out.toByteArray());
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 2, out.toByteArray());
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
         Iterator<Range> iterator = pong.getRanges().iterator();
@@ -248,15 +261,18 @@ public class HeadPongTest extends LimeTestCase {
         assertTrue(pong.isDownloading());
         assertFalse(pong.isRoutingBroken());        
         
-        // Just a quick test, since we already have the outputstream built up, to make
+        // Just a quick test, since we already have the output stream built up, to make
         // sure binary won't work if version < 2
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 1, out.toByteArray());
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 1, out.toByteArray());
             fail("expected bpe!");
         } catch(BadPacketException expected) {}
     }
     
     public void testHigherVersionGGEP() throws Exception {
+        PushEndpointFactory pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        
         GGEP ggep = new GGEP();
         ggep.put("F", (byte)0x1);                               // TLS capable.
         ggep.put("C", (byte)0x2 | 0x8);                         // response code (partial, downloading)
@@ -275,11 +291,11 @@ public class HeadPongTest extends LimeTestCase {
         Random random = new Random();
         byte[] g1 = new byte[16];
         random.nextBytes(g1);
-        PushEndpoint p1 = new PushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p1 = pushEndpointFactory.createPushEndpoint(g1, new IpPortSet(new IpPortImpl("1.2.3.4:5")), PushEndpoint.PLAIN, 0);
         byte[] p1b = p1.toBytes(false);
         byte[] g2 = new byte[16];
         random.nextBytes(g2);
-        PushEndpoint p2 = new PushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
+        PushEndpoint p2 = pushEndpointFactory.createPushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
         byte[] p2b = p2.toBytes(false);
         byte[] pushbytes = new byte[p1b.length + p2b.length];
         System.arraycopy(p1b, 0, pushbytes, 0, p1b.length);
@@ -292,7 +308,8 @@ public class HeadPongTest extends LimeTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);
         
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 3, out.toByteArray());
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 3, out.toByteArray());
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
         Iterator<Range> iterator = pong.getRanges().iterator();
@@ -343,7 +360,8 @@ public class HeadPongTest extends LimeTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ggep.write(out);
         
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 2, out.toByteArray());
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 2, out.toByteArray());
         assertFalse(pong.hasFile());
         
         assertNull(pong.getRanges());
@@ -362,7 +380,8 @@ public class HeadPongTest extends LimeTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(HeadPing.GGEP_PING); // old client didn't unmask the GGEP Ping flag.
         out.write(0); // 404.
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 1, out.toByteArray());
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 1, out.toByteArray());
         assertTrue(pong.isRoutingBroken());
     }
     
@@ -375,7 +394,8 @@ public class HeadPongTest extends LimeTestCase {
         
         ggep.put("F", (byte)0xFF); // tls capable + a lot of unknown fields
         
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 2, arrayof(ggep));
         assertTrue(pong.isTLSCapable());
     }
     
@@ -388,7 +408,8 @@ public class HeadPongTest extends LimeTestCase {
         
         ggep.put("F", (byte)~0x1); // every feature but TLS capable
         
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 2, arrayof(ggep));
         assertFalse(pong.isTLSCapable());
     }
     
@@ -399,7 +420,8 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("V", new byte[4]);
         ggep.put("Q", (byte)0);
         
-        HeadPong pong = new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+        HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                (byte)0, 2, arrayof(ggep));
         assertFalse(pong.isTLSCapable());
     }
     
@@ -410,7 +432,8 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("V", new byte[4]);
         
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 2, arrayof(ggep));
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -422,7 +445,8 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", (byte)0);
         
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 2, arrayof(ggep));
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -434,7 +458,8 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", (byte)0);
         
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 2, arrayof(ggep));
             fail("expected exception!");
         } catch(BadPacketException bpe) {}        
     }
@@ -447,7 +472,8 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", new byte[0]);
         
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 2, arrayof(ggep));
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -460,7 +486,8 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", (byte)0);
         
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 2, arrayof(ggep));
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -473,28 +500,30 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", (byte)0);
         
         try {
-            new HeadPong(new byte[16], (byte)0, (byte)0, 2, arrayof(ggep));
+            headPongFactory.createFromNetwork(new byte[16], (byte)0,
+                    (byte)0, 2, arrayof(ggep));
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
     
     public void testWriteBasicGGEPHeadPong() throws Exception {
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         SSLSettings.TLS_INCOMING.setValue(false);
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        networkManager.setAcceptedIncomingConnection(true);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -516,22 +545,23 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteTLS() throws Exception {
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         SSLSettings.TLS_INCOMING.setValue(true);
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        networkManager.setAcceptedIncomingConnection(true);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -554,22 +584,23 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testFirewalledBitAndDoesntWriteTLSIfFirewalled() throws Exception {
+        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         SSLSettings.TLS_INCOMING.setValue(true);
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.FALSE);
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        networkManager.setAcceptedIncomingConnection(false);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -600,7 +631,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setUrn(FileManagerStub.NOT_HAVE);
         req.setGuid(guid);
                 
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -626,14 +657,14 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -661,15 +692,16 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        fd.setActivelyDownloading(true);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);        
+        DownloadManagerStub downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+        downloadManager.setActivelyDownloadingSet(fd.getUrns());
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);        
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -691,20 +723,21 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteBusyQueueStatus() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         uploadManager.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -726,20 +759,21 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteCorrectQueueStatus() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         uploadManager.setNumQueuedUploads(3);
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -761,20 +795,21 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteCorrectUploadsInProgressQueueStatus() throws Exception {
+        UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        FileDescStub fd = new FileDescStub("file", HugeTestUtils.SHA1, 0);
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue()-5);
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -802,16 +837,16 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -847,16 +882,16 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -886,7 +921,7 @@ public class HeadPongTest extends LimeTestCase {
         
         // try only long ranges now
         fd.setRangesAsIntervals(Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
-        pong = new HeadPong(req);
+        pong = headPongFactory.create(req);
         out = new ByteArrayOutputStream();
         pong.write(out);
         written = out.toByteArray();
@@ -912,16 +947,16 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -949,15 +984,15 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -985,16 +1020,16 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsRanges(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
-        HeadPong pong = new HeadPong(req);
+        HeadPong pong = headPongFactory.create(req);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1016,38 +1051,42 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWritesPushWithTLSWithFWTLocations() throws Exception {
+        PushEndpointFactory pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+        
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         GUID peGUID = new GUID(GUID.makeGuid());      
-        PushAltLoc firewalled = (PushAltLoc)AlternateLocation.create(peGUID.toHexString()+";1.2.3.4:5", HugeTestUtils.SHA1);
+        PushAltLoc firewalled = (PushAltLoc) alternateLocationFactory.create(peGUID.toHexString()+";1.2.3.4:5", UrnHelper.SHA1);
         firewalled.updateProxies(true);
-        RouterService.getAltlocManager().add(firewalled, null);
+        altLocManager.add(firewalled, null);
         
         GUID peTlsGUID = new GUID();
-        PushAltLoc tls = (PushAltLoc)AlternateLocation.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc tls = (PushAltLoc) alternateLocationFactory.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         tls.updateProxies(true);
-        RouterService.getAltlocManager().add(tls, null);
+        altLocManager.add(tls, null);
         
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)AlternateLocation.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        altLocManager.add(fwt, null);
         
-        HeadPong pong = new HeadPong(req);
-        AltLocManager.instance().purge();
+        HeadPong pong = headPongFactory.create(req);
+        altLocManager.purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1068,9 +1107,9 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
         byte[] pushes = writtenGGEP.get("P");
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(pushes));
-        PushEndpoint pe1 = PushEndpoint.fromBytes(in);
-        PushEndpoint pe2 = PushEndpoint.fromBytes(in);
-        PushEndpoint pe3 = PushEndpoint.fromBytes(in);
+        PushEndpoint pe1 = pushEndpointFactory.createFromBytes(in);
+        PushEndpoint pe2 = pushEndpointFactory.createFromBytes(in);
+        PushEndpoint pe3 = pushEndpointFactory.createFromBytes(in);
         assertEquals(0, in.available());
         assertEquals(-1, in.read());
         
@@ -1151,39 +1190,43 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWrittenFWTOnly() throws Exception {
+        PushEndpointFactory pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+        
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(true);
         req.setRequestsFWTOnlyPushLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         GUID peGUID = new GUID(GUID.makeGuid());      
-        PushAltLoc firewalled = (PushAltLoc)AlternateLocation.create(peGUID.toHexString()+";1.2.3.4:5", HugeTestUtils.SHA1);
+        PushAltLoc firewalled = (PushAltLoc)alternateLocationFactory.create(peGUID.toHexString()+";1.2.3.4:5", UrnHelper.SHA1);
         firewalled.updateProxies(true);
-        RouterService.getAltlocManager().add(firewalled, null);
+        altLocManager.add(firewalled, null);
         
         GUID peTlsGUID = new GUID();
-        PushAltLoc tls = (PushAltLoc)AlternateLocation.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc tls = (PushAltLoc)alternateLocationFactory.create(peTlsGUID.toHexString() + ";pptls=6;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         tls.updateProxies(true);
-        RouterService.getAltlocManager().add(tls, null);
+        altLocManager.add(tls, null);
         
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)AlternateLocation.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        altLocManager.add(fwt, null);
         
-        HeadPong pong = new HeadPong(req);
-        AltLocManager.instance().purge();
+        HeadPong pong = headPongFactory.create(req);
+        altLocManager.purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1204,7 +1247,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
         byte[] pushes = writtenGGEP.get("P");
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(pushes));
-        PushEndpoint pe1 = PushEndpoint.fromBytes(in);
+        PushEndpoint pe1 = pushEndpointFactory.createFromBytes(in);
         assertEquals(0, in.available());
         assertEquals(-1, in.read());
         
@@ -1237,28 +1280,31 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testNoPushWrittenIfNotRequested() throws Exception {
+        AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+        
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)AlternateLocation.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        altLocManager.add(fwt, null);
         
-        HeadPong pong = new HeadPong(req);
-        AltLocManager.instance().purge();
+        HeadPong pong = headPongFactory.create(req);
+        altLocManager.purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1280,29 +1326,32 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testNoPushWrittenIfNotRequestedEvenIfFWTOnlyRequested() throws Exception {
+        AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+        
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsPushLocs(false);
         req.setRequestsFWTOnlyPushLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         GUID peFwtGUID = new GUID();
-        PushAltLoc fwt = (PushAltLoc)AlternateLocation.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", HugeTestUtils.SHA1);
+        PushAltLoc fwt = (PushAltLoc)alternateLocationFactory.create(peFwtGUID.toHexString() + ";fwt/1.0;10:20.21.23.23;pptls=8;2.3.4.5:5;3.4.5.6:7;4.5.6.7:8", UrnHelper.SHA1);
         fwt.updateProxies(true);
-        RouterService.getAltlocManager().add(fwt, null);
+        altLocManager.add(fwt, null);
         
-        HeadPong pong = new HeadPong(req);
-        AltLocManager.instance().purge();
+        HeadPong pong = headPongFactory.create(req);
+        altLocManager.purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1324,28 +1373,31 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteDirectLocs() throws Exception {
+        AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+        
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsAltLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234", HugeTestUtils.SHA1);
-            RouterService.getAltlocManager().add(al, null);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", UrnHelper.SHA1);
+            altLocManager.add(al, null);
         }
         
-        HeadPong pong = new HeadPong(req);
-        AltLocManager.instance().purge();
+        HeadPong pong = headPongFactory.create(req);
+        altLocManager.purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1389,28 +1441,31 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testNotWriteDirectLocsIfNotRequested() throws Exception {
+        AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+        
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsAltLocs(false);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234", HugeTestUtils.SHA1);
-            RouterService.getAltlocManager().add(al, null);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", UrnHelper.SHA1);
+            altLocManager.add(al, null);
         }
         
-        HeadPong pong = new HeadPong(req);
-        AltLocManager.instance().purge();
+        HeadPong pong = headPongFactory.create(req);
+        altLocManager.purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();
@@ -1432,28 +1487,31 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteTLSWithLocs() throws Exception {
+        AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
+        
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(HugeTestUtils.SHA1);
+        req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         req.setRequestsAltLocs(true);
         
         IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        fileManager.addFileDescForUrn(fd, HugeTestUtils.SHA1);
+        fileManager.addFileDescForUrn(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
                 
         for(int i=0;i<10;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234", HugeTestUtils.SHA1, i % 2 == 0);
-            RouterService.getAltlocManager().add(al, null);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3."+i+":1234", UrnHelper.SHA1, i % 2 == 0);
+            altLocManager.add(al, null);
         }
         
-        HeadPong pong = new HeadPong(req);
-        AltLocManager.instance().purge();
+        HeadPong pong = headPongFactory.create(req);
+        altLocManager.purge();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         pong.write(out);
         byte[] written = out.toByteArray();

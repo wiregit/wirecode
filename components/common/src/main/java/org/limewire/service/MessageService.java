@@ -112,7 +112,7 @@ public class MessageService {
      * @param messageKey the key for looking up the message to display in the
      *  resource bundles
      */
-    public static void showFormattedMessage(String messageKey, String... args) {
+    public static void showFormattedMessage(String messageKey, Object... args) {
         _callback.showFormattedMessage(messageKey, args);
     }
     
@@ -124,7 +124,7 @@ public class MessageService {
      * @param messageKey the key for looking up the message to display in the
      *  resource bundles
      */
-    public static void showFormattedMessage(String messageKey, Switch ignore, String... args) {
+    public static void showFormattedMessage(String messageKey, Switch ignore, Object... args) {
         _callback.showFormattedMessage(messageKey, ignore, args);
     }
     
@@ -135,7 +135,7 @@ public class MessageService {
      * @param messageKey the key for looking up the message to display in the
      *  resource bundles
      */
-    public static void showFormattedError(String errorKey, String... args) {
+    public static void showFormattedError(String errorKey, Object... args) {
         _callback.showFormattedError(errorKey, args);
     }    
     
@@ -147,7 +147,7 @@ public class MessageService {
      * @param messageKey the key for looking up the message to display in the
      *  resource bundles
      */
-    public static void showFormattedError(String errorKey, Switch ignore, String... args) {
+    public static void showFormattedError(String errorKey, Switch ignore, Object... args) {
         _callback.showFormattedError(errorKey, ignore, args);
     }
     
@@ -188,7 +188,7 @@ public class MessageService {
             showMessage(messageKey); 
         }
 
-        public void showFormattedMessage(String messageKey, String... args) {
+        public void showFormattedMessage(String messageKey, Object... args) {
             StringBuilder sb = new StringBuilder("message key: " + messageKey + " ");
             for(int i = 0; i < args.length; i++) {
                 sb.append("arg[" + i + "]: " + args[i]);
@@ -198,11 +198,11 @@ public class MessageService {
             System.out.println(sb);
         }
 
-        public void showFormattedMessage(String messageKey, Switch ignore, String... args) {
+        public void showFormattedMessage(String messageKey, Switch ignore, Object... args) {
             showFormattedMessage(messageKey, args);
         }
 
-        public void showFormattedError(String errorKey, String... args) {
+        public void showFormattedError(String errorKey, Object... args) {
             StringBuilder sb = new StringBuilder("error key: " + errorKey + " ");
             for(int i = 0; i < args.length; i++) {
                 sb.append("arg[" + i + "]: " + args[i]);
@@ -212,7 +212,7 @@ public class MessageService {
             System.out.println(sb); 
         }
 
-        public void showFormattedError(String errorKey, Switch ignore, String... args) {
+        public void showFormattedError(String errorKey, Switch ignore, Object... args) {
             showFormattedError(errorKey, args);
         }
         

@@ -1,11 +1,9 @@
 package org.limewire.collection;
 
 
-import org.limewire.collection.ApproximateMatcher;
-import org.limewire.util.BaseTestCase;
-
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 /**
  * Unit tests for ApproximateMatcher

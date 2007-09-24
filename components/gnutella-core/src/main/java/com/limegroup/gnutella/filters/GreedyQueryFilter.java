@@ -11,9 +11,12 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * "mpg" or "*.*" are to be blocked, are at least set to travel less than
  * other queries.
  */
-public class GreedyQueryFilter extends SpamFilter {
+public class GreedyQueryFilter implements SpamFilter {
     private static final int GREEDY_QUERY_MAX = 3;
 
+    /**
+     * has a side effect of changing the TTL in some conditions!!
+     */
     public boolean allow(Message m) {
         if (! (m instanceof QueryRequest))
             return true;
@@ -29,8 +32,10 @@ public class GreedyQueryFilter extends SpamFilter {
             return false; 
         if (this.isVeryGeneralSearch(query) ||
             this.isObfuscatedGeneralSearch(query)) {
+
             int hops = m.getHops();
             int ttl = m.getTTL();
+            
             if (hops >= GreedyQueryFilter.GREEDY_QUERY_MAX)
                 return false;
             if ( (hops + ttl) > GreedyQueryFilter.GREEDY_QUERY_MAX) 

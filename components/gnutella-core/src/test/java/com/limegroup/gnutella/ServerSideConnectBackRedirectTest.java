@@ -9,13 +9,11 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.limewire.io.IOUtils;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
+import org.limewire.io.IOUtils;
+
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
@@ -90,8 +88,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
 
-	    LEAF[0] = new Connection("localhost", PORT);
-        LEAF[0].initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+	    LEAF[0] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        LEAF[0].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
 		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 
         //  Give the connection a chance to send its initial messages
@@ -137,7 +135,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = MessageFactory.read(in);
+                Message m = ProviderHacks.getMessageFactory().read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
@@ -265,7 +263,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         // simulate the running of the thread - technically i'm not testing
         // the situation precisely, but i'm confident the schedule work so the
         // abstraction isn't terrible
-        Thread cbThread = new Thread(new MessageRouter.ConnectBackExpirer());
+        Thread cbThread = new Thread(new MessageRouterImpl.ConnectBackExpirer());
         cbThread.start();
         cbThread.join();
 
@@ -285,7 +283,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = MessageFactory.read(in);
+                Message m = ProviderHacks.getMessageFactory().read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);

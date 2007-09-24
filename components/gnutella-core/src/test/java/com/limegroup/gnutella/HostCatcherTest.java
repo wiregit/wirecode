@@ -8,7 +8,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.inject.Providers;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
@@ -26,13 +26,11 @@ import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.HackHostCatcher;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -53,7 +51,7 @@ public class HostCatcherTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     public static void globalSetUp() throws Exception {
-        new RouterService( new ActivityCallbackStub() );
+        //new RouterService( new ActivityCallbackStub() );
     }
     
     /**
@@ -66,7 +64,7 @@ public class HostCatcherTest extends LimeTestCase {
 
         HostCatcher.DEBUG = true;
 
-        hc = new HostCatcher();
+        hc = new HackHostCatcher();
         hc.initialize();		
     }
     
@@ -76,7 +74,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testPutHostOnProbation() throws Exception {
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         String ipStart = "34.56.";
         int penultimatetByte;
         for(int i=0; i<HostCatcher.PROBATION_HOSTS_SIZE; i++) {
@@ -119,7 +117,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testExpireHosts() throws Exception {
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         String ipStart = "34.56.";
         int penultimatetByte;
         for(int i=0; i<HostCatcher.EXPIRED_HOSTS_SIZE; i++) {
@@ -161,7 +159,7 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testUDPCachesUsed() throws Exception {
         assertEquals(0, hc.getNumHosts());
-        PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);        
+ //       PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);        
         
         StubUDPBootstrapper udp = new StubUDPBootstrapper();
         PrivilegedAccessor.setValue(hc, "udpHostCache", udp);
@@ -195,7 +193,7 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testIgnoreExpiredHosts() throws Exception {
         Endpoint expiredHost = new Endpoint("20.4.5.7", 6346);
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         catcher.initialize();
         catcher.add(expiredHost,true);
         assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
@@ -215,7 +213,7 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testIgnoreProbatedHosts() throws Exception {
         Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         catcher.initialize();
         catcher.add(probatedHost,true);
         assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
@@ -235,7 +233,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if any error occurs
      */
     public void testRecoveryOfHostsOnProbation() throws Exception {
-        HostCatcher catcher = new HostCatcher();
+        HostCatcher catcher = new HackHostCatcher();
         long waitTime = 100;
         PrivilegedAccessor.setValue(HostCatcher.class, 
             "PROBATION_RECOVERY_WAIT_TIME", new Long(waitTime));
@@ -340,20 +338,20 @@ public class HostCatcherTest extends LimeTestCase {
         //PingReply's.
         setUp();
         // Adding a private should add 1 more to numPrivateHosts
-        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, 
             new byte[] {(byte)192,(byte)168,(byte)0,(byte)1}, false));
         assertEquals("private PingReply added as ultrapeer",
 					 0 ,hc.getNumUltrapeerHosts());
 
         setUp();
-        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, 
             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1}, false));
         assertEquals("normal PingReply added as ultrapeer",
                 0, hc.getNumUltrapeerHosts());
 
 
         setUp();
-        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, 
             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1}, true));
         assertEquals("ultrapeer PingReply not added as ultrapeer",
                 1, hc.getNumUltrapeerHosts());
@@ -364,20 +362,20 @@ public class HostCatcherTest extends LimeTestCase {
         //Systm.out.println("-Testing write of permanent nodes to Gnutella.net");
         //1. Create HC, add entries, write to disk.
         hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6342,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6342,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 1000, false));
         
         // duplicate
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6342,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6342,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 1000, false));  
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6343,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)143}, 30, false));
         // duplicate (well, with lower uptime)
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6343,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)143}, 30, false));
         
         // private address (ignored)
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6343,
             new byte[] {(byte)192, (byte)168, (byte)0, (byte)1}, 3000, false));
             
         // udp host caches ..
@@ -435,15 +433,15 @@ public class HostCatcherTest extends LimeTestCase {
         //(various uptimes).
         final int N=HostCatcher.PERMANENT_SIZE;
         for (int i=0; i<=N; i++) {            
-            hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, i+1,
+            hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, i+1,
                 new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
                     i+10, false));
         }
         //Now add bad pong--which isn't really added
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, N+2,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, N+2,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 0, false));
         //Now re-add port 1 (which was kicked out earlier).
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 1,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 1,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, N+101,false));
 
         File tmp=File.createTempFile("hc_test", ".net" );
@@ -583,7 +581,7 @@ public class HostCatcherTest extends LimeTestCase {
         // Test with UDPHC pongs.
         GGEP ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
                     (long)0, (long)0, false, ggep);
         hc.add(pr);
@@ -601,7 +599,7 @@ public class HostCatcherTest extends LimeTestCase {
         // Test with a name in the cache.
         ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
-        pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+        pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 5, 4, 3, 2 },
                     (long)0, (long)0, false, ggep);
         hc.add(pr);
@@ -627,7 +625,7 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        PingReply pr = PingReply.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
@@ -648,7 +646,7 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-        PingReply pr = PingReply.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
@@ -668,7 +666,7 @@ public class HostCatcherTest extends LimeTestCase {
         	"www.eff.org\n"+
             "www.test.org:1";
         ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
-        PingReply pr = PingReply.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
@@ -804,27 +802,27 @@ public class HostCatcherTest extends LimeTestCase {
         out.close();
         DatagramSocket s = new DatagramSocket(6000);
         s.setSoTimeout(3000);
-        PrivilegedAccessor.setValue(RouterService.class , "catcher", hc);
-        PrivilegedAccessor.setValue(RouterService.class, "manager",new
-                ConnectionManagerStub() {
-            @Override
-            public boolean isFullyConnected() {
-                return false;
-            }
-            @Override
-            public List<ManagedConnection> getInitializedConnections() {
-                return Collections.emptyList();
-            }
-            @Override
-            public int getPreferredConnectionCount() {
-                return 1;
-            }
-        });
+        //PrivilegedAccessor.setValue(RouterService.class , "catcher", hc);
+//        PrivilegedAccessor.setValue(RouterService.class, "manager",new
+//                ConnectionManagerStub() {
+//            @Override
+//            public boolean isFullyConnected() {
+//                return false;
+//            }
+//            @Override
+//            public List<ManagedConnection> getInitializedConnections() {
+//                return Collections.emptyList();
+//            }
+//            @Override
+//            public int getPreferredConnectionCount() {
+//                return 1;
+//            }
+//        });
         
         // make it send udp pings
-        RouterService.getAcceptor().init();
-        RouterService.getAcceptor().start();
-        RouterService.getMessageRouter().initialize();
+        ProviderHacks.getAcceptor().init();
+        ProviderHacks.getAcceptor().start();
+        ProviderHacks.getMessageRouter().initialize();
         hc.expire();
         hc.sendUDPPings();
         
@@ -837,12 +835,12 @@ public class HostCatcherTest extends LimeTestCase {
         // receive the ping
         DatagramPacket p = new DatagramPacket(new byte[1000], 1000);
         s.receive(p);
-        PingRequest ping = (PingRequest) MessageFactory.read(new ByteArrayInputStream(p.getData()));
+        PingRequest ping = (PingRequest) ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(p.getData()));
         assertNotNull(ping);
 
         
         // this ping should be tagged
-        byte [] expectedGUID = UDPService.instance().getSolicitedGUID().bytes();
+        byte [] expectedGUID = ProviderHacks.getUdpService().getSolicitedGUID().bytes();
         assertNotEquals(expectedGUID, ping.getGUID());
         
         // if a pong is sent from the same host, it will be processed
@@ -850,8 +848,8 @@ public class HostCatcherTest extends LimeTestCase {
         ByteOrder.short2leb((short)6000, payload, 0);
         System.arraycopy(InetAddress.getByName("127.0.0.1").getAddress(),0,payload,2,4);
         PingReply pong = 
-            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
-        UDPService.instance().processMessage(pong, 
+            ProviderHacks.getPingReplyFactory().createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
+        ProviderHacks.getUdpService().processMessage(pong, 
                 new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6000));
         
         // the pong guid should now be restored to the solicited guid
@@ -867,8 +865,8 @@ public class HostCatcherTest extends LimeTestCase {
         // another address, it will be ignored
         System.arraycopy(InetAddress.getByName("127.0.0.2").getAddress(),0,payload,2,4);
         pong = 
-            PingReply.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
-        UDPService.instance().processMessage(pong, 
+            ProviderHacks.getPingReplyFactory().createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
+        ProviderHacks.getUdpService().processMessage(pong, 
                 new InetSocketAddress(InetAddress.getByName("127.0.0.2"), 6000));
         
         // the guid of this pong will not be restored correctly
@@ -909,7 +907,7 @@ public class HostCatcherTest extends LimeTestCase {
         // mark the second & third items as TLS
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
         ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
-        PingReply pr = PingReply.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 0, 1, 0 },
             0, 0, false, ggep);
         hc.add(pr);
@@ -958,7 +956,8 @@ public class HostCatcherTest extends LimeTestCase {
         private boolean expired = false;
         
         public StubUDPBootstrapper() {
-            super(new UDPPinger());
+            super(ProviderHacks.getUDPPinger(), Providers.of(ProviderHacks.getMessageRouter()), ProviderHacks.getPingRequestFactory(),
+                    ProviderHacks.getConnectionServices());
         }
         
         public boolean fetchHosts() {
@@ -967,7 +966,7 @@ public class HostCatcherTest extends LimeTestCase {
             expired = true;
             fetched = true;
             Endpoint ep = new Endpoint(host, 6346);
-            RouterService.getHostCatcher().add(ep, false);
+            ProviderHacks.getHostCatcher().add(ep, false);
             return true;
         }
         

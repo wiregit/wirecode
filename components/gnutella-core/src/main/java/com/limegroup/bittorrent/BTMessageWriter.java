@@ -20,7 +20,7 @@ import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.BandwidthManager;
 
 public class BTMessageWriter implements BTChannelWriter {
 
@@ -99,9 +99,8 @@ public class BTMessageWriter implements BTChannelWriter {
 		myKeepAlive.flip();
 	}
 
-	public void init(ScheduledExecutorService scheduler, int keepAliveInterval) {
-		ThrottleWriter throttle = new ThrottleWriter(
-				RouterService.getBandwidthManager().getWriteThrottle());
+	public void init(ScheduledExecutorService scheduler, int keepAliveInterval, BandwidthManager bwManager) {
+		ThrottleWriter throttle = new ThrottleWriter(bwManager.getWriteThrottle());
 		delayer = new DelayedBufferWriter(1400, 3000);
 		_channel = throttle; 
 		delayer.setWriteChannel(throttle);

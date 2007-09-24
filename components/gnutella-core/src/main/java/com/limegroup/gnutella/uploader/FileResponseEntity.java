@@ -8,10 +8,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.limewire.http.AbstractHttpNIOEntity;
+import org.limewire.http.HttpIOSession;
+import org.limewire.http.entity.FilePieceReader;
+import org.limewire.http.entity.Piece;
+import org.limewire.http.entity.PieceListener;
 import org.limewire.nio.NIODispatcher;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.RouterService;
 
 /**
  * An event based {@link HttpEntity} that uploads a {@link File}. A
@@ -42,9 +47,12 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
     /** Piece that is currently transferred. */
     private Piece piece;
 
-    public FileResponseEntity(HTTPUploader uploader, File file) {
+    private final Provider<BandwidthManager> bandwidthManager;
+
+    FileResponseEntity(HTTPUploader uploader, File file, Provider<BandwidthManager> bandwidthManager) {
         this.uploader = uploader;
         this.file = file;
+        this.bandwidthManager = bandwidthManager;
 
         setContentType(Constants.FILE_MIME_TYPE);
 
@@ -73,8 +81,8 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
             return;
         }
         
-        uploader.getSession().getIOSession().setThrottle(RouterService
-                .getBandwidthManager().getWriteThrottle(uploader.getSession().getIOSession().getSocket()));
+        HttpIOSession ioSession = uploader.getSession().getIOSession();
+        ioSession.setThrottle(bandwidthManager.get().getWriteThrottle(ioSession.getSocket()));
 
         reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler());
         reader.start();

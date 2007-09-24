@@ -4,9 +4,9 @@ package com.limegroup.bittorrent;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.uploader.UploadType;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -24,11 +24,14 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	
 	private final EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher;
 
-	public BTUploader(ManagedTorrent torrent, BTMetaInfo info,
-			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher) {
+    private final ActivityCallback activityCallback;
+
+	BTUploader(ManagedTorrent torrent, BTMetaInfo info,
+			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher, ActivityCallback activityCallback) {
 		_torrent = torrent;
 		_info = info;
 		this.dispatcher = dispatcher;
+        this.activityCallback = activityCallback;
 		dispatcher.addEventListener(this);
 	}
 
@@ -156,11 +159,11 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	private void torrentStarted() {
 		startTime = System.currentTimeMillis();
 		stopTime = 0;
-		RouterService.getCallback().addUpload(this);
+		activityCallback.addUpload(this);
 	}
 	
 	private void torrentStopped() {
-		RouterService.getCallback().removeUpload(this);
+		activityCallback.removeUpload(this);
 		stopTime = System.currentTimeMillis();
 	}
 	

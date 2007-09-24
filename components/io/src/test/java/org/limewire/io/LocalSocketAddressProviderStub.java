@@ -1,6 +1,5 @@
 package org.limewire.io;
 
-import org.limewire.io.LocalSocketAddressProvider;
 
 public class LocalSocketAddressProviderStub implements LocalSocketAddressProvider {
 

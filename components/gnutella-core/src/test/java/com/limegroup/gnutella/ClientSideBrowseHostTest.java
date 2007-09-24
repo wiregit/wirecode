@@ -24,7 +24,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -59,7 +58,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     // 3. if all else fails the client sends a PushRequest
 
     public static void globalSetUp() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
     }
 
     public void testHTTPRequest() throws Exception {
@@ -71,7 +70,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "boalt.org");
+        ProviderHacks.getSearchServices().query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;
@@ -89,11 +88,10 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             IpPort[] proxies = new IpPortImpl[1];
             proxies[0] = new IpPortImpl("127.0.0.1", 7000);
             Response[] res = new Response[1];
-            res[0] = new Response(10, 10, "boalt.org");
-            m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
-                    InetAddress.getLocalHost().getAddress(), 0, res, 
-                    clientGUID, new byte[0], false, false, true,
-                    true, false, false, null);
+            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 7000,
+                    InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[0].send(m);
             testUP[0].flush();
 
@@ -103,7 +101,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
             // tell the leaf to browse host the file, should result in direct HTTP
             // request
-            RouterService.doAsynchronousBrowseHost(callback.getRFD(),
+            ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
                     new GUID(GUID.makeGuid()), new GUID(clientGUID),
                     null, false);
 
@@ -139,7 +137,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "nyu.edu");
+        ProviderHacks.getSearchServices().query(guid, "nyu.edu");
 
         // the testUP[0] should get it
         Message m = null;
@@ -159,11 +157,10 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             final IpPortSet proxies = new IpPortSet();
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             Response[] res = new Response[1];
-            res[0] = new Response(10, 10, "nyu.edu");
-            m = new QueryReply(m.getGUID(), (byte) 1, 6999, 
-                    InetAddress.getLocalHost().getAddress(), 0, res, 
-                    clientGUID, new byte[0], false, false, true,
-                    true, false, false, proxies);
+            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "nyu.edu");
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6999,
+                    InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false,
+                    true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 
@@ -173,7 +170,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
             // tell the leaf to browse host the file, should result in PushProxy
             // request
-            RouterService.doAsynchronousBrowseHost(callback.getRFD(),
+            ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
                     new GUID(GUID.makeGuid()), new GUID(clientGUID),
                     proxies, false);
 
@@ -212,7 +209,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                 StringTokenizer st = new StringTokenizer(currLine, ":");
                 assertEquals(st.nextToken(), "X-Node");
                 InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-                Arrays.equals(addr.getAddress(), RouterService.getAddress());
+                Arrays.equals(addr.getAddress(), ProviderHacks.getNetworkManager().getAddress());
                 assertEquals(Integer.parseInt(st.nextToken()), SERVER_PORT);
 
                 // now we need to GIV
@@ -254,7 +251,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        RouterService.query(guid, "anita");
+        ProviderHacks.getSearchServices().query(guid, "anita");
 
         // the testUP[0] should get it
         Message m = null;
@@ -268,11 +265,10 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         final IpPortSet proxies = new IpPortSet();
         proxies.add(new IpPortImpl("127.0.0.1", 7001));
         Response[] res = new Response[1];
-        res[0] = new Response(10, 10, "anita");
-        m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
-                           InetAddress.getLocalHost().getAddress(), 0, res, 
-                           clientGUID, new byte[0], false, false, true,
-                           true, false, false, proxies);
+        res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita");
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 7000,
+                InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false, true,
+                true, false, false, proxies);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -281,7 +277,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         assertTrue(callback.getRFD() != null);
 
         // tell the leaf to browse host the file,
-        RouterService.doAsynchronousBrowseHost(callback.getRFD(),
+        ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies, false);
 

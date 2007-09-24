@@ -6,20 +6,16 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.limewire.nio.channel.InterestReadableByteChannel;
-
 import junit.framework.Test;
+
+import org.limewire.nio.channel.InterestReadableByteChannel;
 
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -29,7 +25,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public final class MessageReaderTest extends LimeTestCase {
     
     private StubMessageReceiver STUB = new StubMessageReceiver();
-    private MessageReader READER = new MessageReader(STUB);
+    private MessageReader READER = ProviderHacks.getMessageReaderFactory().createMessageReader(STUB);
     
     private static final byte[] IP = new byte[] { (byte)127, 0, 0, 1 };
 
@@ -47,11 +43,11 @@ public final class MessageReaderTest extends LimeTestCase {
 	
 	public void setUp() throws Exception {
 	    STUB.clear();
-        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());	    
+        ProviderHacks.getAcceptor().setAddress(InetAddress.getLocalHost());	    
 	}
 	
 	public void testSingleMessageRead() throws Exception {
-	    Message out = new PingRequest((byte)1);
+	    Message out = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
 	    READER.setReadChannel(channel(buffer(out)));
 	    assertEquals(0, STUB.size());
 	    READER.handleRead();
@@ -62,15 +58,13 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testReadMultipleMessages() throws Exception {
-        Message out1 = new PingRequest((byte)1);
-        Message out2 = QueryRequest.createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
-        Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
+        Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         Message[] allOut = new Message[] { out1, out2, out3, out4, out5 };
         READER.setReadChannel(channel(buffer(allOut)));
 	    assertEquals(0, STUB.size());
@@ -92,15 +86,13 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testBadPacketIgnored() throws Exception {
-        Message out1 = new PingRequest((byte)1);
-        Message out2 = QueryRequest.createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
-        Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
+        Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
         ByteBuffer b2 = buffer(out2);
         ByteBuffer b3 = buffer(out3);
@@ -123,15 +115,13 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testLargeLengthThrows() throws Exception {
-        Message out1 = new PingRequest((byte)1);
-        Message out2 = QueryRequest.createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
-        Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
+        Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
         ByteBuffer b2 = buffer(out2);
         ByteBuffer b3 = buffer(out3);
@@ -160,15 +150,13 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testSmallLengthThrows() throws Exception {
-        Message out1 = new PingRequest((byte)1);
-        Message out2 = QueryRequest.createQuery("test");
-        Message out3 = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, IP, 0, new Response[0],
-                                           GUID.makeGuid(), new byte[0],
-                                           false, false, true, true, true, false,
-                                           null);
+        Message out1 = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        Message out2 = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        Message out3 = ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, false, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
-        Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
+        Message out5 = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
         ByteBuffer b2 = buffer(out2);
         ByteBuffer b3 = buffer(out3);
@@ -197,7 +185,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testReadInPasses() throws Exception {
-        Message out = QueryRequest.createQuery("this is a really long query");
+        Message out = ProviderHacks.getQueryRequestFactory().createQuery("this is a really long query");
         ByteBuffer b1 = buffer(out);
         ByteBuffer b2 = b1.duplicate();
         ByteBuffer b3 = b1.duplicate();
@@ -242,7 +230,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testEOFInHeaderThrows() throws Exception {
-        Message out = QueryRequest.createQuery("test");
+        Message out = ProviderHacks.getQueryRequestFactory().createQuery("test");
         ByteBuffer b = buffer(out);
         b.limit(20);
         
@@ -258,7 +246,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testEOFAfterHeaderThrows() throws Exception {
-        Message out = QueryRequest.createQuery("test");
+        Message out = ProviderHacks.getQueryRequestFactory().createQuery("test");
         ByteBuffer b = buffer(out);
         b.limit(23);
         
@@ -274,7 +262,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
     
     public void testEOFInPayloadThrows() throws Exception {
-        Message out = QueryRequest.createQuery("test");
+        Message out = ProviderHacks.getQueryRequestFactory().createQuery("test");
         ByteBuffer b = buffer(out);
         b.limit(30);
         
@@ -290,7 +278,7 @@ public final class MessageReaderTest extends LimeTestCase {
     }
 
     public void testEOFAfterPayloadThrowsButMessageIsRead() throws Exception {
-        Message out = QueryRequest.createQuery("test");
+        Message out = ProviderHacks.getQueryRequestFactory().createQuery("test");
         ByteBuffer b = buffer(out);
         
         READER.setReadChannel(eof(b));
@@ -324,14 +312,14 @@ public final class MessageReaderTest extends LimeTestCase {
         assertSame(channel, READER.getReadChannel());
         
         try {
-            new MessageReader(null);
+            new MessageReader(null, ProviderHacks.getMessageFactory());
             fail("expected NPE");
         } catch(NullPointerException expected) {}
             
-        READER = new MessageReader(channel, STUB);
+        READER = ProviderHacks.getMessageReaderFactory().createMessageReader(channel, STUB);
         assertSame(channel, READER.getReadChannel());
         
-        READER = new MessageReader(null, STUB);
+        READER = ProviderHacks.getMessageReaderFactory().createMessageReader(null, STUB);
         assertNull(READER.getReadChannel());
     }
     

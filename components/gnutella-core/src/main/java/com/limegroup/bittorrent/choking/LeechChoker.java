@@ -10,6 +10,7 @@ import org.limewire.collection.NECallable;
 
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
+import com.limegroup.gnutella.UploadServices;
 
 /**
  * Choker that implements the choking logic during torrent downloading
@@ -24,9 +25,10 @@ class LeechChoker extends Choker {
 	private static final Comparator<Chokable> DOWNLOAD_SPEED_COMPARATOR = 
 		new SpeedComparator(true);
 	
-	LeechChoker(NECallable<List<? extends Chokable>> chokables, ScheduledExecutorService invoker) {
-		super(chokables, invoker);
-	}
+	LeechChoker(NECallable<List<? extends Chokable>> chokables,
+            ScheduledExecutorService invoker, UploadServices uploadServices) {
+        super(chokables, invoker, uploadServices);
+    }
 
 	@Override
 	protected void rechokeImpl(boolean force) {

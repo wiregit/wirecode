@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -43,8 +45,9 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileManagerEvent.Type;
-import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -57,10 +60,7 @@ import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -69,6 +69,7 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
  *
  * This class is thread-safe.
  */
+@Singleton
 public abstract class FileManager {
 	
     private static final Log LOG = LogFactory.getLog(FileManager.class);
@@ -390,16 +391,21 @@ public abstract class FileManager {
     public final FMInspectables inspectables = new FMInspectables();
     
     /** Contains the definition of a rare file */
-    private final RareFileDefinition rareDefinition = new RareFileDefinition();
+    private final RareFileDefinition rareDefinition;
+    
+    protected final FileManagerController fileManagerController;
     
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
-    public FileManager() {
+    @Inject
+    public FileManager(FileManagerController fileManagerController) {
+        this.fileManagerController = fileManagerController;
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
         // overwrite all these variables
+        rareDefinition = new RareFileDefinition();
         resetVariables();
     }
     
@@ -435,7 +441,7 @@ public abstract class FileManager {
         _data.clean();
         cleanIndividualFiles();
 		loadSettings();
-        SimppManager.instance().addListener(qrpUpdater);
+		fileManagerController.addSimppListener(qrpUpdater);
     }
     
     /**
@@ -468,15 +474,13 @@ public abstract class FileManager {
     
     public void stop() {
         save();
-        SimppManager.instance().removeListener(qrpUpdater);
+        fileManagerController.removeSimppListener(qrpUpdater);
         shutdown = true;
     }
 
     protected void save(){
         _data.save();
-            
-        UrnCache.instance().persistCache();
-        CreationTimeCache.instance().persistCache();
+        fileManagerController.save();
     }
 	
     ///////////////////////////////////////////////////////////////////////////
@@ -732,14 +736,14 @@ public abstract class FileManager {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
             _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListSet));
         }
-	    RouterService.getFileManager().loadSettings();
+	    loadSettings();
     }
     
     /**
      * Kicks off necessary stuff for a load being started.
      */
     protected void loadStarted(int revision) {
-        UrnCache.instance().clearPendingHashes(this);
+        fileManagerController.loadStarted();
     }
     
     /**
@@ -768,13 +772,9 @@ public abstract class FileManager {
         
         // Various cleanup & persisting...
         trim();
-        CreationTimeCache.instance().pruneTimes();
-        RouterService.getDownloadManager().getIncompleteFileManager().registerAllIncompleteFiles();
+        fileManagerController.loadFinished();
         save();
-        SavedFileManager.instance().run();
-        UpdateHandler.instance().tryToDownloadUpdates();
-        
-        RouterService.getCallback().fileManagerLoaded();
+        fileManagerController.loadFinishedPostSave();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADED));
     }
     
@@ -829,7 +829,7 @@ public abstract class FileManager {
         }
 
         //clear this, list of directories retrieved
-        RouterService.getCallback().fileManagerLoading();
+        fileManagerController.fileManagerLoading();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADING));
         
         // Update the FORCED_SHARE directory.
@@ -914,7 +914,7 @@ public abstract class FileManager {
             if (_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
-                if (!RouterService.getCallback().warnAboutSharingSensitiveDirectory(directory))
+                if (!fileManagerController.warnAboutSharingSensitiveDirectory(directory))
                     return;
             }
         }
@@ -1046,7 +1046,7 @@ public abstract class FileManager {
                         removeFolderIfShared(f, folder);
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfShared(f) == null)
-                            UrnCache.instance().clearPendingHashesFor(f, this);
+                            fileManagerController.clearPendingShare(f);
                     }
                 }
             }
@@ -1262,7 +1262,7 @@ public abstract class FileManager {
             _pendingFinished = -1;
         }
         
-		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
+		fileManagerController.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
     /**
@@ -1318,7 +1318,7 @@ public abstract class FileManager {
             }
             
             public boolean isOwner(Object o) {
-                return o == FileManager.this;
+                return o == fileManagerController;
             }
         };
     }
@@ -1345,7 +1345,7 @@ public abstract class FileManager {
 
         int fileIndex = _files.size();
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
-        ContentResponseData r = RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
+        ContentResponseData r = fileManagerController.getResponseDataFor(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
             return null;
@@ -1397,23 +1397,7 @@ public abstract class FileManager {
         // so we have to make sure we don't influence the what is new
         // result set.
         if (!isForcedShare(file)) {
-            URN mainURN = fileDesc.getSHA1Urn();
-            CreationTimeCache ctCache = CreationTimeCache.instance();
-            synchronized (ctCache) {
-                Long cTime = ctCache.getCreationTime(mainURN);
-                if (cTime == null)
-                    cTime = new Long(file.lastModified());
-                // if cTime is non-null but 0, then the IO subsystem is
-                // letting us know that the file was FNF or an IOException
-                // occurred - the best course of action is to
-                // ignore the issue and not add it to the CTC, hopefully
-                // we'll get a correct reading the next time around...
-                if (cTime.longValue() > 0) {
-                    // these calls may be superfluous but are quite fast....
-                    ctCache.addTime(mainURN, cTime.longValue());
-                    ctCache.commitTime(mainURN);
-                }
-            }
+            fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
         }
 
         // Ensure file can be found by URN lookups
@@ -1440,7 +1424,7 @@ public abstract class FileManager {
 		boolean removed = _individualSharedFiles.remove(file); 
 		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
-		    UrnCache.instance().clearPendingHashesFor(file, this);
+            fileManagerController.clearPendingShare(file);
         } else {
 			file = fd.getFile();
 			// if file was not specially shared, add it to files_not_to_share
@@ -1490,7 +1474,7 @@ public abstract class FileManager {
         // We also return false, because the file was never really
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
-            this.removeUrnIndex(fd);
+            removeUrnIndex(fd);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
             assert removed : "File "+i+" not found in " + _incompletesShared;
@@ -1533,10 +1517,7 @@ public abstract class FileManager {
         }
 
         //Remove hash information.
-        this.removeUrnIndex(fd);
-        //Remove creation time information
-        if (_urnMap.get(fd.getSHA1Urn()) == null)
-            CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
+        removeUrnIndex(fd);
   
         // Notify the GUI...
         if (notify) {
@@ -1619,15 +1600,14 @@ public abstract class FileManager {
     
     /** Attempts to validate the given FileDesc. */
     public void validate(final FileDesc fd) {
-        ContentManager cm = RouterService.getContentManager();
         if(_requestingValidation.add(fd.getSHA1Urn())) {
-            cm.request(fd.getSHA1Urn(), new ContentResponseObserver() {
+            fileManagerController.requestValidation(fd.getSHA1Urn(), new ContentResponseObserver() {
                public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
                    if(r != null && !r.isOK())
                        removeFileIfShared(fd.getFile());
                }
-            }, 5000);
+            });
         }
     }
 
@@ -1676,7 +1656,7 @@ public abstract class FileManager {
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0) {
-                RouterService.getAltlocManager().purge(urn);
+                fileManagerController.lastUrnRemoved(urn);
                 _urnMap.remove(urn);
             }
 		}
@@ -1717,7 +1697,7 @@ public abstract class FileManager {
 			_data.SPECIAL_FILES_TO_SHARE.add(newName);
 			
         // Prepopulate the cache with new URNs.
-        UrnCache.instance().addUrns(newName, removed.getUrns());
+        fileManagerController.addUrns(newName, removed.getUrns());
 
         addFileIfShared(newName, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
@@ -2110,9 +2090,9 @@ public abstract class FileManager {
                 continue;
 
             desc.incrementHitCount();
-            RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
+            fileManagerController.handleSharedFileUpdate(desc.getFile());
 
-            Response resp = new Response(desc);
+            Response resp = fileManagerController.createResponse(desc);
             if(includeXML) {
                 addXMLToResponse(resp, desc);
                 if(doc != null && resp.getDocument() != null &&
@@ -2134,7 +2114,7 @@ public abstract class FileManager {
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
-        List<URN> urnList = CreationTimeCache.instance().getFiles(request, 3);
+        List<URN> urnList = fileManagerController.getNewestUrns(request, 3);
         if (urnList.size() == 0)
             return EMPTY_RESPONSES;
         
@@ -2150,7 +2130,7 @@ public abstract class FileManager {
                 throw new RuntimeException("Bad Rep - No IFDs allowed!");
             
             // Formulate the response
-            Response r = new Response(desc);
+            Response r = fileManagerController.createResponse(desc);
             if(includeXML)
                 addXMLToResponse(r, desc);
             
@@ -2183,7 +2163,7 @@ public abstract class FileManager {
                 continue;
         
             assert j<ret.length : "_numFiles is too small";
-            ret[j] = new Response(desc);
+            ret[j] = fileManagerController.createResponse(desc);
             if(includeXML)
                 addXMLToResponse(ret[j], desc);
             j++;
@@ -2405,7 +2385,7 @@ public abstract class FileManager {
                         if (desc == null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
                             continue;
 
-                        preview = new Response(desc);
+                        preview = fileManagerController.createResponse(desc);
                         if(includeXML)
                             addXMLToResponse(preview, desc);
                         return true;
@@ -2474,7 +2454,7 @@ public abstract class FileManager {
             buildInProgress = true;
             
             // schedule a rebuild sometime in the next hour
-            RouterService.schedule(new Runnable() {
+            fileManagerController.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
                     synchronized(QRPUpdater.this) {
                         if (!buildInProgress)
@@ -2483,7 +2463,7 @@ public abstract class FileManager {
                         _needRebuild = true;
                     }
                 }
-            }, (int)(Math.random() * QRP_DELAY), 0);
+            }, (int)(Math.random() * QRP_DELAY), 0, TimeUnit.MILLISECONDS);
         }
         
         public synchronized void cancelRebuild() {
@@ -2593,7 +2573,7 @@ public abstract class FileManager {
                     if (isRareFile(fds[i]))
                         rare++;
                     // locking FM->ALM ok.
-                    int numAlts = RouterService.getAltlocManager().getNumLocs(fds[i].getSHA1Urn());
+                    int numAlts = fileManagerController.getAlternateLocationCount(fds[i].getSHA1Urn());
                     if (!nonZero || numAlts > 0) {
                         alts.add((double)numAlts);
                         topAltsFDs.put(numAlts,fds[i]);
@@ -2679,12 +2659,13 @@ public abstract class FileManager {
         
     }
     
-    private static class RareFileDefinition implements SimppListener {
+    private class RareFileDefinition implements SimppListener {
         
         private RPNParser parser;
         RareFileDefinition() {
             simppUpdated(0);
-            SimppManager.instance().addListener(this);
+            // TODO cleanup listener leaking
+            fileManagerController.addSimppListener(this);
         }
         
         public synchronized void simppUpdated(int ignored) {

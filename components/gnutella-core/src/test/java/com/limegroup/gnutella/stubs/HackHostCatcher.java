@@ -5,7 +5,6 @@ import org.limewire.inject.Providers;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.ProviderHacks;
 
-@Deprecated
 public class HackHostCatcher extends HostCatcher {
 
     public HackHostCatcher() {

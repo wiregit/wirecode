@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -31,6 +32,7 @@ import org.limewire.io.UncompressingInputStream;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.ssl.SSLBandwidthTracker;
 import org.limewire.nio.ssl.SSLUtils;
+import org.limewire.setting.StringSetting;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
@@ -46,6 +48,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
@@ -53,8 +56,8 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -233,7 +236,11 @@ public class Connection implements IpPort, Inspectable, Connectable {
      * multiple threads caching old data for the pong time.
      */
     private volatile long _nextPongTime = Long.MIN_VALUE;
-    
+
+    private final CapabilitiesVMFactory capabilitiesVMFactory;
+    private final SocketsManager socketsManager;
+    private final Acceptor acceptor;
+    private final MessagesSupportedVendorMessage supportedVendorMessage;
     /**
      * Cache the 'connection closed' exception, so we have to allocate
      * one for every closed connection.
@@ -241,20 +248,10 @@ public class Connection implements IpPort, Inspectable, Connectable {
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
 
-    /**
-     * Creates an uninitialized outgoing Gnutella 0.6 connection with the
-     * desired outgoing properties.
-     *
-     * @param host the name of the host to connect to
-     * @param port the port of the remote host
-	 * @throws <tt>NullPointerException</tt> if any of the arguments are
-	 *  <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
-     */
-    public Connection(String host, int port) {
-        this(host, port, ConnectType.PLAIN);
-    }
-    
+    private final MessageFactory messageFactory;
+
+    private final NetworkManager networkManager;
+
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties that may use TLS.
@@ -266,8 +263,14 @@ public class Connection implements IpPort, Inspectable, Connectable {
      *  <tt>null</tt>
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Connection(String host, int port, ConnectType connectType) {
-		if(host == null)
+    Connection(String host, int port, ConnectType connectType, 
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            SocketsManager socketsManager, Acceptor acceptor,
+            MessagesSupportedVendorMessage supportedVendorMessage,
+            MessageFactory messageFactory, NetworkManager networkManager) {
+		this.messageFactory = messageFactory;
+        this.networkManager = networkManager;
+        if(host == null)
 			throw new NullPointerException("null host");
 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("illegal port: "+port);
@@ -278,6 +281,10 @@ public class Connection implements IpPort, Inspectable, Connectable {
         _connectType = connectType;
         _sslTracker = SSLUtils.EmptyTracker.instance(); // default to an empty tracker to avoid NPEs
 		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+		this.capabilitiesVMFactory = capabilitiesVMFactory;
+		this.socketsManager = socketsManager;
+		this.acceptor = acceptor;
+		this.supportedVendorMessage = supportedVendorMessage;
     }
 
     /**
@@ -292,8 +299,11 @@ public class Connection implements IpPort, Inspectable, Connectable {
 	 * @throws <tt>NullPointerException</tt> if any of the arguments are
 	 *  <tt>null</tt>
      */
-    public Connection(Socket socket) {
-		if(socket == null)
+    Connection(Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
+            Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
+            MessageFactory messageFactory, NetworkManager networkManager) {
+		this.networkManager = networkManager;
+        if(socket == null)
 			throw new NullPointerException("null socket");
         
         //Get the address in dotted-quad format.  It's important not to do a
@@ -306,6 +316,11 @@ public class Connection implements IpPort, Inspectable, Connectable {
         _connectType = SSLUtils.isTLSEnabled(socket) ? ConnectType.TLS : ConnectType.PLAIN;
         _sslTracker = SSLUtils.getSSLBandwidthTracker(socket);
 		ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
+		this.capabilitiesVMFactory = capabilitiesVMFactory;
+		this.socketsManager = null;
+		this.acceptor = acceptor;
+        this.supportedVendorMessage = supportedVendorMessage;
+        this.messageFactory = messageFactory;
     }
 
 
@@ -315,8 +330,8 @@ public class Connection implements IpPort, Inspectable, Connectable {
     protected void postInit() {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
 			if(_headersRead.supportsVendorMessages() > 0) {
-                send(MessagesSupportedVendorMessage.instance());
-                send(CapabilitiesVM.instance());
+                send(supportedVendorMessage);
+                send(capabilitiesVMFactory.getCapabilitiesVM());
 			}
         } catch (IOException ioe) {
         }
@@ -329,7 +344,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
     protected void sendUpdatedCapabilities() {
         try {
             if(_headersRead.supportsVendorMessages() > 0)
-                send(CapabilitiesVM.instance());
+                send(capabilitiesVMFactory.getCapabilitiesVM());
         } catch (IOException iox) { }
     }
 
@@ -411,11 +426,11 @@ public class Connection implements IpPort, Inspectable, Connectable {
     }
     
     protected Socket connect(String addr, int port, int timeout) throws IOException {
-        return Sockets.connect(new InetSocketAddress(addr, port), timeout, _connectType);
+        return socketsManager.connect(new InetSocketAddress(addr, port), timeout, _connectType);
     }
 
     protected Socket connect(String addr, int port, int timeout, ConnectObserver observer) throws IOException {
-        return Sockets.connect(new InetSocketAddress(addr, port), timeout, observer, _connectType);
+        return socketsManager.connect(new InetSocketAddress(addr, port), timeout, observer, _connectType);
     }
 
     /**
@@ -451,7 +466,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
         }
         
         // Notify the acceptor of our address.
-        RouterService.getAcceptor().setAddress(localAddress);        
+        acceptor.setAddress(localAddress);        
         performHandshake(requestHeaders, responder, observer);
     }
     
@@ -539,6 +554,8 @@ public class Connection implements IpPort, Inspectable, Connectable {
             // us traffic from their leaves
             _softMax++;
         }
+        
+        updateAddress(shaker.getReadHeaders());
 
         // wrap the streams with inflater/deflater
         // These calls must be delayed until absolutely necessary (here)
@@ -559,6 +576,45 @@ public class Connection implements IpPort, Inspectable, Connectable {
         }
     }
     
+    /**
+     * Determines if the address should be changed and changes it if
+     * necessary.
+     */
+    private void updateAddress(HandshakeResponse readHeaders) {
+        String ip = readHeaders.getProperty(HeaderNames.REMOTE_IP);
+        if (ip == null) {
+            return;
+        }
+         
+        InetAddress ia = null;
+        try {
+            ia = InetAddress.getByName(ip);
+        } catch(UnknownHostException uhe) {
+            return; // invalid.
+        }
+            
+        // invalid or private, exit
+        if(!NetworkUtils.isValidAddress(ia) ||
+                NetworkUtils.isPrivateAddress(ia))
+            return;
+        
+        // If we're forcing, change that if necessary.
+        if( ConnectionSettings.FORCE_IP_ADDRESS.getValue() ) {
+            StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
+            if(!ip.equals(addr.getValue())) {
+                addr.setValue(ip);
+                networkManager.addressChanged();
+            }
+        }
+        // Otherwise, if our current address is invalid, change.
+        else if(!NetworkUtils.isValidAddress(networkManager.getAddress())) {
+            // will auto-call addressChanged.
+            acceptor.setAddress(ia);
+        }
+        
+        acceptor.setExternalAddress(ia);
+    }
+
     /** Creates the output stream for deflating */
     protected OutputStream createDeflatedOutputStream(OutputStream out) {
         return new CompressingOutputStream(out, _deflater);
@@ -715,7 +771,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
-        Message msg = MessageFactory.read(_in, HEADER_BUF, Network.TCP, _softMax);
+        Message msg = messageFactory.read(_in, HEADER_BUF, Network.TCP, _softMax);
         updateReadStatistics(msg);
         return msg;
     }

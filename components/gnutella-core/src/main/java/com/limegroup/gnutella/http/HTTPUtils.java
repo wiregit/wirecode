@@ -7,16 +7,11 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /**
@@ -256,49 +251,6 @@ public final class HTTPUtils {
      */
     public static void writeDate(OutputStream stream) throws IOException {
         writeHeader(HTTPHeaderName.DATE, getDateValue(), stream);       
-    }
-    
-    /**
-     * Utility method for writing the currently supported features
-     * to the <tt>Writer</tt>.
-     */
-    public static void writeFeatures(Writer writer) throws IOException {
-        Set<HTTPHeaderValue> features = getFeaturesValue();
-        // Write X-Features header.
-        if (features.size() > 0) {
-            writeHeader(HTTPHeaderName.FEATURES,
-                    new HTTPHeaderValueCollection(features), writer);
-        }
-    }
-    
-    /**
-     * Utility method for writing the currently supported features
-     * to the <tt>OutputStream</tt>.
-     */
-    public static void writeFeatures(OutputStream stream) throws IOException {
-        Set<HTTPHeaderValue> features = getFeaturesValue();
-        // Write X-Features header.
-        if (features.size() > 0) {
-            writeHeader(HTTPHeaderName.FEATURES,
-                    new HTTPHeaderValueCollection(features), stream);
-        }
-    }        
-    
-    /**
-     * Utlity method for getting the currently supported features.
-     */
-    public static Set<HTTPHeaderValue> getFeaturesValue() {
-        Set<HTTPHeaderValue> features = new HashSet<HTTPHeaderValue>(4);
-        features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
-        if (ChatSettings.CHAT_ENABLED.getValue())
-            features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
-        
-       	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
-       	
-       	if (!RouterService.acceptedIncomingConnection() && UDPService.instance().canDoFWT())
-       	    features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
-        
-        return features;
     }
     
     /**

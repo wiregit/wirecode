@@ -2,11 +2,14 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import junit.framework.Test;
 
+import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -16,6 +19,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class MediaTypeTest extends LimeTestCase {
     
+    static File mediatypesWithOldDescriptionKeys  = CommonUtils.getResourceFile(MediaTypeTest.class.getPackage().getName().replace('.', '/') + "/mediatypes-with-old-description-keys.bin");
     
     public MediaTypeTest(String name) {
 		super(name);
@@ -83,6 +87,15 @@ public class MediaTypeTest extends LimeTestCase {
         out.flush();
         
         ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+        
+        for (MediaType type : MediaType.getDefaultMediaTypes()) {
+            MediaType read = (MediaType)in.readObject();
+            assertSame(type, read);
+        }
+    }
+    
+    public void testDeserializationOfDefaultTypesWithOldDescriptionKeys() throws Exception {
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(mediatypesWithOldDescriptionKeys));
         
         for (MediaType type : MediaType.getDefaultMediaTypes()) {
             MediaType read = (MediaType)in.readObject();

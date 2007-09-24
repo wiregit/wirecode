@@ -15,7 +15,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * If <i>any</i> words in a query are in the banned set, the
  * query is disallowed.
  */
-public class KeywordFilter extends SpamFilter {
+public class KeywordFilter implements SpamFilter {
     /** INVARIANT: strings in ban contain only lowercase */
     private List<String> ban=new ArrayList<String>();
     

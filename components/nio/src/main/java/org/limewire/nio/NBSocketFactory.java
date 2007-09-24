@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/** An ExtendedSocketFactory typed specifically for NBSockets. */
+/** 
+ * Creates sockets typed specifically for {@link NBSocket NBSockets}. 
+ */
 public abstract class NBSocketFactory extends ExtendedSocketFactory {
 
     @Override

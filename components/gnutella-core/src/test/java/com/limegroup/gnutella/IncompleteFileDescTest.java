@@ -21,7 +21,7 @@ public class IncompleteFileDescTest extends LimeTestCase {
     private String fileName = "ifd.txt";
     private URN urn;
     private Set urns;
-    private VerifyingFile vf  = new VerifyingFile(0);
+    private VerifyingFile vf  = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0);
 
     public IncompleteFileDescTest(String name) {
         super(name);

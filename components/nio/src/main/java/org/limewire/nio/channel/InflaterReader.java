@@ -10,19 +10,22 @@ import java.util.zip.Inflater;
 
 /**
  * Reads data from a source channel and offers the inflated version for reading.
- *
- * Each invocation of read(ByteBuffer) will attempt to return any inflated data.
+ * <p>
+ * Each invocation of {@link #read(ByteBuffer)} attempts to return any inflated data.
  * If no data is available for inflation, data will be read from the source channel
- * and inflation will be attempted.  The ByteBuffer will be filled as much as possible
+ * and inflation will be attempted. The {@link ByteBuffer} will be filled as much as possible
  * without blocking.
- *
- * The source channel may not be entirely emptied out in a single call to read(ByteBuffer),
- * because the supplied ByteBuffer may not be large enough to accept all inflated data.
- * If this is the case, the data will remain in the source channel until further calls to
- * read(ByteBuffer).
- *
- * The source channel does not need to be set for construction.  However, before read(ByteBuffer)
- * is called, setReadChannel(ReadableByteChannel) must be called with a valid channel.
+ * <p>
+ * The source channel may not be entirely emptied out in a single call to 
+ * <code>read(ByteBuffer)</code>, because the supplied <code>ByteBuffer</code> 
+ * may not be large enough to accept all inflated data. If this is the case, 
+ * the data will remain in the source channel until further calls to
+ * <code>read(ByteBuffer)</code>.
+ * <p>
+ * The source channel does not need to be set for construction. However, before 
+ * <code>read(ByteBuffer)</code> is called, 
+ * {@link #setReadChannel(InterestReadableByteChannel)}
+ * must be called with a valid channel.
  */
 public class InflaterReader implements ChannelReader, InterestReadableByteChannel {
     
@@ -37,15 +40,17 @@ public class InflaterReader implements ChannelReader, InterestReadableByteChanne
     
     /**
      * Constructs a new InflaterReader without an underlying source.
-     * Prior to read(ByteBuffer) being called, setReadChannel(ReadableByteChannel)
-     * MUST be called.
+     * <p>
+     * Prior to <code>read(ByteBuffer)</code> being called, 
+     * <code>setReadChannel(ReadableByteChannel)</code> MUST be called.
      */
     public InflaterReader(Inflater inflater) {
         this(null, inflater);
     }
     
     /**
-     * Constructs a new InflaterReader with the given source channel & inflater.
+     * Constructs a new <code>InflaterReader</code> with the given source 
+     * channel and inflater.
      */
     public InflaterReader(InterestReadableByteChannel channel, Inflater inflater ) {        
         if(inflater == null)
@@ -76,7 +81,7 @@ public class InflaterReader implements ChannelReader, InterestReadableByteChanne
     }
     
     /**
-     * Reads from this' inflater into the given ByteBuffer.
+     * Reads from this' inflater into the given <code>ByteBuffer</code>.
      */
     public int read(ByteBuffer buffer) throws IOException {
         int written = 0;

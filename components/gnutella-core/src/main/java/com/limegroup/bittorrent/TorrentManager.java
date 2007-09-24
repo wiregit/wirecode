@@ -11,15 +11,16 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.SpeedConstants;
@@ -44,6 +45,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * If active torrent limit is reached and none of the torrents are seeding,
  * the new torrent is queued.
  */
+@Singleton
 public class TorrentManager 
 implements FileLocker, ConnectionAcceptor, TorrentEventListener, 
 EventDispatcher<TorrentEvent, TorrentEventListener> {
@@ -77,14 +79,18 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      *  and acquiring locks in the FileManager and should therefore not be executed
      *  on the NIODispatcher thread */
     private ScheduledExecutorService threadPool;
+
+    private IncomingConnectionHandler incomingConnectionHandler;
     
     /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
 	public void initialize(FileManager fileManager
             , ConnectionDispatcher dispatcher
-            , ScheduledExecutorService threadPool) {
-		if (LOG.isDebugEnabled())
+            , ScheduledExecutorService threadPool,
+            IncomingConnectionHandler incomingConnectionHandler) {
+		this.incomingConnectionHandler = incomingConnectionHandler;
+        if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		
 		// register ourselves as an acceptor.
@@ -94,7 +100,6 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		dispatcher.addConnectionAcceptor(
 				this,
 				false,
-				false,
 				word.toString());
         
         FileUtils.addFileLocker(this);
@@ -103,6 +108,10 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
         this.threadPool = threadPool;
 		// we are a torrent event listener too.
 		listeners.add(this);
+	}
+	
+	public boolean isBlocking() {
+	    return false;
 	}
 	
 	/**
@@ -183,7 +192,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 	
 	public void acceptConnection(String word, Socket sock) {
-		IncomingConnectionHandler.instance().handleIncoming(
+		incomingConnectionHandler.handleIncoming(
 				(AbstractNBSocket)sock, this);
 	}
 

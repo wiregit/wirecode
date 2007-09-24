@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.IntWrapper;
 import org.limewire.io.IOUtils;
@@ -716,15 +717,14 @@ public final class URN implements HTTPHeaderValue, Serializable {
             // read it in the chunks that we want to.
 		    fis = new FileInputStream(file);
             while ((read=fis.read(buffer))!=-1) {
-                long start = System.currentTimeMillis();
+                long start = System.nanoTime();
                 md.update(buffer,0,read);
                 progress.addInt( read );
                 if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
-                    long end = System.currentTimeMillis();
-                    long interval = end - start;
-                    if(interval > 0)
+                    long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+                    if (interval > 0) 
                         Thread.sleep(interval * 3);
-                    else
+                    else 
                         Thread.yield();
                 }
             }

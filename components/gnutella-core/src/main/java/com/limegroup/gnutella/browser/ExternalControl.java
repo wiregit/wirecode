@@ -23,25 +23,42 @@ import org.limewire.service.MessageService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.DownloadServices;
+import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SocketsManager;
 
+@Singleton
 public class ExternalControl {
     
     private static final Log LOG = LogFactory.getLog(ExternalControl.class);
 
+	private final String LOCALHOST = "127.0.0.1";
+    private boolean initialized = false;
+    private volatile String  enqueuedRequest = null;
+    
+    private final DownloadServices downloadServices;
+    private final Provider<ActivityCallback> activityCallback;
+    private final SocketsManager socketsManager;
+    
+    @Inject
+    public ExternalControl(DownloadServices downloadServices,
+            Provider<ActivityCallback> activityCallback,
+            SocketsManager socketsManager) {
+        this.downloadServices = downloadServices;
+        this.activityCallback = activityCallback;
+        this.socketsManager = socketsManager;
+    }
 
-	private static final String LOCALHOST       = "127.0.0.1"; 
-	private static boolean      initialized     = false;
-	private static volatile String       enqueuedRequest = null;
-
-	public static String preprocessArgs(String args[]) {
+    public String preprocessArgs(String args[]) {
 	    LOG.trace("enter proprocessArgs");
 
         StringBuilder arg = new StringBuilder();
@@ -58,28 +75,27 @@ public class ExternalControl {
      * for 'allow multiple instances' -- only the instance that was just
      * started.
      */
-	public static void checkForActiveLimeWire() {
+	public void checkForActiveLimeWire() {
 	    if( testForLimeWire(null) ) {
 		    System.exit(0);	
 		}
 	}
 
-	public static void checkForActiveLimeWire(String arg) {
+	public void checkForActiveLimeWire(String arg) {
 	    if ((OSUtils.isWindows() || OSUtils.isLinux()) && testForLimeWire(arg)) {
 		    System.exit(0);	
 		}
 	}
 
-
-	public static boolean  isInitialized() {
+	public boolean  isInitialized() {
 		return initialized;
 	}
-	public static void enqueueControlRequest(String arg) {
+	public void enqueueControlRequest(String arg) {
 	    LOG.trace("enter enqueueControlRequest");
 		enqueuedRequest = arg;
 	}
 
-	public static void runQueuedControlRequest() {
+	public void runQueuedControlRequest() {
 		initialized = true;
 	    if ( enqueuedRequest != null ) {
 			String request   = enqueuedRequest;
@@ -94,7 +110,7 @@ public class ExternalControl {
 	/**
 	 * @return true if this is a torrent request.  
 	 */
-	private static boolean isTorrentRequest(String arg) {
+	private boolean isTorrentRequest(String arg) {
 		if (arg == null) 
 			return false;
 		arg = arg.trim().toLowerCase();
@@ -103,7 +119,7 @@ public class ExternalControl {
 	}
 	
 	//refactored the download logic into a separate method
-	public static void handleMagnetRequest(String arg) {
+	public void handleMagnetRequest(String arg) {
 	    LOG.trace("enter handleMagnetRequest");
 
 	    ActivityCallback callback = restoreApplication();
@@ -128,14 +144,13 @@ public class ExternalControl {
 		}
 	}
 	
-	private static ActivityCallback restoreApplication() {
-		ActivityCallback callback = RouterService.getCallback();
-		callback.restoreApplication();
-		callback.showDownloads();
-		return callback;
+	private ActivityCallback restoreApplication() {
+		activityCallback.get().restoreApplication();
+		activityCallback.get().showDownloads();
+		return activityCallback.get();
 	}
 	
-	private static void handleTorrentRequest(String arg) {
+	private void handleTorrentRequest(String arg) {
 		LOG.trace("enter handleTorrentRequest");
 		ActivityCallback callback = restoreApplication();
 		File torrentFile = new File(arg.trim());
@@ -147,7 +162,7 @@ public class ExternalControl {
 	 * parse and download the magnet separately (which is what I intend to do in the gui) --zab
 	 * @param options the magnet options returned from parseMagnet
 	 */
-	public static void downloadMagnet(MagnetOptions[] options) {
+	public void downloadMagnet(MagnetOptions[] options) {
 		
 		if(LOG.isDebugEnabled()) {
             for(int i = 0; i < options.length; i++) {
@@ -176,16 +191,16 @@ public class ExternalControl {
                     LOG.warn("Invalid magnet: " + curOpt);
                 }
 				msg = msg != null ? msg : curOpt.toString();
-                MessageService.showError("ERROR_BAD_MAGNET_LINK", msg);
+                MessageService.showError(I18n.marktr("Could not process bad MAGNET link {0}"), msg);
                 return;	
             }
             
             // Warn the user that the link was slightly invalid
             if( msg != null )
-                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
+                MessageService.showError(I18n.marktr("One or more URLs in the MAGNET link were invalid. Your file may not download correctly."));
             
             try {
-            	RouterService.download(curOpt, false);
+            	downloadServices.download(curOpt, false);
             }
             catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);
@@ -193,11 +208,12 @@ public class ExternalControl {
 			catch (SaveLocationException sle) {
 				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
                 MessageService.showError(
-                    "ERROR_ALREADY_EXISTS", sle.getFile().getName());
+                    I18n.marktr("You have already downloaded {0}"), sle.getFile().getName());
 				}
 				else if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_DOWNLOADING) {
 					MessageService.showError(
-		                    "ERROR_ALREADY_DOWNLOADING", sle.getFile().getName());	
+		                    I18n
+                                    .marktr("You are already downloading this file to {0}"), sle.getFile().getName());	
 				}
 			}
 		}
@@ -208,7 +224,7 @@ public class ExternalControl {
 	 *  Deiconify the application, fire MAGNET request
 	 *  and return true as a sign that LimeWire is running.
 	 */
-	public static void fireControlThread(Socket socket, boolean magnet) {
+	public void fireControlThread(Socket socket, boolean magnet) {
 	    LOG.trace("enter fireControl");
 	    
         Thread.currentThread().setName("IncomingControlThread");
@@ -250,7 +266,7 @@ public class ExternalControl {
 	 *   Sends the MAGNET message along the given socket. 
 	 *   @returns  true if a local LimeWire responded with a true.
 	 */
-	private static boolean testForLimeWire(String arg) {
+	private boolean testForLimeWire(String arg) {
 		Socket socket = null;
 		int port = ConnectionSettings.PORT.getValue();
 		// Check to see if the port is valid.
@@ -265,7 +281,7 @@ public class ExternalControl {
 		    port = ConnectionSettings.PORT.getValue();
         }   
 		try {
-			socket = Sockets.connect(new InetSocketAddress(LOCALHOST, port), 500);
+			socket = socketsManager.connect(new InetSocketAddress(LOCALHOST, port), 500);
 			InputStream istream = socket.getInputStream(); 
 			socket.setSoTimeout(500); 
 		    ByteReader byteReader = new ByteReader(istream);
@@ -296,7 +312,7 @@ public class ExternalControl {
 	 * @param magnets
 	 * @return array may be empty, but is never <code>null</code>
 	 */
-	public static MagnetOptions[] parseMagnets(String magnets) {
+	public MagnetOptions[] parseMagnets(String magnets) {
 		List<MagnetOptions> list = new ArrayList<MagnetOptions>();
 		StringTokenizer tokens = new StringTokenizer
 			(magnets, System.getProperty("line.separator"));

@@ -5,8 +5,6 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.nio.observer.AcceptChannelObserver;
-
 @SuppressWarnings("unchecked")
 public class StubAcceptChannelObserver implements AcceptChannelObserver {
     private List /* of SocketChannel */ channels = new LinkedList();

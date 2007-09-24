@@ -6,10 +6,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SettingsProvider;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LimeProps;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -22,15 +24,34 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * This class is the glue that holds LimeWire together.
  * All various components are wired together here.
  */
+@Singleton
 public class LimeCoreGlue {
     
     private static AtomicBoolean preinstalled = new AtomicBoolean(false);
     private static AtomicBoolean installed = new AtomicBoolean(false);
     
-    private LimeCoreGlue() {}
+    /** Uninstalls the glue. */
+    static void uninstall() {
+        preinstalled.set(false);
+        installed.set(false);
+    }
     
-    /** Wires initial pieces together that are required for nearly everything. */
+    
+    /**
+     * Wires initial pieces together that are required for nearly everything.
+     * 
+     * @param userSettingsDir the preferred directory for user settings
+     */
     public static void preinstall() throws InstallFailedException {
+        preinstall(LimeWireUtils.getRequestedUserSettingsLocation());
+    }
+    
+    /**
+     * Wires initial pieces together that are required for nearly everything.
+     * 
+     * @param userSettingsDir the preferred directory for user settings
+     */
+    public static void preinstall(File userSettingsDir) throws InstallFailedException {
         // Only preinstall once
         if(!preinstalled.compareAndSet(false, true))
             return;
@@ -47,7 +68,7 @@ public class LimeCoreGlue {
         //  - If it can't be set, bail.
         //  - Otherwise, success.
         try {
-            CommonUtils.setUserSettingsDir(LimeWireUtils.getRequestedUserSettingsLocation());
+            CommonUtils.setUserSettingsDir(userSettingsDir);
         } catch(IOException requestedFailed) {
             try {
                 // First clear any older temporary settings directories.
@@ -78,7 +99,7 @@ public class LimeCoreGlue {
     }
 
     /** Wires all various components together. */
-    public static void install() {
+    public static void install(final NetworkManager networkManager) {
         // Only install once.
         if(!installed.compareAndSet(false, true))
             return;
@@ -87,19 +108,20 @@ public class LimeCoreGlue {
                 
         // Setup SIMPP to be the settings remote manager.
         SimppManager simppManager = SimppManager.instance();
-        SimppSettingsManager settingsManager = SimppSettingsManager.instance();
+        SimppSettingsManager settingsManager = simppManager.getSimppSettingsManager();
         LimeProps.instance().getFactory().setRemoteSettingManager(settingsManager);
+        MojitoProps.instance().getFactory().setRemoteSettingManager(settingsManager);
         settingsManager.updateSimppSettings(simppManager.getPropsString());
         
         // Setup RouterService & ConnectionSettings.LOCAL_IS_PRIVATE to 
         // be the LocalSocketAddressProvider.
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {
-                return RouterService.getAddress();
+                return networkManager.getAddress();
             }
 
             public int getLocalPort() {
-                return RouterService.getPort();
+                return networkManager.getPort();
             }
 
             public boolean isLocalAddressPrivate() {

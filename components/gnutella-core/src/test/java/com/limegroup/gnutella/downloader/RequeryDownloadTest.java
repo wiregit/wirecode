@@ -11,28 +11,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.collection.Range;
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.collection.Range;
+import org.limewire.inject.Providers;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouteTable;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -67,11 +64,52 @@ public class RequeryDownloadTest
     /** The TestMessageRouter's queryRouteTable. */
     private RouteTable _queryRouteTable;
     /** The TestMessageRouter's FOR_ME_REPLY_HANDLER. */
-    private final ReplyHandler _ourReplyHandler = ForMeReplyHandler.instance();
+    private final ReplyHandler _ourReplyHandler = ProviderHacks.getForMeReplyHandler();
     
     private static final int PORT = 6939;
 
     static class TestMessageRouter extends MessageRouterStub {
+        
+        public TestMessageRouter() {
+            super(ProviderHacks.getNetworkManager(), ProviderHacks
+                    .getQueryRequestFactory(), ProviderHacks
+                    .getQueryHandlerFactory(),
+                    ProviderHacks.getOnDemandUnicaster(), ProviderHacks
+                            .getHeadPongFactory(), ProviderHacks
+                            .getPingReplyFactory(), ProviderHacks
+                            .getConnectionManager(), ProviderHacks
+                            .getForMeReplyHandler(), ProviderHacks
+                            .getQueryUnicaster(), ProviderHacks.getFileManager(),
+                    ProviderHacks.getContentManager(), ProviderHacks
+                            .getDHTManager(), ProviderHacks.getUploadManager(),
+                    ProviderHacks.getDownloadManager(), ProviderHacks
+                            .getUdpService(), ProviderHacks
+                            .getSearchResultHandler(), ProviderHacks
+                            .getSocketsManager(), ProviderHacks.getHostCatcher(),
+                    ProviderHacks.getQueryReplyFactory(), ProviderHacks
+                            .getStaticMessages(), Providers.of(ProviderHacks
+                            .getMessageDispatcher()), ProviderHacks
+                            .getMulticastService(), ProviderHacks
+                            .getQueryDispatcher(), Providers.of(ProviderHacks
+                            .getActivityCallback()), ProviderHacks
+                            .getConnectionServices(), ProviderHacks
+                            .getApplicationServices(), ProviderHacks
+                            .getBackgroundExecutor(), Providers
+                            .of(ProviderHacks.getPongCacher()), Providers
+                            .of(ProviderHacks.getSimppManager()), Providers
+                            .of(ProviderHacks.getUpdateHandler()),
+                            ProviderHacks.getGuidMapManager(),
+                            ProviderHacks.getUDPReplyHandlerCache(),
+                            ProviderHacks.getInspectionRequestHandlerFactory(),
+                            ProviderHacks.getUDPCrawlerPingHandlerFactory(),
+                            ProviderHacks.getAdvancedToggleHandlerFactory(),
+                            ProviderHacks.getStatistics(),
+                            ProviderHacks.getReplyNumberVendorMessageFactory(),
+                            ProviderHacks.getPingRequestFactory()
+
+            );
+        }
+        
         List /* of QueryMessage */ broadcasts=new LinkedList();
 		public void sendDynamicQuery(QueryRequest query) {
             broadcasts.add(query);
@@ -97,28 +135,28 @@ public class RequeryDownloadTest
         setSettings();
         
         _router=new TestMessageRouter();
-        new RouterService(new ActivityCallbackStub(), _router);  
+    //    new RouterService(new ActivityCallbackStub(), _router);  
         _router.initialize();
     }
 
     public void setUp() throws Exception {
         setSettings();
-        RouterService.setListeningPort(ConnectionSettings.PORT.getValue());
-        PrivilegedAccessor.setValue(
-            RouterService.class, "manager", new ConnectionManagerStub());
+        ProviderHacks.getNetworkManager().setListeningPort(ConnectionSettings.PORT.getValue());
+     //   PrivilegedAccessor.setValue(
+     //       RouterService.class, "manager", new ConnectionManagerStub());
         _queryRouteTable = 
             (RouteTable) PrivilegedAccessor.getValue(_router, 
                                                      "_queryRouteTable");
 
         createSnapshot();
-        _mgr=RouterService.getDownloadManager();
+        _mgr=ProviderHacks.getDownloadManager();
         _mgr.initialize();
         _mgr.scheduleWaitingPump();
         boolean ok=_mgr.readSnapshot(_snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         _uploader=new TestUploader("uploader 6666", 6666, false);
         _uploader.setRate(Integer.MAX_VALUE);
-        RouterService.getDownloadManager().clearAllDownloads();
+        ProviderHacks.getDownloadManager().clearAllDownloads();
         
         new File( getSaveDirectory(), _filename).delete();
     }    
@@ -178,7 +216,7 @@ public class RequeryDownloadTest
        }
 
        //Record information in IncompleteFileManager.
-       VerifyingFile vf=new VerifyingFile(TestFile.length());
+       VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(TestFile.length());
        vf.addInterval(Range.createRange(0, 1));  //inclusive
        ifm.addEntry(_incompleteFile, vf);       
        return ifm;
@@ -297,13 +335,10 @@ public class RequeryDownloadTest
         Response response = newResponse(0l, TestFile.length(),
                                         responseName, responseURNs);
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
-        QueryReply reply = new QueryReply(guidToUse, 
-            (byte)6, 6666, ip, 0l, 
-            new Response[] { response }, new byte[16],
-            false, false, //needs push, is busy
-            true, false,  //finished upload, measured speed
-            false, false);//supports chat, is multicast response....
-        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", PORT));
+        QueryReply reply = ProviderHacks.getQueryReplyFactory().createQueryReply(guidToUse, (byte)6, 6666,
+                ip, 0l, new Response[] { response }, new byte[16], false, false, true, false,
+                false, false);//supports chat, is multicast response....
+        _router.handleQueryReply(reply, ProviderHacks.getManagedConnectionFactory().createManagedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(2000);

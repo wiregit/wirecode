@@ -7,7 +7,6 @@ import java.net.Socket;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
@@ -51,7 +50,7 @@ public class MiniAcceptor implements Runnable {
 
     /** Starts the listen socket without blocking. */
     public MiniAcceptor(int port) {
-		this(new UltrapeerHandshakeResponder("localhost"), port);
+		this(ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("localhost"), port);
     }
 
     /** Blocks until a connection is available, and returns it. 
@@ -84,7 +83,7 @@ public class MiniAcceptor implements Runnable {
             Socket s=ss.accept();
             //Technically "GNUTELLA " should be read from s.  Turns out that
             //out implementation doesn't care;
-            Connection c=new Connection(s);
+            Connection c=ProviderHacks.getConnectionFactory().createConnection(s);
             c.initialize(null, properties, 1000);
             ss.close();
             synchronized (lock) {

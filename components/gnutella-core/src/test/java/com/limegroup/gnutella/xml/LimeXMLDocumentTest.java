@@ -8,6 +8,7 @@ import org.limewire.collection.KeyValue;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class LimeXMLDocumentTest extends LimeTestCase {
@@ -25,10 +26,13 @@ public class LimeXMLDocumentTest extends LimeTestCase {
 	}
 	
     public static void testHashcode() throws Exception {
+        LimeXMLDocumentFactory factory = ProviderHacks.getLimeXMLDocumentFactory();
     	List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
     	map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-    	LimeXMLDocument doc1 = new LimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-    	LimeXMLDocument doc2 = new LimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
+    	LimeXMLDocument doc1 = factory.createLimeXMLDocument(map,
+                LimeXMLNames.APPLICATION_SCHEMA);
+    	LimeXMLDocument doc2 = factory.createLimeXMLDocument(map,
+                LimeXMLNames.APPLICATION_SCHEMA);
     	assertEquals(doc1, doc2);
     	assertEquals(doc1.hashCode(), doc2.hashCode());
 

@@ -1,6 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> 
-  <modelVersion>4.0.0</modelVersion>  
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.limewire</groupId>
     <artifactId>lw-components</artifactId>
@@ -13,75 +14,80 @@
   <version>${limewire.version}</version>
   <name>LimeWire Tests</name>
 
-  <dependencies> 
-	<!-- LimeWire Components -->
+  <dependencies>
+    <!-- LimeWire Components -->
     <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-gui</artifactId>
       <version>${limewire.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
     </dependency>
-	<!-- Ibiblio Jars -->
+    <!-- Ibiblio Jars -->
     <dependency>
       <groupId>jaxen</groupId>
       <artifactId>jaxen</artifactId>
       <version>1.1</version>
-	  <scope>test</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.cyberneko</groupId>
       <artifactId>manekineko</artifactId>
       <version>0.2.2</version>
-	  <scope>test</scope>
-    </dependency>	
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>thaiopensource</groupId>
       <artifactId>jing</artifactId>
       <version>20030619</version>
-	  <scope>test</scope>
-    </dependency>	
-<!--     <dependency> -->
-<!--       <groupId>pmd</groupId> -->
-<!--       <artifactId>pmd</artifactId> -->
-<!--       <version>3.9</version> -->
-<!-- 	  <scope>test</scope> -->
-<!-- 	  <exclusions> -->
-<!--         <exclusion> -->
-<!--           <groupId>asm</groupId> -->
-<!--           <artifactId>asm</artifactId> -->
-<!--         </exclusion> -->
-<!--       </exclusions> -->
-<!--     </dependency> -->
+      <scope>test</scope>
+    </dependency>
+    <!--     <dependency> -->
+    <!--       <groupId>pmd</groupId> -->
+    <!--       <artifactId>pmd</artifactId> -->
+    <!--       <version>3.9</version> -->
+    <!-- 	  <scope>test</scope> -->
+    <!-- 	  <exclusions> -->
+    <!--         <exclusion> -->
+    <!--           <groupId>asm</groupId> -->
+    <!--           <artifactId>asm</artifactId> -->
+    <!--         </exclusion> -->
+    <!--       </exclusions> -->
+    <!--     </dependency> -->
     <dependency>
       <groupId>saxpath</groupId>
       <artifactId>saxpath</artifactId>
       <version>1.0-FCS</version>
-	  <scope>test</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
       <version>2.8.0</version>
-	  <scope>test</scope>
-	  <exclusions>
-	    <exclusion>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
           <groupId>xom</groupId>
           <artifactId>xom</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock-legacy</artifactId>
+      <version>2.1.0</version>
     </dependency>
   </dependencies>
 
   <build>
     <testSourceDirectory>${basedir}</testSourceDirectory>
     <plugins>
-     <plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
@@ -91,7 +97,7 @@
           <forkMode>pertest</forkMode>
           <argLine>-enableassertions</argLine>
         </configuration>
-     </plugin>
+      </plugin>
     </plugins>
   </build>
 

@@ -1,5 +1,6 @@
 package org.limewire.mojito.visual;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -67,12 +68,14 @@ public class DartBoard extends Painter {
         
         double dx = width/2d;
         double dy = height/2d;
+        
+        g.setColor(new Color(0x00, 0xFF, 0x00, 0x50)); // what else
+        g.setStroke(new BasicStroke(0.5f));
+        
         for (int i = 0; i < RESOLUTION; i++) {
-            g.setColor(Color.green); // what else
-            g.setStroke(DEFAULT_STROKE);
             int innerWidth = (int)(arc_width * i / RESOLUTION);
             int innerHeight = (int)(arc_height *  i / RESOLUTION);
-            g.drawOval((int)dx - innerWidth / 2, (int)dy - innerHeight /2 , innerWidth, innerHeight);
+            g.drawOval((int)dx - innerWidth / 2, (int)dy - innerHeight / 2, innerWidth, innerHeight);
         }
         
         dot.setFrame(dx - DOT_SIZE/2d, dy - DOT_SIZE/2d, 
@@ -123,6 +126,8 @@ public class DartBoard extends Painter {
         
         private final Stroke stroke;
         
+        private final Ellipse2D.Float ellipse = new Ellipse2D.Float();
+        
         public Node(EventType type, KUID nodeId, OpCode opcode, boolean request) {
             this.type = type;
             this.nodeId = nodeId;
@@ -139,6 +144,15 @@ public class DartBoard extends Painter {
             }
             
             return Math.max(255 - (int)(255f/DURATION * delta), 0);
+        }
+        
+        private double size() {
+            double r = 15d;
+            long delta = System.currentTimeMillis() - timeStamp;
+            if (delta < DURATION) {
+                return r/DURATION * delta;
+            }
+            return r;
         }
         
         public boolean paint(Point2D.Double localhost, 
@@ -186,12 +200,13 @@ public class DartBoard extends Painter {
                 }
             }
 
-            // this is pointless, but pretty
-            int size = (int)(Math.random() * RESOLUTION);
-            
             g.setColor(new Color(red, green, blue, alpha()));
             g.setStroke(stroke);
-            g.drawOval((int)x2 - size/2 , (int)y2 - size/2 , size, size);
+            
+            // this is pointless, but pretty
+            double size = size();
+            ellipse.setFrameFromCenter(x2, y2, x2+size, y2+size);
+            g.draw(ellipse);
             
             return System.currentTimeMillis() - timeStamp >= DURATION;
         }

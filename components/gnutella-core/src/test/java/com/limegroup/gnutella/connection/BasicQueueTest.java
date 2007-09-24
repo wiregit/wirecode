@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -112,15 +113,15 @@ public class BasicQueueTest extends LimeTestCase {
     }
     
     private QueryRequest q(String query) {
-        return QueryRequest.createQuery(query, (byte)5);
+        return ProviderHacks.getQueryRequestFactory().createQuery(query, (byte)5);
     }
     
     private PingReply g(int port) {
-        return PingReply.create(new byte[16], (byte)5, port, IP);
+        return ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, port, IP);
     }
     
     private PingRequest p(int ttl) {
-        return new PingRequest((byte)ttl);
+        return ProviderHacks.getPingRequestFactory().createPingRequest((byte)ttl);
     }
     
     private PushRequest s(int port) {
@@ -128,7 +129,8 @@ public class BasicQueueTest extends LimeTestCase {
     }
     
     private QueryReply r(int port) {
-        return new QueryReply(new byte[16], (byte)5, port, IP, 0, new Response[0], new byte[16], false);
+        return ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5,
+                port, IP, 0, new Response[0], new byte[16], false);
     }
     
     private ResetTableMessage t() {

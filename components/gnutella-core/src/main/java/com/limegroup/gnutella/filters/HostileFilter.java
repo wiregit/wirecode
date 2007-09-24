@@ -14,6 +14,7 @@ import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.messages.DHTMessage;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -21,7 +22,8 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 
-public class HostileFilter extends SpamFilter {
+@Singleton
+public class HostileFilter implements SpamFilter {
 
     private static final Log LOG = LogFactory.getLog(HostileFilter.class);
     
@@ -47,7 +49,6 @@ public class HostileFilter extends SpamFilter {
      * @return true if this Message's host is allowed, false if it is banned
      *  or we are unable to create correct IP addr out of it.
      */
-    @Override
     public boolean allow(Message m) {
         if (m instanceof PingReply) {
             PingReply pr = (PingReply)m;

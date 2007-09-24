@@ -30,7 +30,6 @@ public interface Uploader extends BandwidthTracker, Connectable {
         UNAVAILABLE_RANGE,
         BANNED_GREEDY,
         THEX_REQUEST,
-        BROWSER_CONTROL,
         SUSPENDED, //bt-specific
         WAITING_REQUESTS //bt-specific
     }

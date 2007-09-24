@@ -26,11 +26,6 @@ public final class UDPReplyHandler implements ReplyHandler {
     private final InetSocketAddress addr;
 
 	/**
-	 * Constant for the <tt>UDPService</tt>.
-	 */
-	private static final UDPService UDP_SERVICE = UDPService.instance();
-    
-    /**
      * Used to filter messages that are considered spam.
      * With the introduction of OOB replies, it is important
      * to check UDP replies for spam too.
@@ -38,29 +33,24 @@ public final class UDPReplyHandler implements ReplyHandler {
      * Uses one static instance instead of creating a new
      * filter for every single UDP message.
      */
-    private static volatile SpamFilter _personalFilter =
-        SpamFilter.newPersonalFilter();
+    private final SpamFilter personalFilter;
+
+    private final UDPService udpService;
 	
 	/** Creates a new UDPReplyHandler for the given address. */
-	public UDPReplyHandler(InetSocketAddress addr) {
-	    if(!NetworkUtils.isValidSocketAddress(addr))
+	UDPReplyHandler(InetSocketAddress addr, SpamFilter personalFilter, UDPService udpService) {
+	    this.udpService = udpService;
+        if(!NetworkUtils.isValidSocketAddress(addr))
 	        throw new IllegalArgumentException("invalid addr: " + addr);
 	       
 		this.addr = addr;
+		this.personalFilter = personalFilter;
 	}
     
-    public UDPReplyHandler(InetAddress addr, int port) {
-        this(new InetSocketAddress(addr, port));
+    UDPReplyHandler(InetAddress addr, int port, SpamFilter personalFilter, UDPService udpService) {
+        this(new InetSocketAddress(addr, port), personalFilter, udpService);
     }
     
-    /**
-     * Sets the new personal spam filter to be used for all UDPReplyHandlers.
-     */
-    public static void setPersonalFilter(SpamFilter filter) {
-        _personalFilter = filter;
-    }
-
-	
 	/**
 	 * Sends the <tt>PingReply</tt> via a UDP datagram to the IP and port
 	 * for this handler.<p>
@@ -71,7 +61,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-        UDP_SERVICE.send(pong, addr);
+        udpService.send(pong, addr);
 		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
@@ -85,7 +75,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-        UDP_SERVICE.send(hit, addr);
+        udpService.send(hit, addr);
 		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
@@ -99,14 +89,14 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-        UDP_SERVICE.send(request, addr);
+        udpService.send(request, addr);
 		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
 	public void countDroppedMessage() {}
 
 	public boolean isPersonalSpam(Message m) {
-        return !_personalFilter.allow(m);
+        return !personalFilter.allow(m);
 	}
 
 	public boolean isOpen() {
@@ -269,11 +259,11 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * sends the response through udp back to the requesting party
 	 */
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
-		UDPService.instance().send(m, addr);
+		udpService.send(m, addr);
 	}
 	
 	public void reply(Message m) {
-		UDPService.instance().send(m, addr);
+	    udpService.send(m, addr);
 	}
 	
 	public int getPort() {

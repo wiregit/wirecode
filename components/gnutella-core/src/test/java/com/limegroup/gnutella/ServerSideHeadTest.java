@@ -8,15 +8,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -34,10 +30,10 @@ public class ServerSideHeadTest extends LimeTestCase {
         return buildTestSuite(ServerSideHeadTest.class);
     }
     
-    static DatagramSocket socket1, socket2;
-    static int port1, port2;
-    static InetSocketAddress addr1, addr2;
-    static HeadPing ping1, ping2;
+    private static DatagramSocket socket1, socket2;
+    private static int port1, port2;
+    private static InetSocketAddress addr1, addr2;
+    private static HeadPing ping1, ping2;
 
     
     public static void globalSetUp() throws Exception {
@@ -70,12 +66,13 @@ public class ServerSideHeadTest extends LimeTestCase {
 
 
     	
+        @SuppressWarnings("all") // DPINJ: textfix
     	FileManagerStub fmanager = new FileManagerStub();
     	
-    	RouterService service = new RouterService(new ActivityCallbackStub());
-    	service.start();
+    //	RouterService service = new RouterService(new ActivityCallbackStub());
+    	ProviderHacks.getLifecycleManager().start();
     	
-    	PrivilegedAccessor.setValue(RouterService.class,"fileManager",fmanager);
+    //	PrivilegedAccessor.setValue(RouterService.class,"fileManager",fmanager);
     }
     
     public void tearDown() throws Exception {
@@ -89,7 +86,7 @@ public class ServerSideHeadTest extends LimeTestCase {
   
     public void testGeneralBehavior() throws Exception{
     	
-    	MessageRouter router = RouterService.getMessageRouter();
+    	MessageRouter router = ProviderHacks.getMessageRouter();
     	router.handleUDPMessage(ping1,addr1);
     	Thread.sleep(100);
     	
@@ -97,7 +94,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	socket1.receive(received);
     	
     	HeadPong pong = (HeadPong) 
-			MessageFactory.read(new ByteArrayInputStream(received.getData()));
+			ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     	
@@ -107,7 +104,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	received = new DatagramPacket(new byte[1024],1024);
     	socket2.receive(received);
     	pong = (HeadPong) 
-			MessageFactory.read(new ByteArrayInputStream(received.getData()));
+			ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping2.getGUID(),pong.getGUID()));
     	
@@ -119,7 +116,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	received = new DatagramPacket(new byte[1024],1024);
     	socket1.receive(received);
     	pong = (HeadPong) 
-			MessageFactory.read(new ByteArrayInputStream(received.getData()));
+			ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     }

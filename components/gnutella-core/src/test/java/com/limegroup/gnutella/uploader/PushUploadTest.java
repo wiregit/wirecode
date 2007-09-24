@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
@@ -25,35 +26,57 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IpPort;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionFactory;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HTTPAcceptor;
-import com.limegroup.gnutella.HTTPUploadManager;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.NetworkManagerImpl;
+import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.QueryUnicaster;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.connection.ConnectionCheckerManager;
+import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.gnutella.util.SocketsManager;
 
+//ITEST
 public class PushUploadTest extends LimeTestCase {
 
     private static final int PORT = 6668;
@@ -74,15 +97,19 @@ public class PushUploadTest extends LimeTestCase {
     /** The file contents. */
     private static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-    private MetaFileManager fm;
-
-    private HTTPAcceptor httpAcceptor;
-
-    private HTTPUploadManager upMan;
+    private FileManager fm;
 
     private BufferedReader in;
 
     private BufferedWriter out;
+
+    private LifecycleManager lifeCycleManager;
+
+    private MyNetworkManager networkManager;
+
+    private MyConnectionManager connectionManager;
+
+    private Injector injector;
 
     public PushUploadTest(String name) {
         super(name);
@@ -92,27 +119,12 @@ public class PushUploadTest extends LimeTestCase {
         return buildTestSuite(PushUploadTest.class);
     }
 
-    public static void globalSetUp() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-
-        doSettings();
-
-        rs.start();
-        Thread.sleep(2000);
-
-// // TODO acceptor shutdown in globalTearDown()
-// Acceptor acceptor = RouterService.getAcceptor();
-// acceptor.init();
-// acceptor.start();
-    }
-
     private static void doSettings() throws Exception {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        RouterService.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -148,29 +160,35 @@ public class PushUploadTest extends LimeTestCase {
         assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
                 .length());
 
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).to(MyNetworkManager.class);
+                bind(ConnectionManager.class).to(MyConnectionManager.class);
+            }
+        });
+
         // start services
-        fm = new MetaFileManager();
+        fm = injector.getInstance(FileManager.class);
         fm.startAndWait(4000);
-        PrivilegedAccessor.setValue(RouterService.class, "fileManager", fm);
-
-        httpAcceptor = new HTTPAcceptor();
-        PrivilegedAccessor.setValue(RouterService.class, "httpUploadAcceptor",
-                httpAcceptor);
-
-        upMan = new HTTPUploadManager(new UploadSlotManager());
-        PrivilegedAccessor
-                .setValue(RouterService.class, "uploadManager", upMan);
-
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
-        upMan.start(httpAcceptor, fm, RouterService.getCallback(), RouterService.getMessageRouter());
+        
+        lifeCycleManager = injector.getInstance(LifecycleManager.class);
+        lifeCycleManager.start();
+        
+        networkManager = (MyNetworkManager) injector.getInstance(NetworkManager.class);
+        
+        connectionManager = (MyConnectionManager) injector.getInstance(ConnectionManager.class);
     }
 
     @Override
-    public void tearDown() throws IOException {
+    public void tearDown() throws Exception {
         closeConnection();
 
-        upMan.stop(httpAcceptor);
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        if (lifeCycleManager != null) {
+            lifeCycleManager.shutdown();
+        }
+        
+        LimeTestUtils.waitForNIO();
     }
 
     public void testDownloadHTTP10() throws Exception {
@@ -278,10 +296,7 @@ public class PushUploadTest extends LimeTestCase {
      */
     public void testForPushProxyHeaderWithoutProxy() throws Exception {
         // try when we are not firewalled
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
-                "_acceptedIncoming", new Boolean(true));
-        assertTrue(RouterService.acceptedIncomingConnection());
-
+        networkManager.acceptedIncomingConnection = true;
         establishConnection();
         HttpRequest request = new BasicHttpRequest("GET", url,
                 HttpVersion.HTTP_1_1);
@@ -289,12 +304,8 @@ public class PushUploadTest extends LimeTestCase {
         UploadTestUtils.assertNotHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
 
         // now try with an empty set of proxies
-        establishPushConnection();
-        
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
-                "_acceptedIncoming", new Boolean(false));
-        assertFalse(RouterService.acceptedIncomingConnection());
-
+        establishPushConnection();       
+        networkManager.acceptedIncomingConnection = false;
         response = sendRequest(request);
         UploadTestUtils.assertNotHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
     }
@@ -303,31 +314,14 @@ public class PushUploadTest extends LimeTestCase {
         establishPushConnection();
 
         // now try with some proxies
-        ConnectionManager original = RouterService.getConnectionManager();
-        try {
-            final Set<Connectable> proxies = new TreeSet<Connectable>(IpPort.COMPARATOR);
-            Connectable ppi = new ConnectableImpl("1.2.3.4", 5, false);
-            proxies.add(ppi);
+        Connectable ppi = new ConnectableImpl("1.2.3.4", 5, false);
+        connectionManager.proxies.add(ppi);
 
-            ConnectionManagerStub cmStub = new ConnectionManagerStub() {
-                @Override
-                public Set<Connectable> getPushProxies() {
-                    return proxies;
-                }
-            };
-            PrivilegedAccessor.setValue(RouterService.class, "manager", cmStub);
-
-            PrivilegedAccessor.setValue(RouterService.getAcceptor(),
-                    "_acceptedIncoming", new Boolean(false));
-            assertFalse(RouterService.acceptedIncomingConnection());
-
-            HttpRequest request = new BasicHttpRequest("GET", url,
-                    HttpVersion.HTTP_1_1);
-            HttpResponse response = sendRequest(request);
-            UploadTestUtils.assertHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
-        } finally {
-            PrivilegedAccessor.setValue(RouterService.class, "manager", original);
-        }
+        networkManager.acceptedIncomingConnection = false;
+        HttpRequest request = new BasicHttpRequest("GET", url,
+                HttpVersion.HTTP_1_1);
+        HttpResponse response = sendRequest(request);
+        UploadTestUtils.assertHasHeader(response, "X-Push-Proxy: 1.2.3.4:5");
     }
 
     /**
@@ -335,11 +329,11 @@ public class PushUploadTest extends LimeTestCase {
      * than once.
      */
     public void testDuplicatePushes() throws Exception {
-        Connection connection = new Connection("localhost", PORT);
+        Connection connection = injector.getInstance(ConnectionFactory.class).createConnection("localhost", PORT);
         try {
-            connection.initialize(new UltrapeerHeaders(null),
+            connection.initialize(injector.getInstance(HeadersFactory.class).createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
-            QueryRequest query = QueryRequest.createQuery("txt", (byte) 3);
+            QueryRequest query = injector.getInstance(QueryRequestFactory.class).createQuery("txt", (byte) 3);
             connection.send(query);
             connection.flush();
             QueryReply reply = null;
@@ -393,15 +387,15 @@ public class PushUploadTest extends LimeTestCase {
     /**
      * Does a push and gets a socket from the incoming connection.
      */
-    private static Socket getSocketFromPush() throws IOException,
+    private Socket getSocketFromPush() throws IOException,
             BadPacketException {
-        Connection connection = new Connection("localhost", PORT);
+        Connection connection = injector.getInstance(ConnectionFactory.class).createConnection("localhost", PORT);
         try {
-            connection.initialize(new UltrapeerHeaders(null),
+            connection.initialize(injector.getInstance(HeadersFactory.class).createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
 
             // send query
-            QueryRequest query = QueryRequest.createQuery("txt", (byte) 3);
+            QueryRequest query = injector.getInstance(QueryRequestFactory.class).createQuery("txt", (byte) 3);
             connection.send(query);
             connection.flush();
 
@@ -547,5 +541,58 @@ public class PushUploadTest extends LimeTestCase {
         public void setLocalePreferencing(boolean b) {
         }
     }
+
+    @Singleton
+    private static class MyNetworkManager extends NetworkManagerImpl {
+
+        private boolean acceptedIncomingConnection = true;
+
+        @Inject
+        public MyNetworkManager(Provider<UDPService> udpService,
+                Provider<Acceptor> acceptor, Provider<DHTManager> dhtManager,
+                Provider<ConnectionManager> connectionManager,
+                Provider<ActivityCallback> activityCallback) {
+            super(udpService, acceptor, dhtManager, connectionManager, activityCallback);
+        }
+        
+        @Override
+        public boolean acceptedIncomingConnection() {
+            return acceptedIncomingConnection;
+        }
+        
+    }
+
+    @Singleton
+    private static class MyConnectionManager extends ConnectionManager {
+
+        private Set<Connectable> proxies = new TreeSet<Connectable>();
+
+        @Inject
+        public MyConnectionManager(NetworkManager networkManager,
+                Provider<HostCatcher> hostCatcher,
+                @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
+                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                Provider<SimppManager> simppManager,
+                CapabilitiesVMFactory capabilitiesVMFactory,
+                ManagedConnectionFactory managedConnectionFactory,
+                Provider<MessageRouter> messageRouter,
+                Provider<QueryUnicaster> queryUnicaster,
+                SocketsManager socketsManager,
+                ConnectionServices connectionServices,
+                Provider<NodeAssigner> nodeAssigner,
+                Provider<IPFilter> ipFilter,
+                ConnectionCheckerManager connectionCheckerManager,
+                PingRequestFactory pingRequestFactory) {
+            super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
+                    simppManager, capabilitiesVMFactory, managedConnectionFactory,
+                    messageRouter, queryUnicaster, socketsManager, connectionServices,
+                    nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory);
+        }
+        
+        @Override
+        public Set<Connectable> getPushProxies() {
+            return proxies ;
+        }
+    };
 
 }

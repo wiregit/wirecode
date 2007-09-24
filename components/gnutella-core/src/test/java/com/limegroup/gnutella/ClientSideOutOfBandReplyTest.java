@@ -12,18 +12,16 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import junit.framework.Test;
+
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
@@ -32,7 +30,6 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -77,7 +74,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 testUP[i].isSupernodeClientConnection());
             drain(testUP[i], 500);
             // OOB client side needs server side leaf guidance
-            testUP[i].send(MessagesSupportedVendorMessage.instance());
+            testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
             testUP[i].flush();
         }
 
@@ -85,26 +82,26 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // ----------------------------------------
 
         // set up solicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
         // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
         
         // ----------------------------------------
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
-        assertTrue(RouterService.isGUESSCapable());
+        assertTrue(ProviderHacks.getNetworkManager().isGUESSCapable());
         
         keepAllAlive(testUP);
         // clear up any messages before we begin the test.
         drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
-                                       RouterService.getAddress(), 
-                                       RouterService.getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+                ProviderHacks.getNetworkManager().getAddress(), 
+                ProviderHacks.getNetworkManager().getPort()));
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -117,13 +114,13 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now confirm that we follow the OOB protocol
         ReplyNumberVendorMessage vm = 
-           new ReplyNumberVendorMessage(queryGuid, 10);
+           ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 10);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
                                   testUP[0].getInetAddress(), 
-                                  RouterService.getPort());
+                                  ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(pack);
 
         // we should get a LimeACK in response
@@ -137,7 +134,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -148,32 +145,32 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // now send back some results - they should be accepted.
         Response[] res = new Response[10];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "susheel"+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+j);
         Message m = 
-            new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null, ack.getSecurityToken());
+            ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null, ack.getSecurityToken());
         baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] packet = baos.toByteArray();
         DatagramPacket reply = new DatagramPacket(packet, 
         		packet.length,
         		testUP[0].getInetAddress(), 
-                RouterService.getPort());
+        		ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(reply);
         Thread.sleep(250);
-        assertEquals(10,RouterService.getSearchResultHandler().getNumResultsForQuery(queryGuid));
+        assertEquals(10,ProviderHacks.getSearchResultHandler().getNumResultsForQuery(queryGuid));
     }
 
     public void testOOBv2Disabled() throws Exception {
         drainAll();
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
         Thread.sleep(200);
         assertNull(getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class));
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
         Thread.sleep(2000);
         OOBProxyControlVendorMessage m = getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class);
@@ -187,11 +184,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // the user) we don't request OOB replies for it
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
-                        RouterService.getAddress(), 
-                        RouterService.getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+                ProviderHacks.getNetworkManager().getAddress(), 
+                ProviderHacks.getNetworkManager().getPort()));
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -204,13 +201,13 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now confirm that we follow the OOB protocol
         ReplyNumberVendorMessage vm = 
-           new ReplyNumberVendorMessage(queryGuid, 10);
+            ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 10);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
                                   testUP[0].getInetAddress(), 
-                                  RouterService.getPort());
+                                  ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(pack);
 
         // we should get a LimeACK in response
@@ -224,7 +221,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -232,18 +229,18 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         assertEquals(10, ack.getNumResults());
 
         // now stop the query
-        RouterService.stopQuery(queryGuid);
+        ProviderHacks.getSearchServices().stopQuery(queryGuid);
         keepAllAlive(testUP);
         drainAll();
 
         // send another ReplyNumber
-        vm = new ReplyNumberVendorMessage(queryGuid, 5);
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 5);
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
                                   testUP[0].getInetAddress(), 
-                                  RouterService.getPort());
+                                  ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(pack);
 
         // we should NOT get a LimeACK in response
@@ -259,7 +256,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }
@@ -276,11 +273,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         keepAllAlive(testUP);
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
-                                       RouterService.getAddress(), 
-                                       RouterService.getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+                ProviderHacks.getNetworkManager().getAddress(), 
+                ProviderHacks.getNetworkManager().getPort()));
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -293,13 +290,13 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now confirm that we follow the OOB protocol
         ReplyNumberVendorMessage vm = 
-           new ReplyNumberVendorMessage(queryGuid, 10);
+            ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 10);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
                                   testUP[0].getInetAddress(), 
-                                  RouterService.getPort());
+                                  ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(pack);
 
         // we should get a LimeACK in response
@@ -313,7 +310,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -325,11 +322,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[respsPerUP];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10, 10, "susheel"+i+j);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+i+j);
             Message m = 
-                new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
 
             testUP[i].send(m);
             testUP[i].flush();
@@ -337,13 +334,13 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         Thread.sleep(2000); // lets process these results...
 
         // send another ReplyNumber
-        vm = new ReplyNumberVendorMessage(queryGuid, 5);
+        vm = ProviderHacks.getReplyNumberVendorMessageFactory().create(queryGuid, 5);
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), 
                                   baos.toByteArray().length,
                                   testUP[0].getInetAddress(), 
-                                  RouterService.getPort());
+                                  ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(pack);
 
         // we should NOT get a LimeACK in response
@@ -359,7 +356,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = MessageFactory.read(in);
+            Message m = ProviderHacks.getMessageFactory().read(in);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }
@@ -373,19 +370,17 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         PushProxyAcknowledgement ppAck = 
             new PushProxyAcknowledgement(InetAddress.getLocalHost(), 
                                          testUP[2].getPort(),
-                                         new GUID(RouterService.getMessageRouter()._clientGUID));
+                                         new GUID(ProviderHacks.getApplicationServices().getMyGUID()));
         testUP[2].send(ppAck); testUP[2].flush();
 
         { // this should not go through because of firewall/firewall
             drain(testUP[0]);
 
             QueryRequest query = 
-                new QueryRequest(GUID.makeGuid(), (byte)2, 
-                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
-                                 QueryRequest.SPECIAL_FIREWALL_MASK,
-                                 "berkeley", "", null, 
-                                 null, false, Network.UNKNOWN, false, 
-                                 0, false, 0);
+                ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+                    (byte)2, 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                     QueryRequest.SPECIAL_FIREWALL_MASK, "berkeley", "", null, null,
+                    false, Network.UNKNOWN, false, 0, false, 0);
 
             testUP[0].send(query);testUP[0].flush();
             QueryReply reply = getFirstQueryReply(testUP[0]);
@@ -396,13 +391,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             drain(testUP[0]);
 
             QueryRequest query = 
-                new QueryRequest(GUID.makeGuid(), (byte)2, 
-                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
-                                 QueryRequest.SPECIAL_FIREWALL_MASK |
-                                 QueryRequest.SPECIAL_FWTRANS_MASK,
-                                 "susheel", "", null, 
-                                 null, false, Network.UNKNOWN, false, 
-                                 0, false, 0);
+                ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+                    (byte)2, 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                     QueryRequest.SPECIAL_FIREWALL_MASK |
+                     QueryRequest.SPECIAL_FWTRANS_MASK, "susheel", "", null, null,
+                    false, Network.UNKNOWN, false, 0, false, 0);
 
             testUP[0].send(query);testUP[0].flush();
             QueryReply reply = getFirstQueryReply(testUP[0]);
@@ -414,12 +407,10 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             drain(testUP[1]);
 
             QueryRequest query = 
-                new QueryRequest(GUID.makeGuid(), (byte)2, 
-                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
-                                 QueryRequest.SPECIAL_XML_MASK,
-                                 "susheel", "", null, 
-                                 null, false, Network.UNKNOWN, false, 
-                                 0, false, 0);
+                ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+                    (byte)2, 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                     QueryRequest.SPECIAL_XML_MASK, "susheel", "", null, null,
+                    false, Network.UNKNOWN, false, 0, false, 0);
 
             testUP[1].send(query);testUP[1].flush();
             QueryReply reply = getFirstQueryReply(testUP[1]);
@@ -432,7 +423,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock=Sockets.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                sock=ProviderHacks.getSocketsManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                      SERVER_PORT), 12);
                 os = sock.getOutputStream();
                 os.write("\n\n".getBytes());
@@ -449,18 +440,16 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         }        
 
         Thread.sleep(250);
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         { // this should go through because test node is not firewalled
             drain(testUP[2]);
 
             QueryRequest query = 
-                new QueryRequest(GUID.makeGuid(), (byte)2, 
-                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
-                                 QueryRequest.SPECIAL_FIREWALL_MASK |
-                                 QueryRequest.SPECIAL_FWTRANS_MASK,
-                                 "susheel", "", null, 
-                                 null, false, Network.UNKNOWN, false, 
-                                 0, false, 0);
+                ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+                    (byte)2, 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                     QueryRequest.SPECIAL_FIREWALL_MASK |
+                     QueryRequest.SPECIAL_FWTRANS_MASK, "susheel", "", null, null,
+                    false, Network.UNKNOWN, false, 0, false, 0);
 
             testUP[2].send(query);testUP[2].flush();
             QueryReply reply = getFirstQueryReply(testUP[2]);
@@ -477,11 +466,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     	drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
-                                       RouterService.getAddress(), 
-                                       RouterService.getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+                ProviderHacks.getNetworkManager().getAddress(), 
+                ProviderHacks.getNetworkManager().getPort()));
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // all connected UPs should get a OOB query
@@ -495,23 +484,23 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // now, do not send an RNVM and send a reply directly
         Response[] res = new Response[10];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "susheel"+j);
+            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+j);
         Message m = 
-            new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+            ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] packet = baos.toByteArray();
         DatagramPacket reply = new DatagramPacket(packet, 
         		packet.length,
         		testUP[0].getInetAddress(), 
-                RouterService.getPort());
+        		ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(reply);
         
         // nothing should be accepted.
         Thread.sleep(250);
-        SearchResultHandler handler = RouterService.getSearchResultHandler();
+        SearchResultHandler handler = ProviderHacks.getSearchResultHandler();
         assertEquals(0,handler.getNumResultsForQuery(queryGuid));
     }
     

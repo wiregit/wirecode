@@ -13,14 +13,12 @@ import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
  * This class tests HTTP requests involving URNs, as specified in HUGE v094,
@@ -33,13 +31,13 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
     private static final String STATUS_404 = "HTTP/1.1 404 Not Found";
 
-    private MetaFileManager fm;
-
-    private HTTPAcceptor acceptor;
+    private FileManager fileManager;
 
     private HTTPUploadManager uploadManager;
 
-    private ConnectionDispatcher connectionDispatcher;
+    private LifecycleManager lifeCycleManager;
+
+    private HTTPAcceptor acceptor;
 
     public UrnHttpRequestTest(String name) {
         super(name);
@@ -54,7 +52,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     }
 
     @Override
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         // create shared files with random content
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
@@ -64,27 +62,29 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                     + "file" + i + ".tmp", data);
         }
 
-        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 
-        fm = new MetaFileManager();
-        acceptor = new HTTPAcceptor();
-        uploadManager = new HTTPUploadManager(new UploadSlotManager());
-        connectionDispatcher = new ConnectionDispatcher();
+        // initialize services
+        Injector injector = LimeTestUtils.createInjector();
+
+        uploadManager = (HTTPUploadManager) injector.getInstance(UploadManager.class);
         
-        fm.startAndWait(4000);
-        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fm
-                .getNumFiles());
-        uploadManager.start(acceptor, fm, RouterService.getCallback(), RouterService.getMessageRouter());
-        acceptor.start(connectionDispatcher);
+        acceptor = injector.getInstance(HTTPAcceptor.class);
+        
+        // start services
+        lifeCycleManager = injector.getInstance(LifecycleManager.class);
+        lifeCycleManager.start();
+        
+        // make sure the FileDesc objects in file manager are up-to-date
+        fileManager = injector.getInstance(FileManager.class);
+        fileManager.loadSettingsAndWait(2000);
+        
+        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getNumFiles());
     }
 
     @Override
     protected void tearDown() throws Exception {
-        acceptor.stop(connectionDispatcher);
-        uploadManager.stop(acceptor);
-        fm.stop();
+        lifeCycleManager.shutdown();
     }
 
     /**
@@ -96,8 +96,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         UploadSettings.HARD_MAX_UPLOADS.setValue(0);
 
         try {
-            for (int i = 0; i < fm.getNumFiles(); i++) {
-                FileDesc fd = fm.get(i);
+            for (int i = 0; i < fileManager.getNumFiles(); i++) {
+                FileDesc fd = fileManager.get(i);
                 String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
                 BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -119,8 +119,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * Test requests by URN.
      */
     public void testHttpUrnRequest() throws Exception {
-        for (int i = 0; i < fm.getNumFiles(); i++) {
-            FileDesc fd = fm.get(i);
+        for (int i = 0; i < fileManager.getNumFiles(); i++) {
+            FileDesc fd = fileManager.get(i);
             String uri = "/uri-res/N2R?" + fd.getSHA1Urn().httpStringValue();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -137,8 +137,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * /get/0//uri-res/N2R?urn:sha1:AZUCWY54D63______PHN7VSVTKZA3YYT HTTP/1.1
      */
     public void testMalformedHttpUrnRequest() throws Exception {
-        for (int i = 0; i < fm.getNumFiles(); i++) {
-            FileDesc fd = fm.get(i);
+        for (int i = 0; i < fileManager.getNumFiles(); i++) {
+            FileDesc fd = fileManager.get(i);
             String uri = "/get/0//uri-res/N2R?"
                     + fd.getSHA1Urn().httpStringValue();
 
@@ -156,8 +156,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * the X-Gnutella-Content-URN header is always returned.
      */
     public void testTraditionalGetForReturnedUrn() throws Exception {
-        for (int i = 0; i < fm.getNumFiles(); i++) {
-            FileDesc fd = fm.get(i);
+        for (int i = 0; i < fileManager.getNumFiles(); i++) {
+            FileDesc fd = fileManager.get(i);
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -180,8 +180,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * expected.
      */
     public void testTraditionalGetWithContentUrn() throws Exception {
-        for (int i = 0; i < fm.getNumFiles(); i++) {
-            FileDesc fd = fm.get(i);
+        for (int i = 0; i < fileManager.getNumFiles(); i++) {
+            FileDesc fd = fileManager.get(i);
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -199,8 +199,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * error code 404.
      */
     public void testTraditionalGetWithInvalidContentUrn() throws Exception {
-        for (int i = 0; i < fm.getNumFiles(); i++) {
-            FileDesc fd = fm.get(i);
+        for (int i = 0; i < fileManager.getNumFiles(); i++) {
+            FileDesc fd = fileManager.get(i);
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -221,8 +221,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * matching X-Gnutella-Content-URN header values also fail with 404.
      */
     public void testInvalidTraditionalGetWithValidContentUrn() throws Exception {
-        for (int i = 0; i < fm.getNumFiles(); i++) {
-            FileDesc fd = fm.get(i);
+        for (int i = 0; i < fileManager.getNumFiles(); i++) {
+            FileDesc fd = fileManager.get(i);
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName()
                     + "invalid";
 
@@ -241,7 +241,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     private void sendRequestThatShouldSucceed(HttpRequest request, FileDesc fd)
             throws Exception {
-        HttpResponse response = acceptor.process(request);
+        HttpResponse response = acceptor.testProcess(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         // clean up any created uploaders
@@ -293,7 +293,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     private void sendRequestThatShouldFail(HttpRequest request, String error)
             throws Exception {
-        HttpResponse response = acceptor.process(request);
+        HttpResponse response = acceptor.testProcess(request);
         assertEquals("unexpected HTTP response", error, getStatusLine(response));
     }
 

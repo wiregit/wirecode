@@ -12,11 +12,13 @@ import java.util.Vector;
 import org.limewire.collection.ApproximateMatcher;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 /** 
@@ -90,6 +92,11 @@ public class AutoDownloadDetails implements Serializable {
     // keeps track of committed downloads....
     private int committedDLs = 0;
 
+    @Inject
+    private static LimeXMLDocumentFactory globalLimeXMLDocumentFactory;
+    
+    private transient volatile LimeXMLDocumentFactory limeXMLDocumentFactory;
+    
     /**
      * @param inQuery the standard query string associated with this query.
      * @param inRichQuery the rich query associated with this string.
@@ -97,6 +104,7 @@ public class AutoDownloadDetails implements Serializable {
      */
     public AutoDownloadDetails(String inQuery, String inRichQuery, 
                                MediaType inType) {
+        limeXMLDocumentFactory = globalLimeXMLDocumentFactory;
         query = inQuery;
         richQuery = inRichQuery;
         type = inType;
@@ -113,6 +121,7 @@ public class AutoDownloadDetails implements Serializable {
      */
     private void readObject(ObjectInputStream stream) throws IOException,
                                                     ClassNotFoundException {
+        limeXMLDocumentFactory = globalLimeXMLDocumentFactory;
         stream.defaultReadObject();
 
         if(mediaDesc == null)
@@ -158,7 +167,8 @@ public class AutoDownloadDetails implements Serializable {
                 xmlCreated = true;
                 if( richQuery != null && !richQuery.equals("") ) {
                     try {
-                        xmlDoc = new LimeXMLDocument(richQuery);
+                        xmlDoc = limeXMLDocumentFactory
+                        .createLimeXMLDocument(richQuery);
                     } catch(SchemaNotFoundException ignored) {
                     } catch(SAXException ignored) {
                     } catch(IOException ignored) {

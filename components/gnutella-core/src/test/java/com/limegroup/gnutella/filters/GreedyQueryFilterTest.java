@@ -1,22 +1,20 @@
 package com.limegroup.gnutella.filters;
 
 import junit.framework.Test;
-
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.Message;
+import org.limewire.util.BaseTestCase;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 
 /**
  * Unit tests for GreedyQueryFilter
  */
-public class GreedyQueryFilterTest extends LimeTestCase {
+public class GreedyQueryFilterTest extends BaseTestCase {
     
-    SpamFilter filter=new GreedyQueryFilter();
-    Message msg = null;
-    
+    private Mockery context;
+    private SpamFilter filter;
+   
 	public GreedyQueryFilterTest(String name) {
 		super(name);
 	}
@@ -28,95 +26,206 @@ public class GreedyQueryFilterTest extends LimeTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+	public void setUp()
+    {   context = new Mockery();
+        filter = new GreedyQueryFilter();
+    }
+	
+	/**
+	 * Should only return true on allow if not a QueryRequest
+	 */
+    public void testPingRequest() throws Exception {
+
+        final PingRequest req = context.mock(PingRequest.class);
+        
+        context.checking(new Expectations() {
+            {
+                never(req);
+            }
+        });
+        
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
+
+    }
+
+    public void testQueryVariousDeny() throws Exception {
+
+        QueryRequest req;
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "a",(byte)5);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*", (byte)5);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "a.asf", (byte)5);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "z.mpg", (byte)5);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+    }
+
+    public void testQueryVariousAllow() throws Exception {
+        
+        QueryRequest req;
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "z.mp", (byte)5);
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "z mpg", (byte)5);
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "1.mpg", (byte)5);
+        mockQueryRequestDefHops(req);
+        mockQueryRequestSetTTL(req);
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
+    }
+ 
+    public void testNetworkVariousAllow() throws Exception { 
+        
+        QueryRequest req;
+           
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "--**.*-", (byte)3, (byte)2);
+        mockQueryRequestSetTTL(req);
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "britney*.*", (byte)2, (byte)3);
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
     
-    public void testLegacy() throws Exception {
-        msg=new PingRequest((byte)5);
-        assertTrue(filter.allow(msg));
-
-        msg=QueryRequest.createQuery("a",(byte)5);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createQuery("*", (byte)5);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createQuery("a.asf", (byte)5);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createQuery("z.mpg", (byte)5);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createQuery("z.mp", (byte)5);
-        assertTrue(filter.allow(msg));
-
-        msg=QueryRequest.createQuery("z mpg", (byte)5);
-        assertTrue(filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.mpg".getBytes(), Network.UNKNOWN);
-        assertTrue(!filter.allow(msg));
-
-        msg=QueryRequest.createQuery("1.mpg", (byte)5);
-        assertTrue(filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.mp3".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.*".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.MP3".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.MPG".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "mp3".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "mpg".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "MP3".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "MPG".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "a.b".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*.*-".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)3, 
-            (byte)2, "--**.*-".getBytes(), Network.UNKNOWN);
-        assertTrue(filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, 
-            (byte)4, "*****".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)2,
-            (byte)3, "britney*.*".getBytes(), Network.UNKNOWN);
-        assertTrue(filter.allow(msg)); 
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "new order*", (byte)1, (byte)6);
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
+    }
     
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)2,
-            (byte)3, "*.*.".getBytes(), Network.UNKNOWN);
-        assertTrue(! filter.allow(msg));
-
-        msg=QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1,
-            (byte)6, "new order*".getBytes(), Network.UNKNOWN);
-        assertTrue(filter.allow(msg)); 
     
+    public void testNetworkVariousDeny() throws Exception {
+        
+        QueryRequest req;
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*.mpg", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+               
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*.mp3", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+       
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*.*", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*.MP3", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+      
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*.mp3", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "mpg", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "MP3", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "MPG", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+        
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "a.b", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+       
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*.*-", (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+       
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*****" , (byte)1, (byte)4);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "*.*.", (byte)2, (byte)3);
+        assertFalse(filter.allow(req));
+        context.assertIsSatisfied();   
+    }
+    
+    
+    private void mockQueryRequest(final QueryRequest req, final String query, final byte ttl) {
+
+        context.checking(new Expectations() {
+            {
+                atLeast(1).of(req).getQuery();
+                will(returnValue(query));
+                allowing(req).getTTL();
+                will(returnValue(ttl));
+                allowing(req).hasQueryUrns();
+                will(returnValue(false));
+            }
+        });
+    }
+    
+    private void mockQueryRequest(final QueryRequest req, final String query, final byte ttl, final byte hops) {
+
+        mockQueryRequest(req, query, ttl);
+        
+        context.checking(new Expectations() {
+            {
+                allowing(req).getHops();
+                will(returnValue(hops));
+            }
+        });
+    }
+    
+    public void mockQueryRequestSetTTL(final QueryRequest req) {      
+
+        context.checking(new Expectations() {
+            {
+                allowing(req).setTTL(with(any(byte.class)));
+            }
+        });
+    }
+    
+    public void mockQueryRequestDefHops(final QueryRequest msg) {
+        context.checking(new Expectations() {
+            {
+                allowing(msg).getHops();
+                will(returnValue((byte) 0));
+            }
+        });
     }
 }

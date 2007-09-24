@@ -3,9 +3,6 @@ package com.limegroup.gnutella.gui;
 import java.io.File;
 import java.util.Locale;
 
-import com.limegroup.gnutella.gui.DefaultErrorCatcher;
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.gui.ResourceManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -13,7 +10,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * Base class for gui tests that rely on the "gui" folder to be the
  * working directory.
  */
-public class GUIBaseTestCase extends LimeTestCase {
+public abstract class GUIBaseTestCase extends LimeTestCase {
 
 	private static String savedWorkingDir;
 	

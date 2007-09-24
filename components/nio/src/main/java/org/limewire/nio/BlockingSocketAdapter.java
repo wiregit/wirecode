@@ -12,11 +12,11 @@ import org.limewire.nio.observer.Shutdownable;
 
 /**
  * A socket that allows asynchronous connections but is backed
- * by a legacy I/O Socket.
- * 
- * This is intended primarily for ease-of-use debugging in swapping out
- * an NIOSocket with a BlockingSocketAdapter, so that NIO code can be
- * compared to regular I/O code.
+ * by a legacy I/O socket.
+ * <p>
+ * This is intended primarily for ease of use debugging via swapping out
+ * an {@link NIOSocket} with a {@link BlockingSocketAdapter}, so NIO code can 
+ * be compared to regular I/O code.
  */
 public class BlockingSocketAdapter extends NBSocket {
     

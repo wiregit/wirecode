@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,8 +18,13 @@ import org.limewire.collection.IntWrapper;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
+import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -36,6 +43,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This is the class that goes in the route table when a request is
  * sent whose reply is for me.
  */
+@Singleton
 public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
     
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
@@ -48,33 +56,49 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 
     private final Map<GUID, GUID> GUID_REQUESTS = 
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, GUID>(200));
+    
+    private final NetworkManager networkManager;
+    private final SecureMessageVerifier secureMessageVerifier;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<SearchResultHandler> searchResultHandler;
+    private final Provider<DownloadManager> downloadManager;
+    private final Provider<Acceptor> acceptor;
+    private final Provider<PushManager> pushManager;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final ApplicationServices applicationServices;
+    private final ConnectionServices connectionServices;
+    private final LimeXMLDocumentHelper limeXMLDocumentHelper;
 
-	/**
-	 * Instance following singleton.
-	 */
-	private static final ReplyHandler INSTANCE =
-		new ForMeReplyHandler();
-
-	/**
-	 * Singleton accessor.
-	 *
-	 * @return the <tt>ReplyHandler</tt> instance for this node
-	 */
-	public static ReplyHandler instance() {
-		return INSTANCE;
-	}
-	   
-	/**
-	 * Private constructor to ensure that only this class can construct
-	 * itself.
-	 */
-	private ForMeReplyHandler() {
+    @Inject
+    ForMeReplyHandler(NetworkManager networkManager,
+            SecureMessageVerifier secureMessageVerifier,
+            Provider<ConnectionManager> connectionManager,
+            Provider<SearchResultHandler> searchResultHandler,
+            Provider<DownloadManager> downloadManager,
+            Provider<Acceptor> acceptor, Provider<PushManager> pushManager,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            ApplicationServices applicationServices,
+            ConnectionServices connectionServices,
+            LimeXMLDocumentHelper limeXMLDocumentHelper) {
+        this.networkManager = networkManager;
+        this.secureMessageVerifier = secureMessageVerifier;
+        this.connectionManager = connectionManager;
+        this.searchResultHandler = searchResultHandler;
+        this.downloadManager = downloadManager;
+        this.acceptor = acceptor;
+        this.pushManager = pushManager;
+        this.backgroundExecutor = backgroundExecutor;
+        this.applicationServices = applicationServices;
+        this.connectionServices = connectionServices;
+        this.limeXMLDocumentHelper = limeXMLDocumentHelper;
+    	    
 	    //Clear push requests every 30 seconds.
-	    RouterService.schedule(new Runnable() {
+        //TODO: move to initializer
+	    this.backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
 	        public void run() {
 	            PUSH_REQUESTS.clear();
 	        }
-	    }, 30 * 1000, 30 * 1000);
+	    }, 30 * 1000, 30 * 1000, TimeUnit.MILLISECONDS);
     }
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {
@@ -91,8 +115,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 				SharingSettings.FREELOADER_ALLOWED.getValue())
 			&& (handler instanceof ManagedConnection)
             && (handler.isStable())) {
-			ConnectionManager cm = RouterService.getConnectionManager();
-            cm.remove((ManagedConnection)handler);
+            connectionManager.get().remove((ManagedConnection)handler);
         }
 	}
 	
@@ -112,7 +135,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         // XML must be added to the response first, so that
         // whomever calls toRemoteFileDesc on the response
         // will create the cachedRFD with the correct XML.
-        boolean validResponses = addXMLToResponses(reply);
+        boolean validResponses = addXMLToResponses(reply, limeXMLDocumentHelper);
         // responses invalid?  exit.
         if(!validResponses)
             return;
@@ -121,7 +144,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         if(handler != null && handler.isPersonalSpam(reply)) return;
         
         if(reply.hasSecureData() && ApplicationSettings.USE_SECURE_RESULTS.getValue()) {
-            RouterService.getSecureMessageVerifier().verify(reply, this);
+            secureMessageVerifier.verify(reply, this);
         } else {
             routeQueryReplyInternal(reply);
         }
@@ -135,17 +158,14 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     
     /** Passes the QueryReply off to where it should go. */
     private void routeQueryReplyInternal(QueryReply reply) {
-        SearchResultHandler resultHandler = RouterService.getSearchResultHandler();
-        resultHandler.handleQueryReply(reply);
-
-        DownloadManager dm = RouterService.getDownloadManager();
-        dm.handleQueryReply(reply);
+        searchResultHandler.get().handleQueryReply(reply);
+        downloadManager.get().handleQueryReply(reply);
     }
 	
 	/**
 	 * Adds XML to the responses in a QueryReply.
 	 */
-    private boolean addXMLToResponses(QueryReply qr) {
+    public static boolean addXMLToResponses(QueryReply qr, LimeXMLDocumentHelper limeXMLDocumentHelper) {
         // get xml collection string, then get dis-aggregated docs, then 
         // in loop
         // you can match up metadata to responses
@@ -186,7 +206,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             LOG.debug("xmlCollectionString = " + xmlCollectionString);
 
         List<LimeXMLDocument[]> allDocsArray = 
-            LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
+            limeXMLDocumentHelper.getDocuments(xmlCollectionString, 
                                                responsesLength);
         
         for(int i = 0; i < responsesLength; i++) {
@@ -238,7 +258,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         }
         
         // if the IP is banned, don't accept it
-        if (RouterService.getAcceptor().isBannedIP(ip))
+        if (acceptor.get().isBannedIP(ip))
             return;
 
         int port = pushRequest.getPort();
@@ -249,8 +269,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        RouterService.getPushManager().
-            acceptPushUpload(h, port, req_guid_hexstring,
+        pushManager.get().acceptPushUpload(h, port, req_guid_hexstring,
                              pushRequest.isMulticast(), // force accept
                              pushRequest.isFirewallTransferPush(),
                              pushRequest.isTLSCapable());
@@ -299,7 +318,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	 *  <tt>false</tt>
 	 */
 	public boolean isLeafConnection() {
-		return !RouterService.isSupernode();
+		return !connectionServices.isSupernode();
 	}
 
 	/**
@@ -372,7 +391,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     public InetAddress getInetAddress() {
         try {
             return InetAddress.
-                getByName(NetworkUtils.ip2string(RouterService.getAddress()));
+                getByName(NetworkUtils.ip2string(networkManager.getAddress()));
         } catch(UnknownHostException e) {
             // may want to do something else here if we ever use this!
             return null;
@@ -384,11 +403,11 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     }
     
     public int getPort() {
-        return RouterService.getPort();
+        return networkManager.getPort();
     }
     
     public String getAddress() {
-        return NetworkUtils.ip2string(RouterService.getAddress());
+        return NetworkUtils.ip2string(networkManager.getAddress());
     }
     
     public void handleSimppVM(SimppVM simppVM) {
@@ -417,7 +436,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 
 
     public byte[] getClientGUID() {
-        return RouterService.getMyGUID();
+        return applicationServices.getMyGUID();
     }
 }
 

@@ -5,13 +5,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.RouterService;
+import org.limewire.util.PrivilegedAccessor;
+
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NewConnection;
 import com.limegroup.gnutella.util.OldConnection;
@@ -57,8 +56,8 @@ public final class ProbeQueryTest extends LimeTestCase {
      * with the proper TTL.
      */
     public void testSendProbe() throws Exception {
-        new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", RouterService.getMessageRouter());
+      //  new RouterService(new ActivityCallbackStub());
+        assertNotNull("should have a message router", ProviderHacks.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(ProbeQuery.class, 
                                          "sendProbe",
@@ -69,7 +68,7 @@ public final class ProbeQueryTest extends LimeTestCase {
         }
 
         QueryHandler handler = 
-            QueryHandler.createHandler(QueryRequest.createQuery("test"),
+            ProviderHacks.getQueryHandlerFactory().createHandler(ProviderHacks.getQueryRequestFactory().createQuery("test"),
                                        NewConnection.createConnection(8),
                                        new TestResultCounter(0));
         
@@ -108,7 +107,7 @@ public final class ProbeQueryTest extends LimeTestCase {
             connections.add(new OldConnection(5));
         }                   
 
-        QueryRequest query = QueryRequest.createQuery("test");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test");
         List<List> queryLists = 
             (List<List>)CREATE_PROBE_LISTS.invoke(null, 
                                               new Object[]{connections, query}); 
@@ -132,7 +131,7 @@ public final class ProbeQueryTest extends LimeTestCase {
             connections.add(new OldConnection(5));
         }                   
 
-        QueryRequest query = QueryRequest.createQuery("test");
+        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test");
         List<List> queryLists = 
             (List<List>)CREATE_PROBE_LISTS.invoke(null, 
                                               new Object[]{connections, query}); 

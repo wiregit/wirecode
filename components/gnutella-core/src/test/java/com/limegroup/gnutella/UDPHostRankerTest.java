@@ -14,13 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.search.HostData;
@@ -59,8 +58,8 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         final MLImpl ml = new MLImpl();
 
-        PingRequest pr = new PingRequest(GUID.makeGuid(), (byte)1);
-        UDPPinger pinger = new UniqueHostPinger();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest(GUID.makeGuid(), (byte)1);
+        UDPPinger pinger = ProviderHacks.getUniqueHostPinger();
         pinger.rank(list, ml, null, pr);
         
         Thread.sleep(500);
@@ -76,9 +75,9 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) MessageFactory.read(in);
+            PingRequest ping = (PingRequest) ProviderHacks.getMessageFactory().read(in);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PingReply pong = PingReply.create(ping.getGUID(), (byte)1);
+            PingReply pong = ProviderHacks.getPingReplyFactory().create(ping.getGUID(), (byte)1);
             pong.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
@@ -92,7 +91,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         // wait 20 seconds, make sure MessageRouter's map is clear
         Thread.sleep(20000);
         Map map = 
-        (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
+        (Map) PrivilegedAccessor.getValue(ProviderHacks.getMessageRouter(),
                                           "_messageListeners");
         assertEquals(0, map.size());
         assertTrue(ml.unregistered);

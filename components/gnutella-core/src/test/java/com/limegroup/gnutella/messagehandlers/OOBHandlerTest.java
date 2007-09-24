@@ -1,33 +1,48 @@
 package com.limegroup.gnutella.messagehandlers;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Random;
 import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
-import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactoryImpl;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 
-public class OOBHandlerTest extends LimeTestCase {
+public class OOBHandlerTest extends BaseTestCase {
 
     public OOBHandlerTest(String name) {
         super(name);
@@ -37,33 +52,48 @@ public class OOBHandlerTest extends LimeTestCase {
         return buildTestSuite(OOBHandlerTest.class);
     }
 
-    static MyMessageRouter router;
-
-    static OOBHandler handler;
-
-    static GUID g;
-
-    static InetAddress address;
-
-    static MyReplyHandler replyHandler;
+    private MyMessageRouter router;
+    private OOBHandler handler;
+    private GUID g;
+    private InetAddress address;
+    private MyReplyHandler replyHandler;
+    private ReplyNumberVendorMessageFactory factory;
+    private volatile boolean canReceiveUnsolicited;
     
-    public static void globalSetUp() throws Exception {
-        router = new MyMessageRouter();
-        new RouterService(new QueryAliveActivityCallback(), router);
-        router.initialize();
-    }
-
+    ResponseFactory responseFactory;
+    QueryReplyFactory queryReplyFactory;
+    
     public void setUp() throws Exception {
+        router = new MyMessageRouter();
+        router.initialize();
         handler = new OOBHandler(router);
         g = new GUID(GUID.makeGuid());
         address = InetAddress.getByName("1.2.3.4");
         replyHandler = new MyReplyHandler(address, 1);
+        canReceiveUnsolicited = false;
+        factory = new ReplyNumberVendorMessageFactoryImpl(new NetworkManagerStub() {
+            @Override
+            public boolean canReceiveUnsolicited() {
+                return canReceiveUnsolicited;
+            }
+        });
+        
+        Module module = new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ReplyNumberVendorMessageFactory.class).toInstance(factory);
+            }
+        };
+        
+        Injector injector = LimeTestUtils.createInjector(module);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
     }
 
     public void testDropsLargeResponses() throws Exception {
 
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
 
         // and we request all of them
         router.numToRequest = 10;
@@ -95,7 +125,7 @@ public class OOBHandlerTest extends LimeTestCase {
     
     public void testMessagesWithoutEchoedTokenAreHandled(boolean disableOOBV2) {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
 
         // and we request all of them
         router.numToRequest = 10;
@@ -129,7 +159,7 @@ public class OOBHandlerTest extends LimeTestCase {
     public void testMessagesWithDifferentTokenAreHandled(boolean disableOOBV2)
             throws InvalidSecurityTokenException {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
 
         // and we request all of them
         router.numToRequest = 10;
@@ -184,7 +214,7 @@ public class OOBHandlerTest extends LimeTestCase {
         }
             
         // send an RNVM now
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -201,7 +231,7 @@ public class OOBHandlerTest extends LimeTestCase {
 
     public void testSessionsExpireBecauseOfAliveQuery() throws Exception {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -250,7 +280,7 @@ public class OOBHandlerTest extends LimeTestCase {
         router.reply = null;
 
         // send reply number message
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -280,9 +310,9 @@ public class OOBHandlerTest extends LimeTestCase {
     public void testAddsRNVMs() throws Exception {
 
         // a host claims to have 10 results at first
-        ReplyNumberVendorMessage first = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage first = factory.create(g, 10);
         // and then 20 afterwards
-        ReplyNumberVendorMessage second = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage second = factory.create(g, 10);
 
         // we would like to get 10
         router.numToRequest = 10;
@@ -313,7 +343,7 @@ public class OOBHandlerTest extends LimeTestCase {
 
     public void testDiscardedWithoutAliveQuery() throws InterruptedException {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -355,7 +385,7 @@ public class OOBHandlerTest extends LimeTestCase {
 
     public void testDuplicatePacketsIgnored() {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -375,14 +405,13 @@ public class OOBHandlerTest extends LimeTestCase {
         assertNull(router.reply);
     }
 
-    public void testStoresBypassedResults() throws Exception {
-
-        PrivilegedAccessor.setValue(UDPService.instance(), "_acceptedUnsolicitedIncoming", true);
-        assertTrue(RouterService.canReceiveUnsolicited());
+    public void testStoresBypassedResultsNoRouteBack() throws Exception {
+        // set this for this test
+        canReceiveUnsolicited = true;
         
         // 1. case there's no route back
         GUID guid = new GUID();
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(guid, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(guid, 10);
         assertTrue(rnvm.canReceiveUnsolicited());
         router.numToRequest = 10;
         router.isAlive = false;
@@ -391,16 +420,17 @@ public class OOBHandlerTest extends LimeTestCase {
         handler.handleMessage(rnvm, null, replyHandler);
         
         assertNull(router.reply);
-        Set<GUESSEndpoint> points = router.getQueryLocs(guid);
-        assertFalse(points.isEmpty());
-        
-        GUESSEndpoint point = points.iterator().next();
-        assertEquals(replyHandler.getInetAddress(), point.getInetAddress());
-        assertEquals(replyHandler.getPort(), point.getPort());
+        assertSame(rnvm, router.bypassedReply);
+    }
+
+    
+    public void testStoresBypassedResultsEnoughResultsReceived() throws Exception {
+        // set this for this test
+        canReceiveUnsolicited = true;
         
         // 2. case we received enough results, i.e, it's more than 150 results
-        guid = new GUID();
-        rnvm = new ReplyNumberVendorMessage(guid, 10);
+        GUID guid = new GUID();
+        ReplyNumberVendorMessage rnvm = factory.create(guid, 10);
         assertTrue(rnvm.canReceiveUnsolicited());
         router.numToRequest = -1; // signals enough results have been received
         router.isAlive = true;
@@ -409,23 +439,23 @@ public class OOBHandlerTest extends LimeTestCase {
         handler.handleMessage(rnvm, null, replyHandler);
         
         assertNull(router.reply);
-        points = router.getQueryLocs(guid);
-        assertFalse(points.isEmpty());
-        
-        point = points.iterator().next();
-        assertEquals(replyHandler.getInetAddress(), point.getInetAddress());
-        assertEquals(replyHandler.getPort(), point.getPort());
-        
+        assertSame(rnvm, router.bypassedReply);
+    }
+    
+    public void testStoresBypassedResultsFirstQueryReplyButQueryDead() throws Exception {
+        // set this for this test
+        canReceiveUnsolicited = true;
+
         // 3. case the first query reply comes in but the query is not alive
-        guid = new GUID();
-        rnvm = new ReplyNumberVendorMessage(guid, 10);
+        GUID guid = new GUID();
+        ReplyNumberVendorMessage rnvm = factory.create(guid, 10);
         router.numToRequest = 10;
         router.isAlive = true;
         router.reply = null;
         
         handler.handleMessage(rnvm, null, replyHandler);
         // source is not remembered yet
-        assertTrue(router.getQueryLocs(guid).isEmpty());
+        assertNull(router.bypassedReply);
         
         // double check we sent back an ack
         SecurityToken token = assertACKSent(replyHandler, 10);
@@ -441,11 +471,7 @@ public class OOBHandlerTest extends LimeTestCase {
             // send same five and message should be discarded
             handler.handleMessage(reply, null, replyHandler);
             assertNull(router.reply);
-            
-            assertFalse(router.getQueryLocs(guid).isEmpty());
-            point = router.getQueryLocs(guid).iterator().next();
-            assertEquals(replyHandler.getInetAddress(), point.getInetAddress());
-            assertEquals(replyHandler.getPort(), point.getPort());
+            assertSame(reply, router.bypassedQueryReply);
         }
         finally {
             router.isAlive = true;
@@ -458,7 +484,7 @@ public class OOBHandlerTest extends LimeTestCase {
      */
     public void testMismatchingPublicAddressIsOverwritten() throws Exception {
         // a host claims to have 10 results
-        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
 
@@ -484,7 +510,7 @@ public class OOBHandlerTest extends LimeTestCase {
      */
     public void testMismatchingPrivateAddressIsOverwrittenForNeedsPush() throws Exception {
         router.numToRequest = 10;
-        handler.handleMessage(new ReplyNumberVendorMessage(g, 10), null, replyHandler);
+        handler.handleMessage(factory.create(g, 10), null, replyHandler);
         
         SecurityToken token = assertACKSent(replyHandler, 10);
         
@@ -505,7 +531,7 @@ public class OOBHandlerTest extends LimeTestCase {
      */
     public void testMismatchingPrivateAddressIsNotOverwrittenForNoPush() throws Exception {
         router.numToRequest = 10;
-        handler.handleMessage(new ReplyNumberVendorMessage(g, 10), null, replyHandler);
+        handler.handleMessage(factory.create(g, 10), null, replyHandler);
         
         SecurityToken token = assertACKSent(replyHandler, 10);
         
@@ -526,7 +552,7 @@ public class OOBHandlerTest extends LimeTestCase {
      *  Tests that the mismatching address of v2 replies is overwritten. 
      */
     public void testOOBv2MismatchingPublicAddressIsOverwritten() throws Exception {
-        ReplyNumberVendorMessage rnvm = ReplyNumberVendorMessage.createV2ReplyNumberVendorMessage(g, 10);
+        ReplyNumberVendorMessage rnvm = factory.createV2ReplyNumberVendorMessage(g, 10);
         router.numToRequest = 10;
         handler.handleMessage(rnvm, null, replyHandler);
         
@@ -570,14 +596,14 @@ public class OOBHandlerTest extends LimeTestCase {
             byte[] addr, SecurityToken token, int offset, boolean needsPush) {
         Response[] res = new Response[numResults];
         for (int j = 0; j < res.length; j++)
-            res[j] = new Response(10, 10, "susheel" + j + offset);
+            res[j] = responseFactory.createResponse(10, 10, "susheel" + j + offset);
 
-        return new QueryReply(guid, (byte) 1, 1, addr, 0, res, GUID.makeGuid(),
-                new byte[0], needsPush, false, true, true, false, false, true,
-                null, token);
+        return queryReplyFactory.createQueryReply(guid, (byte) 1, 1,
+                addr, 0, res, GUID.makeGuid(), new byte[0], needsPush, false,
+                true, true, false, false, true, null, token);
     }
 
-    private static class MyMessageRouter extends MessageRouterStub {
+    private static class MyMessageRouter implements MessageRouter {
         volatile QueryReply reply;
 
         volatile int numToRequest;
@@ -586,34 +612,167 @@ public class OOBHandlerTest extends LimeTestCase {
 
         volatile boolean isAlive = true;
 
-        @Override
+        private ReplyNumberVendorMessage bypassedReply;
+
+        private QueryReply bypassedQueryReply;
+
         public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
             return numToRequest;
         }
 
-        @Override
         public long getOOBExpireTime() {
             return timeToExpire;
         }
 
-        @Override
         public void handleQueryReply(QueryReply queryReply, ReplyHandler handler) {
             this.reply = queryReply;
         }
 
-        @Override
         public boolean isQueryAlive(GUID guid) {
             return isAlive;
         }
-    }
-    
-    private static class QueryAliveActivityCallback extends ActivityCallbackStub {
-        @Override
-        public boolean isQueryAlive(GUID guid) {
+
+        public boolean addBypassedSource(ReplyNumberVendorMessage reply,
+                ReplyHandler handler) {
+            bypassedReply = reply;  
             return true;
         }
-    }
 
+        public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
+            bypassedQueryReply = reply;
+            return true;
+        }
+
+        public void addMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+        }
+
+        public void addMulticastMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+        }
+
+        public void addUDPMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+        }
+
+        public void broadcastPingRequest(PingRequest ping) {
+        }
+
+        public void downloadFinished(GUID guid) throws IllegalArgumentException {
+        }
+
+        public void forwardInspectionRequestToLeaves(InspectionRequest ir) {
+        }
+
+        public void forwardQueryRequestToLeaves(QueryRequest query,
+                ReplyHandler handler) {
+        }
+
+        public MessageHandler getMessageHandler(Class<? extends Message> clazz) {
+            return null;
+        }
+
+        public MessageHandler getMulticastMessageHandler(
+                Class<? extends Message> clazz) {
+            return null;
+        }
+
+        public String getPingRouteTableDump() {
+            return null;
+        }
+
+        public String getPushRouteTableDump() {
+            return null;
+        }
+
+        public Set<GUESSEndpoint> getQueryLocs(GUID guid) {
+            return null;
+        }
+
+        public QueryRouteTable getQueryRouteTable() {
+            return null;
+        }
+
+        public String getQueryRouteTableDump() {
+            return null;
+        }
+
+        public MessageHandler getUDPMessageHandler(
+                Class<? extends Message> clazz) {
+            return null;
+        }
+
+        public void handleMessage(Message msg,
+                ManagedConnection receivingConnection) {
+        }
+
+        public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
+        }
+
+        public void handleUDPMessage(Message msg, InetSocketAddress addr) {
+        }
+
+        public void initialize() {
+        }
+
+        public boolean isHostUnicastQueried(GUID guid, IpPort host) {
+            return false;
+        }
+
+        public boolean originateQuery(QueryRequest query, ManagedConnection mc) {
+            return false;
+        }
+
+        public void originateQueryGUID(byte[] guid) {
+        }
+
+        public void queryKilled(GUID guid) throws IllegalArgumentException {
+        }
+
+        public void registerMessageListener(byte[] guid, MessageListener ml) {
+        }
+
+        public void removeConnection(ReplyHandler rh) {
+        }
+
+        public Iterable<QueryReply> responsesToQueryReplies(
+                Response[] responses, QueryRequest queryRequest) {
+            return null;
+        }
+
+        public void sendDynamicQuery(QueryRequest query) {
+        }
+
+        public void sendMulticastPushRequest(PushRequest push) {
+        }
+
+        public void sendPingRequest(PingRequest request,
+                ManagedConnection connection) {
+        }
+
+        public void sendPushRequest(PushRequest push) throws IOException {
+        }
+
+        public void sendQueryRequest(QueryRequest request,
+                ManagedConnection connection) {
+        }
+
+        public void setMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+        }
+
+        public void setMulticastMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+        }
+
+        public void setUDPMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+        }
+
+        public void unregisterMessageListener(byte[] guid, MessageListener ml) {
+        }
+    }
+    
     private static class MyReplyHandler extends ReplyHandlerStub {
         volatile Message m;
 

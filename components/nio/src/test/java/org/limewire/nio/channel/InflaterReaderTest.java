@@ -11,8 +11,6 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import org.limewire.nio.channel.InflaterReader;
-import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.util.BaseTestCase;
 
 
@@ -206,8 +204,7 @@ public final class InflaterReaderTest extends BaseTestCase {
             dos.close();                      //flushes bytes
             return buffer(baos.toByteArray());
         } finally {
-            if(dos != null)
-                try { dos.close(); } catch(IOException x) {}
+            try { dos.close(); } catch(IOException x) {}
         }
     }
     
@@ -221,8 +218,7 @@ public final class InflaterReaderTest extends BaseTestCase {
             dos.flush();
             return buffer(baos.toByteArray());
         } finally {
-            if(dos != null)
-                try { dos.close(); } catch(IOException x) {}
+            try { dos.close(); } catch(IOException x) {}
             def.end();
         }
     }

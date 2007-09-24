@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,12 +43,19 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ClassCNetworks;
@@ -76,6 +85,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
  * use those anymore.
  */
+@Singleton
 public class HostCatcher {
     
     /**
@@ -213,12 +223,7 @@ public class HostCatcher {
      */
     private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
         new ListPartitioner<ExtendedEndpoint>(restoredHosts, 3);
-    
-    /**
-     * The pinger that will send the messages
-     */
-    private UniqueHostPinger pinger;
-        
+            
     /** The UDPHostCache bootstrap system. */
     private UDPHostCache udpHostCache;
     
@@ -308,12 +313,45 @@ public class HostCatcher {
     /** a bunch of inspectables for hostcatcher */
     public final HCInspectables inspectables = new HCInspectables();
     
-	/**
-	 * Creates a new <tt>HostCatcher</tt> instance.
-	 */
-	public HostCatcher() {
-        pinger = new UniqueHostPinger();
-        udpHostCache = new UDPHostCache(pinger);
+    
+    private final ScheduledExecutorService backgroundExecutor;
+    private final ConnectionServices connectionServices;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<UDPService> udpService;
+    private final Provider<DHTManager> dhtManager;
+    private final Provider<QueryUnicaster> queryUnicaster;
+    private final Provider<IPFilter> ipFilter;
+    private final Provider<MulticastService> multicastService;
+    private final UniqueHostPinger uniqueHostPinger;
+
+    private final PingRequestFactory pingRequestFactory;
+    
+    @Inject
+	public HostCatcher(
+	        @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            ConnectionServices connectionServices,
+            Provider<ConnectionManager> connectionManager,
+            Provider<UDPService> udpService, Provider<DHTManager> dhtManager,
+            Provider<QueryUnicaster> queryUnicaster,
+            Provider<IPFilter> ipFilter,
+            Provider<MulticastService> multicastService,
+            UniqueHostPinger uniqueHostPinger,
+            UDPHostCacheFactory udpHostCacheFactory,
+            PingRequestFactory pingRequestFactory) {
+        this.backgroundExecutor = backgroundExecutor;
+        this.connectionServices = connectionServices;
+        this.connectionManager = connectionManager;
+        this.udpService = udpService;
+        this.dhtManager = dhtManager;
+        this.queryUnicaster = queryUnicaster;
+        this.ipFilter = ipFilter;
+        this.multicastService = multicastService;
+        this.uniqueHostPinger = uniqueHostPinger;
+        this.pingRequestFactory = pingRequestFactory;
+        
+        // TODO: this could also be solved with a named injection to get the
+        //       UniqHostPinger and not its super class
+        this.udpHostCache = udpHostCacheFactory.createUDPHostCache(uniqueHostPinger);
     }
 
     /**
@@ -341,13 +379,13 @@ public class HostCatcher {
             } 
         };
         // Recover hosts on probation every minute.
-        RouterService.schedule(probationRestorer, 
-            PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
+        backgroundExecutor.scheduleWithFixedDelay(probationRestorer, 
+            PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME, TimeUnit.MILLISECONDS);
             
         // Try to fetch hosts whenever we need them.
         // Start it immediately, so that if we have no hosts
         // (because of a fresh installation) we will connect.
-        RouterService.schedule(FETCHER, 0, 2*1000);
+        backgroundExecutor.scheduleWithFixedDelay(FETCHER, 0, 2*1000, TimeUnit.MILLISECONDS);
         LOG.trace("STOP scheduling");
     }
 
@@ -371,7 +409,7 @@ public class HostCatcher {
      */
     private void rank(Collection<? extends IpPort> hosts) {
         if(needsPongRanking()) {
-            pinger.rank(
+            uniqueHostPinger.rank(
                 hosts,
                 // cancel when connected -- don't send out any more pings
                 new Cancellable() {
@@ -385,7 +423,7 @@ public class HostCatcher {
     
     
     public void sendMessageToAllHosts(Message m, MessageListener listener, Cancellable c) {
-        pinger.rank(getAllHosts(), listener, c, m);
+        uniqueHostPinger.rank(getAllHosts(), listener, c, m);
     }
     
     private synchronized Collection<ExtendedEndpoint> getAllHosts() {
@@ -426,10 +464,9 @@ public class HostCatcher {
      * Determines if UDP Pongs need to be sent out.
      */
     private synchronized boolean needsPongRanking() {
-        if(RouterService.isFullyConnected())
+        if(connectionServices.isFullyConnected())
             return false;
-        int have = RouterService.getConnectionManager().
-            getInitializedConnections().size();
+        int have = connectionManager.get().getInitializedConnections().size();
         if(have >= MAX_CONNECTIONS)
             return false;
             
@@ -438,7 +475,7 @@ public class HostCatcher {
             return false;
 
         int size;
-        if(RouterService.isSupernode()) {
+        if(connectionServices.isSupernode()) {
             synchronized(this) {
                 size = FREE_ULTRAPEER_SLOTS_SET.size();
             }
@@ -448,8 +485,7 @@ public class HostCatcher {
             }
         }
 
-        int preferred = RouterService.getConnectionManager().
-            getPreferredConnectionCount();
+        int preferred = connectionManager.get().getPreferredConnectionCount();
         
         return size < preferred - have;
     }
@@ -551,7 +587,7 @@ public class HostCatcher {
         if (pr.isUDP()) {
             GUID g = new GUID(pr.getGUID());
             if (!g.equals(PingRequest.UDP_GUID) && 
-                    !g.equals(UDPService.instance().getSolicitedGUID())) 
+                    !g.equals(udpService.get().getSolicitedGUID())) 
                 return false;
         } 
         
@@ -584,24 +620,22 @@ public class HostCatcher {
             endpoint.setDHTVersion(dhtVersion);
             endpoint.setDHTMode(mode);
             
-            DHTManager dhtManager = RouterService.getDHTManager();
-            if (dhtManager.isRunning()) {
+            if (dhtManager.get().isRunning()) {
                 // If active DHT endpoint, immediately send to dht manager
                 if(mode.equals(DHTMode.ACTIVE)) {
                     SocketAddress address = new InetSocketAddress(
                             endpoint.getAddress(), endpoint.getPort());
-                    dhtManager.addActiveDHTNode(address);
+                    dhtManager.get().addActiveDHTNode(address);
                 } else if(mode.equals(DHTMode.PASSIVE)) {
                     SocketAddress address = new InetSocketAddress(
                             endpoint.getAddress(), endpoint.getPort());
-                    dhtManager.addPassiveDHTNode(address);
+                    dhtManager.get().addPassiveDHTNode(address);
                 }
             }
         }
         
         if(pr.supportsUnicast()) {
-            QueryUnicaster.instance().
-				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
+            queryUnicaster.get().addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         
         // if the pong carried packed IP/Ports, add those as their own
@@ -916,7 +950,7 @@ public class HostCatcher {
             return false;
 
         //Skip if this host is banned.
-        if (!RouterService.getIpFilter().allow(addr))
+        if (!ipFilter.get().allow(addr))
             return false;  
         
         synchronized(this) {
@@ -1102,13 +1136,13 @@ public class HostCatcher {
         //LOG.trace("entered getAnEndpointInternal");
         // If we're already an ultrapeer and we know about hosts with free
         // ultrapeer slots, try them.
-        if(RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+        if(connectionServices.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
             return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
                                     
         } 
         // Otherwise, if we're already a leaf and we know about ultrapeers with
         // free leaf slots, try those.
-        else if(RouterService.isShieldedLeaf() && 
+        else if(connectionServices.isShieldedLeaf() && 
                 !FREE_LEAF_SLOTS_SET.isEmpty()) {
             return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
         } 
@@ -1155,7 +1189,7 @@ public class HostCatcher {
         String loc = ApplicationSettings.LANGUAGE.getValue();
         ExtendedEndpoint ret = null;
         // preference a locale host if we haven't matched any locales yet
-        if(!RouterService.getConnectionManager().isLocaleMatched()) {
+        if(!connectionManager.get().isLocaleMatched()) {
             if(LOCALE_SET_MAP.containsKey(loc)) {
                 Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
                 for(ExtendedEndpoint e : base.keySet()) {
@@ -1293,13 +1327,13 @@ public class HostCatcher {
         
         // schedule new runnable to clear the set of endpoints that
         // were pinged while trying to connect
-        RouterService.schedule(
+        backgroundExecutor.scheduleWithFixedDelay(
                 new Runnable() {
                     public void run() {
-                        pinger.resetData();
+                        uniqueHostPinger.resetData();
                     }
                 },
-                PONG_RANKING_EXPIRE_TIME,0);
+                PONG_RANKING_EXPIRE_TIME,0, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -1314,7 +1348,7 @@ public class HostCatcher {
     }
     
     public UDPPinger getPinger() {
-        return pinger;
+        return uniqueHostPinger;
     }
 
     /** Enable very slow rep checking?  Package access for use by
@@ -1393,7 +1427,7 @@ public class HostCatcher {
             FETCHER.resetFetchTime();
             udpHostCache.resetData();
             restoredHosts.clear();
-            pinger.resetData();
+            uniqueHostPinger.resetData();
         }
         
         // Read the hosts file again.  This will also notify any waiting 
@@ -1500,7 +1534,7 @@ public class HostCatcher {
         private synchronized boolean needsHosts(long now) {
             synchronized(HostCatcher.this) { 
                 return getNumHosts() == 0 ||
-                    (!RouterService.isConnected() && _failures > 100);
+                    (!connectionServices.isConnected() && _failures > 100);
             }
         }
         
@@ -1527,8 +1561,8 @@ public class HostCatcher {
             if(nextAllowedMulticastTime < now && 
                !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
                 LOG.trace("Fetching via multicast");
-                PingRequest pr = PingRequest.createMulticastPing();
-                MulticastService.instance().send(pr);
+                PingRequest pr = pingRequestFactory.createMulticastPing();
+                multicastService.get().send(pr);
                 nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
                 return true;
             }

@@ -73,11 +73,10 @@ public interface License {
     public String getLicense();
     
     /**
-     * Starts verification of the license.
-     *
-     * The listener is notified when verification is finished.
+     * Verifies the license. The results of the verification can be retrieved by
+     * invoking {@link #isValid(URN)}.
      */
-    public void verify(VerificationListener listener);
+    public void verify(LicenseCache licenseCache);
     
     /**
      * Returns the last time this license was verified.

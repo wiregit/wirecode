@@ -1,30 +1,22 @@
 package com.limegroup.gnutella.spam;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.IpPortSet;
+
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-
-@SuppressWarnings("unchecked")
 public class SpamManagerTest extends LimeTestCase {
-
-    public SpamManagerTest(String name) {
-        super(name);
-    }
-
-    public static Test suite() {
-        return buildTestSuite(SpamManagerTest.class);
-    }
 
     /** various names of files - some tokens need to exist in each" */
     private static final String badger = " badger ";
@@ -37,44 +29,55 @@ public class SpamManagerTest extends LimeTestCase {
     private static final String addr2 = "2.2.2.2";
     private static final int port2 = 6347;
     
-    /** urns */
-    private static  URN urn1, urn2, urn3;
-    
     /** sizes */
     private static final int size1 = 1000;
     private static final int size2 = 2000;
-    
+
     /** xml docs */
     private static final String xml1 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
         "\"http://www.limewire.com/schemas/audio.xsd\"><audio " +
         "title=\"badger\"" +
         "></audio></audios>";
+
+//    private static final String xml2 = "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=" +
+//        "\"http://www.limewire.com/schemas/video.xsd\"><video " +
+//        "title=\"mushroom\"" +
+//        "></video></videos>";
+
+    private static URN urn1, urn2, urn3;
     
-    private static final String xml2 = "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=" +
-        "\"http://www.limewire.com/schemas/video.xsd\"><video " +
-        "title=\"mushroom\"" +
-        "></video></videos>";
+    private LimeXMLDocument doc1;
+    //private LimeXMLDocument doc2;
+    private SpamManager manager;
     
-    static LimeXMLDocument doc1, doc2;
-    
-    static SpamManager manager = SpamManager.instance();
-    
+    public SpamManagerTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(SpamManagerTest.class);
+    }
+
     public static void globalSetUp() {
         try {
             urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
             urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
             urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-            doc1 = new LimeXMLDocument(xml1);
-            doc2 = new LimeXMLDocument(xml2);
-        } catch (Exception bad) {
-            fail(bad);
+        } catch (Exception e) {
+            fail(e);
         }
     }
     
-    public void setUp() {
+    @Override
+    protected void setUp() throws Exception {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         SearchSettings.FILTER_SPAM_RESULTS.revertToDefault();
+        
+        manager = new SpamManager(new RatingTable());
         manager.clearFilterData();
+        
+        doc1 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml1);
+        //doc2 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml2);        
     }
     
     /** 
@@ -194,7 +197,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, snakeRating);
         
         // make the user send a query with a badger and a mushroom
-        QueryRequest qr = QueryRequest.createQuery(mushroom);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(mushroom);
         manager.startedQuery(qr);
         
         // if we receive results containing badgers and snakes their rating
@@ -278,10 +281,9 @@ public class SpamManagerTest extends LimeTestCase {
         
     }
 
-
     private static RemoteFileDesc createRFD(String addr, int port,
             String name, LimeXMLDocument doc, URN urn, int size) {
-        Set urns = new HashSet();
+        Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         return new RemoteFileDesc(addr, port, 1, name,
                 size, DataUtils.EMPTY_GUID, 3, 
@@ -289,7 +291,7 @@ public class SpamManagerTest extends LimeTestCase {
                 doc, urns,
                 false,false,
                 "ALT",
-                Collections.EMPTY_SET, 0l, false);
+                new IpPortSet(), 0l, false);
     }
     
 }

@@ -34,12 +34,12 @@ public class FirewalledStatusTest extends ClientSideTestCase {
     ///////////////////////// Actual Tests ////////////////////////////
     
     public void testStillFirewalledAfterLocalConnect() throws Exception {
-        assertFalse(RouterService.acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
         Socket incoming = new Socket("localhost", SERVER_PORT);
         incoming.close();
 
-        assertFalse(RouterService.acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
     }
 
 

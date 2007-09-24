@@ -44,11 +44,12 @@ public class ActiveDHTNodeController extends AbstractDHTController {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
-    public ActiveDHTNodeController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher, DHTMode.ACTIVE);
+    ActiveDHTNodeController(Vendor vendor, Version version,
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
+            DHTControllerFacade dhtControllerFacade) {
+        super(vendor, version, dispatcher, DHTMode.ACTIVE, dhtControllerFacade);
     }
-    
+
     @Override
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);

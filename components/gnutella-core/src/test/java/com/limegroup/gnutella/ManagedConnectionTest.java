@@ -83,7 +83,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testConnectionStatsRecorded() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection in = createLeafConnection();
@@ -102,7 +102,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         //long initialBytesSent = out.getUncompressedBytesSent();
         long initialBytesRecv = in.getUncompressedBytesReceived();
         
-        pr=new PingRequest((byte)3);
+        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
         out.send(pr);
         
         start=System.currentTimeMillis();        
@@ -121,7 +121,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testForwardsGGEP() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection conn = createLeafConnection();
@@ -132,7 +132,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         Connection out = (Connection)cm.getConnections().get(0);
         assertTrue("connection should support GGEP", out.supportsGGEP());
 
-        out.send(PingReply.create(GUID.makeGuid(), (byte)1));
+        out.send(ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1));
 		Message m = getFirstInstanceOfMessageType(conn, PingReply.class);
 		assertNotNull(m);
 		assertInstanceof("should be a pong", PingReply.class, m);
@@ -163,7 +163,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 	// Tests to make sure that connections are closed correctly from the
     //	  client side.
     public void testClientSideClose() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection out = createLeafConnection();
@@ -183,7 +183,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 	 // Tests to make sure that connections are closed correctly from the
 	 // server side.
     public void testServerSideClose() throws Exception {
-        ConnectionManager cm = RouterService.getConnectionManager();
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
         assertEquals(0, cm.getNumConnections());
 
         Connection out = createLeafConnection();
@@ -193,13 +193,13 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         assertTrue("connection should be open", out.isOpen());
         
         out.close();
-        Message m = new PingRequest((byte)4);
+        Message m = ProviderHacks.getPingRequestFactory().createPingRequest((byte)4);
         m.hop();
         in.send(m);   
         Thread.sleep(500);
-        in.send(new PingRequest((byte)4));
+        in.send(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4));
         Thread.sleep(500);
-        in.send(new PingRequest((byte)4));
+        in.send(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4));
         Thread.sleep(500);
 
         assertTrue("connection should not be open", !in.isOpen());
@@ -208,15 +208,15 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     
     public void testHashFiltering() throws Exception {
         URN sha1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
-        QueryRequest urnFile = QueryRequest.createQuery(sha1,"java");
+        QueryRequest urnFile = ProviderHacks.getQueryRequestFactory().createQuery(sha1,"java");
         
-        ManagedConnection mc = new ManagedConnection("", 1);
+        ManagedConnection mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection("", 1);
         // default should be no filtering
         assertFalse(mc.isSpam(urnFile));
         
         // now turn filtering on and rebuild filters
         FilterSettings.FILTER_HASH_QUERIES.setValue(true);
-        mc = new ManagedConnection("", 1);
+        mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection("", 1);
         
         assertTrue(mc.isSpam(urnFile));
 
@@ -224,7 +224,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingHandshakeSucceeds() throws Exception {
-        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ManagedConnection mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -244,7 +244,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingBadHandshake() throws Exception {
-        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ManagedConnection mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -265,7 +265,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingNGOK() throws Exception {
-        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ManagedConnection mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -287,7 +287,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingHandshakeTimeout() throws Exception {
-        ManagedConnection mc = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        ManagedConnection mc = ProviderHacks.getManagedConnectionFactory().createManagedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -373,7 +373,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
                             return;
                         }
 
-                        final Connection con = new Connection(socket);
+                        final Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
                         con.initialize(null, new StubHandshakeResponder(), 1000);
                     } catch (Exception e) {
                         ErrorService.error(e);

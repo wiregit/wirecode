@@ -16,7 +16,7 @@ import org.apache.http.protocol.HttpExecutionContext;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.HackMessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -54,8 +54,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             }
         };
         sessionManager.uploader = uploader;
-        requestHandler = new PushProxyRequestHandler(sessionManager,
-                messageRouter);
+        requestHandler = new PushProxyRequestHandler(sessionManager, messageRouter);
         context = new HttpExecutionContext(null);
     }
 
@@ -93,8 +92,8 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
                 .getStatusCode());
     }
 
-    private class StubMessageRouter extends MessageRouter {
-
+    private class StubMessageRouter extends HackMessageRouter {
+        
         private PushRequest push;
 
         @Override

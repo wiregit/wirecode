@@ -36,7 +36,9 @@ import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.BucketRefresherSettings;
+import org.limewire.mojito.settings.KademliaSettings;
 
 /**
  * The BucketRefresher goes in periodic intervals through all Buckets
@@ -138,6 +140,28 @@ public class BucketRefresher implements Runnable {
             // run() call has finished as we don't want to run
             // refresher tasks in parallel
             if (refreshTask.isDone()) {
+                
+                long pingNearest = BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.getValue();
+                if (pingNearest > 0L) {
+                    Collection<Contact> nodes = context.getRouteTable().select(
+                            context.getLocalNodeID(), 
+                            KademliaSettings.REPLICATION_PARAMETER.getValue(), 
+                            SelectMode.ALL);
+                    
+                    for (Contact node : nodes) {
+                        if (context.isLocalNode(node)) {
+                            continue;
+                        }
+                        
+                        // Ping only Nodes that haven't responded/contacted us
+                        // for a certain amount of time
+                        long timeStamp = node.getTimeStamp();
+                        if ((System.currentTimeMillis() - timeStamp) >= pingNearest) {
+                            context.ping(node);
+                        }
+                    }
+                }
+                
                 refreshTask.refresh();
             }
         }

@@ -14,6 +14,7 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -32,60 +33,52 @@ import com.limegroup.gnutella.version.UpdateHandler;
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
 
     private final Provider<ConnectionManager> connectionManager;
-
     private final NetworkManager networkManager;
-
     private final QueryRequestFactory queryRequestFactory;
-
     private final HeadersFactory headersFactory;
-
     private final HandshakeResponderFactory handshakeResponderFactory;
-
     private final QueryReplyFactory queryReplyFactory;
-
     private final Provider<MessageDispatcher> messageDispatcher;
-
     private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
-
+    private final Provider<UDPService> udpService;
     private final Provider<SearchResultHandler> searchResultHandler;
-
     private final CapabilitiesVMFactory capabilitiesVMFactory;
-
     private final Provider<SocketsManager> socketsManager;
-
     private final Provider<Acceptor> acceptor;
-
     private final MessagesSupportedVendorMessage supportedVendorMessage;
-
     private final Provider<SimppManager> simppManager;
-
     private final Provider<UpdateHandler> updateHandler;
-
     private final Provider<ConnectionServices> connectionServices;
-
     private final GuidMapManager guidMapManager;
-
     private final SpamFilterFactory spamFilterFactory;
-
     private final MessageFactory messageFactory;
-
     private final MessageReaderFactory messageReaderFactory;
-
     private final ApplicationServices applicationServices;
 
+
     @Inject
-    public ManagedConnectionFactoryImpl(Provider<ConnectionManager> connectionManager,
-            NetworkManager networkManager, QueryRequestFactory queryRequestFactory,
-            HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,
-            QueryReplyFactory queryReplyFactory, Provider<MessageDispatcher> messageDispatcher,
+    public ManagedConnectionFactoryImpl(
+            Provider<ConnectionManager> connectionManager,
+            NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            HeadersFactory headersFactory,
+            HandshakeResponderFactory handshakeResponderFactory,
+            QueryReplyFactory queryReplyFactory,
+            Provider<MessageDispatcher> messageDispatcher,
             Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
+            Provider<UDPService> udpService,
             Provider<SearchResultHandler> searchResultHandler,
-            CapabilitiesVMFactory capabilitiesVMFactory, Provider<SocketsManager> socketsManager,
-            Provider<Acceptor> acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<SocketsManager> socketsManager,
+            Provider<Acceptor> acceptor,
+            MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
-            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
-            SpamFilterFactory spamFilterFactory, MessageFactory messageFactory,
-            MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices) {
+            Provider<ConnectionServices> connectionServices, 
+            GuidMapManager guidMapManager,
+            SpamFilterFactory spamFilterFactory,
+            MessageFactory messageFactory,
+            MessageReaderFactory messageReaderFactory,
+            ApplicationServices applicationServices) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -94,6 +87,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.queryReplyFactory = queryReplyFactory;
         this.messageDispatcher = messageDispatcher;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+        this.udpService = udpService;
         this.applicationServices = applicationServices;
         this.searchResultHandler = searchResultHandler;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
@@ -109,26 +103,48 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.messageReaderFactory = messageReaderFactory;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.limegroup.gnutella.connection.ManagedConnectionFactory#createManagedConnection(java.lang.String,
+     *      int)
+     */
     public ManagedConnection createManagedConnection(String host, int port) {
         return createManagedConnection(host, port, ConnectType.PLAIN);
     }
 
-    public ManagedConnection createManagedConnection(String host, int port, ConnectType type) {
-        return new ManagedConnection(host, port, type, connectionManager.get(), networkManager,
-                queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
-                        .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
-                supportedVendorMessage, simppManager, updateHandler, connectionServices,
-                guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                applicationServices);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.limegroup.gnutella.connection.ManagedConnectionFactory#createManagedConnection(java.lang.String,
+     *      int, com.limegroup.gnutella.util.SocketsManager.ConnectType)
+     */
+    public ManagedConnection createManagedConnection(String host, int port,
+            ConnectType type) {
+        return new ManagedConnection(host, port, type, connectionManager.get(),
+                networkManager, queryRequestFactory, headersFactory,
+                handshakeResponderFactory, queryReplyFactory, messageDispatcher
+                        .get(), networkUpdateSanityChecker.get(), udpService
+                        .get(), searchResultHandler.get(),
+                        capabilitiesVMFactory,
+                        socketsManager.get(), acceptor.get(), supportedVendorMessage,
+                        simppManager, updateHandler, connectionServices, guidMapManager,
+                        spamFilterFactory, messageReaderFactory, messageFactory, applicationServices);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.limegroup.gnutella.connection.ManagedConnectionFactory#createManagedConnection(java.net.Socket)
+     */
     public ManagedConnection createManagedConnection(Socket socket) {
-        return new ManagedConnection(socket, connectionManager.get(), networkManager,
-                queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
-                        .get(), capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,
-                simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
+        return new ManagedConnection(socket, connectionManager.get(),
+                networkManager, queryRequestFactory, headersFactory,
+                handshakeResponderFactory, queryReplyFactory,
+                messageDispatcher.get(), networkUpdateSanityChecker.get(), udpService.get(),
+                searchResultHandler.get(), capabilitiesVMFactory,
+                acceptor.get(), supportedVendorMessage, simppManager, updateHandler, 
+                connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices);
     }
 

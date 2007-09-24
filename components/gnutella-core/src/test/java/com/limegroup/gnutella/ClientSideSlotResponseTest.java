@@ -7,17 +7,18 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Test;
+
+import org.limewire.inject.Providers;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 
 /**
  * Tests how the availability of upload slots affects responses, as well
@@ -59,13 +60,13 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
         FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
-        RouterService.getFileManager().addFileAlways(textFile, waiter);
-        RouterService.getFileManager().addFileAlways(torrentFile, waiter);
-        RouterService.getFileManager().addFileAlways(userTorrentFile, waiter);
-        RouterService.getFileManager().addFileAlways(appTextFile, waiter);
-        RouterService.getFileManager().addFileAlways(appTorrentFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(textFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(torrentFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(userTorrentFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(appTextFile, waiter);
+        ProviderHacks.getFileManager().addFileAlways(appTorrentFile, waiter);
         waiter.waitForLoad();
-    	assertEquals(5, RouterService.getFileManager().getNumFiles());
+    	assertEquals(5, ProviderHacks.getFileManager().getNumFiles());
     }
     
     public static Integer numUPs() {
@@ -79,7 +80,8 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     private static class UploadManagerStub extends HTTPUploadManager {
     	boolean isServiceable, mayBeServiceable;
     	UploadManagerStub() {
-    		super(new UploadSlotManager());
+    		super(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()),
+    		        Providers.of(ProviderHacks.getHTTPUploadAcceptor()), Providers.of(ProviderHacks.getFileManager()), Providers.of(ProviderHacks.getActivityCallback()));
     	}
 		@Override
 		public synchronized boolean isServiceable() {
@@ -101,8 +103,8 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	drain(testUP[0], 500);
     	uStub.isServiceable = true;
     	uStub.mayBeServiceable = true;
-    	PrivilegedAccessor.setValue(rs, "uploadManager", uStub);
-    	PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+    	//PrivilegedAccessor.setValue(rs, "uploadManager", uStub);
+    	PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
     }
 
     /**
@@ -112,7 +114,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testResponsesSent() throws Exception {
     	uStub.isServiceable = true;
     	uStub.mayBeServiceable = true;
-    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -129,7 +131,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
      */
     public void testNothingSent() throws Exception {
     	uStub.mayBeServiceable = false;
-    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -144,7 +146,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testAllFiltered() throws Exception {
     	uStub.mayBeServiceable = true;
     	uStub.isServiceable = false;
-    	QueryRequest query = QueryRequest.createQuery(TEXT_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(TEXT_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -159,7 +161,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testNoneFiltered() throws Exception {
     	uStub.mayBeServiceable = true;
     	uStub.isServiceable = false;
-    	QueryRequest query = QueryRequest.createQuery(OTHER_TORRENT);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(OTHER_TORRENT);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -177,7 +179,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testMetaFilesSent() throws Exception {
     	uStub.isServiceable = false;
     	uStub.mayBeServiceable = true;
-    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
+    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();

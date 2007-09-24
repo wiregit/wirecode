@@ -25,8 +25,9 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Inject;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -112,9 +113,20 @@ public class IncompleteFileManager implements Serializable {
      */
     private Map<URN, File> hashes = new HashMap<URN, File>();
     
+    @Inject
+    private volatile static FileManager globalFileManager;
 
+    @Inject
+    private volatile static VerifyingFileFactory verifyingFileFactory;
+    
+    private volatile transient FileManager fileManager;
+    
     ///////////////////////////////////////////////////////////////////////////
 
+    public IncompleteFileManager() {
+        this.fileManager = globalFileManager;
+    }
+    
     /**
      * Removes entries in this for which there is no file on disk.
      * 
@@ -127,7 +139,7 @@ public class IncompleteFileManager implements Serializable {
             File file = iter.next();
             if (!file.exists() ) {
                 ret=true;
-                RouterService.getFileManager().removeFileIfShared(file);
+                fileManager.removeFileIfShared(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }
@@ -154,7 +166,7 @@ public class IncompleteFileManager implements Serializable {
             }
             if (!file.exists() || (isOld(file) && !activeFiles.contains(file))) {
                 ret=true;
-                RouterService.getFileManager().removeFileIfShared(file);
+                fileManager.removeFileIfShared(file);
                 file.delete();
                 iter.remove();
             }
@@ -375,6 +387,8 @@ public class IncompleteFileManager implements Serializable {
     
     private synchronized void readObject(ObjectInputStream stream) 
                                    throws IOException, ClassNotFoundException {
+        this.fileManager = globalFileManager;
+        
         GetField gets = stream.readFields();
         blocks = transform(gets.get("blocks", null));
         hashes = verifyHashes(gets.get("hashes", null));
@@ -452,7 +466,7 @@ public class IncompleteFileManager implements Serializable {
                 }
                 VerifyingFile vf;
                 try {
-                    vf = new VerifyingFile(getCompletedSize(f));
+                    vf = verifyingFileFactory.createVerifyingFile(getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
                 	continue;
                 }
@@ -527,7 +541,7 @@ public class IncompleteFileManager implements Serializable {
         }
         
         //Remove the entry from FileManager
-        RouterService.getFileManager().removeFileIfShared(incompleteFile);
+        fileManager.removeFileIfShared(incompleteFile);
     }
 
     /**
@@ -588,7 +602,7 @@ public class IncompleteFileManager implements Serializable {
         Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
-        RouterService.getFileManager().addIncompleteFile(
+        fileManager.addIncompleteFile(
             incompleteFile,
             completeHashes,
             getCompletedName(incompleteFile),

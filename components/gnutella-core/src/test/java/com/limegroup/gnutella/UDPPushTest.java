@@ -13,19 +13,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -76,16 +74,16 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket = new DatagramSocket(20000);
 		udpsocket.setSoTimeout(1000);
 				
-		ActivityCallback ac = new ActivityCallbackStub();
-		RouterService rs = new RouterService(ac);
-		rs.start();
+		//ActivityCallback ac = new ActivityCallbackStub();
+	//	RouterService rs = new RouterService(ac);
+		ProviderHacks.getLifecycleManager().start();
 		
 	}
 	
 	public void setUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		Map map = (Map) PrivilegedAccessor.getValue(
-                RouterService.getDownloadManager().getPushManager(), "UDP_FAILOVER");
+                ProviderHacks.getDownloadManager().getPushManager(), "UDP_FAILOVER");
         map.clear();
 		
 		long now = System.currentTimeMillis();
@@ -123,10 +121,10 @@ public class UDPPushTest extends LimeTestCase {
 				"ALT",
 				proxies,now, false);
 		
-		Acceptor acc = RouterService.getAcceptor();
+		Acceptor acc = ProviderHacks.getAcceptor();
 		PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));
 
-		assertTrue(RouterService.acceptedIncomingConnection());
+		assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 	}
 	
 	
@@ -148,7 +146,7 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		Thread.sleep(5200);
@@ -179,7 +177,7 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		Thread.sleep(5200);
@@ -208,7 +206,7 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		socket = new NIOSocket(InetAddress.getLocalHost(),10000);
@@ -220,7 +218,7 @@ public class UDPPushTest extends LimeTestCase {
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
 		
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		other.close();
 		
@@ -255,12 +253,12 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		udpsocket.receive(push);
 		bais = new ByteArrayInputStream(push.getData());
-		pr = (PushRequest)MessageFactory.read(bais);
+		pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd2.getIndex(),pr.getIndex());
 		
 		Thread.sleep(2000);
@@ -269,7 +267,7 @@ public class UDPPushTest extends LimeTestCase {
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		
@@ -277,7 +275,7 @@ public class UDPPushTest extends LimeTestCase {
 		other = serversocket.accept();
 		socket.setSoTimeout(1000);
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		Thread.sleep(5200);
@@ -303,12 +301,12 @@ public class UDPPushTest extends LimeTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)MessageFactory.read(bais);
+		PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		udpsocket.receive(push);
 		bais = new ByteArrayInputStream(push.getData());
-		pr = (PushRequest)MessageFactory.read(bais);
+		pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
 		assertEquals(rfd2.getIndex(),pr.getIndex());
 		
 		Thread.sleep(2000);
@@ -317,7 +315,7 @@ public class UDPPushTest extends LimeTestCase {
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		
@@ -346,13 +344,13 @@ public class UDPPushTest extends LimeTestCase {
         udpsocket.receive(push);
         
         ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-        PushRequest pr = (PushRequest)MessageFactory.read(bais);
+        PushRequest pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
         assertEquals(rfd1.getIndex(),pr.getIndex());
         assertFalse(pr.isTLSCapable());
         
         udpsocket.receive(push);
         bais = new ByteArrayInputStream(push.getData());
-        pr = (PushRequest)MessageFactory.read(bais);
+        pr = (PushRequest)ProviderHacks.getMessageFactory().read(bais);
         assertEquals(rfd2.getIndex(),pr.getIndex());
         assertTrue(pr.isTLSCapable());
         
@@ -361,14 +359,14 @@ public class UDPPushTest extends LimeTestCase {
         socket = new NIOSocket(InetAddress.getLocalHost(),10000);
         Socket other = serversocket.accept();        
         sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
         socket.close();        
         socket = new NIOSocket(InetAddress.getLocalHost(),10000);
         other = serversocket.accept();
         socket.setSoTimeout(1000);
         sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
-        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
+        ProviderHacks.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
         socket.close();
         Thread.sleep(5200);        
@@ -383,7 +381,7 @@ public class UDPPushTest extends LimeTestCase {
 	static void requestPush(final RemoteFileDesc rfd) throws Exception{
 		Thread t = ThreadExecutor.newManagedThread(new Runnable() {
 			public void run() {
-				RouterService.getDownloadManager().getPushManager().sendPush(rfd);
+				ProviderHacks.getDownloadManager().getPushManager().sendPush(rfd);
 			}
 		});
 		t.start();

@@ -27,13 +27,11 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.HttpIOReactor;
 import org.limewire.http.SessionRequestCallbackAdapter;
+import org.limewire.net.ConnectionAcceptor;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.ProviderHacks;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
@@ -54,9 +52,9 @@ public class HttpIOReactorTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
+      //  new RouterService(new ActivityCallbackStub());
 
-        acceptor = new Acceptor();
+        acceptor = ProviderHacks.getAcceptor();
         acceptor.start();
         acceptor.setListeningPort(ACCEPTOR_PORT);
 
@@ -89,7 +87,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         server.execute(null);
         HttpIOReactor reactor = server.getReactor();
         
-        Socket socket = Sockets.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
+        Socket socket = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
         try {
             DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
@@ -109,12 +107,15 @@ public class HttpIOReactorTest extends BaseTestCase {
             }
         });
         server.execute(new MyEventListener());
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(
+        ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
                         server.getReactor().acceptConnection(word + " ", socket);
                     }
-                }, false, false, "GET", "HEAD", "POST" );
+                    public boolean isBlocking() {
+                        return false;
+                    }
+                }, false, "GET", "HEAD", "POST" );
 
         final HttpTestClient client = new HttpTestClient();
         MyHttpRequestExecutionHandler executionHandler = new MyHttpRequestExecutionHandler();

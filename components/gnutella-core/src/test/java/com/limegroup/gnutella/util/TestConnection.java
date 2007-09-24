@@ -1,12 +1,16 @@
 package com.limegroup.gnutella.util;
 
+import org.limewire.inject.Providers;
+
 import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Helper class that overrides getNumIntraUltrapeerConnections for
@@ -32,7 +36,21 @@ public abstract class TestConnection extends ManagedConnection {
     protected QueryRouteTable QRT;
     
     TestConnection(int connections) {
-        super("60.76.5.3", 4444);
+        super("60.76.5.3", 4444, ConnectType.PLAIN, ProviderHacks
+                .getConnectionManager(), ProviderHacks.getNetworkManager(),
+                ProviderHacks.getQueryRequestFactory(), ProviderHacks
+                .getHeadersFactory(), ProviderHacks
+                .getHandshakeResponderFactory(), ProviderHacks
+                .getQueryReplyFactory(), ProviderHacks
+                .getMessageDispatcher(), ProviderHacks
+                .getNetworkUpdateSanityChecker(), ProviderHacks
+                .getUdpService(),
+                ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
+                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
+                Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
+                Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
+                ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory(),
+                ProviderHacks.getApplicationServices());
         CONNECTIONS = connections;
     }
     

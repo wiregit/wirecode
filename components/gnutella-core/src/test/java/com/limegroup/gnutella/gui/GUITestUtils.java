@@ -4,12 +4,13 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
-import com.limegroup.gnutella.RouterService;
+import junit.framework.Assert;
 
 public class GUITestUtils {
 
     public static void initializeUI() {
-        new RouterService(new VisualConnectionCallback());
+        Assert.fail("fix me");
+        //new RouterService(new VisualConnectionCallback());
     }
     
     public static void waitForSwing() throws InterruptedException, InvocationTargetException {

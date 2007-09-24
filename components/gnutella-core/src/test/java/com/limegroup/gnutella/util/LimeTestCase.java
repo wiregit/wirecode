@@ -25,11 +25,9 @@ import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeCoreGlue;
-import com.limegroup.gnutella.UrnCache;
-import com.limegroup.gnutella.UrnCallback;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -45,6 +43,9 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UISettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
+/**
+ * Should be used when the test case requires to change settings.
+ */
 @SuppressWarnings("unchecked")
 public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback {
     
@@ -221,7 +222,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
             UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
-        LimeCoreGlue.install();
+      //  LimeCoreGlue.install(ProviderHacks.getNetworkManager());
     }
     
     /**
@@ -264,10 +265,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         _xmlSchemasDir.mkdirs();
         
         // set the settings directory, then immediately change it.
-        LimeCoreGlue.preinstall();
-        PrivilegedAccessor.setValue(CommonUtils.class,
-                                    "settingsDirectory",
-                                    _settingsDir);
+        LimeCoreGlue.preinstall(_settingsDir);
 
         File f = getRootDir();
 
@@ -334,38 +332,13 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(set);
     }
     
-    public static Set calculateAndCacheURN(File f) throws Exception {
-        final Set myUrns = new HashSet(1);
-        UrnCallback blocker = new UrnCallback() {
-            public void urnsCalculated(File file, Set urns) {
-                synchronized(myUrns) {
-                    myUrns.addAll(urns);
-                    myUrns.notify();
-                }
-            }
-            
-            public boolean isOwner(Object o) {
-                return false;
-            }
-        };
-        
-        synchronized(myUrns) {
-            UrnCache.instance().calculateAndCacheUrns(f, blocker);
-            if(myUrns.isEmpty()) // only wait if it didn't fill immediately.
-                myUrns.wait(3000);
-        }
-        
-        return myUrns;
-    }
-    
-    
     private static final int TIMEOUT = 2000;
     
     /**
      * Sends a pong through the connection to keep it alive.
      */
     public static void keepAlive(Connection c) throws IOException {
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1);
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1);
         c.send(pr);
         c.flush();
     }
@@ -375,7 +348,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      */
     public static void keepAllAlive(Connection[] cs) throws IOException {
         for(int i = 0; i < cs.length; i++) {
-            PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1);
+            PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1);
             cs[i].send(pr);
             cs[i].flush();
         }
@@ -570,7 +543,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
                 return null;
             try {
                 socket.setSoTimeout(timeout);
-                Message m=MessageFactory.read(socket.getInputStream(), Network.TCP);
+                Message m=ProviderHacks.getMessageFactory().read(socket.getInputStream(), Network.TCP);
                 if(type.isInstance(m))
                     return (T)m;
                 else if(m == null) //interruptedIOException thrown

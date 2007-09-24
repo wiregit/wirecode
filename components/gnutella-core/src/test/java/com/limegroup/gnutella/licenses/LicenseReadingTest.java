@@ -6,17 +6,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Test;
+
 import org.limewire.collection.NameValue;
 import org.limewire.util.CommonUtils;
 
-import junit.framework.Test;
-
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-@SuppressWarnings("unchecked")
 public final class LicenseReadingTest extends LimeTestCase {
 
 	public LicenseReadingTest(String name) {
@@ -43,7 +43,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    assertNotNull(amd);
 	    
 	    boolean foundLicense = false;
-	    List nvList = amd.toNameValueList();
+	    List<NameValue<String>> nvList = amd.toNameValueList();
 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
 	        NameValue nv = (NameValue)i.next();
 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
@@ -56,7 +56,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	                 amd.getLicense());
         
 	    
-	    LimeXMLDocument doc = new LimeXMLDocument(nvList, amd.getSchemaURI());
+	    LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(nvList, amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicense(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +
@@ -68,7 +68,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 "http://creativecommons.org/licenses/sampling+/1.0/ verify at " +
 "http://ccmixter.org/file/Wired/61\"/></audios>", doc.getXMLString());
 	    
-	    List indivList = new LinkedList();
+	    List<String> indivList = new LinkedList<String>();
 	    indivList.add("creativecommons.org/licenses/");
 	    assertEquals(indivList, doc.getKeyWordsIndivisible());
 	    
@@ -140,7 +140,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    
 	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
 	    assertNotNull(amd);
-	    LimeXMLDocument doc = new LimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
+	    LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicenseType(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +
@@ -151,7 +151,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 "track=\"1\" year=\"2004\" seconds=\"158\" bitrate=\"192\" license=\"2004 PUSA Inc.\"/></audios>",
                     doc.getXMLString());
 	    
-	    List indivList = new LinkedList();
+	    List<String> indivList = new LinkedList<String>();
 	    indivList.add("http://www.shmedlic.com/license/3play.aspx");
 	    assertEquals(indivList, doc.getKeyWordsIndivisible());
 	    

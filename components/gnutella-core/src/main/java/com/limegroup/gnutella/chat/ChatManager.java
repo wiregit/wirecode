@@ -1,17 +1,14 @@
 package com.limegroup.gnutella.chat;
 
 import java.net.Socket;
-import java.util.Arrays;
-import java.util.List;
 
-import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
+import org.limewire.net.ConnectionAcceptor;
 
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.RouterService;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.settings.ChatSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
 
 /**
@@ -21,36 +18,20 @@ import com.limegroup.gnutella.statistics.HTTPStat;
  *
  * @author rsoule
  */
+@Singleton
 public final class ChatManager implements ConnectionAcceptor {
 
-	/**
-	 * Constant for the <tt>ChatManager</tt> instance, following
-	 * singleton.
-	 */
-	private static final ChatManager CHAT_MANAGER = new ChatManager();
+    private final SpamServices spamServices;
+    private final InstantMessengerFactory instantMessengerFactory;
+        
+    @Inject
+	public ChatManager(SpamServices spamServices, InstantMessengerFactory instantMessengerFactory) {
+        this.spamServices = spamServices;
+        this.instantMessengerFactory = instantMessengerFactory;
+    }
 
-	/** 
-	 * <tt>List</tt> of InstantMessenger objects.
-	 */
-//	private List<InstantMessenger> _chatsInProgress 
-//		= Collections.synchronizedList(new LinkedList<InstantMessenger>());
-
-	/**
-	 * Instance accessor for the <tt>ChatManager</tt>.
-	 */
-	public static ChatManager instance() {
-		return CHAT_MANAGER;
-	}
-
-	ChatManager() {
-	}
-
-    public void initialize() {
-        RouterService.getConnectionDispatcher().
-        addConnectionAcceptor(this,
-                false,
-                false,
-                "CHAT");
+    public boolean isBlocking() {
+        return false;
     }
     
 	/**
@@ -58,20 +39,21 @@ public final class ChatManager implements ConnectionAcceptor {
      * the given socket for a one-to-one chat connection, like an instant
      * messenger.
      */
-	public void accept(Socket socket) {
+    public void acceptConnection(String word, Socket socket) {
+        HTTPStat.CHAT_REQUESTS.incrementStat();
+
 		boolean allowChats = ChatSettings.CHAT_ENABLED.getValue();
 		if (!allowChats) {
 		    IOUtils.close(socket);
 			return;
 		}
 
-        if(!RouterService.getIpFilter().allow(socket.getInetAddress())) {
+        if(!spamServices.isAllowed(socket.getInetAddress())) {
             IOUtils.close(socket);
             return;
         }
         
-        ActivityCallback callback = RouterService.getCallback();
-        InstantMessenger im = new InstantMessenger(socket, this, callback);
+        InstantMessenger im = instantMessengerFactory.createIncomingInstantMessenger(socket);
         im.start();
 	}
 
@@ -81,51 +63,9 @@ public final class ChatManager implements ConnectionAcceptor {
 	 * will be called when the connection is established or
 	 * the connection has died.
 	 */
-	public Chatter request(String host, int port) {
-        ActivityCallback callback = RouterService.getCallback();
-        InstantMessenger im = new InstantMessenger(host, port, this, callback);
+	public InstantMessenger createConnection(String host, int port) {
+        InstantMessenger im = instantMessengerFactory.createOutgoingInstantMessenger(host, port);
         return im;
 	}
 
-//	/** 
-//	 * Remove the instance of chat from the list of chats
-//	 * in progress.
-//	 */
-//	public void removeChat(InstantMessenger chat) {
-//		_chatsInProgress.remove(chat);
-//	}
-
-	/** blocks incoming connections from a particular ip address  */
-	public void blockHost(String host) {
-		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-		Arrays.sort(bannedIPs, Comparators.stringComparator());
-		synchronized (this) {
-			if ( Arrays.binarySearch(bannedIPs, host, 
-									 Comparators.stringComparator()) < 0 ) {
-				String[] more_banned = new String[bannedIPs.length+1];
-				System.arraycopy(bannedIPs, 0, more_banned, 0, 
-								 bannedIPs.length);
-				more_banned[bannedIPs.length] = host;
-                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
-                RouterService.reloadIPFilter();
-			}
-		}
-	}
-	
-	public void unblockHost(String host) {
-		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-		List<String> bannedList = Arrays.asList(bannedIPs);
-		synchronized (this) {
-			if (bannedList.remove(host) ) {
-                FilterSettings.BLACK_LISTED_IP_ADDRESSES.
-                    setValue((String[])bannedList.toArray());
-				RouterService.reloadIPFilter();
-			}
-		}
-	}
-
-	public void acceptConnection(String word, Socket s) {
-		HTTPStat.CHAT_REQUESTS.incrementStat();
-		accept(s);
-	}
 }

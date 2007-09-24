@@ -27,7 +27,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -202,7 +202,7 @@ public class TestUploader extends AssertComparisons {
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
      */
-    private final IPFilter IP_FILTER = RouterService.getIpFilter();
+    private final IPFilter IP_FILTER = ProviderHacks.getIpFilter();
     
     
     /**
@@ -833,17 +833,17 @@ public class TestUploader extends AssertComparisons {
         }
         if(interestedInFalts) {
             if (!isFirewalled) 
-                HTTPUtils.writeFeatures(out);
+                ProviderHacks.getFeaturesWriter().writeFeatures(out);
             else {
-                boolean previous = RouterService.acceptedIncomingConnection();
+                boolean previous = ProviderHacks.getNetworkManager().acceptedIncomingConnection();
                 
                 try{
-                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                         "_acceptedIncoming",new Boolean(false));
                     
-                    HTTPUtils.writeFeatures(out);
+                    ProviderHacks.getFeaturesWriter().writeFeatures(out);
                     
-                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
                             "_acceptedIncoming",new Boolean(previous));
                 }catch(Exception bad) {
                     ErrorService.error(bad);
@@ -1036,7 +1036,7 @@ public class TestUploader extends AssertComparisons {
 	 */
 	private void readAlternateLocations (String altHeader, final boolean good) {
         String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, ProviderHacks.getAlternateLocationFactory(), new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 if(location instanceof PushAltLoc)
                     ((PushAltLoc)location).updateProxies(good);

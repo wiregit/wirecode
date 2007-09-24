@@ -20,6 +20,7 @@ import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -88,6 +89,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      */
     private transient int _nodeSize;
     
+    @Inject
+    static HashTreeNodeManager hashTreeNodeManager;
+    
     /** Constructs an invalid HashTree. */
     private HashTree() {
         NODES = null;
@@ -117,7 +121,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         DEPTH = allNodes.size()-1;
         assert(TigerTree.log2Ceil(NODES.size()) == DEPTH);
         assert(NODES.size() * (long)nodeSize >= fileSize);
-        HashTreeNodeManager.instance().register(this, allNodes);
+        hashTreeNodeManager.register(this, allNodes);
         _nodeSize = nodeSize;
     }
     
@@ -186,7 +190,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Exists as a hook for tests, to create a HashTree from a File
      * when no FileDesc exists.
      */
-    private static HashTree createHashTree(long fileSize, InputStream is,
+    static HashTree createHashTree(long fileSize, InputStream is,
                                            URN sha1) throws IOException {
         // do the actual hashing
         int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
@@ -423,7 +427,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * @return all nodes.
      */
     public List<List<byte[]>> getAllNodes() {
-        return HashTreeNodeManager.instance().getAllNodes(this);
+        return hashTreeNodeManager.getAllNodes(this);
     }
 
     public ThexWriter createAsyncWriter() {

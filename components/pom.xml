@@ -44,6 +44,7 @@
     <module>http</module>
     <module>mojito</module>
     <module>mojito-ui</module>
+    <module>net</module>
     <module>nio</module>
     <module>resources</module>
     <module>rudp</module>

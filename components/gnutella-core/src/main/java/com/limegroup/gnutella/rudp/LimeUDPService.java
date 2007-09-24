@@ -8,17 +8,30 @@ import java.net.UnknownHostException;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.messages.RUDPMessage;
 
-import com.limegroup.gnutella.RouterService;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 
+@Singleton
 public class LimeUDPService implements org.limewire.rudp.UDPService {
+    
+    private final NetworkManager networkManager;
+    private final Provider<UDPService> udpService;
+    
+    @Inject
+    public LimeUDPService(NetworkManager networkManager, Provider<UDPService> udpService) {
+        this.networkManager = networkManager;
+        this.udpService = udpService;
+    }
 
     public InetAddress getStableListeningAddress() {
         InetAddress lip = null;
         try {
             lip = InetAddress.getByName(
-              NetworkUtils.ip2string(RouterService.getNonForcedAddress()));
+              NetworkUtils.ip2string(networkManager.getNonForcedAddress()));
         } catch (UnknownHostException uhe) {
             try {
                 lip = InetAddress.getLocalHost();
@@ -30,19 +43,19 @@ public class LimeUDPService implements org.limewire.rudp.UDPService {
     }
 
     public int getStableListeningPort() {
-        return UDPService.instance().getStableUDPPort();
+        return udpService.get().getStableUDPPort();
     }
 
     public boolean isListening() {
-        return UDPService.instance().isListening();
+        return udpService.get().isListening();
     }
 
     public boolean isNATTraversalCapable() {
-        return UDPService.instance().canDoFWT();
+        return udpService.get().canDoFWT();
     }
 
     public void send(RUDPMessage message, SocketAddress address) {
-        UDPService.instance().send((Message)message, (InetSocketAddress)address);   
+        udpService.get().send((Message)message, (InetSocketAddress)address);   
     }
 
 }

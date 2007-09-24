@@ -7,11 +7,10 @@ import java.util.Set;
 
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -25,7 +24,8 @@ public class PushAltLoc extends AlternateLocation {
 	/**
 	 * the host we would send push to.  Null if not firewalled.
 	 */
-	private final PushEndpoint _pushAddress;
+	private final PushEndpoint _pushAddress;    
+    private final ApplicationServices applicationServices;
 	
 	/**
 	 * creates a new AlternateLocation for a firewalled host.
@@ -33,7 +33,7 @@ public class PushAltLoc extends AlternateLocation {
 	 * @param sha1
 	 * @throws IOException
 	 */
-	protected PushAltLoc(final PushEndpoint address, final URN sha1) 
+	protected PushAltLoc(final PushEndpoint address, final URN sha1, ApplicationServices applicationServices) 
 		throws IOException {
 		super(sha1);
 		
@@ -41,16 +41,8 @@ public class PushAltLoc extends AlternateLocation {
 			throw new IOException("null address");
 		
 		_pushAddress = address;
-	}
-	
-	/**
-	 * creates a new PushLocation for myself
-	 */
-	protected PushAltLoc(URN sha1) throws IOException{
-		
-		super(sha1);
-		_pushAddress = PushEndpointForSelf.instance();
-	}
+        this.applicationServices = applicationServices;
+	}	
 		
 	protected String generateHTTPString() {
 		return _pushAddress.httpStringValue();
@@ -75,7 +67,7 @@ public class PushAltLoc extends AlternateLocation {
         AlternateLocation ret = null;
         try {
 
-        		ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN);
+        		ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN, applicationServices);
         } catch(IOException ioe) {
             ErrorService.error(ioe);
             return null;
@@ -86,7 +78,7 @@ public class PushAltLoc extends AlternateLocation {
 	
 	public boolean isMe() {
 	    return Arrays.equals(_pushAddress.getClientGUID(),
-	            RouterService.getMyGUID());
+	            applicationServices.getMyGUID());
 	}
 	
 	/**

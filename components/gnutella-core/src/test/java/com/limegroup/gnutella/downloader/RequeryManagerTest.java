@@ -7,6 +7,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
@@ -48,7 +49,7 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     private RequeryManager createRM () {
-        return new RequeryManager(managedDownloader, downloadManager, altLocFinder, dhtManager);
+        return new RequeryManager(managedDownloader, downloadManager, altLocFinder, dhtManager, ProviderHacks.getConnectionServices());
     }
     
     private void setPro(boolean pro) throws Exception {
@@ -379,7 +380,7 @@ public class RequeryManagerTest extends LimeTestCase {
         
         volatile boolean cancelled;
         public MyAltLocFinder() {
-            super(null);
+            super(null, ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getAltLocManager(), ProviderHacks.getPushEndpointFactory());
         }
         
         
@@ -418,7 +419,7 @@ public class RequeryManagerTest extends LimeTestCase {
         private volatile long stateTime;
                 
         public MyManagedDownloader() throws SaveLocationException {
-            super(new RemoteFileDesc[0], new IncompleteFileManager(), new GUID());
+            super(new RemoteFileDesc[0], new IncompleteFileManager(), new GUID(), ProviderHacks.getDownloadManager());
         }
         
         @Override

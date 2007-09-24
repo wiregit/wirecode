@@ -20,15 +20,16 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.http.HttpStatus;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -36,21 +37,22 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class BrowseTest extends LimeTestCase {
 
-    private static final int PORT = 6668;
+    private final int PORT = 6668;
 
-    private static RouterService rs;
-
-    private static File sharedDirectory;
+    private File sharedDirectory;
 
     private HttpClient client;
 
     private HostConfiguration hostConfig;
 
     protected String protocol;
+
+    private FileManager fileManager;
+
+    private MessageFactory messageFactory;
     
     public BrowseTest(String name) {
         super(name);
-        
         protocol = "http";
     }
 
@@ -62,7 +64,9 @@ public class BrowseTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
+
         String directoryName = "com/limegroup/gnutella";
         sharedDirectory = CommonUtils.getResourceFile(directoryName);
         sharedDirectory = sharedDirectory.getCanonicalFile();
@@ -78,42 +82,25 @@ public class BrowseTest extends LimeTestCase {
         assertGreaterThan("Not enough files to test against", 50,
                 testFiles.length);
 
-        doSettings();
-
-        rs = new RouterService(new ActivityCallbackStub());
-    }
-
-    private static void doSettings() {
+    
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("class");
         SharingSettings.DIRECTORIES_TO_SHARE.setValue(Collections
                 .singleton(sharedDirectory));
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.PORT.setValue(PORT);
-    }
 
-    @Override
-    protected void setUp() throws Exception {
-        // allow running single tests from Eclipse
-        if (rs == null) {
-            globalSetUp();
-        }
-
-        doSettings();
-
-        if (!RouterService.isLoaded()) {
-            rs.start();
-        }
-        RouterService.getFileManager().loadSettingsAndWait(100000);
+        Injector injector = LimeTestUtils.createInjectorAndStart();
+        
+        fileManager = injector.getInstance(FileManager.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+        
+        fileManager.loadSettingsAndWait(100000);
 
         client = HttpClientManager.getNewClient();
         hostConfig = new HostConfiguration();
         hostConfig.setHost("localhost", PORT, protocol);
         client.setHostConfiguration(hostConfig);
-    }
-
-    @Override
-    public void tearDown() {
     }
 
     public void testBrowse() throws Exception {
@@ -128,7 +115,7 @@ public class BrowseTest extends LimeTestCase {
             while (true) {
                 Message m;
                 try {
-                    m = MessageFactory.read(in);
+                    m = messageFactory.read(in);
                 } catch (IOException e) {
                     // no other way to tell if we have received all messages
                     if (!"Connection closed.".equals(e.getMessage())) {
@@ -146,10 +133,9 @@ public class BrowseTest extends LimeTestCase {
                 }
             }
 
-            assertEquals(RouterService.getNumSharedFiles(), files.size());
+            assertEquals(fileManager.getNumFiles(), files.size());
             
-            for (Iterator<Response> it = RouterService.getFileManager()
-                    .getIndexingIterator(false); it.hasNext();) {
+            for (Iterator<Response> it = fileManager.getIndexingIterator(false); it.hasNext();) {
                 Response result = it.next();
                 boolean contained = files.remove(result.getName());
                 assertTrue("File is missing in browse response: "

@@ -12,13 +12,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
-import org.limewire.util.StringUtils;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -27,12 +26,10 @@ import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -69,7 +66,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     @SuppressWarnings("unused")
     private static void doSettings() {
         TIMEOUT = 4000;
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(StringUtils.split("txt;mp3", ';'));
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
@@ -81,7 +78,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        RouterService.getFileManager().loadSettingsAndWait(2000);        
+        ProviderHacks.getFileManager().loadSettingsAndWait(2000);        
     }
     
     ///////////////////////// Actual Tests ////////////////////////////
@@ -99,20 +96,20 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 testUP[i].isSupernodeClientConnection());
             drain(testUP[i], 100);
             // OOB client side needs server side leaf guidance
-            testUP[i].send(MessagesSupportedVendorMessage.instance());
+            testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
             testUP[i].flush();
         }
 
-        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming",Boolean.TRUE);
-        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.TRUE);
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.TRUE);
+        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
 
         // ----------------------------------------
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
-        assertTrue(RouterService.isGUESSCapable());
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().isGUESSCapable());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
         // set smaller clear times so we can test in a timely fashion
 
@@ -123,8 +120,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -139,10 +136,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -152,7 +149,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -171,7 +168,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            RouterService.stopQuery(new GUID(qr.getGUID()));
+            ProviderHacks.getSearchServices().stopQuery(new GUID(qr.getGUID()));
             assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         ((MyCallback)getCallback()).clearGUID();
@@ -189,8 +186,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "berkeley");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "berkeley");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -202,7 +199,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // just return ONE real result and the rest junk
         {
             // get a correct response object
-            QueryRequest qrTemp = QueryRequest.createQuery("berkeley");
+            QueryRequest qrTemp = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
             testUP[0].send(qrTemp);
             testUP[0].flush();
         }
@@ -218,9 +215,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         // this isn't really needed but just for completeness send it back to 
         // the test Leaf
-        m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, SERVER_PORT,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -229,11 +226,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
-                               myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "berkeley "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1,
+                    testUP[0].getPort(), myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -250,7 +246,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(guid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -277,7 +273,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "berkeley.txt").exists());
         
-        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         ((MyCallback)getCallback()).clearGUID();
         
         // sleep to make sure the download starts 
@@ -296,7 +292,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     }
 
     private void assertByPassedResultsCacheHasSize(byte[] guid, int size) {
-        Set<GUESSEndpoint> endpoints = RouterService.getMessageRouter().getQueryLocs(new GUID(guid));
+        Set<GUESSEndpoint> endpoints = ProviderHacks.getMessageRouter().getQueryLocs(new GUID(guid));
         assertEquals(size, endpoints.size());
     }
 
@@ -311,8 +307,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "berkeley");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "berkeley");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -326,7 +322,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         QueryReply reply = null;
         {
             // get a correct response object
-            QueryRequest qrTemp = QueryRequest.createQuery("berkeley");
+            QueryRequest qrTemp = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
             testUP[0].send(qrTemp);
             testUP[0].flush();
 
@@ -342,9 +338,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         // this isn't really needed but just for completeness send it back to 
         // the test Leaf
-        m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, SERVER_PORT,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -353,11 +349,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
-                               myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "berkeley "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1,
+                    testUP[0].getPort(), myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -374,7 +369,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(guid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -401,7 +396,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "berkeley.txt").exists());
         
-        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
         // sleep to make sure the download starts 
         Thread.sleep(5000);
@@ -416,7 +411,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertByPassedResultsCacheHasSize(guid, 1);
         }
         
-        RouterService.stopQuery(new GUID(guid));
+        ProviderHacks.getSearchServices().stopQuery(new GUID(guid));
 
         {
             // now we should make sure MessageRouter clears the map
@@ -438,8 +433,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
         QueryRequest qr = 
@@ -453,7 +448,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         QueryReply reply = null;
         {
             // get a correct response object
-            QueryRequest qrTemp = QueryRequest.createQuery("metadata");
+            QueryRequest qrTemp = ProviderHacks.getQueryRequestFactory().createQuery("metadata");
             testUP[0].send(qrTemp);
             testUP[0].flush();
 
@@ -469,9 +464,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         // this isn't really needed but just for completeness send it back to 
         // the test Leaf
-        m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
-                           GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+        m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1, SERVER_PORT,
+                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                true, true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -480,11 +475,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "metadata "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
-                               myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "metadata "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte) 1,
+                    testUP[0].getPort(), myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -501,7 +495,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(guid), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -528,10 +522,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "metadata.mp3").exists());
         
-        RouterService.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         UploadSettings.UPLOAD_SPEED.setValue(5);
 
-        RouterService.stopQuery(new GUID(guid));
+        ProviderHacks.getSearchServices().stopQuery(new GUID(guid));
         ((MyCallback)getCallback()).clearGUID();
 
         {
@@ -567,8 +561,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -583,10 +577,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -601,7 +595,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -619,7 +613,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;
@@ -641,7 +635,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = MessageFactory.read(in);
+                    m = ProviderHacks.getMessageFactory().read(in);
                     m.hop();
                     if (m instanceof PingRequest)
                         gotPing = ((PingRequest) m).isQueryKeyRequest();
@@ -682,8 +676,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -698,10 +692,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -718,7 +712,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // just do it for 1 UDP guy
         {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -737,7 +731,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;
@@ -757,7 +751,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
                 UDP_ACCESS[0].receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                m = MessageFactory.read(in);
+                m = ProviderHacks.getMessageFactory().read(in);
                 m.hop();
                 if (m instanceof PingRequest)
                     gotPing = ((PingRequest) m).isQueryKeyRequest();
@@ -769,7 +763,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
-                PingReply.createQueryKeyReply(GUID.makeGuid(), (byte) 1,
+                ProviderHacks.getPingReplyFactory().createQueryKeyReply(GUID.makeGuid(), (byte) 1,
                                               UDP_ACCESS[0].getLocalPort(),
                                               ip, 10, 10, false, qk);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -802,7 +796,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
                 UDP_ACCESS[0].receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                m = MessageFactory.read(in);
+                m = ProviderHacks.getMessageFactory().read(in);
                 if (m instanceof QueryRequest) {
                     QueryRequest qReq = (QueryRequest) m;
                     Set queryURNs = qReq.getQueryUrns();
@@ -830,10 +824,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         { // send back a query request, the TestUploader should service upload
             rfd = makeRFD(urn, UPLOADER_PORT + 1);
-            Response[] res = new Response[] { new Response(10, 10, "whatever") };
-            m = new QueryReply(urnQueryGUID, (byte) 1, UPLOADER_PORT+1, myIP(), 
-                               0, res, GUID.makeGuid(), new byte[0], false, 
-                               false, true, true, false, false, null);
+            Response[] res = new Response[] { ProviderHacks.getResponseFactory().createResponse(10, 10, "whatever") };
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(urnQueryGUID, (byte) 1,
+                    UPLOADER_PORT+1, myIP(), 0, res, GUID.makeGuid(),
+                    new byte[0], false, false, true, true, false, false, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             m.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -866,8 +860,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -882,10 +876,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -902,7 +896,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back ReplyNumberVMs that should be bypassed
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -925,18 +919,18 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
-                PingReply.createQueryKeyReply(GUID.makeGuid(), (byte) 1,
+                ProviderHacks.getPingReplyFactory().createQueryKeyReply(GUID.makeGuid(), (byte) 1,
                                               UDP_ACCESS[i].getLocalPort(),
                                               ip, 10, 10, false, qk);
             pr.hop();
-            OnDemandUnicaster.handleQueryKeyPong(pr);
+            ProviderHacks.getOnDemandUnicaster().handleQueryKeyPong(pr);
 
         }
 
         // confirm download will try to GUESS
         long currTime = System.currentTimeMillis();
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;
@@ -957,7 +951,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = MessageFactory.read(in);
+                    m = ProviderHacks.getMessageFactory().read(in);
                     if (m instanceof QueryRequest) {
                         QueryRequest qReq = (QueryRequest) m;
                         Set queryURNs = qReq.getQueryUrns();
@@ -1002,8 +996,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -1018,10 +1012,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -1040,7 +1034,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         { // bypass 1 result only
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -1058,12 +1052,12 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         //  Don't try using the same default file 
         Downloader downloader2 = 
-            RouterService.download(new RemoteFileDesc[] { rfd2 }, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd2 }, 
                 new GUID(guid), false, null, "anotherFile" );
         
 
@@ -1124,8 +1118,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Message m = null;
 
-        byte[] guid = RouterService.newQueryGUID();
-        RouterService.query(guid, "whatever");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
         ((MyCallback)getCallback()).setGUID(new GUID(guid));
         
@@ -1140,10 +1134,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[200];
             for (int j = 0; j < res.length; j++)
-                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
-            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                res[j] = ProviderHacks.getResponseFactory().createResponse(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(qr.getGUID(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -1158,7 +1152,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -1176,7 +1170,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         Downloader downloader = 
-            RouterService.download(new RemoteFileDesc[] { rfd }, false, 
+            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
         final int MAX_TRIES = 60;
@@ -1198,7 +1192,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = MessageFactory.read(in);
+                    m = ProviderHacks.getMessageFactory().read(in);
                     m.hop();
                     if (m instanceof PingRequest)
                         gotPing = ((PingRequest) m).isQueryKeyRequest();
@@ -1216,11 +1210,11 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < (UDP_ACCESS.length/2); i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
-                PingReply.createQueryKeyReply(GUID.makeGuid(), (byte) 1,
+                ProviderHacks.getPingReplyFactory().createQueryKeyReply(GUID.makeGuid(), (byte) 1,
                                               UDP_ACCESS[i].getLocalPort(),
                                               ip, 10, 10, false, qk);
             pr.hop();
-            OnDemandUnicaster.handleQueryKeyPong(pr);
+            ProviderHacks.getOnDemandUnicaster().handleQueryKeyPong(pr);
 
         }
 

@@ -1,7 +1,5 @@
 package org.limewire.security;
 
-import org.limewire.security.SecureMessage;
-import org.limewire.security.SecureMessageCallback;
 
 public class StubSecureMessageCallback implements SecureMessageCallback {
 

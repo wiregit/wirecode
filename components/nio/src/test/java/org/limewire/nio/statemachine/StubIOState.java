@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
-import org.limewire.nio.statemachine.IOState;
-
 public class StubIOState implements IOState {
     
     private boolean writing;

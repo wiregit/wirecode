@@ -8,6 +8,8 @@ import java.util.Properties;
 
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Singleton;
+
 
 /** 
  * This class manages the properties needed by the 
@@ -21,6 +23,7 @@ import org.limewire.util.CommonUtils;
  * @author Anurag Singla
  */
 
+@Singleton
 public class LimeXMLProperties
 {
 
@@ -35,17 +38,6 @@ public class LimeXMLProperties
      * Properties and the values set by user
      */
     private Properties _properties = new Properties();
-
-    /**
-     * An instance of this class. As the constructor of the class is private, 
-     * a new
-     * instance of the class cant be made from outside the class. 
-     * This makes sure 
-     * that only properly initialized instance of the class will be used,
-     * as the users
-     * will be invoking all the methods on this instance only.
-     */
-    private static LimeXMLProperties _instance = new LimeXMLProperties();
 
     /**
      * Name of the file that contains the properties used by this class 
@@ -152,20 +144,6 @@ public class LimeXMLProperties
             //no problem, defaults will get used
         }
     }
-
-    /**
-     * If an instance of this object has been already initialized, returns it, 
-     * else initializes
-     * a new instance and returns the same
-     * @return The initialized instance of this class
-     */
-    public static LimeXMLProperties instance()
-    {
-        return _instance;
-    }
-
-
-    //Accessor methods
 
     /**
      * Returns the name of the directory in which XML Schemas are located

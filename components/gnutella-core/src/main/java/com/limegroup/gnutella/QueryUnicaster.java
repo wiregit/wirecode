@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,11 +21,17 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -34,6 +42,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  * HostCatcher to find unicast-enabled hosts.  It also allows for stopping of
  * individual queries by reply counts.
  */ 
+@Singleton
 public final class QueryUnicaster {
     
     private static final Log LOG = LogFactory.getLog(QueryUnicaster.class);
@@ -55,15 +64,9 @@ public final class QueryUnicaster {
      */
     public static final long ONE_HOUR = 1000 * 60 * 60; // 60 minutes
 
-    // the instance of me....
-    private final static QueryUnicaster _instance = new QueryUnicaster();
-
     /** Actually sends any QRs via unicast UDP messages.
      */
-    private Thread _querier = null;
-
-    // should the _querier be running?
-    private boolean _shouldRun = true;
+    private final Thread _querier;
 
     /** 
      * The map of Queries I need to send every iteration.
@@ -71,33 +74,33 @@ public final class QueryUnicaster {
      * maintained:
      * GUID -> QueryBundle where GUID == QueryBundle._qr.getGUID()
      */
-    private Map<GUID, QueryBundle> _queries;
+    private final Map<GUID, QueryBundle> _queries;
 
     /**
      * Maps leaf connections to the queries they've spawned.
      * The map is from ReplyHandler to a Set (of GUIDs).
      */
-    private Map<ReplyHandler, Set<GUID>> _querySets;
+    private final Map<ReplyHandler, Set<GUID>> _querySets;
 
     /** 
      * The unicast enabled hosts I should contact for queries.  Add to the
      * front, remove from the end.  Therefore, the OLDEST entries are at the
      * end.
      */
-    private LinkedList<GUESSEndpoint> _queryHosts;
+    private final LinkedList<GUESSEndpoint> _queryHosts;
 
     /**
      * The Set of QueryKeys to be used for Queries.
      */
-    private Map<GUESSEndpoint, QueryKeyBundle> _queryKeys;
+    private final Map<GUESSEndpoint, QueryKeyBundle> _queryKeys;
 
     /** The fixed size list of endpoints i've pinged.
      */
-    private Buffer<GUESSEndpoint> _pingList;
+    private final Buffer<GUESSEndpoint> _pingList;
 
     /** A List of query GUIDS to purge.
      */
-    private List<GUID> _qGuidsToRemove;
+    private final List<GUID> _qGuidsToRemove;
 
     /** The last time I sent a broadcast ping.
      */
@@ -113,28 +116,52 @@ public final class QueryUnicaster {
 	 * Records whether or not someone has called init on me....
 	 */
 	private boolean _initialized = false;
+		
+	private final NetworkManager networkManager;
+	private final QueryRequestFactory queryRequestFactory;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<MessageRouter> messageRouter;
+    private final Provider<UDPService> udpService;
 
-    /** Need to call initialize() to make sure I'm running!
-     */ 
-    public static QueryUnicaster instance() {
-        return _instance;
+    private final PingRequestFactory pingRequestFactory;
+
+	@Inject
+    public QueryUnicaster(NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<UDPService> udpService,
+            PingRequestFactory pingRequestFactory) {
+        this.networkManager = networkManager;
+        this.queryRequestFactory = queryRequestFactory;
+        this.backgroundExecutor = backgroundExecutor;
+        this.messageRouter = messageRouter;
+        this.udpService = udpService;
+        this.pingRequestFactory = pingRequestFactory;
+        
+        _queries = new Hashtable<GUID, QueryBundle>();
+        _queryHosts = new LinkedList<GUESSEndpoint>();
+        _queryKeys = new Hashtable<GUESSEndpoint, QueryKeyBundle>();
+        _pingList = new Buffer<GUESSEndpoint>(25);
+        _querySets = new Hashtable<ReplyHandler, Set<GUID>>();
+        _qGuidsToRemove = new Vector<GUID>();
+    
+        // start service...
+        _querier = ThreadExecutor.newManagedThread(new Runnable() {
+            public void run() {
+                queryLoop();
+            }
+        });
+        
+        _querier.setName("QueryUnicaster");
+        _querier.setDaemon(true);
     }
-
-
-    //----------------------------------------------------
-    // These methods are used by the QueryUnicasterTester.
-    // That is why they are package level.  In general
-    // they should not be used by others, though it is
-    // technically OK
-
+	
     /** Returns the number of Queries unicasted by this guy...
      */
     int getQueryNumber() {
         return _queries.size();
     }
-
-
-    //----------------------------------------------------
 
 
     /** 
@@ -172,31 +199,6 @@ public final class QueryUnicaster {
                 return _queryHosts.getFirst();
 		}
 	}
-
-
- 	/**
-     * Constructs a new <tt>QueryUnicaster</tt> and starts its query loop.
-     */
-    private QueryUnicaster() {
-        // construct DSes...
-        _queries = new Hashtable<GUID, QueryBundle>();
-        _queryHosts = new LinkedList<GUESSEndpoint>();
-        _queryKeys = new Hashtable<GUESSEndpoint, QueryKeyBundle>();
-        _pingList = new Buffer<GUESSEndpoint>(25);
-        _querySets = new Hashtable<ReplyHandler, Set<GUID>>();
-        _qGuidsToRemove = new Vector<GUID>();
-    
-        // start service...
-        _querier = ThreadExecutor.newManagedThread(new Runnable() {
-            public void run() {
-                queryLoop();
-            }
-        });
-        
-        _querier.setName("QueryUnicaster");
-        _querier.setDaemon(true);
-    }
-
     
     /**
      * Starts the query unicaster thread.
@@ -206,7 +208,7 @@ public final class QueryUnicaster {
             _querier.start();
             
             QueryKeyExpirer expirer = new QueryKeyExpirer();
-            RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
+            backgroundExecutor.scheduleWithFixedDelay(expirer, 0, 3 * ONE_HOUR, TimeUnit.MILLISECONDS);// every 3 hours
 
             _initialized = true;
         }
@@ -218,17 +220,15 @@ public final class QueryUnicaster {
      * it.  Then sleep and try some more later...
      */
     private void queryLoop() {
-        UDPService udpService = UDPService.instance();
-
-        while (_shouldRun) {
+        while (true) {
             try {
                 waitForQueries();
                 GUESSEndpoint toQuery = getUnicastHost();
                 // no query key to use in my query!
                 if (!_queryKeys.containsKey(toQuery)) {
                     // send a AddressSecurityToken Request
-                    PingRequest pr = PingRequest.createQueryKeyRequest();
-                    udpService.send(pr,toQuery.getInetAddress(), toQuery.getPort());
+                    PingRequest pr = pingRequestFactory.createQueryKeyRequest();
+                    udpService.get().send(pr,toQuery.getInetAddress(), toQuery.getPort());
                     SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
                     // AddressSecurityToken Reply!!
@@ -248,9 +248,9 @@ public final class QueryUnicaster {
                         else {
 							InetAddress ip = toQuery.getInetAddress();
 							QueryRequest qrToSend = 
-								QueryRequest.createQueryKeyQuery(currQB._qr, 
+							    queryRequestFactory.createQueryKeyQuery(currQB._qr, 
 																 addressSecurityToken);
-                            udpService.send(qrToSend, 
+                            udpService.get().send(qrToSend, 
                                             ip, toQuery.getPort());
 							currentHostUsed = true;
 							SentMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(qrToSend);
@@ -366,16 +366,16 @@ public final class QueryUnicaster {
 				_queryHosts.removeLast(); // evict a old guy...
 			_queryHosts.addFirst(endpoint);
 			_queryHosts.notify();
-			if(UDPService.instance().isListening() &&
-			   !RouterService.isGUESSCapable() &&
+			if(udpService.get().isListening() &&
+			   !networkManager.isGUESSCapable() &&
 			   (_testUDPPingsSent < 10) &&
                !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
-                 NetworkUtils.isCloseIP(RouterService.getAddress(),
+                 NetworkUtils.isCloseIP(networkManager.getAddress(),
                                         endpoint.getInetAddress().getAddress())) ) {
 				PingRequest pr = 
-                new PingRequest(UDPService.instance().getSolicitedGUID().bytes(),
-                                (byte)1, (byte)0);
-                UDPService.instance().send(pr, endpoint.getInetAddress(), 
+                pingRequestFactory.createPingRequest(udpService.get().getSolicitedGUID().bytes(),
+                        (byte)1, (byte)0);
+                udpService.get().send(pr, endpoint.getInetAddress(), 
                                            endpoint.getPort());
 				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
@@ -392,9 +392,9 @@ public final class QueryUnicaster {
     private boolean notMe(InetAddress address, int port) {
         boolean retVal = true;
 
-        if ((port == RouterService.getPort()) &&
+        if ((port == networkManager.getPort()) &&
 				 Arrays.equals(address.getAddress(), 
-							   RouterService.getAddress())) {			
+				         networkManager.getAddress())) {			
 			retVal = false;
 		}
 
@@ -493,8 +493,8 @@ public final class QueryUnicaster {
                     20000) { // don't sent too many pings..
                     // first send a Ping, hopefully we'll get some pongs....
                     PingRequest pr = 
-                    new PingRequest(ConnectionSettings.TTL.getValue());
-                    RouterService.getMessageRouter().broadcastPingRequest(pr);
+                    pingRequestFactory.createPingRequest(ConnectionSettings.TTL.getValue());
+                    messageRouter.get().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }
 
@@ -510,9 +510,9 @@ public final class QueryUnicaster {
             // if i haven't pinged him 'recently', then ping him...
             synchronized (_pingList) {
                 if (!_pingList.contains(toReturn)) {
-                    PingRequest pr = new PingRequest((byte)1);
+                    PingRequest pr = pingRequestFactory.createPingRequest((byte)1);
                     InetAddress ip = toReturn.getInetAddress();
-                    UDPService.instance().send(pr, ip, toReturn.getPort());
+                    udpService.get().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
 					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                 }

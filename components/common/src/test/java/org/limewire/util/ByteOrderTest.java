@@ -5,10 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.util.Random;
 
-import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
-
-
 import junit.framework.Test;
 
 

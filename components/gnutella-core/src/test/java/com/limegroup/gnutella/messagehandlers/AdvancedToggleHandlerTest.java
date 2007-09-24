@@ -10,10 +10,10 @@ import org.limewire.statistic.StatisticsManager;
 import org.limewire.util.Base32;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
+import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
@@ -46,7 +46,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
     
     static AdvancedStatsToggle getToggle(String source) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(source));
-        return (AdvancedStatsToggle) MessageFactory.read(bais);
+        return (AdvancedStatsToggle) ProviderHacks.getMessageFactory().read(bais);
     }
     /**
      * Tests that if the usage stats setting is off, the message does nothing.
@@ -54,7 +54,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
     public void testSettingRespected() throws Exception {
         ApplicationSettings.USAGE_STATS.setValue(false);
         AdvancedStatsToggle toggle = getToggle(s100);
-        AdvancedToggleHandler handler = new AdvancedToggleHandler();
+        AdvancedToggleHandler handler = new AdvancedToggleHandler(ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getBackgroundExecutor(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
         handler.handleMessage(toggle, addr, new ReplyHandlerStub());
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
@@ -65,7 +65,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
      */
     public void testTurnOn() throws Exception {
         AdvancedStatsToggle toggle = getToggle(s100);
-        AdvancedToggleHandler handler = new AdvancedToggleHandler();
+        AdvancedToggleHandler handler = new AdvancedToggleHandler(ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getBackgroundExecutor(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
         handler.handleMessage(toggle, addr, new ReplyHandlerStub());
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());
@@ -78,7 +78,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
      */
     public void testImmediateShutOff() throws Exception {
         AdvancedStatsToggle toggle = getToggle(s500);
-        AdvancedToggleHandler handler = new AdvancedToggleHandler();
+        AdvancedToggleHandler handler = new AdvancedToggleHandler(ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getBackgroundExecutor(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
         handler.handleMessage(toggle, addr, new ReplyHandlerStub());
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());
@@ -95,7 +95,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
      */
     public void testUserOnNotSchedule() throws Exception {
         AdvancedStatsToggle toggle = getToggle(s50);
-        AdvancedToggleHandler handler = new AdvancedToggleHandler();
+        AdvancedToggleHandler handler = new AdvancedToggleHandler(ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getBackgroundExecutor(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         StatisticsManager.instance().setRecordAdvancedStatsManual(true);
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());
         handler.handleMessage(toggle, addr, new ReplyHandlerStub());
@@ -112,7 +112,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
      */
     public void testUserOnNotShut() throws Exception {
         AdvancedStatsToggle toggle = getToggle(sOffV2);
-        AdvancedToggleHandler handler = new AdvancedToggleHandler();
+        AdvancedToggleHandler handler = new AdvancedToggleHandler(ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getBackgroundExecutor(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         StatisticsManager.instance().setRecordAdvancedStatsManual(true);
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());
         handler.handleMessage(toggle, addr, new ReplyHandlerStub());
@@ -124,7 +124,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
      */
     public void testExtend() throws Exception {
         AdvancedStatsToggle toggle = getToggle(s100);
-        AdvancedToggleHandler handler = new AdvancedToggleHandler();
+        AdvancedToggleHandler handler = new AdvancedToggleHandler(ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getBackgroundExecutor(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
         handler.handleMessage(toggle, addr, new ReplyHandlerStub());
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());
@@ -150,7 +150,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
     public void testMaxTime() throws Exception {
         PrivilegedAccessor.setValue(AdvancedToggleHandler.class, "MAX_TIME", 100);
         AdvancedStatsToggle toggle = getToggle(s1000);
-        AdvancedToggleHandler handler = new AdvancedToggleHandler();
+        AdvancedToggleHandler handler = new AdvancedToggleHandler(ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getBackgroundExecutor(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
         handler.handleMessage(toggle, addr, new ReplyHandlerStub());
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());

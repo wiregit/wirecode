@@ -1,9 +1,8 @@
 package org.limewire.security;
 
-import org.limewire.security.SecurityUtils;
-import org.limewire.util.BaseTestCase;
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 public class SecurityUtilsTest extends BaseTestCase {

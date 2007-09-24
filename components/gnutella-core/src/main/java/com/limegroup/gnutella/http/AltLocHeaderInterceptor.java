@@ -9,9 +9,10 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.Function;
 import org.limewire.http.HeaderInterceptor;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
@@ -21,10 +22,14 @@ import com.limegroup.gnutella.uploader.HTTPUploader;
  */
 public class AltLocHeaderInterceptor implements HeaderInterceptor {
 
-    private HTTPUploader uploader;
+    private final HTTPUploader uploader;
+    private final AltLocManager altLocManager;
+    private final AlternateLocationFactory alternateLocationFactory;
 
-    public AltLocHeaderInterceptor(HTTPUploader uploader) {
+    public AltLocHeaderInterceptor(HTTPUploader uploader, AltLocManager altLocManager, AlternateLocationFactory alternateLocationFactory) {
         this.uploader = uploader;
+        this.altLocManager = altLocManager;
+        this.alternateLocationFactory = alternateLocationFactory;
     }
 
     public void process(Header header, HttpContext context)
@@ -57,7 +62,7 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
      */
     private void parseAlternateLocations(final AltLocTracker tracker,
             String alternateLocations, final boolean isGood, boolean allowTLS) {
-        AltLocUtils.parseAlternateLocations(tracker.getUrn(), alternateLocations, allowTLS, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(tracker.getUrn(), alternateLocations, allowTLS, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 if (location instanceof PushAltLoc)
                     ((PushAltLoc) location).updateProxies(isGood);
@@ -65,9 +70,9 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.
                 if (isGood)
-                    RouterService.getAltlocManager().add(location, null);
+                    altLocManager.add(location, null);
                 else
-                    RouterService.getAltlocManager().remove(location, null);
+                    altLocManager.remove(location, null);
 
                 tracker.addLocation(location);
                 return null;

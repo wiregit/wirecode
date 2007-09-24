@@ -22,17 +22,18 @@ public class UDPTester {
      * host:port
      */
     public static void main(String[] args) {
-        if (args.length != 3)
+        if (args.length != 4)
             printHelp();
         
         String host = args[1];
         int port = Integer.parseInt(args[2]);
+        int localPort = Integer.parseInt(args[3]);
         try {
             if ("-c".equals(args[0])) {
-                startUDPServices(port);
+                startUDPServices(localPort);
                 echoClient(host, port);
             } else if ("-s".equals(args[0])) {
-                startUDPServices(port);
+                startUDPServices(localPort);
                 echoServer(host, port);
             } else {
                 printHelp();
@@ -62,7 +63,7 @@ public class UDPTester {
     }
 
     private static void printHelp() {
-        System.err.println("usage: -c|-s host port");
+        System.err.println("usage: -c|-s host port localPort");
         System.exit(1);
     }
 

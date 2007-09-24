@@ -1,11 +1,11 @@
 package com.limegroup.gnutella;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.filters.KeywordFilterTest;
 import com.limegroup.gnutella.filters.XMLDocFilterTest;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -13,7 +13,16 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLNames;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
+
+/*
+ * import statements for the createReply methods - will delete once ClientSideWhatisNewSearchTest is refactored
+ */
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * Tests the client's WhatIsNewSearch behavior.
@@ -21,6 +30,7 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
 public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
 
     private static StoreRepliesActivityCallback callback = new StoreRepliesActivityCallback();
+    protected byte[] address;
     
     public ClientSideWhatIsNewSearchTest(String name) {
         super(name);
@@ -64,12 +74,12 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         drainAll();
         
         GUID guid = new GUID();
-        RouterService.queryWhatIsNew(guid.bytes(), MediaType.getAnyTypeMediaType());
+        ProviderHacks.getSearchServices().queryWhatIsNew(guid.bytes(), MediaType.getAnyTypeMediaType());
         
         assertQuery(testUP[0], guid);
         
         // send back a result that will be filtered
-        Response resp = new Response(101, 1019, "sex");
+        Response resp = ProviderHacks.getResponseFactory().createResponse(101, 1019, "sex");
         sendAndAssertResponse(resp, guid, enabled);
         
         resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_TYPE, "adult");
@@ -78,12 +88,12 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_RATING, "NC-17");
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = new Response(105, 345, "harmless");
+        resp = ProviderHacks.getResponseFactory().createResponse(105, 345, "harmless");
         sendAndAssertResponse(resp, guid, false);
     }
     
     private void sendAndAssertResponse(Response resp, GUID guid, boolean expectedToBeFiltered) throws Exception {
-        QueryReply reply = KeywordFilterTest.createReply(resp, guid, testUP[0].getPort(), testUP[0].getInetAddress().getAddress());
+        QueryReply reply = createReply(resp, guid, testUP[0].getPort(), testUP[0].getInetAddress().getAddress());
         callback.guid = reply.getClientGUID();
         callback.desc = null;
         
@@ -128,6 +138,27 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
             return desc;
         }
     }
+       
+    public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {
+        String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(new Response [] { resp } );
+        if (xmlCollectionString == null)
+            xmlCollectionString = "";
+
+        byte[] xmlBytes = null;
+        try {
+            xmlBytes = xmlCollectionString.getBytes("UTF-8");
+        } catch(UnsupportedEncodingException ueex) {//no support for utf-8?? 
+        }
+        byte[] xmlCompressed = null;
+        if (!xmlCollectionString.equals(""))
+            xmlCompressed = LimeXMLUtils.compress(xmlBytes);
+        else //there is no XML
+            xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
+        
+        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid.bytes(), (byte)1,
+                port, address, 0, new Response[] { resp }, GUID.makeGuid(), xmlCompressed, false,
+                false, true, true, true, false);
+    }   
     
     
 }

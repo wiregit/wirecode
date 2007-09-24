@@ -7,12 +7,11 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.TEAMACCalculator;
+import junit.framework.Test;
+
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 
 public class TEAMACCalculatorTest extends BaseTestCase {

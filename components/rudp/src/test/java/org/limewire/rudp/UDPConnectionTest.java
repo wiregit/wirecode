@@ -121,7 +121,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             t.start();
 
             // Init the first connection
-            uconn1 = new UDPConnection("127.0.0.1",6346);
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
 
             // Run the first connection
             UStandalone.echoClient(uconn1, NUM_BYTES);
@@ -152,7 +152,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             t.start();
 
             // Init the first connection
-            uconn1 = new UDPConnection("127.0.0.1",6346);
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
 
             // Run the first connection
             UStandalone.echoClientBlock(uconn1, NUM_BLOCKS);
@@ -446,7 +446,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             public void run() {
                 try {
-                    uconn1 = new UDPConnection("127.0.0.1",6348);
+                    uconn1 = new UDPConnection("127.0.0.1", 6348);
                     uconn1.setSoTimeout(TIMEOUT);
                     UStandalone.echoServer(uconn1, NUM_BYTES);                   
                 } catch (IOException e) {
@@ -460,7 +460,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             t.start();
 
             // Start the first connection
-            uconn2 = new UDPConnection("127.0.0.1",6346);
+            uconn2 = new UDPConnection("127.0.0.1", 6346);
             uconn2.setSoTimeout(TIMEOUT);
             UStandalone.echoClient(uconn2, NUM_BYTES);
         } finally {
@@ -505,7 +505,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             t.start();
 
             // Init the first connection
-            uconn1 = new UDPConnection("127.0.0.1",6346);
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
             uconn1.setSoTimeout(TIMEOUT);
             
             // Run the first connection
@@ -551,7 +551,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             t.start();
 
             // Init the first connection
-            uconn1 = new UDPConnection("127.0.0.1",6346);
+            uconn1 = new UDPConnection("127.0.0.1", 6346);
             uconn1.setSoTimeout(TIMEOUT);
             
             // Run the first connection

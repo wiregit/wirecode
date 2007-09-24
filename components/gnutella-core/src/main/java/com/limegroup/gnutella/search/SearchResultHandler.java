@@ -19,11 +19,17 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -40,6 +46,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * results from <tt>QueryReply</tt> instances and performs the logic 
  * necessary to pass those results up to the UI.
  */
+@Singleton
 public final class SearchResultHandler implements Inspectable {
     
     private static final Log LOG =
@@ -74,6 +81,28 @@ public final class SearchResultHandler implements Inspectable {
      */
     private final Map<GUID, Map<URN,ClassCNetworks[]>> cncCounter = 
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, Map<URN,ClassCNetworks[]>>(10));
+    
+    private final NetworkManager networkManager;
+    private final SearchServices searchServices;
+    private final Provider<ActivityCallback> activityCallback;
+    private final Provider<ConnectionManager> connectionManager;
+    private final ConnectionServices connectionServices;
+    private final Provider<SpamManager> spamManager;
+
+    @Inject
+    public SearchResultHandler(NetworkManager networkManager,
+            SearchServices searchServices,
+            Provider<ActivityCallback> activityCallback,
+            Provider<ConnectionManager> connectionManager,
+            ConnectionServices connectionServices,
+            Provider<SpamManager> spamManager) {
+        this.networkManager = networkManager;
+        this.searchServices = searchServices;
+        this.activityCallback = activityCallback;
+        this.connectionManager = connectionManager;
+        this.connectionServices = connectionServices;
+        this.spamManager = spamManager;
+    }
 
     /*---------------------------------------------------    
       PUBLIC INTERFACE METHODS
@@ -89,7 +118,7 @@ public final class SearchResultHandler implements Inspectable {
     public void addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
         if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
-            SpamManager.instance().startedQuery(qr);
+            spamManager.get().startedQuery(qr);
         GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
     }
@@ -111,7 +140,7 @@ public final class SearchResultHandler implements Inspectable {
             // deal if it does....
             QueryStatusResponse stat = new QueryStatusResponse(guid, 
                                                                MAX_RESULTS);
-            RouterService.getConnectionManager().updateQueryStatus(stat);
+            connectionManager.get().updateQueryStatus(stat);
         }
     }
 
@@ -206,9 +235,9 @@ public final class SearchResultHandler implements Inspectable {
             // no chance for FW transfer then drop the reply.
             if(data.isFirewalled() && 
                !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
-               (!RouterService.acceptedIncomingConnection() ||
-                NetworkUtils.isPrivateAddress(RouterService.getAddress())) &&
-               !(UDPService.instance().canDoFWT() && 
+               (!networkManager.acceptedIncomingConnection() ||
+                NetworkUtils.isPrivateAddress(networkManager.getAddress())) &&
+               !(networkManager.canDoFWT() && 
                  qr.getSupportsFWTransfer())
                )  {
                LOG.debug("Ignoring from firewall funkiness");
@@ -236,17 +265,17 @@ public final class SearchResultHandler implements Inspectable {
             
         for(Response response : results) {
             if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                if (!RouterService.matchesType(data.getMessageGUID(), response)) {
+                if (!searchServices.matchesType(data.getMessageGUID(), response)) {
                     continue;
                 }
 
-                if (!RouterService.matchesQuery(data.getMessageGUID(), response)) {
+                if (!searchServices.matchesQuery(data.getMessageGUID(), response)) {
                     continue;
                 }
             }
 
             // Throw away results from Mandragore Worm
-            if (RouterService.isMandragoreWorm(data.getMessageGUID(), response)) {
+            if (searchServices.isMandragoreWorm(data.getMessageGUID(), response)) {
                 continue;
             }
             
@@ -262,9 +291,9 @@ public final class SearchResultHandler implements Inspectable {
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             rfd.setSecureStatus(secureStatus);
             Set<? extends IpPort> alts = response.getLocations();
-            RouterService.getCallback().handleQueryResult(rfd, data, alts);
+            activityCallback.get().handleQueryResult(rfd, data, alts);
             
-            if (skipSpam || !SpamManager.instance().isSpam(rfd))
+            if (skipSpam || !spamManager.get().isSpam(rfd))
                 numGoodSentToFrontEnd++;
             else 
                 numBadSentToFrontEnd++;
@@ -315,7 +344,7 @@ public final class SearchResultHandler implements Inspectable {
             gc.increment(numGoodSentToFrontEnd);
 
             // inform proxying Ultrapeers....
-            if (RouterService.isShieldedLeaf()) {
+            if (connectionServices.isShieldedLeaf()) {
                 if (!gc.isFinished() && 
                     (gc.getNumResults() > gc.getNextReportNum())) {
                     LOG.trace("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
@@ -330,7 +359,7 @@ public final class SearchResultHandler implements Inspectable {
                     QueryStatusResponse stat = 
                         new QueryStatusResponse(gc.getGUID(), 
                                                 numResultsToReport);
-                    RouterService.getConnectionManager().updateQueryStatus(stat);
+                    connectionManager.get().updateQueryStatus(stat);
                 }
 
             }

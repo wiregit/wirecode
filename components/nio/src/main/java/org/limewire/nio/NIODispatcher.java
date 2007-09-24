@@ -45,33 +45,46 @@ import org.limewire.service.ErrorService;
 
 
 /**
- * Dispatcher for NIO.
- *
+ * Dispatcher for <code>NIO</code>.
+ * <p>
  * To register interest initially in either reading, writing, accepting, or connecting,
- * use registerRead, registerWrite, registerReadWrite, registerAccept, or registerConnect.
- *
- * A channel registering for a connect can specify a timeout.  If the timeout is greater than
- * 0 and a connect event hasn't happened in that length of time, the channel will be cancelled 
- * and handleIOException will be called on the Observer. 
- *
- * When handling events, future interest is done different ways.  A channel registered for accepting
- * will remain registered for accepting until that channel is closed.  There is no way to 
- * turn off interest in accepting.  A channel registered for connecting will turn off all
- * interest (for any operation) once the connect event has been handled.  Channels registered
- * for reading or writing must manually change their interest when they no longer want to
- * receive events (and must turn it back on when events are wanted).
- *
- * To change interest in reading or writing, use interestRead(SelectableChannel, boolean) or
- * interestWrite(SelectableChannel, boolean) with the appropriate boolean parameter.  The
- * channel must have already been registered with the dispatcher.  If it was not registered,
- * changing interest is a no-op.  The attachment the channel was registered with must also
- * implement the appropriate Observer to handle read or write events.  If interest in an event
- * is turned on but the attachment does not implement that Observer, a ClassCastException will
- * be thrown while attempting to handle that event.
- *
- * If any unhandled events occur while processing an event for a specific Observer, that Observer
- * will be shutdown and will no longer receive events.  If any IOExceptions occur while handling
- * events for an Observer, handleIOException is called on that Observer.
+ * use {@link #registerRead(SelectableChannel, ReadObserver)}, 
+ * {@link #registerWrite(SelectableChannel, WriteObserver)}, 
+ * {@link #registerReadWrite(SelectableChannel, ReadWriteObserver)},
+ * {@link #registerAccept(SelectableChannel, AcceptChannelObserver)}, or 
+ * {@link #registerConnect(SelectableChannel, ConnectObserver, int)}.
+ * <p>
+ * A channel registering for a connect can specify a timeout. If the timeout is greater than
+ * zero and a connect event hasn't happened in that length of time, the channel will be cancelled 
+ * and <code>handleIOException</code> will be called on the Observer 
+ * (<code>org.limewire.nio.observer</code>). 
+ * <p>
+ * When handling events, future interest is done different ways. A channel 
+ * registered for accepting will remain registered for accepting until that 
+ * channel is closed (There isn't any way to turn off interest in accepting). A 
+ * channel registered for connecting will turn off all interest (for any 
+ * operation) once the connect event has been handled. Channels registered for 
+ * reading or writing must manually change their interest when they no longer 
+ * want to receive events (and must turn it back on when events are wanted).
+ * <p>
+ * To change interest in reading or writing, use {@link #interestRead(SelectableChannel, boolean)}
+ * or {@link #interestWrite(SelectableChannel, boolean)} with the appropriate 
+ * boolean parameter. The channel must have already been registered with the 
+ * dispatcher. If the channel was not registered, changing interest is a no 
+ * operation (no-op).
+ * <p> 
+ * The attachment the channel was registered with (via 
+ * {@link ThrottleListener#setAttachment(Object)}) 
+ * must also implement the appropriate Observer to handle read or write events.
+ * (An attachment is an object that contains additional information.)
+ * If interest in an event is turned on, but the attachment does not implement 
+ * that Observer, a <code>ClassCastException</code> is thrown while attempting
+ * to handle that event.
+ * <p>
+ * If any unhandled events occur while processing an event for a specific Observer, 
+ * that Observer will be shutdown and will no longer receive events. If any 
+ * <code>IOExceptions</code> occur while handling events for an Observer, 
+ * <code>handleIOException</code> is called on that Observer.
  */
 public class NIODispatcher implements Runnable {
     
@@ -174,7 +187,7 @@ public class NIODispatcher implements Runnable {
 	    return Thread.currentThread() == dispatchThread;
 	}
     
-    /** Gets the common ByteBufferCache */
+    /** Gets the common <code>ByteBufferCache</code>. */
     public ByteBufferCache getBufferCache() {
         return BUFFER_CACHE;
     }
@@ -184,7 +197,7 @@ public class NIODispatcher implements Runnable {
         return TIMEOUTER.getNumPendingTimeouts();
     }
 	
-	/** Adds a Throttle into the throttle requesting loop. */
+	/** Adds a <code>Throttle</code> into the throttle requesting loop. */
 	// TODO: have some way to remove Throttles, or make these use WeakReferences
 	public void addThrottle(final NBThrottle t) {
         if(Thread.currentThread() == dispatchThread)
@@ -213,22 +226,22 @@ public class NIODispatcher implements Runnable {
         register(channel, attachment, SelectionKey.OP_CONNECT, timeout);
     }
     
-    /** Register interest in reading */
+    /** Register interest in reading. */
     public void registerRead(SelectableChannel channel, ReadObserver attachment) {
         register(channel, attachment, SelectionKey.OP_READ, 0);
     }
     
-    /** Register interest in writing */
+    /** Register interest in writing. */
     public void registerWrite(SelectableChannel channel, WriteObserver attachment) {
         register(channel, attachment, SelectionKey.OP_WRITE, 0);
     }
     
-    /** Register interest in both reading & writing */
+    /** Register interest in both reading and writing. */
     public void registerReadWrite(SelectableChannel channel, ReadWriteObserver attachment) {
         register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE, 0);
     }
     
-    /** Register interest */
+    /** Register interest. */
     private void register(SelectableChannel channel, IOErrorObserver handler, int op, int timeout) {
 		if(Thread.currentThread() == dispatchThread) {
 		    registerImpl(getSelectorFor(channel), channel, op, handler, timeout);
@@ -241,10 +254,10 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Registers a SelectableChannel as being interested in a write again.
-     *
+     * Registers a <code>SelectableChannel</code> as being interested in a write again.
+     * <p>
      * You must ensure that the attachment that handles events for this channel
-     * implements WriteObserver.  If not, a ClassCastException will be thrown
+     * implements <code>WriteObserver</code>. If not, a <code>ClassCastException</code> will be thrown
      * while handling write events.
      */
     public void interestWrite(SelectableChannel channel, boolean on) {
@@ -252,17 +265,19 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Registers a SelectableChannel as being interested in a read again.
-     *
+     * Registers a <code>SelectableChannel</code> as being interested in a read
+     * again.
+     * <p>
      * You must ensure that the attachment that handles events for this channel
-     * implements ReadObserver.  If not, a ClassCastException will be thrown
+     * implements <code>ReadObserver</code>. If not, a 
+     * <code>ClassCastException</code> will be thrown
      * while handling read events.
      */
     public void interestRead(SelectableChannel channel, boolean on) {
         interest(channel, SelectionKey.OP_READ, on);
     }    
     
-    /** Registers interest on the channel for the given op */
+    /** Registers interest on the channel for the given <code>op</code> */
     private void interest(SelectableChannel channel, int op, boolean on) {
         try {
             Selector sel = getSelectorFor(channel);
@@ -298,7 +313,7 @@ public class NIODispatcher implements Runnable {
         }
     }
     
-    /** Returns the Selector that should be used for the given channel. */
+    /** Returns the <code>Selector</code> that should be used for the given channel. */
     private Selector getSelectorFor(SelectableChannel channel) {
         Selector sel = OTHER_SELECTORS.get(channel.getClass());
         if(sel == null)
@@ -307,14 +322,16 @@ public class NIODispatcher implements Runnable {
             return sel;      // custom selector
     }
     
-    /** Shuts down the handler, possibly scheduling it for shutdown in the NIODispatch thread. */
+    /** Shuts down the handler, possibly scheduling it for shutdown in the 
+     * <code>NIODispatch</code> thread. */
     public void shutdown(Shutdownable handler) {
         handler.shutdown();
     }
     
     /**
-     * Registers a new Selector that should be used when SelectableChannels
-     * assignable from the given class are registered.
+     * Registers a new <code>Selector</code> that should be used when 
+     * <code>SelectableChannels</code> assignable from the given class are 
+     * registered.
      */
     public void registerSelector(final Selector newSelector, final Class<? extends SelectableChannel> channelClass) {
         if(Thread.currentThread() == dispatchThread) {
@@ -348,10 +365,10 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Retrieves the ExecutorService this NIODispatcher uses to
+     * Retrieves the <code>ExecutorService</code> this <code>NIODispatcher</code> uses to
      * run things on the NIO Thread.
      * If tasks are submitted for execution while already on the NIO thread,
-     * the task will be immediately run.  Otherwise,
+     * the task will be immediately run. Otherwise,
      * the tasks will be scheduled for running as soon as possible on the
      * NIO Thread.
      */
@@ -367,13 +384,13 @@ public class NIODispatcher implements Runnable {
         wakeup();
     }
     
-    /** Gets the underlying attachment for the given SelectionKey's attachment. */
+    /** Gets the underlying attachment for the given <code>SelectionKey</code>'s attachment. */
     public IOErrorObserver attachment(Object proxyAttachment) {
         return ((Attachment)proxyAttachment).attachment;
     }
     
     /**
-     * Cancel SelectionKey & shuts down the handler.
+     * Cancel <code>SelectionKey</code> and shuts down the handler.
      */
     private void cancel(SelectionKey sk, Shutdownable handler) {
         sk.cancel();
@@ -383,7 +400,7 @@ public class NIODispatcher implements Runnable {
     
         
     /**
-     * Accept an icoming connection
+     * Accept an incoming connection.
      * 
      * @throws IOException
      */
@@ -466,11 +483,11 @@ public class NIODispatcher implements Runnable {
     
     /**
      * Adds any pending actions.
-     *
+     * <p>
      * This works by adding any pending actions into a local list and then replacing
      * LATER with a new list.  This is done so that actions to the outside world
      * don't need to hold Q_LOCK.
-     *
+     * <p>
      * Throttle is ticked outside the lock because ticking only hits items in this
      * package and we can ensure it doesn't deadlock.
      */
@@ -507,7 +524,7 @@ public class NIODispatcher implements Runnable {
     
     /**
      * Runs through all secondary Selectors and returns a 
-     * Collection of SelectionKeys that they selected.
+     * Collection of <code>SelectionKey</code>s that they selected.
      */
     private Collection <SelectionKey> pollOtherSelectors() {
         Collection<SelectionKey> ret = null;
@@ -547,7 +564,7 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Loops through all Throttles and gives them the ready keys.
+     * Loops through all <code>Throttles</code> and gives them the ready keys.
      */
     private void readyThrottles(Collection<SelectionKey> keys) {
         for (int i = 0; i < THROTTLE.size(); i++)
@@ -566,7 +583,7 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * The actual NIO run loop
+     * The actual NIO run loop.
      */
     private void process() throws ProcessingException, SpinningException {
         boolean checkTime = false;
@@ -835,7 +852,7 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * The run loop
+     * The <code>run</code> loop.
      */
     public void run() {
         while(true) {
@@ -1081,7 +1098,11 @@ public class NIODispatcher implements Runnable {
     public long [] getSelectStats() {
         return stats.getStats();
     }
-    
+    /**
+     * Provides statistics about the {@link Selector} including the number
+     * of selects, number of immediate selects and the average select time.
+     * 
+     */
     public static class SelectStats implements Inspectable {
         private long numSelects, numImmediateSelects, avgSelectTime;
         public synchronized long[] getStats() {

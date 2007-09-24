@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpRecoverableException;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -29,21 +31,28 @@ import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHttpRequest;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.io.LocalSocketAddressService;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.HTTPUploadManager;
+import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -51,7 +60,8 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -59,6 +69,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * Test that a client uploads a file correctly. Depends on a file containing the
  * lowercase characters a-z.
  */
+//ITEST
 public class UploadTest extends LimeTestCase {
 
     private static final String HTTP_CLIENT_REMOTE_CLOSE_MESSAGE = "org.apache.commons.httpclient.HttpRecoverableException: Error in parsing the status  line from the response: unable to find line starting with \"HTTP\"";
@@ -66,17 +77,13 @@ public class UploadTest extends LimeTestCase {
     private static final int PORT = 6668;
 
     /** The file name, plain and encoded. */
-    private static String testDirName = "com/limegroup/gnutella/uploader/data";
+    private static final String testDirName = "com/limegroup/gnutella/uploader/data";
 
-    private static String incName = "partial alphabet.txt";
+    private static final String incName = "partial alphabet.txt";
 
-    private static String fileName = "alphabet test file#2.txt";
+    private static final String fileName = "alphabet test file#2.txt";
 
-    private static String fileNameUrl = "/get/0/alphabet%20test+file%232.txt";
-
-    private static String otherFileName = "upperAlphabet.txt";
-
-    private static String otherFileNameUrl = "/get/1/upperAlphabet.txt";
+    private static final String otherFileName = "upperAlphabet.txt";
 
     /** The hash of the file contents. */
     private static final String baseHash = "GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
@@ -93,21 +100,21 @@ public class UploadTest extends LimeTestCase {
     /** The verifying file for the shared incomplete file */
     private VerifyingFile vf;
 
-    /** The filedesc of the shared file. */
-    private FileDesc FD;
-
-    /** The root32 of the shared file. */
-    private String ROOT32;
-
     private HttpClient client;
 
     private HostConfiguration hostConfig;
 
     protected String protocol;
 
-    private static RouterService ROUTER_SERVICE;
+    private Injector injector;
 
-    private static final Object loaded = new Object();
+    private UploadManager uploadManager;
+
+    private FileManager fileManager;
+
+    private String fileNameUrl;
+
+    private String otherFileNameUrl;
 
     public UploadTest(String name) {
         super(name);
@@ -123,23 +130,73 @@ public class UploadTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetUp() {
-        ROUTER_SERVICE = new RouterService(new FManCallback());
+    @Override
+    protected void setUp() throws Exception {
+        doSettings();
+
+        // copy resources
+        File testDir = CommonUtils.getResourceFile(testDirName);
+        // we must use a separate copy method
+        // because the filename has a # in it which can't be a resource.
+        File target = new File(_sharedDir, fileName);
+        LimeTestUtils.copyFile(new File(testDir, fileName), target);
+        target = new File(_sharedDir, otherFileName);
+        LimeTestUtils.copyFile(new File(testDir, otherFileName), target);
+        assertTrue("Copying resources failed", target.exists());
+        assertGreaterThan("Expected file to contain data", 0, target.length());
+
+        // initialize services
+        injector = LimeTestUtils.createInjector();
+        
+        startServices();
+
+        // get urls from file manager
+        FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
+        assertNotNull("File not loaded", fd);
+        fileNameUrl = "/get/" + fd.getIndex() + "/" + URLEncoder.encode(fileName, "UTF-8");
+        
+        fd = fileManager.getFileDescForFile(new File(_sharedDir, otherFileName));
+        assertNotNull("File not loaded", fd);
+        otherFileNameUrl = "/get/" + fd.getIndex() + "/" + URLEncoder.encode(otherFileName, "UTF-8");
+        
+        // add incomplete file to file manager
+        File incFile = new File(_incompleteDir, incName);
+        fileManager.removeFileIfShared(incFile);
+        CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
+        URN urn = URN.createSHA1Urn(incompleteHash);
+        Set<URN> urns = new HashSet<URN>();
+        urns.add(urn);
+        vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(252450);
+        fileManager.addIncompleteFile(incFile, urns, incName, 1981, vf);
+
+        assertEquals(1, fileManager.getNumIncompleteFiles());
+        assertEquals(2, fileManager.getNumFiles());
+        assertEquals("Unexpected uploads in progress", 0, uploadManager.uploadsInProgress());
+        assertEquals("Unexpected queued uploads", 0, uploadManager.getNumQueuedUploads());
+
+        hostConfig = new HostConfiguration();
+        hostConfig.setHost("localhost", PORT, protocol);
+
+        client = HttpClientManager.getNewClient();
+        client.setConnectionTimeout(500);
+        client.setTimeout(2000);
+        client.setHostConfiguration(hostConfig);
+        // make sure no connections are reused from the previous test case
+        client.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
     }
 
     @Override
-    protected void setUp() throws Exception {
-        // allows to run single tests from Eclipse
-        if (ROUTER_SERVICE == null) {
-            globalSetUp();
-        }
+    public void tearDown() throws Exception {
+        stopServices();
+        LimeTestUtils.waitForNIO();
+    }
 
+    private void doSettings() throws UnknownHostException {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        RouterService.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -155,67 +212,37 @@ public class UploadTest extends LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+    }
 
-        File testDir = CommonUtils.getResourceFile(testDirName);
-        // we must use a separate copy method
-        // because the filename has a # in it which can't be a resource.
-        File target = new File(_sharedDir, fileName);
-        LimeTestUtils.copyFile(new File(testDir, fileName), target);
-        target = new File(_sharedDir, otherFileName);
-        LimeTestUtils.copyFile(new File(testDir, otherFileName), target);
-        assertTrue("Copying resources failed", target.exists());
-        assertGreaterThan("Expected file to contain data", 0, target.length());
-
-        if (!RouterService.isLoaded()) {
-            startAndWaitForLoad();
-            // Thread.sleep(2000);
-        }
-
-        // make sure the FileDesc objects in file manager are up-to-date 
-        FileManager fm = RouterService.getFileManager();
-        fm.loadSettingsAndWait(2000);
+    private void startServices() throws Exception {
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
         
-        File incFile = new File(_incompleteDir, incName);
-        fm.removeFileIfShared(incFile);
-        CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
-        URN urn = URN.createSHA1Urn(incompleteHash);
-        Set<URN> urns = new HashSet<URN>();
-        urns.add(urn);
-        vf = new VerifyingFile(252450);
-        fm.addIncompleteFile(incFile, urns, incName, 1981, vf);
-        assertEquals(1, fm.getNumIncompleteFiles());
-        assertEquals(2, fm.getNumFiles());
-
-        assertEquals("Unexpected uploads in progress", 0, RouterService
-                .getUploadManager().uploadsInProgress());
-        assertEquals("Unexpected queued uploads", 0, RouterService
-                .getUploadManager().getNumQueuedUploads());
-
-        client = HttpClientManager.getNewClient();
-        hostConfig = new HostConfiguration();
-        hostConfig.setHost("localhost", PORT, protocol);
-        client.setConnectionTimeout(500);
-        client.setTimeout(2000);
-        client.setHostConfiguration(hostConfig);
+        HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
+        httpAcceptor.start();
+        
+        uploadManager = injector.getInstance(UploadManager.class);
+        uploadManager.start();
+        
+        // make sure the FileDesc objects in file manager are up-to-date
+        fileManager = injector.getInstance(FileManager.class);
+        fileManager.startAndWait(2000);
+        
+        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
+        
+        Acceptor acceptor = injector.getInstance(Acceptor.class);        
+        acceptor.setListeningPort(PORT);
+        acceptor.start();
+        
+        LimeTestUtils.waitForNIO();
     }
 
-    @Override
-    public void tearDown() {
-        ((HTTPUploadManager) RouterService.getUploadManager()).cleanup();
-
-        assertEquals(0, RouterService.getUploadSlotManager().getNumQueued());
-        assertEquals(0, RouterService.getUploadSlotManager().getNumActive());
-    }
-
-    private void initThexTree() throws Exception {
-        FD = RouterService.getFileManager().getFileDescForFile(
-                new File(_sharedDir, fileName));
-        while (FD.getHashTree() == null) {
-            Thread.sleep(300);
-        }
-        ROOT32 = FD.getHashTree().getRootHash();
-    }
-
+    private void stopServices() throws Exception {
+        Acceptor acceptor = injector.getInstance(Acceptor.class);
+        acceptor.setListeningPort(0);
+        acceptor.shutdown();
+    }    
+    
     public void testHTTP10Download() throws Exception {
         GetMethod method = new GetMethod(fileNameUrl);
         method.setHttp11(false);
@@ -1041,7 +1068,7 @@ public class UploadTest extends LimeTestCase {
     public void testCreationTimeHeaderReturned() throws Exception {
         // assert that creation time exists
         URN urn = URN.createSHA1Urn(hash);
-        Long creationTime = CreationTimeCache.instance().getCreationTime(urn);
+        Long creationTime = injector.getInstance(CreationTimeCache.class).getCreationTime(urn);
         assertNotNull(creationTime);
         assertTrue(creationTime.longValue() > 0);
 
@@ -1066,7 +1093,7 @@ public class UploadTest extends LimeTestCase {
 
         URN urn = URN.createSHA1Urn(incompleteHash);
         Long creationTime = new Long("10776");
-        CreationTimeCache.instance().addTime(urn, creationTime.longValue());
+        injector.getInstance(CreationTimeCache.class).addTime(urn, creationTime.longValue());
 
         GetMethod method = new GetMethod("/uri-res/N2R?" + incompleteHash);
         method.addRequestHeader("Range", "bytes 2-5");
@@ -1129,7 +1156,8 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testThexHeader() throws Exception {
-        initThexTree();
+        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod(fileNameUrl);
         try {
@@ -1137,17 +1165,18 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
             assertNotNull(method.getResponseHeader("X-Thex-URI"));
             String header = method.getResponseHeader("X-Thex-URI").getValue();
-            assertEquals("/uri-res/N2X?" + hash + ";" + ROOT32, header);
+            assertEquals("/uri-res/N2X?" + hash + ";" + tree.getRootHash(), header);
         } finally {
             method.releaseConnection();
         }
     }
 
     public void testDownloadFromBitprintUrl() throws Exception {
-        initThexTree();
+        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod("/uri-res/N2R?urn:bitprint:"
-                + baseHash + "." + ROOT32);
+                + baseHash + "." + tree.getRootHash());
         try {
             int response = client.executeMethod(method);
             assertEquals(HttpStatus.SC_OK, response);
@@ -1182,7 +1211,7 @@ public class UploadTest extends LimeTestCase {
 
         // make sure "bitprint:" is required for bitprint uploading.
         method = new GetMethod("/uri-res/N2R?urn:sha1:" + baseHash + "."
-                + ROOT32);
+                + tree.getRootHash());
         try {
             int response = client.executeMethod(method);
             assertEquals(HttpStatus.SC_BAD_REQUEST, response);
@@ -1210,7 +1239,8 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testGetTree() throws Exception {
-        initThexTree();
+        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
         try {
@@ -1218,10 +1248,10 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response);
             DIMEParser parser = new DIMEParser(method.getResponseBodyAsStream());
             parser.nextRecord(); // xml
-            DIMERecord tree = parser.nextRecord();
+            DIMERecord record = parser.nextRecord();
             assertFalse(parser.hasNext());
-            List<List<byte[]>> allNodes = FD.getHashTree().getAllNodes();
-            byte[] data = tree.getData();
+            List<List<byte[]>> allNodes = tree.getAllNodes();
+            byte[] data = record.getData();
             int offset = 0;
             for (Iterator<List<byte[]>> genIter = allNodes.iterator(); genIter
                     .hasNext();) {
@@ -1243,8 +1273,10 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testGetNonExistingTree() throws Exception {
+        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        
         URN urn = URN.createSHA1Urn(hash);
-        TigerTreeCache.instance().purgeTree(urn);
+        tigerTreeCache.purgeTree(urn);
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
         try {
             int response = client.executeMethod(method);
@@ -1258,7 +1290,7 @@ public class UploadTest extends LimeTestCase {
         // modify shared file and make sure it gets new timestamp
         Thread.sleep(1000);
         File file = new File(_sharedDir, fileName);
-        FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);        
+        FileDesc fd = fileManager.getFileDescForFile(file);        
         FileOutputStream out = new FileOutputStream(file);
         try {
             out.write("abc".getBytes());
@@ -1277,7 +1309,7 @@ public class UploadTest extends LimeTestCase {
             }            
         };
         try {
-            RouterService.getFileManager().addFileEventListener(listener);
+            fileManager.addFileEventListener(listener);
 
             GetMethod method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
             try {
@@ -1289,7 +1321,7 @@ public class UploadTest extends LimeTestCase {
 
             latch.await(500, TimeUnit.MILLISECONDS);
 
-            fd = RouterService.getFileManager().getFileDescForFile(file);
+            fd = fileManager.getFileDescForFile(file);
             assertNotNull(fd);
             method = new GetMethod("/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
             try {
@@ -1300,28 +1332,9 @@ public class UploadTest extends LimeTestCase {
                 method.releaseConnection();
             }
         } finally {
-            RouterService.getFileManager().removeFileEventListener(listener);
+            fileManager.removeFileEventListener(listener);
         }
         
-    }
-    
-    private static class FManCallback extends ActivityCallbackStub {
-        public void fileManagerLoaded() {
-            synchronized (loaded) {
-                loaded.notify();
-            }
-        }
-    }
-
-    private static void startAndWaitForLoad() {
-        synchronized (loaded) {
-            try {
-                ROUTER_SERVICE.start();
-                loaded.wait();
-            } catch (InterruptedException e) {
-                // good.
-            }
-        }
     }
 
     private void assertConnectionIsOpen(boolean open) {
@@ -1330,4 +1343,10 @@ public class UploadTest extends LimeTestCase {
         assertEquals(open, connection.isOpen());
         client.getHttpConnectionManager().releaseConnection(connection);
     }
+
+    private HashTree getThexTree(TigerTreeCache tigerTreeCache) throws Exception {
+        FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
+        return tigerTreeCache.getHashTreeAndWait(fd, 1000);
+    }
+
 }

@@ -7,7 +7,7 @@ import com.limegroup.gnutella.http.AltLocTracker;
 
 
 class MockHTTPUploader extends HTTPUploader {
-    private MockAltLocTracker tracker = new MockAltLocTracker();
+    private StubAltLocTracker tracker = new StubAltLocTracker();
 
     public MockHTTPUploader() {
         super(null, null);

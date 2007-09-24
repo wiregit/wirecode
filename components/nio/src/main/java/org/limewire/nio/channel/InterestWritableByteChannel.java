@@ -7,7 +7,7 @@ import org.limewire.nio.observer.WriteObserver;
 /**
  * A channel that can be written to, can receive write events of when writing
  * on this channel is capable, and can forward these events to other chained
- * WriteObservers.
+ * <code>WriteObservers</code>.
  */
 public interface InterestWritableByteChannel extends WritableByteChannel, WriteObserver {
     

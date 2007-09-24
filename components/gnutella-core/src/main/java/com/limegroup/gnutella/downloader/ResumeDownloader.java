@@ -6,10 +6,8 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.ObjectInputStream.GetField;
 
-import com.limegroup.gnutella.DownloadCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
@@ -67,11 +65,11 @@ public class ResumeDownloader extends ManagedDownloader
      *  IncompleteFileManager.getCompletedName(incompleteFile)
      * @param size the size of the completed file, which MUST be the result of
      *  IncompleteFileManager.getCompletedSize(incompleteFile) */
-    public ResumeDownloader(IncompleteFileManager incompleteFileManager,
+    ResumeDownloader(IncompleteFileManager incompleteFileManager,
                             File incompleteFile,
                             String name,
-                            long size) {
-        super( new RemoteFileDesc[0], incompleteFileManager, null);
+                            long size, SaveLocationManager saveLocationManager) {
+        super( new RemoteFileDesc[0], incompleteFileManager, null, saveLocationManager);
         if( incompleteFile == null )
             throw new NullPointerException("null incompleteFile");
         this._incompleteFile=incompleteFile;
@@ -82,25 +80,25 @@ public class ResumeDownloader extends ManagedDownloader
         this._hash=incompleteFileManager.getCompletedHash(incompleteFile);
     }
 
-    /** Overrides ManagedDownloader to ensure that progress is initially
-     *  non-zero and file previewing works. */
-    public void initialize(DownloadManager manager, 
-                           FileManager fileManager, 
-                           DownloadCallback callback) {
-        if(_hash != null)
+    /**
+     * Overrides ManagedDownloader to ensure that progress is initially non-zero
+     * and file previewing works.
+     */
+    public void initialize(DownloadReferences downloadReferences) {
+        if (_hash != null)
             downloadSHA1 = _hash;
         incompleteFile = _incompleteFile;
-        super.initialize(manager, fileManager, callback);
+        super.initialize(downloadReferences);
         // Auto-activate the requeryManager if this was created
         // from clicking 'Resume' in the library (as opposed to
         // from being deserialized from disk).
-        if(!deserializedFromDisk)
+        if (!deserializedFromDisk)
             requeryManager.activate();
     }
 
     /**
      * Overrides ManagedDownloader to reserve _incompleteFile for this download.
-     * That is, any download that would use the same incomplete file is 
+     * That is, any download that would use the same incomplete file is
      * rejected, even if this is not currently downloading.
      */
     public boolean conflictsWithIncompleteFile(File incompleteFile) {
@@ -159,9 +157,9 @@ public class ResumeDownloader extends ManagedDownloader
             // TODO: we should be sending the URN with the query, but
             // we don't because URN queries are summarily dropped, though
             // this may change
-            return QueryRequest.createQuery(queryName);
+            return queryRequestFactory.createQuery(queryName);
         else
-            return QueryRequest.createQuery(queryName);
+            return queryRequestFactory.createQuery(queryName);
     }
     
     private void readObject(ObjectInputStream stream)

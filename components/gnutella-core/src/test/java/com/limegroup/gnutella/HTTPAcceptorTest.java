@@ -15,20 +15,25 @@ import org.apache.http.nio.NHttpConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
+import org.limewire.http.HttpAcceptorListener;
+import org.limewire.io.LocalSocketAddressService;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.ConnectionDispatcherImpl;
+import org.limewire.net.SocketAcceptor;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
+//ITEST
 public class HTTPAcceptorTest extends BaseTestCase {
 
     private static final int PORT = 6668;
 
-    private static Acceptor acceptor;
-
     private HTTPAcceptor httpAcceptor;
 
     private HttpClient client;
+
+    private SocketAcceptor socketAcceptor;
 
     public HTTPAcceptorTest(String name) {
         super(name);
@@ -38,45 +43,32 @@ public class HTTPAcceptorTest extends BaseTestCase {
         return buildTestSuite(HTTPAcceptorTest.class);
     }
 
-    public static void globalSetUp() throws Exception {
-        LimeTestUtils.setActivityCallBack(new ActivityCallbackStub());
-
-        doSettings();
-
-        // TODO acceptor shutdown in globalTearDown()
-        acceptor = RouterService.getAcceptor();
-        acceptor.init();
-        acceptor.start();
-    }
-
-    private static void doSettings() {
-        ConnectionSettings.PORT.setValue(PORT);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-    }
-
     @Override
     protected void setUp() throws Exception {
-        if (acceptor == null) {
-            globalSetUp();
-        }
-        
-        doSettings();
+        // make sure local connections are accepted
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
 
+        ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl();
+        socketAcceptor = new SocketAcceptor(connectionDispatcher);
+        httpAcceptor = new HTTPAcceptor();
+        connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
+        
+        socketAcceptor.bind(PORT);
+        
         client = new HttpClient();
         HostConfiguration config = new HostConfiguration();
         config.setHost("localhost", PORT);
         client.setHostConfiguration(config);
-        httpAcceptor = new HTTPAcceptor();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        httpAcceptor.stop(RouterService.getConnectionDispatcher());
+        httpAcceptor.stop();
+        socketAcceptor.unbind();
     }
 
     public void testGetRequest() throws Exception {
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start();
 
         GetMethod method = new GetMethod("/");
         try {
@@ -98,7 +90,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
     public void testAddRemoveAcceptorListener() throws Exception {
         MyHTTPAcceptorListener listener = new MyHTTPAcceptorListener();
         httpAcceptor.addAcceptorListener(listener);
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start();
         assertFalse(listener.opened);
         assertFalse(listener.closed);
         
@@ -148,7 +140,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             }
             
         };
-        httpAcceptor.start(RouterService.getConnectionDispatcher());
+        httpAcceptor.start();
 
         httpAcceptor.registerHandler("/", handler);
         GetMethod method = new GetMethod("/");
@@ -169,7 +161,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
         }
     }
 
-    private class MyHTTPAcceptorListener implements HTTPAcceptorListener {
+    private class MyHTTPAcceptorListener implements HttpAcceptorListener {
 
         boolean closed;
 

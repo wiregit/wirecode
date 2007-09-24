@@ -3,7 +3,6 @@ package org.limewire.nio.timeout;
 
 import junit.framework.Test;
 
-import org.limewire.nio.timeout.TimeoutController;
 import org.limewire.util.BaseTestCase;
 
 

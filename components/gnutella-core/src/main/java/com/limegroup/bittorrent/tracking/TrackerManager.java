@@ -3,19 +3,19 @@ package com.limegroup.bittorrent.tracking;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.service.MessageService;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.RouterService;
 
 public class TrackerManager {
 	
@@ -43,12 +43,17 @@ public class TrackerManager {
 	private final ManagedTorrent torrent;
 	
 	private volatile ScheduledFuture<?> scheduledAnnounce;
+    
+    private volatile String lastFailureReason;
+    
+    private final ScheduledExecutorService backgroundExecutor;
 	
-	TrackerManager(ManagedTorrent torrent) {
+	TrackerManager(ManagedTorrent torrent, TrackerFactory trackerFactory, ScheduledExecutorService backgroundExecutor) {
 		this.torrent = torrent;
+        this.backgroundExecutor = backgroundExecutor;
 		TorrentContext context = torrent.getContext();
 		for (URI uri : context.getMetaInfo().getTrackers())
-			trackers.add(new Tracker(uri, context, torrent));
+			trackers.add(trackerFactory.create(uri, context, torrent));
 	}
 	
 	public void add(Tracker t) {
@@ -152,7 +157,7 @@ public class TrackerManager {
 		LOG.debug("scheduling new tracker request");
 		if (scheduledAnnounce != null)
 			scheduledAnnounce.cancel(true);
-		scheduledAnnounce = RouterService.schedule(scheduled, minDelay, 0);
+		scheduledAnnounce = backgroundExecutor.scheduleWithFixedDelay(scheduled, minDelay, 0, TimeUnit.MILLISECONDS);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	
@@ -160,6 +165,10 @@ public class TrackerManager {
 		return _nextTrackerRequestTime;
 	}
 	
+    public String getLastFailureReason() {
+        return lastFailureReason;
+    }
+    
 	/**
 	 * This method handles the response from a tracker
 	 */
@@ -177,14 +186,7 @@ public class TrackerManager {
 				
 				if (response.FAILURE_REASON != null) {
 					t.recordFailure();
-					// if we have only one tracker and it gave a reason,
-					// inform the user on first failure.
-					if (trackers.size() == 1) {
-                        MessageService.showFormattedError("TORRENTS_TRACKER_FAILURE",
-                                torrent.getMetaInfo().getName(), response.FAILURE_REASON);
-						torrent.stopVoluntarily();
-						return;
-					}
+                    lastFailureReason = response.FAILURE_REASON;
 				} else
 					t.recordSuccess();
 		} else 

@@ -5,7 +5,9 @@ import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -15,15 +17,17 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.ExtendedEndpoint;
+import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -84,29 +88,48 @@ public class DHTNodeFetcher {
      */
     private volatile int pingExpireTime = -1;
     
-    public DHTNodeFetcher(DHTBootstrapper bootstrapper) {
+    private final ConnectionServices connectionServices;
+    private final Provider<HostCatcher> hostCatcher;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<UDPPinger> udpPingerFactory;
+
+    private final PingRequestFactory pingRequestFactory;
+    
+    public DHTNodeFetcher(DHTBootstrapper bootstrapper,
+            ConnectionServices connectionServices,
+            Provider<HostCatcher> hostCatcher,
+            ScheduledExecutorService backgroundExecutor,
+            Provider<UDPPinger> udpPingerFactory,
+            PingRequestFactory pingRequestFactory) {
+        this.connectionServices = connectionServices;
+        this.hostCatcher = hostCatcher;
+        this.backgroundExecutor = backgroundExecutor;
+        this.udpPingerFactory = udpPingerFactory;
+
         this.bootstrapper = bootstrapper;
+        this.pingRequestFactory = pingRequestFactory;
     }
     
     /**
-     * Requests active DHT hosts from the Gnutella network. This method has to be 
-     * synchronized because it can be called either directly by the manager
+     * Requests active DHT hosts from the Gnutella network. This method has to
+     * be synchronized because it can be called either directly by the manager
      * or by the timer task.
      * 
      * This method gets hosts from the HostCatcher and therefore uses the
-     * UniqueHostPinger of the HostCatcher in order to avoid pinging hosts twice.
+     * UniqueHostPinger of the HostCatcher in order to avoid pinging hosts
+     * twice.
      */
     private synchronized void requestDHTHosts() {
         
         LOG.debug("Requesting DHT hosts");
         
-        if(!RouterService.isConnected()) {
+        if(!connectionServices.isConnected()) {
             return;
         }
         
         //TODO: min version: for now, 0
         List<ExtendedEndpoint> dhtHosts = 
-            RouterService.getHostCatcher().getDHTSupportEndpoint(0);
+            hostCatcher.get().getDHTSupportEndpoint(0);
         
         //first see if we have any active dht node in our HostCatcher and add them all 
         //to the bootstrapper.
@@ -141,7 +164,7 @@ public class DHTNodeFetcher {
         }
         
         lastRequest = now;
-        Message m = PingRequest.createUDPingWithDHTIPPRequest();
+        Message m = pingRequestFactory.createUDPingWithDHTIPPRequest();
         MessageListener listener = new UDPPingerRequestListener();
         Cancellable canceller = new UDPPingRankerCanceller();
         
@@ -150,14 +173,14 @@ public class DHTNodeFetcher {
             LOG.debug("Sending ping to dht capable hosts");
             
             //we don't have active hosts but have hosts that support dht
-            RouterService.getHostCatcher().getPinger().rank(dhtHosts, 
+            hostCatcher.get().getPinger().rank(dhtHosts, 
                                                             listener, canceller, m);
         } else {
             
             LOG.debug("Sending ping to all hosts");
             
             //send to all hosts
-            RouterService.getHostCatcher().sendMessageToAllHosts(m, 
+            hostCatcher.get().sendMessageToAllHosts(m, 
                     listener, canceller);
         }
     }
@@ -169,7 +192,7 @@ public class DHTNodeFetcher {
      */
     public void requestDHTHosts(SocketAddress hostAddress) {
         
-        if(!RouterService.isConnected()) {
+        if(!connectionServices.isConnected()) {
             return;
         }   
         
@@ -187,10 +210,10 @@ public class DHTNodeFetcher {
                 LOG.debug("Requesting DHT hosts from host " + hostAddress);
             }
             
-            Message m = PingRequest.createUDPingWithDHTIPPRequest();
+            Message m = pingRequestFactory.createUDPingWithDHTIPPRequest();
             
             if(pinger == null) {
-                pinger = new UDPPinger();
+                pinger = udpPingerFactory.get();
             }
             
             pinger.rank(Arrays.asList(ipp), 
@@ -216,7 +239,7 @@ public class DHTNodeFetcher {
                 }
             };
             
-            fetcherTask = RouterService.schedule(task, initialFetch, fetcherTime);
+            fetcherTask = backgroundExecutor.scheduleWithFixedDelay(task, initialFetch, fetcherTime, TimeUnit.MILLISECONDS);
         }
     }
     
@@ -294,12 +317,12 @@ public class DHTNodeFetcher {
             //OR timeout
             boolean cancel = (pingingSingleHost.get() 
                                 || delay > DHTSettings.MAX_DHT_NODE_FETCHER_TIME.getValue()
-                                || !RouterService.isConnected()
+                                || !connectionServices.isConnected()
                                 || !isRunning());
             if(cancel){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Cancelling UDP ping after "+delay+" ms, connected: "
-                            +RouterService.isConnected()+", waiting: "+bootstrapper.isWaitingForNodes());
+                            +connectionServices.isConnected()+", waiting: "+bootstrapper.isWaitingForNodes());
                 }
             }
             return cancel;

@@ -25,6 +25,9 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -32,6 +35,9 @@ import com.limegroup.gnutella.settings.DHTSettings;
 
 public class PassiveLeafTest extends DHTTestCase {
     
+    private MojitoDHT bootstrapDHT;
+    private Injector injector;
+
     public PassiveLeafTest(String name) {
         super(name);
     }
@@ -47,7 +53,15 @@ public class PassiveLeafTest extends DHTTestCase {
     @Override
     protected void setUp() throws Exception {
         setSettings();
-        super.setUp();
+        
+        injector = LimeTestUtils.createInjector();
+        
+        bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        bootstrapDHT.close();
     }
     
     public void testLookup() throws Exception {
@@ -128,8 +142,8 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testPassiveLeafController() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        PassiveLeafController controller = new PassiveLeafController(
-                Vendor.UNKNOWN, Version.ZERO, new DHTEventDispatcherStub());
+        PassiveLeafController controller = injector.getInstance(DHTControllerFactory.class).createPassiveLeafController(Vendor.UNKNOWN,
+                Version.ZERO, new DHTEventDispatcherStub());
         try {
             controller.start();
             
@@ -158,7 +172,7 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testPassiveLeafManager() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        DHTManager manager = new DHTManagerImpl(Executors.newSingleThreadExecutor());
+        DHTManager manager = new DHTManagerImpl(Executors.newSingleThreadExecutor(), injector.getInstance(DHTControllerFactory.class));
         try {
             // Check initial state
             assertEquals(DHTMode.INACTIVE, manager.getDHTMode());

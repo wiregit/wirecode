@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.util.PairTuple;
-
 /**
  * a.k.a. The "ObjectMolester"
  * <p>

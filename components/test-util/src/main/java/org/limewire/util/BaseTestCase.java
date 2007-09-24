@@ -164,8 +164,10 @@ public abstract class BaseTestCase extends AssertComparisons {
 	 */
 	public void runBare() throws Throwable {
         _currentTestName = getName();
-        if(System.getProperty("junit.test.hidetestname", "${hidetestname}").equals("${hidetestname}"))
+        if(System.getProperty("junit.test.hidetestname", "${hidetestname}").equals("${hidetestname}")) {
             System.out.println("Running test: " + _currentTestName);
+            //LogFactory.getLog(this.getClass()).info("Running test: " + _currentTestName);
+        }
         assertNotNull(_currentTestName);
         try {
             preSetUp();

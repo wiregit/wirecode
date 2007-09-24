@@ -4,7 +4,8 @@ import org.limewire.nio.observer.ReadObserver;
 
 
 /**
- * Combines the ReadObserver & ChannelReader interface.
+ * Defines an interface that combines the <code>ReadObserver</code> and 
+ * <code>ChannelReader</code> interface.
  */
 public interface ChannelReadObserver extends ReadObserver, ChannelReader {
 }

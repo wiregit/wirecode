@@ -1,107 +1,165 @@
 package com.limegroup.gnutella.connection;
 
-import org.limewire.util.PrivilegedAccessor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.limewire.util.BaseTestCase;
+
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.DownloadServices;
+import com.limegroup.gnutella.UploadServices;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
- * Tests the class that checks whether or not the user has a live internet 
+ * Tests the class that checks whether or not the user has a live internet
  * connection.
  */
-public class ConnectionCheckerTest extends LimeTestCase {
+public class ConnectionCheckerTest extends BaseTestCase {
 
-    private final static TestManager MANAGER = new TestManager();
-    
-    private static final Object LOCK = new Object();
+    private Mockery context;
 
-    /**
-     * Creates a new test instance.
-     */
+    private ConnectionServices connectionServices;
+
+    private UploadServices uploadServices;
+
+    private DownloadServices downloadServices;
+
+    private SocketsManager socketsManager;
+
+    private UDPConnectionChecker udpConnectionChecker;
+
+    private ConnectionCheckerListener connectionCheckerListener;
+
     public ConnectionCheckerTest(String name) {
         super(name);
     }
-    
+
     public static Test suite() {
         return buildTestSuite(ConnectionCheckerTest.class);
     }
-    
-    public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
-        PrivilegedAccessor.setValue(RouterService.class, "manager", MANAGER);
+
+    @Override
+    protected void setUp() throws Exception {
+        context = new Mockery();
+
+        connectionServices = context.mock(ConnectionServices.class);
+        uploadServices = context.mock(UploadServices.class);
+        downloadServices = context.mock(DownloadServices.class);
+        socketsManager = new SocketsManager();
+        udpConnectionChecker = context.mock(UDPConnectionChecker.class);
+        connectionCheckerListener = context.mock(ConnectionCheckerListener.class);
     }
-    
-    /**
-     * Tests to make sure that the method for checking for a live internet
-     * connection is working properly.
-     * 
-     * @throws Exception in any unexpected error occurs
-     */
+
     public void testForLiveConnection() throws Exception {
+        // setup mocks
+        AtomicInteger numWorkarounds = new AtomicInteger();
+        String[] hosts = { "www.limewire.org" };
 
-        // We should quickly connect to one of our hosts.
-        ConnectionChecker checker = ConnectionChecker.checkForLiveConnection();
-        Thread.sleep(10000);
-        assertTrue("should have successfully connected", 
-            checker.hasConnected());
-        
-        // Now, we "pretend" we're disconnected by just trying to connect to
-        // hosts that don't exist, which is effectively the same as not 
-        // being connected.
-        String[] dummyHosts = {
-            "http://www.dummyhostsjoafds.com",
-            "http://www.dummyhostsjoafdser.com",
-            "http://www.dumfadfostsjoafds.com",
-            "http://www.dummyhostsjafds.com",
-            "http://www.dummyhostjoafdser.com",
-            "http://www.dumfatsjoafds.com",
-        };
+        context.checking(new Expectations() {
+            {
+                never(connectionCheckerListener).noInternetConnection();
+                one(connectionCheckerListener).connected();
+            }
+        });
 
-        PrivilegedAccessor.setValue(ConnectionChecker.class, 
-            "STANDARD_HOSTS", dummyHosts);    
-        checker = ConnectionChecker.checkForLiveConnection();
-        synchronized(LOCK) {
-            LOCK.wait(10000);
-        }
-        //Thread.sleep(2000);
-        assertTrue("should not have successfully connected", 
-            !checker.hasConnected());   
-        assertTrue("should have received callback", 
-            MANAGER.hasReceivedCallback());     
+        // run test
+        ConnectionChecker checker = new ConnectionChecker(numWorkarounds, hosts,
+                connectionServices, uploadServices, downloadServices, socketsManager,
+                udpConnectionChecker);
+        checker.run(connectionCheckerListener);
+
+        assertTrue(checker.hasConnected());
+
+        context.assertIsSatisfied();
     }
 
     /**
-     * Helper class that receives the callback notifying us when there's no
-     * available internet connection.
+     * Now, we "pretend" we're disconnected by just trying to connect to hosts
+     * that don't exist, which is effectively the same as not being connected.
      */
-    private static class TestManager extends ConnectionManager {
+    public void testNonExistingHosts() throws Exception {
+        // setup mocks
+        AtomicInteger numWorkarounds = new AtomicInteger();
+        String[] hosts = { "http://www.dummyhostsjoafds.com", "http://www.dummyhostsjoafdser.com",
+                "http://www.dumfadfostsjoafds.com", "http://www.dummyhostsjafds.com",
+                "http://www.dummyhostjoafdser.com" };
 
-        private boolean _receivedCallback;
-
-        public TestManager() {
-            super();
-        }
-        
-        public void noInternetConnection() {
-            _receivedCallback = true;
-            synchronized(LOCK) {
-                LOCK.notify();
+        context.checking(new Expectations() {
+            {
+                one(connectionCheckerListener).noInternetConnection();
+                never(connectionCheckerListener).connected();
             }
-        }
-        
-        /**
-         * Determines whether or not we have received the callback notifying us
-         * that there's no live internet connection.
-         * 
-         * @return <tt>true</tt> if we've received the callback, otherwise
-         *  <tt>false</tt>
-         */
-        public boolean hasReceivedCallback() {
-            return _receivedCallback;
-        }
+        });
+
+        // run test
+        ConnectionChecker checker = new ConnectionChecker(numWorkarounds, hosts,
+                connectionServices, uploadServices, downloadServices, socketsManager,
+                udpConnectionChecker);
+        checker.run(connectionCheckerListener);
+
+        assertFalse(checker.hasConnected());
+
+        context.assertIsSatisfied();
     }
+
+    public void testNonExistingHostsSP2Workaround() throws Exception {
+        // setup mocks
+        AtomicInteger numWorkarounds = new AtomicInteger();
+        String[] hosts = { "http://www.dummyhostsjoafds.com", "http://www.dummyhostsjoafdser.com",
+                "http://www.dumfadfostsjoafds.com" };
+
+        context.checking(new Expectations() {
+            {
+                one(connectionCheckerListener).noInternetConnection();
+                never(connectionCheckerListener).connected();
+                one(downloadServices).hasActiveDownloads();
+                will(returnValue(false));
+                one(uploadServices).hasActiveUploads();
+                will(returnValue(false));
+                one(udpConnectionChecker).udpIsDead();
+                will(returnValue(false));
+            }
+        });
+
+        // run test
+        MyConnectionChecker checker = new MyConnectionChecker(numWorkarounds, hosts,
+                connectionServices, uploadServices, downloadServices, socketsManager,
+                udpConnectionChecker);
+        checker.shouldTrySP2Workaround = true;
+        checker.run(connectionCheckerListener);
+
+        assertFalse(checker.hasConnected());
+        assertTrue(checker.triedSP2Workaround);
+
+        context.assertIsSatisfied();
+    }
+
+    private class MyConnectionChecker extends ConnectionChecker {
+
+        private boolean shouldTrySP2Workaround;
+        private boolean triedSP2Workaround;
+
+        public MyConnectionChecker(AtomicInteger numWorkarounds, String[] hosts,
+                ConnectionServices connectionServices, UploadServices uploadServices,
+                DownloadServices downloadServices, SocketsManager socketsManager,
+                UDPConnectionChecker udpConnectionChecker) {
+            super(numWorkarounds, hosts, connectionServices, uploadServices, downloadServices,
+                    socketsManager, udpConnectionChecker);
+        }
+
+        @Override
+        boolean shouldTrySP2Workaround() {
+            return shouldTrySP2Workaround;
+        }
+
+        @Override
+        void trySP2Workaround() {
+            triedSP2Workaround = true;
+        }
+
+    }
+
 }

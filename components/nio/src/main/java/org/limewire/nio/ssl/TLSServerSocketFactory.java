@@ -6,7 +6,10 @@ import java.net.InetAddress;
 import org.limewire.nio.NBServerSocketFactory;
 import org.limewire.nio.observer.AcceptObserver;
 
-/** An NBServerSocketFactory that returns TLSNIOServerSockets. */
+/** 
+ * An <code>NBServerSocketFactory</code> that returns 
+ * {@link TLSNIOServerSocket TLSNIOServerSockets}. 
+ */
 public class TLSServerSocketFactory extends NBServerSocketFactory {
 
     @Override

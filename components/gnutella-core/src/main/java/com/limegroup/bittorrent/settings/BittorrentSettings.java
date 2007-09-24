@@ -50,7 +50,7 @@ public class BittorrentSettings extends LimeProps {
 	 * Whether to flush written blocks to disk before verifying them
 	 */
 	public static BooleanSetting TORRENT_FLUSH_VERIRY = 
-		FACTORY.createBooleanSetting("TORRENT_FLUSH_VERIFY", true);
+		FACTORY.createBooleanSetting("TORRENT_FLUSH_VERIFY", false);
 	
 	/**
 	 * Whether to use memory mapped files for disk access.

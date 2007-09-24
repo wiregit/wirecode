@@ -1,31 +1,41 @@
 package com.limegroup.gnutella.search;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.collection.NameValue;
-import org.limewire.security.SecureMessage;
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
+import org.limewire.collection.NameValue;
+import org.limewire.io.IpPort;
+import org.limewire.security.SecureMessage;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.ResponseVerifier;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
-@SuppressWarnings("unchecked")
 public class SearchResultHandlerTest extends LimeTestCase {
     
-    private static StubCallback callback = new StubCallback();
+    private LimeXMLDocumentFactory factory;
+    private MyActivityCallback callback;
+    private LimeXMLDocumentHelper limeXMLDocumentHelper;
+    private SearchResultHandler searchResultHandler;
+    private ResponseFactory responseFactory;
+    private QueryReplyFactory queryReplyFactory;
 
     public SearchResultHandlerTest(String name) {
         super(name);
@@ -39,24 +49,37 @@ public class SearchResultHandlerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public static void globalSetUp()  {
-        new RouterService(callback);
-    }
-    
-    public void setUp() throws Exception {
-        PrivilegedAccessor.setValue(RouterService.class, "VERIFIER", new StubVerifier());
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ResponseVerifier.class).to(StubVerifier.class);
+            }
+        });
+
+        callback = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
+        
+        limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
+        
+        factory = injector.getInstance(LimeXMLDocumentFactory.class);
+        
+        searchResultHandler = injector.getInstance(SearchResultHandler.class);
+        
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
     }
     
     public void testSecureActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
-        List list = new LinkedList();
-        list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
-        Response actionResponse = new Response(0, 1, "test", actionDoc);
+        List<NameValue<String>> list = new LinkedList<NameValue<String>>();
+        list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        Response actionResponse = responseFactory.createResponse(0, 1, "test", actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         reply.setSecureStatus(SecureMessage.SECURE);
         assertEquals(0, callback.results.size());
-        handler.handleQueryReply(reply);
+        searchResultHandler.handleQueryReply(reply);
         assertEquals(1, callback.results.size());
         RemoteFileDesc rfd = callback.getRFD();
         assertNotNull(rfd.getXMLDocument());
@@ -65,30 +88,28 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testInsecureActionNotSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
-        Response actionResponse = new Response(0, 1, "test");
-        List list = new LinkedList();
-        list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        Response actionResponse = responseFactory.createResponse(0, 1, "test");
+        List<NameValue<String>> list = new LinkedList<NameValue<String>>();
+        list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         assertEquals(0, callback.results.size());
-        handler.handleQueryReply(reply);
+        searchResultHandler.handleQueryReply(reply);
         assertEquals(0, callback.results.size());        
     }
     
     public void testInsecureResponseWithoutActionSent() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
-        Response actionResponse = new Response(0, 1, "test");
-        List list = new LinkedList();
-        list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        Response actionResponse = responseFactory.createResponse(0, 1, "test");
+        List<NameValue<String>> list = new LinkedList<NameValue<String>>();
+        list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
-        Response noDoc = new Response(1, 2, "other");
+        Response noDoc = responseFactory.createResponse(1, 2, "other");
         QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
         assertEquals(0, callback.results.size());
-        handler.handleQueryReply(reply);
+        searchResultHandler.handleQueryReply(reply);
         assertEquals(1, callback.results.size());
         RemoteFileDesc rfd = callback.getRFD();
         assertNull(rfd.getXMLDocument());
@@ -96,57 +117,45 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     public void testFailedReplyNotForwarded() throws Exception {
-        SearchResultHandler handler = new SearchResultHandler();
-        Response actionResponse = new Response(0, 1, "test");
-        List list = new LinkedList();
-        list.add(new NameValue("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = new LimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
+        Response actionResponse = responseFactory.createResponse(0, 1, "test");
+        List<NameValue<String>> list = new LinkedList<NameValue<String>>();
+        list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
+        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
         
-        Response noDoc = new Response(1, 2, "other");
+        Response noDoc = responseFactory.createResponse(1, 2, "other");
         QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
         reply.setSecureStatus(SecureMessage.FAILED);
         
         assertEquals(0, callback.results.size());
-        handler.handleQueryReply(reply);
+        searchResultHandler.handleQueryReply(reply);
         assertEquals(0, callback.results.size());        
     }
     
     private QueryReply newQueryReply(Response[] responses) throws Exception {
         QueryReply reply = 
-               new QueryReply( new byte[16]
-                             , (byte)1
-                             , 6346
-                             , new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }
-                             , 1
-                             , responses
-                             , new byte[16]
-                             , LimeXMLDocumentHelper.getAggregateString(responses).getBytes()
-                             , false
-                             , false
-                             , true
-                             , true
-                             , false
-                             , false
-                             , false
-                             , Collections.EMPTY_SET
-                             , null);
-        PrivilegedAccessor.invokeMethod(ForMeReplyHandler.instance(), "addXMLToResponses", reply);
+               queryReplyFactory.createQueryReply(new byte[16], (byte)1, 6346,
+                new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }, 1, responses, new byte[16], LimeXMLDocumentHelper.getAggregateString(responses).getBytes(), false, false,
+                true, true, false, false, false, IpPort.EMPTY_SET, null);
+        ForMeReplyHandler.addXMLToResponses(reply, limeXMLDocumentHelper);
         return reply;
     }
     
-    private static class StubCallback extends ActivityCallbackStub {
-        List results = new LinkedList();
+    @Singleton
+    private static class MyActivityCallback extends ActivityCallbackStub {
+        
+        List<RemoteFileDesc> results = new LinkedList<RemoteFileDesc>();
 
         public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set alts) {
             results.add(rfd);
         }
         
         public RemoteFileDesc getRFD() {
-            return (RemoteFileDesc)results.remove(0);
+            return results.remove(0);
         }
     }
     
+    @Singleton
     private static class StubVerifier extends ResponseVerifier {
 
         public synchronized boolean matchesQuery(byte[] guid, Response response) {

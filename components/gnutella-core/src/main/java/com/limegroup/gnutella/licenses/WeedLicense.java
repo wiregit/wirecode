@@ -135,7 +135,7 @@ class WeedLicense extends AbstractLicense {
 	 *       <Price>1.2500</Price>
      *  </WeedVerifyData>
      */
-    protected void parseDocumentNode(Node doc, boolean liveData) {
+    protected void parseDocumentNode(Node doc, LicenseCache licenseCache) {
         if(!doc.getNodeName().equals("WeedVerifyData"))
             return;
         

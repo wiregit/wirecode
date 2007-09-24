@@ -3,23 +3,25 @@ package com.limegroup.gnutella.search;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-
-import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
+import org.limewire.util.PrivilegedAccessor;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.LeafConnection;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NewConnection;
-import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.util.TestResultCounter;
 import com.limegroup.gnutella.util.UltrapeerConnection;
@@ -28,11 +30,13 @@ import com.limegroup.gnutella.util.UltrapeerConnection;
 /**
  * Tests the functionality of the <tt>QueryHandlerTest</tt> class.
  */
-@SuppressWarnings("unchecked")
 public final class QueryHandlerTest extends LimeTestCase {
 
+	private QueryRequestFactory queryRequestFactory;
+    private QueryHandlerFactory queryHandlerFactory;
 
-	public QueryHandlerTest(String name) {
+
+    public QueryHandlerTest(String name) {
 		super(name);
 	}
 
@@ -44,60 +48,48 @@ public final class QueryHandlerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetUp()  {
-        new RouterService(new ActivityCallbackStub());
+    @Override
+    protected void setUp() throws Exception {
+        
     }
-
+    
+    private Injector createInjector(Module... modules) {
+        Injector injector = LimeTestUtils.createInjector(modules);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        queryHandlerFactory = injector.getInstance(QueryHandlerFactory.class);
+        return injector;
+    }
+    
     /**
      * Tests the method for sending an individual query to a 
      * single connections.
      */
     public void testSendQueryToHost() throws Exception {
+        
+        createInjector();
+        
         ReplyHandler rh = new UltrapeerConnection();        
-        QueryRequest query = QueryRequest.createQuery("test", (byte)1);
-        QueryHandler qh = 
-            QueryHandler.createHandler(query, rh, new TestResultCounter());
-        Class[] paramTypes = new Class[] {
-            QueryRequest.class, 
-            ManagedConnection.class,
-            QueryHandler.class,
-        };
-
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "sendQueryToHost",
-                                         paramTypes);
-
+        QueryRequest query = queryRequestFactory.createQuery("test", (byte)1);
+        QueryHandler qh = queryHandlerFactory.createHandler(query, rh, new TestResultCounter());
         ManagedConnection mc = new UltrapeerConnection();
-        Object[] params = new Object[] {
-            query, mc, qh,
-        };
 
-        m.invoke(null, params);
-        List hostsQueried = 
-            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        qh.sendQueryToHost(query, mc);
+
+        // TODO remove reflection
+        List hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should not have added host", 0, hostsQueried.size());
 
         // make sure we add the connection to the queries handlers
         // if it doesn't support probe queries and the TTL is 1
-        params[1] = LeafConnection.createLeafConnection(false);
-        m.invoke(null, params);
-        hostsQueried = 
-            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        qh.sendQueryToHost(query, LeafConnection.createLeafConnection(false));
+        hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should have added host", 1, hostsQueried.size());
 
         // make sure it adds the connection when the ttl is higher
         // than one and the connection supports probe queries
-        params[0] = QueryRequest.createQuery("test");
-        params[1] = new UltrapeerConnection();
-
-        m.invoke(null, params);
-        hostsQueried = 
-            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        qh.sendQueryToHost(queryRequestFactory.createQuery("test"), new UltrapeerConnection());
+        hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should have added host", 2, hostsQueried.size());
-
-        
-        
     }    
 
     /**
@@ -140,26 +132,26 @@ public final class QueryHandlerTest extends LimeTestCase {
      * expected.
      */
     public void testPublicSendQuery() throws Exception {
-        assertNotNull("should have a message router", RouterService.getMessageRouter());
-
-        List connections = new LinkedList();
-        for(int i=0; i<15; i++) {
-            connections.add(NewConnection.createConnection());
-        }   
-
-        QueryHandler handler = 
-            QueryHandler.createHandler(QueryRequest.createQuery("test"),
+        
+        Injector injector = createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ConnectionManager.class).to(TestConnectionManager.class);
+            }
+        });
+        
+        TestConnectionManager testConnectionManager = injector.getInstance(TestConnectionManager.class);
+        testConnectionManager.resetAndInitialize();
+        
+        QueryHandler handler = queryHandlerFactory.createHandler(queryRequestFactory.createQuery("test"),
                                        NewConnection.createConnection(),
                                        new TestResultCounter(0));
 
-        TestConnectionManager tcm = new TestConnectionManager();
+        assertTrue(testConnectionManager.getInitializedConnections().size() > 0);
 
-        assertTrue(tcm.getInitializedConnections().size() > 0);
-        PrivilegedAccessor.setValue(QueryHandler.class, "_connectionManager", tcm);
-                                           
         handler.sendQuery();
         
-        int numQueries = tcm.getNumUltrapeerQueries();
+        int numQueries = testConnectionManager.getNumUltrapeerQueries();
         assertEquals("unexpected number of probe queries sent", 3, numQueries);
 
         // these calls should not go through, as it's too soon after the probe
@@ -169,7 +161,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         handler.sendQuery();
 
         assertEquals("unexpected number of probe queries sent", 3, 
-            tcm.getNumUltrapeerQueries());        
+            testConnectionManager.getNumUltrapeerQueries());        
         
         Thread.sleep(8000);
 
@@ -178,7 +170,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         Thread.sleep(1000);
 
         // after the sleep, it should go through!
-        assertEquals("unexpected number of queries sent", 4, tcm.getNumUltrapeerQueries());
+        assertEquals("unexpected number of queries sent", 4, testConnectionManager.getNumUltrapeerQueries());
 
         // these calls should not go through, as it's too soon after the last query
         // was sent!
@@ -186,13 +178,13 @@ public final class QueryHandlerTest extends LimeTestCase {
         handler.sendQuery();
         handler.sendQuery();
 
-        assertEquals("unexpected number of queries sent", 4, tcm.getNumUltrapeerQueries());        
+        assertEquals("unexpected number of queries sent", 4, testConnectionManager.getNumUltrapeerQueries());        
         
         Thread.sleep(8000);
         handler.sendQuery();
 
         // after the sleep, it should go through!
-        assertEquals("unexpected number of queries sent", 5, tcm.getNumUltrapeerQueries());
+        assertEquals("unexpected number of queries sent", 5, testConnectionManager.getNumUltrapeerQueries());
 
         // now, send out a bunch of queries to make sure that, eventually, 
         // new queries don't go out because we've reached too high a theoretical
@@ -200,13 +192,13 @@ public final class QueryHandlerTest extends LimeTestCase {
         // should be relatively high, causing us to hit the theoretical 
         // horizon limit!
 
-        for(int i=0; i<tcm.getInitializedConnections().size()-2; i++) {
+        for(int i=0; i<testConnectionManager.getInitializedConnections().size()-2; i++) {
             Thread.sleep(2000);
             handler.sendQuery();
         }        
 
         assertTrue("too many hosts queried! -- theoretical horizon too high", 
-                   (tcm.getNumUltrapeerQueries() <= 12));
+                   (testConnectionManager.getNumUltrapeerQueries() <= 12));
     }
 
 
@@ -248,36 +240,27 @@ public final class QueryHandlerTest extends LimeTestCase {
      * basics of query dispatching are working correctly.
      */
     public void testPrivateSendQuery() throws Exception {
-        assertNotNull("should have a message router", RouterService.getMessageRouter());
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "sendQuery",
-                                         new Class[]{List.class});
-
-        int numConnections = 15;
-        List connections = new ArrayList();
+        
+        createInjector();
+        
+		int numConnections = 15;
+        List<NewConnection> connections = new ArrayList<NewConnection>();
         for(int i=0; i<numConnections; i++) {
             connections.add(NewConnection.createConnection(10));
         }   
 
-        QueryHandler handler = 
-            QueryHandler.createHandler(QueryRequest.createQuery("test"),
+        QueryHandler handler = queryHandlerFactory.createHandler(queryRequestFactory.createQuery("test"),
                                        NewConnection.createConnection(8),
                                        new TestResultCounter(0));
         
-        
-        Object[] params = new Object[] {connections};
-
         // just send queries to all connections
         for(int i=0; i<numConnections; i++) {
-            m.invoke(handler, params);
+            handler.sendQuery(connections);
         }
-
-
         // just make sure all of the connections received the query
-        Iterator iter = connections.iterator();
+        Iterator<NewConnection> iter = connections.iterator();
         while(iter.hasNext()) {
-            TestConnection tc = (TestConnection)iter.next();
+            NewConnection tc = iter.next();
             assertTrue("should have received the query", tc.receivedQuery());
         }
     }

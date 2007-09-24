@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -9,9 +8,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,20 +19,23 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.nio.AbstractNBSocket;
+import org.limewire.net.AsyncConnectionDispatcher;
+import org.limewire.net.BlockingConnectionDispatcher;
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.SocketFactory;
-import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.AcceptObserver;
-import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.MessageService;
 import org.limewire.setting.SettingsGroupManager;
-import org.limewire.util.BufferUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
-
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
@@ -42,6 +45,7 @@ import com.limegroup.gnutella.statistics.HTTPStat;
  * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
+@Singleton
 public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
@@ -51,10 +55,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
     static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
     
-    /** the UPnPManager to use */
-    private static final UPnPManager UPNP_MANAGER 
-        = (!ConnectionSettings.DISABLE_UPNP.getValue()) ? UPnPManager.instance() : null;
-
     /**
      * The socket that listens for incoming connections. Can be changed to
      * listen to new ports.
@@ -88,14 +88,14 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      *
      * LOCKING: obtain Acceptor.class' lock 
      */
-    private static byte[] _address = new byte[4];
+    private byte[] _address = new byte[4];
     
     /**
      * The external address.  This is the address as visible from other peers.
      *
      * LOCKING: obtain Acceptor.class' lock
      */
-    private static byte[] _externalAddress = new byte[4];
+    private byte[] _externalAddress = new byte[4];
     
 	/**
 	 * Variable for whether or not we have accepted an incoming connection --
@@ -121,8 +121,52 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * to starting are dropped.
      */
     private volatile boolean _started;
+    
+    private final NetworkManager networkManager;
+    private final Provider<UDPService> udpService;
+    private final Provider<MulticastService> multicastService;
+    private final Provider<ConnectionDispatcher> connectionDispatcher;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<ActivityCallback> activityCallback;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<IPFilter> ipFilter;
+    private final ConnectionServices connectionServices;
+    private final Provider<UPnPManager> upnpManager;
+    
+    private final boolean upnpEnabled; 
+    
+    @Inject
+    public Acceptor(NetworkManager networkManager,
+            Provider<UDPService> udpService,
+            Provider<MulticastService> multicastService,
+            @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<ActivityCallback> activityCallback,
+            Provider<ConnectionManager> connectionManager,
+            Provider<IPFilter> ipFilter, ConnectionServices connectionServices,
+            Provider<UPnPManager> upnpManager) {
+        this.networkManager = networkManager;
+        this.udpService = udpService;
+        this.multicastService = multicastService;
+        this.connectionDispatcher = connectionDispatcher;
+        this.backgroundExecutor = backgroundExecutor;
+        this.activityCallback = activityCallback;
+        this.connectionManager = connectionManager;
+        this.ipFilter = ipFilter;
+        this.connectionServices = connectionServices;
+        this.upnpManager = upnpManager;
+        
+        // capture UPnP setting on construction, so start/stop can
+        // work even if setting changes between the two.
+        upnpEnabled = !ConnectionSettings.DISABLE_UPNP.getValue();
+    }
+    
+    /** Returns true if UPnP was enabled when Acceptor was constructed. */
+    private boolean isUPnPEnabled() {
+        return upnpEnabled;
+    }
 
-	/**
+    /**
      * @modifes this
      * @effects sets the IP address to use in pongs and query replies.
      *  If addr is invalid or a local address, this is not modified.
@@ -149,7 +193,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 		}
 		
 		if( addrChanged )
-		    RouterService.addressChanged();
+		    networkManager.addressChanged();
 	}
 	
 	/**
@@ -193,9 +237,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         //   block under certain conditions.
         //   See the notes for _address.
         try {
-            setAddress(UPNP_MANAGER != null ? 
-                    NetworkUtils.getLocalAddress() : 
-                        InetAddress.getLocalHost());
+            if(isUPnPEnabled())
+                setAddress(NetworkUtils.getLocalAddress());
+            else
+                setAddress(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
         } catch (SecurityException e) {
         }
@@ -235,26 +280,30 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
             // If we still don't have a socket, there's an error
             if(_socket == null) {
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+                MessageService.showError(I18n.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
             }
         }
         
         if (_port != oldPort || tryingRandom) {
             ConnectionSettings.PORT.setValue(_port);
             SettingsGroupManager.instance().save();
-            RouterService.addressChanged();
+            networkManager.addressChanged();
         }
 
+        setupUPnP();
+	}
+	
+	private void setupUPnP() {
         // if we created a socket and have a NAT, and the user is not 
         // explicitly forcing a port, create the mappings 
-        if (_socket != null && UPNP_MANAGER != null) {
+        if (_socket != null && isUPnPEnabled()) {
             // wait a bit for the device.
-            UPNP_MANAGER.waitForDevice();
+            upnpManager.get().waitForDevice();
             
         	// if we haven't discovered the router by now, its not there
-        	UPNP_MANAGER.stop();
+            upnpManager.get().stop();
         	
-        	boolean natted = UPNP_MANAGER.isNATPresent();
+        	boolean natted = upnpManager.get().isNATPresent();
         	boolean validPort = NetworkUtils.isValidPort(_port);
         	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() &&
 				!ConnectionSettings.UPNP_IN_USE.getValue();
@@ -263,13 +312,13 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         	    LOG.debug("Natted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
         	
         	if(natted && validPort && !forcedIP) {
-        		int mappedPort = UPNP_MANAGER.mapPort(_port);
+        		int mappedPort = upnpManager.get().mapPort(_port);
         		if(LOG.isDebugEnabled())
         		    LOG.debug("UPNP port mapped: " + mappedPort);
         		
 			    //if we created a mapping successfully, update the forced port
 			    if (mappedPort != 0 ) {
-			        UPNP_MANAGER.clearMappingsOnShutdown();
+			        upnpManager.get().clearMappingsOnShutdown();
 			        
 			        //  mark UPNP as being on so that if LimeWire shuts
 			        //  down prematurely, we know the FORCE_IP was from UPnP
@@ -278,14 +327,14 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
         	        ConnectionSettings.UPNP_IN_USE.setValue(true);
         	        if (mappedPort != _port)
-        	            RouterService.addressChanged();
+        	            networkManager.addressChanged();
         		
         		    // we could get our external address from the NAT but its too slow
         		    // so we clear the last connect back times.
         	        // This will not help with already established connections, but if 
         	        // we establish new ones in the near future
         		    resetLastConnectBackTime();
-        		    UDPService.instance().resetLastConnectBackTime();
+        		    udpService.get().resetLastConnectBackTime();
 			    }			        
         	}
         }
@@ -295,14 +344,12 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * Launches the port monitoring thread, MulticastService, and UDPService.
      */
 	public void start() {
-        MulticastService.instance().start();
-        UDPService.instance().start();
-        RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
-        RouterService.getConnectionDispatcher().
-        addConnectionAcceptor(this,
-        		false,
-        		false,
-        		"CONNECT","\n\n");
+        multicastService.get().start();
+        udpService.get().start();
+        backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(),
+                TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES,
+                TimeUnit.MILLISECONDS);
+        connectionDispatcher.get().addConnectionAcceptor(this, false, "CONNECT", "\n\n");
         _started = true;
     }
 	
@@ -315,6 +362,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	    synchronized(Acceptor.class) {
 	        return Arrays.equals(getAddress(true), _externalAddress);
 	    }
+	}
+	
+	public boolean isBlocking() {
+	    return false;
 	}
 	
 	/**
@@ -393,9 +444,9 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             _port=0;
 
             //Shut off UDPService also!
-            UDPService.instance().setListeningSocket(null);
+            udpService.get().setListeningSocket(null);
             //Shut off MulticastServier too!
-            MulticastService.instance().setListeningSocket(null);            
+            multicastService.get().setListeningSocket(null);            
 
             LOG.trace("service OFF.");
             return;
@@ -417,7 +468,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             if(LOG.isDebugEnabled())
                 LOG.debug("changing port to " + port);
 
-            DatagramSocket udpServiceSocket = UDPService.instance().newListeningSocket(port);
+            DatagramSocket udpServiceSocket = udpService.get().newListeningSocket(port);
 
             LOG.trace("UDP Service is ready.");
             
@@ -427,7 +478,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                     ConnectionSettings.MULTICAST_ADDRESS.getValue()
                 );
                 mcastServiceSocket =                            
-                    MulticastService.instance().newListeningSocket(
+                    multicastService.get().newListeningSocket(
                         ConnectionSettings.MULTICAST_PORT.getValue(), mgroup
                     );
                 LOG.trace("multicast service setup");
@@ -459,11 +510,11 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             LOG.trace("Acceptor ready..");
 
             // Commit UDPService's new socket
-            UDPService.instance().setListeningSocket(udpServiceSocket);
+            udpService.get().setListeningSocket(udpServiceSocket);
             // Commit the MulticastService's new socket
             // if we were able to get it
             if (mcastServiceSocket != null) {
-                MulticastService.instance().setListeningSocket(mcastServiceSocket);
+                multicastService.get().setListeningSocket(mcastServiceSocket);
             }
 
             if(LOG.isDebugEnabled())
@@ -487,7 +538,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 		if (_acceptedIncoming == status)
 			return false;
 	    _acceptedIncoming = status;
-		RouterService.getCallback().acceptedIncomingChanged(status);
+		activityCallback.get().acceptedIncomingChanged(status);
 	    return true;
 	}
 	
@@ -514,7 +565,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             }
         }
         if(changed)
-            RouterService.incomingStatusChanged();
+            networkManager.incomingStatusChanged();
     }
 
 
@@ -586,10 +637,24 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             }
 
             // Dispatch asynchronously if possible.
-            if (client instanceof NIOMultiplexor) // supports non-blocking reads
-                ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(client, allowedProtocol));
-            else
-                ThreadExecutor.startThread(new BlockingConnectionDispatcher(client, allowedProtocol), "ConnectionDispatchRunner");
+            if (client instanceof NIOMultiplexor) {// supports non-blocking reads
+                ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(connectionDispatcher.get(), client, allowedProtocol) {
+                    @Override
+                    public void shutdown() {
+                        super.shutdown();
+                        HTTPStat.CLOSED_REQUESTS.incrementStat();
+                    }
+                });
+            } else {
+                HTTPStat.CLOSED_REQUESTS.incrementStat();
+                ThreadExecutor.startThread(new BlockingConnectionDispatcher(connectionDispatcher.get(), client, allowedProtocol) {
+                    @Override
+                    public void shutdown() {
+                        super.shutdown();
+                        HTTPStat.CLOSED_REQUESTS.incrementStat();
+                    }                    
+                }, "ConnectionDispatchRunner");
+            }
         }
     }
     
@@ -605,7 +670,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
         
-        return !RouterService.isConnectedTo(addr) &&
+        return !connectionServices.isConnectedTo(addr) &&
                !NetworkUtils.isLocalAddress(addr);
 	}
 
@@ -616,7 +681,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * @return true iff ip is a banned address.
      */
     public boolean isBannedIP(byte[] addr) {        
-        return !RouterService.getIpFilter().allow(addr);
+        return !ipFilter.get().allow(addr);
     }
     
     /**
@@ -632,9 +697,13 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * any relevant settings.
      */
     public void shutdown() {
-        if(UPNP_MANAGER != null &&
-           UPNP_MANAGER.isNATPresent() &&
-           UPNP_MANAGER.mappingsExist() &&
+        shutdownUPnP();
+    }
+    
+    private void shutdownUPnP() {
+        if(isUPnPEnabled() &&
+           upnpManager.get().isNATPresent() &&
+           upnpManager.get().mappingsExist() &&
            ConnectionSettings.UPNP_IN_USE.getValue()) {
         	// reset the forced port values - must happen before we save them to disk
         	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
@@ -652,7 +721,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // clear and revalidate if 1) we haven't had in incoming 
             // or 2) we've never had incoming and we haven't checked
             final long currTime = System.currentTimeMillis();
-            final ConnectionManager cm = RouterService.getConnectionManager();
             if (
                 (_acceptedIncoming && //1)
                  ((currTime - _lastIncomingTime) > INCOMING_EXPIRE_TIME)) 
@@ -662,7 +730,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                 ) {
                 // send a connectback request to a few peers and clear
                 // _acceptedIncoming IF some requests were sent.
-                if(cm.sendTCPConnectBackRequests())  {
+                if(connectionManager.get().sendTCPConnectBackRequests())  {
                     _lastConnectBackTime = System.currentTimeMillis();
                     Runnable resetter = new Runnable() {
                         public void run() {
@@ -673,158 +741,14 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                                 }
                             }
                             if(changed)
-                                RouterService.incomingStatusChanged();
+                                networkManager.incomingStatusChanged();
                         }
                     };
-                    RouterService.schedule(resetter, 
-                                           WAIT_TIME_AFTER_REQUESTS, 0);
+                    backgroundExecutor.scheduleWithFixedDelay(resetter, 
+                                           WAIT_TIME_AFTER_REQUESTS, 0, TimeUnit.MILLISECONDS);
                 }
             }
         }
     }
     
-    /**
-     * A ConnectionDispatcher that reads asynchronously from the socket.
-     */
-    private static class AsyncConnectionDispatcher extends AbstractChannelInterestReader {
-        private final Socket client;
-        private final String allowedWord;
-        private boolean finished = false;
-        
-        AsyncConnectionDispatcher(Socket client, String allowedWord) {
-            // + 1 for whitespace
-            super(RouterService.getConnectionDispatcher().getMaximumWordSize() + 1);
-            
-            this.client = client;
-            this.allowedWord = allowedWord;
-        }
-        
-        public void shutdown() {
-            super.shutdown();
-            HTTPStat.CLOSED_REQUESTS.incrementStat();
-        }
-
-        public void handleRead() throws IOException {
-            // If we already finished our reading, turn read interest off
-            // and exit early.
-            if(finished) {
-                source.interestRead(false);
-                return;
-            }
-            
-            // Fill up our buffer as much we can.
-            int read = 0;
-            while(buffer.hasRemaining() && (read = source.read(buffer)) > 0);
-            
-            // See if we have a full word.
-            for(int i = 0; i < buffer.position(); i++) {
-                if(buffer.get(i) == ' ') {
-                    ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
-                    String word = new String(buffer.array(), 0, i);
-                    if(dispatcher.isValidProtocolWord(word)) {
-                        if(allowedWord != null && !allowedWord.equals(word)) {
-                            if(LOG.isDebugEnabled())
-                                LOG.debug("Legal but wrong word: " + word);
-                            throw new IOException("wrong word!");
-                        }
-
-                        if(LOG.isDebugEnabled())
-                            LOG.debug("Dispatching word: " + word);
-                        buffer.limit(buffer.position()).position(i+1);
-                        source.interestRead(false);
-                        RouterService.getConnectionDispatcher().dispatch(word, client, true);
-                    } else {
-                        startTLS();
-                    }
-                    finished = true;
-                    return;
-                }
-            }
-            
-            // If there's no room to read more or there's nothing left to read,
-            // we aren't going to read our word.  Attempt to switch to TLS, or
-            // close if we EOF'd early.
-            if(!buffer.hasRemaining()) {
-                startTLS();
-                finished = true;
-                return;
-            } else if(read == -1) {
-                close();
-                return;
-            }
-        }
-        
-        /**
-         * Attempts to start TLS encoding on the socket.
-         * If any data was buffered but not used, the data will be read as part
-         * of the TLS handshake.  If the socket is not capable of switching to TLS,
-         * the socket is closed.
-         * 
-         * @throws IOException if there was an error starting TLS
-         */
-        private void startTLS() throws IOException {
-            if(SSLSettings.isIncomingTLSEnabled() &&
-               !SSLUtils.isTLSEnabled(client) && SSLUtils.isStartTLSCapable(client)) {
-                LOG.debug("Attempting to start TLS");
-                buffer.flip();
-                AbstractNBSocket socket = SSLUtils.startTLS(client, buffer);
-                socket.setReadObserver(new AsyncConnectionDispatcher(socket, allowedWord));
-            } else {
-                close();
-            }
-        }
-        
-        public int read(ByteBuffer dst) {
-            return BufferUtils.transfer(buffer, dst, false);
-        }
-
-        public long read(ByteBuffer [] dst) {
-        	return BufferUtils.transfer(buffer, dst, 0, dst.length, false);
-        }
-        
-        public long read(ByteBuffer [] dst, int offset, int length) {
-            return BufferUtils.transfer(buffer, dst, offset, length, false);
-        }
-    }
-
-
-    /**
-     * A ConnectionDispatcher that blocks while reading.
-     */
-    private static class BlockingConnectionDispatcher implements Runnable {
-        private final Socket client;
-        private final String allowedWord;
-        
-        public BlockingConnectionDispatcher(Socket socket, String allowedWord) {
-            this.client = socket;
-            this.allowedWord = allowedWord;
-        }
-
-        /** Reads a word and sends it off to the ConnectionDispatcher for dispatching. */
-        public void run() {
-            try {
-                //The try-catch below is a work-around for JDK bug 4091706.
-                InputStream in=null;
-                try {
-                    in=client.getInputStream(); 
-                } catch (IOException e) {
-                    HTTPStat.CLOSED_REQUESTS.incrementStat();
-                    throw e;
-                } catch(NullPointerException e) {
-                    // This should only happen extremely rarely.
-                    // JDK bug 4091706
-                    throw new IOException(e.getMessage());
-                }
-                
-                ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
-                String word = IOUtils.readLargestWord(in, dispatcher.getMaximumWordSize());
-                if(allowedWord != null && !allowedWord.equals(word))
-                    throw new IOException("wrong word!");
-                dispatcher.dispatch(word, client, false);
-            } catch (IOException iox) {
-                HTTPStat.CLOSED_REQUESTS.incrementStat();
-                IOUtils.close(client);
-            }
-        }
-    }    
 }

@@ -3,10 +3,9 @@ package org.limewire.collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.limewire.collection.BucketQueue;
-import org.limewire.util.BaseTestCase;
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 /**
  * Unit tests for BucketQueue

@@ -9,20 +9,22 @@ import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
 
-import org.limewire.concurrent.AtomicLazyReference;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.BufferReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.util.BufferUtils;
 
-/** Contains a collection of SSL-related utilites. */
+import com.google.inject.Provider;
+
+/** Contains a collection of SSL-related utilities. */
 public class SSLUtils {
     
     private SSLUtils() {}
         
     private static final Executor TLS_PROCESSOR = ExecutorsHelper.newProcessingQueue("TLSProcessor");
-    private static final AtomicLazyReference<SSLContext> TLS_CONTEXT = new AtomicLazyReference<SSLContext>() {
+    private static final Provider<SSLContext> TLS_CONTEXT = new AbstractLazySingletonProvider<SSLContext>() {
         @Override
         protected SSLContext createObject() {
                 try {
@@ -53,12 +55,14 @@ public class SSLUtils {
         return TLS_CONTEXT.get();
     }
     
-    /** Returns true is the given socket is already using TLS. */
+    /** Returns <code>true</code> is the given socket is already using TLS. */
     public static boolean isTLSEnabled(Socket socket) {
         return socket instanceof TLSNIOSocket;
     }
     
-    /** Returns true if we are capable of performing a startTLS operation on this socket. */
+    /** Returns <code>true</code> if you are capable of performing a 
+     * {@link #startTLS(Socket, ByteBuffer)} operation on this 
+     * <code>socket</code>. */
     public static boolean isStartTLSCapable(Socket socket) {
         return socket instanceof AbstractNBSocket;
     }
@@ -66,11 +70,11 @@ public class SSLUtils {
     /**
      * Wraps an existing socket in a TLS-enabled socket.
      * Any data within 'data' will be pushed into the TLS layer.
-     * 
+     * <p>
      * This currently only works for creating server-side TLS sockets.
-     * 
-     * You must ensure that isTLSCapable returns true for the socket,
-     * otherwise an IllegalArgumentException is thrown.
+     * <p>
+     * You must ensure that <code>isTLSCapable</code> returns true for the socket,
+     * otherwise an <code>IllegalArgumentException</code> is thrown.
      */ 
     public static TLSNIOSocket startTLS(Socket socket, ByteBuffer data) throws IOException {
         if(socket instanceof AbstractNBSocket) {
@@ -103,7 +107,13 @@ public class SSLUtils {
             return EmptyTracker.instance();
         }
     }
-    
+    /**
+     * Provides an implementation for the {@link SSLBandwidthTracker}
+     * interface where each "get" method returns 
+     * zero. Using an empty tracker as the default value of a 
+     * <code>SSLBandwidthTracker</code> avoids 
+     * <code>NullPointerExceptions</code>.
+     */
     public static class EmptyTracker implements SSLBandwidthTracker {
         private static final EmptyTracker instance = new EmptyTracker();
         public static final EmptyTracker instance() { return instance; }

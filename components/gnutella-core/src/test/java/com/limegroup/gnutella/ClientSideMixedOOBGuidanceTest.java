@@ -8,20 +8,17 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -68,29 +65,29 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
             assertTrue("not up->leaf", testUP[i].isSupernodeClientConnection());
             drain(testUP[i], 500);
             if ((i==2)) { // i'll send 0 later....
-                testUP[i].send(MessagesSupportedVendorMessage.instance());
+                testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
                 testUP[i].flush();
             }
         }
         
-        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         testUP[0].flush();
         
         // first we need to set up GUESS capability
         UDP_ACCESS.setSoTimeout(TIMEOUT*2);
         // ----------------------------------------
         // set up solicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
 
         // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
  
         // you also have to set up TCP incoming....
         {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock=Sockets.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                sock=ProviderHacks.getSocketsManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                      SERVER_PORT), 12);
                 os = sock.getOutputStream();
                 os.write("\n\n".getBytes());
@@ -110,18 +107,18 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
-        assertTrue(RouterService.isGUESSCapable());
-        assertTrue(RouterService.acceptedIncomingConnection());
+        assertTrue(ProviderHacks.getNetworkManager().isGUESSCapable());
+        assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
         
         // get rid of any messages that are stored up.
         drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
-        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());
         assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
-                       RouterService.getAddress(), 
-                       RouterService.getPort()));
-        RouterService.query(queryGuid.bytes(), "susheel");
+                ProviderHacks.getNetworkManager().getAddress(), 
+                ProviderHacks.getNetworkManager().getPort()));
+        ProviderHacks.getSearchServices().query(queryGuid.bytes(), "susheel");
         Thread.sleep(250);
 
         // some connected UPs should get a OOB query
@@ -141,24 +138,21 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         // we're sending.
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[] {
-                // Only the 'susheel' Responses will pass the 
-                // ResponseVerifier.matchesQuery() check and 
-                // the others wont
-                new Response(10, 10, "susheel"+i),
-                new Response(10, 10, "susheel smells good"+i),
-                new Response(10, 10, "anita is sweet"+i),
-                new Response(10, 10, "anita is prety"+i),
-                new Response(10, 10, "susheel smells bad" + i),
-                new Response(10, 10, "renu is sweet " + i),
-                new Response(10, 10, "prety is spelled pretty " + i),
-                new Response(10, 10, "go susheel go" + i),
-                new Response(10, 10, "susheel runs fast" + i),
-                new Response(10, 10, "susheel jumps high" + i),
-                new Response(10, 10, "sleepy susheel" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel smells good"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is sweet"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "anita is prety"+i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel smells bad" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "renu is sweet " + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "prety is spelled pretty " + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "go susheel go" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel runs fast" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "susheel jumps high" + i),
+                ProviderHacks.getResponseFactory().createResponse(10, 10, "sleepy susheel" + i),
             };
-            m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
-                               GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+            m = ProviderHacks.getQueryReplyFactory().createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
+                    myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
+                    true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -176,7 +170,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         }
 
         // shut off the query....
-        RouterService.stopQuery(queryGuid);
+        ProviderHacks.getSearchServices().stopQuery(queryGuid);
 
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUP.length; i++) {

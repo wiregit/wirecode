@@ -27,8 +27,6 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     private static Set localSet2,globalSet;
     public Set localSet;
     
-    private boolean _activelyDownloading;
-        
     private IntervalSet.ByteIntervals _ranges;
     
     public static final int size = 1126400;
@@ -102,12 +100,4 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
         _ranges = set.toBytes();
     }
 	
-	public void setActivelyDownloading(boolean yes) {
-	    _activelyDownloading=yes;
-	}
-	
-    @Override
-	public boolean isActivelyDownloading() {
-	    return _activelyDownloading;
-	}
 }

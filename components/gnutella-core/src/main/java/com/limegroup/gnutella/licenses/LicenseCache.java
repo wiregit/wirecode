@@ -20,13 +20,14 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
-
 
 /**
  * A repository of licenses.
  */
-class LicenseCache {
+@Singleton
+public class LicenseCache {
     
     private static final Log LOG = LogFactory.getLog(LicenseCache.class);
     
@@ -57,9 +58,9 @@ class LicenseCache {
      */
     private boolean dirty = false;
 
-    private static final LicenseCache INSTANCE = new LicenseCache();
-    private LicenseCache() { deserialize(); }
-    public static LicenseCache instance() { return INSTANCE; }
+    LicenseCache() {
+        deserialize(); 
+    }
     
     /**
      * Adds a verified license.

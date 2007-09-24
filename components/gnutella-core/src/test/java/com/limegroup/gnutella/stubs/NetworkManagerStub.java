@@ -16,7 +16,6 @@ public class NetworkManagerStub implements NetworkManager {
     private boolean canReceiveSolicited;
     private boolean canReceiveUnsolicited;
     private boolean guessCapable;
-    private byte[] externalAddress;
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -53,7 +52,8 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public byte[] getExternalAddress() {
-        return externalAddress;
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public byte[] getNonForcedAddress() {
@@ -132,12 +132,8 @@ public class NetworkManagerStub implements NetworkManager {
         this.canReceiveUnsolicited = canReceiveUnsolicited;
     }
 
-    public void setGuessCapable(boolean guessCapable) {
-        this.guessCapable = guessCapable;
-    }
-
-    public void setExternalAddress(byte[] externalAddress) {
-        this.externalAddress = externalAddress;
+    public void setGuessCapable(boolean b) {
+        guessCapable = b;
     }
 
 }

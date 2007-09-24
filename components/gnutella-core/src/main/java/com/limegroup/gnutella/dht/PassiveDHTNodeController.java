@@ -60,9 +60,10 @@ public class PassiveDHTNodeController extends AbstractDHTController {
      */
     private PassiveDHTNodeRouteTable routeTable;
     
-    public PassiveDHTNodeController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher, DHTMode.PASSIVE);
+    PassiveDHTNodeController(Vendor vendor, Version version,
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
+            DHTControllerFacade dhtControllerFacade) {
+        super(vendor, version, dispatcher, DHTMode.PASSIVE, dhtControllerFacade);
     }
     
     @Override

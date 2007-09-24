@@ -3,11 +3,9 @@ package org.limewire.io;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import org.limewire.io.IOUtils;
-import org.limewire.util.BaseTestCase;
-
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 public final class IOUtilsTest extends BaseTestCase {

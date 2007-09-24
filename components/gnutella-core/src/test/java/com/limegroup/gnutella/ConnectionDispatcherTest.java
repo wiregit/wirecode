@@ -5,6 +5,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.ConnectionDispatcherImpl;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -24,18 +28,18 @@ public class ConnectionDispatcherTest extends LimeTestCase {
     }
     
     public void testGetMaximumWordSizeAddRemoveAndIsValid() {
-        ConnectionDispatcher dispatcher = new ConnectionDispatcher();
+        ConnectionDispatcher dispatcher = new ConnectionDispatcherImpl();
         assertEquals(0, dispatcher.getMaximumWordSize());
         assertFalse(dispatcher.isValidProtocolWord("333"));
-        dispatcher.addConnectionAcceptor(new StubAcceptor(), false, false, "333");
+        dispatcher.addConnectionAcceptor(new StubAcceptor(), false, "333");
         assertTrue(dispatcher.isValidProtocolWord("333"));
         assertEquals(3, dispatcher.getMaximumWordSize());
-        dispatcher.addConnectionAcceptor(new StubAcceptor(), false, false, "22", "4444");
+        dispatcher.addConnectionAcceptor(new StubAcceptor(), false, "22", "4444");
         assertTrue(dispatcher.isValidProtocolWord("333"));
         assertTrue(dispatcher.isValidProtocolWord("22"));
         assertTrue(dispatcher.isValidProtocolWord("4444"));
         assertEquals(4, dispatcher.getMaximumWordSize());
-        dispatcher.addConnectionAcceptor(new StubAcceptor(), false, false, "55555", "7777777");
+        dispatcher.addConnectionAcceptor(new StubAcceptor(), false, "55555", "7777777");
         assertEquals(7, dispatcher.getMaximumWordSize());
         assertTrue(dispatcher.isValidProtocolWord("7777777"));
         dispatcher.removeConnectionAcceptor("7777777");
@@ -56,6 +60,7 @@ public class ConnectionDispatcherTest extends LimeTestCase {
         private volatile Thread acceptedThread;
         private volatile String acceptedWord;
         private volatile Socket acceptedSocket;
+        private boolean blocking;
 
         public void acceptConnection(String word, Socket s) {
             acceptedThread = Thread.currentThread();
@@ -83,6 +88,10 @@ public class ConnectionDispatcherTest extends LimeTestCase {
         
         public Socket getAcceptedSocket() {
             return acceptedSocket;
+        }
+
+        public boolean isBlocking() {
+             return blocking;
         }
         
     }

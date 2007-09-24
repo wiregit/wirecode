@@ -17,9 +17,11 @@ import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpCoreUtils;
 import org.limewire.nio.observer.WriteObserver;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.connection.BasicQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
@@ -28,6 +30,7 @@ import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
@@ -39,10 +42,19 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(BrowseRequestHandler.class);
     
-    private HTTPUploadSessionManager sessionManager;
+    private final HTTPUploadSessionManager sessionManager;
+    private final QueryRequestFactory queryRequestFactory;
+    private final FileManager fileManager;
+    private final MessageRouter messageRouter;
 
-    public BrowseRequestHandler(HTTPUploadSessionManager sessionManager) {
+    @Inject
+    BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
+            QueryRequestFactory queryRequestFactory, FileManager fileManager,
+            MessageRouter messageRouter) {
         this.sessionManager = sessionManager;
+        this.queryRequestFactory = queryRequestFactory;
+        this.fileManager = fileManager;
+        this.messageRouter = messageRouter;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -109,8 +121,8 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
             sender.setWriteChannel(this);
             
-            query = QueryRequest.createBrowseHostQuery();
-            iterable = RouterService.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
+            query = queryRequestFactory.createBrowseHostQuery();
+            iterable = fileManager.getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());
         }
         
@@ -144,8 +156,8 @@ public class BrowseRequestHandler implements HttpRequestHandler {
                 responses.add(iterable.next());
             }
             
-            Iterable<QueryReply> it = RouterService.getMessageRouter()
-                    .responsesToQueryReplies(responses.toArray(new Response[0]), query);
+            Iterable<QueryReply> it = messageRouter.responsesToQueryReplies(
+                    responses.toArray(new Response[0]), query);
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);
                 pendingMessageCount++;

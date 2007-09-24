@@ -1,17 +1,10 @@
 package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import org.limewire.io.NetworkUtils;
-import org.limewire.setting.StringSetting;
-
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HeaderSupport;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 class HandshakeSupport extends HeaderSupport {
 
@@ -114,8 +107,6 @@ class HandshakeSupport extends HeaderSupport {
         if (i > 0) {
             String key = line.substring(0, i);
             String value = line.substring(i + 1).trim();
-            if (HeaderNames.REMOTE_IP.equals(key))
-                changeAddress(value);
             readHeaders.put(key, value);
         }
         return true;
@@ -136,39 +127,6 @@ class HandshakeSupport extends HeaderSupport {
         return key + ": " + value + CRLF;
     }
 
-    /**
-     * Determines if the address should be changed and changes it if
-     * necessary.
-     */
-    private void changeAddress(final String v) {
-        InetAddress ia = null;
-        try {
-            ia = InetAddress.getByName(v);
-        } catch(UnknownHostException uhe) {
-            return; // invalid.
-        }
-        
-        // invalid or private, exit
-        if(!NetworkUtils.isValidAddress(ia) ||
-            NetworkUtils.isPrivateAddress(ia))
-            return;
-            
-        // If we're forcing, change that if necessary.
-        if( ConnectionSettings.FORCE_IP_ADDRESS.getValue() ) {
-            StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
-            if(!v.equals(addr.getValue())) {
-                addr.setValue(v);
-                RouterService.addressChanged();
-            }
-        }
-        // Otherwise, if our current address is invalid, change.
-        else if(!NetworkUtils.isValidAddress(RouterService.getAddress())) {
-            // will auto-call addressChanged.
-            RouterService.getAcceptor().setAddress(ia);
-        }
-        
-        RouterService.getAcceptor().setExternalAddress(ia);
-    }
     
     /** Returns the number of headers we've read so far. */
     public int getHeadersReadSize() {

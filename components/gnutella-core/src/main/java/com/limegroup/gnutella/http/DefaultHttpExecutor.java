@@ -9,10 +9,13 @@ import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.nio.observer.Shutdownable;
 
+import com.google.inject.Singleton;
+
 
 /**
  * Default implementation of <tt>HttpExecutor</tt>.
  */
+@Singleton
 public class DefaultHttpExecutor implements HttpExecutor {
 
 	private static final ExecutorService POOL = 

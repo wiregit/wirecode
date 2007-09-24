@@ -6,7 +6,10 @@ import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
 
+import com.google.inject.Singleton;
+
 /** A class that verifies secure messages sequentially. */
+@Singleton
 public class SecureMessageVerifier {
     
     private final ExecutorService QUEUE;

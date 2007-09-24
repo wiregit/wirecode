@@ -14,22 +14,19 @@ import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.Verifier;
-import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 
 @SuppressWarnings("all")
@@ -63,7 +60,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         // ban everyone
         ipSetting.setValue(new String[0]);
         TestResponder responder = new TestResponder(null);
-        Message m = PingRequest.createMulticastPing();
+        Message m = ProviderHacks.getPingRequestFactory().createMulticastPing();
         responder.handleMessage(m, addr, h);
         assertNull(responder.msg);
         assertNull(responder.addr);
@@ -202,7 +199,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         // a message w/o a version will go through if it has the proper
         // destination address
         m.version = -1;
-        m.destAddr = new IpPortImpl(InetAddress.getByAddress(RouterService.getExternalAddress()),1234);
+        m.destAddr = new IpPortImpl(InetAddress.getByAddress(ProviderHacks.getNetworkManager().getExternalAddress()),1234);
         responder.handleMessage(m, addr, h);
         assertSame(m, responder.msg);
         
@@ -216,7 +213,7 @@ public class RestrictedResponderTest extends BaseTestCase {
     private static int simppVersion;
     private void triggerSimppUpdate() throws Exception {
         List<SimppListener> l = (List<SimppListener>) 
-            PrivilegedAccessor.getValue(SimppManager.instance(), "listeners");
+            PrivilegedAccessor.getValue(ProviderHacks.getSimppManager(), "listeners");
         for (SimppListener s : l)
             s.simppUpdated(simppVersion++);
     }
@@ -227,7 +224,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         InetSocketAddress addr;
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
-            super(ipSetting, verifier, versionSetting);
+            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
         }
 
         @Override

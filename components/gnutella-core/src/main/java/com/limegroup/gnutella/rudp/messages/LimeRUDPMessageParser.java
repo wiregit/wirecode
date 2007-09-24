@@ -3,8 +3,8 @@ package com.limegroup.gnutella.rudp.messages;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.MessageFormatException;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;

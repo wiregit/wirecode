@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -20,9 +20,9 @@ public abstract class DefaultHeaders extends Properties {
      */
     private static final String QUERY_ROUTING_VERSION = "0.1";
 
-    protected DefaultHeaders(String remoteIP) {
-        byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
+    protected DefaultHeaders(String remoteIP, NetworkManager networkManager) {
+        byte[] addr = networkManager.getAddress();
+        int port = networkManager.getPort();
         if(NetworkUtils.isValidAddress(addr) &&
            NetworkUtils.isValidPort(port)) {
             put(HeaderNames.LISTEN_IP,

@@ -74,7 +74,7 @@ With the call sf.save(), setting.txt now includes:
  * If setting.txt didn't have the key MAX_MESSAGE_SIZE prior to the 
  * <code>createIntSetting</code> call, then the MAX_MESSAGE_SIZE is 0.
  */
-public final class SettingsFactory implements Iterable<Setting> {    
+public final class SettingsFactory implements Iterable<Setting>, RemoteSettingController {    
     /** Time interval, after which the accumulated information expires */
     private static final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
     
@@ -183,7 +183,7 @@ public final class SettingsFactory implements Iterable<Setting> {
                 }
                 //it was the "file or directory corrupted" exception
                 SETTINGS_FILE.delete();//revert to defaults
-                MessageService.showError("ERROR_PROPS_CORRUPTED");
+                MessageService.showError(I18n.marktr("A file used to save your preferences was corrupted. LimeWire will use default values."));
             }
         } catch(IOException e) {
             ErrorService.error(e);
@@ -315,19 +315,17 @@ public final class SettingsFactory implements Iterable<Setting> {
      * */
     public synchronized void setRemoteSettingManager(RemoteSettingManager manager) {
         this.remoteManager = manager;
-        manager.setRemoteSettingController(new RemoteSettingController() {
-            public boolean updateSetting(String remoteKey, String value) {
-                synchronized(SettingsFactory.this) {
-                    Setting setting = remoteKeyToSetting.get(remoteKey);                    
-                    if(setting != null) {
-                        setting.setValue(value);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            }
-        });
+        manager.setRemoteSettingController(this);
+    }
+    
+    public synchronized boolean updateSetting(String remoteKey, String value) {
+        Setting setting = remoteKeyToSetting.get(remoteKey);                    
+        if(setting != null) {
+            setting.setValue(value);
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /**

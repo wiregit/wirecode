@@ -5,8 +5,6 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import org.limewire.nio.observer.ConnectObserver;
-import org.limewire.nio.observer.ReadObserver;
 import org.limewire.nio.timeout.ReadTimeout;
 
 public class StubReadConnectObserver implements ReadObserver, ConnectObserver, ReadTimeout {

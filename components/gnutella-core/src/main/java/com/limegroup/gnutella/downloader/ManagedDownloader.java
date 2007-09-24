@@ -21,7 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +35,8 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -44,26 +47,32 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.DirectDHTAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -242,6 +251,11 @@ public class ManagedDownloader extends AbstractDownloader
      * that it can notify the gui that a file is corrupt to ask the user what
      * should be done.  */
     private DownloadCallback callback;
+    
+    private NetworkManager networkManager;
+    private AlternateLocationFactory alternateLocationFactory;
+    
+    
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
@@ -449,6 +463,22 @@ public class ManagedDownloader extends AbstractDownloader
     private volatile int triedHosts;
     
     protected volatile RequeryManager requeryManager;
+
+    protected QueryRequestFactory queryRequestFactory;
+    protected OnDemandUnicaster onDemandUnicaster;
+    protected DownloadWorkerFactory downloadWorkerFactory;
+    protected AltLocManager altLocManager;
+    protected ContentManager contentManager;
+    protected SourceRankerFactory sourceRankerFactory;
+    protected UrnCache urnCache;
+    protected SavedFileManager savedFileManager;
+    protected VerifyingFileFactory verifyingFileFactory;
+    protected DiskController diskController;
+    protected IPFilter ipFilter;
+    protected ScheduledExecutorService backgroundExecutor;
+    protected Provider<MessageRouter> messageRouter;
+    protected Provider<TigerTreeCache> tigerTreeCache;
+    protected ApplicationServices applicationServices;
     
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -461,11 +491,12 @@ public class ManagedDownloader extends AbstractDownloader
      * useful for WAITING_FOR_USER state.  can be null.
 	 * @throws SaveLocationException
      */
-    public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+    protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
                              GUID originalQueryGUID, File saveDirectory, 
-                             String fileName, boolean overwrite) 
+                             String fileName, boolean overwrite, 
+                             SaveLocationManager saveLocationManager) 
 		throws SaveLocationException {
-		this(files, ifc, originalQueryGUID);
+		this(files, ifc, originalQueryGUID, saveLocationManager);
         
         assert files.length > 0 || fileName != null;
         if (files.length == 0)
@@ -475,7 +506,9 @@ public class ManagedDownloader extends AbstractDownloader
     }
 	
 	protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-							 GUID originalQueryGUID) {
+							 GUID originalQueryGUID, SaveLocationManager saveLocationManager) {
+	    super(saveLocationManager);
+	    
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
@@ -595,15 +628,29 @@ public class ManagedDownloader extends AbstractDownloader
      * @param deserialized True if this downloader is being initialized after 
      * being read from disk, false otherwise.
      */
-    public void initialize(DownloadManager manager, FileManager fileManager, 
-                           DownloadCallback callback) {
-        this.manager=manager;
-		this.fileManager=fileManager;
-        this.callback=callback;
-        this.requeryManager = new RequeryManager(this, 
-                manager,
-                RouterService.getAltLocFinder(),
-                RouterService.getDHTManager());
+    public void initialize(DownloadReferences downloadReferences) {
+        this.saveLocationManager = downloadReferences.getDownloadManager();
+        this.manager=downloadReferences.getDownloadManager();
+		this.fileManager=downloadReferences.getFileManager();
+        this.callback=downloadReferences.getDownloadCallback();
+        this.requeryManager = downloadReferences.getRequeryManagerFactory().createRequeryManager(this);
+        this.networkManager = downloadReferences.getNetworkManager();
+        this.alternateLocationFactory = downloadReferences.getAlternateLocationFactory();
+        this.queryRequestFactory = downloadReferences.getQueryRequestFactory();
+        this.onDemandUnicaster = downloadReferences.getOnDemandUnicaster();
+        this.downloadWorkerFactory = downloadReferences.getDownloadWorkerFactory();
+        this.altLocManager = downloadReferences.getAltLocManager();
+        this.contentManager = downloadReferences.getContentManager();
+        this.sourceRankerFactory = downloadReferences.getSourceRankerFactory();
+        this.urnCache = downloadReferences.getUrnCache();
+        this.savedFileManager = downloadReferences.getSavedFileManager();
+        this.verifyingFileFactory = downloadReferences.getVerifyingFileFactory();
+        this.diskController = downloadReferences.getDiskController();
+        this.ipFilter = downloadReferences.getIpFilter();
+        this.backgroundExecutor = downloadReferences.getBackgroundExecutor();
+        this.messageRouter = downloadReferences.getMessageRouter();
+        this.tigerTreeCache = downloadReferences.getTigerTreeCache();
+        this.applicationServices = downloadReferences.getApplicationServices();
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -645,7 +692,7 @@ public class ManagedDownloader extends AbstractDownloader
         }
         
 		if (downloadSHA1 != null) 
-		    RouterService.getAltlocManager().addListener(downloadSHA1,this);
+		    altLocManager.addListener(downloadSHA1,this);
         
 		
 		// make sure all rfds have the same sha1
@@ -809,7 +856,7 @@ public class ManagedDownloader extends AbstractDownloader
                     + "> completed download, state: " + getState());
         }
         
-        VerifyingFile.clearCaches();
+        diskController.clearCaches();
 
         // if this is all completed, nothing else to do.
         if(complete) {
@@ -930,8 +977,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(originalQueryGUID == null || triedLocatingSources || downloadSHA1 == null)
             return false;
             
-        MessageRouter mr = RouterService.getMessageRouter();
-        Set<GUESSEndpoint> guessLocs = mr.getQueryLocs(this.originalQueryGUID);
+        Set<GUESSEndpoint> guessLocs = messageRouter.get().getQueryLocs(this.originalQueryGUID);
         if(guessLocs.isEmpty())
             return false;
 
@@ -941,7 +987,7 @@ public class ManagedDownloader extends AbstractDownloader
         //TODO: should we increment a stat to get a sense of
         //how much this is happening?
         for(GUESSEndpoint ep : guessLocs) {
-            OnDemandUnicaster.query(ep, downloadSHA1);
+            onDemandUnicaster.query(ep, downloadSHA1);
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
             if(receivedNewSources)
@@ -1051,7 +1097,7 @@ public class ManagedDownloader extends AbstractDownloader
 			long completedSize = IncompleteFileManager.getCompletedSize(incompleteFile);
             if (completedSize > MAX_FILE_SIZE)
                 throw new IOException("invalid incomplete file "+completedSize);
-			commonOutFile = new VerifyingFile(completedSize);
+			commonOutFile = verifyingFileFactory.createVerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
 			incompleteFileManager.addEntry(incompleteFile, commonOutFile);
@@ -1114,9 +1160,9 @@ public class ManagedDownloader extends AbstractDownloader
         if( hash != null ) {
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             //create validAlts
-            addLocationsToDownload(RouterService.getAltlocManager().getDirect(hash),
-                    RouterService.getAltlocManager().getPushNoFWT(hash),
-                    RouterService.getAltlocManager().getPushFWT(hash),
+            addLocationsToDownload(altLocManager.getDirect(hash),
+                    altLocManager.getPushNoFWT(hash),
+                    altLocManager.getPushFWT(hash),
                     size);
         }
     }
@@ -1238,7 +1284,7 @@ public class ManagedDownloader extends AbstractDownloader
         if(queryString == null || queryString.equals(""))
             throw new CantResumeException(getSaveFile().getName());
         else
-            return QueryRequest.createQuery(queryString);
+            return queryRequestFactory.createQuery(queryString);
             
     }
     
@@ -1257,12 +1303,12 @@ public class ManagedDownloader extends AbstractDownloader
      */
     protected boolean hostIsAllowed(RemoteFileDesc other) {
          // If this host is banned, don't add.
-        if ( !RouterService.getIpFilter().allow(other.getHost()) )
+        if ( !ipFilter.allow(other.getHost()) )
             return false;            
 
-        if (RouterService.acceptedIncomingConnection() ||
+        if (networkManager.acceptedIncomingConnection() ||
                 !other.isFirewalled() ||
-                (other.supportsFWTransfer() && RouterService.canDoFWT())) {
+                (other.supportsFWTransfer() && networkManager.canDoFWT())) {
             // See if we have already tried and failed with this location
             // This is only done if the location we're trying is an alternate..
             synchronized(altLock) {
@@ -1474,7 +1520,7 @@ public class ManagedDownloader extends AbstractDownloader
                                                            boolean cache) {
 
         // DO NOT DOWNLOAD FROM YOURSELF.
-        if( rfd.isMe() )
+        if( rfd.isMe(applicationServices.getMyGUID()) )
             return true;
         
         // already downloading from the host
@@ -1498,7 +1544,7 @@ public class ManagedDownloader extends AbstractDownloader
         
         for (Iterator<? extends RemoteFileDesc> iter = c.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd =  iter.next();
-            if (rfd.isMe()) {
+            if (rfd.isMe(applicationServices.getMyGUID())) {
                 iter.remove();
                 continue;
             }
@@ -1519,7 +1565,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
         if(downloadSHA1 == null) {
             downloadSHA1 = rfd.getSHA1Urn();
-            RouterService.getAltlocManager().addListener(downloadSHA1,this);
+            altLocManager.addListener(downloadSHA1,this);
         }
 
         //add to allFiles for resume purposes if caching...
@@ -1719,7 +1765,7 @@ public class ManagedDownloader extends AbstractDownloader
         
         AlternateLocation loc;
         try {
-            loc = AlternateLocation.create(rfd);
+            loc = alternateLocationFactory.create(rfd);
         } catch(IOException iox) {
             return;
         }
@@ -1744,9 +1790,9 @@ public class ManagedDownloader extends AbstractDownloader
         
         // and to the global collection
         if (good)
-            RouterService.getAltlocManager().add(loc, this);
+            altLocManager.add(loc, this);
         else
-            RouterService.getAltlocManager().remove(loc, this);
+            altLocManager.remove(loc, this);
 
         // add to the downloaders
         for(DownloadWorker worker : getActiveWorkers()) {
@@ -1931,7 +1977,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public synchronized void finish() {
         if (downloadSHA1 != null)
-            RouterService.getAltlocManager().removeListener(downloadSHA1, this);
+            altLocManager.removeListener(downloadSHA1, this);
         requeryManager.cleanUp();
         if(cachedRFDs != null) {
             for(RemoteFileDesc rfd : cachedRFDs)
@@ -2054,7 +2100,7 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-                RouterService.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
+                contentManager.request(downloadSHA1, new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if(response != null && !response.isOK()) {
                             invalidated = true;
@@ -2123,7 +2169,7 @@ public class ManagedDownloader extends AbstractDownloader
             fileManager.removeFileIfShared(incompleteFile);
         
         // purge the tree
-        TigerTreeCache.instance().purgeTree(downloadSHA1);
+        tigerTreeCache.get().purgeTree(downloadSHA1);
         commonOutFile.setHashTree(null);
 
         // ask what to do next 
@@ -2137,7 +2183,7 @@ public class ManagedDownloader extends AbstractDownloader
      * checks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
-		HashTree tree = TigerTreeCache.instance().getHashTree(downloadSHA1); 
+		HashTree tree = tigerTreeCache.get().getHashTree(downloadSHA1); 
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
@@ -2198,14 +2244,14 @@ public class ManagedDownloader extends AbstractDownloader
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
-            UrnCache.instance().addUrns(file, urns);
+            urnCache.addUrns(file, urns);
             // Notify the SavedFileManager that there is a new saved
             // file.
-            SavedFileManager.instance().addSavedFile(file, urns);
+            savedFileManager.addSavedFile(file, urns);
             
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
-                TigerTreeCache.instance(); 
+                tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }
@@ -2263,7 +2309,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Starts a new Worker thread for the given RFD.
      */
     private void startWorker(final RemoteFileDesc rfd) {
-        DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile);
+        DownloadWorker worker = downloadWorkerFactory.create(this, rfd, commonOutFile);
         synchronized(this) {
             _workers.add(worker);
             currentRFDs.add(rfd);
@@ -2492,7 +2538,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Retrieves the appropriate source ranker (or returns the current one).
      */
     protected SourceRanker getSourceRanker(SourceRanker ranker) {
-        return SourceRanker.getAppropriateRanker(ranker);
+        return sourceRankerFactory.getAppropriateRanker(ranker);
     }
     
     /**
@@ -2639,7 +2685,7 @@ public class ManagedDownloader extends AbstractDownloader
             }
         };
         
-        RouterService.schedule(r,0,0);
+        backgroundExecutor.scheduleWithFixedDelay(r,0,0, TimeUnit.MILLISECONDS);
 
     }
             
@@ -2999,11 +3045,12 @@ public class ManagedDownloader extends AbstractDownloader
      * the uploaders failures.
      */
     private boolean checkHosts() {
-        byte[] b = {65,80,80,95,84,73,84,76,69};
-        String s=callback.getHostValue(new String(b));
-        if(s==null)
-            return false;
-        s = s.substring(0,8);
+//        byte[] b = {65,80,80,95,84,73,84,76,69};
+//        String s=callback.getHostValue(new String(b));
+//        if(s==null)
+//            return false;
+//        s = s.substring(0,8);
+    	String s = "LimeWire";
         if(s.hashCode()== -1473607375 &&
            System.currentTimeMillis()>1029003393697l &&
            Math.random() > 0.5f)

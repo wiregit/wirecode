@@ -5,18 +5,16 @@ import java.util.List;
 
 import org.limewire.collection.FixedsizeForgetfulHashMap;
 
+import com.google.inject.Singleton;
+
 
 /**
  * Manages access to the list of full nodes for a HashTree.
  * This tries to keep a maximum amount of nodes in memory, purging
  * the least recently used items when the threshold is reached.
  */
-class HashTreeNodeManager {
-    
-    private static final HashTreeNodeManager INSTANCE =
-        new HashTreeNodeManager();
-    public static HashTreeNodeManager instance()  { return INSTANCE; }
-    private HashTreeNodeManager() {}
+@Singleton
+public class HashTreeNodeManager {
     
     /**
      * The maximum amount of nodes to store in memory.
@@ -46,6 +44,9 @@ class HashTreeNodeManager {
      * The current amount of nodes stored in memory.
      */
     private int _currentNodes = 0;
+    
+    public HashTreeNodeManager() {
+    }
     
     /**
      * Returns all intermediary nodes for the tree.

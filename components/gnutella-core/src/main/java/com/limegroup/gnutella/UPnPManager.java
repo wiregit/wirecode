@@ -25,6 +25,9 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -73,6 +76,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * After we discover a router or give up on trying to, we should call stop().
  * 
  */
+@Singleton
 public class UPnPManager extends ControlPoint implements DeviceChangeListener, Inspectable {
 
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
@@ -95,12 +99,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 	/** amount of time to wait while looking for a NAT device. */
     private static final int WAIT_TIME = 3 * 1000; // 3 seconds
 	
-	private static final UPnPManager INSTANCE = new UPnPManager();
-
-	public static UPnPManager instance() {
-		return INSTANCE;
-	}
-	
 	/** 
 	 * the router we have and the sub-device necessary for port mapping 
 	 *  LOCKING: DEVICE_LOCK
@@ -119,18 +117,22 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 	 * Lock that everything uses.
 	 */
 	private final Object DEVICE_LOCK = new Object();
+
+	private final LifecycleManager lifecycleManager;
+	private final Provider<Acceptor> acceptor;
 	
-	private UPnPManager() {
-	    super();
-	    
-        addDeviceChangeListener(this);
+	@Inject
+	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
+	    this.lifecycleManager = lifecycleManager;	
+	    this.acceptor = acceptor;
     }
     
     public boolean start() {
 	    LOG.debug("Starting UPnP Manager.");
-	    
 
-        synchronized(DEVICE_LOCK) {
+	    addDeviceChangeListener(this);
+        
+	    synchronized(DEVICE_LOCK) {
             try {
     	        return super.start();
     	    } catch(Exception bad) {
@@ -270,8 +272,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 		
 		Random gen=null;
 		
-		String localAddress = NetworkUtils.ip2string(
-				RouterService.getAcceptor().getAddress(false));
+		String localAddress = NetworkUtils.ip2string(acceptor.get().getAddress(false));
 		int localPort = port;
 	
 		// try adding new mappings with the same port
@@ -428,7 +429,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 		    }
 		};
 		
-        RouterService.addShutdownItem(waiter);
+        lifecycleManager.addShutdownItem(waiter); 
 	}
 	
 	public void finalize() {

@@ -17,12 +17,17 @@ import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -32,6 +37,7 @@ import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
@@ -56,12 +62,40 @@ public class FileRequestHandler implements HttpRequestHandler {
     private static final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
 
     private final HTTPUploadSessionManager sessionManager;
-
     private final FileManager fileManager;
+    private final HTTPHeaderUtils httpHeaderUtils;
+    private final HttpRequestHandlerFactory httpRequestHandlerFactory;
+    private final Provider<CreationTimeCache> creationTimeCache;
+
+    private final FileResponseEntityFactory fileResponseEntityFactory;
+
+    private final AltLocManager altLocManager;
+
+    private final AlternateLocationFactory alternateLocationFactory;
+
+    private final Provider<DownloadManager> downloadManager;
+
+    private final Provider<TigerTreeCache> tigerTreeCache;
     
-    public FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager) {
+    @Inject
+    FileRequestHandler(HTTPUploadSessionManager sessionManager,
+            FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
+            HttpRequestHandlerFactory httpRequestHandlerFactory,
+            Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
+            AltLocManager altLocManager,
+            AlternateLocationFactory alternateLocationFactory,
+            Provider<DownloadManager> downloadManager,
+            Provider<TigerTreeCache> tigerTreeCache) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
+        this.httpHeaderUtils = httpHeaderUtils;
+        this.httpRequestHandlerFactory = httpRequestHandlerFactory;
+        this.creationTimeCache = creationTimeCache;
+        this.fileResponseEntityFactory = fileResponseEntityFactory;
+        this.altLocManager = altLocManager;
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.downloadManager = downloadManager;
+        this.tigerTreeCache = tigerTreeCache;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -134,7 +168,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         RangeHeaderInterceptor rangeHeaderInterceptor = new RangeHeaderInterceptor();
         processor.addInterceptor(rangeHeaderInterceptor);
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
-        processor.addInterceptor(new AltLocHeaderInterceptor(uploader));
+        processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager, alternateLocationFactory));
         if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }
@@ -209,8 +243,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             QueueStatus queued = sessionManager.enqueue(context, request);
             switch (queued) {
             case REJECTED:
-                new LimitReachedRequestHandler(uploader).handle(request,
-                        response, context);
+                httpRequestHandlerFactory.createLimitReachedRequestHandler(uploader).handle(request, response, context);
                 break;
             case BANNED:
                 uploader.setState(UploadStatus.BANNED_GREEDY);
@@ -257,9 +290,9 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
         }
 
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
-        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
-        HTTPHeaderUtils.addProxyHeader(response);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
+        httpHeaderUtils.addRangeHeader(response, uploader, fd);
+        httpHeaderUtils.addProxyHeader(response);
 
         URN urn = fd.getSHA1Urn();
         if (uploader.isFirstReply()) {
@@ -268,27 +301,27 @@ public class FileRequestHandler implements HttpRequestHandler {
             // this information again.
             // it's possible t do that because we don't use the same
             // uploader for different files
-            CreationTimeCache cache = CreationTimeCache.instance();
-            if (cache.getCreationTime(urn) != null) {
+            if (creationTimeCache.get().getCreationTime(urn) != null) {
                 response.addHeader(HTTPHeaderName.CREATION_TIME
-                        .create(cache.getCreationTime(urn).toString()));
+                        .create(creationTimeCache.get().getCreationTime(urn).toString()));
             }
         }
 
         // write x-features header once because the downloader is
         // supposed to cache that information anyway
         if (uploader.isFirstReply()) {
-            HTTPHeaderUtils.addFeatures(response);
+            httpHeaderUtils.addFeatures(response);
         }
 
         // write X-Thex-URI header with root hash if we have already
         // calculated the tigertree
-        if (fd.getHashTree() != null) {
-            response
-                    .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
+        HashTree tree = tigerTreeCache.get().getHashTree(fd);
+        if (tree != null) {
+            response.addHeader(HTTPHeaderName.THEX_URI.create(tree));
         }
 
-        response.setEntity(new FileResponseEntity(uploader, fd.getFile()));
+        response.setEntity(fileResponseEntityFactory.createFileResponseEntity(uploader,
+                fd.getFile()));
         uploader.setState(UploadStatus.UPLOADING);
 
         if (uploader.isPartial()) {
@@ -311,7 +344,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // do not count THEX transfers towards the total amount 
         uploader.setIgnoreTotalAmountUploaded(true);
         
-        HashTree tree = fd.getHashTree();
+        HashTree tree = tigerTreeCache.get().getHashTree(fd);
         if (tree == null) {
             // tree was requested before hashing completed
             uploader.setState(UploadStatus.FILE_NOT_FOUND);
@@ -338,13 +371,12 @@ public class FileRequestHandler implements HttpRequestHandler {
      */
     private void handleInvalidRange(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
-        uploader.getAltLocTracker().addAltLocHeaders(response);
-        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
-        HTTPHeaderUtils.addProxyHeader(response);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
+        httpHeaderUtils.addRangeHeader(response, uploader, fd);
+        httpHeaderUtils.addProxyHeader(response);
 
         if (fd instanceof IncompleteFileDesc) {
-            IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-            if (!ifd.isActivelyDownloading()) {
+            if (!downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
                 response.addHeader(HTTPHeaderName.RETRY_AFTER
                         .create(INACTIVE_RETRY_AFTER));
             }
@@ -370,18 +402,18 @@ public class FileRequestHandler implements HttpRequestHandler {
                 ", pollMax=" + (HTTPUploadSession.MAX_POLL_TIME / 1000) /* mS to S */;
         response.addHeader(HTTPHeaderName.QUEUE.create(value));
 
-        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
-        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
+        httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
+        httpHeaderUtils.addRangeHeader(response, uploader, fd);
 
         if (uploader.isFirstReply()) {
-            HTTPHeaderUtils.addFeatures(response);
+            httpHeaderUtils.addFeatures(response);
         }
 
         // write X-Thex-URI header with root hash if we have already
         // calculated the tigertree
-        if (fd.getHashTree() != null) {
-            response
-                    .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
+        HashTree tree = tigerTreeCache.get().getHashTree(fd);
+        if (tree != null) {
+            response.addHeader(HTTPHeaderName.THEX_URI.create(tree));
         }
 
         response.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
@@ -408,14 +440,16 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         if (fd == null) {
-            // if (LOG.isDebugEnabled())
-            // LOG.debug(uploader + " fd is null");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid index in request does not map to file descriptor: " + request);
+            }
             return null;
         }
 
         if (!request.filename.equals(fd.getFileName())) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("Wrong file name in request: " + request);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid file name in request: " + request + ", expected: " + fd.getFileName());
+            }
             return null;
         }
 
@@ -429,13 +463,17 @@ public class FileRequestHandler implements HttpRequestHandler {
         // If it's the wrong URN, File Not Found it.
         URN urn = uploader.getRequestedURN();
         if (urn != null && !fd.containsUrn(urn)) {
-            if (LOG.isDebugEnabled())
-                LOG.debug(uploader + " wrong content urn");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Invalid content urn: " + uploader);
+            }
             return false;
         }
 
         // handling THEX Requests
-        if (thexRequest && fd.getHashTree() == null) {
+        if (thexRequest && tigerTreeCache.get().getHashTree(fd) == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Requested thex tree is not available: " + uploader);
+            }
             return false;
         }
 
@@ -443,6 +481,9 @@ public class FileRequestHandler implements HttpRequestHandler {
         if (fd instanceof IncompleteFileDesc) {
             // Check to see if we're allowing PFSP.
             if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Sharing of partial files is diabled: " + uploader);
+                }
                 return false;
             }
 
@@ -452,10 +493,11 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
         } else {
             // check if fd is up-to-date
-            if (fd.getFile().lastModified() != fd.lastModified()) {
-                File file = fd.getFile();
-                if (LOG.isDebugEnabled())
+            File file = fd.getFile();
+            if (file.lastModified() != fd.lastModified()) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
+                }
                 fileManager.removeFileIfShared(file);
                 fileManager.addFileIfShared(file);
                 return false;

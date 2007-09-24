@@ -11,7 +11,6 @@ import org.limewire.util.VersionUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
 
@@ -393,12 +392,12 @@ public final class LimeWireUtils {
     /**
      * Updates a URL to contain common information about the LW installation.
      */
-    public static String addLWInfoToUrl(String url) {
+    public static String addLWInfoToUrl(String url, byte[] myClientGUID) {
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
-        url += "guid=" + EncodingUtils.encode(new GUID(RouterService.getMyGUID()).toHexString())+ 
+        url += "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
             "&pro="   + LimeWireUtils.isPro() + 
             "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
             "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +

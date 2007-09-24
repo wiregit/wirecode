@@ -8,13 +8,15 @@ import javax.net.ServerSocketFactory;
 
 import org.limewire.nio.observer.AcceptObserver;
 
-/** A ServerSocketFactory for use with constructing non-blocking ServerSockets. */
+/**
+ * Constructs non-blocking {@link ServerSocket ServerSockets}.
+ */
 public abstract class NBServerSocketFactory extends ServerSocketFactory {
     
     /**
-     * Constructs a new, unconnected ServerSocket that will notify the given
-     * AcceptObserver when new connections arive.  You must call 'bind' on the
-     * socket to begin accepting new connections.
+     * Constructs a new, unconnected <code>ServerSocket</code> that will notify
+     * the given <code>AcceptObserver</code> when new connections arrive. You 
+     * must call 'bind' on the socket to begin accepting new connections.
      * 
      * @param observer
      * @return
@@ -23,7 +25,7 @@ public abstract class NBServerSocketFactory extends ServerSocketFactory {
     public abstract ServerSocket createServerSocket(AcceptObserver observer) throws IOException;
     
     /**
-     * Constructs a new ServerSocket bound at the given port.
+     * Constructs a new <code>ServerSocket</code> bound at the given port.
      * The given observer will be notified when new incoming connections are accepted.
      * 
      * @param port
@@ -34,8 +36,9 @@ public abstract class NBServerSocketFactory extends ServerSocketFactory {
     public abstract ServerSocket createServerSocket(int port, AcceptObserver observer) throws IOException;
     
     /**
-     * Constructs a new ServerSocket bound at the given port, using the given backlog.
-     * The given AcceptObserver will be notified when new incoming connections are accepted.
+     * Constructs a new <code>ServerSocket</code> bound at the given port, using 
+     * the given backlog. The given <code>AcceptObserver</code> will be notified 
+     * when new incoming connections are accepted.
      * 
      * @param port
      * @param backlog
@@ -46,8 +49,10 @@ public abstract class NBServerSocketFactory extends ServerSocketFactory {
     public abstract ServerSocket createServerSocket(int port, int backlog, AcceptObserver observer) throws IOException;
     
     /**
-     * Constructs a new ServerSocket bound at the given port and given address, using the given backlog.
-     * The given AcceptObserver will be notified when new incoming connections are accepted.
+     * Constructs a new <code>ServerSocket</code> bound at the given port and 
+     * given address, using the given backlog.
+     * The given <code>AcceptObserver</code> will be notified when new incoming 
+     * connections are accepted.
      * 
      * @param port
      * @param backlog

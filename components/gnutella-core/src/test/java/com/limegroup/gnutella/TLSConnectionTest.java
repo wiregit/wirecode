@@ -6,22 +6,20 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public class TLSConnectionTest extends LimeTestCase {
     
     private static final int PORT = 9999;
-    private static RouterService ROUTER;
-    
+
+   
     public TLSConnectionTest(String name) {
         super(name);
     }
@@ -52,20 +50,20 @@ public class TLSConnectionTest extends LimeTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        ROUTER = new RouterService(new ActivityCallbackStub());
+     //   ROUTER = new RouterService(new ActivityCallbackStub());
         assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
-        ROUTER.start();
+        ProviderHacks.getLifecycleManager().start();
     }
     
     public void setUp() throws Exception {
         setSettings();
-        RouterService.clearHostCatcher();
-        RouterService.getConnectionManager().disconnect(false);
-        RouterService.getConnectionManager().connect();
+        ProviderHacks.getHostCatcher().clear();
+        ProviderHacks.getConnectionManager().disconnect(false);
+        ProviderHacks.getConnectionManager().connect();
     }
 
     public void testTLSConnectionBlockingConnect() throws Exception {
-        Connection c = new Connection("localhost", PORT, ConnectType.TLS);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT, ConnectType.TLS);
         assertTrue(c.isTLSCapable());
         assertEquals(0, c.getBytesReceived());
         assertEquals(0, c.getBytesSent());
@@ -74,21 +72,21 @@ public class TLSConnectionTest extends LimeTestCase {
         assertEquals(0.0f, c.getSentLostFromSSL());
         assertEquals(0.0f, c.getReadLostFromSSL());
         
-        assertEquals(0, RouterService.getConnectionManager().getNumConnections());
-        c.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        assertEquals(0, ProviderHacks.getConnectionManager().getNumConnections());
+        c.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         drain(c);
         assertGreaterThan(0, c.getSentLostFromSSL());
         assertGreaterThan(0, c.getReadLostFromSSL());
         System.out.println("sent: " + c.getSentLostFromSSL() + ", read: " + c.getReadLostFromSSL());
-        assertEquals(1, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(1, ProviderHacks.getConnectionManager().getNumConnections());
         
-        ConnectionManager manager = RouterService.getConnectionManager();
+        ConnectionManager manager = ProviderHacks.getConnectionManager();
         List<ManagedConnection> l = manager.getConnections();
         assertEquals(1, l.size());
         ManagedConnection mc = l.get(0);
         assertTrue(mc.isTLSCapable());
         
-        PingRequest pr = PingRequest.createUDPPing();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         mc.send(pr);
         mc.flush();
         Message readPr = c.receive();
@@ -104,7 +102,7 @@ public class TLSConnectionTest extends LimeTestCase {
     }
     
     public void testTLSConnectionNonBlockingConnect() throws Exception {
-        Connection c = new Connection("localhost", PORT, ConnectType.TLS);
+        Connection c = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
         assertTrue(c.isTLSCapable());
         assertEquals(0, c.getBytesReceived());
         assertEquals(0, c.getBytesSent());
@@ -113,23 +111,23 @@ public class TLSConnectionTest extends LimeTestCase {
         assertEquals(0.0f, c.getSentLostFromSSL());
         assertEquals(0.0f, c.getReadLostFromSSL());
         
-        assertEquals(0, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(0, ProviderHacks.getConnectionManager().getNumConnections());
         StubGnetConnectObserver connector = new StubGnetConnectObserver();
-        c.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000, connector);
+        c.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000, connector);
         connector.waitForResponse(1000);
         assertTrue(connector.isConnect());
         drain(c);
         assertGreaterThan(0, c.getSentLostFromSSL());
         assertGreaterThan(0, c.getReadLostFromSSL());
-        assertEquals(1, RouterService.getConnectionManager().getNumConnections());
+        assertEquals(1, ProviderHacks.getConnectionManager().getNumConnections());
         
-        ConnectionManager manager = RouterService.getConnectionManager();
+        ConnectionManager manager = ProviderHacks.getConnectionManager();
         List<ManagedConnection> l = manager.getConnections();
         assertEquals(1, l.size());
         ManagedConnection mc = l.get(0);
         assertTrue(mc.isTLSCapable());
         
-        PingRequest pr = PingRequest.createUDPPing();
+        PingRequest pr = ProviderHacks.getPingRequestFactory().createUDPPing();
         mc.send(pr);
         mc.flush();
         Message readPr = c.receive();

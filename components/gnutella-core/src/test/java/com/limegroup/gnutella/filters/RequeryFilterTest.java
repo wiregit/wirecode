@@ -1,19 +1,22 @@
 package com.limegroup.gnutella.filters;
 
 import junit.framework.Test;
+import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 
 /**
  * Unit tests for RequeryFilter
  */
-public class RequeryFilterTest extends LimeTestCase {
+public class RequeryFilterTest extends BaseTestCase {
         
+    private Mockery context;
+    private SpamFilter filter;
+    
 	public RequeryFilterTest(String name) {
 		super(name);
 	}
@@ -26,28 +29,80 @@ public class RequeryFilterTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
+	public void setUp() {
+	    context =  new Mockery();
+        filter = new RequeryFilter();
+    }
+	
+	public void testNormalRequery() throws Exception {
+
+        QueryRequest req;
+
+        req = context.mock(QueryRequest.class);
+        mockQueryRequest(req, "Requery");
+        assertTrue(filter.allow(req));
+        assertTrue(filter.allow(req));
+
+    }
+	
 	public void testLegacy() throws Exception {
-	    FilterSettings.FILTER_DUPLICATES.setValue(false);
-	    FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
-        SpamFilter filter=SpamFilter.newRouteFilter();
-        assertTrue(filter.allow(new PingRequest((byte)3)));
-        assertTrue(filter.allow(QueryRequest.createQuery("Hello")));
-        assertTrue(filter.allow(QueryRequest.createQuery("Hello")));
-        assertTrue(filter.allow(QueryRequest.createRequery("Hel lo")));
-        assertTrue(filter.allow(QueryRequest.createQuery("asd")));
- 
-        byte[] guid=GUID.makeGuid();   //version 1
-        guid[0]=(byte)0x02;
-        guid[1]=(byte)0x01;
-        guid[2]=(byte)0x17;
-        guid[3]=(byte)0x05;
-        guid[13]=(byte)0x2E;
-        guid[14]=(byte)0x05;
+	    
+	    QueryRequest req;
+	    
+	    req = context.mock(QueryRequest.class);
+	    mockQueryRequest(req, "Hello");
+        assertTrue(filter.allow(req));
+	    req = context.mock(QueryRequest.class); 
+	    mockQueryRequest(req, "Hello");
+        assertTrue(filter.allow(req));
+        req = context.mock(QueryRequest.class); 
+        mockQueryRequest(req, "Hel lo");
+        assertTrue(filter.allow(req));
+        req = context.mock(QueryRequest.class); 
+        mockQueryRequest(req, "asd");
+        assertTrue(filter.allow(req));
+        context.assertIsSatisfied();
+      
+    }
+	
+	public void testGUIDCreate() { 
+	    
+	    byte[] guid = GUID.makeGuid();
+        guid[0] = (byte) 0x02;
+        guid[1] = (byte) 0x01;
+        guid[2] = (byte) 0x17;
+        guid[3] = (byte) 0x05;
+        guid[13] = (byte) 0x2E;
+        guid[14] = (byte) 0x05;
+        
         assertTrue(GUID.isLimeGUID(guid));
         assertTrue(GUID.isLimeRequeryGUID(guid, 1));
-        assertTrue(! GUID.isLimeRequeryGUID(guid, 0));
-        QueryRequest qr = QueryRequest.createNetworkQuery(
-            guid, (byte)5, (byte)0, "asdf".getBytes(), Network.UNKNOWN );
-        assertTrue(! filter.allow(qr) );
+        assertFalse(GUID.isLimeRequeryGUID(guid, 0));
+
+        QueryRequest req = context.mock(QueryRequest.class); 
+        this.mockQueryRequest(req, guid, "asdf");
+
+       assertFalse(filter.allow(req));
+       
+       context.assertIsSatisfied();
+    }
+	
+	
+    private void mockQueryRequest(final QueryRequest req, final String query) {
+
+        context.checking(new Expectations() {
+            {   atLeast(1).of(req).getGUID();
+                will(returnValue(GUID.makeGuid()));
+            }
+        });
+    }
+    
+    private void mockQueryRequest(final QueryRequest req, final byte[] guid, final String query) {
+        
+        context.checking(new Expectations() {
+            {   atLeast(1).of(req).getGUID();
+                will(returnValue(guid));
+            }
+        });
     }
 }

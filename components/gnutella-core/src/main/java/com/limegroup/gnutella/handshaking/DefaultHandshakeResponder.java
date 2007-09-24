@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.RouterService;
 
 /**
  * This is an abstract class that provides a default implementation of
@@ -31,8 +30,8 @@ public abstract class DefaultHandshakeResponder implements HandshakeResponder {
      * connection
      * @param host The host with whom we are handshaking
      */
-    public DefaultHandshakeResponder(String host) {
-        this._manager = RouterService.getConnectionManager();
+    public DefaultHandshakeResponder(String host, ConnectionManager connectionManager) {
+        this._manager = connectionManager;
         this._host = host;
     }
     

@@ -22,8 +22,9 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.Sockets.ConnectType;
+import com.google.inject.Inject;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
 /**
@@ -63,6 +64,9 @@ public class HttpClientManager {
      * The manager which all client connections use if not Java 1.1.8;
      */
     private static final HttpConnectionManager MANAGER;
+    
+    @Inject
+    private static SocketsManager socketsManager; 
     
     static {
         MANAGER = new MultiThreadedHttpConnectionManager();
@@ -232,15 +236,15 @@ public class HttpClientManager {
 
         public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
           throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port),0, type);
+            return socketsManager.connect(new InetSocketAddress(host,port),0, type);
         }
 
         public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port),0, type);
+            return socketsManager.connect(new InetSocketAddress(host,port),0, type);
         }
         
         public Socket createSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
-            return Sockets.connect(new InetSocketAddress(host,port), timeout, type);
+            return socketsManager.connect(new InetSocketAddress(host,port), timeout, type);
         }
         
     }

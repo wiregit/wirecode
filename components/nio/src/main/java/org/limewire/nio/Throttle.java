@@ -2,7 +2,8 @@ package org.limewire.nio;
 
 
 /**
- * Outline of a Throttle.
+ * Defines a throttle interface; a throttle is a mechanism that controls
+ * the flow of data.
  */
 public interface Throttle {
     

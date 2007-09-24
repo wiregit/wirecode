@@ -1,8 +1,9 @@
 package org.limewire.nio.ssl;
 
 /**
- * Allows implementations to query the produced/consumed statistics of an SSLEngine
- * without having access to the engine, or knowing what is causing it.
+ * Defines an interface to allow implementations to query the produced/consumed 
+ * statistics of an <code>SSLEngine</code> without having access to the 
+ * engine, or knowing what is causing the statistical changes.
  */
 public interface SSLBandwidthTracker {
 

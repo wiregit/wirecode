@@ -18,14 +18,12 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import org.limewire.collection.CharSequenceKeyAnalyzer;
-import org.limewire.collection.PatriciaTrie;
+import junit.framework.Test;
+
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
-
-import junit.framework.Test;
 
 
 public class PatriciaTrieTest extends BaseTestCase {

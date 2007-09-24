@@ -29,6 +29,7 @@ import org.limewire.security.SecureMessage;
 import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -198,6 +199,11 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     private static enum RFDProperties {
         PUSH_ADDR, CONNECT_TYPE, LONG_SIZE;
     }
+    
+    @Inject
+    private static PushEndpointFactory globalPushEndpointFactory;
+    
+    private transient volatile PushEndpointFactory pushEndpointFactory;    
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -374,7 +380,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
-	    
+	    this.pushEndpointFactory = globalPushEndpointFactory;
 	    if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -411,9 +417,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 _pushAddr = pe;
             else {
                 try {
-                    _pushAddr = new PushEndpoint(clientGUID,proxies,
-                        PushEndpoint.PLAIN, FWTVersion, 
-                        new IpPortImpl(_host,_port));
+                    _pushAddr = pushEndpointFactory.createPushEndpoint(clientGUID, proxies, PushEndpoint.PLAIN, FWTVersion, new IpPortImpl(_host,_port));
                 }catch (UnknownHostException uhe) {
                     throw new IllegalArgumentException(uhe);
                 }
@@ -448,6 +452,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 
     private void readObject(ObjectInputStream stream) 
 		throws IOException, ClassNotFoundException {
+        pushEndpointFactory = globalPushEndpointFactory;
         stream.defaultReadObject();
         //Older downloads.dat files do not have _urns, so _urns will be null
         //(the default Java value).  Hence we also initialize
@@ -491,7 +496,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
                 http = (String)propertiesMap.get("_pushAddr");
             if (http != null) {
                 try {
-                    _pushAddr = new PushEndpoint(http);
+                    _pushAddr = pushEndpointFactory.createPushEndpoint(http);
                     if (!_firewalled) {
                         ErrorService.error(new IllegalStateException(
                                 "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr));
@@ -578,9 +583,9 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     /**
      * @return whether this rfd points to myself.
      */
-    public boolean isMe() {
+    public boolean isMe(byte[] myClientGUID) {
         return needsPush() ? 
-                Arrays.equals(_clientGUID,RouterService.getMyGUID()) :
+                Arrays.equals(_clientGUID, myClientGUID) :
                     NetworkUtils.isMe(getHost(),getPort());
     }
     /**

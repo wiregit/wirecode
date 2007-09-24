@@ -6,8 +6,6 @@ import java.awt.Toolkit;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 /**
  * Settings to deal with UI.
  */ 
@@ -26,12 +24,6 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting SEARCH_RESULT_FILTERS =
         FACTORY.createBooleanSetting("SEARCH_RESULT_FILTERS", true);
-        
-    /**
-     * Setting for the magnetmix button.
-     */
-    public static final BooleanSetting MAGNETMIX_BUTTON = 
-        FACTORY.createBooleanSetting("SEARCH_MAGNETMIX_BUTTON", !LimeWireUtils.isPro() && !isResolutionLow());
                                      
     /**
      * Setting for using small icons.

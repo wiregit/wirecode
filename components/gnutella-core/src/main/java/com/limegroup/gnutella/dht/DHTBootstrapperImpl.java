@@ -25,6 +25,7 @@ import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -77,8 +78,15 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     private final Object lock = new Object();
     
-    public DHTBootstrapperImpl(DHTController controller) {
+    private final Provider<SimppManager> simppManager;
+    private final DHTNodeFetcherFactory dhtNodeFetcherFactory;
+    
+    public DHTBootstrapperImpl(DHTController controller,
+            Provider<SimppManager> simppManager,
+            DHTNodeFetcherFactory dhtNodeFetcherFactory) {
         this.controller = controller;
+        this.simppManager = simppManager;
+        this.dhtNodeFetcherFactory = dhtNodeFetcherFactory;
     }
     
     /**
@@ -100,7 +108,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
                 return;
             }
             
-            SimppManager.instance().addListener(this);
+            simppManager.get().addListener(this);
             
             if (hosts.isEmpty()) {
                 tryBootstrapFromRouteTable();
@@ -148,7 +156,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     public void stop() {
         synchronized (lock) {
-            SimppManager.instance().removeListener(this);
+            simppManager.get().removeListener(this);
             
             if (pingFuture != null) {
                 pingFuture.cancel(true);
@@ -275,13 +283,13 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     }
 
     /**
-     * Gets the SIMPP host responsible for the keyspace containing the local node ID
+     * Gets the SIMPP host responsible for the keyspace containing the local node ID.
      * 
-     * package access for testing only
+     * Non-private for testing.
      * 
      * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
-    SocketAddress getSimppHost(){
+    SocketAddress getSimppHost() {
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
         List<SocketAddress> list = new ArrayList<SocketAddress>(simppHosts.length);
 
@@ -318,6 +326,21 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         //now map to hostlist size
         int index = (int)((list.size()/16f) * localPrefix);
         return list.get(index);
+    }
+    
+    /** For testing. */
+    boolean isBootstrappingFromRouteTable() {
+        return fromRouteTable;
+    }
+    
+    /** For testing. */
+    DHTFuture<PingResult> getPingFuture() {
+        return pingFuture;
+    }
+    
+    /** For testing */
+    DHTFuture<BootstrapResult> getBootstrapFuture() {
+        return bootstrapFuture;
     }
     
     /**
@@ -386,7 +409,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
             // will restart the bootstrapping. Otherwise see
             // if there are entries in the hosts Set
             if (nodeFetcher == null) {
-                nodeFetcher = new DHTNodeFetcher(DHTBootstrapperImpl.this);
+                nodeFetcher = dhtNodeFetcherFactory.createNodeFetcher(DHTBootstrapperImpl.this);
                 nodeFetcher.start();
             } else {
                 bootstrap();

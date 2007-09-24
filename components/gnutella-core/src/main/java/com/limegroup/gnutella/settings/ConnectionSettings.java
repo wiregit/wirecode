@@ -370,7 +370,7 @@ public final class ConnectionSettings extends LimeProps {
      * (In 1998, the IEC standardized "kibi" as the prefix denoting 1024, or "kilo binary".) 
      */
     public static final PowerOfTwoSetting QRT_SIZE_IN_KIBI_ENTRIES =
-        FACTORY.createRemotePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 64,
+        FACTORY.createRemotePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 128,
                 "ConnectionSettings.QRTSize", 128, 256);
     
     /**

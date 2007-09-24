@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,20 +36,12 @@ import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.dht.db.AltLocModel;
-import com.limegroup.gnutella.dht.db.AltLocValue;
-import com.limegroup.gnutella.dht.db.AltLocValueFactory;
-import com.limegroup.gnutella.dht.db.PushProxiesModel;
-import com.limegroup.gnutella.dht.db.PushProxiesValue;
-import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
-import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.dht.db.AbstractAltLocValue;
+import com.limegroup.gnutella.dht.db.AbstractPushProxiesValue;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -123,9 +116,13 @@ public abstract class AbstractDHTController implements DHTController {
      */
     private final int routeTableVersion;
     
-    public AbstractDHTController(Vendor vendor, Version version, 
+    private final DHTControllerFacade dhtControllerFacade;
+    
+    public AbstractDHTController(Vendor vendor, Version version,
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
-            DHTMode mode) {
+            DHTMode mode, DHTControllerFacade dhtControllerFacade) {
+
+        this.dhtControllerFacade = dhtControllerFacade;
         
         switch(mode) {
             case ACTIVE:
@@ -144,7 +141,7 @@ public abstract class AbstractDHTController implements DHTController {
         this.dht = createMojitoDHT(vendor, version);
         
         assert (dht != null);
-        dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
+        dht.setMessageDispatcher(dhtControllerFacade.getMessageDispatcherFactory());
         dht.getDHTExecutorService().setThreadFactory(new ThreadFactory() {
             public Thread newThread(Runnable runnable) {
                 return new ManagedThread(runnable);
@@ -154,10 +151,10 @@ public abstract class AbstractDHTController implements DHTController {
         dht.setHostFilter(new FilterDelegate());
         
         dht.getDHTValueFactoryManager().addValueFactory(
-                AltLocValue.ALT_LOC, new AltLocValueFactory());
+                AbstractAltLocValue.ALT_LOC, dhtControllerFacade.getAltLocValueFactory());
         
         dht.getDHTValueFactoryManager().addValueFactory(
-                PushProxiesValue.PUSH_PROXIES, new PushProxiesValueFactory());
+                AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyValueFactory());
         
         try {
             PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
@@ -172,21 +169,21 @@ public abstract class AbstractDHTController implements DHTController {
         }
 
         dht.getStorableModelManager().addStorableModel(
-                AltLocValue.ALT_LOC, new AltLocModel());
+                AbstractAltLocValue.ALT_LOC, dhtControllerFacade.getAltLocModel());
         
         // There's no point in publishing my push proxies if I'm
         // not a passive leaf Node (ultrapeers and active nodes
         // do not push proxies as they're not firewalled).
         if (mode == DHTMode.PASSIVE_LEAF) {
             dht.getStorableModelManager().addStorableModel(
-                    PushProxiesValue.PUSH_PROXIES, new PushProxiesModel());
+                    AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyModel());
         }
         
-        this.bootstrapper = new DHTBootstrapperImpl(this);
+        this.bootstrapper = dhtControllerFacade.getDHTBootstrapper(this);
         
         // If we're an Ultrapeer we want to notify our firewalled
         // leafs about every new Contact
-        if (RouterService.isActiveSuperNode()) {
+        if (dhtControllerFacade.isActiveSupernode()) {
             dht.getRouteTable().addRouteTableListener(new RouteTableListener() {
                 public void handleRouteTableEvent(RouteTableEvent event) {
                     switch(event.getEventType()) {
@@ -223,8 +220,7 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         DHTContactsMessage msg = new DHTContactsMessage(node);
-        ConnectionManager cm = RouterService.getConnectionManager();
-        List<ManagedConnection> list = cm.getInitializedClientConnections();
+        List<ManagedConnection> list = dhtControllerFacade.getInitializedClientConnections();
         for (ManagedConnection mc : list) {
             if (mc.isPushProxyFor()
                     && mc.remoteHostIsPassiveLeafNode() > -1) {
@@ -255,7 +251,7 @@ public abstract class AbstractDHTController implements DHTController {
      */
     public void start() {
         if (isRunning() || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
-                && !RouterService.isConnected())) {
+                && !dhtControllerFacade.isConnected())) {
             return;
         }
         
@@ -264,8 +260,8 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         try {
-            InetAddress addr = InetAddress.getByAddress(RouterService.getAddress());
-            int port = RouterService.getPort();
+            InetAddress addr = InetAddress.getByAddress(dhtControllerFacade.getAddress());
+            int port = dhtControllerFacade.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
             
@@ -379,8 +375,8 @@ public abstract class AbstractDHTController implements DHTController {
         
         LOG.debug("Sending updated capabilities to our connections");
         
-        CapabilitiesVM.reconstructInstance();
-        RouterService.getConnectionManager().sendUpdatedCapabilities();
+        dhtControllerFacade.updateCapabilities();
+        dhtControllerFacade.sendUpdatedCapabilities();
         
         dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
@@ -448,7 +444,7 @@ public abstract class AbstractDHTController implements DHTController {
                 return;
             }
             long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
-            timerTask = RouterService.schedule(this, delay, delay);
+            timerTask = dhtControllerFacade.scheduleWithFixedDelay(this, delay, delay, TimeUnit.MILLISECONDS);
             isRunning = true;
         }
         
@@ -499,15 +495,16 @@ public abstract class AbstractDHTController implements DHTController {
     /**
      * A Host Filter that delegates to RouterService's filter
      */
-    private static class FilterDelegate implements HostFilter {
+    private class FilterDelegate implements HostFilter {
         
         public boolean allow(SocketAddress addr) {
-            return RouterService.getIpFilter().allow(addr);
+            return dhtControllerFacade.allow(addr);
         }
 
         public void ban(SocketAddress addr) {
-            RouterService.getIpFilter().ban(addr);
-            RouterService.reloadIPFilter();
+            dhtControllerFacade.ban(addr);
+            dhtControllerFacade.reloadIPFilter();
         }
     }
+
 }

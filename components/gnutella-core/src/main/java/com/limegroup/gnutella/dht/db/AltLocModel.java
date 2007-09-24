@@ -17,10 +17,12 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -35,10 +37,24 @@ import com.limegroup.gnutella.tigertree.TigerTreeCache;
  * the number of query hits instead of upload attempts or even
  * keeping track of the file activities over multiple sessions.
  */
+@Singleton
 public class AltLocModel implements StorableModel {
     
     private final Map<KUID, Storable> values 
         = Collections.synchronizedMap(new HashMap<KUID, Storable>());
+    
+    private final AltLocValueFactory altLocValueFactory;
+
+    private final Provider<TigerTreeCache> tigerTreeCache;
+
+    private final Provider<FileManager> fileManager;
+    
+    @Inject
+    public AltLocModel(AltLocValueFactory altLocValueFactory, Provider<FileManager> fileManager, Provider<TigerTreeCache> tigerTreeCache) {
+        this.altLocValueFactory = altLocValueFactory;
+        this.fileManager = fileManager;
+        this.tigerTreeCache = tigerTreeCache;
+    }
     
     public Collection<Storable> getStorables() {
         if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
@@ -47,8 +63,7 @@ public class AltLocModel implements StorableModel {
             return Collections.emptySet();
         }
         
-        FileManager fileManager = RouterService.getFileManager();
-        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
+        FileDesc[] fds = fileManager.get().getAllSharedFileDescriptors();
         
         // List of Storables we're going to publish
         List<Storable> toRemove = new ArrayList<Storable>();
@@ -63,13 +78,13 @@ public class AltLocModel implements StorableModel {
                     KUID primaryKey = KUIDUtils.toKUID(urn);
                     if (!values.containsKey(primaryKey)) {
                         long fileSize = fd.getFileSize();
-                        HashTree hashTree = TigerTreeCache.instance().getHashTree(urn);
+                        HashTree hashTree = tigerTreeCache.get().getHashTree(urn);
                         byte[] ttroot = null;
                         if (hashTree != null) {
                             ttroot = hashTree.getRootHashBytes();
                         }
                         
-                        AltLocValue value = AltLocValue.createAltLocValueForSelf(fileSize, ttroot);
+                        AltLocValue value = altLocValueFactory.createAltLocValueForSelf(fileSize, ttroot);
                         values.put(primaryKey, new Storable(primaryKey, value));
                     }
                 }
@@ -85,7 +100,7 @@ public class AltLocModel implements StorableModel {
                 URN urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
-                FileDesc fd = fileManager.getFileDescForUrn(urn);
+                FileDesc fd = fileManager.get().getFileDescForUrn(urn);
                 
                 // If it doesn't then remove it from the values map and
                 // replace the entity value with the empty value
@@ -99,7 +114,7 @@ public class AltLocModel implements StorableModel {
                     
                 // And if it does then check if it is rare and needs
                 // publishing.
-                } else if (fileManager.isRareFile(fd) 
+                } else if (fileManager.get().isRareFile(fd) 
                         && DatabaseUtils.isPublishingRequired(storable)) {
                     toPublish.add(storable);
                 }

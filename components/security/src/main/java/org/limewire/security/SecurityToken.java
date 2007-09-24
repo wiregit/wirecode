@@ -32,9 +32,14 @@ public interface SecurityToken {
     public static interface TokenProvider {
         
         /**
-         * Creates and returns a SecurityToken for the given SocketAddress
+         * Creates and returns a {@link SecurityToken} for the given SocketAddress
          */
-        public SecurityToken getSecurityToken(SocketAddress addr);
+        public SecurityToken getSecurityToken(SocketAddress dst);
+        
+        /**
+         * Creates and returns a {@link TokenData} for the given SocketAddress
+         */
+        public TokenData getTokenData(SocketAddress src);
     }
     
     /** A wrapper for data that this SecurityToken uses. */
@@ -48,6 +53,10 @@ public interface SecurityToken {
     public static class AddressSecurityTokenProvider implements TokenProvider {
         public SecurityToken getSecurityToken(SocketAddress addr) {
             return new AddressSecurityToken(addr);
+        }
+
+        public TokenData getTokenData(SocketAddress src) {
+            return new AddressSecurityToken.AddressTokenData(src);
         }
     }
 }

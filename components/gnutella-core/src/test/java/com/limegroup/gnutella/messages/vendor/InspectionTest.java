@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,7 +9,6 @@ import java.net.InetAddress;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.Inflater;
 
@@ -20,7 +18,6 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.IpPort.IpPortComparator;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
@@ -31,17 +28,12 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.ServerSideTestCase;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -75,7 +67,7 @@ public class InspectionTest extends ServerSideTestCase {
     }
     public static void setUpQRPTables() throws Exception {}
     public static void setSettings() throws Exception{
-        SecureMessageVerifier vf = RouterService.getSecureMessageVerifier();
+        SecureMessageVerifier vf = ProviderHacks.getSecureMessageVerifier();
         PrivilegedAccessor.setValue(InspectionRequestHandler.class,"inspectionVerifier",vf);
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(1000);
@@ -93,7 +85,7 @@ public class InspectionTest extends ServerSideTestCase {
     
     private InspectionRequest getRequest(String base32) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(base32));
-        return (InspectionRequest) MessageFactory.read(bais);
+        return (InspectionRequest) ProviderHacks.getMessageFactory().read(bais);
     }
     public void testInspection() throws Exception {
         inspectedValue = "a";
@@ -162,7 +154,7 @@ public class InspectionTest extends ServerSideTestCase {
     
     public void testRouting() throws Exception {
         // one of the leafs supports inspections
-        LEAF[0].send(MessagesSupportedVendorMessage.instance());
+        LEAF[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
         
         // create a request with a return address and one without
         String routedStr = "TJDZMNSU2BMQBE665ZF6V2EFAAYQCAEZAAAAATCJJVCR4AABADBSCSMBIR4JYJOHXME4AMAMAXAILAXWJBX5EC73EEGPUGCLZ36CS4W56UYNE2MQDVTZD6BJVAZBSMSZSD2MER3MXI6RO6WN6CDKY276YV4FQDZ6TO5RVYCCKJAUOAT7AECACICOQFLECAWDAJJUEQEDKNEUO3ZQFUBBKAET3DOHWUHCAUYMMHGNC3JX2SE2FZNQIKACCRYF4HPDK5WODOJ2N2EWPEAFHYEKJNGF5Q";
@@ -214,20 +206,20 @@ public class InspectionTest extends ServerSideTestCase {
         
         // and handling it should also respond to the return address
         MessageSettings.INSPECTION_VERSION.setValue(1);
-        MessageRouter router = RouterService.getMessageRouter();
-        router.handleMessage(received, RouterService.getConnectionManager().getInitializedClientConnections().get(0));
+        MessageRouter router = ProviderHacks.getMessageRouter();
+        router.handleMessage(received, ProviderHacks.getConnectionManager().getInitializedClientConnections().get(0));
         pack = new DatagramPacket(new byte[1000],1000);
         socket2.receive(pack);
         assertEquals(2, received.getRoutableVersion());
     }
     
     private Map tryMessage(Message m) throws Exception {
-        assertTrue(UDPService.instance().isListening());
+        assertTrue(ProviderHacks.getUdpService().isListening());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] b = baos.toByteArray();
         DatagramPacket pack = new DatagramPacket(b,
-                b.length,InetAddress.getByName("127.0.0.1"),RouterService.getPort());
+                b.length,InetAddress.getByName("127.0.0.1"),ProviderHacks.getNetworkManager().getPort());
         UDP_ACCESS.send(pack);
         
         //now read the response       

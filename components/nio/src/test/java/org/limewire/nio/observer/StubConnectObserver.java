@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 
-import org.limewire.nio.observer.ConnectObserver;
-
 public class StubConnectObserver implements ConnectObserver {
     private volatile SocketChannel channel;
     private volatile Socket socket;

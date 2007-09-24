@@ -28,6 +28,7 @@
         <do.setup-properties component="tests">
             <src-classpath>
                 <fileset dir="${limewire.components.tests.home}/lib" includes="*.jar"/>
+            	<fileset dir="${limewire.components.tests.home}/lib/jmock" includes="*.jar"/>
                 <path refid="build.limewire.code.classpath"/>
             </src-classpath>
                 

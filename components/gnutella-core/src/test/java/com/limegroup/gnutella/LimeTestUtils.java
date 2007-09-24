@@ -5,33 +5,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
-import org.limewire.util.PrivilegedAccessor;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class LimeTestUtils {
-
-    public static byte[] writeRandomData(File file, int size)
-            throws IOException {
-        byte[] data = new byte[size];
-        Random r = new Random();
-        r.nextBytes(data);
-        RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        try {
-            raf.write(data);
-        } finally {
-            raf.close();
-        }
-        return data;
-    }
 
     public static void waitForNIO() throws InterruptedException {
         Future<?> future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
@@ -60,11 +49,7 @@ public class LimeTestUtils {
 
     public static void setActivityCallBack(ActivityCallback cb)
             throws Exception {
-        if (RouterService.getCallback() == null) {
-            new RouterService(cb);
-        } else {
-            PrivilegedAccessor.setValue(RouterService.class, "callback", cb);
-        }
+        throw new RuntimeException("fix me");
     }
 
     public static void readBytes(InputStream in, long count) throws IOException {
@@ -139,4 +124,56 @@ public class LimeTestUtils {
 	    for(int i = 0; i < files.length; i++)
 	        files[i].delete();
 	}
+
+    /**
+     * Creates the Guice injector with the limewire default modules and the 
+     * test module that can override bindings in the former modules.
+     * 
+     * @param module the test modules that can override bindings
+     * @param callbackClass the class that is used as a callback
+     * @return the injector
+     */
+    public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
+        List<Module> list = new ArrayList<Module>();
+        list.addAll(Arrays.asList(modules));
+        list.add(new LimeWireCoreModule(callbackClass));
+        list.add(new ModuleHacks());
+        Injector injector = Guice.createInjector(list);
+        
+        ProviderHacks.markUnusable();        
+        
+        return injector;
+    }
+
+    /**
+     * Wraps {@link #createInjector(Module, Class) createInjector(Module, ActivityCallbackStub.class)}.
+     */
+    public static Injector createInjector(Module... modules) {
+        return createInjector(ActivityCallbackStub.class, modules);
+    }
+
+    /**
+     * Creates the Guice injector with the limewire default modules and the 
+     * test module that can override bindings in the former modules.
+     * 
+     * Also starts the {@link LifecycleManager}.
+     * 
+     * @param module the test modules that can override bindings
+     * @param callbackClass the class that is used as a callback
+     * @return the injector
+     */
+    public static Injector createInjectorAndStart(Class<? extends ActivityCallback> callbackClass, Module...modules) {
+        Injector injector = createInjector(callbackClass, modules);
+        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager.start();
+        return injector;
+    }
+    
+    /**
+     * Wraps {@link #createInjectorAndStart(Module, Class) createInjectorAndStart(Module, ActivityCallbackStub.class)}.
+     */
+    public static Injector createInjectorAndStart(Module...modules) {
+        return createInjectorAndStart(ActivityCallbackStub.class, modules);
+    }
+
 }

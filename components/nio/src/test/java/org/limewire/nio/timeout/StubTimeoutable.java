@@ -1,6 +1,5 @@
 package org.limewire.nio.timeout;
 
-import org.limewire.nio.timeout.Timeoutable;
 
 public class StubTimeoutable implements Timeoutable {
     private boolean notified = false;

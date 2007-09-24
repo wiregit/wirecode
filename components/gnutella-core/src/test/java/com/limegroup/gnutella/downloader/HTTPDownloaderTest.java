@@ -24,6 +24,7 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.Range;
+import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -31,10 +32,11 @@ import org.limewire.io.IpPortSet;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
@@ -43,6 +45,8 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
+    
+    private HTTPDownloaderFactory httpDownloaderFactory;
 
     public HTTPDownloaderTest(String name) {
         super(name);
@@ -50,6 +54,10 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     
     public static Test suite() {
         return buildTestSuite(HTTPDownloaderTest.class);
+    }
+    
+    public void setUp() {
+        httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager(), Providers.of(ProviderHacks.getPushEndpointCache()));
     }
     
     public void testWrittenAltHeadersWithTLS() throws Exception {
@@ -67,10 +75,10 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                         boolean failed = false;
                         AlternateLocation loc;            
                         if(i == 25 || i == 30 || Math.random() < 0.5) {
-                            loc = AlternateLocation.create("1.2.3." + i, HugeTestUtils.URNS[0], true);
+                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, UrnHelper.URNS[0], true);
                             tls = true;
                         } else {
-                            loc = AlternateLocation.create("1.2.3." + i, HugeTestUtils.URNS[0], false);
+                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, UrnHelper.URNS[0], false);
                         }
                         
                         if(i != 30 && (i == 25 || Math.random() < 0.5)) {
@@ -185,9 +193,9 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                             null, false, false, "LIME",
                                             null, -1, false);
         File f = new File("sam");
-        VerifyingFile vf = new VerifyingFile(length);
+        VerifyingFile vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(length);
         vf.open(f);
-        HTTPDownloader dl = new HTTPDownloader(rfd, vf, false);
+        HTTPDownloader dl = httpDownloaderFactory.create(null, rfd, vf, false);
         
         PrivilegedAccessor.setValue(dl, "_amountToRead", new Long(rfd.getSize()));
         
@@ -354,7 +362,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 1,
                                                 false,
                                                 null,
-                                                HugeTestUtils.URN_SETS[0],
+                                                UrnHelper.URN_SETS[0],
                                                 false,
                                                 false,
                                                 "TEST",
@@ -363,12 +371,12 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 0,
                                                 false);
                                                 
-        VerifyingFile vf = new VerifyingFile(1000);
+        VerifyingFile vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(1000);
         
         Socket socket = new NIOSocket("127.0.0.1", server.getLocalPort());
         Socket accept = server.accept();
         
-        HTTPDownloader dl = new HTTPDownloader(socket, rfd, vf, false);
+        HTTPDownloader dl = httpDownloaderFactory.create(socket, rfd, vf, false);
         func.apply(dl);
         
         dl.initializeTCP();
@@ -382,14 +390,14 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         assertGreaterThan(0, amtRead);
         
         String headers = new String(read, 0, amtRead);
-        return parseHeaders(headers, "GET /uri-res/N2R?" + HugeTestUtils.URNS[0].httpStringValue() + " HTTP/1.1");
+        return parseHeaders(headers, "GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue() + " HTTP/1.1");
     }
     
     private Map<String, String> parseHeaders(String headers, String firstLine) throws Exception {
         BufferedReader reader = new BufferedReader(new StringReader(headers));
         String line = reader.readLine();
         Map map = new HashMap();
-        assertEquals("GET /uri-res/N2R?" + HugeTestUtils.URNS[0].httpStringValue() + " HTTP/1.1", line);
+        assertEquals("GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue() + " HTTP/1.1", line);
         while( (line = reader.readLine()) != null && line.length() != 0) {
             int colon = line.indexOf(":");
             assertNotEquals("couldn't find colon, line is: " + line, -1, colon);
@@ -399,7 +407,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     
-    private static HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
+    private HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
         s += "\r\n";
         SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
         reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
@@ -414,7 +422,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 1,
                                                 false,
                                                 null,
-                                                HugeTestUtils.URN_SETS[0],
+                                                UrnHelper.URN_SETS[0],
                                                 false,
                                                 false,
                                                 "TEST",
@@ -422,7 +430,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 -1,
                                                 0,
                                                 false);
-        HTTPDownloader d = new HTTPDownloader(rfd, null, false);
+        HTTPDownloader d = httpDownloaderFactory.create(null, rfd, null, false);
         PrivilegedAccessor.setValue(d, "_headerReader", reader);
         return d;
     }

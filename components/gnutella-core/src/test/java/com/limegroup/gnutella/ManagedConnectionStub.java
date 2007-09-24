@@ -1,8 +1,9 @@
 package com.limegroup.gnutella;
 
-import org.limewire.util.PrivilegedAccessor;
+import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /** 
  * A stubbed-out ManagedConnection that does nothing.  Useful for testing, since
@@ -12,15 +13,21 @@ import com.limegroup.gnutella.stubs.ConnectionManagerStub;
  */
 public class ManagedConnectionStub extends ManagedConnection {
     public ManagedConnectionStub() {
-        super("1.2.3.4", 6346);
-		
-        try {
-            PrivilegedAccessor.setValue(this, "_manager", new ConnectionManagerStub());
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        }
+        super("1.2.3.4", 6346, ConnectType.PLAIN, new ConnectionManagerStub(),
+                ProviderHacks.getNetworkManager(), ProviderHacks
+                        .getQueryRequestFactory(), ProviderHacks
+                        .getHeadersFactory(), ProviderHacks
+                        .getHandshakeResponderFactory(), ProviderHacks
+                        .getQueryReplyFactory(), ProviderHacks
+                        .getMessageDispatcher(), ProviderHacks
+                        .getNetworkUpdateSanityChecker(), ProviderHacks
+                        .getUdpService(), 
+                ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
+                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
+                Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
+                Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
+                ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory(),
+                ProviderHacks.getApplicationServices());
     }
 
     public void initialize() {

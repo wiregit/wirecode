@@ -12,15 +12,10 @@ import java.util.Set;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.version.UpdateHandler;
 
 /** 
  * The message that lets other know what capabilities you support.  Everytime 
@@ -40,15 +35,15 @@ public final class CapabilitiesVM extends VendorMessage {
      * The bytes for supporting SIMPP.  This used to be 'SIMP', but that
      * implementation was broken.  We now use 'IMPP' to advertise support.
      */
-    private static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
+    static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
     
     /**
      * The bytes for the LMUP message.
      */
-    private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
     
     /** Bytes for supporting incoming TLS. */
-    private static final byte[] TLS_SUPPORT_BYTES = { 'T', 'L', 'S', '!' };
+    static final byte[] TLS_SUPPORT_BYTES = { 'T', 'L', 'S', '!' };
     
     /**
      * The current version of this message.
@@ -59,11 +54,6 @@ public final class CapabilitiesVM extends VendorMessage {
      * The capabilities supported.
      */
     private final Set<SupportedMessageBlock> _capabilitiesSupported;
-
-    /**
-     * The current instance of this CVM that this node will forward to others
-     */
-    private volatile static CapabilitiesVM _instance;
 
     /**
      * Constructs a new CapabilitiesVM from data read off the network.
@@ -94,7 +84,7 @@ public final class CapabilitiesVM extends VendorMessage {
      * Internal constructor for creating the sole instance of our 
      * CapabilitiesVM.
      */
-    private CapabilitiesVM(Set<SupportedMessageBlock> _capabilitiesSupported) {
+    CapabilitiesVM(Set<SupportedMessageBlock> _capabilitiesSupported) {
         super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload(_capabilitiesSupported));
         this._capabilitiesSupported = _capabilitiesSupported;
     }
@@ -116,53 +106,6 @@ public final class CapabilitiesVM extends VendorMessage {
 
     }
     
-    //  ADD NEW CAPABILITIES HERE AS YOU BUILD THEM....
-    /**
-     * Adds all supported capabilities to the given set.
-     */
-    private static Set<SupportedMessageBlock> getSupportedMessages() {
-        Set<SupportedMessageBlock> supported = new HashSet<SupportedMessageBlock>();
-        
-        SupportedMessageBlock smb = null;
-        smb = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
-                                        FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
-        supported.add(smb);
-        
-        smb = new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES,
-                                        SimppManager.instance().getVersion());
-        supported.add(smb);
-        
-        smb = new SupportedMessageBlock(LIME_UPDATE_BYTES,
-                                        UpdateHandler.instance().getLatestId());
-        supported.add(smb);
-        
-        DHTManager manager = RouterService.getDHTManager();
-        if (manager.isMemberOfDHT()) {
-            DHTMode mode = manager.getDHTMode();
-            assert (mode != null);
-            smb = new SupportedMessageBlock(mode.getCapabilityName(),
-                    RouterService.getDHTManager().getVersion().shortValue());
-            supported.add(smb);
-        }
-        
-        if(SSLSettings.isIncomingTLSEnabled()) {
-            smb = new SupportedMessageBlock(TLS_SUPPORT_BYTES, 1);
-            supported.add(smb);
-        }
-        
-        return supported;
-    }
-    
-    /** @return A CapabilitiesVM with the set of messages 
-     *  this client supports.
-     */
-    public static CapabilitiesVM instance() {
-        if (_instance == null)
-            _instance = new CapabilitiesVM(getSupportedMessages());
-        return _instance;
-    }
-
-
     /**
      * @return -1 if the ability isn't supported, else it returns the version 
      * of the message supported.
@@ -251,17 +194,6 @@ public final class CapabilitiesVM extends VendorMessage {
         return false;
     }
     
-    /**
-     * Constructs a new instance for this node to advertise,
-     * using the latest version numbers of supported messages.
-     */
-    public static void reconstructInstance() {
-        //replace _instance with a newer one, which will be created with the
-        //correct simppVersion, a new _capabilitiesSupported will be created
-        _instance = new CapabilitiesVM(getSupportedMessages());
-    }
-
-    
     // override super
     public int hashCode() {
         return 17*_capabilitiesSupported.hashCode();
@@ -270,7 +202,7 @@ public final class CapabilitiesVM extends VendorMessage {
 
     /** Container for vector elements.
      */  
-    static class SupportedMessageBlock {
+    public static class SupportedMessageBlock {
         final byte[] _capabilityName;
         final int _version;
         final int _hashCode;

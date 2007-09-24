@@ -6,16 +6,24 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.Version;
 
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public final class UpdateCollectionTest extends LimeTestCase {
 
+    UpdateCollectionFactory updateCollectionFactory;
+    
 	public UpdateCollectionTest(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
 		return buildTestSuite(UpdateCollectionTest.class);
+	}
+	
+	@Override
+	protected void setUp() throws Exception {
+	    updateCollectionFactory = ProviderHacks.getUpdateCollectionFactory();
 	}
 
 	/**
@@ -27,34 +35,33 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	
 	public void testBasicCreation() throws Exception {
 	    
-	    UpdateCollection uc = UpdateCollection.create(
-	        "<update id='42' timestamp=\"150973213135\">" +
-	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2'>" +
-	                "<lang id='en'>" +
-	                    "<![CDATA[<html><body>This is the text</body></html>]]>" +
-	                "</lang>" +
-	                "<lang id='es' button1='b1' button2='b2'>" +
-	                    "Hola, no habla espanol." +
-	                "</lang>" +	                
-	                "<lang id='notext'></lang>" +
-	            "</msg>" +
-	            "<msg/> " +
-	            "<msg for='4.1.2' url='http://limewire.com/hi'>" +
-	                "<lang id='en'>" + 
-	                    "This didn't have a style, it should be ignored." +
-	                "</lang>" +
-	            "</msg>" +
-	            "<msg for='4.1.2' style='3'>" +
-	                "<lang id='en'>" + 
-	                    "This didn't have a URL, it should be ignored." +
-	                "</lang>" +
-	            "</msg>" +
-	            "<msg style='3' url='nostyle'>" +
-	                "<lang id='en'>" + 
-	                    "This didn't have a 'for', it should be ignored." +
-	                "</lang>" +
-	            "</msg>" +	            	            
-	        "</update>");
+	    UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42' timestamp=\"150973213135\">" +
+            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2'>" +
+                "<lang id='en'>" +
+                    "<![CDATA[<html><body>This is the text</body></html>]]>" +
+                "</lang>" +
+                "<lang id='es' button1='b1' button2='b2'>" +
+                    "Hola, no habla espanol." +
+                "</lang>" +	                
+                "<lang id='notext'></lang>" +
+            "</msg>" +
+            "<msg/> " +
+            "<msg for='4.1.2' url='http://limewire.com/hi'>" +
+                "<lang id='en'>" + 
+                    "This didn't have a style, it should be ignored." +
+                "</lang>" +
+            "</msg>" +
+            "<msg for='4.1.2' style='3'>" +
+                "<lang id='en'>" + 
+                    "This didn't have a URL, it should be ignored." +
+                "</lang>" +
+            "</msg>" +
+            "<msg style='3' url='nostyle'>" +
+                "<lang id='en'>" + 
+                    "This didn't have a 'for', it should be ignored." +
+                "</lang>" +
+            "</msg>" +	            	            
+        "</update>");
 	        
         // First make sure it ignored the invalid msgs.
         assertEquals(uc.getUpdateData().toString(), 2, uc.getUpdateData().size());
@@ -104,27 +111,26 @@ public final class UpdateCollectionTest extends LimeTestCase {
     }
     
     public void testRanges() throws Exception {
-	    UpdateCollection uc = UpdateCollection.create(
-	        "<update id='42'>" +
-	            "<msg to='3.0.0' for='4.6.0' url='http://www.limewire.com/update/force' style='4'>" +
-	                "<lang id='en'>FORCED Text</lang>" +
-	            "</msg>" +
-	            "<msg from='3.0.0' to='4.0.0' for='4.6.0' url='http://www.limewire.com/update/old' style='2'>" +
-	                "<lang id='en'>Major Text (really old version)</lang>" +
-	            "</msg>" +
-	            "<msg from='4.0.0' for='4.6.0' url='http://www.limewire.com/update' style='2'>" +
-	                "<lang id='en'>Major Text</lang>" +
-	            "</msg>" +
-	            "<msg from='4.6.0' for='4.6.5' url='http://www.limewire.com/update' style='1'>" +
-	                "<lang id='en'>Text</lang>" +
-	            "</msg>" +
-	            "<msg from='4.6.5' to='4.7.2' for='4.7.3' url='http://www.limewire.com/beta' style='0'>" +
-	                "<lang id='en'>Text</lang>" +
-	            "</msg>" +
-	            "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='3'>" +
-	                "<lang id='en'>Text</lang>" +
-	            "</msg>" +	            
-	        "</update>");
+	    UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+            "<msg to='3.0.0' for='4.6.0' url='http://www.limewire.com/update/force' style='4'>" +
+                "<lang id='en'>FORCED Text</lang>" +
+            "</msg>" +
+            "<msg from='3.0.0' to='4.0.0' for='4.6.0' url='http://www.limewire.com/update/old' style='2'>" +
+                "<lang id='en'>Major Text (really old version)</lang>" +
+            "</msg>" +
+            "<msg from='4.0.0' for='4.6.0' url='http://www.limewire.com/update' style='2'>" +
+                "<lang id='en'>Major Text</lang>" +
+            "</msg>" +
+            "<msg from='4.6.0' for='4.6.5' url='http://www.limewire.com/update' style='1'>" +
+                "<lang id='en'>Text</lang>" +
+            "</msg>" +
+            "<msg from='4.6.5' to='4.7.2' for='4.7.3' url='http://www.limewire.com/beta' style='0'>" +
+                "<lang id='en'>Text</lang>" +
+            "</msg>" +
+            "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='3'>" +
+                "<lang id='en'>Text</lang>" +
+            "</msg>" +	            
+        "</update>");
 	        
         assertEquals(uc.getUpdateData().toString(), 6, uc.getUpdateData().size());
         assertEquals(42, uc.getId());
@@ -199,15 +205,14 @@ public final class UpdateCollectionTest extends LimeTestCase {
     }
     
     public void testProFree() throws Exception {
-        UpdateCollection uc = UpdateCollection.create(
-	        "<update id='42'>" +
-	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' pro='1'>" +
-	                "<lang id='en'>Pro Text</lang>" +
-	            "</msg>" +
-	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' free='1'>" +
-	                "<lang id='en'>Free Text</lang>" +
-	            "</msg>" +
-	        "</update>");
+        UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' pro='1'>" +
+                "<lang id='en'>Pro Text</lang>" +
+            "</msg>" +
+            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' free='1'>" +
+                "<lang id='en'>Free Text</lang>" +
+            "</msg>" +
+        "</update>");
 	        
         
         UpdateData data;
@@ -237,42 +242,41 @@ public final class UpdateCollectionTest extends LimeTestCase {
             
             String currentOS = OSUtils.getOS() + " (on iteration: " + i + ")";        
         
-            UpdateCollection uc = UpdateCollection.create(
-    	        "<update id='42'>" +
-    	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Windows'>" +
-    	                "<lang id='en'>Windows Text</lang>" +
-    	            "</msg>" +
-    	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Linux'>" +
-    	                "<lang id='en'>Linux Text</lang>" +
-    	            "</msg>" +
-    	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Mac'>" +
-    	                "<lang id='en'>Mac Text</lang>" +
-    	            "</msg>" +
-    	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Unix'>" +
-    	                "<lang id='en'>Unix Text</lang>" +
-    	            "</msg>" +
-    	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Other'>" +
-    	                "<lang id='en'>Other Text</lang>" +
-    	            "</msg>" +
-    	            "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows'>" +
-    	                "<lang id='en'>Windows, Mac, Linux Text</lang>" +
-    	            "</msg>" +
-    	            "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='0' os='Other, Unix'>" +
-    	                "<lang id='en'>Other, Unix Text</lang>" +
-    	            "</msg>" +
-                    "<msg from='4.9.0' for='4.9.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,4.0,5.0,0.5,2.0'>" +
-                    "<lang id='en'>only Windows version</lang>" +
-                    "</msg>" +
-                    "<msg from='4.10.0' for='4.10.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,2.0,*'>" +
-                    "<lang id='en'>only Linux version</lang>" +
-                    "</msg>" +
-                    "<msg from='4.11.0' for='4.11.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,*'>" +
-                    "<lang id='en'>wrong number of versions</lang>" +
-                    "</msg>" +
-                    "<msg from='4.12.0' for='4.12.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,asdf,*'>" +
-                    "<lang id='en'>malformed version</lang>" +
+            UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Windows'>" +
+                    "<lang id='en'>Windows Text</lang>" +
                 "</msg>" +
-    	        "</update>");
+                "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Linux'>" +
+                    "<lang id='en'>Linux Text</lang>" +
+                "</msg>" +
+                "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Mac'>" +
+                    "<lang id='en'>Mac Text</lang>" +
+                "</msg>" +
+                "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Unix'>" +
+                    "<lang id='en'>Unix Text</lang>" +
+                "</msg>" +
+                "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Other'>" +
+                    "<lang id='en'>Other Text</lang>" +
+                "</msg>" +
+                "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows'>" +
+                    "<lang id='en'>Windows, Mac, Linux Text</lang>" +
+                "</msg>" +
+                "<msg from='4.8.0' for='4.8.3' url='http://www.limewire.com/beta' style='0' os='Other, Unix'>" +
+                    "<lang id='en'>Other, Unix Text</lang>" +
+                "</msg>" +
+                "<msg from='4.9.0' for='4.9.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,4.0,5.0,0.5,2.0'>" +
+                "<lang id='en'>only Windows version</lang>" +
+                "</msg>" +
+                "<msg from='4.10.0' for='4.10.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,2.0,*'>" +
+                "<lang id='en'>only Linux version</lang>" +
+                "</msg>" +
+                "<msg from='4.11.0' for='4.11.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,*'>" +
+                "<lang id='en'>wrong number of versions</lang>" +
+                "</msg>" +
+                "<msg from='4.12.0' for='4.12.3' url='http://www.limewire.com/beta' style='0' os='Mac, Linux, Windows' osv='0.5,1.5,*,5.0,asdf,*'>" +
+                "<lang id='en'>malformed version</lang>" +
+            "</msg>" +
+            "</update>");
     	        
             boolean windows = OSUtils.isWindows();
             boolean mac = OSUtils.isAnyMac();
@@ -356,18 +360,17 @@ public final class UpdateCollectionTest extends LimeTestCase {
     }
     
     public void testJavaRanges() throws Exception {
-	    UpdateCollection uc = UpdateCollection.create(
-	        "<update id='42'>" +
-	            "<msg for='9.9.9' url='http://www.limewire.com/whyupgradejava' style='4' javato='1.4.2'>" +
-	                "<lang id='en'>Your Java Sucks.</lang>" +
-	            "</msg>" +
-	            "<msg for='9.9.9' url='http://www.limewire.com/whyupgradejava' style='4' javafrom='1.4.2' javato='1.5.0_2'>" +
-	                "<lang id='en'>Your Java Doesn't Suck.</lang>" +
-	            "</msg>" +
-	            "<msg for='9.9.9' url='http://www.limewire.com/whyupgradejava' style='4' javafrom='1.5.0_2'>" +
-	                "<lang id='en'>Your Java Is Mysterious.</lang>" +
-	            "</msg>" +
-	        "</update>");
+	    UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+            "<msg for='9.9.9' url='http://www.limewire.com/whyupgradejava' style='4' javato='1.4.2'>" +
+                "<lang id='en'>Your Java Sucks.</lang>" +
+            "</msg>" +
+            "<msg for='9.9.9' url='http://www.limewire.com/whyupgradejava' style='4' javafrom='1.4.2' javato='1.5.0_2'>" +
+                "<lang id='en'>Your Java Doesn't Suck.</lang>" +
+            "</msg>" +
+            "<msg for='9.9.9' url='http://www.limewire.com/whyupgradejava' style='4' javafrom='1.5.0_2'>" +
+                "<lang id='en'>Your Java Is Mysterious.</lang>" +
+            "</msg>" +
+        "</update>");
 	    
 	    // Idea:
 	    // People who have Java [0.0.0, 1.4.2) are told their java sucks.

@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
@@ -22,8 +22,8 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
@@ -34,7 +34,8 @@ public class I18NSendReceiveTest
 
     private static Connection CONN_1;
     private static final int TEST_PORT = 6667;
-    private static RouterService ROUTER_SERVICE;
+
+  
 
     //test file names that should be in the shared dir and returned as
     //replies
@@ -109,23 +110,24 @@ public class I18NSendReceiveTest
 
     public static void globalSetUp() throws Exception {
         doSettings();
-        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
-        ROUTER_SERVICE.start();
-        RouterService.connect();
+        if(true)throw new RuntimeException("fix me");
+      //  ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+        ProviderHacks.getLifecycleManager().start();
+        ProviderHacks.getConnectionServices().connect();
         connect();
     }
 
     public static void globalTearDown() throws Exception {
         drain(CONN_1);
         CONN_1.close();
-        RouterService.disconnect();
+        ProviderHacks.getConnectionServices().disconnect();
     }
 
 
     private static void connect() throws Exception {
-        UltrapeerHeaders headers = new UltrapeerHeaders("localhost");
+        UltrapeerHeaders headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost");
         headers.put(HeaderNames.X_DEGREE,"42");
-        CONN_1 = new Connection("localhost", TEST_PORT);
+        CONN_1 = ProviderHacks.getConnectionFactory().createConnection("localhost", TEST_PORT, ConnectType.PLAIN);
         CONN_1.initialize(headers, new EmptyResponder(), 1000);
         drain(CONN_1);
     }
@@ -137,7 +139,7 @@ public class I18NSendReceiveTest
      */
     public void testSendReceive() throws Exception {        
         //test random query 
-        QueryRequest qr = QueryRequest.createQuery("asdfadf", (byte)2);
+        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("asdfadf", (byte)2);
         CONN_1.send(qr);
         CONN_1.flush();
         
@@ -198,7 +200,7 @@ public class I18NSendReceiveTest
         int size = expectedReply.size();
 
         QueryRequest qr 
-            = QueryRequest.createQuery(q, xml);
+            = ProviderHacks.getQueryRequestFactory().createQuery(q, xml);
         CONN_1.send(qr);
         CONN_1.flush();
 
@@ -273,15 +275,15 @@ public class I18NSendReceiveTest
      * add the metadata
      */
     private void addMetaData(String fname, String xmlstr) throws Exception {
-        FileManager fm = RouterService.getFileManager();
+        FileManager fm = ProviderHacks.getFileManager();
         FileDesc fd = 
             fm.getFileDescForFile(new File(_sharedDir, fname));
         
         LimeXMLDocument newDoc = 
-            new LimeXMLDocument(buildXMLString(xmlstr));
+            ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(buildXMLString(xmlstr));
         
         SchemaReplyCollectionMapper map =
-            SchemaReplyCollectionMapper.instance();
+            ProviderHacks.getSchemaReplyCollectionMapper();
         String uri = newDoc.getSchemaURI();
         LimeXMLReplyCollection collection = map.getReplyCollection(uri);
         
