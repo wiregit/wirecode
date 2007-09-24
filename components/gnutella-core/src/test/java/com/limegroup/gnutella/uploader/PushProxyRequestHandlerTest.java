@@ -3,6 +3,7 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -13,16 +14,27 @@ import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HttpExecutionContext;
+import org.limewire.io.IpPort;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.HackMessageRouter;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.messagehandlers.MessageHandler;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.InspectionRequest;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 
 public class PushProxyRequestHandlerTest extends BaseTestCase {
 
@@ -92,11 +104,10 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
                 .getStatusCode());
     }
 
-    private class StubMessageRouter extends HackMessageRouter {
-        
+    @Singleton
+    private class StubMessageRouter implements MessageRouter {
         private PushRequest push;
 
-        @Override
         protected List<QueryReply> createQueryReply(byte[] guid, byte ttl,
                 long speed, Response[] res, byte[] clientGUID, boolean busy,
                 boolean uploaded, boolean measuredSpeed, boolean isFromMcast,
@@ -104,25 +115,224 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             return null;
         }
 
-        @Override
         protected void respondToPingRequest(PingRequest request,
                 ReplyHandler handler) {
         }
 
-        @Override
         protected boolean respondToQueryRequest(QueryRequest queryRequest,
                 byte[] clientGUID, ReplyHandler handler) {
             return false;
         }
 
-        @Override
         protected void respondToUDPPingRequest(PingRequest request,
                 InetSocketAddress addr, ReplyHandler handler) {
         }
 
-        @Override
         public void sendPushRequest(PushRequest push) throws IOException {
             this.push = push;
+        }
+
+        public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        public boolean addBypassedSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        public void addMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void addMulticastMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void addUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void broadcastPingRequest(PingRequest ping) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void downloadFinished(GUID guid) throws IllegalArgumentException {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void forwardInspectionRequestToLeaves(InspectionRequest ir) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void forwardQueryRequestToLeaves(QueryRequest query, ReplyHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public MessageHandler getMessageHandler(Class<? extends Message> clazz) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public MessageHandler getMulticastMessageHandler(Class<? extends Message> clazz) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public long getOOBExpireTime() {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public String getPingRouteTableDump() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public String getPushRouteTableDump() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Set<GUESSEndpoint> getQueryLocs(GUID guid) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public QueryRouteTable getQueryRouteTable() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public String getQueryRouteTableDump() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public MessageHandler getUDPMessageHandler(Class<? extends Message> clazz) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void handleQueryReply(QueryReply queryReply, ReplyHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void handleUDPMessage(Message msg, InetSocketAddress addr) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void initialize() {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public boolean isHostUnicastQueried(GUID guid, IpPort host) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        public boolean isQueryAlive(GUID guid) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        public boolean originateQuery(QueryRequest query, ManagedConnection mc) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        public void originateQueryGUID(byte[] guid) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void queryKilled(GUID guid) throws IllegalArgumentException {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void registerMessageListener(byte[] guid, MessageListener ml) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void removeConnection(ReplyHandler rh) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+                QueryRequest queryRequest) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public void sendDynamicQuery(QueryRequest query) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void sendMulticastPushRequest(PushRequest push) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void sendPingRequest(PingRequest request, ManagedConnection connection) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void sendQueryRequest(QueryRequest request, ManagedConnection connection) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void setMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void setMulticastMessageHandler(Class<? extends Message> clazz,
+                MessageHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void setUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void unregisterMessageListener(byte[] guid, MessageListener ml) {
+            // TODO Auto-generated method stub
+            
         }
 
     }
