@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.stubs;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -34,11 +35,17 @@ import com.limegroup.gnutella.util.SocketsManager;
 @Singleton
 public class ConnectionManagerStub extends ConnectionManager {
 
-    boolean enableRemove = false;
+    private boolean enableRemove = false;
 
     private boolean alwaysConnected;
 
     private Set<? extends Connectable> pushProxies;
+
+    private Boolean fullyConnected;
+
+    private List<ManagedConnection> initializedConnections;
+
+    private Integer preferredConnectionCount;
 
     @Inject
     public ConnectionManagerStub(NetworkManager networkManager, Provider<HostCatcher> hostCatcher,
@@ -119,4 +126,42 @@ public class ConnectionManagerStub extends ConnectionManager {
             return super.getPushProxies();
     }
 
+    public void setFullyConnected(boolean fullyConnected) {
+        this.fullyConnected = Boolean.valueOf(fullyConnected);
+    }
+    
+
+    public void setInitializedConnections(List<ManagedConnection> initializedConnections) {
+        this.initializedConnections = initializedConnections;
+    }
+
+    public void setPreferredConnectionCount(int i) {
+        this.preferredConnectionCount = Integer.valueOf(i);
+    }
+
+
+    @Override
+    public List<ManagedConnection> getInitializedConnections() {
+        if(initializedConnections != null)
+            return initializedConnections;
+        else
+            return super.getInitializedConnections();
+    }
+
+    @Override
+    public int getPreferredConnectionCount() {
+        if(preferredConnectionCount != null)
+            return preferredConnectionCount;
+        else
+            return super.getPreferredConnectionCount();
+    }
+
+    @Override
+    public boolean isFullyConnected() {
+        if(fullyConnected != null)
+            return fullyConnected;
+        else
+            return super.isFullyConnected();
+    }
+    
 }

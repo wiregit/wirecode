@@ -353,6 +353,10 @@ public class HostCatcher {
         //       UniqHostPinger and not its super class
         this.udpHostCache = udpHostCacheFactory.createUDPHostCache(uniqueHostPinger);
     }
+    
+    UDPHostCache getUdpHostCache() {
+        return udpHostCache;
+    }
 
     /**
      * Initializes any components required for HostCatcher.

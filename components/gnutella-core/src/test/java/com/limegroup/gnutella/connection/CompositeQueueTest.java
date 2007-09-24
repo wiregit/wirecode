@@ -6,7 +6,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
