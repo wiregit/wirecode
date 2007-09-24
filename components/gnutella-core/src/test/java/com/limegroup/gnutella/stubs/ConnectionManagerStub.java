@@ -37,7 +37,7 @@ public class ConnectionManagerStub extends ConnectionManager {
     boolean enableRemove = false;
 
     private boolean alwaysConnected;
-    
+
     private Set<? extends Connectable> pushProxies;
 
     @Inject
@@ -106,14 +106,14 @@ public class ConnectionManagerStub extends ConnectionManager {
     public void setAlwaysConnected(boolean alwaysConnected) {
         this.alwaysConnected = alwaysConnected;
     }
-    
+
     public void setPushProxies(Set<? extends Connectable> pushProxies) {
         this.pushProxies = pushProxies;
     }
-    
+
     @Override
     public Set<? extends Connectable> getPushProxies() {
-        if(pushProxies != null)
+        if (pushProxies != null)
             return pushProxies;
         else
             return super.getPushProxies();

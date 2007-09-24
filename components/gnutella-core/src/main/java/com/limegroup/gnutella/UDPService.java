@@ -292,6 +292,15 @@ public class UDPService implements ReadWriteObserver {
         }
 	}
 	
+	int getListeningPort() {
+	    synchronized(this) {
+	        if(_channel != null)
+	            return _channel.socket().getLocalPort();
+	        else
+	            return -1;
+	    }
+	}
+	
 	/**
 	 * Shuts down this service.
 	 */
