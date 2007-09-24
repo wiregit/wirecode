@@ -404,6 +404,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         }
     }
 
+    public ConnectionDispatcher getConnectionDispatcher() {
+        return connectionDispatcher.get();
+    }
+    
     /**
      * Returns the port at which the Connection Manager listens for incoming
      * connections
