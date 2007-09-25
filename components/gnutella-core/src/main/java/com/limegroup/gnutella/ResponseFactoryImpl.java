@@ -198,7 +198,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @param endpoints a collection of other locations on this network that
      *        will have this file
      */
-    private Response createResponse(long index, long size, String name, int incomingNameByteArraySize,
+    // NOTE: not in the interface, but public so tests not in this package can use.
+    public Response createResponse(long index, long size, String name, int incomingNameByteArraySize,
             Set<? extends URN> urns, LimeXMLDocument doc,
             GGEPContainer ggepData, byte[] extensions) {
         

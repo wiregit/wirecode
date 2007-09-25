@@ -115,6 +115,10 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                 sendDHTQuery();
             else if(!sentGnutellaQuery)
                 sendGnutellaQuery();
+            else
+                LOG.debug("Can send a query now, but not sending it?!");
+        } else {
+            LOG.debug("Tried to send query, but cannot do it now.");
         }
     }
         
@@ -183,6 +187,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     }
     
     private void sendDHTQuery() {
+        LOG.debug("Sending a DHT requery!");
         lastQuerySent = System.currentTimeMillis();
         lastQueryType = QueryType.DHT;
         numDHTQueries++;
@@ -199,6 +204,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
             try {
                 QueryRequest qr = downloader.newRequery(0);
                 if(manager.sendQuery(downloader, qr)) {
+                    LOG.debug("Sent a gnutella requery!");
                     sentGnutellaQuery = true;
                     lastQueryType = QueryType.GNUTELLA;
                     lastQuerySent = System.currentTimeMillis();
@@ -212,6 +218,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
                 LOG.debug("CantResumeException", cre);
             }
         } else {
+            LOG.debug("Tried to send a gnutella requery, but no stable connections.");
             downloader.setState(DownloadStatus.WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
         }
     }

@@ -268,7 +268,8 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         LimeCoreGlue.preinstall(_settingsDir);
 
         // Expand the xml.war file.
-        File xmlWar = CommonUtils.getResourceFile("gui/xml.war");
+        File f = getRootDir();
+        File xmlWar = new File(f, "gui/xml.war");
         assertTrue(xmlWar.exists());
         Expand.expandFile(xmlWar, _settingsDir);
         //make sure it'll delete even if something odd happens.

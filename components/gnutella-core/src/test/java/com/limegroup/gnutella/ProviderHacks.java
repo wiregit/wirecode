@@ -125,7 +125,7 @@ public class ProviderHacks {
     }
     
     public static ScheduledExecutorService getBackgroundExecutor() { return use().getBackgroundExecutor(); }
-    public static UPnPManager getUPnPManager() { return use().getUPnPManager(); }
+
     public static PongCacher getPongCacher() { return use().getPongCacher(); }
     public static Pinger getPinger() { return use().getPinger(); }
     public static ChatManager getChatManager() { return use().getChatManager(); }
