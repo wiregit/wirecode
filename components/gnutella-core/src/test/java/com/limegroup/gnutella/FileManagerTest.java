@@ -89,10 +89,10 @@ public class FileManagerTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).toInstance(fman);
-                
+                bind(FileManager.class).to(SimpleFileManager.class);
             }
         });
+        fman = injector.getInstance(FileManager.class);
     }
 	
     @Override
