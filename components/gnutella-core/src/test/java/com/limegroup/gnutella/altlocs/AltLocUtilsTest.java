@@ -6,15 +6,16 @@ import org.limewire.collection.Function;
 import org.limewire.io.Connectable;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 
-public class AltLocUtilsTest extends LimeTestCase {
+public class AltLocUtilsTest extends BaseTestCase {
 
     private AlternateLocationFactory alternateLocationFactory;
 
@@ -31,7 +32,14 @@ public class AltLocUtilsTest extends LimeTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        this.alternateLocationFactory = ProviderHacks.getAlternateLocationFactory();
+        Injector injector = LimeTestUtils.createInjector();
+        
+        LocalSocketAddressProviderStub localSocketAddressProvider = new LocalSocketAddressProviderStub();
+        localSocketAddressProvider.setTLSCapable(true);
+        localSocketAddressProvider.setLocalPort(6346);
+        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProvider);
+        
+        this.alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
     }
     
     public void testParseAlternateLocationsNoTLS() throws Exception {
