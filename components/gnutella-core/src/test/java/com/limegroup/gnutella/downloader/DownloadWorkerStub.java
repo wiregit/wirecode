@@ -1,20 +1,21 @@
 package com.limegroup.gnutella.downloader;
 
 import java.net.Socket;
+import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.inject.Providers;
-
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.util.SocketsManager;
 
 class DownloadWorkerStub extends DownloadWorker {
 
-    public DownloadWorkerStub(ManagedDownloader manager, RemoteFileDesc rfd) {
-        super(manager, rfd, null, ProviderHacks.getHTTPDownloaderFactory(),
-                ProviderHacks.getBackgroundExecutor(),
-                ProviderHacks.getNIOExecutor(), 
-                Providers.of(ProviderHacks.getPushDownloadManager()),
-                ProviderHacks.getSocketsManager());
+
+    public DownloadWorkerStub(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf,
+            HTTPDownloaderFactory httpDownloaderFactory,
+            ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
+            Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager) {
+        super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
+                pushDownloadManager, socketsManager);
     }
 
     HTTPDownloader getDownloader() {

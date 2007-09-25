@@ -202,7 +202,7 @@ public class TestUploader extends AssertComparisons {
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
      */
-    private final IPFilter IP_FILTER = ProviderHacks.getIpFilter();
+    private final IPFilter IP_FILTER;
     
     
     /**
@@ -220,11 +220,13 @@ public class TestUploader extends AssertComparisons {
     public TestUploader(String name, final int port, boolean tls) {
         super(name);
 
-        // ensure that only local machines can connect!!
+         // ensure that only local machines can connect!!
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*"});
+        this.IP_FILTER = new IPFilter();
+        
         this.name=name;
         reset();
         
@@ -261,6 +263,12 @@ public class TestUploader extends AssertComparisons {
     
     public TestUploader(String name) throws IOException{
         super(name);
+        // ensure that only local machines can connect!!
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*"});
+        this.IP_FILTER = new IPFilter();
         this.name=name;
         reset();
         LOG.debug("starting to handle request with direct socket given");
