@@ -190,8 +190,8 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Exists as a hook for tests, to create a HashTree from a File
      * when no FileDesc exists.
      */
-    static HashTree createHashTree(long fileSize, InputStream is,
-                                           URN sha1) throws IOException {
+    public static HashTree createHashTree(long fileSize, InputStream is,
+            URN sha1) throws IOException {
         // do the actual hashing
         int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
         List<byte[]> nodes = createTTNodes(nodeSize, fileSize, is);
