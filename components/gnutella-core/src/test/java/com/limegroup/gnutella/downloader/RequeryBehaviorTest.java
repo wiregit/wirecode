@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +42,6 @@ import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
-/// note -- mock ManagedDownloader
 public class RequeryBehaviorTest extends LimeTestCase {
 
     private static final Log LOG = LogFactory.getLog(RequeryBehaviorTest.class);
@@ -54,28 +54,22 @@ public class RequeryBehaviorTest extends LimeTestCase {
     }
     
     
-    public static void globalSetUp() throws Exception {
-        // load up
-        TestFile.length();
-        RequeryManager.NO_DELAY = true;
-        // TODO: fix this 
-        PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",100);
-        PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",100);
-    }
+    private DownloadManager downloadManager;
+    private MyAltLocFinder myAltFinder;
+    private MyDHTManager myDHTManager;
+    private Runnable pump;
     
-    static DownloadManager downloadManager;
-    static MyAltLocFinder myAltFinder;
-    static MyDHTManager myDHTManager;
-    static Runnable pump;
     public void setUp() throws Exception {
       DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
       DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
       DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
         RequeryManager.TIME_BETWEEN_REQUERIES = 5000;
+        
+        myDHTManager = new MyDHTManager();
         Module m = new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DHTManager.class).to(MyDHTManager.class);
+                bind(DHTManager.class).toInstance(myDHTManager);
                 bind(AltLocFinder.class).to(MyAltLocFinder.class);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).to(MyExecutor.class);
             }
@@ -84,11 +78,16 @@ public class RequeryBehaviorTest extends LimeTestCase {
         downloadManager = injector.getInstance(DownloadManager.class);
         downloadManager.initialize();
         myAltFinder = (MyAltLocFinder) injector.getInstance(AltLocFinder.class);
-        myDHTManager = (MyDHTManager) injector.getInstance(DHTManager.class);
         MyExecutor myExecutor = (MyExecutor) injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
-        Thread.sleep(1100);
+        myExecutor.latch.await();
         assertNotNull(myExecutor.r);
         pump = myExecutor.r;
+        // load up
+        TestFile.length();
+        RequeryManager.NO_DELAY = true;
+        // TODO: fix this 
+        PrivilegedAccessor.setValue(DownloadWorker.class,"NORMAL_CONNECT_TIME",100);
+        PrivilegedAccessor.setValue(DownloadWorker.class,"PUSH_CONNECT_TIME",100);
     }
     
     /**
@@ -414,11 +413,14 @@ public class RequeryBehaviorTest extends LimeTestCase {
     
     @Singleton
     private static class MyExecutor extends ScheduledExecutorServiceStub {
-        public Runnable r;
+        final CountDownLatch latch = new CountDownLatch(1);
+        public volatile Runnable r;
         @Override
         public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-            if (initialDelay == delay && delay == 1000)
+            if (initialDelay == delay && delay == 1000) {
                 r = command;
+                latch.countDown();
+            }
             return null;
         }
         
