@@ -12,6 +12,7 @@ import org.limewire.nio.NIODispatcher;
 
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Tests various things of HttpClient / HttpClientManager.
@@ -40,6 +41,9 @@ public class HttpClientManagerTest extends LimeTestCase {
     }
     
     public void setUp() throws Exception {
+        
+         HttpClientManager.socketsManager = new SocketsManager();
+        
         httpServers = new TestBootstrapServer[11];
         tlsServers = new TestBootstrapServer[11];
         httpUrls = new String[11];
