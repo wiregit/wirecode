@@ -17,22 +17,38 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPPingerImpl;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for UDPHostCache.
  */
-@SuppressWarnings("unchecked")
+// TODO refactor UDPHostCache so it can be tested without subclassing it
 public class UDPHostCacheTest extends LimeTestCase {
     private StubCache cache;
+    private UDPService udpService;
+    private MessageRouter messageRouter;
+    private PingReplyFactory pingReplyFactory;
     
     public UDPHostCacheTest(String name) {
         super(name);
@@ -42,29 +58,44 @@ public class UDPHostCacheTest extends LimeTestCase {
         return buildTestSuite(UDPHostCacheTest.class);
     }
     
-    public static void globalSetUp() throws Exception {
-   //     new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
-        ProviderHacks.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
+    public void setUp() throws Exception {
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setAddress(new byte[] { 1, 1, 1, 1 });
+        networkManagerStub.setPort(5555);
+        networkManagerStub.setSolicitedGUID(new GUID());
+        
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+                bind(UDPHostCache.class).to(StubCache.class);
+            }
+        });
+
+        // use a really tiny expiry time
+        cache = (StubCache) injector.getInstance(UDPHostCache.class);
+        udpService = injector.getInstance(UDPService.class);
+        messageRouter = injector.getInstance(MessageRouter.class);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         
         DatagramSocket ds = (DatagramSocket)PrivilegedAccessor.invokeMethod(
-                ProviderHacks.getUdpService(),
+                udpService,
                 "newListeningSocket",
                 new Object[] { new Integer(7000) },
                 new Class[] { Integer.TYPE } );
                                 
         PrivilegedAccessor.invokeMethod(
-                ProviderHacks.getUdpService(),
+                udpService,
                 "setListeningSocket",
                 new Object[] { ds } ,
                 new Class[] { DatagramSocket.class });
                 
-        ProviderHacks.getMessageRouter().initialize();
+        messageRouter.initialize();
     }
-        
     
-    public void setUp() {
-        // use a really tiny expiry time
-        cache = new StubCache();
+    @Override
+    protected void tearDown() throws Exception {
+        udpService.shutdown();
     }
 
     public void testMaximumStored() {
@@ -140,7 +171,7 @@ public class UDPHostCacheTest extends LimeTestCase {
     public void testUsesFiveBestAtATime() {
         assertEquals(0, cache.getSize());
         
-        List endpoints = new LinkedList();
+        List<ExtendedEndpoint> endpoints = new LinkedList<ExtendedEndpoint>();
         
         // add 8 hosts with 0 failures, 3 with 1 failure,
         // 5 with 2 failures, 4 with 3 failures,
@@ -170,7 +201,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         // in order we fetched'm.  (Note that we already have
         // a test that makes sure we only do 5 at a time --
         // this test just ensures we do them in the right order.)
-        List fetchedHosts = new ArrayList();
+        List<ExtendedEndpoint> fetchedHosts = new ArrayList<ExtendedEndpoint>();
         while(true) {
             cache.fetchHosts();
             if(cache.amountFetched == 0)
@@ -181,7 +212,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         int max = 8+3+5+4+7;
         assertEquals(max, fetchedHosts.size());
         for(i = 0; i < 8+3+5+4+7; i++) {
-            ExtendedEndpoint ep = (ExtendedEndpoint)fetchedHosts.get(i);
+            ExtendedEndpoint ep = fetchedHosts.get(i);
             if(i < 8)
                 assertEquals(0, ep.getUDPHostCacheFailures());
             else if(i < 8+3)
@@ -264,7 +295,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(20, cache.getSize());
         cache.write(writer);
         String written = writer.toString();
-        Set readEPs = new HashSet();
+        Set<ExtendedEndpoint> readEPs = new HashSet<ExtendedEndpoint>();
         BufferedReader reader = new BufferedReader(new StringReader(written));
         for(int i = 0; i < 20; i++) {
             String read = reader.readLine();
@@ -292,7 +323,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         cache.write(writer);
         String written = writer.toString();
         BufferedReader reader = new BufferedReader(new StringReader(written));
-        List readLines = new LinkedList();
+        List<String> readLines = new LinkedList<String>();
         readLines.add(reader.readLine());
         readLines.add(reader.readLine());
         readLines.add(reader.readLine());
@@ -439,10 +470,10 @@ public class UDPHostCacheTest extends LimeTestCase {
     }    
     
     private void routeFor(String host, byte[] guid) throws Exception {
-        PingReply pr = ProviderHacks.getPingReplyFactory().create(guid, (byte)1);
+        PingReply pr = pingReplyFactory.create(guid, (byte)1);
         InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName(host), 6346);
         
-        ProviderHacks.getMessageRouter().handleUDPMessage(pr, addr);
+        messageRouter.handleUDPMessage(pr, addr);
     }    
     
     private ExtendedEndpoint create(String host) {
@@ -456,20 +487,23 @@ public class UDPHostCacheTest extends LimeTestCase {
         return ep;
     }
     
+    @Singleton
     private static class StubCache extends UDPHostCache {
         private static final int EXPIRY_TIME = 10 * 1000;        
         private int amountFetched = -1;
-        private Collection lastFetched;
+        private Collection<? extends ExtendedEndpoint> lastFetched;
         private boolean doRealFetch = false;
         private byte[] guid = null;
         private boolean doRealDecrement = false;
         
-        public StubCache() {
-            super(EXPIRY_TIME, ProviderHacks.getUniqueHostPinger(), Providers.of(ProviderHacks.getMessageRouter()), ProviderHacks.getPingRequestFactory(),
-                    ProviderHacks.getConnectionServices());
+        @Inject
+        public StubCache(UDPPinger pinger, Provider<MessageRouter> messageRouter,
+                PingRequestFactory pingRequestFactory, ConnectionServices connectionServices) {
+            super(EXPIRY_TIME, pinger, messageRouter, pingRequestFactory,
+                    connectionServices);
         }
         
-        protected boolean fetch(Collection hosts) {
+        protected boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
             if(doRealFetch) {
                 return super.fetch(hosts);
             } else {
