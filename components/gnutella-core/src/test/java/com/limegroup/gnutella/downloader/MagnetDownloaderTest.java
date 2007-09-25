@@ -2,11 +2,21 @@ package com.limegroup.gnutella.downloader;
 
 import junit.framework.Test;
 
+import org.limewire.io.LocalSocketAddressService;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerStub;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -17,12 +27,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public class MagnetDownloaderTest extends LimeTestCase {
 
 	//private static final Log LOG = LogFactory.getLog(MagnetDownloaderTest.class);
-    
-    final static int PORT=6666;
-    private DownloadManagerStub manager;
-//    private FileManager fileman;
-//    private ActivityCallback callback;
-//    private MessageRouter router;
+    private DownloadManagerStub downloadManager;
 	
     /**
      * Creates a new test instance.
@@ -41,27 +46,27 @@ public class MagnetDownloaderTest extends LimeTestCase {
         return buildTestSuite(MagnetDownloaderTest.class);
     }
     
-    public static void globalSetUp() throws Exception{
-        @SuppressWarnings("all") // DPINJ: textfix
-        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
-            public boolean isConnected() {
-                return true;
-            }
-        };
-   //     PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
-        assertTrue(ProviderHacks.getConnectionServices().isConnected());
-    }
     
     public void setUp() throws Exception {
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        manager = new DownloadManagerStub();
-//        fileman = new FileManagerStub();
-//        callback = new ActivityCallbackStub();
-//        router = new MessageRouterStub();
-        manager.initialize();
-     //   PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-    //    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
+        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
+        localSocketAddressProviderStub.setLocalAddressPrivate(false);
+        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
+        
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+           @Override
+            protected void configure() {
+               bind(DownloadManager.class).to(DownloadManagerStub.class);
+               bind(FileManager.class).to(FileManagerStub.class);
+               bind(MessageRouter.class).to(MessageRouterStub.class);
+               bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+            } 
+        });
+        
+        ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
+        connectionManager.setConnected(true);;
+        
+        downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+        downloadManager.initialize();
     }
 
     public void testInvalidMagnetDownloads() throws Exception {
@@ -70,7 +75,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertFalse("Should not be downloadable", opts[0].isDownloadable());
 		try {
-			manager.download(opts[0], false, null, null);
+			downloadManager.download(opts[0], false, null, null);
 			fail("No illegal argument exception thrown");
 		}
 		catch (IllegalArgumentException iae) {
@@ -81,7 +86,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertFalse("Should not be downloadable", opts[0].isDownloadable());
 		try {
-			manager.download(opts[0], false, null, null);
+			downloadManager.download(opts[0], false, null, null);
 			fail("No illegal argument exception thrown");
 		}
 		catch (IllegalArgumentException iae) {
@@ -92,7 +97,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertFalse("Should not be downloadable", opts[0].isDownloadable());
 		try {
-			manager.download(opts[0], false, null, null);
+			downloadManager.download(opts[0], false, null, null);
 			fail("No illegal argument exception thrown");
 		}
 		catch (IllegalArgumentException iae) {
@@ -104,38 +109,38 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		manager.download(opts[0], true, null, null);
+		downloadManager.download(opts[0], true, null, null);
 				
 		// valid: has a url and keyword topic
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://magnet2.limewire.com:6346");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		manager.download(opts[0], true, null, null);
+		downloadManager.download(opts[0], true, null, null);
 		
 		// valid: has everything
 		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:KRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
-		manager.download(opts[0], true, null, null);
-		
+		downloadManager.download(opts[0], true, null, null);
+	
 		
 		// downloadable: has kt and hash
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xt=urn:sha1:MRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		manager.download(opts[0], true, null, null);
+		downloadManager.download(opts[0], true, null, null);
 		
 		// downloadable: has dn and hash
 		opts = MagnetOptions.parseMagnet("magnet:?dn=test&xt=urn:sha1:TRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
-		manager.download(opts[0], true, null, null);
+		downloadManager.download(opts[0], true, null, null);
 		
 		// downloadable hash only magnet
 		opts = MagnetOptions.parseMagnet("magnet:?xt=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:YRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		assertTrue("Should be hash only", opts[0].isHashOnly());
-		manager.download(opts[0], true, null, null);
+		downloadManager.download(opts[0], true, null, null);
     }
 }
