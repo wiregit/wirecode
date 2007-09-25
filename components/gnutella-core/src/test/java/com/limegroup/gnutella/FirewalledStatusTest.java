@@ -15,7 +15,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  */
 public class FirewalledStatusTest extends ClientSideTestCase {
 
-    Injector injector;
+    private Injector injector;
     private NetworkManager networkManager;
     
     public FirewalledStatusTest(String name) {
