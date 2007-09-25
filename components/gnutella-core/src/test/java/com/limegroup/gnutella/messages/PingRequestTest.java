@@ -8,7 +8,6 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
-import org.limewire.io.LocalSocketAddressProviderStub;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -20,6 +19,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 @SuppressWarnings("unchecked")
 // TODO stub / mock out ping requests
