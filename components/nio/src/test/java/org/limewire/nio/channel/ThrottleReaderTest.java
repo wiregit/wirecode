@@ -1,13 +1,12 @@
 package org.limewire.nio.channel;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.nio.ThrottleListener;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.PrivilegedAccessor;
 
 /**
  * Tests that ThrottleWriter throttles data correctly.
@@ -47,7 +46,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
         assertEquals(1, THROTTLE.interests());
 	    assertFalse(SOURCE.isInterested());
 	    
-	    bandwidthAvailable(READER);
+	    READER.bandwidthAvailable();
 	    assertTrue(SOURCE.isInterested());
     }
     
@@ -56,7 +55,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
 
         // set up reader & SOURCE.
         READER.interestRead(true);
-        bandwidthAvailable(READER);
+        READER.bandwidthAvailable();
         assertTrue(SOURCE.isInterested());
         
         // set up SOURCE & THROTTLE.
@@ -81,7 +80,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
     public void testHandleReadSourceEmptiesWithLeftover() throws Exception {
         SOURCE.setBuffer(buffer(data(500)));
         READER.interestRead(true);
-        bandwidthAvailable(READER);
+        READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(550);        
         
@@ -97,10 +96,10 @@ public final class ThrottleReaderTest extends BaseTestCase {
     public void testHandleReadSourceEmptiesExactly() throws Exception {
         SOURCE.setBuffer(buffer(data(200)));
         READER.interestRead(true);
-        bandwidthAvailable(READER);
+        READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(200);
-        bandwidthAvailable(READER);
+        READER.bandwidthAvailable();
         assertTrue(SOURCE.isInterested());
         doRead(BUFFER, true);
         assertEquals(1, THROTTLE.interests());
@@ -114,7 +113,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
     public void testHandleReadSinkFills() throws Exception {
         SOURCE.setBuffer(buffer(data(100)));
         READER.interestRead(true);
-        bandwidthAvailable(READER);
+        READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests());        
         
         BUFFER.limit(75);
@@ -133,7 +132,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
         BUFFER.limit(150);
         THROTTLE.clear();
         THROTTLE.setAvailable(200);
-        bandwidthAvailable(READER);
+        READER.bandwidthAvailable();
         assertEquals(0, THROTTLE.interests());
         doRead(BUFFER, true);
         assertEquals(100, BUFFER.position());
@@ -148,12 +147,12 @@ public final class ThrottleReaderTest extends BaseTestCase {
     public void testBandwidthAvailableWhenClosed() throws Exception {
         assertFalse(SOURCE.isInterested());
         READER.interestRead(true);
-        assertTrue(bandwidthAvailable(READER));
+        assertTrue(READER.bandwidthAvailable());
         assertTrue(SOURCE.isInterested());
         
         SOURCE.interestRead(false);
         READER.close();
-        assertFalse(bandwidthAvailable(READER));
+        assertFalse(READER.bandwidthAvailable());
         assertFalse(SOURCE.isInterested());
     }   
     
@@ -161,7 +160,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
     	assertFalse(SOURCE.isInterested());
         SOURCE.setBuffer(buffer(data(100)));
         READER.interestRead(true);
-        bandwidthAvailable(READER);
+        READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests()); 
         THROTTLE.setAvailable(1);
         ByteBuffer buf = buffer (data (10)); 
@@ -188,24 +187,12 @@ public final class ThrottleReaderTest extends BaseTestCase {
 	private ByteBuffer buffer(byte[] data) {
 	    return ByteBuffer.wrap(data);
 	}
-	
-	private boolean bandwidthAvailable(Object o) throws Exception {
-	    return ((ThrottleListener)PrivilegedAccessor.getValue(o, "throttleListener")).bandwidthAvailable();
-	}
-	
-    private void requestBandwidth(Object o) throws Exception {
-        ((ThrottleListener)PrivilegedAccessor.getValue(o, "throttleListener")).requestBandwidth();
-    }
     
-    private void releaseBandwidth(Object o) throws Exception {
-        ((ThrottleListener)PrivilegedAccessor.getValue(o, "throttleListener")).releaseBandwidth();
-    }
-    
-    private void doRead(ByteBuffer buffer, boolean interestOff) throws Exception {
-        requestBandwidth(READER);
+    private void doRead(ByteBuffer buffer, boolean interestOff) throws IOException {
+        READER.requestBandwidth();
         READER.read(buffer);
         if(interestOff)
             READER.interestRead(false);
-        releaseBandwidth(READER);
+        READER.releaseBandwidth();
     }
 }

@@ -162,8 +162,7 @@ public class ApplicationSettings extends LimeProps {
 	 * The locale variant to use for the application.
 	 */
     public static final StringSetting LOCALE_VARIANT =
-        FACTORY.createStringSetting("LOCALE_VARIANT", 
-            System.getProperty("user.variant", ""));
+        FACTORY.createStringSetting("LOCALE_VARIANT", "");
    
     /**
 	 * Sets whether or not Monitor Tab should be enabled.

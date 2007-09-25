@@ -6,7 +6,7 @@ import java.util.Set;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.chat.InstantMessenger;
+import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.search.HostData;
@@ -60,16 +60,16 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
      * for a connection has been completed and the connection is ready for
      * sending and receiving of messages.
      */
-	public void acceptChat(InstantMessenger ctr);
+	public void acceptChat(Chatter ctr);
 
     /** A new message is available from the given chatter. */
-	public void receiveMessage(InstantMessenger chr, String messsage);
+	public void receiveMessage(Chatter chr, String messsage);
 
 	/** The given chatter is no longer available */
-	public void chatUnavailable(InstantMessenger chatter);
+	public void chatUnavailable(Chatter chatter);
 
 	/** display an error message in the chat gui */
-	public void chatErrorMessage(InstantMessenger chatter, String str);
+	public void chatErrorMessage(Chatter chatter, String str);
 
     /** display an error message since the browse host failed. 
      *  @param guid The GUID of the browse host.

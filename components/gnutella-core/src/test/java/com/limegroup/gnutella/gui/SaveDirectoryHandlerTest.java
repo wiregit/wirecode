@@ -5,8 +5,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 
-import junit.framework.Test;
-
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -20,10 +18,7 @@ public class SaveDirectoryHandlerTest extends LimeTestCase {
         super(name);
     }
 
-    public static Test suite() {
-        return buildTestSuite(SaveDirectoryHandlerTest.class);
-    }
-
+    
     /**
      * Tests the method for checking whether or not the save directory is 
      * valid.

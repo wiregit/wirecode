@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
+import org.limewire.concurrent.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
@@ -72,7 +72,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                                     "_catcher",CATCHER);
              
         ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getHostCatcher().clear();
+        LimeTestUtils.clearHostCatcher();
     }
 
     public void setUp() throws Exception {
@@ -103,7 +103,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     public void tearDown() throws Exception {
         //Kill all connections
         ProviderHacks.getConnectionServices().disconnect();
-        ProviderHacks.getHostCatcher().clear();
+        LimeTestUtils.clearHostCatcher();
         Thread.sleep(500);
     }
     
@@ -794,7 +794,8 @@ public class ConnectionManagerTest extends LimeTestCase {
                             .getHandshakeResponderFactory(), ProviderHacks
                             .getQueryReplyFactory(), ProviderHacks
                             .getMessageDispatcher(), ProviderHacks
-                            .getNetworkUpdateSanityChecker(), 
+                            .getNetworkUpdateSanityChecker(), ProviderHacks
+                    .getUdpService(), 
             ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
             ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
             Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),

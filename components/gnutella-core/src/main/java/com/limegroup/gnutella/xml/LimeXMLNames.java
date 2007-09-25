@@ -20,7 +20,7 @@ public class LimeXMLNames {
     public static final String AUDIO_TYPE = "audios__audio__type__";
     public static final String AUDIO_LANGUAGE = "audios__audio__language__";
     public static final String AUDIO_SECONDS = "audios__audio__seconds__";
-    public static final String AUDIO_SHA1 = "audios__audio__sha1__";
+    public static final String AUDIO_SHA1 = "audios__audio__SHA1__";
     public static final String AUDIO_BITRATE = "audios__audio__bitrate__";
     public static final String AUDIO_PRICE = "audios__audio__price__";
     public static final String AUDIO_LINK = "audios__audio__link__";

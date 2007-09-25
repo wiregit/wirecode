@@ -1,38 +1,29 @@
 package com.limegroup.gnutella.filters;
 
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 
 import junit.framework.Test;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.limewire.io.IpPort;
-import org.limewire.util.BaseTestCase;
-
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * Unit tests for KeywordFilter
  */
-public class KeywordFilterTest extends BaseTestCase {
+public class KeywordFilterTest extends LimeTestCase {
     
     KeywordFilter filter=new KeywordFilter();
+    QueryRequest qr=null;    
     
-    QueryRequest queryRequestMock=null;
-    QueryReply queryReplyMock = null;
-    PingRequest pingRequestMock = null;
-    Mockery context;
-    
-    
+    protected byte[] address;
     
 	public KeywordFilterTest(String name) {
 		super(name);
@@ -48,165 +39,74 @@ public class KeywordFilterTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        
-        
-        context = new Mockery();
-                
-        queryRequestMock = context.mock(QueryRequest.class);
-        queryReplyMock = context.mock(QueryReply.class);
-        pingRequestMock = context.mock(PingRequest.class);
+        address = InetAddress.getLocalHost().getAddress();
     }
-    
-    private void keywordContextValue(QueryRequest query, String keyword){
-        final QueryRequest localQuery = query;
-        final String localKeyword = keyword;
-        
-        context.checking(new Expectations() {{
-            one(localQuery).getQuery();
-            will(returnValue(localKeyword));
-        }});  
-                
-    }
-    
-    public void testAllowKeyword(){
-                
-        keywordContextValue(queryRequestMock, "pie with rhubarb");
-        assertTrue(filter.allow(queryRequestMock));
+	
+	public void testLegacy() {        
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("Britney", (byte)1);
+        assertTrue(filter.allow(qr));
         filter.disallow("britney spears");
-                
+        assertTrue(filter.allow(qr));
+        
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("pie with rhubarb", (byte)1);
+        assertTrue(filter.allow(qr));
         filter.disallow("rhuBarb");
+        assertTrue(!filter.allow(qr));
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("rhubarb.txt", (byte)1);
+        assertTrue(!filter.allow(qr));
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("Rhubarb*", (byte)1);
+        assertTrue(!filter.allow(qr));
         
-        keywordContextValue(queryRequestMock, "rhubar");
-        assertTrue(filter.allow(queryRequestMock));
-                 
-        keywordContextValue(queryRequestMock, "pie with rhubarb");
-        assertFalse(filter.allow(queryRequestMock));
-        
-        keywordContextValue(queryRequestMock, "rhubarb.txt");
-        assertFalse(filter.allow(queryRequestMock));
-        
-        keywordContextValue(queryRequestMock, "Rhubarb*");
-        assertFalse(filter.allow(queryRequestMock));
-        
-        keywordContextValue(queryRequestMock, "Rhubarb#");
-        assertFalse(filter.allow(queryRequestMock));
-        
-        keywordContextValue(queryRequestMock, "Rhubarb***");
-        assertFalse(filter.allow(queryRequestMock));
-        
-        context.assertIsSatisfied();
-    }
-
-    public void testAllowFileExt(){      
-        keywordContextValue(queryRequestMock, "test.vbs");
-        assertTrue(filter.allow(queryRequestMock));
-
         filter.disallowVbs();
-        
-        keywordContextValue(queryRequestMock, "test.vbs");
-        assertFalse(filter.allow(queryRequestMock));
-                
-        keywordContextValue(queryRequestMock, "test.htm");
-        assertTrue(filter.allow(queryRequestMock));
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("test.vbs", (byte)1);
+        assertTrue(!filter.allow(qr));
         
         filter.disallowHtml();
-                 
-        keywordContextValue(queryRequestMock, "test.htm");
-        assertFalse(filter.allow(queryRequestMock));
-                
-        keywordContextValue(queryRequestMock, "test.wmv");
-        assertTrue(filter.allow(queryRequestMock));
-               
-        keywordContextValue(queryRequestMock, "test.asf");
-        assertTrue(filter.allow(queryRequestMock));
-                
-        filter.disallowWMVASF();
-        
-        keywordContextValue(queryRequestMock, "test.wmv");
-        assertFalse(filter.allow(queryRequestMock));
-        
-        keywordContextValue(queryRequestMock, "test.asf");
-        assertFalse(filter.allow(queryRequestMock));
-        
-        context.assertIsSatisfied();
-        
-        }
+        qr=ProviderHacks.getQueryRequestFactory().createQuery("test.htm", (byte)1);
+        assertTrue(!filter.allow(qr));
+    }
     
     public void testDisallowAdult() throws Exception {
         KeywordFilter filter = new KeywordFilter();
+        QueryReply qr = createReply("adult");
+        assertTrue(filter.allow(qr));
+        qr = createReply("Sex");
+        assertTrue(filter.allow(qr));
         
-        createResponseList(queryReplyMock, "adult");
-        assertTrue(filter.allow(queryReplyMock));
-        
-        createResponseList(queryReplyMock, "Sex");
-        assertTrue(filter.allow(queryReplyMock));
-
-        /*
-         * turn filter on
-         */
+        // turn filter on
         filter.disallowAdult();
         
-        createResponseList(queryReplyMock, "adult");
-        assertFalse(filter.allow(queryReplyMock));
+        assertFalse(filter.allow(qr));
         
-        createResponseList(queryReplyMock, "Sex");
-        assertFalse(filter.allow(queryReplyMock));
-                
-        createResponseList(queryReplyMock, "innocent");
-        assertTrue(filter.allow(queryReplyMock));
+        qr = createReply("adult");
+        assertFalse(filter.allow(qr));
         
-        context.assertIsSatisfied();
-        
+        qr = createReply("innocent");
+        assertTrue(filter.allow(qr));
     }
     
-    public void queryReply(QueryRequest query, String keyword){
-        final QueryRequest localQuery = query;
-        final String localKeyword = keyword;
-        
-        context.checking(new Expectations() {{
-            one(localQuery).getQuery();
-            will(returnValue(localKeyword));
-        }});  
-                
+    protected QueryReply createReply(String response) {
+        return createReply(ProviderHacks.getResponseFactory().createResponse(5, 5, response), new GUID(), 5555, address); 
     }
     
-    public void testOtherMessagesAreIgnored() throws Exception{
-        context.checking(new Expectations()
-        {{ never(pingRequestMock);
-        }});
+    public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {
+        String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(new Response [] { resp } );
+        if (xmlCollectionString == null)
+            xmlCollectionString = "";
+
+        byte[] xmlBytes = null;
+        try {
+            xmlBytes = xmlCollectionString.getBytes("UTF-8");
+        } catch(UnsupportedEncodingException ueex) {//no support for utf-8?? 
+        }
+        byte[] xmlCompressed = null;
+        if (!xmlCollectionString.equals(""))
+            xmlCompressed = LimeXMLUtils.compress(xmlBytes);
+        else //there is no XML
+            xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
         
-        assertTrue(filter.allow(pingRequestMock));
-        
-        context.assertIsSatisfied();
-    }
-    
-    protected void createResponseList (QueryReply qr, String response)throws BadPacketException{
-                
-        final QueryReply localqr = qr;
-        final List<Response> responseList = new Vector<Response>();
-        
-        //create Response
-        final Response qrResponse;
-        long index = 0;
-        long size = 0;
-        LimeXMLDocument emptyDoc = null;
-        Set<URN> emptyurns = null;
-        Set<IpPort> alternateLocations = null;
-        long creationTime = 0;
-        byte[] extensions = null;
-        
-        qrResponse = new Response(index,size,response, -1, emptyurns, emptyDoc, alternateLocations, creationTime, extensions);
-                     
-        /*
-         * add Response to Response List
-         */
-         
-        responseList.add(qrResponse);
-        
-        context.checking(new Expectations() {{
-            one(localqr).getResultsAsList();
-            will(returnValue(responseList));
-        }});  
-    
+        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid.bytes(), (byte)1,
+                port, address, 0, new Response[] { resp }, GUID.makeGuid(), xmlCompressed, false,
+                false, true, true, true, false);
     }
 }

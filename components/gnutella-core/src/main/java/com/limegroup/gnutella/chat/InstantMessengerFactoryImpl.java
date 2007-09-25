@@ -21,11 +21,11 @@ public class InstantMessengerFactoryImpl implements InstantMessengerFactory {
     }
     
     public InstantMessenger createIncomingInstantMessenger(Socket socket) {
-        return new InstantMessengerImpl(socket, activityCallback.get());
+        return new InstantMessenger(socket, activityCallback.get());
     }
 
     public InstantMessenger createOutgoingInstantMessenger(String host, int port) {
-        return new InstantMessengerImpl(host, port, activityCallback.get(), socketsManager.get());
+        return new InstantMessenger(host, port, activityCallback.get(), socketsManager.get());
     }
 
 }

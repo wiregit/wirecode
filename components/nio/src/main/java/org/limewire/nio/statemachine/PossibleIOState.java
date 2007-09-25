@@ -6,8 +6,8 @@ import java.nio.channels.Channel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Wraps another <code>IOState</code>; <code>IOState</code> 
- * processes only if the <code>AtomicBoolean</code> allows.
+ * Wraps another IOState, allowing it to process only
+ * if the AtomicBoolean says so.
  */
 public class PossibleIOState implements IOState {
     

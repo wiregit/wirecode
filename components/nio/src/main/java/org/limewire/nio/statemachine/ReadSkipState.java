@@ -9,11 +9,10 @@ import org.limewire.util.BufferUtils;
 
 /**
  * A state used for skipping over data.
- * <p>
- * If constructed with {@link #ReadSkipState(AtomicLong)}, it is possible to 
- * change the skipping value prior to the state's first processing. 
- * <p>
- * You MUST NOT change the skipping value after the state has begun processing.
+ * 
+ * If this is constructed with an AtomicLong, it is possible to change
+ * the skipping value prior to the state's first processing.  You MUST NOT
+ * change the value after the state has begun processing.
  */
 public class ReadSkipState extends ReadState {
     

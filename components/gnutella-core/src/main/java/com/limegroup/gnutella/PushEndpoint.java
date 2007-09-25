@@ -136,6 +136,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     
     private final PushEndpointCache pushEndpointCache;
 
+
+    @SuppressWarnings("unchecked")
     PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features,
             int version, IpPort addr, PushEndpointCache pushEndpointCache) {
         this.pushEndpointCache = pushEndpointCache;
@@ -444,6 +446,9 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         return addr != null ? addr.getAddress() : RemoteFileDesc.BOGUS_IP;
     }
     
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.util.IpPort#getInetAddress()
+     */
     public InetAddress getInetAddress() {
         IpPort addr = getIpPort();
         return addr != null ? addr.getInetAddress() : null;
@@ -481,6 +486,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * will point to the most recent known set.
 	 */
 	public synchronized void updateProxies(boolean good) {
+        //DPINJ: needed to move setting of _proxies outside of GUID_MAP lock -- should be OK
         _guid = pushEndpointCache.updateProxiesFor(_guid, this, good);
         _proxies = null;
     }

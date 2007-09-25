@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,35 +11,60 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import junit.framework.Test;
-
 import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.util.LimeTestCase;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
-public class CreationTimeCacheTest extends LimeTestCase {
+/**
+ * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
+ * redirects properly, etc.  The test includes a leaf attached to 3 
+ * Ultrapeers.
+ */
+@SuppressWarnings("unchecked")
+public class CreationTimeCacheTest 
+    extends com.limegroup.gnutella.util.LimeTestCase {
+    private static final int PORT=6669;
+
+
     
-    private URN hash1;
-    private URN hash2;
-    private URN hash3;
-    private URN hash4;
-    
-    private MyFileManager fileManager;
-    private Injector injector;
+    @SuppressWarnings("unused") //DPINJ - testfix
+    private static MyActivityCallback callback;
+    private static MyFileManager fm;
+
+    private static URN hash1;
+    private static URN hash2;
+    private static URN hash3;
+    private static URN hash4;
+
+    static {
+        try {
+        hash1 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
+        hash2 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
+        hash3 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
+        hash4 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
+        }
+        catch (Exception terrible) {}
+    }
 
     /**
      * File where urns (currently SHA1 urns) get persisted to
      */
     private static final String CREATION_CACHE_FILE = "createtimes.cache";
-    private final String FILE_PATH = "com/limegroup/gnutella/util";
+    private static final String FILE_PATH = "com/limegroup/gnutella/util";
 
+
+	/**
+	 * Constructs a new CreationTimeCacheTest with the specified name.
+	 */
 	public CreationTimeCacheTest(String name) {
 		super(name);
 	}
@@ -49,44 +73,77 @@ public class CreationTimeCacheTest extends LimeTestCase {
 		return buildTestSuite(CreationTimeCacheTest.class);
 	}
 
+	/**
+	 * Runs this test individually.
+	 */
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
-	}      
+	}
+
+    private static void doSettings() {
+        ConnectionSettings.PORT.setValue(PORT);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
+		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
+        // get the resource file for com/limegroup/gnutella
+        File berkeley = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        File susheel = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        File mp3 = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
+        // now move them to the share dir
+        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
+        // make sure results get through
+        SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
+    }        
+    
+    public static void globalSetUp() throws Exception {
+        doSettings();
+
+        callback=new MyActivityCallback();
+        fm = new MyFileManager();
+        if(true)throw new RuntimeException("fix me");
+        //rs= new RouterService(callback, ProviderHacks.getMessageRouter());
+
+        assertEquals("unexpected port",
+            PORT, ConnectionSettings.PORT.getValue());
+        ProviderHacks.getLifecycleManager().start();
+        LimeTestUtils.clearHostCatcher();
+        ProviderHacks.getConnectionServices().connect();
+        Thread.sleep(1000);
+        assertEquals("unexpected port",
+            PORT, ConnectionSettings.PORT.getValue());
+
+    }        
     
     public void setUp() throws Exception  {
-        hash1 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
-        hash2 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
-        hash3 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
-        hash4 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
-        
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-           @Override
-            protected void configure() {
-                bind(FileManager.class).to(MyFileManager.class);
-                bind(MetaFileManager.class).to(MyFileManager.class);
-            } 
-        });
-        
-        fileManager = (MyFileManager)injector.getInstance(FileManager.class);
-        fileManager.setDefaultUrn(hash1);
-        fileManager.setValidUrns(new HashSet<URN>(Arrays.asList(hash1, hash2, hash3, hash4)));
+        doSettings();
     }
 
     ///////////////////////// Actual Tests ////////////////////////////
+
+    private CreationTimeCache getCTC() throws Exception {
+        return new CreationTimeCache(fm);
+    }
     
-    
-    @SuppressWarnings("unchecked")
-    private Map<URN, Long> getUrnToTime(CreationTimeCache cache) throws Exception {
+    private Map getUrnToTime(CreationTimeCache cache) throws Exception {
         Future<?> future = (Future)PrivilegedAccessor.getValue(cache, "deserializer");
         Object o = future.get();
-        return (Map<URN, Long>)PrivilegedAccessor.invokeMethod(o, "getUrnToTime");
+        return (Map)PrivilegedAccessor.invokeMethod(o, "getUrnToTime");
     }
 
     /** Tests that the URN_MAP is derived correctly from the URN_TO_TIME_MAP
      */
     public void testMapCreation() throws Exception {
         // mock up our own createtimes.txt
-        Map<URN, Long> toSerialize = new HashMap<URN, Long>();
+        Map toSerialize = new HashMap();
         Long old = new Long(1);
         Long middle = new Long(2);
         Long young = new Long(3);
@@ -102,7 +159,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         oos.close();
         
         // now have the CreationTimeCache read it in
-        CreationTimeCache ctCache = new CreationTimeCache(fileManager);
+        CreationTimeCache ctCache = getCTC();
         Map map = getUrnToTime(ctCache);
         assertEquals(toSerialize, map);
     }
@@ -112,7 +169,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
      */
     public void testGetFiles() throws Exception {
         // mock up our own createtimes.txt
-        Map<URN, Long> toSerialize = new HashMap<URN, Long>();
+        Map toSerialize = new HashMap();
         Long old = new Long(1);
         Long middle = new Long(2);
         Long young = new Long(3);
@@ -128,7 +185,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         oos.close();
         
         // now have the CreationTimeCache read it in
-        CreationTimeCache ctCache = new CreationTimeCache(fileManager);
+        CreationTimeCache ctCache = getCTC();
         // is everything mapped correctly from URN to Long?
         assertEquals(ctCache.getCreationTime(hash1), middle);
         assertEquals(ctCache.getCreationTime(hash2), young);
@@ -193,7 +250,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
     /** Tests the getFiles().iterator() method.
      */
     public void testSettersAndGetters() throws Exception {
-        MyFileManager fileManager = (MyFileManager)injector.getInstance(FileManager.class);
+        CreationTimeCache ctCache = null;
         Iterator iter = null;
         Map TIME_MAP = null;
         Long old = new Long(1);
@@ -203,7 +260,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         
         // should be a empty cache
         // ---------------------------
-        CreationTimeCache ctCache = new CreationTimeCache(fileManager);
+        ctCache = getCTC();
         assertFalse(ctCache.getFiles().iterator().hasNext());
 
         TIME_MAP = getUrnToTime(ctCache);
@@ -220,7 +277,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         // should have one value
         // ---------------------------
-        ctCache = new CreationTimeCache(fileManager); // test the deserialization.
+        ctCache = getCTC();
         iter = ctCache.getFiles().iterator();
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
@@ -247,7 +304,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         // should have three values
         // ---------------------------
-        ctCache = new CreationTimeCache(fileManager); // test the deserialization.
+        ctCache = getCTC();
         iter = ctCache.getFiles().iterator();
         assertEquals(hash3, iter.next());
         assertEquals(hash4, iter.next());
@@ -262,8 +319,8 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         // should have two values but exclude one
         // ---------------------------
-        fileManager.setExcludeURN(hash4);
-        ctCache = new CreationTimeCache(fileManager); // test the deserialization.
+        fm.setExcludeURN(hash4);
+        ctCache = getCTC();
         iter = ctCache.getFiles().iterator();
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
@@ -271,7 +328,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         TIME_MAP = getUrnToTime(ctCache);
         assertEquals(1, TIME_MAP.size());
         ctCache = null;
-        fileManager.clearExcludeURN();
+        fm.clearExcludeURN();
         // ---------------------------
     }
 
@@ -287,7 +344,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         
         // should be a empty cache
         // ---------------------------
-        ctCache = new CreationTimeCache(fileManager);
+        ctCache = getCTC();
         assertFalse(ctCache.getFiles().iterator().hasNext());
 
         TIME_MAP = getUrnToTime(ctCache);
@@ -336,8 +393,8 @@ public class CreationTimeCacheTest extends LimeTestCase {
         deleteCacheFile();
         assertTrue("cache should not be present", !cacheExists() );
         
-        CreationTimeCache cache = new CreationTimeCache(fileManager);
-        FileDesc[] descs = createFileDescs(cache);
+        CreationTimeCache cache = ProviderHacks.getCreationTimeCache();
+        FileDesc[] descs = createFileDescs();
         assertNotNull("should have some file descs", descs);
         assertGreaterThan("should have some file descs", 0, descs.length);
         cache.persistCache();
@@ -348,7 +405,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         }
     }
 
-	private FileDesc[] createFileDescs(CreationTimeCache cache) throws Exception {
+	private static FileDesc[] createFileDescs() throws Exception {
         File path = CommonUtils.getResourceFile(FILE_PATH);
         File[] files = path.listFiles(new FileFilter() { 
             public boolean accept(File file) {
@@ -357,15 +414,15 @@ public class CreationTimeCacheTest extends LimeTestCase {
         });
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
-			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], injector.getInstance(UrnCache.class));            
+			Set urns = calculateAndCacheURN(files[i]);            
 			fileDescs[i] = new FileDesc(files[i], urns, i);
-			cache.addTime(fileDescs[i].getSHA1Urn(),
+            ProviderHacks.getCreationTimeCache().addTime(fileDescs[i].getSHA1Urn(),
                                                  files[i].lastModified());
 		}				
 		return fileDescs;
 	}
 
-	private void deleteCacheFile() {
+	private static void deleteCacheFile() {
 		File cacheFile = new File(_settingsDir, CREATION_CACHE_FILE);
 		cacheFile.delete();
 	}
@@ -373,31 +430,24 @@ public class CreationTimeCacheTest extends LimeTestCase {
 	/**
 	 * Convenience method for making sure that the serialized file exists.
 	 */
-	private boolean cacheExists() {
+	private static boolean cacheExists() {
 		File cacheFile = new File(_settingsDir, CREATION_CACHE_FILE);
 		return cacheFile.exists();
 	}
 
 
 
-	@Singleton
-    private static class MyFileManager extends MetaFileManager {
+    //////////////////////////////////////////////////////////////////
+
+    public static class MyActivityCallback extends ActivityCallbackStub {
+    }
+
+    public static class MyFileManager extends MetaFileManager {
         private FileDesc fd = null;
-        private URN toExclude = null;
-        private URN defaultURN;
-        private Set<URN> validUrns;
+        public URN toExclude = null;
         
-        @Inject
-        public MyFileManager(FileManagerController fileManagerController) {
-            super(fileManagerController);
-        }
-        
-        public void setDefaultUrn(URN urn) {
-            this.defaultURN = urn;
-        }
-        
-        public void setValidUrns(Set<URN> validUrns) {
-            this.validUrns = validUrns;
+        public MyFileManager() {
+            super(ProviderHacks.getFileManagerController());
         }
 
         public void setExcludeURN(URN urn) {
@@ -407,19 +457,19 @@ public class CreationTimeCacheTest extends LimeTestCase {
             toExclude = null;
         }
 
-        public FileDesc getFileDescForUrn(URN urn) {
+        public FileDesc getFileDescForUrn(URN urn){
             if (fd == null) {
-                Set<URN> urnSet = new HashSet<URN>();
-                urnSet.add(defaultURN);
-                fd = new FileDesc(new File(_settingsDir, CREATION_CACHE_FILE), urnSet, 0);
+                File cacheFile = new File(_settingsDir, CREATION_CACHE_FILE);
+                Set urnSet = new HashSet();
+                urnSet.add(hash1);
+                fd = new FileDesc(cacheFile, urnSet, 0);
             }
-            if ((toExclude != null) && toExclude.equals(urn)) {
-                return null;
-            } else if (validUrns.contains(urn)) {
-                return fd;
-            } else {
-                return super.getFileDescForUrn(urn);
-            }
+            if ((toExclude != null) && toExclude.equals(urn)) return null;
+            else if (urn.equals(hash1) ||
+                     urn.equals(hash2) ||
+                     urn.equals(hash3) ||
+                     urn.equals(hash4)) return fd;
+            else return super.getFileDescForUrn(urn);
         }
     }
 

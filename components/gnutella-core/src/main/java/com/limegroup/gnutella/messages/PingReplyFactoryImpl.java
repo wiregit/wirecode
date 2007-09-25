@@ -226,7 +226,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         }
 
         try {
-            return new PingReplyImpl(guid, ttl, (byte) 0, payload, ggep, ip,
+            return new PingReply(guid, ttl, (byte) 0, payload, ggep, ip,
                     Network.UNKNOWN);
         } catch (BadPacketException e) {
             throw new IllegalStateException(e);
@@ -336,7 +336,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                         + e.getMessage());
             }
         }
-        return new PingReplyImpl(guid, ttl, hops, payload, ggep, ip, network);
+        return new PingReply(guid, ttl, hops, payload, ggep, ip, network);
     }
 
     public PingReply mutateGUID(PingReply pingReply, byte[] guid) {
@@ -363,7 +363,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
         if (isGUESSCapable && isUltrapeer) {
             // indicate guess support
-            byte[] vNum = { PingReplyImpl.convertToGUESSFormat(LimeWireUtils
+            byte[] vNum = { PingReply.convertToGUESSFormat(LimeWireUtils
                     .getGUESSMajorVersionNumber(), LimeWireUtils
                     .getGUESSMinorVersionNumber()) };
             ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
@@ -377,7 +377,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         addDHTExtension(ggep);
 
         // all pongs should have vendor info
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, PingReplyImpl.CACHED_VENDOR);
+        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, PingReply.CACHED_VENDOR);
 
         // add our support of TLS
         if (SSLSettings.isIncomingTLSEnabled())
@@ -489,7 +489,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private void addUltrapeerExtension(GGEP ggep) {
         byte[] payload = new byte[3];
         // put version
-        payload[0] = PingReplyImpl.convertToGUESSFormat(LimeWireUtils
+        payload[0] = PingReply.convertToGUESSFormat(LimeWireUtils
                 .getUPMajorVersionNumber(), LimeWireUtils
                 .getUPMinorVersionNumber());
         payload[1] = localPongInfo.getNumFreeLimeWireLeafSlots();

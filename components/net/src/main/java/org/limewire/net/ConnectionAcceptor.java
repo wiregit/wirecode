@@ -11,19 +11,11 @@ import java.net.Socket;
  * with the ConnectionDispatcher.
  */
 public interface ConnectionAcceptor {
-	
-    /**
+	/**
 	 * Notification that a new incoming socket has been
 	 * opened.
 	 * @param word first word that arrived on the wire
 	 * @param s the newly opened socket.
 	 */
-	void acceptConnection(String word, Socket s);
-	
-	/**
-     * Returns true, if {@link #acceptConnection(String, Socket)} needs to be
-     * invoked in a separate thread.
-     */
-	boolean isBlocking();
-	
+	public void acceptConnection(String word, Socket s);
 }

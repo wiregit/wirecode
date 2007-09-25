@@ -387,10 +387,8 @@ public final class QueryHandler implements Inspectable {
      *  queries over
      * @return the number of new hosts theoretically reached by this
      *  query iteration
-     *  
-     *  Default access for testing
      */
-    int sendQuery(List<? extends ManagedConnection> ultrapeersAll) {
+    private int sendQuery(List<? extends ManagedConnection> ultrapeersAll) {
 
         //we want to try to use all connections in ultrapeersLocale first.
         List<? extends ManagedConnection> ultrapeers = // method returns a copy

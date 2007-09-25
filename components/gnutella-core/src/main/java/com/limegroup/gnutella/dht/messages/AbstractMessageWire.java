@@ -8,14 +8,14 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 
-import com.limegroup.gnutella.messages.AbstractMessage;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * An abstract class that extends from Message and takes a 
  * DHTMessage as a delegate argument
  */
 abstract class AbstractMessageWire<T extends DHTMessage> 
-        extends AbstractMessage implements DHTMessage {
+        extends Message implements DHTMessage {
     
     /** 
      * An empty GUID, it's never written to Network.

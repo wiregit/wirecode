@@ -18,6 +18,7 @@ import javax.net.ssl.SSLEngineResult.Status;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -29,7 +30,7 @@ import org.limewire.util.FileUtils;
 
 /**
  * An SSL-capable layer that can transform incoming and outgoing
- * data according to the specified <code>SSLContext</code> and cipher suite.
+ * data according to the specified SSLContext and cipher suite.
  */
 class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritableByteChannel,
                                  ChannelReader, ChannelWriter {
@@ -39,7 +40,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     /** The context from which to retrieve a new SSLEngine. */
     private final SSLContext context;
     /** An executor to perform blocking tasks. */
-    private final Executor sslBlockingExecutor;
+    private final Executor executor;
     /** The engine managing this SSL session. */
     private SSLEngine engine;
     /** A temporary buffer which data is unwrapped to. */
@@ -71,7 +72,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     
     /**
      * Whether or not this has been shutdown.
-     * Shutting down must be atomic with regard to initializing, so that
+     * Shutting down must be atomic wrt initializing, so that
      * we can guarantee all allocated buffers are released
      * properly.
      * 
@@ -100,7 +101,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     private volatile boolean taskScheduled = false;
     
     /**
-     * The last state of who interested us in reading must be kept,
+     * The last state of who interested us in readinng must be kept,
      * so that after handshaking finishes, we can put reading into
      * the correct interest state.  otherwise, our options are:
      *  1) leave interest on, which could potentially loop forever
@@ -109,20 +110,14 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      *     had wanted to read data.
      * 
      * Note that we don't have to do this for writing because writing
-     * can successfully turn itself off.
+     * can succesfully turn itself off.
      */
     private boolean readInterest = false;
     private final Object readInterestLock = new Object();
     
-    private final ByteBufferCache byteBufferCache;
-    private final Executor networkExecutor;
-    
-    public SSLReadWriteChannel(SSLContext context, Executor sslBlockingExecutor,
-            ByteBufferCache byteBufferCache, Executor networkExecutor) {
-        this.sslBlockingExecutor = sslBlockingExecutor;
+    public SSLReadWriteChannel(SSLContext context, Executor executor) {
+        this.executor = executor;
         this.context = context;
-        this.byteBufferCache = byteBufferCache;
-        this.networkExecutor = networkExecutor;
     }
     
     /**
@@ -158,8 +153,8 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 engine.setNeedClientAuth(needClientAuth);
             }
             SSLSession session = engine.getSession();
-            readIncoming = byteBufferCache.getHeap(session.getApplicationBufferSize());
-            writeOutgoing = byteBufferCache.getHeap(session.getPacketBufferSize());
+            readIncoming = NIODispatcher.instance().getBufferCache().getHeap(session.getApplicationBufferSize());
+            writeOutgoing = NIODispatcher.instance().getBufferCache().getHeap(session.getPacketBufferSize());
             if(LOG.isTraceEnabled())
                 LOG.trace("Initialized engine: " + engine + ", session: " + session);
         }
@@ -224,7 +219,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 if(readOutgoing == null) {
                     synchronized(initLock) {
                         if(!shutdown)
-                            readOutgoing = byteBufferCache.getHeap(engine.getSession().getPacketBufferSize());
+                            readOutgoing = NIODispatcher.instance().getBufferCache().getHeap(engine.getSession().getPacketBufferSize());
                     }
                 }
                 result = engine.unwrap(readIncoming, readOutgoing);
@@ -247,19 +242,12 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             }
             
             if(LOG.isDebugEnabled())
-                LOG.debug("Read unwrap result: " + result + ", transferred: " + transferred);
-            
+                LOG.debug("Read unwrap result: " + result);
             
             // If we were unable to interpret this packet because not enough was
             // read, then we must exit and wait for more to be read later.
-            if(status == Status.BUFFER_UNDERFLOW) {
-                if(transferred == 0 && read == -1) {
-                    LOG.debug("Read EOF & underflow when unwrapping.  Connection finished");
-                    return -1;
-                } else {
-                    return transferred;
-                }
-            }
+            if(status == Status.BUFFER_UNDERFLOW)
+                return transferred;
             
             // If the engine is closed and nothing was transferred,
             // return -1 to show the stream ended.  Otherwise return
@@ -324,7 +312,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             }
             // If we had previously buffered read data, force a read.
             if(readDataLeft && !reading)
-                networkExecutor.execute(new Runnable() {
+                NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {
                         try {
                             read(BufferUtils.getEmptyBuffer());
@@ -359,7 +347,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         while(true) {
             final Runnable runner = engine.getDelegatedTask();
             if(runner == null) {
-                sslBlockingExecutor.execute(new Runnable() {
+                executor.execute(new Runnable() {
                     public void run() {
                         synchronized(taskLock) {
                             taskScheduled = false;
@@ -372,7 +360,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 });
                 break;
             } else {
-                sslBlockingExecutor.execute(runner);
+                executor.execute(runner);
             }
         }
     }
@@ -480,14 +468,15 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         }
         
         if(shutdown) {
-            networkExecutor.execute(new Runnable() {
+            NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                 public void run() {
+                    ByteBufferCache cache = NIODispatcher.instance().getBufferCache();
                     if(readIncoming != null)
-                        byteBufferCache.release(readIncoming);
+                        cache.release(readIncoming);
                     if(readOutgoing != null)
-                        byteBufferCache.release(readOutgoing);
+                        cache.release(readOutgoing);
                     if(writeOutgoing != null)
-                        byteBufferCache.release(writeOutgoing);
+                        cache.release(writeOutgoing);
                 }
             });
         }

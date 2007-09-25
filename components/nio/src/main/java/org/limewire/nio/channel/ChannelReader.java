@@ -1,8 +1,8 @@
 package org.limewire.nio.channel;
 
 /**
- * Defines the interface to set and get {@link InterestReadableByteChannel 
- * InterestReadableByteChannels} as the source for reading.
+ * Allows arbitrary ReadableByteChannels to be set as the source
+ * for reading from this object.
  */
 public interface ChannelReader {
     

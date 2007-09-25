@@ -376,6 +376,11 @@ public final class CreationTimeCache {
     /**
      * Constructs the TIME_TO_URNSET_MAP, which is based off the entries in the
      * URN_TO_TIME_MAP.
+     * IMPORTANT NOTE: currently this method is not synchronized, and does not
+     * need to be since it is only called from the constructor (which auto-
+     * magically disallows concurrent acess to the instance.  If this method
+     * is ever made public, called from multiple entrypoints, etc.,
+     * synchronization may be needed.
      */
     private SortedMap<Long, Set<URN>> constructURNMap(Map<URN, Long> urnToTime) {
         SortedMap<Long, Set<URN>> timeToUrn = new TreeMap<Long, Set<URN>>(Comparators.inverseLongComparator());
@@ -384,6 +389,10 @@ public final class CreationTimeCache {
             // for each entry, get the creation time and the urn....
             Long cTime = currEntry.getValue();
             URN urn = currEntry.getKey();    
+            
+            // don't ever add IFDs
+            if (fileManager.getFileDescForUrn(urn)
+                instanceof IncompleteFileDesc) continue;
 
             // put the urn in a set of urns that have that creation time....
             Set<URN> urnSet = timeToUrn.get(cTime);
@@ -408,8 +417,7 @@ public final class CreationTimeCache {
 		try {
             ois = new ConverterObjectInputStream(new BufferedInputStream(
                             new FileInputStream(CTIME_CACHE_FILE)));
-            Map<URN, Long> map = GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, GenericsUtils.ScanMode.REMOVE);
-            return map;
+            return GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, GenericsUtils.ScanMode.REMOVE);
 	    } catch(Throwable t) {
             dirty = true;
 	        LOG.error("Unable to read creation time file", t);

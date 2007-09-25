@@ -80,7 +80,7 @@ public class OnDemandUnicaster {
         _bufferedURNs = new Hashtable<GUESSEndpoint, SendLaterBundle>(); // synchronization handy
         _queriedHosts = new HashMap<GUID.TimedGUID, Set<IpPort>>();
         
-        // TODO: move scheduling to an initializer
+        // DPINJ: move scheduling to an initializer
         // schedule a runner to clear various data structures
         backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         backgroundExecutor.scheduleWithFixedDelay(new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME, TimeUnit.MILLISECONDS);

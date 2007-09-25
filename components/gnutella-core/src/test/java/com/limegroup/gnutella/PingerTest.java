@@ -1,36 +1,19 @@
 package com.limegroup.gnutella;
 
-import org.jmock.Mockery;
-
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import org.jmock.Expectations;
-import org.limewire.inject.Providers;
-import com.google.inject.Provider;
-
-import org.limewire.util.BaseTestCase;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.LeafConnectionManager;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 
 /**
  * Tests the <tt>Pinger</tt> class that periodically sends pings to gather new
  * host data.
  */
-public final class PingerTest extends BaseTestCase {
+public final class PingerTest extends LimeTestCase {
 
-    private Mockery context = new Mockery();
-    private Pinger pinger;
-    
-    private ScheduledExecutorService backgroundExecutor;
-    private ConnectionServices       connectionServices;
-    private Provider<MessageRouter>  messageRouterP;
-    private MessageRouter            messageRouter;
-    private PingRequestFactory       pingRequestFactory;
-    private PingRequest              pingRequest;  
-    
 
     public PingerTest(String name) {
         super(name);        
@@ -44,55 +27,34 @@ public final class PingerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public void setUp() {
- 
-        context = new Mockery();
-        
-        backgroundExecutor = context.mock(ScheduledExecutorService.class);
-        connectionServices = context.mock(ConnectionServices.class);
-        
-        messageRouter      = context.mock(MessageRouter.class);
-        messageRouterP     = Providers.of(messageRouter);
-        
-        pingRequestFactory = context.mock(PingRequestFactory.class);
-        pingRequest        = context.mock(PingRequest.class);  
-        
-        pinger = new Pinger(backgroundExecutor,connectionServices, messageRouterP, pingRequestFactory);
-        
-        context.checking(new Expectations() {
-            {
-                atLeast(1).of(backgroundExecutor).scheduleWithFixedDelay(
-                        with(any(Runnable.class)),
-                        with(any(long.class)), 
-                        with(any(long.class)),
-                        with(any(TimeUnit.class)));
-            }
-        });
-        
+    public static void globalSetUp() throws Exception {
+        //ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
     }
-    
+
     /**
      * Test to make sure that we're correctly sending out periodic pings
      * from the pinger as an Ultrapeer (we should not be sending these
      * periodic pings as a leaf).
      */
     public void testPeriodicUltrapeerPings() throws Exception {
- 
-        context.checking(new Expectations() {
-            {
-                atLeast(1).of(messageRouter).broadcastPingRequest(with(any(PingRequest.class)));
-                allowing(connectionServices).isSupernode();
-                will(returnValue(true));
-                atLeast(1).of(pingRequestFactory).createPingRequest(with(any(byte.class)));
-                will(returnValue(pingRequest));
-            }
-        });
-        
+        TestMessageRouter mr = new TestMessageRouter();
+        @SuppressWarnings("all") // DPINJ: textfix
+        ConnectionManager cm = new UltrapeerConnectionManager();
+     //   PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+        Pinger pinger = ProviderHacks.getPinger();
         pinger.start();
-        pinger.run();
+
+        synchronized(mr) {
+            while(mr.getNumPings() < 2) {
+                mr.wait(7000);
+            }
+        }
         
-        context.assertIsSatisfied();
-        
+        // don't know exactly how many have been sent because of thread
+        // scheduling, but just make sure they're going out
+        assertTrue("unexpected number of ping sends: "+mr.getNumPings(), 
+                   mr.getNumPings()>=2);
     }
 
     /**
@@ -100,19 +62,42 @@ public final class PingerTest extends BaseTestCase {
      * leaf.
      */
     public void testPeriodicLeafPings() throws Exception {
-  
-        context.checking(new Expectations() {
-            {
-                atMost(0).of(messageRouter).broadcastPingRequest(with(any(PingRequest.class)));
-                allowing(connectionServices).isSupernode();
-                will(returnValue(false));
-            }
-        });
-              
+        TestMessageRouter mr = new TestMessageRouter();
+        @SuppressWarnings("all") // DPINJ: textfix
+        ConnectionManager cm = new LeafConnectionManager();
+      //  PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
+     //   PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
+        Pinger pinger = ProviderHacks.getPinger();
         pinger.start();
-        pinger.run();
 
-        context.assertIsSatisfied();
+
+        Thread.sleep(8000);
+
         
+        
+        // we should not have sent any out, since we're a leaf
+        assertEquals("unexpected number of ping sends", 0, mr.getNumPings()); 
+    }
+
+    /**
+     * Test class for making sure that <tt>MessageRouter</tt> receives the
+     * expected calls.
+     */
+    private final class TestMessageRouter extends MessageRouterStub {
+
+        private volatile int _numPings = 0;
+
+        public void broadcastPingRequest(PingRequest ping) {
+            _numPings++;
+            
+            // notify any waiting threads that we have received a ping request
+            synchronized(this) {
+                notifyAll();
+            }
+        }
+
+        int getNumPings() {
+            return _numPings;
+        }
     }
 }

@@ -348,14 +348,8 @@ public class HostCatcher {
         this.multicastService = multicastService;
         this.uniqueHostPinger = uniqueHostPinger;
         this.pingRequestFactory = pingRequestFactory;
-        
-        // TODO: this could also be solved with a named injection to get the
-        //       UniqHostPinger and not its super class
+        // DPINJ this could also be solved with a named injection to get the UniqHostPinger and not its super class
         this.udpHostCache = udpHostCacheFactory.createUDPHostCache(uniqueHostPinger);
-    }
-    
-    UDPHostCache getUdpHostCache() {
-        return udpHostCache;
     }
 
     /**

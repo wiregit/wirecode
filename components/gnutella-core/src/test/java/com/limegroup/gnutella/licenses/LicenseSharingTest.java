@@ -40,6 +40,9 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 		return buildTestSuite(LicenseSharingTest.class);
 	}
 
+	/**
+	 * Runs this test individually.
+	 */
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
     }

@@ -9,21 +9,15 @@ import org.apache.http.message.BasicHeader;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.altlocs.AltLocListener;
-import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AltLocHeaderInterceptorTest extends LimeTestCase {
-
-    private AltLocManager altLocManager;
-    private AlternateLocationFactory alternateLocationFactory;
 
     public AltLocHeaderInterceptorTest(String name) {
         super(name);
@@ -33,15 +27,6 @@ public class AltLocHeaderInterceptorTest extends LimeTestCase {
         return buildTestSuite(AltLocHeaderInterceptorTest.class);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-        
-        altLocManager = injector.getInstance(AltLocManager.class);
-        
-        alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
-    }
-    
     private void check(AlternateLocation loc, String ip, int port, boolean tls) {
         DirectAltLoc d = (DirectAltLoc)loc;
         IpPort host = d.getHost();
@@ -80,14 +65,14 @@ public class AltLocHeaderInterceptorTest extends LimeTestCase {
         };
         
         MockHTTPUploader uploader = new MockHTTPUploader();
-        AltLocHeaderInterceptor interceptor = new AltLocHeaderInterceptor(uploader, altLocManager, alternateLocationFactory);
-        List<AlternateLocation> addedLocs = ((StubAltLocTracker)uploader.getAltLocTracker()).getAddedLocs();
+        AltLocHeaderInterceptor interceptor = new AltLocHeaderInterceptor(uploader, ProviderHacks.getAltLocManager(), ProviderHacks.getAlternateLocationFactory());
+        List<AlternateLocation> addedLocs = ((MockAltLocTracker)uploader.getAltLocTracker()).getAddedLocs();
         
-        altLocManager.addListener(UrnHelper.SHA1, listener);
+        ProviderHacks.getAltLocManager().addListener(HugeTestUtils.SHA1, listener);
         try {
             interceptor.process(new BasicHeader(key, value), null);
         } finally {
-            altLocManager.removeListener(UrnHelper.SHA1, listener);
+            ProviderHacks.getAltLocManager().removeListener(HugeTestUtils.SHA1, listener);
         }
         
         assertEquals(10, received.get()); // incremented one+

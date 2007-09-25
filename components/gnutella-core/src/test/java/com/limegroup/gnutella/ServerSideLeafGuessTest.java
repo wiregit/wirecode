@@ -20,7 +20,6 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -160,7 +159,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
         // now send a URN query, make sure that works....
         File berkeley = CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()).iterator();
+        Iterator iter = calculateAndCacheURN(berkeley).iterator();
         URN berkeleyURN = (URN) iter.next();
         
         // we should be able to send a URN query
@@ -182,7 +181,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
         iter = qRep.getResults();
         Response first = (Response) iter.next();
-        assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()));
+        assertEquals(first.getUrns(), calculateAndCacheURN(berkeley));
     }
 
 

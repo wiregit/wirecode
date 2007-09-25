@@ -12,11 +12,7 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
@@ -24,8 +20,6 @@ import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
  
 public class ContentManagerNetworkTest extends LimeTestCase {
-    
-    private Injector injector;
     
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     
@@ -35,13 +29,8 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     private ContentResponse crOne;
     private Observer one;
     
-    private static  int LISTEN_PORT = 9172;
-    private static  int SEND_PORT = 9876;
-    
-    private MessageRouter messageRouter;
-    private Acceptor acceptor;
-    private UDPService udpService;
-    private IpPortContentAuthorityFactory ipPortContentAuthorityFactory;
+    private static final int LISTEN_PORT = 9172;
+    private static final int SEND_PORT = 9876;
     
     
     public ContentManagerNetworkTest(String name) {
@@ -52,29 +41,20 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         return buildTestSuite(ContentManagerNetworkTest.class);
     }
     
-    
-    public void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector();
+    public static void globalSetUp() throws Exception {
+      //  new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
+        ProviderHacks.getMessageRouter().initialize();
         
-        messageRouter = injector.getInstance(MessageRouter.class);
-        acceptor      = injector.getInstance(Acceptor.class);
-        udpService    = injector.getInstance(UDPService.class);
-        
-        
-        messageRouter.initialize();
-        
-        LISTEN_PORT++; // TODO: Remove port hack, new port needed on each run
-        acceptor.setListeningPort(LISTEN_PORT); 
-        udpService.start();
+        ProviderHacks.getAcceptor().setListeningPort(LISTEN_PORT);
+        ProviderHacks.getUdpService().start();
         
         URN_1 = URN.createSHA1Urn(S_URN_1);
-        
+    }
+    
+    public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
-        
-        
-        ipPortContentAuthorityFactory = injector.getInstance(IpPortContentAuthorityFactory.class);
-        mgr = new ContentManager(ipPortContentAuthorityFactory);
+        mgr = new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory());
         crOne = new ContentResponse(URN_1, true);
         one = new Observer();
         assertNull(mgr.getResponse(URN_1));
@@ -82,12 +62,8 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         assertNull(one.response);
     }
     
-    @Override
-    public void tearDown() throws Exception {
+    public void teardown() throws Exception {
         mgr.shutdown();
-        
-        acceptor.shutdown();
-        udpService.shutdown();
     }
     
     public void testMessageSent() throws Exception {
@@ -96,7 +72,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
         
-        mgr.setContentAuthority(ipPortContentAuthorityFactory
+        mgr.setContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory()
                 .createIpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort())));
         mgr.request(URN_1, one, 2000);
         
@@ -126,9 +102,9 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         final IpPort authority = new IpPortImpl("127.0.0.1", socket.getLocalPort());
         
         mgr.shutdown();
-        mgr = new ContentManager(ipPortContentAuthorityFactory) {
+        mgr = new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory()) {
             protected ContentAuthority getDefaultContentAuthority() {
-                return ipPortContentAuthorityFactory
+                return ProviderHacks.getIpPortContentAuthorityFactory()
                         .createIpPortContentAuthority(authority);
             }
         };
@@ -155,9 +131,9 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     
     public void testResponseReceived() throws Exception {        
         mgr.shutdown();
-        mgr = injector.getInstance(ContentManager.class);
+        mgr = ProviderHacks.getContentManager();
         mgr.request(URN_1, one, 4000);
-        udpService.send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
+        ProviderHacks.getUdpService().send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
         Thread.sleep(1000); // let the message process.
         assertNotNull(mgr.getResponse(URN_1));
         assertTrue(mgr.getResponse(URN_1).isOK());

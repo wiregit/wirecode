@@ -36,13 +36,15 @@ class CCLicense extends AbstractLicense {
     /** The license information for each Work. */
     private Map<URN, Details> allWorks;
 
+    private final LicenseCache licenseCache;
+    
     /**
      * Constructs a new CCLicense.
      */
-    CCLicense(String license, URI uri) {
-        super(uri);
-        
+    CCLicense(String license, URI uri, LicenseCache licenseCache) {
+        super(uri, licenseCache);
         this.license = license;
+        this.licenseCache = licenseCache;
     }
     
     public String getLicense() {
@@ -302,11 +304,11 @@ class CCLicense extends AbstractLicense {
      * Parses through the XML.  If this is live data, we look for works.
      * Otherwise (it isn't from the verifier), we only look for licenses.
      */
-    protected void parseDocumentNode(Node doc, LicenseCache licenseCache) {
+    protected void parseDocumentNode(Node doc, boolean liveData) {
         NodeList children = doc.getChildNodes();
         
         // Do a first pass for Work elements.
-        if(licenseCache != null) {
+        if(liveData) {
             for(int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
                 if(child.getNodeName().equals("Work"))
@@ -323,9 +325,8 @@ class CCLicense extends AbstractLicense {
         
         // If this was from the verifier, see if we need to get any more
         // license details.
-        if (licenseCache != null) {
-            updateLicenseDetails(licenseCache);
-        }
+        if(liveData)
+            updateLicenseDetails();
             
         return;
     }
@@ -456,7 +457,7 @@ class CCLicense extends AbstractLicense {
      * Updates the license details, potentially retrieving information
      * from the licenseURL in each Details.
      */
-    private void updateLicenseDetails(LicenseCache licenseCache) {
+    private void updateLicenseDetails() {
         if(allWorks == null)
             return;
         
@@ -484,7 +485,7 @@ class CCLicense extends AbstractLicense {
                 // parsing MUST NOT alter allWorks,
                 // otherwise a ConcurrentMod will happen
                 if(body != null)
-                    parseXML(body, null);
+                    parseXML(body, false);
              }
         }
     }

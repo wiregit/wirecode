@@ -6,10 +6,7 @@ import java.net.UnknownHostException;
 
 import org.limewire.nio.NBSocketFactory;
 
-/** 
- * An <code>NBSocketFactory</code> that returns 
- * <a href="http://en.wikipedia.org/wiki/Secure_Sockets_Layer">TLS</a> sockets. 
- */
+/** An NBSocketFactory that returns TLS sockets. */
 public class TLSSocketFactory extends NBSocketFactory {
 
     @Override

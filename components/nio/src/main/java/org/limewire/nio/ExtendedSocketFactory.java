@@ -4,9 +4,7 @@ import java.net.Socket;
 
 import javax.net.SocketFactory;
 
-/** A <code>SocketFactory</code> that also allows you to create unconnected 
- * sockets. 
- */
+/** A SocketFactory that also allows you to create unconnected sockets. */
 public abstract class ExtendedSocketFactory extends SocketFactory {
     
     /** Returns a new unconnected socket. */

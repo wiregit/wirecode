@@ -44,7 +44,7 @@ public class ContentManagerTest extends LimeTestCase {
     
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
-        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
         mgr = new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory());
         crOne = new ContentResponse(URN_1, true);
         crTwo = new ContentResponse(URN_2, false);

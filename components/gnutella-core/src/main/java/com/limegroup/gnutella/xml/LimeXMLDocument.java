@@ -37,7 +37,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
 
     public static final String XML_ID_ATTRIBUTE = "identifier__";
     public static final String XML_ACTION_ATTRIBUTE = "action__";
-    public static final String XML_ACTION_INFO = "addactiondetail__";
+    public static final String XML_ACTION_INFO = "addActionDetail__";
     public static final String XML_INDEX_ATTRIBUTE = "index__";
     public static final String XML_LICENSE_ATTRIBUTE = "license__";
     public static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";

@@ -8,16 +8,13 @@ import java.io.ObjectOutputStream;
 import junit.framework.Test;
 
 import org.apache.commons.httpclient.URI;
-import org.limewire.inject.Providers;
-import org.limewire.util.BaseTestCase;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
-import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public final class CCLicenseTest extends BaseTestCase {
+public final class CCLicenseTest extends LimeTestCase {
     
     private static final String RDF_GOOD = 
 "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
@@ -41,10 +38,6 @@ public final class CCLicenseTest extends BaseTestCase {
 "     <requires rdf:resource=\"http://web.resource.org/cc/Notice\" />" +
 "  </License>" +
 "</rdf:RDF>";
-    
-    private LicenseFactoryImpl licenseFactory;
-
-    private LicenseCache licenseCache;
 
 	public CCLicenseTest(String name) {
 		super(name);
@@ -55,28 +48,10 @@ public final class CCLicenseTest extends BaseTestCase {
 	}
 
 	/**
-     * Runs this test individually.
-     */
+	 * Runs this test individually.
+	 */
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-	    licenseCache = new LicenseCache();
-	    licenseFactory = new LicenseFactoryImpl(Providers.of(licenseCache));
-	    
-	    // XXX HttpClient should be usable without static injection
-        Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                requestStaticInjection(HttpClientManager.class);
-            }            
-        });
-	}
-	
-	@Override
-	protected void tearDown() throws Exception {
 	}
 	
 	public void testBasicParsingRDF() throws Exception {
@@ -84,13 +59,16 @@ public final class CCLicenseTest extends BaseTestCase {
 	    URN bad = URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
 	    
 	    License l = new StubCCLicense(RDF_GOOD);
+	    Callback c = new Callback();
+	    assertFalse(c.completed);
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isVerifying());
-	    l.verify(licenseCache);
+	    l.verify(c);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(good));
 	    assertFalse(l.isValid(bad));
+	    assertTrue(c.completed);
 	    assertEquals("http://creativecommons.org/licenses/by/2.0/", l.getLicenseDeed(null).toExternalForm());
         assertEquals("http://creativecommons.org/licenses/by/2.0/", l.getLicenseDeed(good).toExternalForm());
         assertEquals(null, l.getLicenseDeed(bad));
@@ -164,7 +142,7 @@ public final class CCLicenseTest extends BaseTestCase {
         
         // Now try with a full out parsed License.
 	    l = new StubCCLicense("good license text", RDF_GOOD);
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertEquals("good license text", l.getLicense());
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
@@ -197,7 +175,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    URN badUrn = URN.createSHA1Urn("urn:sha1:BADBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
         
         // GOOD: within HTML comments.
-        AbstractLicense l = new StubCCLicense("<html><--" +
+        License l = new StubCCLicense("<html><--" +
 "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
 "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
 "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
@@ -207,7 +185,7 @@ public final class CCLicenseTest extends BaseTestCase {
 "  <License />" +
 "</rdf:RDF>" +
 "--></html>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertEquals("http://creativecommons.org/licenses/by/2.0/", l.getLicenseDeed(null).toString());
@@ -215,26 +193,26 @@ public final class CCLicenseTest extends BaseTestCase {
 	    
 	    // BAD: No data.
 	    l = new StubCCLicense("<rdf:RDF/>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 
         // BAD: RDF not bound.
 	    l = new StubCCLicense("<rdf:RDF><Work/></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: Work, no license for it.
 	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><Work/></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: Work, Valid for specific URN, but no license for it.
 	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD\"/></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    assertFalse(l.isValid(goodUrn));
@@ -244,7 +222,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    "<Work>" +
 	    "<license rdf:resource=\"http://creativecommons.org/licenses/by/2.0/\" />"  +
 	    "</Work></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -255,7 +233,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    "<Work rdf:about=\"" + goodUrn + "\">" +
 	    "<license rdf:resource=\"http://mydeed.com\" />" +
 	    "</Work></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -272,7 +250,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    "<license rdf:resource=\"http://deed2.com\" />" +
 	    "</Work>" +
 	    "</rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -284,7 +262,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    // No Work item.
         l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
         "<License/></rdf:RDF>");
-        l.verify(licenseCache);
+        l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
@@ -299,7 +277,7 @@ public final class CCLicenseTest extends BaseTestCase {
 "     <permits rdf:resource=\"http://web.resource.org/cc/Distribution\" />" +
 "     <permits rdf:resource=\"http://web.resource.org/cc/DerivativeWorks\" />" +
 "  </License></rdf:RDF>");
-	    l.verify(licenseCache);
+        l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertEquals("Permitted: Distribution, DerivativeWorks\n" +
@@ -316,7 +294,7 @@ public final class CCLicenseTest extends BaseTestCase {
 "     <unknown rdf:resource=\"http://web.resource.org/cc/Unknown\" />" +
 "     <permits rdf:resource=\"http://web.resource.org/cc/DerivativeWorks\" />" +
 "  </License></rdf:RDF>");
-	    l.verify(licenseCache);
+        l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertEquals("Permitted: Distribution, DerivativeWorks\n" +
@@ -342,7 +320,7 @@ public final class CCLicenseTest extends BaseTestCase {
         "     <permits rdf:resource=\"http://web.resource.org/cc/Happiness\" />" +
         "  </License>" +     
 	    "</rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -360,14 +338,14 @@ public final class CCLicenseTest extends BaseTestCase {
         l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
         "<Work><license rdf:resource=\"http://deed1.com\" /></Work>" +
         "<Unknown/></rdf:RDF>");
-        l.verify(licenseCache);
+        l.verify(null);
         assertTrue(l.isVerified());
         assertTrue(l.isValid(null));
         
         // Invalid -- Work is inside an unknown element.
         l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
         "<Unknown><Work><license rdf:resource=\"http://deed1.com\" /></Work></Unknown></rdf:RDF>");
-        l.verify(licenseCache);
+        l.verify(null);
         assertTrue(l.isVerified());
         assertFalse(l.isValid(null));
     }
@@ -377,7 +355,7 @@ public final class CCLicenseTest extends BaseTestCase {
     public void testMultipleLicenseElementsInWork() throws Exception {
         URN goodUrn = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
         
-	    AbstractLicense l = new StubCCLicense("http://creativecommons.org/licenses/mylicense verify at http://nowhere.com", 
+	    License l = new StubCCLicense("http://creativecommons.org/licenses/mylicense verify at http://nowhere.com", 
 	    "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"" + goodUrn + "\">" +
 	    "<license rdf:resource=\"http://deed1.com\" />" +
@@ -395,7 +373,7 @@ public final class CCLicenseTest extends BaseTestCase {
         "     <permits rdf:resource=\"http://web.resource.org/cc/Happiness\" />" +
         "  </License>" +     
 	    "</rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(null);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -405,16 +383,16 @@ public final class CCLicenseTest extends BaseTestCase {
     }        
     
     public void testHTTPRetrieval() throws Exception {
+        TestBootstrapServer server = new TestBootstrapServer(20181);
         URN good = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
         URN bad = URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
-
-        TestBootstrapServer server = new TestBootstrapServer(20181);
         try {
             server.setResponseData("<html><head>Hi</head><body><--\n"+
                                    RDF_GOOD + "\n--></body></html>");
             
-            License l = licenseFactory.create("verify at http://127.0.0.1:20181/");
-            l.verify(licenseCache);
+            License l = ProviderHacks.getLicenseFactory().create("verify at http://127.0.0.1:20181/");
+            l.verify(null);
+            Thread.sleep(1000);
             assertTrue(l.isVerified());
     	    assertTrue(l.isValid(null));
     	    assertTrue(l.isValid(good));
@@ -437,26 +415,22 @@ public final class CCLicenseTest extends BaseTestCase {
     }
     
     public void testSeparateLicenseRetrieval() throws Exception {
+        TestBootstrapServer  deed1  = new TestBootstrapServer(11111);
+        TestBootstrapServer  deed2  = new TestBootstrapServer(22222);
+        TestBootstrapServer  deed3  = new TestBootstrapServer(33333);
+        TestBootstrapServer server1 = new TestBootstrapServer(44444);
+        TestBootstrapServer server2 = new TestBootstrapServer(55555);
+        deed1.setAllowConnectionReuse(true);
+        deed2.setAllowConnectionReuse(true);
+        deed3.setAllowConnectionReuse(true);
+        
         URN goodUrn1 = URN.createSHA1Urn("urn:sha1:GOOD15VEUDLTC26UT5W7GZBAKZHCY2MD");
         URN goodUrn2 = URN.createSHA1Urn("urn:sha1:GOOD25VEUDLTC26UT5W7GZBAKZHCY2MD");
         URN goodUrn3 = URN.createSHA1Urn("urn:sha1:GOOD35VEUDLTC26UT5W7GZBAKZHCY2MD");
         URN goodUrn4 = URN.createSHA1Urn("urn:sha1:GOOD45VEUDLTC26UT5W7GZBAKZHCY2MD");
         URN badUrn   = URN.createSHA1Urn("urn:sha1:BADAC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
-
-        TestBootstrapServer  deed1  = new TestBootstrapServer(11111);
-        deed1.setAllowConnectionReuse(true);
-        try {
-            TestBootstrapServer  deed2  = new TestBootstrapServer(22222);
-            deed2.setAllowConnectionReuse(true);
-            try {
-                TestBootstrapServer  deed3  = new TestBootstrapServer(33333);
-                deed3.setAllowConnectionReuse(true);
-                try {
-                    TestBootstrapServer server1 = new TestBootstrapServer(44444);
-                    try {
-                        TestBootstrapServer server2 = new TestBootstrapServer(55555);
-                        try {
-                            String rdf =
+        
+        String rdf =
 "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
     "<Work rdf:about=\"" + goodUrn1 + "\">" +
         "<license rdf:resource=\"http://127.0.0.1:11111\" />" +
@@ -476,21 +450,21 @@ public final class CCLicenseTest extends BaseTestCase {
         "<permits rdf:resource=\"http://web.resource.org/cc/Happiness\" />" +
     "</License>" +
 "</rdf:RDF>";
-                            server1.setResponseData(rdf);
-                            server2.setResponseData(rdf);
+        server1.setResponseData(rdf);
+        server2.setResponseData(rdf);
 
-                            String data =
+        String data =
     "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
     "<License rdf:about=\"http://127.0.0.1:11111\">" +
         "<requires rdf:resource=\"http://web.resource.org/cc/War\" />" +
         "<permits rdf:resource=\"http://web.resource.org/cc/Hate\" />" +
         "<permits rdf:resource=\"http://web.resource.org/cc/Evil\" />" +
     "</License></rdf:RDF>";
-                            deed1.setResponseData(data);
-                            deed1.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
+        deed1.setResponseData(data);
+        deed1.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
     
-                            // throw in an extra work -- make sure it never is added.
-                            data =
+        // throw in an extra work -- make sure it never is added.
+        data =
     "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
     "<Work rdf:about=\"" + badUrn + "\">" +
         "<license rdf:resource=\"http://deeddead.com\" />" +
@@ -500,129 +474,127 @@ public final class CCLicenseTest extends BaseTestCase {
         "<permits rdf:resource=\"http://web.resource.org/cc/Fun\" />" +
         "<prohibits rdf:resource=\"http://web.resource.org/cc/Sadness\" />" +
     "</License></rdf:RDF>";
-                            deed2.setResponseData(data);
-                            deed2.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
+        deed2.setResponseData(data);
+        deed2.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
         
-                            data =
+        data =
     "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
     "<License rdf:about=\"http://127.0.0.1:8080\">" + // wrong about!!
         "<requires rdf:resource=\"http://web.resource.org/cc/Beauty\" />" +
         "<permits rdf:resource=\"http://web.resource.org/cc/Models\" />" +
         "<prohibits rdf:resource=\"http://web.resource.org/cc/UglyPeople\" />" +
     "</License></rdf:RDF>";
-                            deed3.setResponseData(data);
-                            deed3.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
+        deed3.setResponseData(data);
+        deed3.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
     
-                            License l = licenseFactory.create("verify at http://127.0.0.1:44444/");
-                            l.verify(licenseCache);
-                            assertTrue(l.isVerified());
-                            assertTrue(l.isValid(null));
-                            assertTrue(l.isValid(goodUrn1));
-                            assertTrue(l.isValid(goodUrn2));
-                            assertTrue(l.isValid(goodUrn3));
-                            assertTrue(l.isValid(goodUrn4));
-                            assertFalse(l.isValid(badUrn));
-
-                            assertEquals("http://127.0.0.1:11111", l.getLicenseDeed(goodUrn1).toExternalForm());
-                            assertEquals("http://127.0.0.1:22222", l.getLicenseDeed(goodUrn2).toExternalForm());
-                            assertEquals("http://127.0.0.1:33333", l.getLicenseDeed(goodUrn3).toExternalForm());
-                            assertEquals("http://deed4.com", l.getLicenseDeed(goodUrn4).toExternalForm());
-                            assertEquals(null, l.getLicenseDeed(badUrn));
-
-                            // Alright -- these are the real tests.
-                            // Make sure that the license was picked up correctly!
-                            // (Order is Permit, Prohibit, Require)
-
-                            assertEquals("Permitted: Hate, Evil\n" +
-                                    "Required: War", l.getLicenseDescription(goodUrn1));
-
-                            assertEquals("Permitted: Fun\n" +
-                                    "Prohibited: Sadness\n" +
-                                    "Required: Joy", l.getLicenseDescription(goodUrn2));
-
-                            assertEquals("Permissions unknown.", l.getLicenseDescription(goodUrn3));
-
-                            assertEquals("Permitted: Love, Happiness\n" +
-                                    "Required: Peace", l.getLicenseDescription(goodUrn4));
-
-                            assertEquals("Permissions unknown.", l.getLicenseDescription(badUrn));
-
-                            assertEquals(1, server1.getConnectionAttempts());
-                            assertEquals(1, server1.getRequestAttempts());
-                            assertEquals(0, server2.getConnectionAttempts());
-                            assertEquals(0, server2.getRequestAttempts());            
-                            assertEquals(1, deed1.getConnectionAttempts());
-                            assertEquals(1, deed1.getRequestAttempts());
-                            assertEquals(1, deed2.getConnectionAttempts());
-                            assertEquals(1, deed2.getRequestAttempts());
-                            assertEquals(1, deed3.getConnectionAttempts());
-                            assertEquals(1, deed3.getRequestAttempts());
-
-                            // Okay -- now contact again for a new license.
-                            // The details should already have been cached for 11111 & 22222,
-                            // and even 33333 (even though it failed 'cause it had the wrong
-                            // addr).
-
-                            l = licenseFactory.create("verify at http://127.0.0.1:55555/");
-                            l.verify(licenseCache);
-                            assertTrue(l.isVerified());
-                            assertTrue(l.isValid(null));
-                            assertTrue(l.isValid(goodUrn1));
-                            assertTrue(l.isValid(goodUrn2));
-                            assertTrue(l.isValid(goodUrn3));
-                            assertTrue(l.isValid(goodUrn4));
-                            assertFalse(l.isValid(badUrn));
-
-                            assertEquals("http://127.0.0.1:11111", l.getLicenseDeed(goodUrn1).toExternalForm());
-                            assertEquals("http://127.0.0.1:22222", l.getLicenseDeed(goodUrn2).toExternalForm());
-                            assertEquals("http://127.0.0.1:33333", l.getLicenseDeed(goodUrn3).toExternalForm());
-                            assertEquals("http://deed4.com", l.getLicenseDeed(goodUrn4).toExternalForm());
-                            assertEquals(null, l.getLicenseDeed(badUrn));
-
-                            // Alright -- these are the real tests.
-                            // Make sure that the license was picked up correctly!
-                            // (Order is Permit, Prohibit, Require)
-
-                            assertEquals("Permitted: Hate, Evil\n" +
-                                    "Required: War", l.getLicenseDescription(goodUrn1));
-
-                            assertEquals("Permitted: Fun\n" +
-                                    "Prohibited: Sadness\n" +
-                                    "Required: Joy", l.getLicenseDescription(goodUrn2));
-
-                            assertEquals("Permissions unknown.", l.getLicenseDescription(goodUrn3));
-
-                            assertEquals("Permitted: Love, Happiness\n" +
-                                    "Required: Peace", l.getLicenseDescription(goodUrn4));
-
-                            assertEquals("Permissions unknown.", l.getLicenseDescription(badUrn));
-
-                            assertEquals(1, server1.getConnectionAttempts());
-                            assertEquals(1, server1.getRequestAttempts());
-                            assertEquals(1, server2.getConnectionAttempts());
-                            assertEquals(1, server2.getRequestAttempts());
-                            assertEquals(1, deed1.getConnectionAttempts());
-                            assertEquals(1, deed1.getRequestAttempts());
-                            assertEquals(1, deed2.getConnectionAttempts());
-                            assertEquals(1, deed2.getRequestAttempts());
-                            assertEquals(1, deed3.getConnectionAttempts());
-                            assertEquals(1, deed3.getRequestAttempts());
-
-                        } finally {
-                            server2.shutdown();
-                        } 
-                    } finally {
-                        server1.shutdown();
-                    } 
-                } finally {
-                    deed3.shutdown();
-                }
-            } finally {
-                deed2.shutdown();
+        try {
+            License l = ProviderHacks.getLicenseFactory().create("verify at http://127.0.0.1:44444/");
+            VerificationListener vl = new Listener();
+            synchronized(vl) {
+                l.verify(vl);
+                vl.wait();
             }
+            assertTrue(l.isVerified());
+    	    assertTrue(l.isValid(null));
+    	    assertTrue(l.isValid(goodUrn1));
+            assertTrue(l.isValid(goodUrn2));
+            assertTrue(l.isValid(goodUrn3));
+            assertTrue(l.isValid(goodUrn4));
+    	    assertFalse(l.isValid(badUrn));
+    	    
+    	    assertEquals("http://127.0.0.1:11111", l.getLicenseDeed(goodUrn1).toExternalForm());
+    	    assertEquals("http://127.0.0.1:22222", l.getLicenseDeed(goodUrn2).toExternalForm());
+    	    assertEquals("http://127.0.0.1:33333", l.getLicenseDeed(goodUrn3).toExternalForm());
+    	    assertEquals("http://deed4.com", l.getLicenseDeed(goodUrn4).toExternalForm());
+    	    assertEquals(null, l.getLicenseDeed(badUrn));
+    	    
+            // Alright -- these are the real tests.
+            // Make sure that the license was picked up correctly!
+            // (Order is Permit, Prohibit, Require)
+            
+            assertEquals("Permitted: Hate, Evil\n" +
+                         "Required: War", l.getLicenseDescription(goodUrn1));
+        
+            assertEquals("Permitted: Fun\n" +
+                         "Prohibited: Sadness\n" +
+                         "Required: Joy", l.getLicenseDescription(goodUrn2));
+                         
+            assertEquals("Permissions unknown.", l.getLicenseDescription(goodUrn3));
+            
+            assertEquals("Permitted: Love, Happiness\n" +
+                         "Required: Peace", l.getLicenseDescription(goodUrn4));
+                         
+            assertEquals("Permissions unknown.", l.getLicenseDescription(badUrn));
+            
+            assertEquals(1, server1.getConnectionAttempts());
+            assertEquals(1, server1.getRequestAttempts());
+            assertEquals(0, server2.getConnectionAttempts());
+            assertEquals(0, server2.getRequestAttempts());            
+            assertEquals(1, deed1.getConnectionAttempts());
+            assertEquals(1, deed1.getRequestAttempts());
+            assertEquals(1, deed2.getConnectionAttempts());
+            assertEquals(1, deed2.getRequestAttempts());
+            assertEquals(1, deed3.getConnectionAttempts());
+            assertEquals(1, deed3.getRequestAttempts());
+            
+            // Okay -- now contact again for a new license.
+            // The details should already have been cached for 11111 & 22222,
+            // and even 33333 (even though it failed 'cause it had the wrong addr).
+            
+            l = ProviderHacks.getLicenseFactory().create("verify at http://127.0.0.1:55555/");
+            vl = new Listener();
+            synchronized(vl) {
+                l.verify(vl);
+                vl.wait();
+            }
+            assertTrue(l.isVerified());
+    	    assertTrue(l.isValid(null));
+    	    assertTrue(l.isValid(goodUrn1));
+            assertTrue(l.isValid(goodUrn2));
+            assertTrue(l.isValid(goodUrn3));
+            assertTrue(l.isValid(goodUrn4));
+    	    assertFalse(l.isValid(badUrn));
+    	    
+    	    assertEquals("http://127.0.0.1:11111", l.getLicenseDeed(goodUrn1).toExternalForm());
+    	    assertEquals("http://127.0.0.1:22222", l.getLicenseDeed(goodUrn2).toExternalForm());
+    	    assertEquals("http://127.0.0.1:33333", l.getLicenseDeed(goodUrn3).toExternalForm());
+    	    assertEquals("http://deed4.com", l.getLicenseDeed(goodUrn4).toExternalForm());
+    	    assertEquals(null, l.getLicenseDeed(badUrn));
+    	    
+            // Alright -- these are the real tests.
+            // Make sure that the license was picked up correctly!
+            // (Order is Permit, Prohibit, Require)
+            
+            assertEquals("Permitted: Hate, Evil\n" +
+                         "Required: War", l.getLicenseDescription(goodUrn1));
+        
+            assertEquals("Permitted: Fun\n" +
+                         "Prohibited: Sadness\n" +
+                         "Required: Joy", l.getLicenseDescription(goodUrn2));
+                         
+            assertEquals("Permissions unknown.", l.getLicenseDescription(goodUrn3));
+            
+            assertEquals("Permitted: Love, Happiness\n" +
+                         "Required: Peace", l.getLicenseDescription(goodUrn4));
+                         
+            assertEquals("Permissions unknown.", l.getLicenseDescription(badUrn));
+            
+            assertEquals(1, server1.getConnectionAttempts());
+            assertEquals(1, server1.getRequestAttempts());
+            assertEquals(1, server2.getConnectionAttempts());
+            assertEquals(1, server2.getRequestAttempts());
+            assertEquals(1, deed1.getConnectionAttempts());
+            assertEquals(1, deed1.getRequestAttempts());
+            assertEquals(1, deed2.getConnectionAttempts());
+            assertEquals(1, deed2.getRequestAttempts());
+            assertEquals(1, deed3.getConnectionAttempts());
+            assertEquals(1, deed3.getRequestAttempts());
         } finally {
+            server1.shutdown();
+            server2.shutdown();
             deed1.shutdown();
+            deed2.shutdown();
+            deed3.shutdown();
         }
     }
-    
 }

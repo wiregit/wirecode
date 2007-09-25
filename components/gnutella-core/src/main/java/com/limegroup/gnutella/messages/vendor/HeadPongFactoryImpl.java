@@ -55,7 +55,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     public static final int DEFAULT_PACKET_SIZE = 1380;
 
     /** The packet size used by this class -- non-final for testing. */
-    // TODO: Should either be a parameter in the constructor, or changed by a setter
+    // DPINJ: Should either be a parameter in the constructor, or changed by a setter
     private static /*final*/ int PACKET_SIZE = DEFAULT_PACKET_SIZE;
 
     private final Provider<DownloadManager> downloadManager;
@@ -177,14 +177,11 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         if(!networkManager.acceptedIncomingConnection()) {
             code = HeadPong.FIREWALLED;
         }
-        
         if(fd instanceof IncompleteFileDesc) {
             code |= HeadPong.PARTIAL_FILE;
             
-            if (downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
+            if (downloadManager.get().isActivelyDownloading(fd.getSHA1Urn()))
                 code |= HeadPong.DOWNLOADING;
-            }
-            
         } else {
             code |= HeadPong.COMPLETE_FILE;
         }

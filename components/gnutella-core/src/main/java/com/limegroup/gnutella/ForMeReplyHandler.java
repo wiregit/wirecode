@@ -67,6 +67,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     private final ScheduledExecutorService backgroundExecutor;
     private final ApplicationServices applicationServices;
     private final ConnectionServices connectionServices;
+
     private final LimeXMLDocumentHelper limeXMLDocumentHelper;
 
     @Inject
@@ -93,7 +94,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         this.limeXMLDocumentHelper = limeXMLDocumentHelper;
     	    
 	    //Clear push requests every 30 seconds.
-        //TODO: move to initializer
+        //DPINJ: move to initializer
 	    this.backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
 	        public void run() {
 	            PUSH_REQUESTS.clear();
@@ -135,7 +136,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         // XML must be added to the response first, so that
         // whomever calls toRemoteFileDesc on the response
         // will create the cachedRFD with the correct XML.
-        boolean validResponses = addXMLToResponses(reply, limeXMLDocumentHelper);
+        boolean validResponses = addXMLToResponses(reply);
         // responses invalid?  exit.
         if(!validResponses)
             return;
@@ -165,7 +166,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	/**
 	 * Adds XML to the responses in a QueryReply.
 	 */
-    public static boolean addXMLToResponses(QueryReply qr, LimeXMLDocumentHelper limeXMLDocumentHelper) {
+    private boolean addXMLToResponses(QueryReply qr) {
         // get xml collection string, then get dis-aggregated docs, then 
         // in loop
         // you can match up metadata to responses

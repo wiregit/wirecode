@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
-import org.limewire.nio.RequiresSelectionKeyAttachment;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;
 import org.limewire.util.BufferUtils;
@@ -12,16 +11,12 @@ import org.limewire.util.BufferUtils;
 
 
 /**
- * Reads data from a channel. The data is controlled by a {@link Throttle}; to 
- * work with the <code>Throttle</code>, <code>ThrottleReader</code> uses an 
- * attachment.
- * <p>
- * The attachment must be the same as the attachment of the 
- * <code>SelectionKey</code> associated with the socket 
- * <code>ThrottleReader</code> uses.
- * 
+ * A reader that throttles data according to a throttle.
+ *
+ * To work with the Throttle, this uses an attachment (which must be the same as the
+ * attachment of the SelectionKey associated with the socket this is using).
  */
-public class ThrottleReader implements InterestReadableByteChannel, ChannelReader, RequiresSelectionKeyAttachment {
+public class ThrottleReader implements InterestReadableByteChannel, ChannelReader, ThrottleListener {
     
     //private static final Log LOG = LogFactory.getLog(ThrottleReader.class);
     
@@ -30,57 +25,75 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
     /** The throttle we're using. */
     private final Throttle throttle;
     /** The amount of data we were told we can read. */
-    private int available;
-    
+    private int available;    
+    /** The object that the Throttle will recognize as the SelectionKey attachments */
+    private Object attachment;
     /** The last interest state, to interact well with the Throttle. */
     private volatile boolean lastInterestState;
     
-    private final Listener throttleListener;
-    
     /**
-     * Constructs a <code>ThrottleReader</code> with the given 
-     * <code>Throttle</code>.
-     * <p>
-     * You MUST call 
-     * {@link #setReadChannel(InterestReadableByteChannel) setReadChannel(InterestReadableByteChannel)}
-     * prior to using <code>ThrottleReader</code>.
+     * Constructs a ThrottleReader with the given Throttle.
+     *
+     * You MUST call setWriteChannel prior to using this.
      */
     public ThrottleReader(Throttle throttle) {
         this(throttle, null);
     }
     
     /**
-     * Constructs a new <code>ThrottleReader</code> with the given throttle and 
-     * channel.
+     * Constructs a new ThrottleWriter with the given throttle & channel.
      */
     public ThrottleReader(Throttle throttle, InterestReadableByteChannel channel) {
         this.throttle = throttle;
         this.channel = channel;
-        this.throttleListener = new Listener();
     }
     
-    /** Retrieves the channel. */
+    /** Retreives the sink. */
     public InterestReadableByteChannel getReadChannel() {
         return channel;
     }
     
-    /** Sets the channel. */
+    /** Sets the sink. */
     public void setReadChannel(InterestReadableByteChannel channel) {
         this.channel = channel;
-        throttle.interest(throttleListener);
+        throttle.interest(this);
     }
-        
+    
+    /** Sets the attachment that the Throttle will recognize for this Writer. */
+    public void setAttachment(Object att) {
+        attachment = att;
+    }
+    
+    /** Gets the attachment. */
+    public Object getAttachment() {
+        return attachment;
+    }
+    
     /**
-     * Tells the <code>Throttle</code> that we're interested in receiving 
-     * bandwidthAvailable events at some point in time.
+     * Tells the Throttle that we're interested in receiving bandwidthAvailable
+     * events at some point in time.
      */
     public void interestRead(boolean status) {
         lastInterestState = status;
         if(channel != null) {
             if(status)
-                throttle.interest(throttleListener);
+                throttle.interest(this);
             else
                 channel.interestRead(false);
+        }
+    }
+    
+    /**
+     * Notification from the Throttle that bandwidth is available.
+     * Returns false if this no longer is open & will not be interested
+     * ever again.
+     */
+    public boolean bandwidthAvailable() {
+        if(channel.isOpen() && lastInterestState) {
+            channel.interestRead(true);
+            return true;
+        } else {
+            return false;
         }
     }
     
@@ -117,7 +130,7 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
             channel.read(BufferUtils.getEmptyBuffer());
         	channel.interestRead(false);
         	if(lastInterestState)
-        		throttle.interest(throttleListener);
+        		throttle.interest(this);
         }
         //LOG.debug("Read: " + totalRead  + ", leaving: " + available + " left.");
         
@@ -137,59 +150,20 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
         return source != null ? source.isOpen() : false;
     }
     
-    public void setAttachment(Object o) {
-        throttleListener.setAttachment(o);
+    /**
+     * Requests some bandwidth from the throttle.
+     */
+    public void requestBandwidth() {
+        available = throttle.request();
     }
     
-    private final class Listener implements ThrottleListener {
-        /** The object that the Throttle will recognize as the SelectionKey attachments */
-        private Object attachment;
-        
-        /**
-         * Notification from the <code>Throttle</code> that bandwidth is available.
-         * Returns <code>false</code> if the channel no longer is open and will not 
-         * be interested again.
-         */
-        public boolean bandwidthAvailable() {
-            if(channel.isOpen() && lastInterestState) {
-                channel.interestRead(true);
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        /** Determines if the underlying channel is open. */
-        public boolean isOpen() {
-            return ThrottleReader.this.isOpen();
-        }
-        
-        /**
-         * Requests some bandwidth from the throttle.
-         */
-        public void requestBandwidth() {
-            available = throttle.request();
-        }
-        
-        /**
-         * Releases available bandwidth back to the throttle.
-         */
-        public void releaseBandwidth() {
-            throttle.release(available);
-            available = 0;
-            if(lastInterestState)
-                throttle.interest(this);
-        }
-
-        /** Sets the attachment that the <code>Throttle</code> will recognize for this Writer. */
-        public void setAttachment(Object att) {
-            attachment = att;
-        }
-        
-        /** Gets the attachment. */
-        public Object getAttachment() {
-            return attachment;
-        }
-        
+    /**
+     * Releases available bandwidth back to the throttle.
+     */
+    public void releaseBandwidth() {
+        throttle.release(available);
+        available = 0;
+        if(lastInterestState)
+            throttle.interest(this);
     }
 }

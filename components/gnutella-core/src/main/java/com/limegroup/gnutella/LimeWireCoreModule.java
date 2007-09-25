@@ -63,8 +63,6 @@ import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.ManagedConnectionFactoryImpl;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactoryImpl;
-import com.limegroup.gnutella.connection.UDPConnectionChecker;
-import com.limegroup.gnutella.connection.UDPConnectionCheckerImpl;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactoryImpl;
 import com.limegroup.gnutella.dht.DHTControllerFacade;
@@ -273,10 +271,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateCollectionFactory.class).to(UpdateCollectionFactoryImpl.class);
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("global")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
-        bind(UDPPinger.class).to(UDPPingerImpl.class);
-        bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
         
-        // TODO: statically injecting this for now...
+        // DPINJ: statically injecting this for now...
         requestStaticInjection(SimppManager.class);
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
         requestStaticInjection(AddressToken.class);
@@ -287,11 +283,11 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(HttpClientManager.class);
         requestStaticInjection(LimeXMLDocument.class);
                         
-        // TODO: This is odd -- move to initialize & LifecycleManager?
+        // DPINJ: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
         bind(Statistics.class).asEagerSingleton();
         
-        // TODO: Need to add interface to these classes
+        // DPINJ: Need to add interface to these classes
         //----------------------------------------------
         //bind(UDPService.class)
         //bind(Acceptor.class);
@@ -345,7 +341,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(IncomingConnectionHandler.class);
         //bind(ConnectionWatchdog.class);
         //bind(Pinger.class);
-        bind(PongCacher.class).to(PongCacherImpl.class);
+        //bind(PongCacher.class);
         //bind(UPnPManager.class);
         //bind(MutableGUIDFilter.class);
         //bind(LicenseCache.class);
@@ -363,7 +359,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(ControlRequestAcceptor.class);
         //bind(PushDownloadManager.class);
         
-        //TODO: Don't need interfaces really, but listing them just 'cause I want to list everything.
+        //DPINJ: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);
         //bind(FileRequestHandler.class);
         //bind(FreeLoaderRequestHandler.class);
@@ -378,12 +374,12 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class);
                 
         
-        // TODO: Could delay instantiation...
+        // DPINJ: Could delay instantiation...
         //----------------------------------------------
         bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
  
         
-        // TODO: only needed in tests, so move there eventually
+        // DPINJ: only needed in tests, so move there eventually
         bind(ConnectionFactory.class).to(ConnectionFactoryImpl.class);
     }    
     

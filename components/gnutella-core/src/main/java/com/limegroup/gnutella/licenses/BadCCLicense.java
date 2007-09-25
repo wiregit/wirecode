@@ -9,7 +9,7 @@ import com.limegroup.gnutella.URN;
 /**
  * A bad Creative Commons license (unverifiable).
  */
-public class BadCCLicense implements MutableLicense {
+public class BadCCLicense implements NamedLicense {
     
     private String license;
     private String name;
@@ -33,7 +33,7 @@ public class BadCCLicense implements MutableLicense {
     public URI getLicenseURI() { return null; }
     public URL getLicenseDeed(URN urn) { return guessLicenseDeed(); }
     public String getLicense() { return license; }
-    public void verify(LicenseCache licenseCache) {}
+    public void verify(VerificationListener listener) {}
     public long getLastVerifiedTime() { return 0; }
     public String getLicenseName() { return name; }
     

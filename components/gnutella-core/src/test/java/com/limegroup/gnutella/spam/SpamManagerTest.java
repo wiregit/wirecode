@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.spam;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.Test;
-
-import org.limewire.io.IpPortSet;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -16,7 +15,17 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+
+@SuppressWarnings("unchecked")
 public class SpamManagerTest extends LimeTestCase {
+
+    public SpamManagerTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(SpamManagerTest.class);
+    }
 
     /** various names of files - some tokens need to exist in each" */
     private static final String badger = " badger ";
@@ -29,55 +38,44 @@ public class SpamManagerTest extends LimeTestCase {
     private static final String addr2 = "2.2.2.2";
     private static final int port2 = 6347;
     
+    /** urns */
+    private static  URN urn1, urn2, urn3;
+    
     /** sizes */
     private static final int size1 = 1000;
     private static final int size2 = 2000;
-
+    
     /** xml docs */
     private static final String xml1 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
         "\"http://www.limewire.com/schemas/audio.xsd\"><audio " +
         "title=\"badger\"" +
         "></audio></audios>";
-
-//    private static final String xml2 = "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=" +
-//        "\"http://www.limewire.com/schemas/video.xsd\"><video " +
-//        "title=\"mushroom\"" +
-//        "></video></videos>";
-
-    private static URN urn1, urn2, urn3;
     
-    private LimeXMLDocument doc1;
-    //private LimeXMLDocument doc2;
-    private SpamManager manager;
+    private static final String xml2 = "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=" +
+        "\"http://www.limewire.com/schemas/video.xsd\"><video " +
+        "title=\"mushroom\"" +
+        "></video></videos>";
     
-    public SpamManagerTest(String name) {
-        super(name);
-    }
-
-    public static Test suite() {
-        return buildTestSuite(SpamManagerTest.class);
-    }
-
+    static LimeXMLDocument doc1, doc2;
+    
+    static SpamManager manager = ProviderHacks.getSpamManager();
+    
     public static void globalSetUp() {
         try {
             urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
             urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
             urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-        } catch (Exception e) {
-            fail(e);
+            doc1 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml1);
+            doc2 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml2);
+        } catch (Exception bad) {
+            fail(bad);
         }
     }
     
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         SearchSettings.FILTER_SPAM_RESULTS.revertToDefault();
-        
-        manager = new SpamManager(new RatingTable());
         manager.clearFilterData();
-        
-        doc1 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml1);
-        //doc2 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml2);        
     }
     
     /** 
@@ -281,9 +279,10 @@ public class SpamManagerTest extends LimeTestCase {
         
     }
 
+
     private static RemoteFileDesc createRFD(String addr, int port,
             String name, LimeXMLDocument doc, URN urn, int size) {
-        Set<URN> urns = new HashSet<URN>();
+        Set urns = new HashSet();
         urns.add(urn);
         return new RemoteFileDesc(addr, port, 1, name,
                 size, DataUtils.EMPTY_GUID, 3, 
@@ -291,7 +290,7 @@ public class SpamManagerTest extends LimeTestCase {
                 doc, urns,
                 false,false,
                 "ALT",
-                new IpPortSet(), 0l, false);
+                Collections.EMPTY_SET, 0l, false);
     }
     
 }

@@ -553,7 +553,7 @@ public class HeadPong extends VendorMessage {
 		return ret;
 	}
     
-    // TODO: hack to let PingRankerTest compile
+    // DPINJ: hack to let PingRankerTest compile
     public byte[] getPayload() {
         return super.getPayload();
     }

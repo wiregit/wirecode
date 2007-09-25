@@ -4,75 +4,52 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.net.ConnectionDispatcher;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ConnectionServices;
-import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NodeAssigner;
-import com.limegroup.gnutella.QueryUnicaster;
-import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.HackConnectionManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.simpp.SimppManager;
 
 /**
  * Helper class that supplies the list of connections for searching.
  */
-@Singleton
-public class TestConnectionManager extends ConnectionManager {
+@SuppressWarnings("unchecked")
+public final class TestConnectionManager extends HackConnectionManager {
     
     /**
      * The list of ultrapeer <tt>Connection</tt> instances
      */
-    private final List<ManagedConnection> CONNECTIONS = new LinkedList<ManagedConnection>();
+    private final List CONNECTIONS = new LinkedList();
     
     /**
      * The list of leaf <tt>Connection</tt> instances
      */
-    private final List<ManagedConnection> LEAF_CONNECTIONS = new LinkedList<ManagedConnection>();
+    private final List LEAF_CONNECTIONS = new LinkedList();
     
     /**
      * Constant for whether or not this should be considered an
      * Ultrapeer.
      */
-    private boolean ULTRAPEER;
+    private final boolean ULTRAPEER;
 
     /**
      * Constant for the number of Ultrapeer connections that the 
      * test connection manager should maintain.
      */
-    private int NUM_CONNECTIONS;
+    private final int NUM_CONNECTIONS;
 
     /**
      * Constant for the number of leaf connections that the test 
      * connection manager should maintain.
      */
-    private int NUM_LEAF_CONNECTIONS;
+    private final int NUM_LEAF_CONNECTIONS;
 
     /**
      * Constant array for the keywords that I should have (this node).
      */
-    private String[] MY_KEYWORDS;
-
-    private int numNewConnections;
-
-    private boolean useVaried;
+    private final String[] MY_KEYWORDS;
 
     /**
      * Constant array for the keywords that I should have (this node)
@@ -108,7 +85,7 @@ public class TestConnectionManager extends ConnectionManager {
         "hopefully", "in", "fact", "as", "well", 
         "but", "it's", "hard", "to", "know", 
     };
-
+   
 
     /**
      * Array of keywords that should not match anything in the routing
@@ -118,79 +95,81 @@ public class TestConnectionManager extends ConnectionManager {
         "miss", "NCWEPHCE", "IEYWHFDSNC", "UIYRIEH", "dfjaivuih",
     };
 
-    private final QueryRequestFactory queryRequestFactory;
+    /**
+     * Factory method for generating a test manager with varied route tables from leaves.
+     * 
+     * @return a new <tt>TestConnectionManager</tt> with varied leaf route tables for
+     *   use in tests that require varied tables
+     */
+    public static TestConnectionManager createManagerWithVariedLeaves() {
+        return new TestConnectionManager(20, true, 20, 
+            UltrapeerSettings.MAX_LEAVES.getValue(), DEFAULT_MY_KEYWORDS, true);
+    }
 
-    @Inject
-    public TestConnectionManager(NetworkManager networkManager,
-            Provider<HostCatcher> hostCatcher,
-            @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<SimppManager> simppManager,
-            CapabilitiesVMFactory capabilitiesVMFactory,
-            ManagedConnectionFactory managedConnectionFactory,
-            Provider<MessageRouter> messageRouter,
-            Provider<QueryUnicaster> queryUnicaster,
-            SocketsManager socketsManager,
-            ConnectionServices connectionServices,
-            Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
-            ConnectionCheckerManager connectionCheckerManager,
-            PingRequestFactory pingRequestFactory, QueryRequestFactory queryRequestFactory) {
-        super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
-                simppManager, capabilitiesVMFactory, managedConnectionFactory,
-                messageRouter, queryUnicaster, socketsManager, connectionServices,
-                nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory);
-        this.queryRequestFactory = queryRequestFactory;
-        configureDefaultManager();
+    /**
+     * Creates a standard manager.
+     */
+    public static TestConnectionManager createManager() {
+        return new TestConnectionManager(20);
+    }
+
+    /**
+     * Convenience constructor that creates a new 
+     * <tt>TestConnectionManager</tt> with all of the default settings.
+     */
+    public TestConnectionManager() {
+        this(20);
+    }
+
+    public TestConnectionManager(String[] myKeywords) {
+        this(20, true, 20, UltrapeerSettings.MAX_LEAVES.getValue(), myKeywords, false);
     }
     
-    public void configureDefaultManager() {
-        setNumNewConnections(20);
-        setUltraPeer(true);
-        setNumConnections(20);
-        setNumLeafConnections(UltrapeerSettings.MAX_LEAVES.getValue());
-        setKeywords(DEFAULT_MY_KEYWORDS);
-        setUseVaried(false);
+    /**
+     * Creates a new <tt>ConnectionManager</tt> with a list of 
+     * <tt>TestConnection</tt>s for testing.
+     *
+     * @param numNewConnections the number of new connections to 
+     *  include in the set of connections
+     */
+    public TestConnectionManager(int numNewConnections) {
+        this(numNewConnections, true);
     }
-    
-    public void configureManagerWithVariedLeafs() {
-        setNumNewConnections(20);
-        setUltraPeer(true);
-        setNumConnections(20);
-        setNumLeafConnections(UltrapeerSettings.MAX_LEAVES.getValue());
-        setKeywords(DEFAULT_MY_KEYWORDS);
-        setUseVaried(true);
+
+    /**
+     * Creates a new <tt>ConnectionManager</tt> with a list of 
+     * <tt>TestConnection</tt>s for testing.
+     *
+     * @param numNewConnections the number of new connections to 
+     *  include in the set of connections
+     * @param ultrapeer whether or not this should be considered
+     *  an ultrapeer
+     */
+    public TestConnectionManager(int numNewConnections, boolean ultrapeer) {
+        this(numNewConnections, ultrapeer, 20, UltrapeerSettings.MAX_LEAVES.getValue(), 
+            DEFAULT_MY_KEYWORDS, false);
     }
-    
-    public void setNumNewConnections(int numNewConnections) {
-        this.numNewConnections = numNewConnections;
-    }
-    
-    public void setUltraPeer(boolean ultraPeer) {
-        ULTRAPEER = ultraPeer;
-    }
-     
-    public void setNumConnections(int numConnections) {
-        NUM_CONNECTIONS = numConnections; 
-    }
-    
-    public void setNumLeafConnections(int numLeafConnections) {
+
+    /**
+     * Creates a new <tt>ConnectionManager</tt> with a list of 
+     * <tt>TestConnection</tt>s for testing.
+     *
+     * @param numNewConnections the number of new connections to 
+     *  include in the set of connections
+     * @param ultrapeer whether or not this should be considered
+     *  an ultrapeer
+     * @param useVaried boolean specifying whether or not leaves should
+     *   have variable routing tables
+     */
+    public TestConnectionManager(int numNewConnections, boolean ultrapeer,
+                                 int numConnections, int numLeafConnections,
+                                 String[] myKeywords, boolean useVaried) {
+        super();
+        NUM_CONNECTIONS = numConnections;
         NUM_LEAF_CONNECTIONS = numLeafConnections;
-    }
-    
-    public void setKeywords(String[] keywords) {
-        MY_KEYWORDS = keywords;
-    }
-    
-    public void setUseVaried(boolean useVaried) {
-        this.useVaried = useVaried;
-    }
-    
-    public void resetAndInitialize() {
-        CONNECTIONS.clear();
-        LEAF_CONNECTIONS.clear();
-        
+        MY_KEYWORDS = myKeywords;
         for(int i=0; i<NUM_CONNECTIONS; i++) {
-            ManagedConnection curConn = null;
+            Connection curConn = null;
             if(i < numNewConnections) {
                 curConn = 
                     new UltrapeerConnection(new String[]{ULTRAPEER_KEYWORDS[i]});
@@ -202,7 +181,7 @@ public class TestConnectionManager extends ConnectionManager {
 
         // now, give ourselves the desired number of leaves
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
-            ManagedConnection conn;
+            Connection conn;
             if(useVaried && i >= (NUM_LEAF_CONNECTIONS/2)) {
                 conn = LeafConnection.createAltLeafConnection();
             } else {
@@ -210,6 +189,7 @@ public class TestConnectionManager extends ConnectionManager {
             }
             LEAF_CONNECTIONS.add(conn);
         }
+        ULTRAPEER = ultrapeer;
     }
 
     /**
@@ -221,17 +201,18 @@ public class TestConnectionManager extends ConnectionManager {
      */
     public boolean runQRPMatch(QueryRouteTable qrt) {
         for(int i=0; i<MY_KEYWORDS.length; i++) {
-            QueryRequest qr = queryRequestFactory.createQuery(MY_KEYWORDS[i]);
+            QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(MY_KEYWORDS[i]);
             if(!qrt.contains(qr)) return false;
         }
 
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
-            QueryRequest qr = queryRequestFactory.createQuery(LEAF_KEYWORDS[i]);
+            QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(LEAF_KEYWORDS[i]);
             if(!qrt.contains(qr)) return false;
         }
 
         for(int i=0; i<UNMATCHING_KEYWORDS.length; i++) {
-            QueryRequest qr = queryRequestFactory.createQuery(UNMATCHING_KEYWORDS[i]);
+            QueryRequest qr = 
+                ProviderHacks.getQueryRequestFactory().createQuery(UNMATCHING_KEYWORDS[i]);
             if(qrt.contains(qr)) return false;
         }
         return true;
@@ -240,16 +221,11 @@ public class TestConnectionManager extends ConnectionManager {
     /**
      * Accessor for the custom list of connections.
      */
-    public List<ManagedConnection> getInitializedConnections() {
+    public List getInitializedConnections() {
         return CONNECTIONS;
     }
-    
-    public void setInitializedConnections(List<ManagedConnection> connections) {
-        CONNECTIONS.clear();
-        CONNECTIONS.addAll(connections);
-    }
-    
-    public List<ManagedConnection> getInitializedClientConnections() {
+
+    public List getInitializedClientConnections() {
         return LEAF_CONNECTIONS;
     }
 
@@ -274,9 +250,9 @@ public class TestConnectionManager extends ConnectionManager {
     /**
      * Returns the total number of queries received over all leaf connections.
      */
-    private static int getNumQueries(Collection<ManagedConnection> connections) {
+    private static int getNumQueries(Collection connections) {
         int numQueries = 0;
-        Iterator<ManagedConnection> iter = connections.iterator();
+        Iterator iter = connections.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             numQueries += tc.getNumQueries();
@@ -289,7 +265,7 @@ public class TestConnectionManager extends ConnectionManager {
      */
     public int getNumOldConnectionQueries() {
         int numQueries = 0;
-        Iterator<ManagedConnection> iter = CONNECTIONS.iterator();
+        Iterator iter = CONNECTIONS.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             if(tc instanceof OldConnection) {
@@ -304,7 +280,7 @@ public class TestConnectionManager extends ConnectionManager {
      */
     public int getNumNewConnectionQueries() {
         int numQueries = 0;
-        Iterator<ManagedConnection> iter = CONNECTIONS.iterator();
+        Iterator iter = CONNECTIONS.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             if(tc instanceof NewConnection) {
@@ -318,3 +294,5 @@ public class TestConnectionManager extends ConnectionManager {
         return false;
     }
 }
+
+

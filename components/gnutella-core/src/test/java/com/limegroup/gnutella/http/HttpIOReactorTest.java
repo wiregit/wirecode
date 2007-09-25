@@ -28,13 +28,10 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.HttpIOReactor;
 import org.limewire.http.SessionRequestCallbackAdapter;
 import org.limewire.net.ConnectionAcceptor;
-import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.ProviderHacks;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
@@ -42,13 +39,9 @@ public class HttpIOReactorTest extends BaseTestCase {
 
     private static Acceptor acceptor;
 
-    private HttpRequestFactory requestFactory;
+    private HttpRequestFactory requestFactory = new DefaultHttpRequestFactory();
 
     private BasicHttpParams params;
-
-    private ConnectionDispatcher connectionDispatcher;
-
-    private SocketsManager socketsManager;
 
     public HttpIOReactorTest(String name) {
         super(name);
@@ -58,14 +51,27 @@ public class HttpIOReactorTest extends BaseTestCase {
         return buildTestSuite(HttpIOReactorTest.class);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-        
-        acceptor = injector.getInstance(Acceptor.class);
+    public static void globalSetUp() throws Exception {
+      //  new RouterService(new ActivityCallbackStub());
+
+        acceptor = ProviderHacks.getAcceptor();
         acceptor.start();
         acceptor.setListeningPort(ACCEPTOR_PORT);
-        
+
+        // Give thread time to find and open it's sockets. This race condition
+        // is tolerated in order to speed up LimeWire startup
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+        }
+    }
+
+    public static void globealTearDown() throws Exception {
+        acceptor.setListeningPort(0);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
         params = new BasicHttpParams();
         params.setIntParameter(HttpConnectionParams.SO_TIMEOUT, 2222)
                .setIntParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 1111)
@@ -74,23 +80,14 @@ public class HttpIOReactorTest extends BaseTestCase {
                .setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true)
                .setParameter(HttpProtocolParams.USER_AGENT, "TEST-SERVER/1.1");
 
-        requestFactory = new DefaultHttpRequestFactory();
-        
-        connectionDispatcher = acceptor.getConnectionDispatcher();
-        
-        socketsManager = injector.getInstance(SocketsManager.class);
     }
-
-    public static void globealTearDown() throws Exception {
-        acceptor.shutdown();
-    }
-
+    
     public void testAcceptConnection() throws Exception {
         HttpTestServer server = new HttpTestServer(params);
         server.execute(null);
         HttpIOReactor reactor = server.getReactor();
         
-        Socket socket = socketsManager.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
+        Socket socket = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
         try {
             DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
@@ -110,15 +107,12 @@ public class HttpIOReactorTest extends BaseTestCase {
             }
         });
         server.execute(new MyEventListener());
-        connectionDispatcher.addConnectionAcceptor(
+        ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(
                 new ConnectionAcceptor() {
                     public void acceptConnection(String word, Socket socket) {
                         server.getReactor().acceptConnection(word + " ", socket);
                     }
-                    public boolean isBlocking() {
-                        return false;
-                    }
-                }, false, "GET", "HEAD", "POST" );
+                }, false, false, "GET", "HEAD", "POST" );
 
         final HttpTestClient client = new HttpTestClient();
         MyHttpRequestExecutionHandler executionHandler = new MyHttpRequestExecutionHandler();

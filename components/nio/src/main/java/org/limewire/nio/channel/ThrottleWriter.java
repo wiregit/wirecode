@@ -5,22 +5,18 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
 import org.limewire.nio.NIODispatcher;
-import org.limewire.nio.RequiresSelectionKeyAttachment;
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 
 /**
- * Writes data to a channel. The data writes are controlled by a {@link 
- * Throttle}.
- * <p>
- * To work with the <code>Throttle</code>, <code>ThrottleWriter</code>
- * uses an attachment. This attachment must be the same as the 
- * <code>SelectionKey</code> attachment associated with the socket 
- * <code>ThrottleWriter</code> uses.
+ * A writer that throttles data according to a throttle.
+ *
+ * To work with the Throttle, this uses an attachment (which must be the same as the
+ * attachment of the SelectionKey associated with the socket this is using).
  */
-public class ThrottleWriter implements ChannelWriter, InterestWritableByteChannel, RequiresSelectionKeyAttachment {
+public class ThrottleWriter implements ChannelWriter, InterestWritableByteChannel, ThrottleListener {
     
     //private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
     
@@ -31,34 +27,30 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     /** The throttle we're using. */
     private volatile Throttle throttle;
     /** The amount of data we were told we can write. */
-    private int available;
-    
+    private int available;    
+    /** The object that the Throttle will recognize as the SelectionKey attachments */
+    private Object attachment;
     /** Whether we interested the channel last time */
     private boolean channelInterested;
     
-    private final Listener throttleListener;
-    
     /**
-     * Constructs a <code>ThrottleWriter</code> with the given <code>Throttle</code>.
-     * <p>
-     * You MUST call {@link #setWriteChannel(InterestWritableByteChannel)}
-     * prior to using <code>ThrottleWriter</code>.
+     * Constructs a ThrottleWriter with the given Throttle.
+     *
+     * You MUST call setWriteChannel prior to using this.
      */
     public ThrottleWriter(Throttle throttle) {
         this(throttle, null);
     }
     
     /**
-     * Constructs a new <code>ThrottleWriter</code> with the given throttle 
-     * and channel.
+     * Constructs a new ThrottleWriter with the given throttle & channel.
      */
     public ThrottleWriter(Throttle throttle, InterestWritableByteChannel channel) {
         this.throttle = throttle;
         this.channel = channel;
-        throttleListener = new Listener();
     }
     
-    /** Retrieves the sink. */
+    /** Retreives the sink. */
     public InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
@@ -68,15 +60,25 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         this.channel = channel;
         Throttle t = this.throttle;
         if (t != null) {
-            t.interest(throttleListener);
+            t.interest(this);
         } else if (channel != null) {
             channel.interestWrite(this, true);
         }
     }
     
+    /** Sets the attachment that the Throttle will recognize for this Writer. */
+    public void setAttachment(Object att) {
+        attachment = att;
+    }
+    
+    /** Gets the attachment. */
+    public Object getAttachment() {
+        return attachment;
+    }
+    
     /**
-     * Tells the <code>Throttle</code> that we're interested in receiving 
-     * bandwidthAvailable events at some point in time.
+     * Tells the Throttle that we're interested in receiving bandwidthAvailable
+     * events at some point in time.
      */
     public void interestWrite(WriteObserver observer, boolean status) {
         if(status) {
@@ -84,12 +86,29 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
             if(channel != null) {
                 Throttle t = this.throttle;
                 if (t != null)
-                    t.interest(throttleListener);
+                    t.interest(this);
                 else 
                     channel.interestWrite(this, status);
             }
         } else {
             this.observer = null;
+        }
+    }
+    
+    /**
+     * Notification from the Throttle that bandwidth is available.
+     * Returns false if this no longer is open & will not be interested
+     * ever again.
+     */
+    public boolean bandwidthAvailable() {
+        if(channel.isOpen()) {
+        	if (!channelInterested) {
+        		channelInterested = true;
+        		channel.interestWrite(this, true);
+        	}
+        	return true;
+        } else {
+            return false;
         }
     }
     
@@ -137,6 +156,25 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     }
     
     /**
+     * Requests some bandiwdth from the throttle.
+     */
+    public void requestBandwidth() {
+        if (throttle != null) {
+            available = throttle.request();
+        }
+    }
+    
+    /**
+     * Releases available bandwidth back to the throttle.
+     */
+    public void releaseBandwidth() {
+        if (throttle != null) {
+            throttle.release(available);
+            available = 0;
+        }
+    }
+    
+    /**
      * Writes up to 'available' data to the sink channel.
      * requestBandwidth must be called prior to this to allow data
      * to be written, and releaseBandwidth must be called afterwards
@@ -156,7 +194,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         }
         if(interested != null) {
             if (this.throttle != null)
-                this.throttle.interest(throttleListener);
+                this.throttle.interest(this);
             else 
                 chain.interestWrite(this, true);
         	return true;
@@ -191,76 +229,15 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     }
 
     protected void setThrottleInternal(Throttle throttle) {
-        throttleListener.releaseBandwidth();
+        releaseBandwidth();
         
         this.throttle = throttle;
         
         if (throttle != null) {
-            throttle.interest(throttleListener);
+            throttle.interest(ThrottleWriter.this);
         } else if (channel != null) {
             channel.interestWrite(this, true);
         }
-    }
-    
-    public void setAttachment(Object o) {
-        throttleListener.setAttachment(o);
-    }
-    
-    private final class Listener implements ThrottleListener {        
-
-        /** The object that the Throttle will recognize as the SelectionKey attachments */
-        private Object attachment;
-        
-        /**
-         * Notification from the <code>Throttle</code> that bandwidth is available.
-         * Returns <code>false</code> if this no longer is open and will not be 
-         * interested ever again.
-         */
-        public boolean bandwidthAvailable() {
-            if(channel.isOpen()) {
-                if (!channelInterested) {
-                    channelInterested = true;
-                    channel.interestWrite(ThrottleWriter.this, true);
-                }
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        public boolean isOpen() {
-            return ThrottleWriter.this.isOpen();
-        }
-        
-        /**
-         * Requests some bandwidth from the throttle.
-         */
-        public void requestBandwidth() {
-            if (throttle != null) {
-                available = throttle.request();
-            }
-        }
-        
-        /**
-         * Releases available bandwidth back to the throttle.
-         */
-        public void releaseBandwidth() {
-            if (throttle != null) {
-                throttle.release(available);
-                available = 0;
-            }
-        }
-        
-        /** Sets the attachment that the <code>Throttle</code> will recognize for this Writer. */
-        public void setAttachment(Object att) {
-            attachment = att;
-        }
-        
-        /** Gets the attachment. */
-        public Object getAttachment() {
-            return attachment;
-        }
-        
     }
     
 }

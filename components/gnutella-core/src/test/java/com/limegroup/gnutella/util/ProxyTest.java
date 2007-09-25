@@ -10,17 +10,14 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.limewire.io.LocalSocketAddressService;
-import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.stubs.ConnectObserverStub;
+import com.limegroup.gnutella.stubs.StubConnectObserver;
 
-public class ProxyTest extends BaseTestCase {
+public class ProxyTest extends LimeTestCase {
 
     private static final int PROXY_PORT = 9990;
 
@@ -36,8 +33,6 @@ public class ProxyTest extends BaseTestCase {
 
     private static FakeProxyServer fps;
 
-    private SocketsManager socketsManager;
-
     public ProxyTest(String name) {
         super(name);
     }
@@ -50,6 +45,10 @@ public class ProxyTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    public static void globalSetUp() throws Exception {
+      //  new RouterService(new ActivityCallbackStub());
+    }
+
     @Override
     public void setUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -58,17 +57,11 @@ public class ProxyTest extends BaseTestCase {
         
         fps = new FakeProxyServer(9990, 9999);
         fps.setMakeError(false);
-        
-        socketsManager = new SocketsManager();
-        
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
     }
 
     @Override
     public void tearDown() throws Exception {
         fps.killServers();
-        
-        LimeTestUtils.waitForNIO();
     }
 
     /**
@@ -80,7 +73,7 @@ public class ProxyTest extends BaseTestCase {
         fps.setAuthentication(false);
         fps.setProxyVersion(NONE);
 
-        Socket s = socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0);
+        Socket s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
         // we should be connected to something, NPE is an error
         s.close();
     }
@@ -244,10 +237,10 @@ public class ProxyTest extends BaseTestCase {
         if (success) {
             Socket s;
             if (!nb) {
-                s = socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0);
+                s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
             } else {
-                ConnectObserverStub o = new ConnectObserverStub();
-                s = socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
+                StubConnectObserver o = new StubConnectObserver();
+                s = ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
                 o.waitForResponse(5000);
                 assertEquals(s, o.getSocket());
                 assertNull(o.getIoException());
@@ -258,14 +251,14 @@ public class ProxyTest extends BaseTestCase {
         } else {
             if (!nb) {
                 try {
-                    socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0);
+                    ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0);
                     fail("acceptedConnection from a bad proxy server");
                 } catch (IOException iox) {
                     // Good -- expected behaviour
                 }
             } else {
-                ConnectObserverStub o = new ConnectObserverStub();
-                socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
+                StubConnectObserver o = new StubConnectObserver();
+                ProviderHacks.getSocketsManager().connect(new InetSocketAddress("localhost", DEST_PORT), 0, o);
                 o.waitForResponse(5000);
                 assertNull(o.getSocket());
                 assertNull(o.getIoException());

@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.dht.db;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -8,17 +10,16 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
-import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTTestCase;
 
+@SuppressWarnings("null")
 public class PushProxiesValueTest extends DHTTestCase {
     
-    private PushProxiesValueFactoryImpl pushProxiesValueFactory;
-
     public PushProxiesValueTest(String name) {
         super(name);
     }
@@ -31,23 +32,24 @@ public class PushProxiesValueTest extends DHTTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    @Override
-    protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-        pushProxiesValueFactory = (PushProxiesValueFactoryImpl) injector.getInstance(PushProxiesValueFactory.class);
-    }
-    
-    public void testSerialization() throws Exception {
+    public void testSerialization() {
         byte[] guid = GUID.makeGuid();
         byte features = 1;
         int fwtVersion = 2;
         int port = 1234;
         
         Set<IpPort> proxies = new IpPortSet();
-        proxies.add(new IpPortImpl("localhost", 4321));
-        proxies.add(new IpPortImpl("localhost", 3333));
+        try {
+            proxies.add(new IpPortImpl("localhost", 4321));
+            proxies.add(new IpPortImpl("localhost", 3333));
+        } catch (UnknownHostException err) {
+            fail("UnknownHostException", err);
+        }
         
-        AbstractPushProxiesValue value1 = pushProxiesValueFactory.createPushProxiesValue(
+        AbstractPushProxiesValue value1 = new PushProxiesValueFactoryImpl(
+                ProviderHacks.getNetworkManager(), ProviderHacks
+                        .getPushEndpointFactory(), ProviderHacks
+                        .getApplicationServices()).createPushProxiesValue(
                 Version.ZERO, guid, features, fwtVersion, port, proxies);
         
         assertEquals(guid, value1.getGUID());
@@ -62,13 +64,26 @@ public class PushProxiesValueTest extends DHTTestCase {
         
         // Serialize it
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        value1.write(baos);
+        try {
+            value1.write(baos);
+        } catch (IOException err) {
+            fail("IOException", err);
+        }
         
         // Get the raw bytes
         byte[] serialized = baos.toByteArray();
         
         // De-serialize it
-        PushProxiesValue value2 = pushProxiesValueFactory.createFromData(Version.ZERO, serialized);
+        PushProxiesValue value2 = null;
+        try {
+            value2 = new PushProxiesValueFactoryImpl(ProviderHacks
+                    .getNetworkManager(), ProviderHacks
+                    .getPushEndpointFactory(), ProviderHacks
+                    .getApplicationServices()).createFromData(Version.ZERO,
+                    serialized);
+        } catch (DHTValueException err) {
+            fail("DHTValueException", err);
+        }
         
         // Should be equal
         assertEquals(value1.getGUID(), value2.getGUID());

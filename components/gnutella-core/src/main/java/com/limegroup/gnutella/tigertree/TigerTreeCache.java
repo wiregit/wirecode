@@ -11,11 +11,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,36 +67,6 @@ public final class TigerTreeCache {
      */
     private static boolean dirty = false;        
 
-    
-    public HashTree getHashTreeAndWait(FileDesc fd, long timeout) throws InterruptedException, TimeoutException {
-        if (fd instanceof IncompleteFileDesc) {
-            throw new IllegalArgumentException("fd must not inherit from IncompleFileDesc");
-        }
-        
-        synchronized (this) {
-            HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
-            if (tree != null && tree != BUSH)
-                return tree;
-
-            TREE_MAP.put(fd.getSHA1Urn(), BUSH);
-        }
-        
-        Future<?> future = QUEUE.submit(new HashRunner(fd));
-        try {
-            future.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-        
-        synchronized (this) {
-            HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
-            if (tree != null && tree != BUSH)
-                return tree;
-        }
-        
-        throw new RuntimeException("hash tree was not calculated");
-    }
-    
     /**
      * If HashTree wasn't found, schedule file for hashing
      * 

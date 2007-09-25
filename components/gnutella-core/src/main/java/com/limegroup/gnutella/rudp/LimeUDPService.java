@@ -51,7 +51,7 @@ public class LimeUDPService implements org.limewire.rudp.UDPService {
     }
 
     public boolean isNATTraversalCapable() {
-        return networkManager.canDoFWT();
+        return udpService.get().canDoFWT();
     }
 
     public void send(RUDPMessage message, SocketAddress address) {

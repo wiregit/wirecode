@@ -60,6 +60,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     @Override
     protected void setUp() throws Exception {
         setSettings();
+        super.setUp();
     }
     
     public void testRandomNodeAdder() throws Exception {
@@ -68,7 +69,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_ADDER_DELAY, "value", 50L);
         
-        DHTController controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.valueOf(1),
+        AbstractDHTController controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.valueOf(1),
                 Version.valueOf(1), new DHTManagerStub());
         try {
             controller.start();
@@ -282,6 +283,4 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
     }
-    
-    
 }

@@ -349,7 +349,8 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(),
                 TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES,
                 TimeUnit.MILLISECONDS);
-        connectionDispatcher.get().addConnectionAcceptor(this, false, "CONNECT", "\n\n");
+        connectionDispatcher.get().addConnectionAcceptor(this, false, false,
+                "CONNECT", "\n\n");
         _started = true;
     }
 	
@@ -362,10 +363,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	    synchronized(Acceptor.class) {
 	        return Arrays.equals(getAddress(true), _externalAddress);
 	    }
-	}
-	
-	public boolean isBlocking() {
-	    return false;
 	}
 	
 	/**
@@ -404,10 +401,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         }
     }
 
-    public ConnectionDispatcher getConnectionDispatcher() {
-        return connectionDispatcher.get();
-    }
-    
     /**
      * Returns the port at which the Connection Manager listens for incoming
      * connections
@@ -533,13 +526,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	public boolean acceptedIncoming() {
         return _acceptedIncoming;
 	}
-
-	/**
-	 * For testing.
-	 */
-	protected void setAcceptedIncoming(boolean incoming) {
-        _acceptedIncoming = incoming;
-    }
 	
 	/**
 	 * Sets the new incoming status.

@@ -23,9 +23,7 @@ import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.util.CommonUtils;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -34,8 +32,6 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
     private static final EventDispatcher<DHTEvent, DHTEventListener> dispatcherStub 
         = new DHTEventDispatcherStub();
-    private MojitoDHT bootstrapDHT;
-    private DHTControllerFactory dhtControllerFactory;
     
     public PassiveDHTNodeControllerTest(String name) {
         super(name);
@@ -54,20 +50,8 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());
-        
-        // fake a connection to the network
-        Injector injector = LimeTestUtils.createInjector();
-
-        dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
-        
-        bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
     }
     
-    @Override
-    protected void tearDown() throws Exception {
-        bootstrapDHT.close();
-    }
-
     public void testNodesPersistence() throws Exception{
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
         DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
@@ -76,7 +60,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //first delete any previous file
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
-        PassiveDHTNodeController controller = dhtControllerFactory.createPassiveDHTNodeController(
+        PassiveDHTNodeController controller = ProviderHacks.getDHTControllerFactory().createPassiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         try {
             Context context = (Context) controller.getMojitoDHT();
@@ -95,7 +79,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             Thread.sleep(5000);
             controller.stop();
             //now nodeID should have changed and we should have persisted SOME nodes
-            controller = dhtControllerFactory.createPassiveDHTNodeController(
+            controller = ProviderHacks.getDHTControllerFactory().createPassiveDHTNodeController(
                     Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
             context = (Context) controller.getMojitoDHT();
             rt = context.getRouteTable();
@@ -116,7 +100,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //   There are 20 Nodes from Port 2000 to 20019
         //   Total: 22 Nodes
         
-        PassiveDHTNodeController controller = dhtControllerFactory.createPassiveDHTNodeController(
+        PassiveDHTNodeController controller = ProviderHacks.getDHTControllerFactory().createPassiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
@@ -134,6 +118,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
                 dht.bind(port);
                 dht.start();
                 MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost",BOOTSTRAP_DHT_PORT)).get();
+                DHT_LIST.add(dht);
                 
                 // And add each of the 20 Nodes to the controller's
                 // leafs list

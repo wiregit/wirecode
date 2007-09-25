@@ -136,6 +136,8 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		if (shutdown)
 			return;
 		
+		 // DPINJ: Change to using passed-in SocketsManager!!!
+		
 		while (_torrent.needsMoreConnections() &&
 				connecting.size() < socketsManager.getNumAllowedSockets() &&
 				_torrent.hasNonBusyLocations()) {

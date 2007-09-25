@@ -61,7 +61,7 @@ public class RatingTable {
 	 * constructor, tries to deserialize filter data from disc, which will fail
 	 * silently, if it fails
 	 */
-	RatingTable() {
+	private RatingTable() {
 		// deserialize
 		_tokenMap = readData();
 

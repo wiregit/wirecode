@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import org.limewire.inject.Providers;
+import org.limewire.concurrent.Providers;
 
 public class HackConnectionManager extends ConnectionManager {
 

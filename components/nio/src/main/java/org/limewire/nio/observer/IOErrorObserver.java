@@ -3,11 +3,10 @@ package org.limewire.nio.observer;
 import java.io.IOException;
 
 /**
- * Defines an interface to handle <code>IOExceptions</code> generated during NIO 
- * dispatching.
+ * Allows IOExceptions generated during NIO dispatching to be handled.
  */
 public interface IOErrorObserver extends Shutdownable {
     
-    /** Notification that an <code>IOException</code> occurred while dispatching. */
+    /** Notification that an IOException occurred on the while dispatching. */
     void handleIOException(IOException iox);
 }

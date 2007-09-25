@@ -26,7 +26,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -60,14 +59,14 @@ public class ResponseFactoryImpl implements ResponseFactory {
     private static final String KHZ = "kHz";
 
     private final AltLocManager altLocManager;
-    private final Provider<CreationTimeCache> creationTimeCache;
+    private final CreationTimeCache creationTimeCache;
     private final IPFilter ipFilter;
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
 
     @Inject
     public ResponseFactoryImpl(AltLocManager altLocManager,
-            Provider<CreationTimeCache> creationTimeCache, IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
+            CreationTimeCache creationTimeCache, IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
         this.altLocManager = altLocManager;
         this.creationTimeCache = creationTimeCache;
         this.ipFilter = ipFilter;
@@ -78,27 +77,27 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @see com.limegroup.gnutella.ResponseFactory#createResponse(long, long, java.lang.String)
      */
     public Response createResponse(long index, long size, String name) {
-        return createResponse(index, size, name, -1, null, null, null, null);
+        return createResponse(index, size, name, null, null, null, null);
     }
-  
+
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.ResponseFactory#createResponse(long, long, java.lang.String, com.limegroup.gnutella.xml.LimeXMLDocument)
      */
     public Response createResponse(long index, long size, String name,
             LimeXMLDocument doc) {
-        return createResponse(index, size, name, -1, null, doc, null, null);
+        return createResponse(index, size, name, null, doc, null, null);
     }
-    
+
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.ResponseFactory#createResponse(com.limegroup.gnutella.FileDesc)
      */
     public Response createResponse(FileDesc fd) {
         GGEPContainer container = new GGEPContainer(getAsIpPorts(altLocManager
-                .getDirect(fd.getSHA1Urn())), creationTimeCache.get()
+                .getDirect(fd.getSHA1Urn())), creationTimeCache
                 .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize());
 
         return createResponse(fd.getIndex(), fd.getFileSize(),
-                fd.getFileName(), -1, fd.getUrns(), null, container, null);
+                fd.getFileName(), fd.getUrns(), null, container, null);
     }
 
     /* (non-Javadoc)
@@ -109,8 +108,6 @@ public class ResponseFactoryImpl implements ResponseFactory {
         long index = ByteOrder.uint2long(ByteOrder.leb2int(is));
         long size = ByteOrder.uint2long(ByteOrder.leb2int(is));
 
-        int incomingNameByteArraySize;
-        
         if ((index & 0xFFFFFFFF00000000L) != 0)
             throw new IOException("invalid index: " + index);
         if (size < 0)
@@ -123,7 +120,6 @@ public class ResponseFactoryImpl implements ResponseFactory {
         // See:
         //  http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
 
-        
         // Extract the filename
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int c;
@@ -132,12 +128,9 @@ public class ResponseFactoryImpl implements ResponseFactory {
                 throw new IOException("EOF before null termination");
             baos.write(c);
         }
-        
-        incomingNameByteArraySize = baos.size();
-        
-		String name = new String(baos.toByteArray(), "UTF-8");    
+        String name = new String(baos.toByteArray(), "UTF-8");
         checkFilename(name); // throws IOException
-		
+
         // Extract extra info, if any
         baos.reset();
         while ((c = is.read()) != 0) {
@@ -150,8 +143,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (is.available() < 16) {
                 throw new IOException("not enough room for the GUID");
             }
-            //changed to pass an additional parameter (incomingNameByteArraySize) for the new response
-            return createResponse(index, size, name, incomingNameByteArraySize, null, null, null, null);
+            return createResponse(index, size, name);
         } else {
             // now handle between-the-nulls
             // \u001c is the HUGE v0.93 GEM delimiter
@@ -172,8 +164,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (ggep.size64 > Integer.MAX_VALUE)
                 size = ggep.size64;
 
-            //changed to pass an additional parameter (baosByteArraySize) for the new response
-            return createResponse(index, size, name, incomingNameByteArraySize, urns, doc, ggep, rawMeta);
+            return createResponse(index, size, name, urns, doc, ggep, rawMeta);
         }
     }
 
@@ -189,16 +180,15 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @param index the index of the file referenced in the response
      * @param size the size of the file (in bytes)
      * @param name the name of the file
-     * @param incomingNameByteArraySize TODO
      * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
      *        with the file
      * @param doc the <tt>LimeXMLDocument</tt> instance associated with the
      *        file
-     * @param extensions The raw unparsed extension bytes.
      * @param endpoints a collection of other locations on this network that
      *        will have this file
+     * @param extensions The raw unparsed extension bytes.
      */
-    private Response createResponse(long index, long size, String name, int incomingNameByteArraySize,
+    private Response createResponse(long index, long size, String name,
             Set<? extends URN> urns, LimeXMLDocument doc,
             GGEPContainer ggepData, byte[] extensions) {
         
@@ -214,9 +204,10 @@ public class ResponseFactoryImpl implements ResponseFactory {
         if (extensions == null)
             extensions = createExtBytes(urns, ggepData);
 
-        return new Response(index, size, name, incomingNameByteArraySize, urns, doc,
-                ggepData.locations, ggepData.createTime, extensions);
+        return new Response(index, size, name, urns, doc, ggepData.locations,
+                ggepData.createTime, extensions);
     }
+    
     
     private void checkFilename(String name) throws IOException {
         if (name.length() == 0) {

@@ -6,11 +6,7 @@ import java.util.List;
 
 import org.limewire.collection.IntHashMap;
 
-/**
- * Provides a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/nio/ByteBuffer.html#direct">
- * non-direct</a> cache of {@link ByteBuffer ByteBuffers}. 
- *
- */
+
 public class HeapByteBufferCache {
 
     // Store up to 1MB of byte[] here.

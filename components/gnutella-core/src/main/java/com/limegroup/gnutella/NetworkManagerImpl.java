@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.limewire.io.NetworkUtils;
-import org.limewire.rudp.UDPConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -57,6 +56,7 @@ public class NetworkManagerImpl implements NetworkManager {
      * @see com.limegroup.gnutella.NetworkManager#isOOBCapable()
      */
     public boolean isOOBCapable() {
+        // DPINJ: Settings should be passed in instead of statics
         return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
                !NetworkUtils.isPrivate() &&
                SearchSettings.OOB_ENABLED.getValue() &&
@@ -207,10 +207,5 @@ public class NetworkManagerImpl implements NetworkManager {
 
     public GUID getSolicitedGUID() {
         return udpService.get().getSolicitedGUID();
-    }
-
-
-    public int supportsFWTVersion() {
-        return udpService.get().canDoFWT() ? UDPConnection.VERSION : 0;
     }
 }

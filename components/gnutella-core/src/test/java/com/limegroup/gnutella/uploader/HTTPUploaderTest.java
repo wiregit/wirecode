@@ -11,24 +11,16 @@ import junit.framework.Test;
 
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
-import org.limewire.io.LocalSocketAddressService;
-import org.limewire.net.ConnectionDispatcher;
+import org.limewire.concurrent.Providers;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Singleton;
-import com.google.inject.name.Names;
 import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -36,7 +28,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class HTTPUploaderTest extends LimeTestCase {
@@ -53,11 +44,9 @@ public class HTTPUploaderTest extends LimeTestCase {
 
     private FileManagerStub fm;
 
-    private HTTPUploadManager uploadManager;
+    private HTTPUploadManager upMan;
 
     private FileDescStub fd1;
-
-    private Acceptor acceptor;
 
     public HTTPUploaderTest(String name) {
         super(name);
@@ -67,11 +56,33 @@ public class HTTPUploaderTest extends LimeTestCase {
         return buildTestSuite(HTTPUploaderTest.class);
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    public static void globalSetUp() throws Exception {
+        cb = new MyActivityCallback();
+        LimeTestUtils.setActivityCallBack(cb);
+
+        doSettings();
+
+        // TODO acceptor shutdown in globalTearDown()
+        Acceptor acceptor = ProviderHacks.getAcceptor();
+        acceptor.init();
+        acceptor.start();
+    }
+
+    private static void doSettings() {
         ConnectionSettings.PORT.setValue(PORT);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        if (cb == null) {
+            globalSetUp();
+        }
+
+        doSettings();
+
+        cb.uploads.clear();
 
         Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
         Vector<FileDesc> descs = new Vector<FileDesc>();
@@ -81,51 +92,25 @@ public class HTTPUploaderTest extends LimeTestCase {
         urns.put(urn1, fd1);
         descs.add(fd1);
 
-        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(FileManager.class).to(FileManagerStub.class);
-            } 
-        });        
+        fm = new FileManagerStub(urns, descs);
 
-        fm = (FileManagerStub) injector.getInstance(FileManager.class);
-        fm.setUrns(urns);
-        fm.setDescs(descs);
+        httpAcceptor = new HTTPAcceptor(Providers.of(ProviderHacks.getConnectionDispatcher()));
 
-        cb = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
+        upMan = new HTTPUploadManager(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()));
 
-        acceptor = injector.getInstance(Acceptor.class);
-        httpAcceptor = injector.getInstance(HTTPAcceptor.class);
-        uploadManager = injector.getInstance(HTTPUploadManager.class);
-
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub().setTLSCapable(true));
-
-        acceptor.setListeningPort(PORT);
-        acceptor.start();
-        
         httpAcceptor.start();
-        uploadManager.start();
-
-        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
-        connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
-        
-        HostConfiguration config = new HostConfiguration();
-        config.setHost("localhost", PORT);
+        upMan.start(httpAcceptor, fm, cb, ProviderHacks.getMessageRouter());
 
         client = new HttpClient();
+        HostConfiguration config = new HostConfiguration();
+        config.setHost("localhost", PORT);
         client.setHostConfiguration(config);
-        client.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
     }
 
     @Override
     protected void tearDown() throws Exception {
-        uploadManager.stop();
+        upMan.stop(httpAcceptor);
         httpAcceptor.stop();
-
-        acceptor.setListeningPort(0);
-        acceptor.shutdown();
-
-        LimeTestUtils.waitForNIO();
     }
 
     public void testChatAndBrowseEnabled() throws Exception {
@@ -216,7 +201,6 @@ public class HTTPUploaderTest extends LimeTestCase {
         assertEquals(UploadStatus.COMPLETE, uploader.getState());
     }
 
-    @Singleton
     private static class MyActivityCallback extends ActivityCallbackStub {
 
         List<Uploader> uploads = new ArrayList<Uploader>();

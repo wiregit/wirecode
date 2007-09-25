@@ -277,28 +277,5 @@ public final class FileUtilsTest extends BaseTestCase {
     	assertTrue(FileUtils.deleteRecursive(dir));
     	assertFalse(dir.exists());
     }
-
-    public void testGetJarFromClasspath() throws Exception {
-        assertNull(FileUtils.getJarFromClasspath("does/not/exist"));
-        File file = FileUtils.getJarFromClasspath("org/apache/commons/logging/Log.class");
-        assertNotNull(file);
-        assertTrue(file.exists());
-        assertEquals("commons-logging.jar", file.getName());
-    }
-
-    public void testGetJarFromClasspathClassLoader() throws Exception {
-        ClassLoader classLoader = FileUtils.class.getClassLoader();
-        assertNull(FileUtils.getJarFromClasspath(classLoader, "does/not/exist"));
-        File file = FileUtils.getJarFromClasspath(classLoader, "org/apache/commons/logging/Log.class");
-        assertNotNull(file);
-        assertTrue(file.exists());
-        assertEquals("commons-logging.jar", file.getName());
-        
-        try {
-            FileUtils.getJarFromClasspath(null, "org/apache/commons/logging/Log.class");
-            fail("Expected IllegalArgumentException");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
+    
 }

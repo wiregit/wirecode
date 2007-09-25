@@ -318,6 +318,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         connectionDispatcher.get().
         addConnectionAcceptor(this,
         		false,
+        		false,
         		ConnectionSettings.CONNECT_STRING_FIRST_WORD,
                 "LIMEWIRE");
         
@@ -450,10 +451,6 @@ public class ConnectionManager implements ConnectionAcceptor,
         adjustConnectionFetchers();
     }
 
-    public boolean isBlocking() {
-        return false;
-    }
-    
     /**
      * True if this is currently or wants to be a supernode,
      * otherwise false.

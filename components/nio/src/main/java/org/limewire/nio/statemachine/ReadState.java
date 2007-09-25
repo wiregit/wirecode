@@ -5,11 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
 
-/**
- * Abstract class that processes a read state, and declares a read state is 
- * taking place and write state is not taking place.
- *
- */
 public abstract class ReadState implements IOState {
 
     public final boolean isWriting() {

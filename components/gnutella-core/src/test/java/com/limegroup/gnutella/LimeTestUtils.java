@@ -7,18 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class LimeTestUtils {
 
@@ -126,54 +120,9 @@ public class LimeTestUtils {
 	}
 
     /**
-     * Creates the Guice injector with the limewire default modules and the 
-     * test module that can override bindings in the former modules.
-     * 
-     * @param module the test modules that can override bindings
-     * @param callbackClass the class that is used as a callback
-     * @return the injector
+     * Clears the hostcatcher.
      */
-    public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
-        List<Module> list = new ArrayList<Module>();
-        list.addAll(Arrays.asList(modules));
-        list.add(new LimeWireCoreModule(callbackClass));
-        list.add(new ModuleHacks());
-        Injector injector = Guice.createInjector(list);
-        
-        ProviderHacks.markUnusable();        
-        
-        return injector;
+    public static void clearHostCatcher() {
+        ProviderHacks.getHostCatcher().clear();
     }
-
-    /**
-     * Wraps {@link #createInjector(Module, Class) createInjector(Module, ActivityCallbackStub.class)}.
-     */
-    public static Injector createInjector(Module... modules) {
-        return createInjector(ActivityCallbackStub.class, modules);
-    }
-
-    /**
-     * Creates the Guice injector with the limewire default modules and the 
-     * test module that can override bindings in the former modules.
-     * 
-     * Also starts the {@link LifecycleManager}.
-     * 
-     * @param module the test modules that can override bindings
-     * @param callbackClass the class that is used as a callback
-     * @return the injector
-     */
-    public static Injector createInjectorAndStart(Class<? extends ActivityCallback> callbackClass, Module...modules) {
-        Injector injector = createInjector(callbackClass, modules);
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
-        lifecycleManager.start();
-        return injector;
-    }
-    
-    /**
-     * Wraps {@link #createInjectorAndStart(Module, Class) createInjectorAndStart(Module, ActivityCallbackStub.class)}.
-     */
-    public static Injector createInjectorAndStart(Module...modules) {
-        return createInjectorAndStart(ActivityCallbackStub.class, modules);
-    }
-
 }

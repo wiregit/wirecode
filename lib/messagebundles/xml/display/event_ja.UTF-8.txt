@@ -1,0 +1,15 @@
+﻿events__event               = イベント
+events__event__performer__  = 主催者
+events__event__event_name__ = イベント名
+events__event__venue__      = 開催地
+events__event__city__       = 町
+events__event__state__      = 州
+events__event__country__    = 国
+events__event__year__       = 年
+events__event__month__      = 月
+events__event__day__        = 日
+events__event__type__       = タイプ
+events__event__price__      = 価格
+events__event__link__       = リンク
+events__event__comments__   = コメント
+events__event__action__ = アクション

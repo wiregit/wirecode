@@ -180,41 +180,26 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private final Map<String, RequestCache> REQUESTS = new FixedsizeForgetfulHashMap<String, RequestCache>(
             250);
 
-    private volatile Provider<ActivityCallback> activityCallback;
+    private volatile ActivityCallback activityCallback;
 
-    private volatile Provider<FileManager> fileManager;
+    private volatile FileManager fileManager;
 
     private volatile boolean started;
     
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
 
     private final Provider<ContentManager> contentManager;
-
-    private final Provider<HTTPAcceptor> httpAcceptor;
     
     @Inject
-    public HTTPUploadManager(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<ContentManager> contentManager,
-            Provider<HTTPAcceptor> httpAcceptor, Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback) {
+    public HTTPUploadManager(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<ContentManager> contentManager) {
         if (slotManager == null) {
             throw new IllegalArgumentException("slotManager may not be null");
-        }
-        if (httpAcceptor == null) {
-            throw new IllegalArgumentException("acceptor may not be null");
-        }
-        if (activityCallback == null) {
-            throw new IllegalArgumentException("activityCallback may not be null");
-        }        
-        if (fileManager == null) {
-            throw new IllegalArgumentException("fileManager may not be null");
         }
 
         this.slotManager = slotManager;
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.contentManager = contentManager;
         this.freeLoaderRequestHandler = httpRequestHandlerFactory.createFreeLoaderRequestHandler();
-        this.httpAcceptor = httpAcceptor;
-        this.fileManager = fileManager;
-        this.activityCallback = activityCallback;
     }
 
     /**
@@ -223,27 +208,43 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * @throws IllegalStateException if uploadmanager was already started
      * @see #stop(HTTPAcceptor)
      */
-    public void start() {
+    public void start(HTTPAcceptor acceptor, FileManager fileManager, ActivityCallback activityCallback, MessageRouter messageRouter) {
+        if (acceptor == null) {
+            throw new IllegalArgumentException("acceptor may not be null");
+        }
+        if (activityCallback == null) {
+            throw new IllegalArgumentException("activityCallback may not be null");
+        }        
+        if (fileManager == null) {
+            throw new IllegalArgumentException("fileManager may not be null");
+        }
+        if (messageRouter == null) {
+            throw new IllegalArgumentException("messageRouter may not be null");
+        }        
+
         if (started) {
             throw new IllegalStateException();
         }
         
+        this.fileManager = fileManager;
+        this.activityCallback = activityCallback;
+        
         FileUtils.addFileLocker(this);
 
-        httpAcceptor.get().addAcceptorListener(responseListener);
+        acceptor.addAcceptorListener(responseListener);
 
         // browse
-        httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler());
+        acceptor.registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler());
 
         // push-proxy requests
         HttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
-        httpAcceptor.get().registerHandler("/gnutella/push-proxy", pushProxyHandler);
-        httpAcceptor.get().registerHandler("/gnet/push-proxy", pushProxyHandler);
+        acceptor.registerHandler("/gnutella/push-proxy", pushProxyHandler);
+        acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
 
         // uploads
         FileRequestHandler fileRequestHandler = httpRequestHandlerFactory.createFileRequestHandler();
-        httpAcceptor.get().registerHandler("/get*", fileRequestHandler);
-        httpAcceptor.get().registerHandler("/uri-res/*", fileRequestHandler);
+        acceptor.registerHandler("/get*", fileRequestHandler);
+        acceptor.registerHandler("/uri-res/*", fileRequestHandler);
         
         started = true;
     }
@@ -253,23 +254,29 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * 
      * @see #start(HTTPAcceptor)
      */
-    public void stop() {
+    public void stop(HTTPAcceptor acceptor) {
+        if (acceptor == null) {
+            throw new IllegalArgumentException("acceptor may not be null");
+        }
         if (!started) {
             throw new IllegalStateException();
         }
 
-        httpAcceptor.get().unregisterHandler("/");
-        httpAcceptor.get().unregisterHandler("/update.xml");
-        httpAcceptor.get().unregisterHandler("/gnutella/push-proxy");
-        httpAcceptor.get().unregisterHandler("/gnet/push-proxy");
-        httpAcceptor.get().unregisterHandler("/get*");
-        httpAcceptor.get().unregisterHandler("/uri-res/*");
+        acceptor.unregisterHandler("/");
+        acceptor.unregisterHandler("/update.xml");
+        acceptor.unregisterHandler("/gnutella/push-proxy");
+        acceptor.unregisterHandler("/gnet/push-proxy");
+        acceptor.unregisterHandler("/get*");
+        acceptor.unregisterHandler("/uri-res/*");
         
-        httpAcceptor.get().removeAcceptorListener(responseListener);
+        acceptor.removeAcceptorListener(responseListener);
         
         FileUtils.removeFileLocker(this);
         
         started = false;
+        
+        fileManager = null;
+        activityCallback = null;
     }
     
     public void handleFreeLoader(HttpRequest request, HttpResponse response,
@@ -343,11 +350,11 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     && state == UploadStatus.COMPLETE
                     && (lastState == UploadStatus.UPLOADING || lastState == UploadStatus.THEX_REQUEST)) {
                 fd.incrementCompletedUploads();
-                activityCallback.get().handleSharedFileUpdate(fd.getFile());
+                activityCallback .handleSharedFileUpdate(fd.getFile());
             }
         }
 
-        activityCallback.get().removeUpload(uploader);
+        activityCallback.removeUpload(uploader);
     }
 
     public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {
@@ -377,14 +384,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // We are going to notify the gui about the new upload, and let
         // it decide what to do with it - will act depending on it's
         // state
-        activityCallback.get().addUpload(uploader);
+        activityCallback.addUpload(uploader);
         uploader.setVisible(true);
 
         if (!uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
             if (fd != null) {
                 fd.incrementAttemptedUploads();
-                activityCallback.get().handleSharedFileUpdate(fd.getFile());
+                activityCallback.handleSharedFileUpdate(fd.getFile());
             }
         }
     }
@@ -403,7 +410,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             return false;
         }
         
-        if (fileManager.get().hasApplicationSharedFiles())
+        if (fileManager.hasApplicationSharedFiles())
             return slotManager.hasHTTPSlotForMeta(uploadsInProgress()
                     + getNumQueuedUploads());
         return isServiceable();
@@ -436,7 +443,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public boolean releaseLock(File file) {
         assert started;
         
-        FileDesc fd = fileManager.get().getFileDescForFile(file);
+        FileDesc fd = fileManager.getFileDescForFile(file);
         if (fd != null)
             return killUploadsForFileDesc(fd);
         else
@@ -482,7 +489,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         FileDesc fd = session.getUploader().getFileDesc();
         if (!contentManager.get().isVerified(fd.getSHA1Urn())) // spawn a validation
-            fileManager.get().validate(fd);
+            fileManager.validate(fd);
 
         URN sha1 = fd.getSHA1Urn();
 
@@ -548,7 +555,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         // Enable auto shutdown
         if (activeUploadList.size() == 0)
-            activityCallback.get().uploadsComplete();
+            activityCallback.uploadsComplete();
     }
 
     /**

@@ -29,7 +29,6 @@ public class AltLocUtils {
             Function<AlternateLocation, Void> function) {
         parseAlternateLocations(sha1, locations, allowTLS, alternateLocationFactory, function, false);
     }
-    
     public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS,  AlternateLocationFactory alternateLocationFactory, 
                                                Function<AlternateLocation, Void> function, boolean allowMe) {
         if(locations == null)

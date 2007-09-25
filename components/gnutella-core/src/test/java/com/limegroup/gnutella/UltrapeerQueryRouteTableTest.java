@@ -6,8 +6,6 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
-
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -162,47 +160,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         //mr.broadcastQueryRequest(qr);
     }
     
-    private static class TestMessageRouter extends StandardMessageRouter {
-        
-        public TestMessageRouter() {
-            super(ProviderHacks.getNetworkManager(), ProviderHacks
-                    .getQueryRequestFactory(), ProviderHacks
-                    .getQueryHandlerFactory(),
-                    ProviderHacks.getOnDemandUnicaster(), ProviderHacks
-                            .getHeadPongFactory(), ProviderHacks
-                            .getPingReplyFactory(), ProviderHacks
-                            .getConnectionManager(), ProviderHacks
-                            .getForMeReplyHandler(), ProviderHacks
-                            .getQueryUnicaster(), ProviderHacks.getFileManager(),
-                    ProviderHacks.getContentManager(), ProviderHacks
-                            .getDHTManager(), ProviderHacks.getUploadManager(),
-                    ProviderHacks.getDownloadManager(), ProviderHacks
-                            .getUdpService(), ProviderHacks
-                            .getSearchResultHandler(), ProviderHacks
-                            .getSocketsManager(), ProviderHacks.getHostCatcher(),
-                    ProviderHacks.getQueryReplyFactory(), ProviderHacks
-                            .getStaticMessages(), Providers.of(ProviderHacks
-                            .getMessageDispatcher()), ProviderHacks
-                            .getMulticastService(), ProviderHacks
-                            .getQueryDispatcher(), Providers.of(ProviderHacks
-                            .getActivityCallback()), ProviderHacks
-                            .getConnectionServices(), ProviderHacks
-                            .getApplicationServices(), ProviderHacks
-                            .getBackgroundExecutor(), Providers
-                            .of(ProviderHacks.getPongCacher()), Providers
-                            .of(ProviderHacks.getSimppManager()), Providers
-                            .of(ProviderHacks.getUpdateHandler()),
-                            ProviderHacks.getGuidMapManager(),
-                            ProviderHacks.getUDPReplyHandlerCache(),
-                            ProviderHacks.getInspectionRequestHandlerFactory(),
-                            ProviderHacks.getUDPCrawlerPingHandlerFactory(),
-                            ProviderHacks.getAdvancedToggleHandlerFactory(),
-                            ProviderHacks.getStatistics(),
-                            ProviderHacks.getReplyNumberVendorMessageFactory(),
-                            ProviderHacks.getPingRequestFactory()
-
-            );
-        }
+    private static class TestMessageRouter extends HackMessageRouter {
         
         public boolean originateQuery(QueryRequest r, ManagedConnection c) {
             SENT.add(r);

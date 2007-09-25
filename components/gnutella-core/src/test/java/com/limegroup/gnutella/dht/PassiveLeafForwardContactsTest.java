@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.io.InterruptedIOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,32 +16,24 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM.SupportedMessageBlock;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.CapabilitiesVMFactoryImplStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -50,6 +43,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * Everytime an Ultrapeer learns of a new Contact or updates an
  * existing Contact it will forward it to its leafs
  */
+@SuppressWarnings("unchecked")
 public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     private static final int PORT = 6667;
@@ -57,14 +51,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     private List<MojitoDHT> dhts;
     
     private int k;
-
-    private Injector injector;
-
-    private ConnectionManager connectionManager;
-
-    private ConnectionServices connectionServices;
-
-    private DHTManager dhtManager;
     
     public PassiveLeafForwardContactsTest(String name) {
         super(name);
@@ -80,50 +66,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        doSettings();
-        
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImplStub.class);
-            }            
-        });
-
-        // start an instance of LimeWire in Ultrapeer mode
-        injector.getInstance(LifecycleManager.class).start();
-            
-        injector.getInstance(HostCatcher.class).clear();
-
-        connectionServices = injector.getInstance(ConnectionServices.class);
-        connectionServices.connect();
-           
-        // make sure LimeWire is running as an Ultrapeer
-        assertTrue(connectionServices.isSupernode());
-        assertFalse(connectionServices.isActiveSuperNode());
-        assertFalse(connectionServices.isShieldedLeaf());
-        
-        connectionManager = injector.getInstance(ConnectionManager.class);
-        
-        dhtManager = injector.getInstance(DHTManager.class);
-        
-        // Start and bootstrap a bunch of DHT Nodes
-        k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        dhts = new ArrayList<MojitoDHT>();
-        for (int i = 0; i < 2*k; i++) {
-            MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-            dht.bind(2000 + i);
-            dht.start();
-            
-            if (i > 0) {
-                dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
-            }
-            
-            dhts.add(dht);
-        }
-        dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
-    }
-
-    private void doSettings() {
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -170,6 +112,37 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         // Nothing should take longer than 1.5 seconds. If we start seeing
         // LockTimeoutExceptions on the loopback then check this Setting!
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
+        
+        if (!ProviderHacks.getLifecycleManager().isLoaded()) {
+            // Start an instance of LimeWire in Ultrapeer mode
+            //RouterService routerService = new RouterService(new ActivityCallbackStub());
+            ProviderHacks.getLifecycleManager().start();
+            
+            LimeTestUtils.clearHostCatcher();
+            ProviderHacks.getConnectionServices().connect();
+            
+            // Make sure LimeWire is running as an Ultrapeer
+            assertTrue(ProviderHacks.getLifecycleManager().isStarted());
+            assertTrue(ProviderHacks.getConnectionServices().isSupernode());
+            assertFalse(ProviderHacks.getConnectionServices().isActiveSuperNode());
+            assertFalse(ProviderHacks.getConnectionServices().isShieldedLeaf());
+        }
+        
+        // Start and bootstrap a bunch of DHT Nodes
+        k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        dhts = new ArrayList<MojitoDHT>();
+        for (int i = 0; i < 2*k; i++) {
+            MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
+            dht.bind(2000 + i);
+            dht.start();
+            
+            if (i > 0) {
+                dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
+            }
+            
+            dhts.add(dht);
+        }
+        dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
     }
 
     @Override
@@ -178,13 +151,16 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             dht.close();
         }
         dhts = null;
-        
-        injector.getInstance(LifecycleManager.class).shutdown();
+    }
+    
+    public static void globalTearDown() throws Exception {
+        ProviderHacks.getLifecycleManager().shutdown();
     }
     
     public void testForwardContacts() throws Exception {
         // There should be no connections
-        assertEquals(0, connectionManager.getNumConnections());
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
+        assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
         Connection out = createLeafConnection();
@@ -195,22 +171,33 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             drain(out);
             
             // There should be one connection now
-            assertEquals(1, connectionManager.getNumConnections());
-            assertTrue(connectionServices.isActiveSuperNode());
+            assertEquals(1, cm.getNumConnections());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = connectionManager.getConnections().get(0);
+            ManagedConnection in = cm.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
             // Pretend the leaf is running in PASSIVE_LEAF mode.
-            addPassiveLeafCapability();
-           
-            // Tell our Ultrapeer that we've PASSIVE_LEAF mode enabled
-            CapabilitiesVM vm = injector.getInstance(CapabilitiesVMFactory.class).getCapabilitiesVM();
+            // Thanks to Singletons trivial to do... ;)
+            Method m = CapabilitiesVM.class.getDeclaredMethod("getSupportedMessages", new Class[]{});
+            m.setAccessible(true);
+            Set capabilites = (Set)m.invoke(null, new Object[0]);
+            
+            Class clazz = Class.forName("com.limegroup.gnutella.messages.vendor.CapabilitiesVM$SupportedMessageBlock");
+            Object smb = PrivilegedAccessor.invokeConstructor(clazz, 
+                    new Object[]{ DHTMode.PASSIVE_LEAF.getCapabilityName(), Integer.valueOf(0) }, 
+                    new Class[] { byte[].class, int.class });
+            capabilites.add(smb);
+            
+            CapabilitiesVM vm = (CapabilitiesVM)PrivilegedAccessor.invokeConstructor(
+                    CapabilitiesVM.class, new Object[] { capabilites }, new Class[] { Set.class });
             assertEquals(0, vm.isPassiveLeafNode());
+            
+            // Tell our Ultrapeer that we've PASSIVE_LEAF mode enabled
             out.send(vm);
             out.flush();
             
@@ -225,13 +212,14 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertNotEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertTrue(in.isPushProxyFor());
             
-            dhtManager.start(DHTMode.PASSIVE);
+            ProviderHacks.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, ProviderHacks.getDHTManager().getDHTMode());
             
             
             // Bootstrap the Ultrapeer
-            dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
+            ProviderHacks.getDHTManager().getMojitoDHT()
+                .bootstrap(dhts.get(0).getContactAddress()).get();
             
             // -------------------------------------
             
@@ -272,7 +260,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     public void testDoNotSendCapabilitiesVM() throws Exception {
         // There should be no connections
-        assertEquals(0, connectionManager.getNumConnections());
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
+        assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
         Connection out = createLeafConnection();
@@ -282,11 +271,11 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             drain(out);
             
             // There should be one connection now
-            assertEquals(1, connectionManager.getNumConnections());
-            assertTrue(connectionServices.isActiveSuperNode());
+            assertEquals(1, cm.getNumConnections());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = connectionManager.getConnections().get(0);
+            ManagedConnection in = cm.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());
@@ -305,12 +294,13 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertTrue(in.isPushProxyFor());
             
-            dhtManager.start(DHTMode.PASSIVE);
+            ProviderHacks.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, ProviderHacks.getDHTManager().getDHTMode());
             
             // Bootstrap the Ultrapeer
-            dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
+            ProviderHacks.getDHTManager().getMojitoDHT()
+                .bootstrap(dhts.get(0).getContactAddress()).get();
             
             // -------------------------------------
             
@@ -331,7 +321,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     public void testDoNotSendPushProxyRequest() throws Exception {
         // There should be no connections
-        assertEquals(0, connectionManager.getNumConnections());
+        ConnectionManager cm = ProviderHacks.getConnectionManager();
+        assertEquals(0, cm.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
         Connection out = createLeafConnection();
@@ -341,22 +332,33 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             drain(out);
             
             // There should be one connection now
-            assertEquals(1, connectionManager.getNumConnections());
-            assertTrue(connectionServices.isActiveSuperNode());
+            assertEquals(1, cm.getNumConnections());
+            assertTrue(ProviderHacks.getConnectionServices().isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = connectionManager.getConnections().get(0);
+            ManagedConnection in = cm.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
             assertEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
-            // pretend the leaf is running in PASSIVE_LEAF mode.
-            addPassiveLeafCapability();
+            // Pretend the leaf is running in PASSIVE_LEAF mode.
+            // Thanks to Singletons trivial to do... ;)
+            Method m = CapabilitiesVM.class.getDeclaredMethod("getSupportedMessages", new Class[]{});
+            m.setAccessible(true);
+            Set capabilites = (Set)m.invoke(null, new Object[0]);
+            
+            Class clazz = Class.forName("com.limegroup.gnutella.messages.vendor.CapabilitiesVM$SupportedMessageBlock");
+            Object smb = PrivilegedAccessor.invokeConstructor(clazz, 
+                    new Object[]{ DHTMode.PASSIVE_LEAF.getCapabilityName(), Integer.valueOf(0) }, 
+                    new Class[] { byte[].class, int.class });
+            capabilites.add(smb);
+            
+            CapabilitiesVM vm = (CapabilitiesVM)PrivilegedAccessor.invokeConstructor(
+                    CapabilitiesVM.class, new Object[] { capabilites }, new Class[] { Set.class });
+            assertEquals(0, vm.isPassiveLeafNode());
             
             // Tell our Ultrapeer that we've PASSIVE_LEAF mode enabled
-            CapabilitiesVM vm = injector.getInstance(CapabilitiesVMFactory.class).getCapabilitiesVM();
-            assertEquals(0, vm.isPassiveLeafNode());
             out.send(vm);
             out.flush();
             
@@ -368,12 +370,13 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertNotEquals(-1, in.remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
-            dhtManager.start(DHTMode.PASSIVE);
+            ProviderHacks.getDHTManager().start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, ProviderHacks.getDHTManager().getDHTMode());
             
             // Bootstrap the Ultrapeer
-            dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
+            ProviderHacks.getDHTManager().getMojitoDHT()
+                .bootstrap(dhts.get(0).getContactAddress()).get();
             
             // -------------------------------------
             
@@ -392,19 +395,13 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         }
     }
     
-    private void addPassiveLeafCapability() {
-        CapabilitiesVMFactoryImplStub factory = (CapabilitiesVMFactoryImplStub) injector.getInstance(CapabilitiesVMFactory.class);
-        SupportedMessageBlock messageBlock = new CapabilitiesVM.SupportedMessageBlock(DHTMode.PASSIVE_LEAF.getCapabilityName(), Integer.valueOf(0));
-        factory.addMessageBlock(messageBlock);
-    }
-
     protected Connection createLeafConnection() throws Exception {
-        return createConnection(injector.getInstance(HeadersFactory.class).createLeafHeaders("localhost"));
+        return createConnection(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"));
     }
     
     /** Builds a single connection with the given headers. */
     protected Connection createConnection(Properties headers) throws Exception {
-        Connection c = injector.getInstance(ManagedConnectionFactory.class).createManagedConnection("localhost", PORT);
+        Connection c = ProviderHacks.getManagedConnectionFactory().createManagedConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         return c;
     }

@@ -29,6 +29,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 
@@ -79,7 +80,8 @@ public final class UrnCache {
     /**
      * Create and initialize urn cache.
      */
-    public UrnCache() {
+    @Inject
+    UrnCache() {
         deserializer = QUEUE.submit(new Callable<Map<UrnSetKey, Set<URN>>>() {
             @SuppressWarnings("unchecked")
             public Map<UrnSetKey, Set<URN>> call() {

@@ -189,7 +189,7 @@ public class UpdateHandler implements HttpClientListener {
         this.applicationServices = applicationServices;
         this.updateCollectionFactory = updateCollectionFactory;
         
-        initialize(); // TODO: move to an initializer
+        initialize(); // DPINJ: move to an initializer
     }
 
     /**

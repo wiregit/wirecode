@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
 /**
- * Defines the interface that allows <code>SocketChannel</code> accept events 
- * to be received.
- * <p>
- * If the events are being received because of a <code>SelectableChannel</code>,
- * you can turn off interest in events via
- * <code>NIODispatcher.instance().interestAccept(channel, false)</code>.
- * 
+ * Allows accept events to be received.
+ *
+ * If the events are being received because of a SelectableChannel,
+ * interest in events can be turned off by using:
+ *  NIODispatcher.instance().interestAccept(channel, false);
  */
 public interface AcceptChannelObserver extends IOErrorObserver {
     

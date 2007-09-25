@@ -6,8 +6,6 @@ import org.limewire.io.IpPort;
 
 public interface PushEndpointCache {
 
-    void clear();
-    
     CachedPushEndpoint getCached(GUID guid);    
     
     /**

@@ -4,7 +4,6 @@ import java.net.Socket;
 
 import junit.framework.Test;
 
-import com.google.inject.Injector;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
@@ -15,9 +14,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  */
 public class FirewalledStatusTest extends ClientSideTestCase {
 
-    private Injector injector;
-    private NetworkManager networkManager;
-    
     public FirewalledStatusTest(String name) {
         super(name);
     }
@@ -30,29 +26,20 @@ public class FirewalledStatusTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() {
-        injector = LimeTestUtils.createInjector();
-        
-        networkManager = injector.getInstance(NetworkManager.class);
-        
-    }
-    
     @SuppressWarnings("unused")
     private static void doSettings() {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
     }        
 
     ///////////////////////// Actual Tests ////////////////////////////
     
     public void testStillFirewalledAfterLocalConnect() throws Exception {
-
-        
-        assertFalse(networkManager.acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
 
         Socket incoming = new Socket("localhost", SERVER_PORT);
         incoming.close();
 
-        assertFalse(networkManager.acceptedIncomingConnection());
+        assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
     }
 
 

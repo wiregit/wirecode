@@ -10,7 +10,6 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
@@ -20,10 +19,7 @@ import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.util.CommonUtils;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -31,10 +27,6 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     private static final EventDispatcher<DHTEvent, DHTEventListener> dispatcherStub = 
         new DHTEventDispatcherStub();
-    
-    private Injector injector;
-
-    private DHTControllerFactory dhtControllerFactory;
     
     public ActiveDHTNodeControllerTest(String name) {
         super(name);
@@ -52,10 +44,6 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     protected void setUp() throws Exception {
         setSettings();
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        
-        injector = LimeTestUtils.createInjector();
-        
-        dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
     }
     
     public void testPersistence() throws Exception{
@@ -66,7 +54,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
         //start the node controller
-        ActiveDHTNodeController controller = dhtControllerFactory.createActiveDHTNodeController(Vendor.UNKNOWN,
+        ActiveDHTNodeController controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.UNKNOWN,
                 Version.ZERO, dispatcherStub);
         
         try {
@@ -92,7 +80,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
             controller.start();
             controller.stop();
             
-            controller = dhtControllerFactory.createActiveDHTNodeController(
+            controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(
                     Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
             context = (Context) controller.getMojitoDHT();
             rt = context.getRouteTable();
@@ -109,36 +97,31 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testGetActiveDHTNodes() throws Exception{
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        ActiveDHTNodeController controller = dhtControllerFactory.createActiveDHTNodeController(Vendor.UNKNOWN,
+        ActiveDHTNodeController controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.UNKNOWN,
                 Version.ZERO, dispatcherStub);
         
-        MojitoDHT dhtBootstrapNode = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
-        try {        
-            try {
-                controller.start();
-                assertTrue(controller.isRunning());
-
-                // bootstrap active node
-                controller.addActiveDHTNode(dhtBootstrapNode.getContactAddress());
-                for (int i = 0; i < 10; i++) {
-                    if (controller.isBootstrapped()) {
-                        break;
-                    }
-
-                    Thread.sleep(500);
+        try {
+            controller.start();
+            assertTrue(controller.isRunning());
+            
+            // bootstrap active node
+            controller.addActiveDHTNode(new InetSocketAddress("localhost",3000));
+            for (int i = 0; i < 10; i++) {
+                if (controller.isBootstrapped()) {
+                    break;
                 }
-                assertTrue(controller.isBootstrapped());
-
-                // ask for active nodes -- should return itself and the bootstrap node
-                List<IpPort> l = controller.getActiveDHTNodes(10);
-                assertEquals(2, l.size());
-                assertEquals(injector.getInstance(NetworkManager.class).getPort(), l.get(0).getPort());
-                assertEquals(3000, l.get(1).getPort());
-            } finally {
-                controller.stop();
+                
+                Thread.sleep(500);
             }
+            assertTrue(controller.isBootstrapped());
+            
+            // ask for active nodes -- should return itself and the bootstrap node
+            List<IpPort> l = controller.getActiveDHTNodes(10);
+            assertEquals(2, l.size());
+            assertEquals(ProviderHacks.getNetworkManager().getPort(), l.get(0).getPort());
+            assertEquals(3000, l.get(1).getPort());
         } finally {
-            dhtBootstrapNode.close();
+            controller.stop();
         }
     }
     
@@ -149,14 +132,14 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
         
-        ActiveDHTNodeController controller = dhtControllerFactory.createActiveDHTNodeController(Vendor.UNKNOWN,
+        ActiveDHTNodeController controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.UNKNOWN,
                 Version.ZERO, dispatcherStub);
         
         Contact localNode1 = controller.getMojitoDHT().getLocalNode();
         controller.start();
         controller.stop();
         
-        controller = dhtControllerFactory.createActiveDHTNodeController(Vendor.UNKNOWN,
+        controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.UNKNOWN,
                 Version.ZERO, dispatcherStub);
         Contact localNode2 = controller.getMojitoDHT().getLocalNode();
         controller.start();
@@ -165,7 +148,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         assertEquals(localNode1.getNodeID(), localNode2.getNodeID());
         
         DHTSettings.ACTIVE_DHT_ROUTETABLE_VERSION.setValue(1);
-        controller = dhtControllerFactory.createActiveDHTNodeController(Vendor.UNKNOWN,
+        controller = ProviderHacks.getDHTControllerFactory().createActiveDHTNodeController(Vendor.UNKNOWN,
                 Version.ZERO, dispatcherStub);
         Contact localNode3 = controller.getMojitoDHT().getLocalNode();
         controller.start();

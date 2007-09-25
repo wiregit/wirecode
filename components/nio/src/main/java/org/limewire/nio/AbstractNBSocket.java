@@ -33,16 +33,12 @@ import org.limewire.nio.timeout.SoTimeout;
 import org.limewire.util.VersionUtils;
 
 /**
- * Implements all common functionality that a non-blocking socket must contain. 
- * Specifically, <code>AbstractNBSocket</code> handles 
- * the multiplexing aspect of handing off reading, writing and connecting to 
- * other Observers (<code>org.limewire.nio.observer</code>). 
- * <p>
- * Additionally, <code>AbstractNBSocket</code> traverses the chain of readers 
- * and writers to read leftover data and ensure remaining data is written. 
- * <p>
- * <code>AbstractNBSocket</code> also exposes a common blocking input and output
- * stream.
+ * Implements all common functionality that a non-blocking socket must contain.
+ * Specifically, this will handle the multiplexing aspect of handing off
+ * reading, writing & connecting to other observers.  It will also handle correctly
+ * traversing the chain of readers & writers so-as to set read up leftover data and
+ * ensure all remaining data is written.   This also exposes a common blocking input
+ * & output stream.
  */
 public abstract class AbstractNBSocket extends NBSocket implements ConnectObserver, ReadWriteObserver,
                                                                   NIOMultiplexor, ReadTimeout, SoTimeout{
@@ -77,9 +73,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     protected abstract InterestReadableByteChannel getBaseReadChannel();
     
     /**
-     * Retrieves the channel which should be used as the base channel
+     * Retrives the channel which should be used as the base channel
      * for all writing operations.
-     * <p>
+     * 
      * If the base write channel is chained (that is, if there are multiple
      * writing layers that will always be used) then this must return
      * the top-most layer.  That layer will be installed beneath the
@@ -91,7 +87,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     
     /**
      * Performs any operations required for shutting down this socket.
-     * <code>shutdownImpl</code> method will only be called once per Socket.
+     * This will only be called once per Socket.
      */
     protected abstract void shutdownImpl();
     
@@ -123,7 +119,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /**
-     * Sets the <code>Shutdown</code> observer.
+     * Sets the Shutdown observer.
      * This observer is useful for when the Socket is created,
      * but connect has not been called yet.  This observer will be
      * notified when the socket is shutdown.
@@ -133,10 +129,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /**
-     * Sets the new <code>ReadObserver</code>.
-     * <p>
-     * The deepest <code>ChannelReader</code> in the chain first has its source
-     * set to the prior reader (assuming it implemented <code>ReadableByteChannel</code>)
+     * Sets the new ReadObserver.
+     *
+     * The deepest ChannelReader in the chain first has its source
+     * set to the prior reader (assuming it implemented ReadableByteChannel)
      * and a read is notified, in order to read any buffered data.
      * The source is then set to the Socket's channel and interest
      * in reading is turned on.
@@ -162,8 +158,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     while(lastChannel.getReadChannel() instanceof ChannelReader)
                         lastChannel = (ChannelReader)lastChannel.getReadChannel();
                     
-                    if(lastChannel instanceof RequiresSelectionKeyAttachment)
-                    	((RequiresSelectionKeyAttachment)lastChannel).setAttachment(AbstractNBSocket.this);
+                    if(lastChannel instanceof ThrottleListener)
+                    	((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
                     
                     if(oldReader instanceof InterestReadableByteChannel && oldReader != newReader) {
                         lastChannel.setReadChannel((InterestReadableByteChannel)oldReader);
@@ -191,17 +187,17 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /**
-     * Sets the new <code>WriteObserver</code>.
-     *<p>
-     * If a <code>ThrottleWriter</code> is one of the <code>ChannelWriters</code>, 
-     * the attachment of the <code>ThrottleWriter</code> is set to be this.
-     * <p>
-     * The deepest <code>ChannelWriter<code> in the chain has its source set to be
-     * a new <code>InterestWriteChannel</code>, which will be used as the hub to receive
+     * Sets the new WriteObserver.
+     *
+     * If a ThrottleWriter is one of the ChannelWriters, the attachment
+     * of the ThrottleWriter is set to be this.
+     *
+     * The deepest ChannelWriter in the chain has its source set to be
+     * a new InterestWriteChannel, which will be used as the hub to receive
      * and forward interest events from/to the channel.
-     * <p>
-     * If this is called while the existing <code>WriteObserver</code> still has data left to
-     * write, then an <code>IllegalStateException</code> is thrown.
+     *
+     * If this is called while the existing WriteObserver still has data left to
+     * write, then an IllegalStateException is thrown.
      */
     public final void setWriteObserver(final ChannelWriter newWriter) {
         NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
@@ -217,8 +213,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     ChannelWriter lastChannel = newWriter;
                     while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
                         lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
-                        if(lastChannel instanceof RequiresSelectionKeyAttachment)
-                            ((RequiresSelectionKeyAttachment)lastChannel).setAttachment(AbstractNBSocket.this);
+                        if(lastChannel instanceof ThrottleListener)
+                            ((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
                     }
 
                     InterestWritableByteChannel source = getBaseWriteChannel();
@@ -242,7 +238,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     
     /**
      * Notification that a connect can occur.
-     * <p>
+     *
      * This passes it off on to the delegating connecter and then forgets the
      * connecter for the duration of the connection.
      */
@@ -258,7 +254,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     
     /**
      * Notification that a read can occur.
-     * 
+     *
      * This passes it off to the delegating reader.
      */
     public final void handleRead() throws IOException {
@@ -279,12 +275,12 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         shutdown();
     }
     
-    /** Connects to <code>addr</code> with no timeout */
+    /** Connects to addr with no timeout */
     public final void connect(SocketAddress addr) throws IOException {
         connect(addr, 0);
     }
     
-    /** Connects to <code>addr</code> with the given timeout (in milliseconds) */
+    /** Connects to addr with the given timeout (in milliseconds) */
     public final void connect(SocketAddress addr, int timeout) throws IOException {
         if (timeout < 0) {
             throw new IllegalArgumentException("timeout must not be < 0");
@@ -325,12 +321,11 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     
     /**
      * Connects to the specified address within the given timeout (in milliseconds).
-     * The given <code>ConnectObserver</code> will be notified of success or failure.
-     * In the event of success, <code>observer.handleConnect</code> is called. In a failure,
-     * <code>observer.shutdown</code> is called. <code>observer.handleIOException</code> 
-     * is never called.
-     * <p>
-     * Returns true if this was able to connect immediately. The observer is still
+     * The given ConnectObserver will be notified of success or failure.
+     * In the event of success, observer.handleConnect is called.  In a failure,
+     * observer.shutdown is called.  observer.handleIOException is never called.
+     *
+     * Returns true if this was able to connect immediately.  The observer is still
      * notified about the success even it it was immediate.
      */
     public boolean connect(SocketAddress addr, int timeout, final ConnectObserver observer) {
@@ -389,9 +384,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
 
     
     /**
-     * Returns the <code>InputStream</code> from the <code>NIOInputStream</code>.
+     * Returns the InputStream from the NIOInputStream.
      *
-     * Internally, this is a blocking Pipe from the non-blocking <code>SocketChannel</code>.
+     * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public final InputStream getInputStream() throws IOException {
         // Unlocked check real quickly.
@@ -432,7 +427,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /**
-     * Returns the <code>OutputStream</code> from the <code>NIOOutputStream</code>.
+     * Returns the OutputStream from the NIOOutputStream.
      *
      * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
@@ -464,7 +459,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }    
     
     /**
-     * Notification that an <code>IOException</code> occurred while processing a
+     * Notification that an IOException occurred while processing a
      * read, connect, or write.
      */
     public final void handleIOException(IOException iox) {

@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.net.Socket;
 
 /**
- * Defines the interface that allows accept events to be received.
+ * Allows accept events to be received.
  */
 public interface AcceptObserver extends IOErrorObserver {
     
     /**
-     *  Notification that a socket is ready.
+     *  Notification that a socket.
      */
     void handleAccept(Socket socket) throws IOException;
 }

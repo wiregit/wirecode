@@ -19,7 +19,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 
 
@@ -71,11 +70,11 @@ public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue("Necessary file test2.mp3 cannot be found!", test2.exists());
         
         Set urns;
-        urns = UrnHelper.calculateAndCacheURN(mason, ProviderHacks.getUrnCache());
+        urns = calculateAndCacheURN(mason);
         files[0] = new FileDesc(mason, urns, 0);
-        urns = UrnHelper.calculateAndCacheURN(test1, ProviderHacks.getUrnCache());
+        urns = calculateAndCacheURN(test1);
         files[1] = new FileDesc(test1, urns, 1);
-        urns = UrnHelper.calculateAndCacheURN(test2, ProviderHacks.getUrnCache());
+        urns = calculateAndCacheURN(test2);
         files[2] = new FileDesc(test2, urns, 2);
 
         factory = ProviderHacks.getLimeXMLReplyCollectionFactory();

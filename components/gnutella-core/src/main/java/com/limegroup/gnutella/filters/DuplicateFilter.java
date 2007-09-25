@@ -47,9 +47,6 @@ public class DuplicateFilter implements SpamFilter {
     private Buffer<GUIDPair> guids=new Buffer<GUIDPair>(BUF_SIZE);
     /** The time, in milliseconds, allowed between similar messages. */
     private static final int GUID_LAG=500;
-    
-    private int guidLag = GUID_LAG;
-    
     /** 
      * When comparing two messages, if the GUIDs of the two messages differ
      * in more than TOLERANCE bytes, the second message will be allowed.
@@ -85,14 +82,11 @@ public class DuplicateFilter implements SpamFilter {
      * be as high as 3*Q if there is little traffic.  
      */
     private static final int QUERY_LAG=1500;
-    
-    private int queryLag = QUERY_LAG;
-    
     /** The system time when we will promote youngQueries. */
     private long querySwapTime=0;
     /** The system time when we will clear both sets. 
      *  INVARIANT: queryClearTime=querySwapTime+QUERY_LAG. */
-    private long queryClearTime=queryLag;
+    private long queryClearTime=QUERY_LAG;
     /** INVARIANT: youngQueries and oldQueries are disjoint. */
     private Set<QueryPair> youngQueries=new HashSet<QueryPair>();
     private Set<QueryPair> oldQueries=new HashSet<QueryPair>();
@@ -136,7 +130,7 @@ public class DuplicateFilter implements SpamFilter {
             //for daylight savings time.  Luckily it need not hold for the code
             //to work correctly.  
             //  Assert.that(me.time>=other.time,"Unexpected clock behavior");
-            if ((me.time-other.time) > guidLag)
+            if ((me.time-other.time) > GUID_LAG)
                 //All remaining pings have smaller timestamps.
                 break;
             //If different hops, keep looking
@@ -172,8 +166,8 @@ public class DuplicateFilter implements SpamFilter {
                 youngQueries.clear();
                 oldQueries.clear();
             }
-            querySwapTime=time+ queryLag;
-            queryClearTime=querySwapTime+ queryLag;
+            querySwapTime=time+QUERY_LAG;
+            queryClearTime=querySwapTime+QUERY_LAG;
         }
 
         //Look up query in both sets.  Add it to new set if not already there.
@@ -188,35 +182,6 @@ public class DuplicateFilter implements SpamFilter {
             boolean added = youngQueries.add(qp);
             return added;     //allow if wasn't already in young set
         }
-    }
-    
-    /**
-     * For testing. 
-     */
-    void setQueryLag(int queryLag) {
-        this.queryLag = queryLag;
-    }
-    
-    /**
-     * For testing. 
-     */
-    int getQueryLag() {
-        return queryLag;
-    }
-    
-    /**
-     * For testing. 
-     */
-    
-    void setGUIDLag(int guidLag) {
-        this.guidLag = guidLag;
-    }
-    
-    /**
-     * For testing. 
-     */
-    int getGUIDLag() {
-        return guidLag;
     }
 }
 
@@ -299,6 +264,4 @@ final class QueryPair {
     public String toString() {
         return "QP: [hops: " + hops + ", metaMask: " + metaMask + ", URNs: " + URNs + ", query: " + query + ", xml: " + xml + "]";
     }
-
-    
 }

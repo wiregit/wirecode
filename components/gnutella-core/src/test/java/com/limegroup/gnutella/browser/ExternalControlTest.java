@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.browser;
 
-import org.limewire.inject.Providers;
+import org.limewire.concurrent.Providers;
 
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.util.LimeTestCase;

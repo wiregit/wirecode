@@ -42,11 +42,6 @@ public class Response {
      *  include the double null terminator.
      */
     private final String name;
-    
-    /** 
-     *  The size of the byte array for the response object
-     */
-    private final int incomingNameByteArraySize;
 
     /** The document representing the XML in this response. */
     private LimeXMLDocument document;
@@ -93,24 +88,21 @@ public class Response {
 	 * of creating them from the urns and locations.
 	 *
 	 * @param index the index of the file referenced in the response
-     * @param size the size of the file (in bytes)
-     * @param name the name of the file
-     * @param incomingNameByteArraySize TODO
-     * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
+	 * @param size the size of the file (in bytes)
+	 * @param name the name of the file
+	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
 	 *  with the file
-     * @param doc the <tt>LimeXMLDocument</tt> instance associated with
+	 * @param doc the <tt>LimeXMLDocument</tt> instance associated with
 	 *  the file
-     * @param extensions The raw unparsed extension bytes.
-     * @param endpoints a collection of other locations on this network
+	 * @param endpoints a collection of other locations on this network
 	 *        that will have this file
+	 * @param extensions The raw unparsed extension bytes.
      */
-    public Response(long index, long size, String name,
-					 int incomingNameByteArraySize, Set<? extends URN> urns, 
-					 LimeXMLDocument doc,
+    Response(long index, long size, String name,
+					 Set<? extends URN> urns, LimeXMLDocument doc, 
 					 Set<? extends IpPort> alternateLocations,
-					 long creationTime, byte[] extensions) {
-        
-                
+					 long creationTime,
+					 byte[] extensions) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
         // see note in createFromStream about Integer.MAX_VALUE
@@ -145,8 +137,6 @@ public class Response {
 		this.alternateLocations = alternateLocations;
 		this.creationTime = creationTime;
 		this.extBytes = extensions;
-		
-		this.incomingNameByteArraySize = incomingNameByteArraySize;
 
 		this.document = doc;
     }
@@ -179,20 +169,18 @@ public class Response {
     public void setDocument(LimeXMLDocument doc) {
         document = doc;
 	}
-	   
+	
+    
     /**
      */
-    public int getIncomingLength() {
-        // must match same number of bytes of Response when initially read from the network
-		if(incomingNameByteArraySize != -1){
-            return 8 +                   // index and size
-            incomingNameByteArraySize +
-    		1 +                   // null
-    		extBytes.length +
-    		1;                    // final null
-		}
-		return 8 + nameBytes.length + 1 + extBytes.length + 1;
-	}
+    public int getLength() {
+        // must match same number of bytes writeToArray() will write
+		return 8 +                   // index and size
+		nameBytes.length +
+		1 +                   // null
+		extBytes.length +
+		1;                    // final null
+    }   
    
 
 	/**

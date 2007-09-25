@@ -9,10 +9,9 @@ import org.limewire.nio.observer.AcceptObserver;
 
 /**
  * A server socket that listens for incoming TLS-capable connections.
- * <p>
- * <code>TLSNIOServerSocket</code> is currently hardcoded to use 
- * {@link TLSNIOSocket}, which supports only 
- * <code>TLS_DH_anon_WITH_AES_128_CBC_SHA</code>.
+ * 
+ * This is currently hardcoded to use TLSNIOSocket, which supports only:
+ *  - TLS_DH_anon_WITH_AES_128_CBC_SHA
  */
 public class TLSNIOServerSocket extends NIOServerSocket {
 

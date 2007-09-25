@@ -11,9 +11,8 @@ import junit.framework.Test;
 import org.limewire.collection.FixedSizeSortedSet;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.helpers.AlternateLocationHelper;
-import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -26,7 +25,6 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
 	private Set _alternateLocations;
 
 	private AlternateLocationCollection _alCollection;
-	private AlternateLocationHelper alternateLocationHelper;
 
 	public AlternateLocationCollectionTest(String name) {
 		super(name);
@@ -41,12 +39,11 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
 	}
 
 	protected void setUp() {
-	    alternateLocationHelper = new AlternateLocationHelper(ProviderHacks.getAlternateLocationFactory());
 		_alternateLocations = new HashSet();
         
-		for(int i=0; i<alternateLocationHelper.EQUAL_SHA1_LOCATIONS.length; i++) {
+		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
             try {
-                _alternateLocations.add(ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[i], UrnHelper.URNS[0]));
+                _alternateLocations.add(ProviderHacks.getAlternateLocationFactory().create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.URNS[0]));
             } catch (IOException e) {
                 fail("could not set up test");
             }
@@ -92,12 +89,12 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
 	public void testAddWrongLocation() {
 		AlternateLocationCollection collection = 
 			AlternateLocationCollection.create
-			(UrnHelper.UNIQUE_SHA1);
-		for(int i=0; i<alternateLocationHelper.UNEQUAL_SHA1_LOCATIONS.length; i++) {
+			(HugeTestUtils.UNIQUE_SHA1);
+		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
-				collection.add(alternateLocationHelper.UNEQUAL_SHA1_LOCATIONS[i]);
+				collection.add(HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i]);
 				fail("should not have accepted unequal location: "+
-				        alternateLocationHelper.UNEQUAL_SHA1_LOCATIONS[i]);
+					 HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i]);
 			} catch(IllegalArgumentException e) {
 				// this is the expected behavior
 			}
@@ -218,13 +215,13 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
         AlternateLocation[] alts = new AlternateLocation[5];
         
         for(int i=0; i<5; i++) {
-            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[i], UrnHelper.URNS[0]);
+            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create(HugeTestUtils.SOME_IPS[i], HugeTestUtils.URNS[0]);
             alts[i] = al;
             c1.add(al);
         }
         
         try {
-            c1.add(ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[6], UrnHelper.URNS[1]));
+            c1.add(ProviderHacks.getAlternateLocationFactory().create(HugeTestUtils.SOME_IPS[6], HugeTestUtils.URNS[1]));
             fail("exception should have been thrown by now");
         } catch(IllegalArgumentException e) {
             //expected behaviour

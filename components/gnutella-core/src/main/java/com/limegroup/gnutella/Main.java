@@ -13,7 +13,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.chat.InstantMessenger;
+import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
@@ -230,13 +230,13 @@ public class Main {
     
         public void fileManagerLoading() {}
     
-        public void acceptChat(InstantMessenger chat) {}
+        public void acceptChat(Chatter chat) {}
     
-        public void receiveMessage(InstantMessenger chat, String message) {}
+        public void receiveMessage(Chatter chat, String message) {}
         
-        public void chatUnavailable(InstantMessenger chatter) {}
+        public void chatUnavailable(Chatter chatter) {}
     
-        public void chatErrorMessage(InstantMessenger chatter, String st) {}
+        public void chatErrorMessage(Chatter chatter, String st) {}
             
         public void downloadsComplete() {}    
         

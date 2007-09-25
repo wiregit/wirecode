@@ -40,8 +40,9 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
 
     public void addConnectionAcceptor(ConnectionAcceptor acceptor,
     		boolean localOnly,
+    		boolean blocking,
     		String... words) {
-    	Delegator d = new Delegator(acceptor, localOnly, acceptor.isBlocking());
+    	Delegator d = new Delegator(acceptor, localOnly, blocking);
     	synchronized(protocols) {
     		for (int i = 0; i < words.length; i++) {
     			if (words[i].length() > longestWordSize) {

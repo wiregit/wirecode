@@ -19,6 +19,7 @@ public class AllUploadTests {
         //$JUnit-BEGIN$
         suite.addTest(FileRequestHandlerTest.suite());
         suite.addTest(PushProxyRequestHandlerTest.suite());
+        suite.addTest(HTTPUploadManagerTest.suite());
         suite.addTest(HTTPUploaderTest.suite());
         suite.addTest(UploadSlotManagerTest.suite());
         suite.addTest(UrnHttpRequestTest.suite());

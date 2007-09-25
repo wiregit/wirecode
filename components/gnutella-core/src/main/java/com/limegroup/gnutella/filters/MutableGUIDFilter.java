@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.google.inject.Singleton;
-
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -16,14 +15,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 @Singleton
 public final class MutableGUIDFilter implements SpamFilter {
     
-    MutableGUIDFilter(KeywordFilter filter) { 
-        FILTER = filter;
-    }
-    
-    MutableGUIDFilter() { 
-        this(new KeywordFilter());
-        FILTER.disallowAdult(); 
-    }
+    private MutableGUIDFilter() { FILTER.disallowAdult(); }
     /**
      * The Set of GUIDs to compare.
      *
@@ -34,7 +26,7 @@ public final class MutableGUIDFilter implements SpamFilter {
     /**
      * The underlying filter.
      */
-    private final KeywordFilter FILTER;
+    private final KeywordFilter FILTER = new XMLDocFilter();
     
     /**
      * Adds a guid to be scanned for keyword filters.
@@ -74,6 +66,7 @@ public final class MutableGUIDFilter implements SpamFilter {
             return true;
         }
     }
+    
     
     /**
      * Determines if this message is allowed.

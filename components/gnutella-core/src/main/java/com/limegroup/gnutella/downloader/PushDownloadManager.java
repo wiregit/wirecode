@@ -26,6 +26,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
@@ -91,7 +92,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private final Provider<SocketProcessor> socketProcessor;
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;    
-    private final NetworkManager networkManager;
+    private final NetworkManager networkManager;    
+    private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<PushedSocketHandler> downloadAcceptor;
     private final Provider<IPFilter> ipFilter;
@@ -105,6 +107,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
+    		@Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
     		Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService) {
     	this.downloadAcceptor = downloadAcceptor;
@@ -113,12 +116,17 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	this.backgroundExecutor = scheduler;
     	this.socketProcessor = processor;
     	this.networkManager = networkManager;
+    	this.connectionDispatcher = connectionDispatcher;
         this.ipFilter = ipFilter;
         this.udpService = udpService;
     }
     
-    public boolean isBlocking() {
-        return true;
+    /** Informs the ConnectionDispatcher that this will be handling GIV requests. */
+    public void initialize() {
+        connectionDispatcher.get().addConnectionAcceptor(this,
+    			false,
+    			true,
+    			"GIV");
     }
     
     /**
@@ -174,7 +182,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         // using the TCP push proxy, which will do fw-fw transfers.
         if (!networkManager.acceptedIncomingConnection()) {
             // if we can do FWT, offload a TCP pusher.
-            if (networkManager.canDoFWT())
+            if (udpService.get().canDoFWT())
                 sendPushTCP(file, guid, observer);
             else if (observer != null)
                 observer.shutdown();
@@ -280,7 +288,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private void sendPushTCP(RemoteFileDesc file, final byte[] guid, MultiShutdownable observer) {
         // if this is a FW to FW transfer, we must consider special stuff
         final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
-                         networkManager.canDoFWT() &&
+                         udpService.get().canDoFWT() &&
                         !networkManager.acceptedIncomingConnection();
 
     	PushData data = new PushData(observer, file, guid, shouldDoFWTransfer);

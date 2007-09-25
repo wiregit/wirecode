@@ -1,12 +1,7 @@
 package org.limewire.nio;
 
 import java.nio.ByteBuffer;
-/**
- * Provides both direct and non-direct caches of {@link ByteBuffer ByteBuffers}.
- * See <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/nio/ByteBuffer.html#direct">
- * direct vs. non-direct</a> buffers for more information. 
 
- */
 public class ByteBufferCache {
 
     private final DirectByteBufferCache DIRECT = new DirectByteBufferCache();

@@ -462,6 +462,7 @@ public class BTDownloader extends AbstractDownloader
         this.btUploaderFactory = downloadReferences.getBtUploaderFactory();
         ifm = manager.getIncompleteFileManager();
         _torrent = downloadReferences.getManagedTorrentFactory().create(context);
+        // DPINJ: make sure the torrentManager in the factory is the same as the one the listener is added to
         torrentManager.get().addEventListener(this);
         ifm.addTorrentEntry(_info.getURN());
     }

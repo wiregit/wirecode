@@ -8,7 +8,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -17,39 +16,27 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.concurrent.Providers;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
-import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.HackHostCatcher;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
-public class HostCatcherTest extends LimeTestCase {
-    
-    private HostCatcher hostCatcher;
-    private Injector injector;
-    private LocalSocketAddressProvider oldProvider;
+@SuppressWarnings( { "unchecked", "cast" } )
+public class HostCatcherTest extends LimeTestCase {  
+    private HostCatcher hc;
 
     public HostCatcherTest(String name) {
         super(name);
@@ -63,6 +50,9 @@ public class HostCatcherTest extends LimeTestCase {
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
     }
+    public static void globalSetUp() throws Exception {
+        //new RouterService( new ActivityCallbackStub() );
+    }
     
     /**
      * Returns a new HostCatcher connected to stubs. YOU MAY WANT TO CALL EXPIRE to force bootstrap pongs.
@@ -73,15 +63,9 @@ public class HostCatcherTest extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*" });
 
         HostCatcher.DEBUG = true;
-        
-        injector = LimeTestUtils.createInjector();
-        hostCatcher = injector.getInstance(HostCatcher.class);
-        hostCatcher.initialize();
-        oldProvider = LocalSocketAddressService.getSharedProvider();
-    }
-    
-    public void tearDown() {
-        LocalSocketAddressService.setSocketAddressProvider(oldProvider);
+
+        hc = new HackHostCatcher();
+        hc.initialize();		
     }
     
     /**
@@ -90,6 +74,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testPutHostOnProbation() throws Exception {
+        HostCatcher catcher = new HackHostCatcher();
         String ipStart = "34.56.";
         int penultimatetByte;
         for(int i=0; i<HostCatcher.PROBATION_HOSTS_SIZE; i++) {
@@ -106,11 +91,11 @@ public class HostCatcherTest extends LimeTestCase {
             int lastByte = i%256;
             Endpoint curHost = 
                 new Endpoint(ipStart+penultimatetByte+"."+lastByte, 6346);
-            hostCatcher.putHostOnProbation(curHost);
+            catcher.putHostOnProbation(curHost);
         }
         
         Set probatedHosts =
-            (Set)PrivilegedAccessor.getValue(hostCatcher, "PROBATION_HOSTS");
+            (Set)PrivilegedAccessor.getValue(catcher, "PROBATION_HOSTS");
         
         assertEquals("unexpected size", HostCatcher.PROBATION_HOSTS_SIZE,
             probatedHosts.size());
@@ -119,7 +104,7 @@ public class HostCatcherTest extends LimeTestCase {
         ipStart = "35.56.5.";
         for(int i=0; i<10; i++) {
             Endpoint curHost = new Endpoint(ipStart+i, 6346);
-            hostCatcher.putHostOnProbation(curHost);
+            catcher.putHostOnProbation(curHost);
             assertEquals("unexpected size", HostCatcher.PROBATION_HOSTS_SIZE,
             probatedHosts.size());
         }
@@ -132,6 +117,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testExpireHosts() throws Exception {
+        HostCatcher catcher = new HackHostCatcher();
         String ipStart = "34.56.";
         int penultimatetByte;
         for(int i=0; i<HostCatcher.EXPIRED_HOSTS_SIZE; i++) {
@@ -148,11 +134,11 @@ public class HostCatcherTest extends LimeTestCase {
             int lastByte = i%256;
             Endpoint curHost = 
                 new Endpoint(ipStart+penultimatetByte+"."+lastByte, 6346);
-            hostCatcher.expireHost(curHost);
+            catcher.expireHost(curHost);
         }
         
         Set expiredHosts =
-            (Set)PrivilegedAccessor.getValue(hostCatcher, "EXPIRED_HOSTS");
+            (Set)PrivilegedAccessor.getValue(catcher, "EXPIRED_HOSTS");
         
         assertEquals("unexpected size", HostCatcher.EXPIRED_HOSTS_SIZE,
             expiredHosts.size());
@@ -161,7 +147,7 @@ public class HostCatcherTest extends LimeTestCase {
         ipStart = "35.56.5.";
         for(int i=0; i<10; i++) {
             Endpoint curHost = new Endpoint(ipStart+i, 6346);
-            hostCatcher.putHostOnProbation(curHost);
+            catcher.putHostOnProbation(curHost);
             assertEquals("unexpected size", HostCatcher.EXPIRED_HOSTS_SIZE,
             expiredHosts.size());
         }
@@ -172,27 +158,20 @@ public class HostCatcherTest extends LimeTestCase {
      * if we know of any host caches.
      */
     public void testUDPCachesUsed() throws Exception {
-        // Use a different setup...
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(UDPHostCacheFactory.class).to(UDPHostCacheFactoryStub.class);               
-            }
-        });
-        hostCatcher = injector.getInstance(HostCatcher.class);
-        hostCatcher.initialize();
+        assertEquals(0, hc.getNumHosts());
+ //       PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);        
         
-        assertEquals(0, hostCatcher.getNumHosts());   
+        StubUDPBootstrapper udp = new StubUDPBootstrapper();
+        PrivilegedAccessor.setValue(hc, "udpHostCache", udp);
         
-        StubUDPBootstrapper udp = (StubUDPBootstrapper)injector.getInstance(HostCatcher.class).getUdpHostCache();        
-        Endpoint firstHost = hostCatcher.getAnEndpoint();
+        Endpoint firstHost = hc.getAnEndpoint();
         assertTrue(udp.fetched);
         assertEquals(udp.host, firstHost.getAddress());
         udp.fetched = false;
         
         // Since udp was done quickly and only gave us one host (and we
         // just used it), the next request will spark a GW request.
-        Endpoint second = hostCatcher.getAnEndpointImmediate(null);
+        Endpoint second = hc.getAnEndpointImmediate(null);
         assertNull(second);
         Thread.sleep(5000); // just to make sure it doesn't trigger a fetch later
         assertFalse(udp.fetched);
@@ -201,7 +180,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         // Now another fetch will wait until time passes enough to retry
         // udp (too long before retrying a GW)
-        Endpoint thirdHost = hostCatcher.getAnEndpoint();
+        Endpoint thirdHost = hc.getAnEndpoint();
         assertTrue(udp.fetched);
         assertEquals(udp.host, thirdHost.getAddress());
     }
@@ -214,16 +193,17 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testIgnoreExpiredHosts() throws Exception {
         Endpoint expiredHost = new Endpoint("20.4.5.7", 6346);
-        hostCatcher.initialize();
-        hostCatcher.add(expiredHost,true);
-        assertEquals("unexpected number of hosts", 1, hostCatcher.getNumHosts());
-        Endpoint accessedHost = hostCatcher.getAnEndpoint();
+        HostCatcher catcher = new HackHostCatcher();
+        catcher.initialize();
+        catcher.add(expiredHost,true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
+        Endpoint accessedHost = catcher.getAnEndpoint();
         assertNotNull("host should not be null", accessedHost);
-        assertEquals("unexpected number of hosts", 0, hostCatcher.getNumHosts());
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
         
-        hostCatcher.expireHost(expiredHost);
-        hostCatcher.add(expiredHost, true);
-        assertEquals("unexpected number of hosts", 0, hostCatcher.getNumHosts());        
+        catcher.expireHost(expiredHost);
+        catcher.add(expiredHost, true);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());        
     }
     
     /**
@@ -233,16 +213,17 @@ public class HostCatcherTest extends LimeTestCase {
      */
     public void testIgnoreProbatedHosts() throws Exception {
         Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
-        hostCatcher.initialize();
-        hostCatcher.add(probatedHost,true);
-        assertEquals("unexpected number of hosts", 1, hostCatcher.getNumHosts());
-        Endpoint accessedHost = hostCatcher.getAnEndpoint();
+        HostCatcher catcher = new HackHostCatcher();
+        catcher.initialize();
+        catcher.add(probatedHost,true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
+        Endpoint accessedHost = catcher.getAnEndpoint();
         assertNotNull("host should not be null", accessedHost);
-        assertEquals("unexpected number of hosts", 0, hostCatcher.getNumHosts());
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
         
-        hostCatcher.putHostOnProbation(probatedHost);
-        hostCatcher.add(probatedHost, true);
-        assertEquals("unexpected number of hosts", 0, hostCatcher.getNumHosts());        
+        catcher.putHostOnProbation(probatedHost);
+        catcher.add(probatedHost, true);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());        
     }
     
     /**
@@ -252,6 +233,7 @@ public class HostCatcherTest extends LimeTestCase {
      * @throws Exception if any error occurs
      */
     public void testRecoveryOfHostsOnProbation() throws Exception {
+        HostCatcher catcher = new HackHostCatcher();
         long waitTime = 100;
         PrivilegedAccessor.setValue(HostCatcher.class, 
             "PROBATION_RECOVERY_WAIT_TIME", new Long(waitTime));
@@ -262,23 +244,23 @@ public class HostCatcherTest extends LimeTestCase {
         Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
         
         // Put the host on probation.
-        hostCatcher.putHostOnProbation(probatedHost);
+        catcher.putHostOnProbation(probatedHost);
         
-        hostCatcher.add(probatedHost, true);
+        catcher.add(probatedHost, true);
         
         // And make sure that it did not get added
-        assertEquals("unexpected number of hosts", 0, hostCatcher.getNumHosts());
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
         
         // Start the probation recovery sequence...
-        hostCatcher.initialize();        
+        catcher.initialize();        
         
         // Sleep until the recovery operation takes place...
         Thread.sleep(waitTime+200);
         
         // Finally, make sure we are then able to add the host that was 
         // formerly on probation.
-        hostCatcher.add(probatedHost, true);
-        assertEquals("unexpected number of hosts", 1, hostCatcher.getNumHosts());        
+        catcher.add(probatedHost, true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());        
     }
     
     /**
@@ -289,39 +271,39 @@ public class HostCatcherTest extends LimeTestCase {
      */    
     public void testRecoversUsedHosts() throws Exception {
         // write data to gnutella.net
-        hostCatcher.add(new Endpoint("18.239.0.1"), false);
-        hostCatcher.add(new Endpoint("18.239.0.2"), false);
-        hostCatcher.add(new Endpoint("18.239.0.3"), false);
-        hostCatcher.add(new Endpoint("18.239.0.4"), false);
-        hostCatcher.add(new Endpoint("18.239.0.5"), false);
-        hostCatcher.add(new Endpoint("18.239.0.6"), false);
-        hostCatcher.add(new Endpoint("18.239.0.7"), false);
-        hostCatcher.add(new Endpoint("18.239.0.8"), false);
-        hostCatcher.add(new Endpoint("18.239.0.9"), false);
-        hostCatcher.add(new Endpoint("18.239.0.10"), false);
+        hc.add(new Endpoint("18.239.0.1"), false);
+        hc.add(new Endpoint("18.239.0.2"), false);
+        hc.add(new Endpoint("18.239.0.3"), false);
+        hc.add(new Endpoint("18.239.0.4"), false);
+        hc.add(new Endpoint("18.239.0.5"), false);
+        hc.add(new Endpoint("18.239.0.6"), false);
+        hc.add(new Endpoint("18.239.0.7"), false);
+        hc.add(new Endpoint("18.239.0.8"), false);
+        hc.add(new Endpoint("18.239.0.9"), false);
+        hc.add(new Endpoint("18.239.0.10"), false);
 
-        hostCatcher.write();
-        int numHosts = hostCatcher.getNumHosts();
+        hc.write();
+        int numHosts = hc.getNumHosts();
 
         for(int i=0; i<10; i++) {
-            hostCatcher.getAnEndpoint();
+            hc.getAnEndpoint();
         }
         
-        assertEquals("hosts should be 0", 0, hostCatcher.getNumHosts());
-        hostCatcher.recoverHosts();
+        assertEquals("hosts should be 0", 0, hc.getNumHosts());
+        hc.recoverHosts();
         assertEquals("hosts should have been recovered", 
-            numHosts, hostCatcher.getNumHosts());
+            numHosts, hc.getNumHosts());
     }
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
      *  priority but different ip's.  This was a problem at one point. */
     public void testEndpointPriorities() {
-        ExtendedEndpoint e1=new ExtendedEndpoint("18.239.0.146", 6346);
-        ExtendedEndpoint e2=new ExtendedEndpoint("18.239.0.147", 6347);
+        Endpoint e1=new ExtendedEndpoint("18.239.0.146", 6346);
+        Endpoint e2=new ExtendedEndpoint("18.239.0.147", 6347);
         assertNotEquals("e1 vs e2", e1, e2);
         assertNotEquals("e2 vs e1", e2, e1);
         
-        FixedsizePriorityQueue<ExtendedEndpoint> queue=new FixedsizePriorityQueue<ExtendedEndpoint>(
+        FixedsizePriorityQueue queue=new FixedsizePriorityQueue(
             ExtendedEndpoint.priorityComparator(),
             10);
         assertNull(queue.insert(e1));
@@ -331,163 +313,158 @@ public class HostCatcherTest extends LimeTestCase {
 
 
     public void testAddPriorities() {
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         
         // HostCatcher should ignore attempts to add hosts with private 
         // addresses.
-        hostCatcher.add(new Endpoint("192.168.0.1"), false);
+        hc.add(new Endpoint("192.168.0.1"), false);
         assertEquals("private endpoint added as ultrapeer",
-					 0, hostCatcher.getNumUltrapeerHosts());
+					 0, hc.getNumUltrapeerHosts());
 
         assertEquals("private endpoint added at all",
-					 0, hostCatcher.getNumHosts());
+					 0, hc.getNumHosts());
 
         setUp();
         // Adding a normal host should add 1 more to numNormalHosts
-        hostCatcher.add(new Endpoint("18.239.0.1"), false);
+        hc.add(new Endpoint("18.239.0.1"), false);
         assertEquals("normal endpoint added as ultrapeer",
-                0, hostCatcher.getNumUltrapeerHosts());
+                0, hc.getNumUltrapeerHosts());
 
         setUp();
         // Adding a ultrapeer should add 1 more to numUltrapeerHosts
-        hostCatcher.add(new Endpoint("18.239.0.1"), true);
+        hc.add(new Endpoint("18.239.0.1"), true);
         assertEquals("ultrapeer endpoint not added as ultrapeer",
-                1, hostCatcher.getNumUltrapeerHosts());
+                1, hc.getNumUltrapeerHosts());
 
         //PingReply's.
         setUp();
         // Adding a private should add 1 more to numPrivateHosts
-        hostCatcher.add(pingReplyFactory.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, 
             new byte[] {(byte)192,(byte)168,(byte)0,(byte)1}, false));
         assertEquals("private PingReply added as ultrapeer",
-					 0 ,hostCatcher.getNumUltrapeerHosts());
+					 0 ,hc.getNumUltrapeerHosts());
 
         setUp();
-        hostCatcher.add(pingReplyFactory.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, 
             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1}, false));
         assertEquals("normal PingReply added as ultrapeer",
-                0, hostCatcher.getNumUltrapeerHosts());
+                0, hc.getNumUltrapeerHosts());
 
 
         setUp();
-        hostCatcher.add(pingReplyFactory.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(new byte[16], (byte)3, 6346, 
             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1}, true));
         assertEquals("ultrapeer PingReply not added as ultrapeer",
-                1, hostCatcher.getNumUltrapeerHosts());
+                1, hc.getNumUltrapeerHosts());
     }
 
 
     public void testPermanent() throws Exception {
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        
         //Systm.out.println("-Testing write of permanent nodes to Gnutella.net");
         //1. Create HC, add entries, write to disk.
-        hostCatcher.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
-        hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, 6342,
+        hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6342,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 1000, false));
         
         // duplicate
-        hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, 6342,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6342,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 1000, false));  
-        hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6343,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)143}, 30, false));
         // duplicate (well, with lower uptime)
-        hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6343,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)143}, 30, false));
         
         // private address (ignored)
-        hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 6343,
             new byte[] {(byte)192, (byte)168, (byte)0, (byte)1}, 3000, false));
             
         // udp host caches ..
-        hostCatcher.add(new ExtendedEndpoint("1.2.3.4", 6346).setUDPHostCache(true), false);
-        hostCatcher.add(new ExtendedEndpoint("1.2.3.5", 6341).setUDPHostCache(true), false);
+        hc.add(new ExtendedEndpoint("1.2.3.4", 6346).setUDPHostCache(true), false);
+        hc.add(new ExtendedEndpoint("1.2.3.5", 6341).setUDPHostCache(true), false);
         
         // dht capable node
         ExtendedEndpoint ep = new ExtendedEndpoint("18.239.0.100", 6323, 3);
         ep.setDHTVersion(2);
         ep.setDHTMode(DHTMode.INACTIVE);
-        hostCatcher.add(ep, false);
+        hc.add(ep, false);
         // dht active node
         ep = new ExtendedEndpoint("18.239.0.101", 6322, 2);
         ep.setDHTVersion(1);
         ep.setDHTMode(DHTMode.ACTIVE);
-        hostCatcher.add(ep, false);
+        hc.add(ep, false);
             
         File tmp=File.createTempFile("hc_test", ".net" );
-        hostCatcher.write(tmp);
+        hc.write(tmp);
 
         //2. read HC from file.
         setUp(); // make sure we clear from memory the stuff we just added.
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
         assertEquals(0, uhc.getSize());
-        assertEquals(0, hostCatcher.getNumHosts());
-        hostCatcher.read(tmp);
+        assertEquals(0, hc.getNumHosts());
+        hc.read(tmp);
         assertEquals(2, uhc.getSize());        
-        assertEquals(5, hostCatcher.getNumHosts());
+        assertEquals(5, hc.getNumHosts());
         // the highest uptime hosts should be given out first,
         // but not in order
         Set<Endpoint> s = new HashSet<Endpoint>();
-        s.add(hostCatcher.getAnEndpoint());
-        s.add(hostCatcher.getAnEndpoint());
-        s.add(hostCatcher.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
         assertTrue(s.contains(new Endpoint("18.239.0.142", 6342)));
         assertTrue(s.contains(new Endpoint("18.239.0.141", 6341)));
         assertTrue(s.contains(new Endpoint("18.239.0.143", 6343)));
         
-        ExtendedEndpoint xep = (ExtendedEndpoint) hostCatcher.getAnEndpoint();
+        ExtendedEndpoint xep = (ExtendedEndpoint) hc.getAnEndpoint();
         assertTrue(xep.supportsDHT());
         assertEquals(xep.getDHTVersion(), 2);
-        xep = (ExtendedEndpoint) hostCatcher.getAnEndpoint();
+        xep = (ExtendedEndpoint) hc.getAnEndpoint();
         assertTrue(xep.supportsDHT());
         assertEquals(xep.getDHTVersion(), 1);
         assertEquals(DHTMode.ACTIVE, xep.getDHTMode());
-        assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, hc.getNumHosts());
         //Cleanup.
         tmp.delete();
     }
 
     /** Tests that only the best hosts are remembered.  */
     public void testBestPermanent() throws Exception  {  
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        
         HostCatcher.DEBUG=false;  //Too darn slow
         //1. Fill up host catcher with PERMANENT_SIZE+1 mid-level pongs
         //(various uptimes).
         final int N=HostCatcher.PERMANENT_SIZE;
         for (int i=0; i<=N; i++) {            
-            hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, i+1,
+            hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, i+1,
                 new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
                     i+10, false));
         }
         //Now add bad pong--which isn't really added
-        hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, N+2,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, N+2,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 0, false));
         //Now re-add port 1 (which was kicked out earlier).
-        hostCatcher.add(pingReplyFactory.createExternal(GUID.makeGuid(), (byte)7, 1,
+        hc.add(ProviderHacks.getPingReplyFactory().createExternal(GUID.makeGuid(), (byte)7, 1,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, N+101,false));
 
         File tmp=File.createTempFile("hc_test", ".net" );
-        hostCatcher.write(tmp);            
+        hc.write(tmp);            
 
         //2. Read
         setUp();
         HostCatcher.DEBUG=false;  //Too darn slow
-        hostCatcher.read(tmp);
-        assertEquals(0, hostCatcher.getNumUltrapeerHosts());
+        hc.read(tmp);
+        assertEquals(0, hc.getNumUltrapeerHosts());
 
         Set<Endpoint> s = new HashSet<Endpoint>();
         // Note that we only go to 1 (not 0) because we already extracted
         // a host in the line before this.
         for (int i=N; i > 0; i--) 
-            s.add(hostCatcher.getAnEndpoint());
+            s.add(hc.getAnEndpoint());
         
         // the bad host should not be in there
         assertFalse(s.contains(new Endpoint("18.239.0.142",N+2)));
         // the good one should
         assertTrue(s.contains(new Endpoint("18.239.0.142",1)));
         
-        assertEquals("some hosts leftover", 0, hostCatcher.getNumHosts());
+        assertEquals("some hosts leftover", 0, hc.getNumHosts());
 
         //Cleanup.
         tmp.delete();
@@ -500,55 +477,55 @@ public class HostCatcherTest extends LimeTestCase {
     public void testBestRestored() throws Exception {
         // add a bunch of bad hosts
         for (int i = 0; i < 10; i++)
-            hostCatcher.add(new ExtendedEndpoint("1.1.1.1", 100+i, i), false);
+            hc.add(new ExtendedEndpoint("1.1.1.1", 100+i, i), false);
         // a bunch of average hosts
         for (int i = 0; i < 10; i++)
-            hostCatcher.add(new ExtendedEndpoint("2.2.2.2", 200+i, 200+i), false);
+            hc.add(new ExtendedEndpoint("2.2.2.2", 200+i, 200+i), false);
         // a bunch of good hosts
         for (int i = 0; i < 20; i++)
-            hostCatcher.add(new ExtendedEndpoint("3.3.3.3", 300+i, 300+i), false);
+            hc.add(new ExtendedEndpoint("3.3.3.3", 300+i, 300+i), false);
 
         // reload
         File tmp=File.createTempFile("hc_test", ".net" );
-        hostCatcher.write(tmp);            
+        hc.write(tmp);            
         setUp();
-        hostCatcher.read(tmp);
+        hc.read(tmp);
         tmp.delete();
         
         // the first 10 hosts should all be good
         for (int i = 0; i < 10; i++) 
-            assertEquals("3.3.3.3",hostCatcher.getAnEndpoint().getAddress());
+            assertEquals("3.3.3.3",hc.getAnEndpoint().getAddress());
         
         // the next 10 should not have any bad ones
         Set<Endpoint> s = new HashSet<Endpoint>();
         for (int i = 0; i < 10; i++) 
-            s.add(hostCatcher.getAnEndpoint());
+            s.add(hc.getAnEndpoint());
         for (int i = 0; i < 10; i++) 
             assertFalse(s.contains(new Endpoint("1.1.1.1", 100+i)));
     }
 
     /** Test that connection history is recorded. */
     public void testDoneWithConnect() throws Exception {
-        hostCatcher.add(new Endpoint("18.239.0.1"), true);  
-        hostCatcher.add(new Endpoint("18.239.0.2"), true);  //will succeed
-        hostCatcher.add(new Endpoint("18.239.0.3"), true);  //will fail
+        hc.add(new Endpoint("18.239.0.1"), true);  
+        hc.add(new Endpoint("18.239.0.2"), true);  //will succeed
+        hc.add(new Endpoint("18.239.0.3"), true);  //will fail
 
-        ExtendedEndpoint e3=(ExtendedEndpoint)hostCatcher.getAnEndpoint();
+        ExtendedEndpoint e3=(ExtendedEndpoint)hc.getAnEndpoint();
         assertEquals(new Endpoint("18.239.0.3"), e3);
-        ExtendedEndpoint e2=(ExtendedEndpoint)hostCatcher.getAnEndpoint();
+        ExtendedEndpoint e2=(ExtendedEndpoint)hc.getAnEndpoint();
         assertEquals(new Endpoint("18.239.0.2"), e2);
 
         //record success (increases priority)
-        hostCatcher.doneWithConnect(e2, true); 
+        hc.doneWithConnect(e2, true); 
         //record failure (lowers priority) with alternate form of method
-        hostCatcher.doneWithConnect(e3, false);
+        hc.doneWithConnect(e3, false);
         //Garbage (ignored)
-        hostCatcher.doneWithConnect(new Endpoint("1.2.3.4", 6346), false);  
-        hostCatcher.doneWithConnect(new Endpoint("18.239.0.3", 6349), true); //port
+        hc.doneWithConnect(new Endpoint("1.2.3.4", 6346), false);  
+        hc.doneWithConnect(new Endpoint("18.239.0.3", 6349), true); //port
 
         //Check that permanent hosts are re-arranged.
         //Note that iterator yields worst to best.
-        Iterator iter=hostCatcher.getPermanentHosts();
+        Iterator iter=hc.getPermanentHosts();
         ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
         assertEquals(new Endpoint("18.239.0.3"), e);
         assertTrue(!e.getConnectionSuccesses().hasNext());
@@ -582,53 +559,51 @@ public class HostCatcherTest extends LimeTestCase {
 
         //2. Read and verify
         setUp();
-        hostCatcher.read(tmp);
+        hc.read(tmp);
         Set<Endpoint> s = new HashSet<Endpoint>();
-        s.add(hostCatcher.getAnEndpoint());
-        s.add(hostCatcher.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
         assertTrue(s.contains(new Endpoint("18.239.0.142", 6342)));
         assertTrue(s.contains(new Endpoint("18.239.0.141", 6346)));
-        assertEquals("unexpected number of hosts", 0, hostCatcher.getNumHosts());
+        assertEquals("unexpected number of hosts", 0, hc.getNumHosts());
         assertEquals("unexpected number of ultrapeers",
-            0, hostCatcher.getNumUltrapeerHosts());
+            0, hc.getNumUltrapeerHosts());
 
         //Clean up
         tmp.delete();
     }
     
     public void testUDPHostCacheAdded() throws Exception {
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
-        assertEquals(0, hostCatcher.getNumHosts());
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
+        assertEquals(0, hc.getNumHosts());
         assertEquals(0, uhc.getSize());
         
         // Test with UDPHC pongs.
         GGEP ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-        PingReply pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 1,
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
-                    0, 0, false, ggep);
-        hostCatcher.add(pr);
+                    (long)0, (long)0, false, ggep);
+        hc.add(pr);
         
-        assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, hc.getNumHosts());
         assertEquals(1, uhc.getSize());
         
         // Test with an endpoint.
         ExtendedEndpoint ep = new ExtendedEndpoint("3.2.3.4", 6346);
         ep.setUDPHostCache(true);
-        hostCatcher.add(ep, false);
-        assertEquals(0, hostCatcher.getNumHosts());
+        hc.add(ep, false);
+        assertEquals(0, hc.getNumHosts());
         assertEquals(2, uhc.getSize());
         
         // Test with a name in the cache.
         ggep = new GGEP();
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
-        pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 1,
+        pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 5, 4, 3, 2 },
-                    0, 0, false, ggep);
-        hostCatcher.add(pr);
-        assertEquals(0, hostCatcher.getNumHosts());
+                    (long)0, (long)0, false, ggep);
+        hc.add(pr);
+        assertEquals(0, hc.getNumHosts());
         assertEquals(3, uhc.getSize());
         
         Set s = (Set)PrivilegedAccessor.getValue(uhc, "udpHostsSet");
@@ -639,10 +614,8 @@ public class HostCatcherTest extends LimeTestCase {
     }
     
     public void testPackedIPPongsAreUsed() throws Exception {
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
-        assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, hc.getNumHosts());
         
         GGEP ggep = new GGEP();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -652,19 +625,17 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        PingReply pr = pingReplyFactory.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
-        hostCatcher.add(pr);
-        assertEquals(5, hostCatcher.getNumHosts());
+        hc.add(pr);
+        assertEquals(5, hc.getNumHosts());
     }
     
     public void testPackedIPsWithUHC() throws Exception {
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
-        assertEquals(0, hostCatcher.getNumHosts());
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
+        assertEquals(0, hc.getNumHosts());
         assertEquals(0, uhc.getSize());
         
         GGEP ggep = new GGEP();
@@ -675,20 +646,18 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-        PingReply pr = pingReplyFactory.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
-        hostCatcher.add(pr);
-        assertEquals(4, hostCatcher.getNumHosts());
+        hc.add(pr);
+        assertEquals(4, hc.getNumHosts());
         assertEquals(1, uhc.getSize());
     }
     
     public void testPackedHostCachesAreStored() throws Exception {
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
-        assertEquals(0, hostCatcher.getNumHosts());
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
+        assertEquals(0, hc.getNumHosts());
         assertEquals(0, uhc.getSize());
         
         GGEP ggep = new GGEP();
@@ -697,44 +666,44 @@ public class HostCatcherTest extends LimeTestCase {
         	"www.eff.org\n"+
             "www.test.org:1";
         ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
-        PingReply pr = pingReplyFactory.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
-        hostCatcher.add(pr);
-        assertEquals(1, hostCatcher.getNumHosts());
+        hc.add(pr);
+        assertEquals(1, hc.getNumHosts());
         assertEquals(4, uhc.getSize());
     }
     
     public void testImmediateEndpointObserverNoHosts() throws Exception {
         StubEndpointObserver observer = new StubEndpointObserver();
-        assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, hc.getNumHosts());
         assertNull(observer.getEndpoint());
-        assertNull(hostCatcher.getAnEndpointImmediate(observer));
+        assertNull(hc.getAnEndpointImmediate(observer));
         assertNull(observer.getEndpoint());
         Endpoint p = new Endpoint("231.123.254.1", 1);
-        hostCatcher.add(p, true);
+        hc.add(p, true);
         assertEquals(p, observer.getEndpoint());
     }
     
     public void testImmediateEndpointObserverWithHosts() throws Exception {
         Endpoint p = new Endpoint("231.123.254.1", 1);
-        hostCatcher.add(p, true);
+        hc.add(p, true);
         StubEndpointObserver observer = new StubEndpointObserver();
-        assertEquals(1, hostCatcher.getNumHosts());
+        assertEquals(1, hc.getNumHosts());
         assertNull(observer.getEndpoint());
-        assertEquals(p, hostCatcher.getAnEndpointImmediate(observer));
+        assertEquals(p, hc.getAnEndpointImmediate(observer));
         assertNull(observer.getEndpoint());
     }
     
     public void testAsyncEndpointObserver() throws Exception {
         StubEndpointObserver observer = new StubEndpointObserver();
-        assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, hc.getNumHosts());
         assertNull(observer.getEndpoint());
-        hostCatcher.getAnEndpoint(observer);
+        hc.getAnEndpoint(observer);
         assertNull(observer.getEndpoint());
         Endpoint p = new Endpoint("231.123.254.1", 1);
-        hostCatcher.add(p, true);
+        hc.add(p, true);
         assertEquals(p, observer.getEndpoint());
     }
     
@@ -742,32 +711,32 @@ public class HostCatcherTest extends LimeTestCase {
         StubEndpointObserver o1 = new StubEndpointObserver();
         StubEndpointObserver o2 = new StubEndpointObserver();
         
-        assertEquals(0, hostCatcher.getNumHosts());
-        hostCatcher.getAnEndpoint(o1);
-        hostCatcher.getAnEndpoint(o2);
+        assertEquals(0, hc.getNumHosts());
+        hc.getAnEndpoint(o1);
+        hc.getAnEndpoint(o2);
         assertNull(o1.getEndpoint());
         assertNull(o2.getEndpoint());
         Endpoint p1 = new Endpoint("231.123.254.1", 1);
         Endpoint p2 = new Endpoint("231.123.254.1", 2);
-        hostCatcher.add(p1, true);
-        hostCatcher.add(p2, true);
+        hc.add(p1, true);
+        hc.add(p2, true);
         assertEquals(p1, o1.getEndpoint());
         assertEquals(p2, o2.getEndpoint());
     }
     
     public void testAsyncEndpointObserverEndpointAlreadyAdded() throws Exception {
         StubEndpointObserver observer = new StubEndpointObserver();
-        assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, hc.getNumHosts());
         assertNull(observer.getEndpoint());
         Endpoint p = new Endpoint("231.123.254.1", 1);
-        hostCatcher.add(p, true);
-        hostCatcher.getAnEndpoint(observer);
+        hc.add(p, true);
+        hc.getAnEndpoint(observer);
         assertEquals(p, observer.getEndpoint());       
     }
     
     public void testGetDHTSupportEndpoint() throws Exception {
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
-        assertEquals(0, hostCatcher.getDHTSupportEndpoint(0).size());
+        assertEquals(0, hc.getDHTSupportEndpoint(0).size());
         
         // add a bunch of nodes from the same class C network
         ExtendedEndpoint ep;
@@ -780,10 +749,10 @@ public class HostCatcherTest extends LimeTestCase {
             } else {
                 ep.setDHTMode(DHTMode.PASSIVE);
             }
-            hostCatcher.add(ep, false);
+            hc.add(ep, false);
         }
         
-        List<ExtendedEndpoint> hostList = hostCatcher.getDHTSupportEndpoint(0);
+        List<ExtendedEndpoint> hostList = hc.getDHTSupportEndpoint(0);
         assertEquals(1, hostList.size());
         
         // add nodes from different class C networks
@@ -795,15 +764,15 @@ public class HostCatcherTest extends LimeTestCase {
             } else {
                 ep.setDHTMode(DHTMode.PASSIVE);
             }
-            hostCatcher.add(ep, false);
+            hc.add(ep, false);
         }
         //dht active node
         ep = new ExtendedEndpoint("18.239.10.101", 6322);
         ep.setDHTVersion(1);
         ep.setDHTMode(DHTMode.ACTIVE);
-        hostCatcher.add(ep, false);
+        hc.add(ep, false);
         
-        hostList = hostCatcher.getDHTSupportEndpoint(0);
+        hostList = hc.getDHTSupportEndpoint(0);
         ep = hostList.get(0);
         assertEquals("18.239.10.101", ep.getAddress());
         assertTrue(ep.getDHTMode().equals(DHTMode.ACTIVE));
@@ -816,51 +785,12 @@ public class HostCatcherTest extends LimeTestCase {
         assertTrue(ep.getDHTMode().equals(DHTMode.INACTIVE));
         
         //try excluding version
-        hostList = hostCatcher.getDHTSupportEndpoint(2);
+        hostList = hc.getDHTSupportEndpoint(2);
         assertEquals(9, hostList.size());
         assertTrue(hostList.get(0).getAddress().endsWith(".100"));
     }
 
-    @SuppressWarnings("unchecked")
     public void testPingTagging() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
-            public byte[] getLocalAddress() {
-                return null;
-            }
-
-            public int getLocalPort() {
-                return 0;
-            }
-
-            public boolean isLocalAddressPrivate() {
-                return false;
-            };
-
-            public boolean isTLSCapable() {
-                return false;
-            }
-        });
-        
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-            }
-        });
-        hostCatcher = injector.getInstance(HostCatcher.class);
-        hostCatcher.initialize();       
-        
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        Acceptor acceptor = injector.getInstance(Acceptor.class);
-        MessageRouter messageRouter = injector.getInstance(MessageRouter.class);
-        MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
-        UDPService udpService = injector.getInstance(UDPService.class);
-        ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
-        
-        connectionManager.setFullyConnected(false);
-        connectionManager.setInitializedConnections(Collections.EMPTY_LIST);
-        connectionManager.setPreferredConnectionCount(1);
-        
         ConnectionSettings.FILTER_CLASS_C.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
@@ -872,29 +802,45 @@ public class HostCatcherTest extends LimeTestCase {
         out.close();
         DatagramSocket s = new DatagramSocket(6000);
         s.setSoTimeout(3000);
-                
+        //PrivilegedAccessor.setValue(RouterService.class , "catcher", hc);
+//        PrivilegedAccessor.setValue(RouterService.class, "manager",new
+//                ConnectionManagerStub() {
+//            @Override
+//            public boolean isFullyConnected() {
+//                return false;
+//            }
+//            @Override
+//            public List<ManagedConnection> getInitializedConnections() {
+//                return Collections.emptyList();
+//            }
+//            @Override
+//            public int getPreferredConnectionCount() {
+//                return 1;
+//            }
+//        });
+        
         // make it send udp pings
-        acceptor.init();
-        acceptor.start();
-        messageRouter.initialize();
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        ProviderHacks.getAcceptor().init();
+        ProviderHacks.getAcceptor().start();
+        ProviderHacks.getMessageRouter().initialize();
+        hc.expire();
+        hc.sendUDPPings();
         
         // empty the hostcatcher
         StubEndpointObserver seo = new StubEndpointObserver();
-        assertNotNull(hostCatcher.getAnEndpointImmediate(seo));
-        assertNull(hostCatcher.getAnEndpointImmediate(seo));
-        hostCatcher.removeEndpointObserver(seo);
+        assertNotNull(hc.getAnEndpointImmediate(seo));
+        assertNull(hc.getAnEndpointImmediate(seo));
+        hc.removeEndpointObserver(seo);
         
         // receive the ping
         DatagramPacket p = new DatagramPacket(new byte[1000], 1000);
         s.receive(p);
-        PingRequest ping = (PingRequest)messageFactory.read(new ByteArrayInputStream(p.getData()));
+        PingRequest ping = (PingRequest) ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(p.getData()));
         assertNotNull(ping);
 
         
         // this ping should be tagged
-        byte [] expectedGUID = udpService.getSolicitedGUID().bytes();
+        byte [] expectedGUID = ProviderHacks.getUdpService().getSolicitedGUID().bytes();
         assertNotEquals(expectedGUID, ping.getGUID());
         
         // if a pong is sent from the same host, it will be processed
@@ -902,15 +848,15 @@ public class HostCatcherTest extends LimeTestCase {
         ByteOrder.short2leb((short)6000, payload, 0);
         System.arraycopy(InetAddress.getByName("127.0.0.1").getAddress(),0,payload,2,4);
         PingReply pong = 
-            pingReplyFactory.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
-        udpService.processMessage(pong, 
+            ProviderHacks.getPingReplyFactory().createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
+        ProviderHacks.getUdpService().processMessage(pong, 
                 new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 6000));
         
         // the pong guid should now be restored to the solicited guid
         assertEquals(expectedGUID,pong.getGUID());
         
         Thread.sleep(1000);
-        Endpoint e = hostCatcher.getAnEndpointImmediate(new StubEndpointObserver());
+        Endpoint e = hc.getAnEndpointImmediate(new StubEndpointObserver());
         assertNotNull(e);
         assertEquals("127.0.0.1",e.getAddress());
         assertEquals(6000, e.getPort());
@@ -919,40 +865,38 @@ public class HostCatcherTest extends LimeTestCase {
         // another address, it will be ignored
         System.arraycopy(InetAddress.getByName("127.0.0.2").getAddress(),0,payload,2,4);
         pong = 
-            pingReplyFactory.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
-        udpService.processMessage(pong, 
+            ProviderHacks.getPingReplyFactory().createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);
+        ProviderHacks.getUdpService().processMessage(pong, 
                 new InetSocketAddress(InetAddress.getByName("127.0.0.2"), 6000));
         
         // the guid of this pong will not be restored correctly
         assertNotEquals(expectedGUID,pong.getGUID());
         Thread.sleep(1000);
-        assertEquals(0,hostCatcher.getNumHosts());
+        assertEquals(0,hc.getNumHosts());
 
         tmp.delete();
     }
     
     public void testIsTLSCapable() throws Exception {
-        PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        
-        assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, hc.getNumHosts());
         ExtendedEndpoint p = new ExtendedEndpoint("231.123.254.1", 1);
-        hostCatcher.add(p, true);
-        assertFalse(hostCatcher.isHostTLSCapable(new IpPortImpl("231.123.254.1", 1)));
-        assertFalse(hostCatcher.isHostTLSCapable(p));
+        hc.add(p, true);
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("231.123.254.1", 1)));
+        assertFalse(hc.isHostTLSCapable(p));
         
         p = new ExtendedEndpoint("21.81.1.1", 1);
         p.setTLSCapable(true);
-        hostCatcher.add(p, true);
-        assertTrue(hostCatcher.isHostTLSCapable(new IpPortImpl("21.81.1.1", 1)));
-        assertTrue(hostCatcher.isHostTLSCapable(p));
+        hc.add(p, true);
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("21.81.1.1", 1)));
+        assertTrue(hc.isHostTLSCapable(p));
         
         p = new ExtendedEndpoint("1.2.3.101", 1);
         p.setTLSCapable(true);
-        assertTrue(hostCatcher.isHostTLSCapable(p));
+        assertTrue(hc.isHostTLSCapable(p));
         
         // Hand-craft a PingReply w/ TLS IPPs to see if they're added as
         // TLS capable hosts.
-        assertEquals(2, hostCatcher.getNumHosts());
+        assertEquals(2, hc.getNumHosts());
         GGEP ggep = new GGEP();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
@@ -963,91 +907,58 @@ public class HostCatcherTest extends LimeTestCase {
         // mark the second & third items as TLS
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
         ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
-        PingReply pr = pingReplyFactory.create(
+        PingReply pr = ProviderHacks.getPingReplyFactory().create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 0, 1, 0 },
             0, 0, false, ggep);
-        hostCatcher.add(pr);
-        assertEquals(7, hostCatcher.getNumHosts());
-        assertFalse(hostCatcher.isHostTLSCapable(new IpPortImpl("1.1.1.1:1")));
-        assertTrue(hostCatcher.isHostTLSCapable(new IpPortImpl("1.2.3.4:2")));
-        assertTrue(hostCatcher.isHostTLSCapable(new IpPortImpl("3.4.2.3:3")));
-        assertFalse(hostCatcher.isHostTLSCapable(new IpPortImpl("254.0.0.3:4")));
-        assertTrue(hostCatcher.isHostTLSCapable(new IpPortImpl("1.0.1.0:1")));
+        hc.add(pr);
+        assertEquals(7, hc.getNumHosts());
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("1.1.1.1:1")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("1.2.3.4:2")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("3.4.2.3:3")));
+        assertFalse(hc.isHostTLSCapable(new IpPortImpl("254.0.0.3:4")));
+        assertTrue(hc.isHostTLSCapable(new IpPortImpl("1.0.1.0:1")));
 
         // The order of these checks are a little stricter than necessary
-        Endpoint ep = hostCatcher.getAnEndpointImmediate(null);
+        Endpoint ep = hc.getAnEndpointImmediate(null);
         assertEquals("254.0.0.3", ep.getAddress());
         assertFalse(ep.isTLSCapable());
         
-        ep = hostCatcher.getAnEndpointImmediate(null);
+        ep = hc.getAnEndpointImmediate(null);
         assertEquals("3.4.2.3", ep.getAddress());
         assertTrue(ep.isTLSCapable());
         
-        ep = hostCatcher.getAnEndpointImmediate(null);
+        ep = hc.getAnEndpointImmediate(null);
         assertEquals("1.2.3.4", ep.getAddress());
         assertTrue(ep.isTLSCapable());
         
-        ep = hostCatcher.getAnEndpointImmediate(null);
+        ep = hc.getAnEndpointImmediate(null);
         assertEquals("1.1.1.1", ep.getAddress());
         assertFalse(ep.isTLSCapable());
         
-        ep = hostCatcher.getAnEndpointImmediate(null);
+        ep = hc.getAnEndpointImmediate(null);
         assertEquals("21.81.1.1", ep.getAddress());
         assertTrue(ep.isTLSCapable());
         
-        ep = hostCatcher.getAnEndpointImmediate(null);
+        ep = hc.getAnEndpointImmediate(null);
         assertEquals("231.123.254.1", ep.getAddress());
         assertFalse(ep.isTLSCapable());
         
-        ep = hostCatcher.getAnEndpointImmediate(null);
+        ep = hc.getAnEndpointImmediate(null);
         assertEquals("1.0.1.0", ep.getAddress());
         assertTrue(ep.isTLSCapable());
         
-        assertNull(hostCatcher.getAnEndpointImmediate(null));
-    }
-    
-    @Singleton
-    private static class UDPHostCacheFactoryStub implements UDPHostCacheFactory {
-        private final Provider<MessageRouter> messageRouter;
-        private final PingRequestFactory pingRequestFactory;
-        private final ConnectionServices connectionServices;
-        private final Provider<HostCatcher> hostCatcher;
-
-        @Inject
-        public UDPHostCacheFactoryStub(Provider<MessageRouter> messageRouter,
-                PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
-                Provider<HostCatcher> hostCatcher) {
-            this.messageRouter = messageRouter;
-            this.pingRequestFactory = pingRequestFactory;
-            this.connectionServices = connectionServices;
-            this.hostCatcher = hostCatcher;
-        }
-
-        public UDPHostCache createUDPHostCache(UDPPinger pinger) {
-            return new StubUDPBootstrapper(pinger, messageRouter, pingRequestFactory, connectionServices, hostCatcher);
-        }
-
-        public UDPHostCache createUDPHostCache(long expiryTime, UDPPinger pinger) {
-            throw new UnsupportedOperationException();
-        }
-        
+        assertNull(hc.getAnEndpointImmediate(null));
     }
     
     private static class StubUDPBootstrapper extends UDPHostCache {
-        
-        private final Provider<HostCatcher> hostCatcher;
-        
-        public StubUDPBootstrapper(UDPPinger pinger, Provider<MessageRouter> messageRouter,
-                PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
-                Provider<HostCatcher> hostCatcher) {
-            super(pinger, messageRouter, pingRequestFactory, connectionServices);
-            this.hostCatcher = hostCatcher;
-        }
-
         private boolean fetched = false;
         private String host = "143.123.234.132";
         private boolean expired = false;
         
+        public StubUDPBootstrapper() {
+            super(ProviderHacks.getUDPPinger(), Providers.of(ProviderHacks.getMessageRouter()), ProviderHacks.getPingRequestFactory(),
+                    ProviderHacks.getConnectionServices());
+        }
         
         public boolean fetchHosts() {
             if(expired)
@@ -1055,7 +966,7 @@ public class HostCatcherTest extends LimeTestCase {
             expired = true;
             fetched = true;
             Endpoint ep = new Endpoint(host, 6346);
-            hostCatcher.get().add(ep, false);
+            ProviderHacks.getHostCatcher().add(ep, false);
             return true;
         }
         

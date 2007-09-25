@@ -114,7 +114,7 @@ public class IncompleteFileManager implements Serializable {
     private Map<URN, File> hashes = new HashMap<URN, File>();
     
     @Inject
-    volatile static FileManager globalFileManager;
+    private volatile static FileManager globalFileManager;
 
     @Inject
     private volatile static VerifyingFileFactory verifyingFileFactory;

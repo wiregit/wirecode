@@ -2,8 +2,13 @@ package com.limegroup.gnutella.licenses;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.limewire.service.ErrorService;
+
+import com.limegroup.gnutella.ProviderHacks;
+
 
 class StubCCLicense extends CCLicense {
+
 
     private static final URI LICENSE_URI;
     
@@ -29,7 +34,7 @@ class StubCCLicense extends CCLicense {
     }
     
     StubCCLicense(String license, String page, String details) {
-        super(license, getURI(license));
+        super(license, getURI(license), ProviderHacks.getLicenseCache());
         this.page = page;
         this.details = details;
     }
@@ -49,4 +54,15 @@ class StubCCLicense extends CCLicense {
             return details;
     }
     
+    public void verify(VerificationListener listener) {
+        VerificationListener waiter = new Listener(listener);
+        synchronized(waiter) {
+            super.verify(waiter);
+            try {
+                waiter.wait();
+            } catch(InterruptedException ie) {
+                ErrorService.error(ie);
+            }
+        }
+    }
 }

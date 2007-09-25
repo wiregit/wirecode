@@ -12,7 +12,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.chat.InstantMessenger;
+import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -42,10 +42,10 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void removeDownload(Downloader d) { }    
     public void addUpload(Uploader u) { }
     public void removeUpload(Uploader u) { }    	
-	public void acceptChat(InstantMessenger ctr) { }
-	public void receiveMessage(InstantMessenger chr, String message) { }	
-	public void chatUnavailable(InstantMessenger chatter) { }	
-	public void chatErrorMessage(InstantMessenger chatter, String str) { }
+	public void acceptChat(Chatter ctr) { }
+	public void receiveMessage(Chatter chr, String message) { }	
+	public void chatUnavailable(Chatter chatter) { }	
+	public void chatErrorMessage(Chatter chatter, String str) { }
     public void addSharedDirectory(final File directory, final File parent) { }
     public void addSharedFile(final FileDesc file, final File parent) { }
     public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }

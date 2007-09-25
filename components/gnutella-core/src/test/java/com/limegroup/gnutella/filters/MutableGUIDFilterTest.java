@@ -1,25 +1,18 @@
 package com.limegroup.gnutella.filters;
 
+import java.net.InetAddress;
+
 import junit.framework.Test;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
 
 public class MutableGUIDFilterTest extends BaseTestCase {
 
-    Mockery context;
-        
-    MutableGUIDFilter filter;
-    final KeywordFilterStub filterKeyword = new KeywordFilterStub();
-        
-    QueryReply queryReplyMock;  
-    QueryRequest queryRequestMock;
+    private byte[] address; 
     
     public MutableGUIDFilterTest(String name) {
         super(name);
@@ -27,11 +20,7 @@ public class MutableGUIDFilterTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        context = new Mockery();
-        filter = new MutableGUIDFilter(filterKeyword);
-        
-        queryReplyMock = context.mock(QueryReply.class);
-        queryRequestMock = context.mock(QueryRequest.class);
+        address = InetAddress.getLocalHost().getAddress();
     }
     
     public static Test suite() {
@@ -42,70 +31,45 @@ public class MutableGUIDFilterTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    /*
-     * add and remove GUIDS:
-     * add GUIDs and test accordingly
-     * remove GUIDS and test accordingly
+    /**
+     * Tests if more than one guid can be added by seeing if messages
+     * for it are filterted. Also test removal.
      */
-    public void testAddRemoveGUID(){
+    public void testAddRemoveGUID() {
+        MutableGUIDFilter filter = ProviderHacks.getMutableGUIDFilter();
         
-        final GUID guid = new GUID();
-        final GUID guid2 = new GUID();
-        Message msg = null;
-        
-        /*
-         * check if filter allows messages
-         */
-        assertTrue(filter.allow(msg));
-        
-        /*
-         * add guid to filter
-         */
+        GUID guid = new GUID();
         filter.addGUID(guid.bytes());
-               
-        context.checking(new Expectations() {{
-            exactly(1).of(queryReplyMock).getGUID();
-            will(returnValue(guid.bytes()));
-            exactly(1).of(queryReplyMock).getGUID();
-            will(returnValue(guid2.bytes()));
-        }});
         
-        assertFalse(filter.allow(queryReplyMock));
-        assertTrue(filter.allow(queryReplyMock));
+        QueryReply qr = KeywordFilterTest.createReply(ProviderHacks.getResponseFactory().createResponse(1, 2, "sex"), guid, 777, address);
+        QueryReply unrelated = KeywordFilterTest.createReply(ProviderHacks.getResponseFactory().createResponse(1, 2, "sex"), new GUID(), 777, address);
+        assertFalse(filter.allow(qr));
+        assertTrue(filter.allow(unrelated));
         
-        /*
-         * remove guid from filter
-         */
+        GUID guid2 = new GUID();
+        filter.addGUID(guid2.bytes());
+        
+        QueryReply qr2 = KeywordFilterTest.createReply(ProviderHacks.getResponseFactory().createResponse(1, 2, "sex"), guid2, 777, address);
+        
+        assertFalse(filter.allow(qr2));
+        assertFalse(filter.allow(qr));
+        assertTrue(filter.allow(unrelated));
+        
         filter.removeGUID(guid.bytes());
+        assertFalse(filter.allow(qr2));
+        assertTrue(filter.allow(qr));
+        assertTrue(filter.allow(unrelated));
         
-        context.checking(new Expectations() {{
-            exactly(1).of(queryReplyMock).getGUID();
-            will(returnValue(guid.bytes()));
-            exactly(1).of(queryReplyMock).getGUID();
-            will(returnValue(guid2.bytes()));
-        }});
+        // remove element that's not filtered
+        filter.removeGUID(guid.bytes());
+        assertFalse(filter.allow(qr2));
+        assertTrue(filter.allow(qr));
+        assertTrue(filter.allow(unrelated));
         
-        assertTrue(filter.allow(queryReplyMock));
-        assertTrue(filter.allow(queryReplyMock));
-        
-        context.assertIsSatisfied();
+        filter.removeGUID(guid2.bytes());
+        assertTrue(filter.allow(qr));
+        assertTrue(filter.allow(qr2));
+        assertTrue(filter.allow(unrelated));
     }
-    
-    public void testOtherMessagesAreIgnored() throws Exception{
-        context.checking(new Expectations()
-        {{ never(queryRequestMock);
-        }});
-        
-        assertTrue(filter.allow(queryRequestMock));
-        
-        context.assertIsSatisfied();
-    }
-    
-    private class KeywordFilterStub extends KeywordFilter {
-                               
-        @Override
-        boolean allow(QueryReply qr){
-            return false;
-        }
-    }
+
 }

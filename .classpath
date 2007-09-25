@@ -65,7 +65,6 @@
 	<classpathentry kind="lib" path="tests/lib/jmock/jmock-junit4.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jmock/jmock-legacy.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jmock/objenesis.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="lib" path="tests/lib/jaxen-core-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jing.jar"/>
 	<classpathentry kind="lib" path="tests/lib/junit.jar"/>
@@ -83,5 +82,7 @@
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.6.0/lib/jsse.jar"/>
+	<classpathentry kind="var" path="JRE_LIB"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

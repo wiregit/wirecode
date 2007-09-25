@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.handshaking;
 
 import java.lang.reflect.Method;
-import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,21 +12,13 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
-import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -37,23 +29,12 @@ import com.limegroup.gnutella.util.TestConnectionManager;
 /**
  * Tests the functionality of the <tt>HandshakeResponse</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class HandshakeResponseTest extends LimeTestCase {
 
     private static HandshakeResponse ULTRAPEER_HEADERS;
 
     private static HandshakeResponse LEAF_HEADERS;
-
-    private TestConnectionManager testConnectionManager;
-
-    private HostCatcher hostCatcher;
-
-    private PingReplyFactory pingReplyFactory;
-
-    private ManagedConnectionFactory managedConnectionFactory;
-
-    private ConnectionServices connectionServices;
-
-    private HeadersFactory headersFactory;
 
 	public HandshakeResponseTest(String name) {
 		super(name);
@@ -73,37 +54,24 @@ public final class HandshakeResponseTest extends LimeTestCase {
     public void setUp() {
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
-        
-         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(ConnectionManager.class).to(TestConnectionManager.class);
-            }
-         });
-         
-         testConnectionManager = (TestConnectionManager) injector.getInstance(ConnectionManager.class);
-         hostCatcher = injector.getInstance(HostCatcher.class);
-         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-         managedConnectionFactory = injector.getInstance(ManagedConnectionFactory.class);
-         connectionServices = injector.getInstance(ConnectionServices.class);
-         headersFactory = injector.getInstance(HeadersFactory.class);
-         
-         ULTRAPEER_HEADERS = 
-             HandshakeResponse.createResponse(headersFactory.createUltrapeerHeaders("45.67.89.54"));
-         LEAF_HEADERS =
-             HandshakeResponse.createResponse(headersFactory.createLeafHeaders("45.67.89.54"));
-         hostCatcher.clear();
     }
 
     public static void globalSetUp(Class name) throws Exception {
-        }
+        ULTRAPEER_HEADERS = 
+            HandshakeResponse.createResponse(
+                    ProviderHacks.getHeadersFactory().createUltrapeerHeaders("45.67.89.54"));
+        LEAF_HEADERS =
+            HandshakeResponse.createResponse(ProviderHacks.getHeadersFactory().createLeafHeaders("45.67.89.54"));
+        ProviderHacks.getHostCatcher().clear();
+    }
 
     public void testLeafRejectIncoming() throws Exception {
         Properties props = new Properties();
         props.put(HeaderNames.X_ULTRAPEER, "false");
-        hostCatcher.add(MessageTestUtils.createPongWithFreeLeafSlots(pingReplyFactory));
+        HostCatcher hc = ProviderHacks.getHostCatcher();
+        hc.add(MessageTestUtils.createPongWithFreeLeafSlots());
         HandshakeResponse headers = HandshakeResponse.createResponse(props);
-        HandshakeResponse hr = HandshakeResponse.createLeafRejectIncomingResponse(headers, HandshakeStatus.NO_HEADERS, connectionServices);
+        HandshakeResponse hr = HandshakeResponse.createLeafRejectIncomingResponse(headers, HandshakeStatus.NO_HEADERS, ProviderHacks.getConnectionServices());
         assertTrue(hr.hasXTryUltrapeers());
     }
     
@@ -112,37 +80,51 @@ public final class HandshakeResponseTest extends LimeTestCase {
      * header.
      */
     public void testAddXTryHeader() throws Exception {
-        hostCatcher.clear();
-        assertEquals(0, hostCatcher.getNumHosts());
-        List<ManagedConnection> ipPorts = new LinkedList<ManagedConnection>();
-        ipPorts.add(managedConnectionFactory.createManagedConnection("24.67.85.4", 6346));
-        testConnectionManager.setInitializedConnections(ipPorts);
+        Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                "addXTryHeader",
+                new Class[]{HandshakeResponse.class, 
+                Properties.class});
+        // First, check to make sure that we add connected hosts when we don't
+        // have any hosts in the host catcher. 
+        ProviderHacks.getHostCatcher().clear();
+        assertEquals(0, ProviderHacks.getHostCatcher().getNumHosts());
+        List ipPorts = new LinkedList();
+        ipPorts.add(ProviderHacks.getManagedConnectionFactory().createManagedConnection("24.67.85.4", 6346));
+        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
+            "_initializedConnections", ipPorts);
         
-        Properties props = HandshakeResponse.addXTryHeader(ULTRAPEER_HEADERS, new Properties(), connectionServices);
-        
+        Object[] params = new Object[2];
+        params[0] = ULTRAPEER_HEADERS;
+        params[1] = new Properties();
+        Properties props = 
+            (Properties)m.invoke(HandshakeResponse.class, params);
         HandshakeResponse hr = HandshakeResponse.createResponse(props);
         String xTry = hr.getXTryUltrapeers().trim();
         assertEquals("unexpected header", "24.67.85.4:6346", xTry);
         
         // Add a bunch of hosts to the host catcher to look for later.
+        HostCatcher hc = ProviderHacks.getHostCatcher();
         int limit = 30;
-        Set<String> ultrapeersWithLeafSlots = new HashSet<String>();
-        Set<String> ultrapeersWithUltrapeerSlots = new HashSet<String>();
+        Set ultrapeersWithLeafSlots = new HashSet();
+        Set ultrapeersWithUltrapeerSlots = new HashSet();
         for(int i=0; i<limit; i++) {
-            PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots(pingReplyFactory);
-            hostCatcher.add(pr);
+            PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots();
+            hc.add(pr);
             ultrapeersWithLeafSlots.add(pr.getAddress()+":"+pr.getPort());
             
-            pr = MessageTestUtils.createPongWithUltrapeerSlots(pingReplyFactory);
-            hostCatcher.add(pr);
+            pr = MessageTestUtils.createPongWithUltrapeerSlots();
+            hc.add(pr);
             ultrapeersWithUltrapeerSlots.add(pr.getAddress()+":"+pr.getPort());
         }
         
         
         
         Properties headers = new Properties();
-        headers = HandshakeResponse.addXTryHeader(ULTRAPEER_HEADERS, headers, connectionServices);
-            
+        headers = 
+            (Properties)m.invoke(null, 
+                new Object[] {ULTRAPEER_HEADERS, headers});
+
         // Check that the appropriate hosts are returned to a request from
         // an ultrapeer.
         hr = HandshakeResponse.createResponse(headers);
@@ -158,16 +140,16 @@ public final class HandshakeResponseTest extends LimeTestCase {
             assertTrue(ultrapeersWithUltrapeerSlots.contains(st.nextToken()));
         }
         // Double-check that the hosts are what we expect them to be.
-        String[] hostArray = ultrapeersWithUltrapeerSlots.toArray(new String[0]);
+        String[] hostArray = 
+            (String[])ultrapeersWithUltrapeerSlots.toArray(new String[0]);
         makeSureHeadersMatch(hostArray, headers);
         
         
         // Now check that the appropriate hosts are returned to a request from
         // a leaf.
         headers = new Properties();
-        // there was no assignment to headers again, strange
-        HandshakeResponse.addXTryHeader(LEAF_HEADERS, headers, connectionServices);
-                
+        m.invoke(null, new Object[] {LEAF_HEADERS, headers});
+        
         // Make sure the returned list of hosts is what we expect.
         hr = HandshakeResponse.createResponse(headers);
         
@@ -182,27 +164,39 @@ public final class HandshakeResponseTest extends LimeTestCase {
         }
         
         // Double-check that the hosts are what we expect them to be.
-        hostArray = ultrapeersWithLeafSlots.toArray(new String[0]);
+        hostArray = 
+            (String[])ultrapeersWithLeafSlots.toArray(new String[0]);
         makeSureHeadersMatch(hostArray, headers);
     }
     
     public void testDefaultCreateEndpointString() throws Exception {
-        List<IpPort> leaves = new LinkedList<IpPort>();
-        List<IpPort> ultrapeers = new LinkedList<IpPort>();
+        List leaves = new LinkedList();
+        List ultrapeers = new LinkedList();
         String leafAddress = "10.254.0.";
         String ultrapeerAddress = "20.23.0.";
         for(int i=0; i<10; i++) {
-            leaves.add(new IpPortImpl(leafAddress + i, 6346));
-            ultrapeers.add(new IpPortImpl(ultrapeerAddress + i, 6346));
+            Connection conn = ProviderHacks.getConnectionFactory().createConnection(leafAddress+i, 6346);
+            leaves.add(conn);
+            conn = ProviderHacks.getConnectionFactory().createConnection(ultrapeerAddress+i, 6346);
+            ultrapeers.add(conn);
         }
-        String leafStr = HandshakeResponse.createEndpointString(leaves);
-            
-        List<IpPort> leavesFromString = createListFromIPPortString(leafStr);
-        assertAllIpPortsAreEqual(leaves, leavesFromString);
+        Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                "createEndpointString", 
+                new Class[] {Collection.class});
         
-        String ultrapeerStr = HandshakeResponse.createEndpointString(ultrapeers);
-        List<IpPort> ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
-        assertAllIpPortsAreEqual(ultrapeers, ultrapeersFromString);        
+        String leafStr =
+            (String)m.invoke(HandshakeResponse.class, 
+                new Object[] {leaves});  
+        
+        List leavesFromString = createListFromIPPortString(leafStr);
+        assertAllConnectionsAreEqual(leaves, leavesFromString);
+        
+        String ultrapeerStr =
+            (String)m.invoke(HandshakeResponse.class, 
+                new Object[] {ultrapeers});  
+        List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
+        assertAllConnectionsAreEqual(ultrapeers, ultrapeersFromString);        
     }
     
 	/**
@@ -211,24 +205,36 @@ public final class HandshakeResponseTest extends LimeTestCase {
 	 * 
 	 * @throws Exception if anything unexpected occurs
 	 */
-    // TODO make this a real test case where the limit is tested
 	public void testCreateEndpointString() throws Exception {
-	    List<IpPort> leaves = new LinkedList<IpPort>();
-        List<IpPort> ultrapeers = new LinkedList<IpPort>();
-        String leafAddress = "10.254.0.";
-        String ultrapeerAddress = "20.23.0.";
-        for(int i=0; i<30; i++) {
-            leaves.add(new IpPortImpl(leafAddress + i, 6346));
-            ultrapeers.add(new IpPortImpl(ultrapeerAddress + i, 6346));
-        }
-        String leafStr = HandshakeResponse.createEndpointString(leaves, leaves.size());
-            
-        List<IpPort> leavesFromString = createListFromIPPortString(leafStr);
-        assertAllIpPortsAreEqual(leaves, leavesFromString);
+		List leaves = new LinkedList();
+		List ultrapeers = new LinkedList();
+		String leafAddress = "10.254.0.";
+		String ultrapeerAddress = "20.23.0.";
+		for(int i=0; i<30; i++) {
+			Connection conn = ProviderHacks.getConnectionFactory().createConnection(leafAddress+i, 6346);
+			leaves.add(conn);
+			conn = ProviderHacks.getConnectionFactory().createConnection(ultrapeerAddress+i, 6346);
+			ultrapeers.add(conn);
+		}
+		Method m = 
+			PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+				"createEndpointString", 
+                new Class[] {Collection.class, Integer.TYPE});
         
-        String ultrapeerStr = HandshakeResponse.createEndpointString(ultrapeers, ultrapeers.size());
-        List<IpPort> ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
-        assertAllIpPortsAreEqual(ultrapeers, ultrapeersFromString);  
+        int limit = leaves.size();
+		String leafStr =
+			(String)m.invoke(HandshakeResponse.class, 
+                new Object[] {leaves, new Integer(limit)});	
+		
+		List leavesFromString = createListFromIPPortString(leafStr);
+		assertAllConnectionsAreEqual(leaves, leavesFromString);
+		
+        limit = ultrapeers.size();
+		String ultrapeerStr =
+		    (String)m.invoke(HandshakeResponse.class, 
+                new Object[] {ultrapeers, new Integer(limit)});	
+		List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
+		assertAllConnectionsAreEqual(ultrapeers, ultrapeersFromString);
 		
 	}
 	
@@ -236,17 +242,17 @@ public final class HandshakeResponseTest extends LimeTestCase {
 	 * Asserts that two lists of connections are equal as per having
 	 * the same host/ip.
 	 */
-	private void assertAllIpPortsAreEqual(List<IpPort> one, List<IpPort> two) {
-	    IpPort c1, c2;
+	private void assertAllConnectionsAreEqual(List one, List two) {
+	    Connection c1, c2;
 	    boolean found;
 	    
 	    assertEquals("wrong sizes", one.size(), two.size());
 	    
-	    for(Iterator<IpPort> a = one.iterator(); a.hasNext(); ) {
+	    for(Iterator a = one.iterator(); a.hasNext(); ) {
             found = false;
-            c1 = a.next();
-            for(Iterator<IpPort> b = two.iterator(); b.hasNext();) {
-                c2 = b.next();
+            c1 = (Connection)a.next();
+            for(Iterator b = two.iterator(); b.hasNext();) {
+                c2 = (Connection)b.next();
                 if( c1.getAddress().equals(c2.getAddress()) &&
                   c1.getPort() == c2.getPort() )
                     found = true;
@@ -254,11 +260,11 @@ public final class HandshakeResponseTest extends LimeTestCase {
             assertTrue("missing " + c1 + " from list two", found);
         }
         
-	    for(Iterator<IpPort> a = two.iterator(); a.hasNext(); ) {
+	    for(Iterator a = two.iterator(); a.hasNext(); ) {
             found = false;
-            c1 = a.next();
-            for(Iterator<IpPort> b = one.iterator(); b.hasNext();) {
-                c2 = b.next();
+            c1 = (Connection)a.next();
+            for(Iterator b = one.iterator(); b.hasNext();) {
+                c2 = (Connection)b.next();
                 if( c1.getAddress().equals(c2.getAddress()) &&
                   c1.getPort() == c2.getPort() )
                     found = true;
@@ -274,16 +280,15 @@ public final class HandshakeResponseTest extends LimeTestCase {
 	 * 
 	 * @param ipPorts the string of IP/port pairs
 	 * @return a new List of Connections from the IP/port pairs
-	 * @throws UnknownHostException 
-	 * @throws NumberFormatException 
 	 */
-	private List<IpPort> createListFromIPPortString(String ipPorts) throws NumberFormatException, UnknownHostException {
+	private List createListFromIPPortString(String ipPorts) {
 		StringTokenizer st = new StringTokenizer(ipPorts, ",");
-		List<IpPort> list = new LinkedList<IpPort>();
+		List list = new LinkedList();
 		while(st.hasMoreTokens()) {
 			String ipPort = st.nextToken();
 			StringTokenizer ipPortST = new StringTokenizer(ipPort, ":");
-			list.add(new IpPortImpl(ipPortST.nextToken(), Integer.parseInt(ipPortST.nextToken())));
+			Connection conn = ProviderHacks.getConnectionFactory().createConnection(ipPortST.nextToken(), Integer.parseInt(ipPortST.nextToken()));
+			list.add(conn);
 		}
 		return list;
 	}
@@ -308,8 +313,10 @@ public final class HandshakeResponseTest extends LimeTestCase {
 	 * Tests the method for creating a response to the crawler.
 	 */
 	public void testCreateCrawlerResponse() throws Exception {
-	    testConnectionManager.resetAndInitialize();
-		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse(testConnectionManager);
+	    @SuppressWarnings("all") // DPINJ: textfix
+		TestConnectionManager tcm = new TestConnectionManager();
+	//	PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse(ProviderHacks.getConnectionManager());
 		Properties headers = hr.props();
 		String leaves = headers.getProperty(HeaderNames.LEAVES);
 		String ultrapeers = headers.getProperty(HeaderNames.PEERS);
@@ -347,32 +354,44 @@ public final class HandshakeResponseTest extends LimeTestCase {
      * handshake status line.
      */
     public void testExtractMessage() throws Exception {
-		String line = "200 OK";
-        int code = HandshakeResponse.extractCode(line); 
-        String message = HandshakeResponse.extractMessage(line);
+		Method codeMethod = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractCode",
+                                         new Class[]{String.class});
+
+		Method messageMethod = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "extractMessage",
+                                         new Class[]{String.class});
+        String line = "200 OK";
+        int code = 
+            ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
+        String message = (String)messageMethod.invoke(null, new Object[]{line});
         assertEquals("unexpected code", 200, code);
         assertEquals("unexpected message", "OK", message);
 
         line = "503 Service Unavailable";
-        code = HandshakeResponse.extractCode(line);
+        code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
         assertEquals("unexpected code", 503, code);
-        message = HandshakeResponse.extractMessage(line);
+        message = (String)messageMethod.invoke(null, new Object[]{line});
         assertEquals("unexpected message", "Service Unavailable", message);
 
         line = "503 Something Totally Different";
-        code = HandshakeResponse.extractCode(line); 
+        code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
         assertEquals("unexpected code", 503, code);
-        message = HandshakeResponse.extractMessage(line);
+        message = (String)messageMethod.invoke(null, new Object[]{line});
         assertEquals("unexpected message", "Something Totally Different", 
             message);
 
         line = "200 Something Totally Different";
-        code = HandshakeResponse.extractCode(line); 
+        code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
         assertEquals("unexpected code", 200, code);
-        message = HandshakeResponse.extractMessage(line);
+        message = (String)messageMethod.invoke(null, new Object[]{line});
         assertEquals("unexpected message", "Something Totally Different", 
             message);
     }
+
+
 
     /**
      * Helper method to make sure that the X-Try-Ultrapeers header in the
@@ -527,13 +546,13 @@ public final class HandshakeResponseTest extends LimeTestCase {
         Properties headers = new Properties();
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
-        HandshakeResponse hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED, connectionServices);
+        HandshakeResponse hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED, ProviderHacks.getConnectionServices());
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-            headersFactory.createUltrapeerHeaders("32.9.8.9"),
-            connectionServices);
+            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"),
+            ProviderHacks.getConnectionServices());
         runUltrapeerHeadersTest(hr);
         
         headers = new Properties();
@@ -542,13 +561,13 @@ public final class HandshakeResponseTest extends LimeTestCase {
         
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
         hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED,
-                connectionServices);
+                ProviderHacks.getConnectionServices());
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-            headersFactory.createUltrapeerHeaders("32.9.8.9"),
-            connectionServices);
+            ProviderHacks.getHeadersFactory().createUltrapeerHeaders("32.9.8.9"),
+            ProviderHacks.getConnectionServices());
         runUltrapeerHeadersTest(hr);
     }
 
@@ -566,12 +585,12 @@ public final class HandshakeResponseTest extends LimeTestCase {
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
         HandshakeResponse hr = 
-            HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED, connectionServices);
+            HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED, ProviderHacks.getConnectionServices());
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
             HandshakeResponse.createEmptyResponse(),
-            headersFactory.createLeafHeaders("32.9.8.9"), connectionServices);
+            ProviderHacks.getHeadersFactory().createLeafHeaders("32.9.8.9"), ProviderHacks.getConnectionServices());
         runLeafHeadersTest(hr);
 
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
@@ -579,7 +598,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
         runRejectOutgoingLeafHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptOutgoingResponse(
-                headersFactory.createLeafHeaders("32.9.8.9"));
+                ProviderHacks.getHeadersFactory().createLeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
     }
 
@@ -686,16 +705,16 @@ public final class HandshakeResponseTest extends LimeTestCase {
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "true");
         HandshakeResponse hr = 
             HandshakeResponse.createAcceptIncomingResponse(
-                HandshakeResponse.createEmptyResponse(), headers, connectionServices);
+                HandshakeResponse.createEmptyResponse(), headers, ProviderHacks.getConnectionServices());
         assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
 
         headers.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
         hr = HandshakeResponse.createAcceptIncomingResponse(
-            HandshakeResponse.createEmptyResponse(), headers, connectionServices);
+            HandshakeResponse.createEmptyResponse(), headers, ProviderHacks.getConnectionServices());
         assertTrue("should include leaf guidance", hr.hasLeafGuidance());
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
-            HandshakeResponse.createEmptyResponse(), new Properties(), connectionServices);
+            HandshakeResponse.createEmptyResponse(), new Properties(), ProviderHacks.getConnectionServices());
         assertTrue("should not include leaf guidance", !hr.hasLeafGuidance());
     }
         
@@ -749,7 +768,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
                                                      String.class, 
                                                      Byte.TYPE}); 
 
-        Properties headers = headersFactory.createUltrapeerHeaders("3.7.6.8");
+        Properties headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("3.7.6.8");
         Object[] params = new Object[3];
         params[0] = headers;
         params[1] = HeaderNames.X_MAX_TTL;         
@@ -772,7 +791,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
                                                      String.class, 
                                                      Byte.TYPE}); 
 
-        Properties headers = headersFactory.createUltrapeerHeaders("3.7.6.8");
+        Properties headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("3.7.6.8");
         Object[] params = new Object[3];
         params[0] = headers;
         params[1] = HeaderNames.X_MAX_TTL; 
@@ -815,7 +834,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
                                                      String.class, 
                                                      Integer.TYPE}); 
 
-        Properties headers = headersFactory.createUltrapeerHeaders("3.7.6.8");
+        Properties headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("3.7.6.8");
 
         // construct the parameters to pass to the method
         Object[] params = new Object[3];

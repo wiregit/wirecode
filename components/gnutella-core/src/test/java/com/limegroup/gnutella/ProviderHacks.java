@@ -91,164 +91,158 @@ import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 // DPINJ: REMOVE THIS CLASS!!!
 public class ProviderHacks {
     
-    private static volatile boolean unusable = false;
-    private static volatile boolean used = false;
-    
     private static volatile boolean initialized = false;
     private static volatile boolean initializing = false;
     
-    private static volatile Throwable initializedSource;
-    
     private static LimeWireCore aReallyLongNameThatYouDontWantToTypeALot;
     
-    public static void markUnusable() {
-        if(used)
-            throw new IllegalStateException("already used", initializedSource);
-        unusable = true;
-        initializedSource = new Exception();
+    public static void setLimeWireCore(LimeWireCore core) {
+        if(initialized || initializing)
+            throw new IllegalStateException("already initialized, or initializing!");
+        ProviderHacks.aReallyLongNameThatYouDontWantToTypeALot = core;
+        initialized = true;
     }
     
-    private static LimeWireCore use() {
-        if(unusable)
-            throw new IllegalStateException("marked unusable", initializedSource);        
-        used = true;
-        
+    private static LimeWireCore i() {
         if(initialized)
-            return aReallyLongNameThatYouDontWantToTypeALot;        
+            return aReallyLongNameThatYouDontWantToTypeALot;
         if(initializing)
             throw new IllegalStateException("already initializing!");
         initializing = true;
-        aReallyLongNameThatYouDontWantToTypeALot = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class), new ModuleHacks()).getInstance(LimeWireCore.class);
-        initializedSource = new Exception();
+        aReallyLongNameThatYouDontWantToTypeALot = 
+            Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class), new ModuleHacks()).getInstance(LimeWireCore.class);
         initializing = false;
+        initialized = true;
         return aReallyLongNameThatYouDontWantToTypeALot;
     }
     
-    public static ScheduledExecutorService getBackgroundExecutor() { return use().getBackgroundExecutor(); }
-    public static UPnPManager getUPnPManager() { return use().getUPnPManager(); }
-    public static PongCacher getPongCacher() { return use().getPongCacher(); }
-    public static Pinger getPinger() { return use().getPinger(); }
-    public static ChatManager getChatManager() { return use().getChatManager(); }
-    public static MulticastService getMulticastService() { return use().getMulticastService(); }
-    public static NodeAssigner getNodeAssigner() { return use().getNodeAssigner(); }
-    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() { return use().getNetworkUpdateSanityChecker(); }
-    public static HostCatcher getHostCatcher() { return use().getHostCatcher(); }
-    public static ConnectionDispatcher getConnectionDispatcher() { return use().getConnectionDispatcher(); }
-    public static QueryUnicaster getQueryUnicaster() { return use().getQueryUnicaster(); }
-    public static ManagedConnectionFactory getManagedConnectionFactory() { return use().getManagedConnectionFactory(); }
-    public static UploadManager getUploadManager() { return use().getUploadManager(); }
+    // Cleaned up in all but tests
+    public static ScheduledExecutorService getBackgroundExecutor() { return i().getBackgroundExecutor(); }
+    public static UPnPManager getUPnPManager() { return i().getUPnPManager(); }
+    public static PongCacher getPongCacher() { return i().getPongCacher(); }
+    public static Pinger getPinger() { return i().getPinger(); }
+    public static ChatManager getChatManager() { return i().getChatManager(); }
+    public static MulticastService getMulticastService() { return i().getMulticastService(); }
+    public static NodeAssigner getNodeAssigner() { return i().getNodeAssigner(); }
+    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() { return i().getNetworkUpdateSanityChecker(); }
+    public static HostCatcher getHostCatcher() { return i().getHostCatcher(); }
+    public static ConnectionDispatcher getConnectionDispatcher() { return i().getConnectionDispatcher(); }
+    public static QueryUnicaster getQueryUnicaster() { return i().getQueryUnicaster(); }
+    public static ManagedConnectionFactory getManagedConnectionFactory() { return i().getManagedConnectionFactory(); }
+    public static UploadManager getUploadManager() { return i().getUploadManager(); }
 
-    public static UploadSlotManager getUploadSlotManager() { return use().getUploadSlotManager(); }
-    public static DHTNodeFetcherFactory getDHTNodeFetcherFactory() { return use().getDHTNodeFetcherFactory(); }
-    public static DHTBootstrapperFactory getDHTBootstrapperFactory() { return use().getDHTBootstrapperFactory(); }
-    public static SearchServices getSearchServices() { return use().getSearchServices(); }
-    public static DownloadServices getDownloadServices() { return use().getDownloadServices(); }
-    public static ConnectionCheckerManager getConnectionCheckerManager() { return use().getConnectionCheckerManager(); }
-    public static SpamServices getSpamServices() { return use().getSpamServices(); }
-    public static HTTPAcceptor getHTTPUploadAcceptor() { return use().getHttpUploadAcceptor(); }
-    public static SavedFileManager getSavedFileManager() { return use().getSavedFileManager(); }
-    public static StaticMessages getStaticMessages() { return use().getStaticMessages(); }
-    public static Statistics getStatistics() { return use().getStatistics(); }
-    public static SearchResultHandler getSearchResultHandler() { return use().getSearchResultHandler(); }
-    public static DHTControllerFactory getDHTControllerFactory() { return use().getDhtControllerFactory(); }
-    public static HandshakeResponderFactory getHandshakeResponderFactory() { return use().getHandshakeResponderFactory(); } 
-    public static HeadersFactory getHeadersFactory() { return use().getHeadersFactory(); }    
-    public static ManagedTorrentFactory getManagedTorrentFactory() { return use().getManagedTorrentFactory(); }    
-    public static HTTPHeaderUtils getHTTPHeaderUtils() { return use().getHttpHeaderUtils(); }
-    public static FeaturesWriter getFeaturesWriter() { return use().getFeaturesWriter(); }
-    public static DownloadWorkerFactory getDownloadWorkerFactory() { return use().getDownloadWorkerFactory(); }
-    public static HeadPongFactory getHeadPongFactory() { return use().getHeadPongFactory(); }
-    public static QueryHandlerFactory getQueryHandlerFactory() { return use().getQueryHandlerFactory(); }    
-    public static SourceRankerFactory getSourceRankerFactory() { return use().getSourceRankerFactory(); }
-    public static VerifyingFileFactory getVerifyingFileFactory() { return use().getVerifyingFileFactory(); }    
-    public static DiskController getDiskController() { return use().getDiskController(); }    
-    public static AltLocValueFactory getAltLocValueFactory() { return use().getAltLocValueFactory(); }    
-    public static HTTPDownloaderFactory getHTTPDownloaderFactory() { return use().getHttpDownloaderFactory(); }
-    public static OnDemandUnicaster getOnDemandUnicaster() { return use().getOnDemandUnicaster(); }
-    public static AltLocFinder getAltLocFinder() { return use().getAltLocFinder(); }
-    public static SecureMessageVerifier getSecureMessageVerifier() { return use().getSecureMessageVerifier(); }
-    public static MessageDispatcher getMessageDispatcher() { return use().getMessageDispatcher(); }
-    public static UrnCache getUrnCache() { return use().getUrnCache(); }
-    public static ResponseFactory getResponseFactory() { return use().getResponseFactory(); }
-    public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { return use().getHttpRequestHandlerFactory(); }
-    public static FileManagerController getFileManagerController() { return use().getFileManagerController(); }
-    public static CreationTimeCache getCreationTimeCache() { return use().getCreationTimeCache(); }
-    public static DownloadReferencesFactory getDownloadReferencesFactory() { return use().getDownloadReferencesFactory(); }
-    public static DownloadCallback getInNetworkCallback() { return use().getInNetworkCallback(); }
-    public static RequeryManagerFactory getRequeryManagerFactory() { return use().getRequeryManagerFactory(); }
-    public static RUDPContext getRUDPContext() { return use().getRUDPContext(); }
-    public static BTContextFactory getBTContextFactory() { return use().getBTContextFactory(); }
-    public static BTDownloaderFactory getBTDownloaderFactory() { return use().getBTDownloaderFactory(); }
-    public static UDPSelectorProvider getUDPSelectorProvider() { return use().getUDPSelectorProvider(); }
-    public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return use().getCapabilitiesVMFactory(); }
-    public static ConnectionFactory getConnectionFactory() { return use().getConnectionFactory(); };
-    public static LifecycleManager getLifecycleManager() { return use().getLifecycleManager(); }
-    public static SimppManager getSimppManager() { return use().getSimppManager(); }
-    public static QueryDispatcher getQueryDispatcher() { return use().getQueryDispatcher(); }
-    public static SpamManager getSpamManager() { return use().getSpamManager(); }
-    public static MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() { return use().getMessagesSupportedVendorMessage(); }
-    public static DownloadCallback getDownloadCallback() { return use().getDownloadCallback(); }
-    public static PushDownloadManager getPushDownloadManager() { return use().getPushDownloadManager(); }
-    public static UniqueHostPinger getUniqueHostPinger() { return use().getUniqueHostPinger(); }
-    public static UDPPinger getUDPPinger() { return use().getUDPPinger(); }
-    public static ScheduledExecutorService getNIOExecutor() { return use().getNIOExecutor(); }
-    public static GuidMapManager getGuidMapManager() { return use().getGuidMapManager(); }
-    public static BrowseHostHandlerManager getBrowseHostHandlerManager() { return use().getBrowseHostHandlerManager(); }
-    public static PushEndpointCache getPushEndpointCache() { return use().getPushEndpointCache(); }
-    public static SpamFilterFactory getSpamFilterFactory() { return use().getSpamFilterFactory(); };
-    public static UDPReplyHandlerFactory getUDPReplyHandlerFactory() { return use().getUDPReplyHandlerFactory(); }
-    public static UDPReplyHandlerCache getUDPReplyHandlerCache() { return use().getUDPReplyHandlerCache(); }
-    public static Provider<InspectionRequestHandler> getInspectionRequestHandlerFactory() { return use().getInspectionRequestHandlerFactory(); }
-    public static Provider<UDPCrawlerPingHandler> getUDPCrawlerPingHandlerFactory() { return use().getUDPCrawlerPingHandlerFactory(); }
-    public static Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() { return use().getAdvancedToggleHandlerFactory(); }
-    public static FileResponseEntityFactory getFileResponseEntityFactory() { return use().getFileRepsoneEntityFactory(); }
-    public static BandwidthManager getBandwidthManager() { return use().getBandwidthManager(); }
-    public static MutableGUIDFilter getMutableGUIDFilter() { return use().getMutableGUIDFilter(); }
-    public static IPFilter getIpFilter() { return use().getIpFilter(); }
-    public static MessageFactory getMessageFactory() { return use().getMessageFactory(); }
-    public static MessageReaderFactory getMessageReaderFactory() { return use().getMessageReaderFactory(); }
-    public static PingReplyFactory getPingReplyFactory() { return use().getPingReplyFactory(); }
-    public static QueryReplyFactory getQueryReplyFactory() { return use().getQueryReplyFactory(); }
-    public static VendorMessageFactory getVendorMessageFactory() { return use().getVendorMessageFactory(); }
-    public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return use().getReplyNumberVendorMessageFactory(); }
-    public static ForMeReplyHandler getForMeReplyHandler() { return use().getForMeReplyHandler(); }
-    public static UDPCrawlerPongFactory getUDPCrawlerPongFactory() { return use().getUDPCrawlerPongFactory(); }
-    public static DHTManager getDHTManager() { return use().getDhtManager(); }    
-    public static AltLocManager getAltLocManager() { return use().getAltLocManager(); }
-    public static AlternateLocationFactory getAlternateLocationFactory() { return use().getAlternateLocationFactory(); }
-    public static UDPHostCacheFactory getUDPHostCacheFactory() { return use().getUDPHostCacheFactory(); }
-    public static MessageRouter getMessageRouter() { return use().getMessageRouter(); }
-    public static UpdateHandler getUpdateHandler() { return use().getUpdateHandler(); }
-    public static TigerTreeCache getTigerTreeCache() { return use().getTigerTreeCache(); }
-    public static PushEndpointFactory getPushEndpointFactory() { return use().getPushEndpointFactory(); }
-    public static ConnectionManager getConnectionManager() { return use().getConnectionManager(); }
-    public static LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() { return use().getLimeXMLReplyCollectionFactory(); }
-    public static FileManager getFileManager() { return use().getFileManager(); }
-    public static LicenseFactory getLicenseFactory() { return use().getLicenseFactory(); }
-    public static LimeXMLDocumentFactory getLimeXMLDocumentFactory() { return use().getLimeXMLDocumentFactory(); }
-    public static LimeXMLDocumentHelper getLimeXMLDocumentHelper()  { return use().getLimeXMLDocumentHelper(); }
-    public static MetaDataReader getMetaDataReader() { return use().getMetaDataReader(); }
-    public static LicenseCache getLicenseCache() { return use().getLicenseCache(); }
-    public static LimeXMLProperties getLimeXMLProperties() { return use().getLimeXMLProperties(); }
-    public static InstantMessengerFactory getInstantMessengerFactory() { return use().getInstantMessengerFactory(); };
-    public static SocketsManager getSocketsManager() { return use().getSocketsManager(); }
-    public static QueryRequestFactory getQueryRequestFactory() { return use().getQueryRequestFactory(); }
-    public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return use().getSchemaReplyCollectionMapper(); }
-    public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return use().getLimeXMLSchemaRepository(); }
-    public static Acceptor getAcceptor() { return use().getAcceptor(); }    
-    public static GnutellaDownloaderFactory getGnutellaDownloaderFactory() { return use().getGnutellaDownloaderFactory(); }
-    public static DownloadManager getDownloadManager() { return use().getDownloadManager(); }
-    public static ContentManager getContentManager() { return use().getContentManager(); }
-    public static BTUploaderFactory getBTUploaderFactory() { return use().getBTUploaderFactory(); }
-    public static TorrentManager getTorrentManager() { return use().getTorrentManager(); }      
-    public static ActivityCallback getActivityCallback() { return use().getActivityCallback(); }
-    public static PingRequestFactory getPingRequestFactory() { return use().getPingRequestFactory(); }
-    public static UDPService getUdpService() { return use().getUdpService(); }     
-    public static IpPortContentAuthorityFactory getIpPortContentAuthorityFactory() { return use().getIpPortContentAuthorityFactory(); }
-    public static UpdateCollectionFactory getUpdateCollectionFactory() { return use().getUpdateCollectionFactory(); }
-    public static ApplicationServices getApplicationServices() { return use().getApplicationServices(); }
-    public static NetworkManager getNetworkManager() { return use().getNetworkManager(); }
-    public static ConnectionServices getConnectionServices() { return use().getConnectionServices(); }
+    public static UploadSlotManager getUploadSlotManager() { return i().getUploadSlotManager(); }
+    public static DHTNodeFetcherFactory getDHTNodeFetcherFactory() { return i().getDHTNodeFetcherFactory(); }
+    public static DHTBootstrapperFactory getDHTBootstrapperFactory() { return i().getDHTBootstrapperFactory(); }
+    public static SearchServices getSearchServices() { return i().getSearchServices(); }
+    public static DownloadServices getDownloadServices() { return i().getDownloadServices(); }
+    public static ConnectionCheckerManager getConnectionCheckerManager() { return i().getConnectionCheckerManager(); }
+    public static SpamServices getSpamServices() { return i().getSpamServices(); }
+    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() { return i().getHttpUploadAcceptor(); }
+    public static SavedFileManager getSavedFileManager() { return i().getSavedFileManager(); }
+    public static StaticMessages getStaticMessages() { return i().getStaticMessages(); }
+    public static Statistics getStatistics() { return i().getStatistics(); }
+    public static SearchResultHandler getSearchResultHandler() { return i().getSearchResultHandler(); }
+    public static DHTControllerFactory getDHTControllerFactory() { return i().getDhtControllerFactory(); }
+    public static HandshakeResponderFactory getHandshakeResponderFactory() { return i().getHandshakeResponderFactory(); } 
+    public static HeadersFactory getHeadersFactory() { return i().getHeadersFactory(); }    
+    public static ManagedTorrentFactory getManagedTorrentFactory() { return i().getManagedTorrentFactory(); }    
+    public static HTTPHeaderUtils getHTTPHeaderUtils() { return i().getHttpHeaderUtils(); }
+    public static FeaturesWriter getFeaturesWriter() { return i().getFeaturesWriter(); }
+    public static DownloadWorkerFactory getDownloadWorkerFactory() { return i().getDownloadWorkerFactory(); }
+    public static HeadPongFactory getHeadPongFactory() { return i().getHeadPongFactory(); }
+    public static QueryHandlerFactory getQueryHandlerFactory() { return i().getQueryHandlerFactory(); }    
+    public static SourceRankerFactory getSourceRankerFactory() { return i().getSourceRankerFactory(); }
+    public static VerifyingFileFactory getVerifyingFileFactory() { return i().getVerifyingFileFactory(); }    
+    public static DiskController getDiskController() { return i().getDiskController(); }    
+    public static AltLocValueFactory getAltLocValueFactory() { return i().getAltLocValueFactory(); }    
+    public static HTTPDownloaderFactory getHTTPDownloaderFactory() { return i().getHttpDownloaderFactory(); }
+    public static OnDemandUnicaster getOnDemandUnicaster() { return i().getOnDemandUnicaster(); }
+    public static AltLocFinder getAltLocFinder() { return i().getAltLocFinder(); }
+    public static SecureMessageVerifier getSecureMessageVerifier() { return i().getSecureMessageVerifier(); }
+    public static MessageDispatcher getMessageDispatcher() { return i().getMessageDispatcher(); }
+    public static UrnCache getUrnCache() { return i().getUrnCache(); }
+    public static ResponseFactory getResponseFactory() { return i().getResponseFactory(); }
+    public static HttpRequestHandlerFactory getHttpRequestHandlerFactory() { return i().getHttpRequestHandlerFactory(); }
+    public static FileManagerController getFileManagerController() { return i().getFileManagerController(); }
+    public static CreationTimeCache getCreationTimeCache() { return i().getCreationTimeCache(); }
+    public static DownloadReferencesFactory getDownloadReferencesFactory() { return i().getDownloadReferencesFactory(); }
+    public static DownloadCallback getInNetworkCallback() { return i().getInNetworkCallback(); }
+    public static RequeryManagerFactory getRequeryManagerFactory() { return i().getRequeryManagerFactory(); }
+    public static RUDPContext getRUDPContext() { return i().getRUDPContext(); }
+    public static BTContextFactory getBTContextFactory() { return i().getBTContextFactory(); }
+    public static BTDownloaderFactory getBTDownloaderFactory() { return i().getBTDownloaderFactory(); }
+    public static UDPSelectorProvider getUDPSelectorProvider() { return i().getUDPSelectorProvider(); }
+    public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return i().getCapabilitiesVMFactory(); }
+    public static ConnectionFactory getConnectionFactory() { return i().getConnectionFactory(); };
+    public static LifecycleManager getLifecycleManager() { return i().getLifecycleManager(); }
+    public static SimppManager getSimppManager() { return i().getSimppManager(); }
+    public static QueryDispatcher getQueryDispatcher() { return i().getQueryDispatcher(); }
+    public static SpamManager getSpamManager() { return i().getSpamManager(); }
+    public static MessagesSupportedVendorMessage getMessagesSupportedVendorMessage() { return i().getMessagesSupportedVendorMessage(); }
+    public static DownloadCallback getDownloadCallback() { return i().getDownloadCallback(); }
+    public static PushDownloadManager getPushDownloadManager() { return i().getPushDownloadManager(); }
+    public static UniqueHostPinger getUniqueHostPinger() { return i().getUniqueHostPinger(); }
+    public static UDPPinger getUDPPinger() { return i().getUDPPinger(); }
+    public static ScheduledExecutorService getNIOExecutor() { return i().getNIOExecutor(); }
+    public static GuidMapManager getGuidMapManager() { return i().getGuidMapManager(); }
+    public static BrowseHostHandlerManager getBrowseHostHandlerManager() { return i().getBrowseHostHandlerManager(); }
+    public static PushEndpointCache getPushEndpointCache() { return i().getPushEndpointCache(); }
+    public static SpamFilterFactory getSpamFilterFactory() { return i().getSpamFilterFactory(); };
+    public static UDPReplyHandlerFactory getUDPReplyHandlerFactory() { return i().getUDPReplyHandlerFactory(); }
+    public static UDPReplyHandlerCache getUDPReplyHandlerCache() { return i().getUDPReplyHandlerCache(); }
+    public static Provider<InspectionRequestHandler> getInspectionRequestHandlerFactory() { return i().getInspectionRequestHandlerFactory(); }
+    public static Provider<UDPCrawlerPingHandler> getUDPCrawlerPingHandlerFactory() { return i().getUDPCrawlerPingHandlerFactory(); }
+    public static Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() { return i().getAdvancedToggleHandlerFactory(); }
+    public static FileResponseEntityFactory getFileResponseEntityFactory() { return i().getFileRepsoneEntityFactory(); }
+    public static BandwidthManager getBandwidthManager() { return i().getBandwidthManager(); }
+    public static MutableGUIDFilter getMutableGUIDFilter() { return i().getMutableGUIDFilter(); }
+    public static IPFilter getIpFilter() { return i().getIpFilter(); }
+    public static MessageFactory getMessageFactory() { return i().getMessageFactory(); }
+    public static MessageReaderFactory getMessageReaderFactory() { return i().getMessageReaderFactory(); }
+    public static PingReplyFactory getPingReplyFactory() { return i().getPingReplyFactory(); }
+    public static QueryReplyFactory getQueryReplyFactory() { return i().getQueryReplyFactory(); }
+    public static VendorMessageFactory getVendorMessageFactory() { return i().getVendorMessageFactory(); }
+    public static ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() { return i().getReplyNumberVendorMessageFactory(); }
+    public static ForMeReplyHandler getForMeReplyHandler() { return i().getForMeReplyHandler(); }
+    public static UDPCrawlerPongFactory getUDPCrawlerPongFactory() { return i().getUDPCrawlerPongFactory(); }
+    public static DHTManager getDHTManager() { return i().getDhtManager(); }    
+    public static AltLocManager getAltLocManager() { return i().getAltLocManager(); }
+    public static AlternateLocationFactory getAlternateLocationFactory() { return i().getAlternateLocationFactory(); }
+    public static UDPHostCacheFactory getUDPHostCacheFactory() { return i().getUDPHostCacheFactory(); }
+    public static MessageRouter getMessageRouter() { return i().getMessageRouter(); }
+    public static UpdateHandler getUpdateHandler() { return i().getUpdateHandler(); }
+    public static TigerTreeCache getTigerTreeCache() { return i().getTigerTreeCache(); }
+    public static PushEndpointFactory getPushEndpointFactory() { return i().getPushEndpointFactory(); }
+    public static ConnectionManager getConnectionManager() { return i().getConnectionManager(); }
+    public static LimeXMLReplyCollectionFactory getLimeXMLReplyCollectionFactory() { return i().getLimeXMLReplyCollectionFactory(); }
+    public static FileManager getFileManager() { return i().getFileManager(); }
+    public static LicenseFactory getLicenseFactory() { return i().getLicenseFactory(); }
+    public static LimeXMLDocumentFactory getLimeXMLDocumentFactory() { return i().getLimeXMLDocumentFactory(); }
+    public static LimeXMLDocumentHelper getLimeXMLDocumentHelper()  { return i().getLimeXMLDocumentHelper(); }
+    public static MetaDataReader getMetaDataReader() { return i().getMetaDataReader(); }
+    public static LicenseCache getLicenseCache() { return i().getLicenseCache(); }
+    public static LimeXMLProperties getLimeXMLProperties() { return i().getLimeXMLProperties(); }
+    public static InstantMessengerFactory getInstantMessengerFactory() { return i().getInstantMessengerFactory(); };
+    public static SocketsManager getSocketsManager() { return i().getSocketsManager(); }
+    public static QueryRequestFactory getQueryRequestFactory() { return i().getQueryRequestFactory(); }
+    public static SchemaReplyCollectionMapper getSchemaReplyCollectionMapper() { return i().getSchemaReplyCollectionMapper(); }
+    public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return i().getLimeXMLSchemaRepository(); }
+    public static Acceptor getAcceptor() { return i().getAcceptor(); }    
+    public static GnutellaDownloaderFactory getGnutellaDownloaderFactory() { return i().getGnutellaDownloaderFactory(); }
+    public static DownloadManager getDownloadManager() { return i().getDownloadManager(); }
+    public static ContentManager getContentManager() { return i().getContentManager(); }
+    public static BTUploaderFactory getBTUploaderFactory() { return i().getBTUploaderFactory(); }
+    public static TorrentManager getTorrentManager() { return i().getTorrentManager(); }      
+    public static ActivityCallback getActivityCallback() { return i().getActivityCallback(); }
+    public static PingRequestFactory getPingRequestFactory() { return i().getPingRequestFactory(); }
+    public static UDPService getUdpService() { return i().getUdpService(); }     
+    public static IpPortContentAuthorityFactory getIpPortContentAuthorityFactory() { return i().getIpPortContentAuthorityFactory(); }
+    public static UpdateCollectionFactory getUpdateCollectionFactory() { return i().getUpdateCollectionFactory(); }
+    public static ApplicationServices getApplicationServices() { return i().getApplicationServices(); }
+    public static NetworkManager getNetworkManager() { return i().getNetworkManager(); }
+    public static ConnectionServices getConnectionServices() { return i().getConnectionServices(); }
     
     
+    // DO NOT ADD METHODS HERE -- PUT THEM IN THE RIGHT CATEGORY!
 }

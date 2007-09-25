@@ -81,7 +81,7 @@ public abstract class PeerTestCase extends LimeTestCase {
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getHostCatcher().clear();
+        LimeTestUtils.clearHostCatcher();
         ProviderHacks.getConnectionServices().connect();
         Thread.sleep(2000);
         assertEquals("unexpected port",

@@ -100,6 +100,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		dispatcher.addConnectionAcceptor(
 				this,
 				false,
+				false,
 				word.toString());
         
         FileUtils.addFileLocker(this);
@@ -108,10 +109,6 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
         this.threadPool = threadPool;
 		// we are a torrent event listener too.
 		listeners.add(this);
-	}
-	
-	public boolean isBlocking() {
-	    return false;
 	}
 	
 	/**

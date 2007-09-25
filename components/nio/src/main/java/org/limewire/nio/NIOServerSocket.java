@@ -25,9 +25,7 @@ import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.util.VersionUtils;
 
 /**
- * A <code>ServerSocket</code> that does all of its accepting using NIO, 
- * however <code>NIOServerSocket</code> pseudo-blocks ({@link #accept()} waits
- * until an accept, or timeouts after {@link #getSoTimeout()}).
+ * A ServerSocket that does all of its accepting using NIO, but psuedo-blocks.
  */
 public class NIOServerSocket extends ServerSocket implements AcceptChannelObserver {
     
@@ -41,7 +39,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     private final AcceptObserver observer;
     
     /**
-     * Constructs a new, unbound, <code>NIOServerSocket</code>.
+     * Constructs a new, unbound, NIOServerSocket.
      * You must call 'bind' to start listening for incoming connections.
      */
     public NIOServerSocket() throws IOException {
@@ -49,9 +47,9 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     }
     
     /**
-     * Constructs a new, unbound, <code>NIOServerSocket</code>.
+     * Constructs a new, unbound, NIOServerSocket.
      * You must call 'bind' to start listening for incoming connections.
-     * All accepted connections will be routed to the given <code>AcceptObserver</code>.
+     * All accepted connections will be routed to the given AcceptObserver.
      */
     public NIOServerSocket(AcceptObserver observer) throws IOException {
         channel = ServerSocketChannel.open();
@@ -63,14 +61,14 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
             this.observer = observer;
     }
     
-    /** Constructs a new <code>NIOServerSocket</code> bound to the given port. */
+    /** Constructs a new NIOServerSocket bound to the given port */
     public NIOServerSocket(int port) throws IOException {
         this(port, null);
     }
 
     /** 
-     * Constructs a new <code>NIOServerSocket</code> bound to the given port 
-     * All accepted connections will be routed to the given <code>AcceptObserver</code>.
+     * Constructs a new NIOServerSocket bound to the given port 
+     * All accepted connections will be routed to the given AcceptObserver
      */
     public NIOServerSocket(int port, AcceptObserver observer) throws IOException {
         this(observer);
@@ -78,17 +76,17 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     }
     
     /**
-     * Constructs a new <code>NIOServerSocket</code> bound to the given port, 
-     * able to accept the given backlog of connections.
+     * Constructs a new NIOServerSocket bound to the given port, able to accept
+     * the given backlog of connections.
      */
     public NIOServerSocket(int port, int backlog) throws IOException {
         this(port, backlog, (AcceptObserver)null);
     }
     
     /**
-     * Constructs a new <code>NIOServerSocket</code> bound to the given port, 
-     * able to accept the given backlog of connections.
-     * All accepted connections will be routed to the given <code>AcceptObserver</code>.
+     * Constructs a new NIOServerSocket bound to the given port, able to accept
+     * the given backlog of connections.
+     * All accepted connections will be routed to the given AcceptObserver.
      */
     public NIOServerSocket(int port, int backlog, AcceptObserver observer) throws IOException {
         this(observer);
@@ -97,17 +95,17 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     }
     
     /**
-     * Constructs a new <code>NIOServerSocket</code> bound to the given port and
-     * addr, able to accept the given backlog of connections.
+     * Constructs a new NIOServerSocket bound to the given port & addr, able to accept
+     * the given backlog of connections.
      */
     public NIOServerSocket(int port, int backlog, InetAddress bindAddr) throws IOException {
         this(port, backlog, bindAddr, null);
     }
     
     /**
-     * Constructs a new <code>NIOServerSocket</code> bound to the given port and
-     * addr, able to accept the given backlog of connections.
-     * All accepted connections will be routed to the given <code>AcceptObserver</code>.
+     * Constructs a new NIOServerSocket bound to the given port & addr, able to accept
+     * the given backlog of connections.
+     * All accepted connections will be routed to the given AcceptObserver.
      */
     public NIOServerSocket(int port, int backlog, InetAddress bindAddr, AcceptObserver observer) throws IOException {
         this(observer);
@@ -116,7 +114,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     
     /**
      * Initializes the connection.
-     * Currently this sets the channel to blocking and setReuseAddress to true
+     * Currently this sets the channel to blocking & setReuseAddress to true
      */
     private void init() throws IOException {
         channel.configureBlocking(false);
@@ -125,10 +123,8 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
 
     /**
      * Accepts an incoming connection.
-     * <p>
-     * THIS CAN ONLY BE USED IF NO <code>AcceptObserver</code> WAS PROVIDED WHEN 
-     * CONSTRUCTING THIS <code>NIOServerSocket</code>. All other attempts will 
-     * cause an immediate <code>RuntimeException</code>.
+     * THIS CAN ONLY BE USED IF NO AcceptObserver WAS PROVIDED WHEN CONSTRUCTING
+     * THIS NIOServerSocket.  All other attempts will cause an immediate RuntimeException.
      */
     public Socket accept() throws IOException {
         if(observer instanceof BlockingObserver)
@@ -160,19 +156,19 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
         } catch(IOException ignored) {}
     }
     
-    /** Binds the socket to the endpoint & starts listening for incoming connections. */
+    /** Binds the socket to the endpoint & starts listening for incoming connections */
     public void bind(SocketAddress endpoint) throws IOException {
         socket.bind(endpoint);
         NIODispatcher.instance().registerAccept(channel, this);
     }
      
-    /** Binds the socket to the endpoint & starts listening for incoming connections. */
+    /** Binds the socket to the endpoint & starts listening for incoming connections */
     public void bind(SocketAddress endpoint, int backlog) throws IOException {
         socket.bind(endpoint, backlog);
         NIODispatcher.instance().registerAccept(channel, this);
     }
     
-    /** Shuts down this NIOServerSocket. */
+    /** Shuts down this NIOServerSocket */
     public void close() throws IOException {
         IOException exception;
         
@@ -280,8 +276,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     }
     
     /**
-     * An <code>AcceptObserver</code> that stores up connections for use with 
-     * blocking accepts.
+     * An AcceptObserver that stores up connections for use with blocking accepts.
      */
     private class BlockingObserver implements AcceptObserver {
         /** List of all pending sockets that can be accepted. */

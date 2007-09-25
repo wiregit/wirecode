@@ -18,7 +18,7 @@ import org.limewire.util.BufferUtils;
 
 import com.google.inject.Provider;
 
-/** Contains a collection of SSL-related utilities. */
+/** Contains a collection of SSL-related utilites. */
 public class SSLUtils {
     
     private SSLUtils() {}
@@ -55,14 +55,12 @@ public class SSLUtils {
         return TLS_CONTEXT.get();
     }
     
-    /** Returns <code>true</code> is the given socket is already using TLS. */
+    /** Returns true is the given socket is already using TLS. */
     public static boolean isTLSEnabled(Socket socket) {
         return socket instanceof TLSNIOSocket;
     }
     
-    /** Returns <code>true</code> if you are capable of performing a 
-     * {@link #startTLS(Socket, ByteBuffer)} operation on this 
-     * <code>socket</code>. */
+    /** Returns true if we are capable of performing a startTLS operation on this socket. */
     public static boolean isStartTLSCapable(Socket socket) {
         return socket instanceof AbstractNBSocket;
     }
@@ -70,11 +68,11 @@ public class SSLUtils {
     /**
      * Wraps an existing socket in a TLS-enabled socket.
      * Any data within 'data' will be pushed into the TLS layer.
-     * <p>
+     * 
      * This currently only works for creating server-side TLS sockets.
-     * <p>
-     * You must ensure that <code>isTLSCapable</code> returns true for the socket,
-     * otherwise an <code>IllegalArgumentException</code> is thrown.
+     * 
+     * You must ensure that isTLSCapable returns true for the socket,
+     * otherwise an IllegalArgumentException is thrown.
      */ 
     public static TLSNIOSocket startTLS(Socket socket, ByteBuffer data) throws IOException {
         if(socket instanceof AbstractNBSocket) {
@@ -107,13 +105,7 @@ public class SSLUtils {
             return EmptyTracker.instance();
         }
     }
-    /**
-     * Provides an implementation for the {@link SSLBandwidthTracker}
-     * interface where each "get" method returns 
-     * zero. Using an empty tracker as the default value of a 
-     * <code>SSLBandwidthTracker</code> avoids 
-     * <code>NullPointerExceptions</code>.
-     */
+    
     public static class EmptyTracker implements SSLBandwidthTracker {
         private static final EmptyTracker instance = new EmptyTracker();
         public static final EmptyTracker instance() { return instance; }

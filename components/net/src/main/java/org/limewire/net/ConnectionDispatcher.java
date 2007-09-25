@@ -27,7 +27,7 @@ public interface ConnectionDispatcher {
      * @param words The list of words to associate with this SocketAcceptor
      */
     public abstract void addConnectionAcceptor(ConnectionAcceptor acceptor,
-            boolean localOnly, String... words);
+            boolean localOnly, boolean blocking, String... words);
 
     /** Removes any ConnectionAcceptors from being associated with the given words. */
     public abstract void removeConnectionAcceptor(String... words);

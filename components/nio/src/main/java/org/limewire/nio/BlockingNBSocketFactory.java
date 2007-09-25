@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/** 
- * An <code>NBSocketFactory</code> that returns {@link BlockingSocketAdapter}
- * sockets. 
- */
+/** An NBSocketFactory that returns BlockingSocketAdapter sockets. */
 public class BlockingNBSocketFactory extends NBSocketFactory {
 
     @Override

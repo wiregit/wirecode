@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import org.limewire.inject.Providers;
+import org.limewire.concurrent.Providers;
 
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;

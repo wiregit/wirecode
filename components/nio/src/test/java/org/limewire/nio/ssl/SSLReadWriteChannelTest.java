@@ -13,8 +13,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -70,7 +68,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        SSLReadWriteChannel channel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        SSLReadWriteChannel channel = new SSLReadWriteChannel(context, executor);
         channel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
         
         ReadBufferChannel readSink = new ReadBufferChannel("NOT TLS DATA!".getBytes());
@@ -98,7 +96,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        SSLReadWriteChannel channel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        SSLReadWriteChannel channel = new SSLReadWriteChannel(context, executor);
         channel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
         
         ReadBufferChannel readSink = new ReadBufferChannel("NOT TLS DATA!".getBytes());
@@ -119,8 +117,8 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
-        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
         
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
@@ -181,8 +179,8 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
-        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
         
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
@@ -277,8 +275,8 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        final SSLReadWriteChannel channel1 = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
-        final SSLReadWriteChannel channel2 = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        final SSLReadWriteChannel channel1 = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel channel2 = new SSLReadWriteChannel(context, executor);
         
         ByteBufferCache cache = NIODispatcher.instance().getBufferCache();
         cache.clearCache();
@@ -318,8 +316,8 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
-        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
         
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
@@ -413,8 +411,8 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
-        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor);
+        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor);
         
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {
@@ -458,82 +456,6 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         serverChannel.shutdown();
     }
 
-    public void testEOFDuringUnderflow() throws Exception {
-        ExecutorService executor = ExecutorsHelper.newProcessingQueue("TLSTest");
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, null, null);
-        
-        final SSLReadWriteChannel clientChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), executor);
-        final SSLReadWriteChannel serverChannel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), executor);
-        
-        executor.submit(new Runnable() {
-            public void run() {
-                clientChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, true, false);
-                serverChannel.initialize(null, new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, false, false);
-            }
-        }).get();
-        
-        Pipe clientToServer = Pipe.open();
-        Pipe serverToClient = Pipe.open();
-        
-        serverToClient.source().configureBlocking(false);
-        serverToClient.sink().configureBlocking(false);
-        clientToServer.source().configureBlocking(false);
-        clientToServer.sink().configureBlocking(false);
-        
-        clientChannel.setReadChannel(new IRWrapper(serverToClient.source()));
-        clientChannel.setWriteChannel(new IWWrapper(clientToServer.sink()));
-        serverChannel.setReadChannel(new IRWrapper(clientToServer.source(), 264));
-        serverChannel.setWriteChannel(new IWWrapper(serverToClient.sink()));
-        
-        String clientOut = "I AM A CLIENT\r\n, HELLO\r\n";
-        new WriteBufferChannel(new byte[0], serverChannel);
-        new WriteBufferChannel(clientOut.getBytes(), clientChannel);
-        
-        final ByteBuffer clientRead = ByteBuffer.allocate(100);
-        final ByteBuffer serverRead = ByteBuffer.allocate(100);
-        final AtomicInteger lastServerReadAmount = new AtomicInteger(Integer.MAX_VALUE);
-        final AtomicInteger lastClientReadAmount = new AtomicInteger(Integer.MAX_VALUE);
-        for(int i = 0; i < 10; i++) {
-            executor.submit(new Callable<Void>() {
-                public Void call() throws IOException {
-                    clientChannel.handleWrite();
-                    return null;
-                }
-            }).get();
-            executor.submit(new Callable<Void>() {
-                public Void call() throws IOException {
-                    lastServerReadAmount.set(serverChannel.read(serverRead));
-                    return null;
-                }
-            }).get();
-            executor.submit(new Callable<Void>() {
-                public Void call() throws IOException {
-                    serverChannel.handleWrite();
-                    return null;
-                }
-            }).get();
-            executor.submit(new Callable<Void>() {
-                public Void call() throws IOException {
-                    lastClientReadAmount.set(clientChannel.read(clientRead));
-                    return null;
-                }
-            }).get();
-        }
-        
-        assertEquals(0, clientRead.position());
-        assertEquals(0, serverRead.position());
-        assertEquals(-1, lastServerReadAmount.get());
-        assertEquals(0, lastClientReadAmount.get());
-        
-        serverToClient.source().close();
-        serverToClient.sink().close();
-        clientToServer.source().close();
-        clientToServer.sink().close(); 
-        clientChannel.shutdown();
-        serverChannel.shutdown();
-    }    
-    
     
     // TODO: Test underflows & overflows
     
@@ -549,7 +471,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         
-        final SSLReadWriteChannel channel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        final SSLReadWriteChannel channel = new SSLReadWriteChannel(context, executor);
         
         SSLSocketFactory sslFactory = context.getSocketFactory();
         final SSLSocket sslSocket = (SSLSocket)sslFactory.createSocket();
@@ -633,28 +555,15 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         private final InputStream in;
         private volatile boolean lastReadInterest;
         private volatile int totalRead;
-        private final int totalAllowedToRead;
         
         IRWrapper(InputStream in) {
-            this(in, Integer.MAX_VALUE);
-        }
-        
-        public IRWrapper(InputStream in, int totalAllowedToRead) {
-            this(in, Channels.newChannel(in), totalAllowedToRead);
+            this.in = in;
+            this.channel = Channels.newChannel(in);
         }
         
         public IRWrapper(ReadableByteChannel channel) {
-            this(null, channel, Integer.MAX_VALUE);
-        }
-        
-        public IRWrapper(ReadableByteChannel channel, int totalAllowedToRead) {
-            this(null, channel, totalAllowedToRead);
-        }
-        
-        public IRWrapper(InputStream in, ReadableByteChannel channel, int totalAllowedToRead) {
             this.channel = channel;
-            this.in = in;
-            this.totalAllowedToRead = totalAllowedToRead;
+            this.in = null;
         }
         
         public boolean getLastReadInterest() {
@@ -670,15 +579,8 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         }
 
         public int read(ByteBuffer dst) throws IOException {
-            if(totalRead >= totalAllowedToRead)
-                return -1;
-            
             if(in == null || in.available() > 0) { // prevents blocking
-                int oldLimit = dst.limit();
-                if(dst.remaining() + totalRead > totalAllowedToRead)
-                    dst.limit(totalAllowedToRead - totalRead + dst.position());
                 int read = channel.read(dst);
-                dst.limit(oldLimit);
                 totalRead += read;
                 return read;
             } else

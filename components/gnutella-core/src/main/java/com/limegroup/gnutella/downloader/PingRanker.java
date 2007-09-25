@@ -32,7 +32,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
-public class PingRanker extends AbstractSourceRanker implements MessageListener, Cancellable {
+public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
     private static final Log LOG = LogFactory.getLog(PingRanker.class);
     
@@ -400,7 +400,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         }
     }
     
-    public synchronized Collection<RemoteFileDesc> getShareableHosts(){
+    protected synchronized Collection<RemoteFileDesc> getShareableHosts(){
         List<RemoteFileDesc>  ret = new ArrayList<RemoteFileDesc> (verifiedHosts.size()+newHosts.size()+testedLocations.size());
         ret.addAll(verifiedHosts);
         ret.addAll(newHosts);

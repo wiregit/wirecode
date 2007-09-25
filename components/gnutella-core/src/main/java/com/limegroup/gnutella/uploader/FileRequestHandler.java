@@ -65,7 +65,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final FileManager fileManager;
     private final HTTPHeaderUtils httpHeaderUtils;
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
-    private final Provider<CreationTimeCache> creationTimeCache;
+    private final CreationTimeCache creationTimeCache;
 
     private final FileResponseEntityFactory fileResponseEntityFactory;
 
@@ -81,7 +81,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
             FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
-            Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
+            CreationTimeCache creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
             AltLocManager altLocManager,
             AlternateLocationFactory alternateLocationFactory,
             Provider<DownloadManager> downloadManager,
@@ -301,9 +301,9 @@ public class FileRequestHandler implements HttpRequestHandler {
             // this information again.
             // it's possible t do that because we don't use the same
             // uploader for different files
-            if (creationTimeCache.get().getCreationTime(urn) != null) {
+            if (creationTimeCache.getCreationTime(urn) != null) {
                 response.addHeader(HTTPHeaderName.CREATION_TIME
-                        .create(creationTimeCache.get().getCreationTime(urn).toString()));
+                        .create(creationTimeCache.getCreationTime(urn).toString()));
             }
         }
 
@@ -440,16 +440,14 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         if (fd == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid index in request does not map to file descriptor: " + request);
-            }
+            // if (LOG.isDebugEnabled())
+            // LOG.debug(uploader + " fd is null");
             return null;
         }
 
         if (!request.filename.equals(fd.getFileName())) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid file name in request: " + request + ", expected: " + fd.getFileName());
-            }
+            if (LOG.isDebugEnabled())
+                LOG.debug("Wrong file name in request: " + request);
             return null;
         }
 
@@ -463,17 +461,13 @@ public class FileRequestHandler implements HttpRequestHandler {
         // If it's the wrong URN, File Not Found it.
         URN urn = uploader.getRequestedURN();
         if (urn != null && !fd.containsUrn(urn)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid content urn: " + uploader);
-            }
+            if (LOG.isDebugEnabled())
+                LOG.debug(uploader + " wrong content urn");
             return false;
         }
 
         // handling THEX Requests
         if (thexRequest && tigerTreeCache.get().getHashTree(fd) == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Requested thex tree is not available: " + uploader);
-            }
             return false;
         }
 
@@ -481,9 +475,6 @@ public class FileRequestHandler implements HttpRequestHandler {
         if (fd instanceof IncompleteFileDesc) {
             // Check to see if we're allowing PFSP.
             if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Sharing of partial files is diabled: " + uploader);
-                }
                 return false;
             }
 
@@ -493,11 +484,10 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
         } else {
             // check if fd is up-to-date
-            File file = fd.getFile();
-            if (file.lastModified() != fd.lastModified()) {
-                if (LOG.isDebugEnabled()) {
+            if (fd.getFile().lastModified() != fd.lastModified()) {
+                File file = fd.getFile();
+                if (LOG.isDebugEnabled())
                     LOG.debug("File has changed on disk, resharing: " + file);
-                }
                 fileManager.removeFileIfShared(file);
                 fileManager.addFileIfShared(file);
                 return false;

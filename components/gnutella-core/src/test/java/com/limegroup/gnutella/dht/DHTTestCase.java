@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -13,7 +15,7 @@ import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
-import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -22,45 +24,37 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public abstract class DHTTestCase extends LimeTestCase {
     
-    protected static final int BOOTSTRAP_DHT_PORT = 3000;
-    
     protected static final int PORT = 6667;
     
-    private boolean bootstrapped = false;
+    //protected static RouterService ROUTER_SERVICE;
     
-    //protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
+    protected static MojitoDHT BOOTSTRAP_DHT;
+    
+    protected static final int BOOTSTRAP_DHT_PORT = 3000;
+    
+    protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
 
-    // DPINJ: remove
-    protected static boolean startDHT = true;
-    
     public DHTTestCase(String name) {
         super(name);
     }
     
-//    public static void globalSetUp() throws Exception {
-//        if (startDHT) {
-//            startServices(ProviderHacks.getLifecycleManager());
-//        }
-//    }
-    
-    protected MojitoDHT startBootstrapDHT(LifecycleManager lifeCycleManager) throws Exception {
-        assertFalse("bootstrap DHT already started", bootstrapped);
-        bootstrapped = true;
+    public static void globalSetUp() throws Exception {
         
-        // setup bootstrap node
-        MojitoDHT bootstrapDHT = MojitoFactory.createDHT("bootstrapNode");
-        bootstrapDHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
-        bootstrapDHT.start();
+        // Setup bootstrap node
+        BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
+        BOOTSTRAP_DHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
+        BOOTSTRAP_DHT.start();
+        DHT_LIST.add(BOOTSTRAP_DHT);
         
-        ConnectionSettings.PORT.setValue(PORT);
+        /*ConnectionSettings.PORT.setValue(PORT);
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, 
+                 ConnectionSettings.PORT.getValue());*/
         
+     //   ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        lifeCycleManager.start();
-        
-        return bootstrapDHT;
+        ProviderHacks.getLifecycleManager().start();
     }
     
     protected void setSettings() {
@@ -70,7 +64,8 @@ public abstract class DHTTestCase extends LimeTestCase {
                 new String[] {"127.*.*.*", "18.239.0.*"});
                 
         ConnectionSettings.PORT.setValue(PORT);
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, 
+                ConnectionSettings.PORT.getValue());
                 
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -95,14 +90,10 @@ public abstract class DHTTestCase extends LimeTestCase {
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
     }
     
-//    public static void globalTearDown() throws Exception {
-//        if (startDHT) {
-//            close(DHT_LIST);
-//        }
-//        
-//        DHT_LIST.clear();
-//        BOOTSTRAP_DHT = null;
-//    }
+    public static void globalTearDown() throws Exception {
+        close(DHT_LIST);
+        ProviderHacks.getLifecycleManager().shutdown();
+    }
 
     protected void fillRoutingTable(RouteTable rt, int numNodes) {
         for(int i = 0; i < numNodes; i++) {

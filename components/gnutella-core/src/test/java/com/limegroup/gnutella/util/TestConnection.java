@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import org.limewire.inject.Providers;
+import org.limewire.concurrent.Providers;
 
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ProviderHacks;
@@ -43,7 +43,8 @@ public abstract class TestConnection extends ManagedConnection {
                 .getHandshakeResponderFactory(), ProviderHacks
                 .getQueryReplyFactory(), ProviderHacks
                 .getMessageDispatcher(), ProviderHacks
-                .getNetworkUpdateSanityChecker(), 
+                .getNetworkUpdateSanityChecker(), ProviderHacks
+                .getUdpService(),
                 ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
                 ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
                 Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),

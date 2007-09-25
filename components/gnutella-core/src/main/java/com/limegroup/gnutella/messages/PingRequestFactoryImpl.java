@@ -29,7 +29,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
      * @see com.limegroup.gnutella.messages.PingRequestFactory#createPingRequest(byte[], byte, byte)
      */
     public PingRequest createPingRequest(byte[] guid, byte ttl, byte hops) {
-        return new PingRequestImpl(guid, ttl, hops);
+        return new PingRequest(guid, ttl, hops);
     }
 
     /* (non-Javadoc)
@@ -37,7 +37,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
      */
     public PingRequest createPingRequest(byte[] guid, byte ttl,
             byte hops, byte length) {
-        return new PingRequestImpl(guid, ttl, hops, length);
+        return new PingRequest(guid, ttl, hops, length);
     }
 
     /* (non-Javadoc)
@@ -45,21 +45,21 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
      */
     public PingRequest createPingRequest(byte[] guid, byte ttl,
             byte hops, byte[] payload) {
-        return new PingRequestImpl(guid, ttl, hops, payload);
+        return new PingRequest(guid, ttl, hops, payload);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.PingRequestFactory#createPingRequest(byte)
      */
     public PingRequest createPingRequest(byte ttl) {
-        return new PingRequestImpl(ttl);
+        return new PingRequest(ttl);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.PingRequestFactory#createPingRequest(byte[], byte)
      */
     public PingRequest createPingRequest(byte[] guid, byte ttl) {
-        return new PingRequestImpl(guid, ttl);
+        return new PingRequest(guid, ttl);
     }
 
     /* (non-Javadoc)
@@ -68,7 +68,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
     public PingRequest createQueryKeyRequest() {
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
-        return new PingRequestImpl(GUID.makeGuid(), (byte)1, l);
+        return new PingRequest(GUID.makeGuid(), (byte)1, l);
     }
     
     /* (non-Javadoc)
@@ -76,7 +76,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
      */
     public PingRequest createUDPPing() {
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        return new PingRequestImpl(populateUDPGGEPList(l).bytes(), (byte)1, l);
+        return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
     }
     
     /* (non-Javadoc)
@@ -86,7 +86,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         GUID guid = new GUID();
         l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
-        return new PingRequestImpl(guid.bytes(), (byte)1, l);
+        return new PingRequest(guid.bytes(), (byte)1, l);
     }
     
     /* (non-Javadoc)
@@ -96,7 +96,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
         List<NameValue<?>> ggeps = new LinkedList<NameValue<?>>();
         GUID guid = populateUDPGGEPList(ggeps);
         ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
-        return new PingRequestImpl(guid.bytes(),(byte)1,ggeps);
+        return new PingRequest(guid.bytes(),(byte)1,ggeps);
     }
     
     /**
@@ -107,7 +107,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
         GUID guid = new GUID();        
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
-        return new PingRequestImpl(guid.bytes(), (byte)1, l);
+        return new PingRequest(guid.bytes(), (byte)1, l);
     }    
     
     /**

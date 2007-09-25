@@ -38,11 +38,6 @@ public class IpPortImpl implements IpPort {
         this(new InetSocketAddress(InetAddress.getByName(host), port), host);
     }
     
-    /** Constructs a new IpPort using the given byte[] & port. */
-    public IpPortImpl(byte[] addr, int port) throws UnknownHostException {
-        this(new InetSocketAddress(InetAddress.getByAddress(addr), port), asString(addr));
-    }
-    
     /** Constructs an IpPort using the given host:port */
     public IpPortImpl(String hostport) throws UnknownHostException {
         int colonIdx = hostport.indexOf(":");
@@ -82,15 +77,5 @@ public class IpPortImpl implements IpPort {
     
     public String toString() {
         return "host: " + getAddress() + ", port: " + getPort();
-    }
-    
-    private static String asString(byte[] addr) {
-        StringBuilder sb = new StringBuilder(19);
-        for(int i = 0; i < addr.length; i++) {
-            sb.append(addr[i]);
-            if(i != addr.length - 1)
-                sb.append(".");
-        }
-        return sb.toString();
     }
 }

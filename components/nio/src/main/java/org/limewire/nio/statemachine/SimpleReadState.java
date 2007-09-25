@@ -5,9 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * An abstract class reading state that reads all its data first, then validates
- * the data at the end. <code>SimpleReadState</code> also clears all data it 
- * reads from the buffer.
+ * A reading state that reads all its data first, then validates it at the end.
+ * It will also clear all data it read from the buffer.
  */
 public abstract class SimpleReadState extends ReadState {
     /** The amount of data we expected to read. */
@@ -50,10 +49,7 @@ public abstract class SimpleReadState extends ReadState {
         return amountRead;
     }
     
-    /** 
-     * Validates the buffer, after it is filled. Throws an 
-     * <code>IOException</code> if there are errors. 
-     */
+    /** Validates the buffer, after it is filled.  Throw an IOException if there are errors. */
     public abstract void validateBuffer(ByteBuffer buffer) throws IOException;
 
 }

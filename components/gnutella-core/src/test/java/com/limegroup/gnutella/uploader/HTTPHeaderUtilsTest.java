@@ -4,34 +4,35 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpResponse;
-import org.limewire.inject.Providers;
+import org.limewire.collection.Function;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.HackConnectionManager;
-import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AltLocUtils;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.http.FeaturesWriter;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
-public class HTTPHeaderUtilsTest extends BaseTestCase {
+public class HTTPHeaderUtilsTest extends LimeTestCase {
     
-    private StubConnectionManager connectionManager;
+    private StubConnectionManager stub;
+    @SuppressWarnings("all") // DPINJ: textfix
+    private ConnectionManager oldCM;
     private AltLocManager altLocManager;
-    private HTTPHeaderUtils httpHeaderUtils;
+
 
     public HTTPHeaderUtilsTest(String name) {
         super(name);
@@ -40,120 +41,121 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
     public static Test suite() {
         return buildTestSuite(HTTPHeaderUtilsTest.class);
     }
-
-    @Override
+    
     public void setUp() throws Exception {
-        connectionManager = new StubConnectionManager();
-        connectionManager.proxies = new StrictIpPortSet<Connectable>();
-        altLocManager = new AltLocManager();
-        NetworkManager networkManager = new NetworkManagerStub();
-        httpHeaderUtils = new HTTPHeaderUtils(new FeaturesWriter(networkManager), networkManager, Providers.of((ConnectionManager) connectionManager));
+        stub = new StubConnectionManager();
+        stub.proxies = new StrictIpPortSet<Connectable>();
+        oldCM = ProviderHacks.getConnectionManager();
+        altLocManager = ProviderHacks.getAltLocManager();
+       // PrivilegedAccessor.setValue(RouterService.class, "manager", stub);  
     }
-
-    @Override
+    
     public void tearDown() throws Exception {
+      //  PrivilegedAccessor.setValue(RouterService.class, "manager", oldCM);
     }
         
     public void testWritesAltsWhenEmpty() throws Exception {
-        StubAltLocTracker altLocTracker = new StubAltLocTracker();
+        MockHTTPUploader uploader = new MockHTTPUploader();
+        MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
 
-        altLocTracker.setNextSetOfAltsToSend(new ArrayList<DirectAltLoc>());
-        httpHeaderUtils.addAltLocationsHeader(response, altLocTracker, altLocManager);
+        tracker.setNextSetOfAltsToSend(new ArrayList<DirectAltLoc>());
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         assertNull(response.getLastHeader("X-Alt"));
     }
     
     public void testWritesAltsNoTLS() throws Exception {
-        StubAltLocTracker altLocTracker = new StubAltLocTracker();
+        MockHTTPUploader uploader = new MockHTTPUploader();
+        MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
 
-        altLocTracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "2.3.4.6", "7.3.2.1", "2.1.5.3:6201", "1.2.65.2"));
-        httpHeaderUtils.addAltLocationsHeader(response, altLocTracker, altLocManager);
-        Header header = response.getLastHeader("X-Alt");
-        assertNotNull("Missing X-Alt header", header);
-        assertEquals("1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2", header.getValue());
+        tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "2.3.4.6", "7.3.2.1", "2.1.5.3:6201", "1.2.65.2"));
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
+        assertEquals("1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2", response.getLastHeader("X-Alt").getValue());
     }
     
     public void testWritesAltsWithTLS() throws Exception {
-        StubAltLocTracker altLocTracker = new StubAltLocTracker();
+        MockHTTPUploader uploader = new MockHTTPUploader();
+        MockAltLocTracker tracker = (MockAltLocTracker)uploader.getAltLocTracker();
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
         
-        altLocTracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "T2.3.4.6", "T7.3.2.1", "2.1.5.3:6201", "T1.2.65.2"));
-        httpHeaderUtils.addAltLocationsHeader(response, altLocTracker, altLocManager);
-        Header header = response.getLastHeader("X-Alt");
-        assertNotNull("Missing X-Alt header", header);
-        assertEquals("tls=68,1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2", header.getValue());
+        tracker.setNextSetOfAltsToSend(altsFor("1.2.3.4:5", "T2.3.4.6", "T7.3.2.1", "2.1.5.3:6201", "T1.2.65.2"));
+        ProviderHacks.getHTTPHeaderUtils().addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
+        String expected = "tls=68,1.2.3.4:5,2.3.4.6,7.3.2.1,2.1.5.3:6201,1.2.65.2";
+        assertEquals(expected, response.getLastHeader("X-Alt").getValue());
+        
+        // Just make sure that AltLocUtils can parse this.
+        final AtomicInteger index = new AtomicInteger(0);
+        AltLocUtils.parseAlternateLocations(HugeTestUtils.SHA1, expected, true, ProviderHacks.getAlternateLocationFactory(), new Function<AlternateLocation, Void>() {
+            public Void apply(AlternateLocation argument) {
+                switch(index.getAndIncrement()) {
+                case 0: checkDirect(argument, "1.2.3.4", 5,    false); break;
+                case 1: checkDirect(argument, "2.3.4.6", 6346, true); break;
+                case 2: checkDirect(argument, "7.3.2.1", 6346, true); break;
+                case 3: checkDirect(argument, "2.1.5.3", 6201, false); break;
+                case 4: checkDirect(argument, "1.2.65.2",6346, true); break;
+                default: throw new IllegalArgumentException("bad loc: " + argument + ", i: " + (index.get()-1));
+                }
+                return null;
+            }
+        });
+        assertEquals(5, index.get());
     }
     
     public void testWritePushProxiesWhenEmpty() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        httpHeaderUtils.addProxyHeader(response);
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
         assertNull(response.getLastHeader("X-Push-Proxy"));
     }
     
     public void testWritePushProxiesNoTLS() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
-        connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
-        httpHeaderUtils.addProxyHeader(response);
-        
-        Header header = response.getLastHeader("X-Push-Proxy");
-        assertNotNull("Missing X-Push-Proxy header", header);
-        assertEquals("1.2.3.4:5,2.3.4.5:6", header.getValue());
+        stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
+        stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
+        assertEquals("1.2.3.4:5,2.3.4.5:6", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
     public void testWritePushProxiesSomeTLS() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
-        connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
-        connectionManager.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
-        httpHeaderUtils.addProxyHeader(response);
-        
-        Header header = response.getLastHeader("X-Push-Proxy");
-        assertNotNull("Missing X-Push-Proxy header", header);
-        assertEquals("pptls=A,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7", header.getValue());
+        stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
+        stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
+        stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
+        assertEquals("pptls=A,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
     public void testWritePushProxiesLimitsAt4() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
-        connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
-        connectionManager.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
-        connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
-        connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, false));
-        httpHeaderUtils.addProxyHeader(response);
-
-        Header header = response.getLastHeader("X-Push-Proxy");
-        assertNotNull("Missing X-Push-Proxy header", header);
-        assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", header.getValue());
+        stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
+        stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
+        stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
+        stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
+        stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, false));
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
+        assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
     public void testWritePushProxiesLimitsAt4NoTLSIfLater() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
-        connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
-        connectionManager.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
-        connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
-        connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
-        httpHeaderUtils.addProxyHeader(response);
-
-        Header header = response.getLastHeader("X-Push-Proxy");
-        assertNotNull("Missing X-Push-Proxy header", header);
-        assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", header.getValue());
+        stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, false));
+        stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, false));
+        stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, false));
+        stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
+        stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
+        assertEquals("1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
     public void testWritePushProxiesLimitsAt4TLSRight() throws Exception {
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
-        connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
-        connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, true));
-        connectionManager.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
-        connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, true));
-        connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
-        httpHeaderUtils.addProxyHeader(response);
-        
-        Header header = response.getLastHeader("X-Push-Proxy");
-        assertNotNull("Missing X-Push-Proxy header", header);
-        assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", header.getValue());
+        stub.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
+        stub.proxies.add(new ConnectableImpl("2.3.4.5", 6, true));
+        stub.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
+        stub.proxies.add(new ConnectableImpl("4.5.6.7", 8, true));
+        stub.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
+        ProviderHacks.getHTTPHeaderUtils().addProxyHeader(response);
+        assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", response.getLastHeader("X-Push-Proxy").getValue());
     }
     
     private Collection<DirectAltLoc> altsFor(String... locs) throws Exception {
@@ -164,21 +166,34 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
                 tls = true;
                 loc = loc.substring(1);
             }
-            alts.add((DirectAltLoc)ProviderHacks.getAlternateLocationFactory().create(loc, UrnHelper.SHA1, tls));
+            alts.add((DirectAltLoc)ProviderHacks.getAlternateLocationFactory().create(loc, HugeTestUtils.SHA1, tls));
         }
         return alts;
     }
-        
+    
+    private void checkDirect(AlternateLocation alt, String host, int port, boolean tls) {
+        assertInstanceof(DirectAltLoc.class, alt);
+        DirectAltLoc d = (DirectAltLoc)alt;
+        assertEquals(host, d.getHost().getAddress());
+        assertEquals(port, d.getHost().getPort());
+        if(tls) {
+            assertInstanceof(Connectable.class, d.getHost());
+            assertTrue(((Connectable)d.getHost()).isTLSCapable());
+        } else {
+            if(d.getHost() instanceof Connectable)
+                assertFalse(((Connectable)d.getHost()).isTLSCapable());
+        }
+    }
+    
+    
+    
     /** A fake ConnectionManager with custom proxies. */
     private static class StubConnectionManager extends HackConnectionManager {
-
         private Set<Connectable> proxies;
-        
         @Override
         public Set<? extends Connectable> getPushProxies() {
             return proxies;
-        }
-        
+        }        
     }
     
 }

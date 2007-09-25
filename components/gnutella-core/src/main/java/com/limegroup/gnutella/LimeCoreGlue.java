@@ -30,28 +30,8 @@ public class LimeCoreGlue {
     private static AtomicBoolean preinstalled = new AtomicBoolean(false);
     private static AtomicBoolean installed = new AtomicBoolean(false);
     
-    /** Uninstalls the glue. */
-    static void uninstall() {
-        preinstalled.set(false);
-        installed.set(false);
-    }
-    
-    
-    /**
-     * Wires initial pieces together that are required for nearly everything.
-     * 
-     * @param userSettingsDir the preferred directory for user settings
-     */
+    /** Wires initial pieces together that are required for nearly everything. */
     public static void preinstall() throws InstallFailedException {
-        preinstall(LimeWireUtils.getRequestedUserSettingsLocation());
-    }
-    
-    /**
-     * Wires initial pieces together that are required for nearly everything.
-     * 
-     * @param userSettingsDir the preferred directory for user settings
-     */
-    public static void preinstall(File userSettingsDir) throws InstallFailedException {
         // Only preinstall once
         if(!preinstalled.compareAndSet(false, true))
             return;
@@ -68,7 +48,7 @@ public class LimeCoreGlue {
         //  - If it can't be set, bail.
         //  - Otherwise, success.
         try {
-            CommonUtils.setUserSettingsDir(userSettingsDir);
+            CommonUtils.setUserSettingsDir(LimeWireUtils.getRequestedUserSettingsLocation());
         } catch(IOException requestedFailed) {
             try {
                 // First clear any older temporary settings directories.
@@ -117,6 +97,7 @@ public class LimeCoreGlue {
         // be the LocalSocketAddressProvider.
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {
+                // DPINJ: make this work :/
                 return networkManager.getAddress();
             }
 

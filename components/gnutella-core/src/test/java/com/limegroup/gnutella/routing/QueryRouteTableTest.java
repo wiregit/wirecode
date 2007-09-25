@@ -17,8 +17,8 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.Pools;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 
 public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -153,7 +153,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         qrt.add("bad");   //{good, book, bad}
         assertEquals(3,entries(qrt));
         //{good, book, bad, SHA1}
-        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         assertEquals(4,entries(qrt));
 
 
@@ -173,7 +173,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         assertTrue(! qrt.contains(ProviderHacks.getQueryRequestFactory().createQuery(
                                                     "good bad bok", (byte)3)));
         assertTrue(qrt.contains(
-                ProviderHacks.getQueryRequestFactory().createQuery(UrnHelper.UNIQUE_SHA1)));
+                ProviderHacks.getQueryRequestFactory().createQuery(HugeTestUtils.UNIQUE_SHA1)));
     }
     
     public void testAddAll() throws Exception {
@@ -181,7 +181,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         QueryRouteTable qrt = new QueryRouteTable(1000);
         qrt.add("good book");
         qrt.add("bad");
-        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000);
@@ -196,7 +196,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         qrt3.add("good");
         qrt3.add("new");
         qrt3.add("bad");
-        qrt3.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
+        qrt3.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         assertEquals(qrt2,qrt3);
         assertEquals(qrt3,qrt2);
     }
@@ -206,7 +206,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         QueryRouteTable qrt = new QueryRouteTable(1000);
         qrt.add("good book");
         qrt.add("bad");
-        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
 
         //3. encode-decode test--with compression
         //qrt={good, book, bad}
@@ -262,7 +262,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         // set up initial qrt.
         QueryRouteTable qrt = new QueryRouteTable();
         fillWithCompressables(qrt);
-        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
 
         //3. encode-decode test--with compression
         //qrt={good, book, bad}

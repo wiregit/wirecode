@@ -2,22 +2,17 @@ package com.limegroup.gnutella.filters;
 
 import junit.framework.Test;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.limewire.util.BaseTestCase;
-
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.FilterSettings;
 
 /**
  * Unit tests for GUIDFilterTest
  */
-public class GUIDFilterTest extends BaseTestCase {
+public class GUIDFilterTest extends com.limegroup.gnutella.util.LimeTestCase {
     SpamFilter filter;
     byte[] guid;
-    private Mockery context;
-    private QueryRequest query;
-    
-    
+
     public GUIDFilterTest(String name) {
         super(name);
     }
@@ -25,25 +20,13 @@ public class GUIDFilterTest extends BaseTestCase {
     public static Test suite() {
         return buildTestSuite(GUIDFilterTest.class);
     }
-    
-    @Override
-    public void setUp() throws Exception {
+
+    public void setUp() {
         guid=new byte[16];
-        
-        filter = new GUIDFilter();
-        context = new Mockery();
-        
-        
-        query = context.mock(QueryRequest.class);
-        
-        context.checking(new Expectations()
-        {{ one (query).getGUID();
-           will(returnValue(guid));
-        }});
-        
+        FilterSettings.FILTER_DUPLICATES.setValue(false);
+        FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
+        filter = ProviderHacks.getSpamFilterFactory().createRouteFilter();
     }
-    
-    
 
     public void testDisallow() {
         guid[0]=(byte)0x41;
@@ -51,9 +34,8 @@ public class GUIDFilterTest extends BaseTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-
-        assertFalse( filter.allow(query));
-        context.assertIsSatisfied();
+		QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(guid, "test query", "");
+        assertTrue(! filter.allow(query));
     }
 
     public void testAllow1() {
@@ -62,9 +44,8 @@ public class GUIDFilterTest extends BaseTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5B;
-		
+		QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(guid, "test query", "");
         assertTrue(filter.allow(query));
-        context.assertIsSatisfied();
     }
 
     public void testAllow2() {
@@ -73,8 +54,7 @@ public class GUIDFilterTest extends BaseTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-
+		QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(guid, "test query", "");
         assertTrue(filter.allow(query));
-        context.assertIsSatisfied();
     }
 }

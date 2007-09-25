@@ -3,33 +3,24 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import com.google.inject.Provider;
-import com.limegroup.gnutella.BandwidthManager;
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.DownloadManager;
+import org.limewire.concurrent.Providers;
+
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 
 /**
  * stubbed out HTTPDownloader.  Extend this stub to override specific behavior
  */
+@SuppressWarnings("all")
 public class HTTPDownloaderStub extends HTTPDownloader {
 
-    public HTTPDownloaderStub(RemoteFileDesc rfd, VerifyingFile incompleteFile,
-            NetworkManager networkManager,
-            AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
-            CreationTimeCache creationTimeCache, BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache) {
-        super(null, rfd, incompleteFile, false, false, networkManager,
-                alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                pushEndpointCache);
-    }
+	public HTTPDownloaderStub(RemoteFileDesc file, VerifyingFile incompleteFile) {
+		super(null, file, incompleteFile, false, false, ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager(), Providers.of(ProviderHacks.getPushEndpointCache()));
+	}
 	
 	public void addFailedAltLoc(AlternateLocation loc) {
 

@@ -13,8 +13,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -26,37 +24,28 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 @SuppressWarnings("unchecked")
 public class MulticastTest extends LimeTestCase {
 
-    private  final int DELAY = 1000;
+
+    @SuppressWarnings("unused") //DPINJ - testfix
+    private static ActivityCallback CALLBACK;
+    
+    private static final int DELAY = 1000;
         
-    private  FileManager fileManager;
+    private static FileManager FMAN;
     
-    private  MulticastHandler M_HANDLER;
+    private static MulticastHandler M_HANDLER;
     
-    private  UnicastedHandler U_HANDLER;
+    private static UnicastedHandler U_HANDLER;
+        
+  //  private static RouterService ROUTER_SERVICE;
         
 	private static final String MP3_NAME =
         "com/limegroup/gnutella/metadata/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3";
-
-    private MessageRouterImpl messageRouter;
-
-    private ConnectionServices connectionServices;
-
-    private SearchServices searchServices;
-
-    private NetworkManager networkManager;
-
-    private PushDownloadManager pushDownloadManager;
-
-    private DownloadServices downloadServices;
-
-    private ForMeReplyHandler forMeReplyHandler;
-
-    private LifecycleManager lifeCycleManager;
         
 
     public MulticastTest(String name) {
@@ -98,48 +87,48 @@ public class MulticastTest extends LimeTestCase {
         ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.setValue(true);
 	}
 
-    @Override
-    public void setUp() throws Exception {
-        setSettings();
-        
+    public static void globalSetUp() throws Exception {
+        CALLBACK = new ActivityCallbackStub();
+      //  ROUTER_SERVICE = new RouterService(CALLBACK, ProviderHacks.getMessageRouter());
+        FMAN = ProviderHacks.getFileManager();
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
     
-        Injector injector = LimeTestUtils.createInjector();
-        
-        fileManager = injector.getInstance(FileManager.class);
-        connectionServices = injector.getInstance(ConnectionServices.class);
-        messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
-        searchServices = injector.getInstance(SearchServices.class);
-        networkManager = injector.getInstance(NetworkManager.class);
-        pushDownloadManager = injector.getInstance(PushDownloadManager.class);
-        downloadServices = injector.getInstance(DownloadServices.class);
-        forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
-        lifeCycleManager = injector.getInstance(LifecycleManager.class);
-        
-        lifeCycleManager.start();
-		connectionServices.connect();
+        setSettings();
+                
+        ProviderHacks.getLifecycleManager().start();
+		LimeTestUtils.clearHostCatcher();
+		ProviderHacks.getConnectionServices().connect();
         
         // MUST SLEEP TO LET THE FILE MANAGER INITIALIZE
         sleep(2000);
         
         // Set these after RouterService is started & MessageRouter
         // is initialized, or else they'll be erased.
-        messageRouter.addMulticastMessageHandler(PushRequest.class, M_HANDLER);
-        messageRouter.addMulticastMessageHandler(QueryRequest.class, M_HANDLER);
-        messageRouter.addUDPMessageHandler(QueryReply.class, U_HANDLER);
-        messageRouter.addUDPMessageHandler(PushRequest.class, U_HANDLER);
-        
-        fileManager.loadSettingsAndWait(2000);
-        
-        assertEquals("unexpected number of shared files", 1, fileManager.getNumFiles() );
+        ProviderHacks.getMessageRouter().addMulticastMessageHandler(PushRequest.class, M_HANDLER);
+        ProviderHacks.getMessageRouter().addMulticastMessageHandler(QueryRequest.class, M_HANDLER);
+        ProviderHacks.getMessageRouter().addUDPMessageHandler(QueryReply.class, U_HANDLER);
+        ProviderHacks.getMessageRouter().addUDPMessageHandler(PushRequest.class, U_HANDLER);
     }
+
+    public void setUp() throws Exception {
+     //   if (ROUTER_SERVICE == null) {
+      //      globalSetUp();
+      //  }
+        
+        setSettings();
+        
+        M_HANDLER.multicasted.clear();
+        U_HANDLER.unicasted.clear();
+        
+        ProviderHacks.getFileManager().loadSettingsAndWait(2000);
+        assertEquals("unexpected number of shared files", 1,
+            FMAN.getNumFiles() );
+	}
     
-    @Override
-    protected void tearDown() throws Exception {
-        connectionServices.disconnect();
-        lifeCycleManager.shutdown();
-    }
+    public static void globalTearDown() throws Exception {
+        ProviderHacks.getConnectionServices().disconnect();
+	}
     
     private static void sleep(int time) {
         try {
@@ -153,8 +142,8 @@ public class MulticastTest extends LimeTestCase {
      * sent it.
      */
     public void testQueryIsSentAndReceived() {
-        byte[] guid = searchServices.newQueryGUID();
-        searchServices.query(guid, "sam");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "sam");
         
         // sleep to let the search go.
         sleep(DELAY);
@@ -179,8 +168,8 @@ public class MulticastTest extends LimeTestCase {
      * and other appropriate info.
      */
     public void testQueryReplies() throws Exception {
-        byte[] guid = searchServices.newQueryGUID();
-        searchServices.query(guid, "metadata"); // search for the name
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata"); // search for the name
         
         // sleep to let the search process.
         sleep(DELAY);
@@ -210,8 +199,8 @@ public class MulticastTest extends LimeTestCase {
         
         // wipe out the address so the first addr == my addr check isn't used
         wipeAddress(qr);
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(false, networkManager));
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(true, networkManager));
+        assertEquals("wrong qos", 4, qr.calculateQualityOfService(false, ProviderHacks.getNetworkManager()));
+        assertEquals("wrong qos", 4, qr.calculateQualityOfService(true, ProviderHacks.getNetworkManager()));
 	}
     
     /**
@@ -225,8 +214,8 @@ public class MulticastTest extends LimeTestCase {
     public void testPushSentThroughMulticastWithTLS() throws Exception {
         // first go through some boring stuff to get a correct QueryReply
         // that we can convert to an RFD.
-        byte[] guid = searchServices.newQueryGUID();
-        searchServices.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
                 M_HANDLER.multicasted.size());
@@ -256,7 +245,7 @@ public class MulticastTest extends LimeTestCase {
         
         // Finally, we have the RFD we want to push.
         SSLSettings.TLS_INCOMING.setValue(true);
-        pushDownloadManager.sendPush(rfd);
+        ProviderHacks.getDownloadManager().getPushManager().sendPush(rfd);
         
         
         // sleep to make sure the push goes through.
@@ -291,8 +280,8 @@ public class MulticastTest extends LimeTestCase {
     public void testPushSentThroughMulticastWithoutTLS() throws Exception {
         // first go through some boring stuff to get a correct QueryReply
         // that we can convert to an RFD.
-        byte[] guid = searchServices.newQueryGUID();
-        searchServices.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
                 M_HANDLER.multicasted.size());
@@ -322,7 +311,7 @@ public class MulticastTest extends LimeTestCase {
         
         // Finally, we have the RFD we want to push.
         SSLSettings.TLS_INCOMING.setValue(false);
-        pushDownloadManager.sendPush(rfd);
+        ProviderHacks.getDownloadManager().getPushManager().sendPush(rfd);
         
         
         // sleep to make sure the push goes through.
@@ -356,8 +345,8 @@ public class MulticastTest extends LimeTestCase {
     
         // first go through some boring stuff to get a correct QueryReply
         // that we can convert to an RFD.
-        byte[] guid = searchServices.newQueryGUID();
-        searchServices.query(guid, "metadata");
+        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
+        ProviderHacks.getSearchServices().query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
                 M_HANDLER.multicasted.size());
@@ -388,7 +377,7 @@ public class MulticastTest extends LimeTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "metadata.mp3").exists());
         
-        downloadServices.download(new RemoteFileDesc[] { rfd }, false, 
+        ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, 
                                new GUID(guid));
         
         // sleep to make sure the download starts & push goes through.
@@ -407,27 +396,27 @@ public class MulticastTest extends LimeTestCase {
             new File(_savedDir, "metadata.mp3").exists());
 
         // Get rid of this file, so the -Dtimes=X option works properly... =)
-        assertEquals("unexpected number of shared files", 2, fileManager.getNumFiles());
+        assertEquals("unexpected number of shared files", 2, FMAN.getNumFiles());
 
         File temp = new File(_savedDir, "metadata.mp3");
         if (temp.exists()) {
-            fileManager.removeFileIfShared(temp);
+            FMAN.removeFileIfShared(temp);
             temp.delete();
         }
         sleep(2 * DELAY);
         assertFalse("file should have been deleted", temp.exists());
 
-        assertEquals("unexpected number of shared files", 1, fileManager.getNumFiles());
+        assertEquals("unexpected number of shared files", 1, FMAN.getNumFiles());
 	}
     
     private static void wipeAddress(QueryReply qr) throws Exception {
-        // TODO mock QueryReply
         PrivilegedAccessor.setValue(qr, "_address", new byte[4]);
 	}
     
-    private void reroutePush(byte[] guid) throws Exception {
-        RouteTable rt = messageRouter.getPushRouteTable();
-        rt.routeReply(guid, forMeReplyHandler);
+    private static void reroutePush(byte[] guid) throws Exception {
+        RouteTable rt = (RouteTable)PrivilegedAccessor.getValue(
+            ProviderHacks.getMessageRouter(), "_pushRouteTable");
+        rt.routeReply(guid, ProviderHacks.getForMeReplyHandler());
     }
     
     private static class MulticastHandler implements MessageHandler {

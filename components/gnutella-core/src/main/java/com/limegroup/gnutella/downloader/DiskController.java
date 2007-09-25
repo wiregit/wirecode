@@ -51,6 +51,7 @@ public class DiskController {
     
     @Inject
     public DiskController(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        // DPINJ: Change to using passed in scheduler!
         backgroundExecutor.scheduleWithFixedDelay(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000, TimeUnit.MILLISECONDS);
     }
     

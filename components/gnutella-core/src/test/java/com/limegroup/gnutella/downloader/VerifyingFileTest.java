@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
 
 import junit.framework.Test;
 
@@ -11,8 +12,7 @@ import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile.WriteCallback;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -22,46 +22,48 @@ public class VerifyingFileTest extends LimeTestCase {
 
     private static final String filename = "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
 
-    private static final File completeFile = CommonUtils.getResourceFile(filename);
+    private static final File completeFile = CommonUtils
+            .getResourceFile(filename);
 
     private static final String sha1 = "urn:sha1:UBJSGDTCVZDSBS4K3ZDQJV5VQ3WTBCOK";
 
-    private RandomAccessFile raf;
+    private static RandomAccessFile raf;
 
-    private HashTree hashTree;
+    private static HashTree hashTree;
 
-    private HashTree defaultHashTree;
+    private static HashTree defaultHashTree;
 
     private VerifyingFile vf;
 
-    private VerifyingFileFactory verifyingFileFactory;
-
-    public VerifyingFileTest(String name) {
-        super(name);
+    public VerifyingFileTest(String s) {
+        super(s);
     }
 
     public static Test suite() {
         return buildTestSuite(VerifyingFileTest.class);
     }
 
+    public static void globalSetUp() throws Exception {
+        defaultHashTree = (HashTree) PrivilegedAccessor.invokeMethod(
+                HashTree.class, "createHashTree", //
+                new Object[] { new Long(completeFile.length()),
+                        new FileInputStream(completeFile),
+                        URN.createSHA1Urn(sha1) }, // 
+                new Class[] { long.class, InputStream.class, URN.class });
+
+        raf = new RandomAccessFile(completeFile, "r");
+    }
+
+    public static void globalTearDown() throws Exception {
+        raf = null;
+        hashTree = null;
+        defaultHashTree = null;
+    }
+
     @Override
     public void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-
-        InputStream in = new FileInputStream(completeFile);
-        try {
-            defaultHashTree = HashTree.createHashTree(completeFile.length(), in, URN
-                    .createSHA1Urn(sha1));
-        } finally {
-            in.close();
-        }
-
-        verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
-        
-        raf = new RandomAccessFile(completeFile, "r");
-
         hashTree = defaultHashTree;
-        vf = verifyingFileFactory.createVerifyingFile(completeFile.length());
+        vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile((int) completeFile.length());
         vf.open(new File("outfile"));
         vf.setHashTree(defaultHashTree);
         raf.seek(0);
@@ -69,17 +71,18 @@ public class VerifyingFileTest extends LimeTestCase {
 
     @Override
     public void tearDown() {
-        if (vf != null) {
-            vf.close();
-        }
+        vf.close();
     }
 
+    
+        
     /**
      * tests that sequential chunks are leased.
      */
     public void testLease() throws Exception {
         int chunkSize = (int) completeFile.length() / 5;
-        PrivilegedAccessor.setValue(vf, "blockChooser", new TestSequentialStrategy());
+        PrivilegedAccessor.setValue(vf, "blockChooser",
+                new TestSequentialStrategy());
         for (long i = 0; i < 5; i++) {
             Range leased = vf.leaseWhite(chunkSize);
             assertEquals(i * chunkSize, leased.getLow());
@@ -105,7 +108,8 @@ public class VerifyingFileTest extends LimeTestCase {
         // However, running at least one test with a block size that
         // isn't a power of two has a certain appeal for testing.
         Range firstLease = vf.leaseWhite(100000);
-        if (firstLease.getHigh() % 100000 != 99999 && firstLease.getHigh() != fileSize - 1) {
+        if (firstLease.getHigh() % 100000 != 99999
+                && firstLease.getHigh() != fileSize - 1) {
             assertTrue("First chunk is not aligned.", false);
         }
 
@@ -126,7 +130,8 @@ public class VerifyingFileTest extends LimeTestCase {
         Range leased = vf.leaseWhite(512 * 1024);
         if (leased.getHigh() % (512 * 1024) != 512 * 1024 - 1
                 && leased.getHigh() != firstLease.getLow() - 1
-                && leased.getHigh() != secondLease.getLow() - 1 && leased.getHigh() != fileSize - 1) {
+                && leased.getHigh() != secondLease.getLow() - 1
+                && leased.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 512k-aligned chunk.", false);
         }
 
@@ -134,7 +139,8 @@ public class VerifyingFileTest extends LimeTestCase {
         leased = vf.leaseWhite(256 * 1024);
         if (leased.getHigh() % (256 * 1024) != 256 * 1024 - 1
                 && leased.getHigh() != firstLease.getLow() - 1
-                && leased.getHigh() != secondLease.getLow() - 1 && leased.getHigh() != fileSize - 1) {
+                && leased.getHigh() != secondLease.getLow() - 1
+                && leased.getHigh() != fileSize - 1) {
             assertTrue("Failed to assign a 256k-aligned chunk.", false);
         }
     }
@@ -146,7 +152,8 @@ public class VerifyingFileTest extends LimeTestCase {
         // Lease two chunks and create a hole in between them.
 
         // This test assumes a sequential download strategy.
-        PrivilegedAccessor.setValue(vf, "blockChooser", new TestSequentialStrategy());
+        PrivilegedAccessor.setValue(vf, "blockChooser",
+                new TestSequentialStrategy());
         Range leased = vf.leaseWhite(512 * 1024);
         vf.releaseBlock(Range.createRange(128 * 1024, 3 * 128 * 1024 - 1));
 
@@ -201,7 +208,8 @@ public class VerifyingFileTest extends LimeTestCase {
             writer.write();
             writer.waitForComplete();
         } else {
-            if (!vf.writeBlock(new VerifyingFile.WriteRequest(pos, 0, chunk.length, chunk)))
+            if (!vf.writeBlock(new VerifyingFile.WriteRequest(pos, 0,
+                    chunk.length, chunk)))
                 fail("can't write: " + pos);
         }
     }
@@ -223,9 +231,10 @@ public class VerifyingFileTest extends LimeTestCase {
 
         synchronized void write() {
             while (start < data.length) {
-                final int toWrite = Math.min(data.length - start, HTTPDownloader.BUF_LENGTH);
-                VerifyingFile.WriteRequest request = new VerifyingFile.WriteRequest(filePos, start,
-                        toWrite, data);
+                final int toWrite = Math.min(data.length - start,
+                        HTTPDownloader.BUF_LENGTH);
+                VerifyingFile.WriteRequest request = new VerifyingFile.WriteRequest(
+                        filePos, start, toWrite, data);
                 if (!vf.writeBlock(request)) {
                     lastWrote = toWrite;
                     vf.registerWriteCallback(request, this);
@@ -312,7 +321,8 @@ public class VerifyingFileTest extends LimeTestCase {
         raf.read(chunk);
         writeImpl((int) (completeFile.length() - 2 * chunk.length), chunk);
         vf.waitForPending(1000);
-        assertEquals(768 * 1024 + completeFile.length() - lastOffset, vf.getVerifiedBlockSize());
+        assertEquals(768 * 1024 + completeFile.length() - lastOffset, vf
+                .getVerifiedBlockSize());
         assertEquals(800 * 1024 + 2 * chunk.length, vf.getBlockSize());
     }
 
@@ -321,7 +331,8 @@ public class VerifyingFileTest extends LimeTestCase {
      */
     public void testCorruptChunks() throws Exception {
         // This test assumes a sequential download strategy
-        PrivilegedAccessor.setValue(vf, "blockChooser", new TestSequentialStrategy());
+        PrivilegedAccessor.setValue(vf, "blockChooser",
+                new TestSequentialStrategy());
         vf.leaseWhite((int) completeFile.length());
         byte[] chunk = new byte[hashTree.getNodeSize()];
 
@@ -360,7 +371,8 @@ public class VerifyingFileTest extends LimeTestCase {
         byte[] chunk = new byte[hashTree.getNodeSize()];
 
         int j = 0;
-        while (j * chunk.length < completeFile.length() * VerifyingFile.MAX_CORRUPTION) {
+        while (j * chunk.length < completeFile.length()
+                * VerifyingFile.MAX_CORRUPTION) {
             assertFalse(vf.isHopeless());
             raf.read(chunk);
             for (int i = 0; i < 100; i++)
@@ -408,7 +420,8 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl(512 * 1024, chunk);
         vf.waitForPending(1000);
 
-        assertEquals((int) completeFile.length() - 256 * 1024, vf.getVerifiedBlockSize());
+        assertEquals((int) completeFile.length() - 256 * 1024, vf
+                .getVerifiedBlockSize());
         assertTrue(vf.isComplete());
 
     }
@@ -447,28 +460,27 @@ public class VerifyingFileTest extends LimeTestCase {
     public void testExactMultiple() throws Exception {
         File exact = new File("exactSize");
         RandomAccessFile raf = new RandomAccessFile(exact, "rw");
-        try {
-            for (int i = 0; i < 1024 * 1024; i++) {
-                raf.write(i);
-            }
-        } finally {
-            raf.close();
-        }
-        
-        InputStream in = new FileInputStream(exact);
+        for (int i = 0; i < 1024 * 1024; i++)
+            raf.write(i);
+        raf.close();
+
         HashTree exactTree;
         try {
-            exactTree = HashTree.createHashTree(exact.length(), in,
-                    URN.createSHA1Urn(exact));
-        } finally {
-            in.close();
+            exactTree = (HashTree) PrivilegedAccessor.invokeMethod(
+                    HashTree.class, "createHashTree", //
+                    new Object[] { new Long(exact.length()),
+                            new FileInputStream(exact),
+                            URN.createSHA1Urn(exact) }, //
+                    new Class[] { long.class, InputStream.class, URN.class });
+        } catch (InvocationTargetException ite) {
+            throw (Exception) ite.getCause();
         }
 
         assertEquals(0, exact.length() % exactTree.getNodeSize());
         raf = new RandomAccessFile(exact, "r");
 
         vf.close();
-        vf = verifyingFileFactory.createVerifyingFile((int) exact.length());
+        vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile((int) exact.length());
         vf.open(new File("outfile"));
         vf.setHashTree(exactTree);
         vf.leaseWhite();
@@ -537,22 +549,19 @@ public class VerifyingFileTest extends LimeTestCase {
 
         long wrote = 0;
         RandomAccessFile out = new RandomAccessFile(outfile, "rw");
-        try {
-            byte[] data = new byte[hashTree.getNodeSize()];
-            for (; wrote < completeFile.length() / 2;) {
-                raf.read(data);
-                out.write(data);
-                wrote += hashTree.getNodeSize();
-            }
-
-            // null the rest of the file.
-            for (long i = wrote; i < completeFile.length(); i++) {
-                out.write(0);
-            }
-        } finally {
-            out.close();
+        byte[] data = new byte[hashTree.getNodeSize()];
+        for (; wrote < completeFile.length() / 2;) {
+            raf.read(data);
+            out.write(data);
+            wrote += hashTree.getNodeSize();
         }
-        
+
+        // null the rest of the file.
+        for (long i = wrote; i < completeFile.length(); i++) {
+            out.write(0);
+        }
+
+        out.close();
         vf.open(outfile);
         assertEquals(0, vf.getVerifiedBlockSize());
         vf.setScanForExistingBlocks(true, outfile.length());
@@ -564,8 +573,8 @@ public class VerifyingFileTest extends LimeTestCase {
 
     public void testGetOffsetForPreview() throws Exception {
         // at first we have nothing for preview.
-        assertEquals(0, vf.getOffsetForPreview());
-
+        assertEquals(0,vf.getOffsetForPreview());
+        
         // one verified chunk - preview that.
         vf.leaseWhite((int) completeFile.length());
 
@@ -576,14 +585,14 @@ public class VerifyingFileTest extends LimeTestCase {
 
         vf.waitForPending(1000);
         assertEquals(chunk.length, vf.getVerifiedBlockSize());
-
+        
         assertEquals(chunk.length - 1, vf.getOffsetForPreview());
-
+        
         // some partial bytes at the end of that chunk
         writeImpl(chunk.length, new byte[10000]);
         vf.waitForPending(100);
-        assertEquals(chunk.length + 10000 - 1, vf.getOffsetForPreview());
-
+        assertEquals(chunk.length +10000 - 1, vf.getOffsetForPreview());
+        
         // another full verified chunk at position 3
         // but the amount for preview should not change
         raf.seek(chunk.length * 2);
@@ -591,15 +600,15 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl(chunk.length * 2, chunk);
         vf.waitForPending(1000);
         assertEquals(chunk.length * 2, vf.getVerifiedBlockSize());
-        assertEquals(chunk.length + 10000 - 1, vf.getOffsetForPreview());
-
-        // fill up the space between the two good chunks with junk.
-        byte[] junk = new byte[chunk.length - 10000];
-        writeImpl(chunk.length + 10000, junk);
+        assertEquals(chunk.length +10000 - 1, vf.getOffsetForPreview());
+        
+        // fill up the space between the two good chunks with junk. 
+        byte []junk = new byte[chunk.length - 10000];
+        writeImpl(chunk.length+10000, junk);
         vf.waitForPending(1000);
         assertEquals(chunk.length * 2, vf.getVerifiedBlockSize());
         assertEquals(chunk.length, vf.getAmountLost());
-
+        
         // since we're not discarding, that should be added to the
         // previewable offset that will also take the second
         // verifyiable chunk

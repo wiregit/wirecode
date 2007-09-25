@@ -399,7 +399,7 @@ public class FileDesc implements StringLookup {
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
 				"urns:     "+URNS+"\r\n"+
-				"docs:     "+ _limeXMLDocs+"\r\n");
+				"docs:     "+ _limeXMLDocs);
 	}
     
     /**
@@ -438,9 +438,7 @@ public class FileDesc implements StringLookup {
         else if (key.startsWith("xml_") && getXMLDocument() != null) {
             key = key.substring(4,key.length());
             return getXMLDocument().lookup(key);
-            
-        // Note: Removed 'firewalled' check -- might not be necessary, but
-        // should see if other ways to re-add can be done.
+        // DPINJ: Removed 'firewalled' check -- might not be necessary, but should see if other ways to re-add can be done.
         }
         return null;
     }

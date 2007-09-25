@@ -324,9 +324,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * Creates a MessageRouter. Must call initialize before using.
      */
     @Inject
-    // TODO: Create a MessageRouterController,
-    //       or split MessageRouter into a number of different classes,
-    //       instead of passing all of these...
+    // DPINJ: Create a MessageRouterController instead of passing all of these...
     protected MessageRouterImpl(NetworkManager networkManager,
             QueryRequestFactory queryRequestFactory,
             QueryHandlerFactory queryHandlerFactory,
@@ -648,7 +646,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
-        MessageHandler msgHandler = getMessageHandler(msg.getHandlerClass());
+        MessageHandler msgHandler = getMessageHandler(msg.getClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, null, receivingConnection);
         } else if (msg instanceof VendorMessage) {
@@ -695,7 +693,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
         
         UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
-        MessageHandler msgHandler = getUDPMessageHandler(msg.getHandlerClass());
+        MessageHandler msgHandler = getUDPMessageHandler(msg.getClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
         }  else if (msg instanceof VendorMessage) {
@@ -737,7 +735,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
         UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
         
-        MessageHandler msgHandler = getMulticastMessageHandler(msg.getHandlerClass());
+        MessageHandler msgHandler = getMulticastMessageHandler(msg.getClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
         } else if (msg instanceof VendorMessage) {
@@ -1116,7 +1114,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             if ((request.isFirewalledSource() &&
                  !networkManager.acceptedIncomingConnection()) &&
                 !(request.canDoFirewalledTransfer() &&
-                  networkManager.canDoFWT())
+                  udpService.canDoFWT())
                 )
                 return;
             respondToQueryRequest(request, _clientGUID, handler);
@@ -1391,6 +1389,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             public void run() {
                 Socket sock = null;
                 try {
+                    // DPINJ: Change to using passed-in SocketsManager!!!
                     sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000);
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
@@ -1711,8 +1710,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * as desired.  If you do, note that receivingConnection may be null (for
      * requests originating here).
      */
-    // default access for testing
-    void forwardQueryToUltrapeers(QueryRequest query,
+    private void forwardQueryToUltrapeers(QueryRequest query,
                                           ReplyHandler handler) {
 		// Note the use of initializedConnections only.
 		// Note that we have zero allocations here.
@@ -1740,8 +1738,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param handler the <tt>ReplyHandler</tt> from which we received
      *  the query
      */
-    // default access for testing
-    void forwardLimitedQueryToUltrapeers(QueryRequest query,
+    private void forwardLimitedQueryToUltrapeers(QueryRequest query,
                                                  ReplyHandler handler) {
 		//Broadcast the query to other connected nodes (ultrapeers or older
 		//nodes), but DON'T forward any queries not originating from me 
@@ -1785,8 +1782,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param handler the <tt>ReplyHandler</tt> that sent the query
      * @param ultrapeer the Ultrapeer to send the query to
      */
-    // default access for testing
-    void forwardQueryToUltrapeer(QueryRequest query, 
+    private void forwardQueryToUltrapeer(QueryRequest query, 
                                          ReplyHandler handler,
                                          ManagedConnection ultrapeer) {    
         // don't send a query back to the guy who sent it
@@ -1825,8 +1821,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      *
      * @param qr the <tt>QueryRequest</tt> to send
      */
-    // default access for testing
-    void originateLeafQuery(QueryRequest qr) {
+    private void originateLeafQuery(QueryRequest qr) {
 		List<ManagedConnection> list = connectionManager.getInitializedConnections();
 
         // only send to at most 4 Ultrapeers, as we could have more
@@ -2274,8 +2269,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param security token might be null
      * @return Iterable of QueryReply
      */
-    // default access for testing
-    Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+    private Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
                                              final int REPLY_LIMIT, SecurityToken securityToken) {
 
@@ -2530,9 +2524,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * been updated in a while.  You can call this method as often as you want;
      * it takes care of throttling.
      *     @modifies connections
-     */
-    // default access for testing
-    void forwardQueryRouteTables() {
+     */    
+    private void forwardQueryRouteTables() {
 		//Check the time to decide if it needs an update.
 		long time = System.currentTimeMillis();
 
@@ -2623,8 +2616,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * This will not include information from c.
      *     @requires queryUpdateLock held
      */
-    //default access for testing
-    QueryRouteTable createRouteTable() {
+    private QueryRouteTable createRouteTable() {
         QueryRouteTable ret = fileManager.getQRT();
         
         // Add leaves' files if we're an Ultrapeer.
@@ -2795,17 +2787,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
             if (mc.remoteHostSupportsInspections() >= ir.getVersion())
                 mc.send(ir);
         }
-    }
-    
-    /**
-     * Should only be used for testing.
-     */
-    RouteTable getPushRouteTable() {
-        return _pushRouteTable;
-    }
-    
-    RouteTable getHeadPongRouteTable() {
-        return _headPongRouteTable;
     }
     
     private static class QueryResponseBundle {

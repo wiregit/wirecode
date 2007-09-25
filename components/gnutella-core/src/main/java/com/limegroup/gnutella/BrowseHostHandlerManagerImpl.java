@@ -52,7 +52,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
 
-        // TODO: move an an initializer
+        // DPINJ: move an an initializer
         backgroundExecutor.scheduleWithFixedDelay(new Expirer(), 0, 5000, TimeUnit.MILLISECONDS);
     }
 

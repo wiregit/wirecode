@@ -36,7 +36,6 @@ import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
@@ -81,7 +80,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<StaticMessages> staticMessages;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<DownloadManager> downloadManager;
-    private final Provider<PushDownloadManager> pushDownloadManager;
     private final Provider<NodeAssigner> nodeAssigner;
     private final Provider<HostCatcher> hostCatcher;
     private final Provider<FileManager> fileManager;
@@ -116,8 +114,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
     private final Provider<LicenseFactory> licenseFactory;
 
-    private final Provider<ConnectionDispatcher> localConnectionDispatcher;
-
     @Inject
     public LifecycleManagerImpl(Provider<IPFilter> ipFilter,
             Provider<SimppManager> simppManager, Provider<Acceptor> acceptor,
@@ -129,13 +125,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<StaticMessages> staticMessages,
             Provider<ConnectionManager> connectionManager,
             Provider<DownloadManager> downloadManager,
-            Provider<PushDownloadManager> pushDownloadManager,
             Provider<NodeAssigner> nodeAssigner,
             Provider<HostCatcher> hostCatcher,
             Provider<FileManager> fileManager,
             Provider<TorrentManager> torrentManager,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
-            @Named("local") Provider<ConnectionDispatcher> localConnectionDispatcher,
             Provider<UpdateHandler> updateHandler,
             Provider<QueryUnicaster> queryUnicaster,
             Provider<LocalHTTPAcceptor> localHttpAcceptor,
@@ -168,13 +162,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.staticMessages = staticMessages;
         this.connectionManager = connectionManager;
         this.downloadManager = downloadManager;
-        this.pushDownloadManager = pushDownloadManager;
         this.nodeAssigner = nodeAssigner;
         this.hostCatcher = hostCatcher;
         this.fileManager = fileManager;
         this.torrentManager = torrentManager;
         this.connectionDispatcher = connectionDispatcher;
-        this.localConnectionDispatcher = localConnectionDispatcher;
         this.updateHandler = updateHandler;
         this.queryUnicaster = queryUnicaster;
         this.localHttpAcceptor = localHttpAcceptor;
@@ -311,12 +303,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         LOG.trace("START HTTPUploadManager");
         activityCallback.get().componentLoading(I18n.marktr("Loading Upload Management..."));
-        uploadManager.get().start(); 
+        uploadManager.get().start(httpUploadAcceptor.get(), fileManager.get(), activityCallback.get(), messageRouter.get()); 
         LOG.trace("STOP HTTPUploadManager");
 
         LOG.trace("START HTTPUploadAcceptor");
         httpUploadAcceptor.get().start(); 
-        connectionDispatcher.get().addConnectionAcceptor(httpUploadAcceptor.get(), false, httpUploadAcceptor.get().getHttpMethods());
         LOG.trace("STOP HTTPUploadAcceptor");
 
         LOG.trace("START Acceptor");
@@ -335,8 +326,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		
 		LOG.trace("START DownloadManager");
 		activityCallback.get().componentLoading(I18n.marktr("Loading Download Management..."));
-		downloadManager.get().initialize();
-        connectionDispatcher.get().addConnectionAcceptor(pushDownloadManager.get(), false, "GIV");
+		downloadManager.get().initialize(); 
 		LOG.trace("STOP DownloadManager");
 		
 		LOG.trace("START NodeAssigner");
@@ -370,6 +360,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get(), incomingConnectionHandler.get());
 		LOG.trace("STOP TorrentManager");
         
+        LOG.trace("START ControlRequestAcceptor");
+        activityCallback.get().componentLoading(I18n.marktr("Loading magnet Management..."));
+		controlRequestAcceptor.get().register();
+		LOG.trace("STOP ControlRequestAcceptor");
+		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
         activityCallback.get().componentLoading(I18n.marktr("Loading Old Downloads..."));
@@ -389,11 +384,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		LOG.trace("START LocalHTTPAcceptor");
 		activityCallback.get().componentLoading(I18n.marktr("Loading Magnet Listener..."));
         localHttpAcceptor.get().start();
-        localConnectionDispatcher.get().addConnectionAcceptor(localHttpAcceptor.get(), true, localHttpAcceptor.get().getHttpMethods());
         LOG.trace("STOP LocalHTTPAcceptor");
 
         LOG.trace("START LocalAcceptor");
-        initializeLocalConnectionDispatcher();
         localAcceptor.get().start();
         LOG.trace("STOP LocalAcceptor");
         
@@ -417,10 +410,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		ratingTable.get();
 		LOG.trace("START loading spam data");
         
-        LOG.trace("START register connection dispatchers");
-        activityCallback.get().componentLoading(I18n.marktr("Loading Network Listeners..."));
-        initializeConnectionDispatcher();
-        LOG.trace("STOP register connection dispatchers");
+        LOG.trace("START ChatManager");
+        chatManager.get().start();
+        LOG.trace("END ChatManager");
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();
@@ -430,17 +422,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
         startFinishedTime = System.currentTimeMillis();
     }
     
-    private void initializeConnectionDispatcher() {
-        connectionDispatcher.get().addConnectionAcceptor(controlRequestAcceptor.get(),
-                true, "MAGNET","TORRENT");
-        connectionDispatcher.get().addConnectionAcceptor(chatManager.get(), false, "CHAT");
-    }
-
-    private void initializeLocalConnectionDispatcher() {
-        localConnectionDispatcher.get().addConnectionAcceptor(controlRequestAcceptor.get(),
-                true, "MAGNET", "TORRENT");
-    }
-
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.LifecycleManager#shutdown()
      */
@@ -468,11 +449,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         dhtManager.get().stop();
         
-        try {
-            acceptor.get().setListeningPort(0);
-        } catch (IOException e) {
-            LOG.error("Error stopping acceptor", e);
-        }
         acceptor.get().shutdown();
         
         //clean-up connections and record connection uptime for this session
@@ -490,9 +466,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         //Write gnutella.net
         try {
             hostCatcher.get().write();
-        } catch (IOException e) {
-            LOG.error("Error saving host catcher file", e);   
-        }
+        } catch (IOException e) {}
         
         // save limewire.props & other settings
         SettingsGroupManager.instance().save();

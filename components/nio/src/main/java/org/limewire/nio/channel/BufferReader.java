@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.limewire.util.BufferUtils;
 
-/** A <code>ReadableByteChannel</code> that reads directly from a buffer.  */
+/** A simple ReadableByteChannel that reads directly from a buffer. */
 public class BufferReader implements InterestScatteringByteChannel {
     
     private final ByteBuffer buffer;

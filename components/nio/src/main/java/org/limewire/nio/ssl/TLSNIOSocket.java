@@ -7,17 +7,16 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.NIOSocket;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.ConnectObserver;
 
 /**
- * A <code>NIOSocket</code> that uses TLS for transfer encoding.
- * <p>
- * <code>TLSNIOSocket</code> is currently hardcoded to only support the cipher suite
- * <code>TLS_DH_anon_WITH_AES_128_CBC_SHA</code>.
+ * A version of NIOSocket that uses TLS for transfer encoding.
+ * 
+ * This is currently hardcoded to only support the cipher suite:
+ *  - TLS_DH_anon_WITH_AES_128_CBC_SHA
  */
 public class TLSNIOSocket extends NIOSocket {
 
@@ -75,14 +74,14 @@ public class TLSNIOSocket extends NIOSocket {
     @Override
     protected void initIncomingSocket() {
         super.initIncomingSocket();
-        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor(), NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
         tlsLayer.initialize(getRemoteSocketAddress(), SSLUtils.getTLSCipherSuites(), false, false);
     }
 
     @Override
     protected void initOutgoingSocket() throws IOException {
         super.initOutgoingSocket();
-        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor(), NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
+        tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
     }
     
     
@@ -99,7 +98,7 @@ public class TLSNIOSocket extends NIOSocket {
     }
     
     @Override
-    /* Overridden to retrieve the soTimeout from the socket if we're still handshaking. */
+    /* Overriden to retrieve the soTimeout from the socket if we're still handshaking. */
     public long getReadTimeout() {
         if(tlsLayer != null && tlsLayer.isHandshaking()) {
             try {
@@ -115,7 +114,7 @@ public class TLSNIOSocket extends NIOSocket {
     
     /**
      * A delegating connector that forces the TLS Layer to be initialized
-     * prior to informing the real <code>ConnectObserver</code> about the connection.
+     * prior to informing the real ConnectObserver about the connection.
      */
     private class TLSConnectInitializer implements ConnectObserver {
         private final ConnectObserver delegate;

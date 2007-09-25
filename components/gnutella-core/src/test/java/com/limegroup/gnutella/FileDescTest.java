@@ -12,7 +12,6 @@ import junit.framework.Test;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.xml.MetaFileManager;
@@ -43,7 +42,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
 	 */
 	public void testInvalidConstructorArguments() throws Exception {
         File file = CommonUtils.getResourceFile("build.xml");
-        Set urns = UrnHelper.calculateAndCacheURN(file, ProviderHacks.getUrnCache());
+        Set urns = calculateAndCacheURN(file);
         
 		try {
 			new FileDesc(null, urns, 0);
@@ -85,7 +84,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         Iterator it = fileList.iterator();
         for(int i = 0; it.hasNext(); i++) {
             File file = (File)it.next();
-            Set urns = UrnHelper.calculateAndCacheURN(file, ProviderHacks.getUrnCache()); 
+            Set urns = calculateAndCacheURN(file); 
             new FileDesc(file, urns, i);
         }
     }
@@ -93,7 +92,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testIsRareFile() throws Exception {
         FileManager fm = new MetaFileManager(ProviderHacks.getFileManagerController());
         File file = CommonUtils.getResourceFile("build.xml");
-        Set urns = UrnHelper.calculateAndCacheURN(file, ProviderHacks.getUrnCache());
+        Set urns = calculateAndCacheURN(file);
         
         FileDesc fd = new FileDesc(file, urns, 0);
         

@@ -15,7 +15,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
  * A ranker which uses the legacy logic for selecting from available
  * sources.
  */
-public class LegacyRanker extends AbstractSourceRanker {
+public class LegacyRanker extends SourceRanker {
     
     private static final Log LOG = LogFactory.getLog(LegacyRanker.class);
 
@@ -101,7 +101,7 @@ public class LegacyRanker extends AbstractSourceRanker {
 		return !rfds.isEmpty();
 	}
 
-    public Collection<RemoteFileDesc> getShareableHosts() {
+    protected Collection<RemoteFileDesc> getShareableHosts() {
         return rfds;
     }
     

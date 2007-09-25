@@ -12,9 +12,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.AsyncHttpRequestHandler;
 import org.limewire.http.BasicHttpAcceptor;
+import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -47,8 +50,9 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
     private final ExternalControl externalControl;
 
     @Inject
-    public LocalHTTPAcceptor(ExternalControl externalControl) {
-        super(createDefaultParams(LimeWireUtils.getHttpServer(), Constants.TIMEOUT), SUPPORTED_METHODS);
+    public LocalHTTPAcceptor(@Named("local") Provider<ConnectionDispatcher> connectionDispatcher, ExternalControl externalControl) {
+        super(connectionDispatcher, true, createDefaultParams(LimeWireUtils
+                .getHttpServer(), Constants.TIMEOUT), SUPPORTED_METHODS);
         this.externalControl = externalControl;
         
         registerHandler("magnet:", new MagnetCommandRequestHandler());

@@ -3,7 +3,6 @@ package com.limegroup.gnutella.routing;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.messages.AbstractMessage;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 
@@ -13,7 +12,7 @@ import com.limegroup.gnutella.messages.Message;
  * call the static read(..) method.  To create a new message from scratch, call
  * one of its subclass' constructors.<p>
  */
-public abstract class RouteTableMessage extends AbstractMessage {
+public abstract class RouteTableMessage extends Message {
     public static final byte RESET_VARIANT=(byte)0x0;
     public static final byte PATCH_VARIANT=(byte)0x1;
 

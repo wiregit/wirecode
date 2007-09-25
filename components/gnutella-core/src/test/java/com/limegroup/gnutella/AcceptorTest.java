@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -17,25 +16,18 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionAcceptor;
-import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AcceptorTest extends LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(AcceptorTest.class);
     
-    private Acceptor acceptor;
-    private ConnectionDispatcher connectionDispatcher;
+    private static Acceptor acceptThread;
 
     public AcceptorTest(String name) {
         super(name);
@@ -49,29 +41,41 @@ public class AcceptorTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-    @Override
-    public void setUp() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub().setTLSCapable(true));
+    private static void setSettings() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+    }
+
+    public static void globalSetUp() throws Exception {
+        setSettings();
+        if(true)throw new RuntimeException("fix me");
+        //new RouterService(new ActivityCallbackStub());
+        ProviderHacks.getConnectionManager().initialize();
         
-        Injector injector = LimeTestUtils.createInjector();
+        // start it up!
+        acceptThread = ProviderHacks.getAcceptor();
+        acceptThread.start();
         
-        connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
-        
-        acceptor = injector.getInstance(Acceptor.class);
-        acceptor.start();
-        
-        //shut off the various services,
-        //if an exception is thrown, something bad happened.
-        acceptor.setListeningPort(0);
+        // Give thread time to find and open it's sockets.   This race condition
+        // is tolerated in order to speed up LimeWire startup
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {}                
     }
     
-    @Override
+    public void setUp() throws Exception {
+        setSettings();
+        //shut off the various services,
+        //if an exception is thrown, something bad happened.
+        acceptThread.setListeningPort(0);
+    }
+    
     public void tearDown() throws Exception {
         //shut off the various services,
         //if an exception is thrown, something bad happened.
-        acceptor.setListeningPort(0);
-        ConnectionSettings.LOCAL_IS_PRIVATE.revertToDefault();
+        acceptThread.setListeningPort(0);
     }
+    
+    
         
     /**
      * This test checks to ensure that Acceptor.setListeningPort
@@ -93,7 +97,7 @@ public class AcceptorTest extends LimeTestCase {
         }
 
         try {
-            acceptor.setListeningPort(portToTry);
+            acceptThread.setListeningPort(portToTry);
             assertTrue("had no trouble binding UDP port!", false);
         }
         catch (IOException expected) {
@@ -121,7 +125,7 @@ public class AcceptorTest extends LimeTestCase {
         }
 
         try {
-            acceptor.setListeningPort(portToTry);
+            acceptThread.setListeningPort(portToTry);
             fail("had no trouble binding TCP port!");
         }
         catch (IOException expected) {
@@ -140,7 +144,7 @@ public class AcceptorTest extends LimeTestCase {
         int portToTry = 2000;
         while (true) {
             try {
-                acceptor.setListeningPort(portToTry);
+                acceptThread.setListeningPort(portToTry);
                 break;
             }
             catch (IOException occupied) {
@@ -168,8 +172,7 @@ public class AcceptorTest extends LimeTestCase {
          int port = bindAcceptor();
          
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
-         
-         connectionDispatcher.addConnectionAcceptor(acceptor, false, "BLOCKING");
+         ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
          
          Socket tls = new TLSNIOSocket("localhost", port);
          tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
@@ -182,8 +185,7 @@ public class AcceptorTest extends LimeTestCase {
          int port = bindAcceptor();
          
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
-         
-         connectionDispatcher.addConnectionAcceptor(acceptor, false, "BLOCKING");
+         ProviderHacks.getConnectionDispatcher().addConnectionAcceptor(acceptor, false, true, "BLOCKING");
          
          SSLContext context = SSLUtils.getTLSContext();
          SSLSocket tls = (SSLSocket)context.getSocketFactory().createSocket();
@@ -196,19 +198,10 @@ public class AcceptorTest extends LimeTestCase {
          tls.close();
      }
      
-     public void testAcceptorPortForcing() throws Exception {
-         int localPort = acceptor.getPort(false);
-         ConnectionSettings.FORCED_PORT.setValue(1000);
-         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(InetAddress.getLocalHost().getHostAddress());
-         assertEquals(1000, acceptor.getPort(true));
-         assertNotEquals(1000,localPort); 
-     }
-     
      private int bindAcceptor() throws Exception {
          for(int p = 2000; p < Integer.MAX_VALUE; p++) {
              try {
-                 acceptor.setListeningPort(p);
+                 acceptThread.setListeningPort(p);
                  return p;
              } catch(IOException ignored) {}
          }
@@ -246,10 +239,6 @@ public class AcceptorTest extends LimeTestCase {
          boolean waitForAccept() throws Exception {
              return latch.await(5, TimeUnit.SECONDS);
          }
-         
-         public boolean isBlocking() {
-            return true;
-        }
          
      }
      

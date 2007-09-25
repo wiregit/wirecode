@@ -4,19 +4,14 @@ import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -29,15 +24,7 @@ public class CompositeQueueTest extends LimeTestCase {
     
     private CompositeQueue QUEUE = new CompositeQueue(3000, 100, 1000, 1);
 	
-    private final byte[] IP = new byte[] { 1, 1, 1, 1 };
-
-    private QueryRequestFactory queryRequestFactory;
-
-    private PingRequestFactory pingRequestFactory;
-
-    private QueryReplyFactory queryReplyFactory;
-
-    private PingReplyFactory pingReplyFactory;
+    private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
 
 	public CompositeQueueTest(String name) {
 		super(name);
@@ -49,16 +36,6 @@ public class CompositeQueueTest extends LimeTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
-    }
-    
-    @Override
-    protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
-        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
-        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
-        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
     }
         
     /**
@@ -74,15 +51,15 @@ public class CompositeQueueTest extends LimeTestCase {
         Message m=null;
 
         // send QueryRequest		
-		QUEUE.add(queryRequestFactory.createQuery("test", (byte)5));
+		QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("test", (byte)5));
 
         // send PingRequest with one hop
-        m=pingRequestFactory.createPingRequest((byte)5);
+        m=ProviderHacks.getPingRequestFactory().createPingRequest((byte)5);
         m.hop();
         QUEUE.add(m);
 
         // send QueryReply with priority 1
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6340,
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6340,
                 IP, 0, new Response[0], new byte[16], false);
         m.setPriority(30000);
         QUEUE.add(m);
@@ -96,7 +73,7 @@ public class CompositeQueueTest extends LimeTestCase {
                                  0, IP, 6342));
                                  
         // send QueryReply with priority 1
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6343,
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6343,
                 IP, 0, new Response[0], new byte[16], false);
         m.setPriority(30000);
         QUEUE.add(m);
@@ -112,28 +89,28 @@ public class CompositeQueueTest extends LimeTestCase {
                                  0, IP, 6346));                                                                                                                                    
                                  
         // send QueryReply with priority 7                                 
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6341,
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6341,
                 IP, 0, new Response[0], new byte[16], false);
         QUEUE.add(m);
         
         // send PingReply with 3 hops
-        m=pingReplyFactory.create(new byte[16], (byte)5, 6343, IP);
+        m=ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, 6343, IP);
         m.hop();  m.hop();  m.hop();        
         QUEUE.add(m);
         
         // send PingReply with 3 hops
-        m=pingReplyFactory.create(new byte[16], (byte)5, 6344, IP);
+        m=ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, 6344, IP);
         m.hop();  m.hop();  m.hop();
         QUEUE.add(m);        
         
         // send QueryReply with priority 2
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6344,
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6344,
                 IP, 0, new Response[0], new byte[16], false);
         m.setPriority(20000);
         QUEUE.add(m);
         
         // send QueryReply with priority 0
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6345,
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6345,
                 IP, 0, new Response[0], new byte[16], false);
         m.setPriority(50000);
         QUEUE.add(m);              
@@ -142,22 +119,22 @@ public class CompositeQueueTest extends LimeTestCase {
         QUEUE.add(new ResetTableMessage(1024, (byte)2));
         
         // send a watchdog pong
-        QUEUE.add(pingReplyFactory.create(new byte[16], (byte)1, 6342, IP));
+        QUEUE.add(ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)1, 6342, IP));
         
         // send PingReply with 2 hops
-        m = pingReplyFactory.create(new byte[16], (byte)3, 6340, IP);
+        m = ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)3, 6340, IP);
         m.hop();
         m.hop();
         QUEUE.add(m);
         
         // send QueryReply with priority 4
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6346,
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6346,
                 IP, 0, new Response[0], new byte[16], false);
         m.setPriority(5000);
         QUEUE.add(m);            
         
         // send QueryReply with priority 5
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6342,
+        m=ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6342,
                 IP, 0, new Response[0], new byte[16], false);
         m.setPriority(1000);
         QUEUE.add(m);
@@ -168,7 +145,7 @@ public class CompositeQueueTest extends LimeTestCase {
                                        (byte)8, new byte[10], 0, 5));
                                        
         // send a watchdog ping                                       
-        QUEUE.add(pingRequestFactory.createPingRequest((byte)1));
+        QUEUE.add(ProviderHacks.getPingRequestFactory().createPingRequest((byte)1));
         
         // send Patch message
         QUEUE.add(new PatchTableMessage((short)2, (short)2, 
@@ -176,15 +153,15 @@ public class CompositeQueueTest extends LimeTestCase {
                                        (byte)8, new byte[10], 5, 9));
 
         // send QueryRequest
-		QUEUE.add(queryRequestFactory.createQuery("test2", (byte)5));
+		QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("test2", (byte)5));
 				 
         // send QueryRequest with 1 hop
-		m = queryRequestFactory.createQuery("test far", (byte)5);
+		m = ProviderHacks.getQueryRequestFactory().createQuery("test far", (byte)5);
         m.hop();
         QUEUE.add(m);
         
         // send QueryRequest with 2 hop
-		m = queryRequestFactory.createQuery("test farther", (byte)5);
+		m = ProviderHacks.getQueryRequestFactory().createQuery("test farther", (byte)5);
         m.hop(); m.hop();
         QUEUE.add(m);        
                
@@ -342,9 +319,9 @@ public class CompositeQueueTest extends LimeTestCase {
      */
     public void testBufferTimeout() throws Exception {
         //Drop one message
-        QUEUE.add(queryRequestFactory.createQuery("0", (byte)3));   
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("0", (byte)3));   
         sleep(1200);
-        QUEUE.add(queryRequestFactory.createQuery("1200", (byte)3)); 
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("1200", (byte)3)); 
         
         Message m = QUEUE.removeNext();
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
@@ -353,15 +330,15 @@ public class CompositeQueueTest extends LimeTestCase {
         assertEquals(1, QUEUE.resetDropped());
 
         //Drop many messages
-        QUEUE.add(queryRequestFactory.createQuery("0", (byte)3));   
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("0", (byte)3));   
         sleep(300);
-        QUEUE.add(queryRequestFactory.createQuery("300", (byte)3));        
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("300", (byte)3));        
         sleep(300);
-        QUEUE.add(queryRequestFactory.createQuery("600", (byte)3));        
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("600", (byte)3));        
         sleep(500);
-        QUEUE.add(queryRequestFactory.createQuery("1100", (byte)3));
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("1100", (byte)3));
         sleep(900);
-        QUEUE.add(queryRequestFactory.createQuery("2000", (byte)3));
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("2000", (byte)3));
         m=QUEUE.removeNext();
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "2000", ((QueryRequest)m).getQuery());
@@ -377,15 +354,15 @@ public class CompositeQueueTest extends LimeTestCase {
         Message m=null;
 
         // head...tail
-        QUEUE.add(hopped(pingRequestFactory.createPingRequest((byte)4)));
-        QUEUE.add(queryRequestFactory.createQuery("a", (byte)3));
+        QUEUE.add(hopped(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4)));
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("a", (byte)3));
         assertInstanceof("didn't recieve queryrequest", QueryRequest.class, QUEUE.removeNext());
         assertInstanceof("didn't recieve pingrequest", PingRequest.class, QUEUE.removeNext());
         assertNull(QUEUE.removeNext()); // force it to reset the current cycle.
 
         //tail...<wrap>...head
-        QUEUE.add(queryRequestFactory.createQuery("a", (byte)3));
-        QUEUE.add(hopped(pingRequestFactory.createPingRequest((byte)5)));
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("a", (byte)3));
+        QUEUE.add(hopped(ProviderHacks.getPingRequestFactory().createPingRequest((byte)5)));
         assertInstanceof("didn't recieve pingrequest", PingRequest.class, QUEUE.removeNext());
         assertInstanceof("didn't recieve queryrequest", QueryRequest.class, QUEUE.removeNext());
         assertNull(QUEUE.removeNext()); // force it to reset the current cycle.
@@ -398,11 +375,11 @@ public class CompositeQueueTest extends LimeTestCase {
         //  PING_REPLY: 
         //  PING: 
         //  OTHER: reset
-        QUEUE.add(pingRequestFactory.createPingRequest((byte)1));
-        QUEUE.add(queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6341,
+        QUEUE.add(ProviderHacks.getPingRequestFactory().createPingRequest((byte)1));
+        QUEUE.add(ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5, 6341,
                 IP, 0, new Response[0], new byte[16], false));
         QUEUE.add(new ResetTableMessage(1024, (byte)2));
-        QUEUE.add(queryRequestFactory.createQuery("a", (byte)3));
+        QUEUE.add(ProviderHacks.getQueryRequestFactory().createQuery("a", (byte)3));
         m=QUEUE.removeNext();
         assertInstanceof("Got: "+m, QueryRequest.class, m);
         m=QUEUE.removeNext();

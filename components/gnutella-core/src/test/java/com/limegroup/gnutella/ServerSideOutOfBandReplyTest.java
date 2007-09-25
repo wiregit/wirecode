@@ -23,7 +23,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messagehandlers.OOBSecurityToken;
 import com.limegroup.gnutella.messagehandlers.OOBSecurityToken.OOBTokenData;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -101,7 +100,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
-        qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[0].send((RouteTableMessage)iter.next());
 			LEAF[0].flush();

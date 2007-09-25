@@ -9,7 +9,7 @@ import com.limegroup.gnutella.URN;
 /**
  * An unknown license (unverifiable).
  */
-public class UnknownLicense implements MutableLicense {
+public class UnknownLicense implements NamedLicense {
     private String name;
     
     /** Sets the license name. */
@@ -22,7 +22,7 @@ public class UnknownLicense implements MutableLicense {
     public URI getLicenseURI() { return null; }
     public URL getLicenseDeed(URN urn) { return null; }
     public String getLicense() { return null; }
-    public void verify(LicenseCache licenseCache) {}
+    public void verify(VerificationListener listener) {}
     public long getLastVerifiedTime() { return 0; }
     public String getLicenseName() { return name; }
     

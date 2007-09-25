@@ -6,7 +6,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.WRMXML;
@@ -20,16 +19,16 @@ public final class LicenseFactoryImpl implements LicenseFactory {
     
     private static final Log LOG = LogFactory.getLog(LicenseFactoryImpl.class);
     
-    final Provider<LicenseCache> licenseCache;
+    final LicenseCache licenseCache;
     
     @Inject
-    public LicenseFactoryImpl(Provider<LicenseCache> licenseCache) {
+    public LicenseFactoryImpl(LicenseCache licenseCache) {
         this.licenseCache = licenseCache;
     }
     
     public boolean isVerifiedAndValid(URN urn, String licenseString) {
         URI uri = getLicenseURI(licenseString);
-        return uri != null && licenseCache.get().isVerifiedAndValid(urn, uri);
+        return uri != null && licenseCache.isVerifiedAndValid(urn, uri);
     }
     
     public String getLicenseName(String licenseString) {
@@ -55,27 +54,26 @@ public final class LicenseFactoryImpl implements LicenseFactory {
         
         // Try to get a cached version, first.
         if(uri != null)
-            license = licenseCache.get().getLicense(licenseString, uri);
+            license = licenseCache.getLicense(licenseString, uri);
         
         // If the cached version didn't exist, try to make one.
         if(license == null) {
             if(isCCLicense(licenseString)) {
                 if(uri != null)
-                    license = new CCLicense(licenseString, uri);
+                    license = new CCLicense(licenseString, uri, licenseCache);
                 else
                     license = new BadCCLicense(licenseString);
             } else if(isWeedLicense(licenseString) && uri != null) {
-                license = new WeedLicense(uri);
+                license = new WeedLicense(uri, licenseCache);
             } else if(isUnknownLicense(licenseString)) {
                 license = new UnknownLicense();
             }
         }
         
-        // set additional properties
-        if (license instanceof MutableLicense) {
-            ((MutableLicense)license).setLicenseName(getLicenseName(licenseString));
-        }
-        
+        // If we managed to get one, and it's a NamedLicense, try and set its name.
+        if(license != null && license instanceof NamedLicense)
+            ((NamedLicense)license).setLicenseName(getLicenseName(licenseString));
+
         return license;
     }
     
@@ -98,7 +96,7 @@ public final class LicenseFactoryImpl implements LicenseFactory {
      * Persists the cache.
      */
     public void persistCache() {
-        licenseCache.get().persistCache();
+        licenseCache.persistCache();
     }
     
     /**

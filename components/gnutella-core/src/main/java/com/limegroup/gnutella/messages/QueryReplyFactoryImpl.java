@@ -293,7 +293,7 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
 
     public QueryReply createFromNetwork(byte[] guid, byte ttl, byte hops,
             byte[] payload, Network network) throws BadPacketException {
-        return new QueryReplyImpl(guid, ttl, hops, payload, network,
+        return new QueryReply(guid, ttl, hops, payload, network,
                 hostDataFactory, responseFactory);
     }
 
@@ -304,7 +304,7 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
             boolean supportsChat, boolean supportsBH, boolean isMulticastReply,
             boolean supportsFWTransfer, Set<? extends IpPort> proxies,
             SecurityToken securityToken) {
-        return new QueryReplyImpl(guid, ttl, port, ip, speed, responses,
+        return new QueryReply(guid, ttl, port, ip, speed, responses,
                 clientGUID, xmlBytes, includeQHD, needsPush, isBusy,
                 finishedUpload, measuredSpeed, supportsChat, supportsBH,
                 isMulticastReply, supportsFWTransfer, proxies, securityToken,

@@ -117,12 +117,6 @@ public interface DownloadServices {
             throws SaveLocationException;
 
     /**
-     * Returns whether there are any active internet (non-multicast) transfers
-     * going at speed greater than 0.
-     */
-    public boolean hasActiveDownloads();
-    
-    /**
      * Returns the number of active downloads.
      */
     public int getNumActiveDownloads();
