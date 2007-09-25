@@ -2,11 +2,13 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import org.limewire.util.PrivilegedAccessor;
+
+import com.google.inject.Injector;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -23,7 +25,11 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public final class LeafHandshakeResponderTest extends LimeTestCase {
 
 
-	public LeafHandshakeResponderTest(String name) {
+	private HandshakeResponderFactory handshakeResponderFactory;
+    private HeadersFactory headersFactory;
+    private ConnectionManager connectionManager;
+
+    public LeafHandshakeResponderTest(String name) {
 		super(name);
 	}
 
@@ -43,6 +49,11 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
     public void setUp() {
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+        
+        Injector injector = LimeTestUtils.createInjector();
+        handshakeResponderFactory = injector.getInstance(HandshakeResponderFactory.class);
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        connectionManager = injector.getInstance(ConnectionManager.class);
     }
 
     /**
@@ -59,12 +70,12 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
 
         // create the Ultrapeer responder to test off of
         LeafHandshakeResponder responder = 
-            ProviderHacks.getHandshakeResponderFactory().createLeafHandshakeResponder("23.3.4.5");
+            handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
         // 1) Ultrapeer-Leaf::No X-Ultrapeer-Needed -- we should ignore 
         //    the ultrapeer needed, and it should never be sent, but
         //    test it anyway
-        Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("40.0.9.8");
+        Properties props = headersFactory.createUltrapeerHeaders("40.0.9.8");
         HandshakeResponse headers = HandshakeResponse.createResponse(props);
         
         HandshakeResponse hr = responder.respond(headers, true);
@@ -77,7 +88,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
 
 
         // 2) Ultrapeer-Leaf::X-Ultrapeer-Needed: true
-        props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("40.0.9.8");
+        props = headersFactory.createUltrapeerHeaders("40.0.9.8");
 
         // this should be redundant, but make sure it's handled the way
         // we want
@@ -93,7 +104,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         assertTrue("should be deflated", hr.isDeflateEnabled());
 
         // 3) Ultrapeer-Leaf::X-Ultrapeer-Needed: false
-        props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("78.9.3.0");
+        props = headersFactory.createUltrapeerHeaders("78.9.3.0");
         props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
         
         headers = HandshakeResponse.createResponse(props);        
@@ -115,11 +126,11 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         LeafHandshakeResponder responder = 
-            ProviderHacks.getHandshakeResponderFactory().createLeafHandshakeResponder("23.3.4.5");
+            handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
         // Leaf-Leaf  --> never allowed, regardless of slots
         UltrapeerSettings.MAX_LEAVES.setValue(1);
-        Properties props = ProviderHacks.getHeadersFactory().createLeafHeaders("78.9.3.0");
+        Properties props = headersFactory.createLeafHeaders("78.9.3.0");
         HandshakeResponse headers = HandshakeResponse.createResponse(props);  
         HandshakeResponse hr = responder.respond(headers, true);
 
@@ -150,13 +161,13 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         LeafHandshakeResponder responder = 
-            ProviderHacks.getHandshakeResponderFactory().createLeafHandshakeResponder("23.3.4.5");
+            handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
         // 1) check the Ultrapeer case.  Here, the "leaf" does
         //    not have any leaf connections yet, so it should just
         //    accept the incoming connection
         HandshakeResponse up = 
-            HandshakeResponse.createResponse(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("80.45.0.1"));
+            HandshakeResponse.createResponse(headersFactory.createUltrapeerHeaders("80.45.0.1"));
         
         HandshakeResponse hr = responder.respond(up, false);
         assertTrue("should accept incoming connections as a leaf -- "+
@@ -174,20 +185,20 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);        
         // the ultrapeer we'll be testing against
         LeafHandshakeResponder responder = 
-            ProviderHacks.getHandshakeResponderFactory().createLeafHandshakeResponder("23.3.4.5");
+            handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
 
         //  1) check to make sure that leaves are properly accepted as
         //     leaves
         HandshakeResponse leaf = 
-            HandshakeResponse.createResponse(ProviderHacks.getHeadersFactory().createLeafHeaders("80.45.0.1"));
+            HandshakeResponse.createResponse(headersFactory.createLeafHeaders("80.45.0.1"));
         HandshakeResponse hr = responder.respond(leaf, false);
         
         assertFalse("should never accept leaves if we're a leaf.", hr.isAccepted());
     }
     
     private void setPreferredConnections() throws Exception {
-        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
+        PrivilegedAccessor.setValue(connectionManager,
                                     "_preferredConnections",
                                     new Integer(ConnectionSettings.NUM_CONNECTIONS.getValue()));
     }
