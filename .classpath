@@ -83,5 +83,8 @@
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
+	<classpathentry kind="var" path="JRE_LIB"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.6.0/lib/jsse.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/SWT_LIB"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
