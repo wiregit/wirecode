@@ -16,7 +16,6 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;

@@ -88,6 +88,7 @@ public class LeechChokerTest extends LimeTestCase {
     /**
      * tests that calls to rechoke() happen immediately on the nio executor.
      */
+    @SuppressWarnings("unchecked")
     public void testImmediateRechoke() throws Exception {
         final NECallable<List<? extends Chokable>> callable = mockery.mock(NECallable.class);
         final ScheduledExecutorService myService = new ScheduledExecutorServiceStub() {

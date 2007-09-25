@@ -217,6 +217,7 @@ public class TestUploader extends AssertComparisons {
      * another thread to do the listening. 
      * @param tls TODO
      */
+    @Deprecated // should have things injected into it.
     public TestUploader(String name, final int port, boolean tls) {
         super(name);
 
@@ -261,6 +262,7 @@ public class TestUploader extends AssertComparisons {
         t.start();        
     }
     
+    @Deprecated // should have things injected into it.
     public TestUploader(String name) throws IOException{
         super(name);
         // ensure that only local machines can connect!!

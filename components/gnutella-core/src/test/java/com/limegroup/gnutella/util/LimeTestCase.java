@@ -267,8 +267,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         // set the settings directory, then immediately change it.
         LimeCoreGlue.preinstall(_settingsDir);
 
-        File f = getRootDir();
-
         // Expand the xml.war file.
         File xmlWar = CommonUtils.getResourceFile("gui/xml.war");
         assertTrue(xmlWar.exists());
