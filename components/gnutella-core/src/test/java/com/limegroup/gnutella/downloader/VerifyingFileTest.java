@@ -552,6 +552,7 @@ public class VerifyingFileTest extends LimeTestCase {
         } finally {
             out.close();
         }
+        
         vf.open(outfile);
         assertEquals(0, vf.getVerifiedBlockSize());
         vf.setScanForExistingBlocks(true, outfile.length());
