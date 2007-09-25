@@ -174,7 +174,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         // using the TCP push proxy, which will do fw-fw transfers.
         if (!networkManager.acceptedIncomingConnection()) {
             // if we can do FWT, offload a TCP pusher.
-            if (udpService.get().canDoFWT())
+            if (networkManager.canDoFWT())
                 sendPushTCP(file, guid, observer);
             else if (observer != null)
                 observer.shutdown();
@@ -280,7 +280,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private void sendPushTCP(RemoteFileDesc file, final byte[] guid, MultiShutdownable observer) {
         // if this is a FW to FW transfer, we must consider special stuff
         final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
-                         udpService.get().canDoFWT() &&
+                         networkManager.canDoFWT() &&
                         !networkManager.acceptedIncomingConnection();
 
     	PushData data = new PushData(observer, file, guid, shouldDoFWTransfer);

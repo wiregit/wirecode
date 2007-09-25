@@ -112,7 +112,6 @@ public class NodeAssigner {
     private final Provider<DHTManager> dhtManager;
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
-    private final Provider<UDPService> udpService;
     
 
     /** 
@@ -132,8 +131,7 @@ public class NodeAssigner {
                         SearchServices searchServices,
                         Provider<DHTManager> dhtManager,
                         @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                        ConnectionServices connectionServices,
-                        Provider<UDPService> udpService) {
+                        ConnectionServices connectionServices) {
         this.uploadTracker = uploadTracker;
         this.downloadTracker = downloadTracker;  
         this.connectionManager = connectionManager;
@@ -142,7 +140,6 @@ public class NodeAssigner {
         this.dhtManager = dhtManager;
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
-        this.udpService = udpService;
     }
     
     /**
@@ -530,7 +527,7 @@ public class NodeAssigner {
         return ULTRAPEER_OS
                 && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
                 && _currentUptime >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
-                && udpService.get().canReceiveSolicited();
+                && networkManager.canReceiveSolicited();
     }
     
     /**

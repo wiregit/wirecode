@@ -1116,7 +1116,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             if ((request.isFirewalledSource() &&
                  !networkManager.acceptedIncomingConnection()) &&
                 !(request.canDoFirewalledTransfer() &&
-                  udpService.canDoFWT())
+                  networkManager.canDoFWT())
                 )
                 return;
             respondToQueryRequest(request, _clientGUID, handler);

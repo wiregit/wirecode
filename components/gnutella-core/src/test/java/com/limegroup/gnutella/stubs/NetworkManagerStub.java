@@ -17,6 +17,7 @@ public class NetworkManagerStub implements NetworkManager {
     private boolean canReceiveUnsolicited;
     private boolean guessCapable;
     private byte[] externalAddress;
+    private boolean canDoFWT;
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -32,8 +33,11 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public boolean canDoFWT() {
-        // TODO Auto-generated method stub
-        return false;
+        return canDoFWT;
+    }
+    
+    public void setCanDoFWT(boolean canDoFWT) {
+        this.canDoFWT = canDoFWT;
     }
 
     public boolean canReceiveSolicited() {
