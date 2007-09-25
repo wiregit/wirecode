@@ -31,20 +31,24 @@ public class MediaType implements Serializable {
     // These values should match standard MIME content-type
     // categories and/or XSD schema names.
     public static final String SCHEMA_ANY_TYPE = "*";
+    public static final String SCHEMA_CUSTOM = "custom";
     public static final String SCHEMA_DOCUMENTS = "document";
     public static final String SCHEMA_PROGRAMS = "application";
     public static final String SCHEMA_AUDIO = "audio";
     public static final String SCHEMA_VIDEO = "video";
     public static final String SCHEMA_IMAGES = "image";
+    public static final String SCHEMA_OTHER = "other";
     
     // These are used as resource keys to retreive descriptions in the GUI
     public static final String ANY_TYPE = I18n.marktr("All Types");
+    public static final String CUSTOM = I18n.marktr("Custom");
     public static final String DOCUMENTS = I18n.marktr("Documents");
     public static final String PROGRAMS = I18n.marktr("Programs");
     public static final String AUDIO = I18n.marktr("Audio");
     public static final String VIDEO = I18n.marktr("Video");
     public static final String IMAGES = I18n.marktr("Images");
-
+    public static final String OTHER = I18n.marktr("Other");
+    
     /**
      * Type for 'any file'
      */
@@ -58,7 +62,22 @@ public class MediaType implements Serializable {
             return true;
         }
     };
-                                       
+       
+    
+    /**
+     * Type for to differentiate user added file types that matches with anything
+     */
+    private static final MediaType TYPE_CUSTOM = 
+        new MediaType(SCHEMA_CUSTOM, CUSTOM, null) {
+        // required SVUID because we're constructing an anonymous class.
+        // the id is taken from old limewire builds, versions 4.4 to 4.12
+        private static final long serialVersionUID = 8621995774682321539L; //3728385699213635375L;
+        
+        public boolean matches(String ext) {
+            return true;
+        }
+    };
+    
     /**
      * Type for 'documents'
      */
@@ -162,6 +181,20 @@ public class MediaType implements Serializable {
                 "sgi", "fax", "rgb", "ras"
             });
         
+    /**
+     * Type for 'other'
+     */
+    private static final MediaType TYPE_OTHER =
+        new MediaType(SCHEMA_OTHER, OTHER, null) {
+            // required SVUID because we're constructing an anonymous class.
+            // the id is taken from old limewire builds, versions 4.4 to 4.12
+            private static final long serialVersionUID = 8621995074682321539L; //3728385699213635375L;
+            
+            public boolean matches(String ext) {
+                return true;
+            }
+        };
+    
     /**
      * All media types.
      */
@@ -352,7 +385,14 @@ public class MediaType implements Serializable {
     public static MediaType getAnyTypeMediaType() {
         return TYPE_ANY;
     }
-        
+       
+    /**
+     * Retrieves the other media type.
+     */
+    public static MediaType getOtherMediaType() {
+        return TYPE_OTHER;
+    }
+    
     /**
      * Retrieves the audio media type.
      */
@@ -388,6 +428,13 @@ public class MediaType implements Serializable {
         return TYPE_PROGRAMS;
     }
 
+    /**
+     * Retrieves the other media type.
+     */
+    public static MediaType getCustomMediaType() {
+        return TYPE_CUSTOM;
+    }
+    
     /** @return a MediaType.Aggregator to use for your query.  Null is a
      *  possible return value.
      */
