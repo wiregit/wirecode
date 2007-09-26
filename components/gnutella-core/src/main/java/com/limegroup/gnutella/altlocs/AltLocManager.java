@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
@@ -20,9 +22,6 @@ public class AltLocManager {
      * LOCKING: itself for all map operations as well as operations on the contained arrays
      */
     private final Map<URN, URNData> urnMap = Collections.synchronizedMap(new HashMap<URN, URNData>());
-    
-    public final Object inspectables = new ALMInspectables();
-    
     
     /**
      * adds a given altloc to the manager
@@ -262,8 +261,11 @@ public class AltLocManager {
         }
     }
     
+    @SuppressWarnings("unused")
+    @InspectableContainer
     private class ALMInspectables {
         /** Inspectable for class C networks of alternate locations */
+        @InspectionPoint("alternate locations class C stats")
         public final Inspectable classC = new Inspectable() {
             public Object inspect() {
                 ClassCNetworks direct = new ClassCNetworks();

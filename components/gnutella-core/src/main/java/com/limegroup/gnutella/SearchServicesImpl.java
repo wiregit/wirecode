@@ -30,7 +30,7 @@ public class SearchServicesImpl implements SearchServices {
     private final Provider<ConnectionServices> connectionServices;
     private final Provider<QueryDispatcher> queryDispatcher;
     private final Provider<MutableGUIDFilter> mutableGUIDFilter;
-    private final Provider<QueryStats> queryStats;
+    private final Provider<QueryStats> queryStats; // TODO figure out how to inspect this
     private final Provider<NetworkManager> networkManager;
     private final Provider<QueryRequestFactory> queryRequestFactory;
     private final BrowseHostHandlerManager browseHostHandlerManager;

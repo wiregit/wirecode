@@ -25,6 +25,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -118,8 +119,12 @@ public class ConnectionManager implements ConnectionAcceptor,
     public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
     
     // for inspection...
-    @SuppressWarnings("unused") private final Inspectable LEAF = new LegacyConnectionStats(true);
-    @SuppressWarnings("unused") private final Inspectable UP = new LegacyConnectionStats(false);
+    @SuppressWarnings("unused")
+    @InspectionPoint("leaf connections")
+    private final Inspectable LEAF = new LegacyConnectionStats(true);
+    @SuppressWarnings("unused")
+    @InspectionPoint("ultrapeer connections")
+    private final Inspectable UP = new LegacyConnectionStats(false);
     
     /** Timestamp for the last time the user selected to disconnect. */
     @InspectablePrimitive("last disconnect time")
@@ -2589,7 +2594,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * a class that uses the Inspection framework to provide the same functionality
      * as the former GetStatsVM.
      */
-    class LegacyConnectionStats implements Inspectable {
+    private class LegacyConnectionStats implements Inspectable {
         /** Whether to report only leaf connections or only up connections */
         private final boolean leaf;
         private LegacyConnectionStats(boolean leaf) {

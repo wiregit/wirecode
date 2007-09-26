@@ -10,6 +10,8 @@ import java.util.TreeMap;
 
 import org.limewire.collection.MultiIterable;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.statistic.StatsUtils;
 
 import com.limegroup.gnutella.messages.QueryReply;
@@ -82,9 +84,6 @@ public final class RouteTable  {
     private Map<ReplyHandler, Integer> _handlerMap = new HashMap<ReplyHandler, Integer>();
     private int _nextID;
     
-    /** Inspectables for a routing table */
-    public final Object rtInspectables = new RTInspectables();
-
     /** Values stored in _newMap/_oldMap. */
     private static final class RouteTableEntry implements ResultCounter {
         /** The numericID of the reply connection. */
@@ -532,9 +531,12 @@ public final class RouteTable  {
         */
     }
 
+    @SuppressWarnings("unused")
+    @InspectableContainer
     private class RTInspectables {
         
         /** Inspectable with some general stats about the routing table */
+        @InspectionPoint("query routing table stats")
         public final Inspectable RTStats = new Inspectable() {
             public synchronized Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
@@ -633,6 +635,7 @@ public final class RouteTable  {
          * its a good idea to first inspect the stats to see how many
          * entries there are.
          */
+        @InspectionPoint("query routing table dump")
         public final Inspectable RTDump = new Inspectable() {
             public Object inspect() {
                 Map<byte [], Object> ret = new HashMap<byte [], Object>();

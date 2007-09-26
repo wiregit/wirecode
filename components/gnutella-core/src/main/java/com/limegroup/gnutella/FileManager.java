@@ -34,8 +34,10 @@ import org.limewire.collection.MultiCollection;
 import org.limewire.collection.StringTrie;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
@@ -388,8 +390,6 @@ public abstract class FileManager {
     
     private final QRPUpdater qrpUpdater = new QRPUpdater();
 
-    public final FMInspectables inspectables = new FMInspectables();
-    
     /** Contains the definition of a rare file */
     private final RareFileDefinition rareDefinition;
     
@@ -2472,6 +2472,8 @@ public abstract class FileManager {
     }
 
     /** A bunch of inspectables for FileManager */
+    @SuppressWarnings("unused")
+    @InspectableContainer
     private class FMInspectables {
         /*
          * 1 - used to create smaller qrp table
@@ -2483,6 +2485,7 @@ public abstract class FileManager {
         }
 
         /** An inspectable that returns some info about the QRP */
+        @InspectionPoint("FileManager QRP info")
         public final Inspectable QRP = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
@@ -2497,11 +2500,14 @@ public abstract class FileManager {
         };
 
         /** An inspectable that returns stats about hits, uploads & alts */
+        @InspectionPoint("FileManager h/u/a stats")
         public final Inspectable FDS = new FDInspectable(false);
         /** An inspectable that returns stats about hits, uploads & alts > 0 */
+        @InspectionPoint("FileManager h/u/a stats > 0")
         public final Inspectable FDSNZ = new FDInspectable(true);
         
         /** An inspectable that counts how many shared fds match a custom criteria */
+        @InspectionPoint("FileManager custom criteria")
         public final Inspectable CUSTOM = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String,Object>();

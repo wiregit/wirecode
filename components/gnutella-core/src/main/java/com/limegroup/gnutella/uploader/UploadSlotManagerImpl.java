@@ -13,6 +13,7 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.collection.NumericBuffer;
 import org.limewire.collection.QueueCounter;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -48,17 +49,20 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
      * INVARIANT: sorted by priority and contains only 
      * requests of the highest priority or non-preemptible requests
      */
+    @InspectionPoint("active uploads")
     private final List <UploadSlotRequest> active;
     
     /**
      * The list of queued non-resumable requests
      */
+    @InspectionPoint("queued uploads")
     private final List <HTTPSlotRequest> queued;
     
     /**
      * The list of queued resumable requests
      * (currently only Seeding BT Uploaders)
      */
+    @InspectionPoint("queued resumable uploads")
     private final List<BTSlotRequest> queuedResumable;
     
     private final MultiIterable<UploadSlotRequest> allRequests;

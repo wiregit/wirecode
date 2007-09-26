@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.nio.observer.AcceptChannelObserver;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.IOErrorObserver;
@@ -129,6 +130,7 @@ public class NIODispatcher implements Runnable {
     private final Object Q_LOCK = new Object();
     
     /** Stats for the selector */
+    @InspectionPoint("nio selector stats")
     private final SelectStats stats = new SelectStats();
     
     /** A listener to notify the NIO thread when a selector has a pending event. */

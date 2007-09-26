@@ -60,7 +60,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     private final NetworkManager networkManager;
     private final SecureMessageVerifier secureMessageVerifier;
     private final Provider<ConnectionManager> connectionManager;
-    private final Provider<SearchResultHandler> searchResultHandler;
+    private final Provider<SearchResultHandler> searchResultHandler; // TODO inspect this
     private final Provider<DownloadManager> downloadManager;
     private final Provider<Acceptor> acceptor;
     private final Provider<PushManager> pushManager;

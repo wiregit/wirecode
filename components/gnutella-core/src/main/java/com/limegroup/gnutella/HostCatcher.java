@@ -37,6 +37,8 @@ import org.limewire.collection.ListPartitioner;
 import org.limewire.collection.RandomAccessMap;
 import org.limewire.collection.RandomOrderHashMap;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -309,10 +311,6 @@ public class HostCatcher {
      * Whether or not hosts have been added since we wrote to disk.
      */
     private boolean dirty = false;
-    
-    /** a bunch of inspectables for hostcatcher */
-    public final HCInspectables inspectables = new HCInspectables();
-    
     
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
@@ -1610,9 +1608,11 @@ public class HostCatcher {
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
     //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
     //
-    
+    @SuppressWarnings("unused")
+    @InspectableContainer
     private class HCInspectables {
         
+        @InspectionPoint("known hosts by class C")
         public final Inspectable top10classC = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
@@ -1651,6 +1651,7 @@ public class HostCatcher {
         };
         
         /** Inspectable with some tls stats */
+        @InspectionPoint("tls stats of known hosts")
         public final Inspectable tlsStats = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
@@ -1687,6 +1688,7 @@ public class HostCatcher {
         };
         
         /** Inspectable with some dht stats */
+        @InspectionPoint("dht stats of known hosts")
         public final Inspectable dhtStats = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();

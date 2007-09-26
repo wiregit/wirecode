@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.security.AddressSecurityToken;
@@ -288,7 +289,9 @@ public class OnDemandUnicaster {
     }
     
     /** inspectable for the class C distribution of the queried addresses */
-    public final Inspectable classCQueried = new Inspectable() {
+    @SuppressWarnings("unused")
+    @InspectionPoint("Unicaster class C stats")
+    private final Inspectable classCQueried = new Inspectable() {
         public Object inspect() {
             ClassCNetworks cnc = new ClassCNetworks();
             synchronized(_queriedHosts) {

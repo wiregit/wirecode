@@ -13,6 +13,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Singleton;
@@ -37,6 +38,7 @@ public final class QueryDispatcher implements Runnable {
 	private final Map<GUID, QueryHandler> QUERIES = new HashMap<GUID, QueryHandler>();
 
     /** Details about the queries */
+    @InspectionPoint("dispatched queries details")
     public final Inspectable queryDetail = new Inspectable() {
         public Object inspect() {
             List<Object> l = new ArrayList<Object>(QUERIES.size());

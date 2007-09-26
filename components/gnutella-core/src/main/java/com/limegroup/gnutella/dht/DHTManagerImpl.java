@@ -19,6 +19,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
@@ -85,9 +87,6 @@ public class DHTManagerImpl implements DHTManager {
     private final Executor dispatchExecutor;
     
     private volatile boolean enabled = true;
-    
-    /** reference to a bunch of inspectables */
-    public final DHTInspectables inspectables = new DHTInspectables();
     
     private final DHTControllerFactory dhtControllerFactory;
     
@@ -367,6 +366,8 @@ public class DHTManagerImpl implements DHTManager {
     }
 
     /** a bunch of inspectables */
+    @SuppressWarnings("unused")
+    @InspectableContainer
     private class DHTInspectables {
         
         /*
@@ -378,7 +379,7 @@ public class DHTManagerImpl implements DHTManager {
         private void addVersion(Map<String, Object> m) {
             m.put("sv",VERSION);
         }
-        
+        @InspectionPoint("general dht stats")
         public Inspectable general = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
@@ -398,6 +399,7 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        @InspectionPoint("dht contacts")
         public Inspectable contacts = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
@@ -439,6 +441,7 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        @InspectionPoint("dht route table class C networks")
         public Inspectable routeTableTop10Networks = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
@@ -467,6 +470,7 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        @InspectionPoint("dht buckets")
         public Inspectable buckets = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
@@ -507,6 +511,7 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        @InspectionPoint("dht buckets detailed")
         public Inspectable bucketDetail = new Inspectable() {
             public Object inspect() {
                 List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
@@ -532,6 +537,7 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        @InspectionPoint("dht database")
         public Inspectable database = new Inspectable() {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
@@ -575,6 +581,7 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        @InspectionPoint("dht database top 10 keys")
         public Inspectable databaseTop10Keys = new Inspectable() {
           public Object inspect() {
               List<byte[]>ret = new ArrayList<byte[]>();
@@ -605,8 +612,11 @@ public class DHTManagerImpl implements DHTManager {
         };
         
         /** Histograms of the stored keys with various detail */
+        @InspectionPoint("dht database 10 histogram")
         public Inspectable database10StoredHist = new DBHist(10);
+        @InspectionPoint("dht database 100 histogram")
         public Inspectable database100StoredHist = new DBHist(100); // ~ 400 bytes uncompressed
+        @InspectionPoint("dht database 500 histogram")
         public Inspectable database500StoredHist = new DBHist(500); // ~ 2kb uncompressed
     }
     

@@ -21,6 +21,8 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.CommonUtils;
@@ -41,9 +43,6 @@ public class RatingTable {
 	 */
 	private static final int MAX_SIZE = 50000;
     
-    @SuppressWarnings("unused")
-    private final Object inspectables = new RatingTableInspectables();
-
 	/**
 	 * a Map containing all tokens.
      * 
@@ -301,6 +300,8 @@ public class RatingTable {
 	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
 	}
     
+    @SuppressWarnings("unused")
+    @InspectableContainer
 	private class RatingTableInspectables {
         
         private static final int VERSION = 1;
@@ -309,6 +310,7 @@ public class RatingTable {
         }
         
         /** Inspectable with some stats about tokens */
+        @InspectionPoint("spam rating table token stats")
         public final Inspectable TOKEN_STAT = new Inspectable() {
             public Object inspect() {
                 synchronized(RatingTable.this) {
@@ -335,6 +337,7 @@ public class RatingTable {
         };
 
         /** Inspectable that returns a hash of the tokens */
+        @InspectionPoint("spam rating table token hashes")
         public final Inspectable TOKEN_HASH = new Inspectable() {
             public Object inspect() {
                 synchronized(RatingTable.this) {
