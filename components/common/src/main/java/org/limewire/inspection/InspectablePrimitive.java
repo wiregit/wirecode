@@ -16,4 +16,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface InspectablePrimitive {}
+public @interface InspectablePrimitive {
+    String value() default ""; // TODO make value required
+}
