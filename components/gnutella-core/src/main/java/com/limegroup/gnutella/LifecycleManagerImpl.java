@@ -110,7 +110,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
     /** The time when this finished starting. */
-    @InspectablePrimitive private long startFinishedTime;
+    @InspectablePrimitive("time lifecycle finished starting") 
+    private long startFinishedTime;
 
     private final Provider<IncomingConnectionHandler> incomingConnectionHandler;
 

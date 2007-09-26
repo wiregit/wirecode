@@ -101,7 +101,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	 * Variable for whether or not we have accepted an incoming connection --
 	 * used to determine firewall status.
 	 */
-    @InspectablePrimitive
+    @InspectablePrimitive("accepted incoming")
 	private volatile boolean _acceptedIncoming = false;
 	
     /**

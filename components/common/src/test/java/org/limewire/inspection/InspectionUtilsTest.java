@@ -147,11 +147,11 @@ class TestClass {
     static TestClass2 reference2;
     
     String memberString;
-    @InspectablePrimitive
+    @InspectablePrimitive("")
     String inspectableString;
     
     List memberList;
-    @InspectableForSize
+    @InspectableForSize("")
     List inspectableList;
     
     Object reference;
@@ -185,7 +185,7 @@ class InspectableClass implements Inspectable {
 class PrivateInts {
     static PrivateInts self;
     private int memberInt;
-    @InspectablePrimitive
+    @InspectablePrimitive("")
     private int inspectableInt;
     PrivateInts(int a, int b) {
         memberInt = a;
@@ -194,6 +194,6 @@ class PrivateInts {
 }
 
 class SyncList {
-    @InspectableForSize
+    @InspectableForSize("")
     static List l;
 }

@@ -33,7 +33,7 @@ public final class QueryDispatcher implements Runnable {
 	/**
 	 * <tt>Map</tt> of outstanding queries.  
 	 */
-    @InspectableForSize
+    @InspectableForSize("number of dispatched queries")
 	private final Map<GUID, QueryHandler> QUERIES = new HashMap<GUID, QueryHandler>();
 
     /** Details about the queries */
@@ -51,7 +51,7 @@ public final class QueryDispatcher implements Runnable {
 	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if
 	 * it's ever iterated over.  
 	 */
-    @InspectableForSize
+    @InspectableForSize("number of newly dispatched queries")
 	private final List<QueryHandler> NEW_QUERIES =
         Collections.synchronizedList(new LinkedList<QueryHandler>());
     
@@ -66,7 +66,7 @@ public final class QueryDispatcher implements Runnable {
      * Whether or not processing is already active.  If it is, we don't start it up again
      * when adding new queries.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("querydispatcher active")
     private boolean _active;
     
 	/**

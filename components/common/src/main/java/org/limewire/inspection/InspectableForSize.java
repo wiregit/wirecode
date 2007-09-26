@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface InspectableForSize {
-    String value() default ""; // TODO make value required
+    String value();
 }

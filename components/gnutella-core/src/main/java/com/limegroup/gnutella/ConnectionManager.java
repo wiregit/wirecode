@@ -122,13 +122,13 @@ public class ConnectionManager implements ConnectionAcceptor,
     @SuppressWarnings("unused") private final Inspectable UP = new LegacyConnectionStats(false);
     
     /** Timestamp for the last time the user selected to disconnect. */
-    @InspectablePrimitive
+    @InspectablePrimitive("last disconnect time")
     private volatile long _disconnectTime = -1;
     /** Timestamp for the last time we started trying to connect */
-    @InspectablePrimitive
+    @InspectablePrimitive("last connect time")
     private volatile long _connectTime = Long.MAX_VALUE;
     /** Timestamp for the last time we reached our preferred connections */
-    @InspectablePrimitive
+    @InspectablePrimitive("last time preferred reached")
     @SuppressWarnings("unused")
     private volatile long _lastFullConnectTime;
     /**
@@ -136,22 +136,22 @@ public class ConnectionManager implements ConnectionAcceptor,
      * trying to automatically connect if the user has disconnected since that
      * time.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("begin of automatic connect")
     private volatile long _automaticConnectTime = 0;
     /** Flag for whether or not the auto-connection process is in effect. */
-    @InspectablePrimitive
+    @InspectablePrimitive("automatically connecting")
     private volatile boolean _automaticallyConnecting;
     /** Timestamp of our last successful connection. */
-    @InspectablePrimitive
+    @InspectablePrimitive("last successful connection")
     private volatile long _lastSuccessfulConnect = 0;
     /** Timestamp of the last time we checked to verify that the user has a live Internet connection. */
-    @InspectablePrimitive
+    @InspectablePrimitive("last internet check")
     private volatile long _lastConnectionCheck = 0;
     /** Counter for the number of connection attempts we've made. */
-    @InspectablePrimitive
+    @InspectablePrimitive("connection attempts")
     private volatile int _connectionAttempts;
     /** The current number of connections we want to maintain. */
-    @InspectablePrimitive
+    @InspectablePrimitive("preferred connections")
     private volatile int _preferredConnections = -1;
     
 
@@ -164,7 +164,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * we have decided not to connect to.
      * LOCKING: this 
      */
-    @InspectableForSize
+    @InspectableForSize("number of skipped class C networks")
     private final Map<Integer, List<Endpoint>> classCNetworks = 
         new HashMap<Integer,List<Endpoint>>();
     
@@ -241,7 +241,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 * to become an Ultrapeer that we were told to become leaves.  If this
 	 * number is too great, we give up and become a leaf.
 	 */
-    @InspectablePrimitive
+    @InspectablePrimitive("leaf tries")
 	private volatile int _leafTries;
 
 	/**
@@ -249,7 +249,7 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 * a leaf -- this number depends on how good this potential Ultrapeer seems
 	 * to be.
 	 */
-    @InspectablePrimitive
+    @InspectablePrimitive("demotion limit")
 	private volatile int _demotionLimit = 0;
 
     /** The current measured upstream bandwidth in kbytes/sec. */

@@ -69,7 +69,7 @@ public class FilterSettings extends LimeProps {
     /**
 	 * An array of ip addresses that the user has banned.
 	 */    
-    @InspectablePrimitive
+    @InspectablePrimitive("blacklisted hosts")
     public static final StringArraySetting BLACK_LISTED_IP_ADDRESSES =
         FACTORY.createStringArraySetting("BLACK_LISTED_IP_ADDRESSES", new String[0]);
     

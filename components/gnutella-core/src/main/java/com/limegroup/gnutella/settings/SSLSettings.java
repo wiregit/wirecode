@@ -28,7 +28,7 @@ public class SSLSettings extends LimeProps {
     private static volatile boolean tlsDisabled;
     
     /** The Throwable that was the reason TLS failed. */
-    @InspectablePrimitive
+    @InspectablePrimitive("reason tls failed")
     @SuppressWarnings("unused")
     private static volatile String tlsDisabledReason;
     

@@ -79,7 +79,7 @@ public class InspectionTest extends ServerSideTestCase {
         MessageSettings.INSPECTION_VERSION.setValue(0);
     }
     
-    @InspectablePrimitive
+    @InspectablePrimitive("")
     private static String inspectedValue;
     private static String otherValue;
     

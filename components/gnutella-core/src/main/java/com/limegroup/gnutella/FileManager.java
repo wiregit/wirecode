@@ -150,7 +150,7 @@ public abstract class FileManager {
      * INVARIANT: _filesSize=sum of all size of the elements of _files,
      *   except IncompleteFileDescs, whose size may change at any time.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("total size of shared files")
     private long _filesSize;
     
     /**
@@ -158,14 +158,14 @@ public abstract class FileManager {
      * INVARIANT: _numFiles==number of elements of _files that are not null
      *  and not IncompleteFileDescs.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("number of shared files")
     private int _numFiles;
     
     /** 
      * The total number of files that are pending sharing.
      *  (ie: awaiting hashing or being added)
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("number of pending files")
     private int _numPendingFiles;
     
     /**
@@ -173,14 +173,14 @@ public abstract class FileManager {
      * INVARIANT: _numFiles + _numIncompleteFiles == the number of
      *  elements of _files that are not null.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("number of incomplete files")
     private int _numIncompleteFiles;
     
     /**
      * The number of files that are forcibly shared over the network.
      * INVARIANT: _numFiles >= _numForcedFiles.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("number force-shared files")
     private int _numForcedFiles;
     
     /**
@@ -206,7 +206,7 @@ public abstract class FileManager {
      * i, for all k in _files[i]._path where _files[i] is not an
      * IncompleteFileDesc, _keywordTrie.get(k) contains i.
      */
-    @InspectableForSize
+    @InspectableForSize("size of keyword trie")
     private StringTrie<IntSet> _keywordTrie;
     
     /**
@@ -244,7 +244,7 @@ public abstract class FileManager {
      * Incomplete shared files are NOT stored in this data structure, but are
      * instead in the _incompletesShared IntSet.
      */
-    @InspectableForSize
+    @InspectableForSize("number of shared directories")
     private Map<File, IntSet> _sharedDirectories;
     
 	/**
@@ -252,7 +252,7 @@ public abstract class FileManager {
 	 * directories are shared by default and will be shared unless the File is
 	 * listed in SharingSettings.FILES_NOT_TO_SHARE.
 	 */
-    @InspectableForSize
+    @InspectableForSize("number completely shared directories")
 	private Set<File> _completelySharedDirectories;
 	
     /**
@@ -269,7 +269,7 @@ public abstract class FileManager {
      * others to retrieve all the incomplete shared files, which is
      * relatively useful.                                                                                                       
      */
-    @InspectableForSize
+    @InspectableForSize("number incompletely shared files")
     private IntSet _incompletesShared;
     
     /**
@@ -284,26 +284,26 @@ public abstract class FileManager {
      * INVARIANT: no file can be in this and _data.SPECIAL_FILES_TO_SHARE
      * at the same time
      */
-    @InspectableForSize
+    @InspectableForSize("number of transiently shared files")
     private Set<File> _transientSharedFiles = new HashSet<File>();
     
     /**
      * Individual files that are not in a shared folder.
      */
-    @InspectableForSize
+    @InspectableForSize("number of individually shared files")
     private Collection<File> _individualSharedFiles; 
     
     /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("filemanager revision")
     protected volatile int _revision = 0;
     
     /**
      * The revision that finished loading all pending files.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("revision that finished loading")
     private volatile int _pendingFinished = -1;
     
     /**
@@ -314,7 +314,7 @@ public abstract class FileManager {
     /**
      * If true, indicates that the FileManager is currently updating.
      */
-    @InspectablePrimitive
+    @InspectablePrimitive("filemanager currently updating")
     private volatile boolean _isUpdating = false;
     
     /**
