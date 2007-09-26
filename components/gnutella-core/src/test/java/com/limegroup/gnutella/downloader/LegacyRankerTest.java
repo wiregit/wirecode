@@ -4,10 +4,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
@@ -20,6 +23,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 @SuppressWarnings( { "unchecked", "cast" } )
 public class LegacyRankerTest extends LimeTestCase {
 
+    
     public LegacyRankerTest(String name) {
         super(name);
     }
@@ -33,8 +37,9 @@ public class LegacyRankerTest extends LimeTestCase {
     public void setUp() throws Exception {
         ranker = new LegacyRanker();
         
-        // TODO: Fix me, remove this
-        PrivilegedAccessor.setValue(HashTree.class, "hashTreeNodeManager", new HashTreeNodeManager());
+        // TODO: remove.... HashTree requires static injections for this test to complete
+        LimeTestUtils.createInjector();
+        
     }
     
     /**
