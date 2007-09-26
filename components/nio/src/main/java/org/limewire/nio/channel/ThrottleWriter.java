@@ -14,11 +14,6 @@ import org.limewire.nio.observer.WriteObserver;
 /**
  * Writes data to a channel. The data writes are controlled by a {@link 
  * Throttle}.
- * <p>
- * To work with the <code>Throttle</code>, <code>ThrottleWriter</code>
- * uses an attachment. This attachment must be the same as the 
- * <code>SelectionKey</code> attachment associated with the socket 
- * <code>ThrottleWriter</code> uses.
  */
 public class ThrottleWriter implements ChannelWriter, InterestWritableByteChannel, RequiresSelectionKeyAttachment {
     
@@ -39,10 +34,12 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     private final Listener throttleListener;
     
     /**
-     * Constructs a <code>ThrottleWriter</code> with the given <code>Throttle</code>.
+     * Constructs a <code>ThrottleWriter</code> with the given 
+     * <code>Throttle</code>.
      * <p>
-     * You MUST call {@link #setWriteChannel(InterestWritableByteChannel)}
-     * prior to using <code>ThrottleWriter</code>.
+     * <b>NOTE</b>: you must call {@link 
+     * #setWriteChannel(InterestWritableByteChannel)} prior to using 
+     * <code>ThrottleWriter</code>.
      */
     public ThrottleWriter(Throttle throttle) {
         this(throttle, null);
@@ -95,7 +92,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
     
     /**
      * Writes data to the chain.
-     *
+     * <p>
      * Only writes up to 'available' amount of data.
      */
     public int write(ByteBuffer buffer) throws IOException {
@@ -201,7 +198,13 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
             channel.interestWrite(this, true);
         }
     }
-    
+
+    /**
+     * To work with the <code>Throttle</code>, <code>ThrottleWriter</code>
+     * uses an attachment. This attachment must be the same as the
+     * <code>SelectionKey</code> attachment associated with the socket
+     * <code>ThrottleWriter</code> uses.
+     */
     public void setAttachment(Object o) {
         throttleListener.setAttachment(o);
     }

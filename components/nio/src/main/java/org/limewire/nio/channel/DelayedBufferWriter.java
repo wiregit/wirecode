@@ -15,7 +15,7 @@ import org.limewire.nio.observer.WriteObserver;
 
 
 /**
- * Stores data within a buffer and writes it out after some delay,
+ * Stores data within a buffer and writes it out after a configurable delay,
  * or if the buffer fills up.
  */
 public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteChannel {
@@ -23,7 +23,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     private static final Log LOG = LogFactory.getLog(DelayedBufferWriter.class);
 
     /** The default delay time to use before forcing a flush */
-    private final static int MAX_TIME = 200;
+    private final static int DEFAULT_DELAY = 200;
    
     /** The channel to write to & interest on. */    
     private volatile InterestWritableByteChannel sink;
@@ -47,7 +47,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     /** Constructs a new <code>DelayedBufferWriter</code> whose buffer is the 
      * given size. */
     public DelayedBufferWriter(int size) {
-    	this(size, MAX_TIME);
+    	this(size, DEFAULT_DELAY);
     }
     
     /** Constructs a new <code>DelayedBufferWriter</code> whose buffer is the
@@ -67,11 +67,6 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     /**
      * Used by an observer to interest themselves in when something can
      * write to this.
-     * <p>
-     * We must synchronize interest setting so that in the writing loop
-     * we can ensure that interest isn't turned on between the time we
-     * get the interested party, check for null, and turn off interest
-     * (if it was null).
      */
     public synchronized void interestWrite(WriteObserver observer, boolean status) {
     	if (status) {
@@ -198,8 +193,9 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
      * Writes data to the underlying channel, remembering the time we did this
      * if anything was written.  
      * <p>
-     * THIS DOES NOT BLOCK, NOR DOES IT ENFORCE
-     * THAT ALL DATA WILL BE WRITTEN, UNLIKE <code>OutputStream.flush()</code>.
+     * <b>Important</b>:
+     * <code>flush</code> does not block, nor does it enforce that all data will be written, 
+     * unlike <code>OutputStream.flush()</code>.
      * 
      * @return true if the buffer is now empty
      */

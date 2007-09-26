@@ -4,7 +4,7 @@ import org.limewire.nio.observer.WriteObserver;
 
 /**
  * Defines an interface that allows {@link InterestWritableByteChannel 
- * InterestWritableByteChannels} to be set as the source writing channel 
+ * InterestWritableByteChannels} to be set as the target writing channel 
  * for this object.
  * <p>
  * The general flow for chained writing goes something as follows.
@@ -18,7 +18,7 @@ import org.limewire.nio.observer.WriteObserver;
  *      b.setWriteChannel(c);
  *      MyNIOMultiplexor.setWriteObserver(a);
  * </pre>
- * When writing can happen on the socket, the {@link NIOMultiplexor} will notify its
+ * When writing can happen on the socket, the {@link NIOMultiplexor} notifies its
  * internal source that a write can happen. That source will notify the last
  * chain that was interested in it (generally 'c' above, the deflator).
  * 'c' can choose to either pass the event to the last chain that was interested
@@ -30,12 +30,12 @@ import org.limewire.nio.observer.WriteObserver;
 public interface ChannelWriter extends WriteObserver {
     
     /**
-     * Set the new source channel.  This object should immediately
+     * Set the write target, AKA sink. This object should immediately
      * register interest with the newChannel if there is any data to be
      * written.
      */
     void setWriteChannel(InterestWritableByteChannel newChannel);
     
-    /** Gets the existing source channel. */
+    /** Returns the write target, AKA sink. */
     InterestWritableByteChannel getWriteChannel();
 }

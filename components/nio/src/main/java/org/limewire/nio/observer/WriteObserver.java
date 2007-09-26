@@ -11,9 +11,8 @@ public interface WriteObserver extends IOErrorObserver {
 
     /**
      * Notification that a write can be performed.
-     *
-     * If there is still data to be written, this returns <code>true</code>.
-     * Otherwise <code>handleWrite</code> returns <code>false</code>.
+     * @return <code>true</code> there is still data to be written, otherwise 
+     * <code>false</code>.
      */
     boolean handleWrite() throws java.io.IOException;
     

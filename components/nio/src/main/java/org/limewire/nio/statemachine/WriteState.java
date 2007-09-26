@@ -9,6 +9,8 @@ import java.nio.channels.WritableByteChannel;
  * Abstract class that represents a write state and declares that reading
  * is not taking place.
  */
+//TODO rename to AbstractWriteState - when rename with Abstract prepended, 
+//remove "Abstract class that" from the javadoc comment.
 public abstract class WriteState implements IOState {
 
     public final boolean isWriting() {

@@ -11,21 +11,8 @@ import java.util.zip.Inflater;
 /**
  * Reads data from a source channel and offers the inflated version for reading.
  * <p>
- * Each invocation of {@link #read(ByteBuffer)} attempts to return any inflated data.
- * If no data is available for inflation, data will be read from the source channel
- * and inflation will be attempted. The {@link ByteBuffer} will be filled as much as possible
- * without blocking.
- * <p>
- * The source channel may not be entirely emptied out in a single call to 
- * <code>read(ByteBuffer)</code>, because the supplied <code>ByteBuffer</code> 
- * may not be large enough to accept all inflated data. If this is the case, 
- * the data will remain in the source channel until further calls to
- * <code>read(ByteBuffer)</code>.
- * <p>
- * The source channel does not need to be set for construction. However, before 
- * <code>read(ByteBuffer)</code> is called, 
- * {@link #setReadChannel(InterestReadableByteChannel)}
- * must be called with a valid channel.
+ * Each invocation of {@link #read(ByteBuffer)} attempts to return as much
+ * inflated data as possible.
  */
 public class InflaterReader implements ChannelReader, InterestReadableByteChannel {
     
@@ -81,7 +68,22 @@ public class InflaterReader implements ChannelReader, InterestReadableByteChanne
     }
     
     /**
-     * Reads from this' inflater into the given <code>ByteBuffer</code>.
+     * Reads from this inflater into the given <code>ByteBuffer</code>. 
+     * <p>
+     * If data isn't available for inflation, data will be read from the source
+     * channel and inflation will be attempted. The {@link ByteBuffer} will be
+     * filled as much as possible without blocking.
+     * <p>
+     * The source channel may not be entirely emptied out in a single call to
+     * <code>read(ByteBuffer)</code>, because the supplied
+     * <code>ByteBuffer</code> may not be large enough to accept all inflated
+     * data. If this is the case, the data will remain in the source channel
+     * until further calls to <code>read(ByteBuffer)</code>.
+     * <p>
+     * The source channel does not need to be set for construction. However,
+     * before <code>read(ByteBuffer)</code> is called,
+     * {@link #setReadChannel(InterestReadableByteChannel)} must be called with
+     * a valid channel.
      */
     public int read(ByteBuffer buffer) throws IOException {
         int written = 0;
@@ -126,8 +128,7 @@ public class InflaterReader implements ChannelReader, InterestReadableByteChanne
             // if a), we'll continue trying to inflate so long as the output buffer
             // has space left.
             // if b), we try to inflate and ultimately end up at a).
-        }
-        
+        }        
         
         if(written > 0)
             return written;
@@ -161,18 +162,17 @@ public class InflaterReader implements ChannelReader, InterestReadableByteChanne
     }
     
     /**
-     * Determines if this reader is open.
+     * Determines if the underlying channel is open. <code>setReadChannel</code>
+     * must be called prior to calling <code>isOpen</code>.
      */
     public boolean isOpen() {
         return channel.isOpen();
     }
     
     /**
-     * Closes this channel.
+     * Closes the underlying channel.
      */
     public void close() throws IOException {
         channel.close();
     }
 }
-    
-    

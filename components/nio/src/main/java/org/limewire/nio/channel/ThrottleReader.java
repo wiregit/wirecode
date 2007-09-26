@@ -15,11 +15,6 @@ import org.limewire.util.BufferUtils;
  * Reads data from a channel. The data is controlled by a {@link Throttle}; to 
  * work with the <code>Throttle</code>, <code>ThrottleReader</code> uses an 
  * attachment.
- * <p>
- * The attachment must be the same as the attachment of the 
- * <code>SelectionKey</code> associated with the socket 
- * <code>ThrottleReader</code> uses.
- * 
  */
 public class ThrottleReader implements InterestReadableByteChannel, ChannelReader, RequiresSelectionKeyAttachment {
     
@@ -41,8 +36,9 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
      * Constructs a <code>ThrottleReader</code> with the given 
      * <code>Throttle</code>.
      * <p>
-     * You MUST call 
-     * {@link #setReadChannel(InterestReadableByteChannel) setReadChannel(InterestReadableByteChannel)}
+     * <b>NOTE</b>: You must call 
+     * {@link #setReadChannel(InterestReadableByteChannel) 
+     * setReadChannel(InterestReadableByteChannel)}
      * prior to using <code>ThrottleReader</code>.
      */
     public ThrottleReader(Throttle throttle) {
@@ -86,7 +82,7 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
     
     /**
      * Read data from the chain.
-     *
+     * <p>
      * Only reads up to 'available' amount of data.
      */
     public int read(ByteBuffer buffer) throws IOException {
@@ -112,7 +108,7 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
         	if (totalRead > 0)
         		available -= totalRead;
         } else {
-            // Humour the underlying channel -- it may need
+            // Humur the underlying channel -- it may need
             // to read data internally.
             channel.read(BufferUtils.getEmptyBuffer());
         	channel.interestRead(false);
@@ -137,6 +133,11 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
         return source != null ? source.isOpen() : false;
     }
     
+    /**
+     * The attachment must be the same as the attachment of the
+     * <code>SelectionKey</code> associated with the socket
+     * <code>ThrottleReader</code> uses.
+     */
     public void setAttachment(Object o) {
         throttleListener.setAttachment(o);
     }

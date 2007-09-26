@@ -36,7 +36,8 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
     /**
      * Constructs a new <code>DeflaterWriter</code> with the given deflater.
      * <p>
-     * You MUST call <code>setWriteChannel</code> prior to <code>handleWrite</code>.
+     * <b>NOTE:</b> You must call <code>setWriteChannel</code> prior to 
+     * <code>handleWrite</code>.
      */
     public DeflaterWriter(Deflater deflater) {
         this(deflater, null);
@@ -54,25 +55,19 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
         this.channel = channel;
     }
     
-    /** Retrieves the sink. */
+    /** {@inheritDoc} */
     public InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
     
-    /** Sets the sink. */
+    /** {@inheritDoc} */
     public void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
         channel.interestWrite(this, true);
     }
     
     /**
-     * Used by an observer to interest themselves in when something can
-     * write to this.
-     * <p>
-     * We must synchronize interest setting so that in the writing loop
-     * we can ensure that interest isn't turned on between the time we
-     * get the interested party, check for null, and turn off interest
-     * (if it was null).
+     * {@inheritDoc}
      */
     public synchronized void interestWrite(WriteObserver observer, boolean status) {
         this.observer = status ? observer : null;

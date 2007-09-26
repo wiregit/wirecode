@@ -6,9 +6,8 @@ import java.nio.channels.WritableByteChannel;
 
 /**
  * Process a write state. <code>SimpleWriteState</code> declares a write is 
- * taking place, whereas a reading is not taking place. Additionally, 
- * <code>SimpleWriteState</code> returns how much was written by the channel.
- *
+ * taking place. Additionally, <code>SimpleWriteState</code> returns how much 
+ * was written by the channel.
  */
 public class SimpleWriteState extends WriteState {
     

@@ -49,8 +49,9 @@ public interface NIOMultiplexor {
      *      setWriteObserver(a);
      *      
      * the deepest ChannelWriter is 'c', so the multiplexor would call
-     *      c.setWriteChannel(ultimateSource);
-     *
+     *      c.setWriteChannel(networkSink);
+     * where networkSink is the network channel from where data is actually read.
+     * 
      * The deepest ChannelWriter is found with code equivalent to:
      * 
      *      ChannelWriter deepest = initial;

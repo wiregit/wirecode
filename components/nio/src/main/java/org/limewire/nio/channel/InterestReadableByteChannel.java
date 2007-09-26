@@ -9,7 +9,10 @@ public interface InterestReadableByteChannel extends ReadableByteChannel {
 
     /** 
      * Allows this <code>ReadableByteChannel</code> to be told that someone is 
-     * no longer interested in reading from it.
+     * no longer interested in reading from it. Conversely, you can signal
+     * interest in reading.
+     * @param status true means interest in reading, false means a lack of
+     * interest.
      */
     public void interestRead(boolean status);
     

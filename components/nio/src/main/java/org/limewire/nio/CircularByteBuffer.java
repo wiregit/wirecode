@@ -11,7 +11,7 @@ import java.nio.channels.WritableByteChannel;
 import org.limewire.service.ErrorService;
 
 /**
- * A circular buffer - allows to read and write to and from channels and other buffers
+ * Allows to read and write to/from channels and other buffers
  * with virtually no memory overhead.
  */
 public class CircularByteBuffer {
@@ -194,7 +194,7 @@ public class CircularByteBuffer {
     /**
      * Reads data from the source channel
      * @return the amount of data read, >= 0
-     * @throws IOException if an error occured or 
+     * @throws IOException if an error occurred or 
      * no data was read and end of stream was reached.
      */
     public int read(ReadableByteChannel source) throws IOException {
