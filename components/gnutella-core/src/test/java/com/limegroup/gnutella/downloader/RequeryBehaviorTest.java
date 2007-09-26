@@ -104,6 +104,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader); // quick cycle through GAVE_UP
         assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
         
         // click resume, launch a dht query
@@ -114,6 +115,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
         
         // while we're querying the dht, a search result arrives
@@ -122,6 +124,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUERYING_DHT, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         
         // after the result fails, we should fall back in querying state
         assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
@@ -134,6 +137,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING,downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
          
         // now we should try a gnet query after a pump
         pump.run();
@@ -146,6 +150,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         
         // should be waiting for sources again
         assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
@@ -174,6 +179,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
         
         LOG.debug("waiting for a few handleInactivity() calls");
@@ -197,6 +203,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
         
         // few pumps, still querying dht
@@ -213,6 +220,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING,downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         
         // now we should try a gnet query
         assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
@@ -233,6 +241,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
         
         // lets say this query times out instead of receiving callback
@@ -273,6 +282,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
         
         LOG.debug("waiting for a few handleInactivity() calls");
@@ -291,6 +301,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
         
         // now tell them the dht query failed
@@ -303,6 +314,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.WAITING_FOR_USER, downloader.getState());
         
         pump.run();pump.run(); // few more pumps
@@ -317,6 +329,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader); 
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
         
         // if we find nothing, we give up
@@ -336,6 +349,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         waitForStateToEnd(DownloadStatus.QUEUED, downloader);
         assertSame(DownloadStatus.CONNECTING, downloader.getState());
         waitForStateToEnd(DownloadStatus.CONNECTING, downloader);
+        waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUERYING_DHT, downloader.getState());
         
     }
