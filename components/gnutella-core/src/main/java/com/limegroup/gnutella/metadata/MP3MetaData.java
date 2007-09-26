@@ -265,10 +265,10 @@ public class MP3MetaData extends AudioMetaData {
      * @param content
      */
     private void checkLWS(String content) {
-        if( getEncoder() != LWS) {
+        if( getSongType() != LWS) {
             //search for the substring MAGIC_KEY
             if( content.indexOf(MAGIC_KEY) != -1)
-                setEncoder(LWS); 
+                setSongType(LWS); 
             }
     }
 

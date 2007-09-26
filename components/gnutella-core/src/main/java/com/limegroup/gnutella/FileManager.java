@@ -1003,7 +1003,7 @@ public abstract class FileManager {
         }
         // STEP 2:
         // Scan subdirectory for the amount of shared files.
-        File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);//directory.listFiles();//SHAREABLE_FILE_FILTER);
+        File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
@@ -2351,9 +2351,7 @@ public abstract class FileManager {
         else if( FileUtils.getFileExtension(file).toLowerCase().equals("mp3")) 
             try {
                 AudioMetaData amd = AudioMetaData.parseAudioFile(file);
-                if( amd.getLicenseType() != null && (amd.getLicenseType().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString() )
-                        || amd.getEncoder() == AudioMetaData.LWS) ) {
-                    
+                if(amd.getSongType() == AudioMetaData.LWS) {
                     return true;
                 }
             } catch (IOException e) {
