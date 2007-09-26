@@ -1006,7 +1006,6 @@ public final class QueryRequestTest extends LimeTestCase {
     }
 
     private void testMetaFlag(int flag) throws Exception {
-        try {
         QueryRequest query = 
             ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
                 "whatever", "", null, null, true, Network.TCP, false, 0, false,
@@ -1041,10 +1040,6 @@ public final class QueryRequestTest extends LimeTestCase {
             assertTrue(qr.desiresWindowsPrograms());
         if ((flag & QueryRequest.LIN_PROG_MASK) > 0)
             assertTrue(qr.desiresLinuxOSXPrograms());
-        }
-        catch (IllegalArgumentException no) {
-            assertTrue(false);
-        }
     }
 
     

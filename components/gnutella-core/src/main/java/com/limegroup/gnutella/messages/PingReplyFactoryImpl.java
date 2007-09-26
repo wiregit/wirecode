@@ -14,6 +14,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
@@ -33,20 +34,20 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 public class PingReplyFactoryImpl implements PingReplyFactory {
 
     private final NetworkManager networkManager;
-    private final Statistics statistics;
-    private final UDPService udpService;
-    private final ConnectionManager connectionManager;
-    private final HostCatcher hostCatcher;
-    private final DHTManager dhtManager;
+    private final Provider<Statistics> statistics;
+    private final Provider<UDPService> udpService;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<HostCatcher> hostCatcher;
+    private final Provider<DHTManager> dhtManager;
     private final LocalPongInfo localPongInfo;
 
     @Inject
     // TODO: All these objects should be folded into LocalPongInfo
     public PingReplyFactoryImpl(NetworkManager networkManager,
-            Statistics statistics, UDPService udpService,
-            ConnectionManager connectionManager,
-            HostCatcher hostCatcher,
-            DHTManager dhtManager,
+            Provider<Statistics> statistics, Provider<UDPService> udpService,
+            Provider<ConnectionManager> connectionManager,
+            Provider<HostCatcher> hostCatcher,
+            Provider<DHTManager> dhtManager,
             LocalPongInfo localPongInfo) {
         this.networkManager = networkManager;
         this.statistics = statistics;
@@ -68,12 +69,12 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                 localPongInfo.getNumSharedFiles(),
                 localPongInfo.getSharedFileSize() / 1024,
                 localPongInfo.isSupernode(),
-                statistics.calculateDailyUptime(),
-                udpService.isGUESSCapable(),
+                statistics.get().calculateDailyUptime(),
+                udpService.get().isGUESSCapable(),
                 ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                         .getValue()
                         : ApplicationSettings.LANGUAGE.getValue(),
-                connectionManager.getNumLimeWireLocalePrefSlots(), gnutHosts,
+                connectionManager.get().getNumLimeWireLocalePrefSlots(), gnutHosts,
                 dhtHosts);
     }
 
@@ -88,15 +89,15 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     public PingReply create(byte[] guid, byte ttl, IpPort returnAddr,
             Collection<? extends IpPort> gnutHosts,
             Collection<? extends IpPort> dhtHosts) {
-        GGEP ggep = newGGEP(statistics.calculateDailyUptime(),
+        GGEP ggep = newGGEP(statistics.get().calculateDailyUptime(),
                 localPongInfo.isSupernode(), udpService
-                        .isGUESSCapable());
+                        .get().isGUESSCapable());
 
         String locale = ApplicationSettings.LANGUAGE.getValue().equals("") ? ApplicationSettings.DEFAULT_LOCALE
                 .getValue()
                 : ApplicationSettings.LANGUAGE.getValue();
         addLocale(ggep, locale, connectionManager
-                .getNumLimeWireLocalePrefSlots());
+                .get().getNumLimeWireLocalePrefSlots());
 
         addAddress(ggep, returnAddr);
 
@@ -471,7 +472,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         BitNumbers bn = new BitNumbers(hosts.size());
         int i = 0;
         for (IpPort ipp : hosts) {
-            if (hostCatcher.isHostTLSCapable(ipp))
+            if (hostCatcher.get().isHostTLSCapable(ipp))
                 bn.set(i);
             i++;
         }
@@ -511,12 +512,12 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         byte[] payload = new byte[3];
 
         // put version
-        int version = dhtManager.getVersion().shortValue();
+        int version = dhtManager.get().getVersion().shortValue();
 
         ByteOrder.short2beb((short) version, payload, 0);
 
-        if (dhtManager.isMemberOfDHT()) {
-            DHTMode mode = dhtManager.getDHTMode();
+        if (dhtManager.get().isMemberOfDHT()) {
+            DHTMode mode = dhtManager.get().getDHTMode();
             assert (mode != null);
             payload[2] = mode.byteValue();
         } else {

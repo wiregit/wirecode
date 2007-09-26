@@ -97,6 +97,7 @@ public class ProviderHacks {
             throw new IllegalStateException("already initializing!");
         initializing = true;
         aReallyLongNameThatYouDontWantToTypeALot = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class), new ModuleHacks()).getInstance(LimeWireCore.class);
+        initialized = true;
         initializedSource = new Exception();
         initializing = false;
         return aReallyLongNameThatYouDontWantToTypeALot;
