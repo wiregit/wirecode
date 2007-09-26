@@ -21,6 +21,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
@@ -62,7 +63,7 @@ public class SimppManager {
     private int _latestVersion;
     
     @Inject // DPINJ: GET RID OF STATIC INJECTION!
-    private static NetworkUpdateSanityChecker networkUpdateSanityChecker;
+    private static Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     
     private SimppManager() {
         this.simppSettingsManager = new SimppSettingsManager();
@@ -148,7 +149,7 @@ public class SimppManager {
      */
     public void checkAndUpdate(final ReplyHandler handler, final byte[] simppPayload) { 
         if(simppPayload == null) {
-            networkUpdateSanityChecker.handleInvalidResponse(handler, RequestType.SIMPP);
+            networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
             return;
         }
         
@@ -159,10 +160,10 @@ public class SimppManager {
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 
                 if (!verifier.verifySource()) {
-                    networkUpdateSanityChecker.handleInvalidResponse(handler, RequestType.SIMPP);
+                    networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
                     return;
                 } else {
-                    networkUpdateSanityChecker.handleValidResponse(handler, RequestType.SIMPP);
+                    networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.SIMPP);
                 }
                 
                 SimppParser parser=null;

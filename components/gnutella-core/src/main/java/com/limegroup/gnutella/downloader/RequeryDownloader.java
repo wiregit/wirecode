@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RemoteFileDesc;
 
 /** 
  * DEPRECATED.  Used to be a 'wishlist' downloader, however now it only exists
@@ -10,14 +8,13 @@ import com.limegroup.gnutella.RemoteFileDesc;
  */
 public class RequeryDownloader extends ManagedDownloader {
     /** Ensure backwards downloads.dat compatibility. */
-    static final long serialVersionUID = 8241301635419840924L;
+    private static final long serialVersionUID = 8241301635419840924L;
 
     /**
      * DEPRECATED.  Throws an exception on construction.
      */
-    private RequeryDownloader(IncompleteFileManager incompleteFileManager,
-                             AutoDownloadDetails add, GUID queryGUID) {
-        super(new RemoteFileDesc[0], incompleteFileManager, queryGUID, null);
+    private RequeryDownloader() {
+        super(null, null, null, null);
         throw new UnsupportedOperationException("deprecated");
     }
 }

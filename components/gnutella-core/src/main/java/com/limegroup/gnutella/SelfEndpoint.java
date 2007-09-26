@@ -20,7 +20,7 @@ public class SelfEndpoint extends PushEndpoint {
     private final Provider<UDPService> udpService;
     
     @Inject
-    private SelfEndpoint(NetworkManager networkManager,
+    SelfEndpoint(NetworkManager networkManager,
             ApplicationServices applicationServices,
             Provider<ConnectionManager> connectionManager,
             Provider<UDPService> udpService) {

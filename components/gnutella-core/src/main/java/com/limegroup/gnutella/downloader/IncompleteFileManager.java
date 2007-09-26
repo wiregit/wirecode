@@ -26,6 +26,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
@@ -114,17 +115,17 @@ public class IncompleteFileManager implements Serializable {
     private Map<URN, File> hashes = new HashMap<URN, File>();
     
     @Inject
-    volatile static FileManager globalFileManager;
+    volatile static Provider<FileManager> globalFileManager;
 
     @Inject
-    private volatile static VerifyingFileFactory verifyingFileFactory;
+    private volatile static Provider<VerifyingFileFactory> verifyingFileFactory;
     
     private volatile transient FileManager fileManager;
     
     ///////////////////////////////////////////////////////////////////////////
 
     public IncompleteFileManager() {
-        this.fileManager = globalFileManager;
+        this.fileManager = globalFileManager.get();
     }
     
     /**
@@ -387,7 +388,7 @@ public class IncompleteFileManager implements Serializable {
     
     private synchronized void readObject(ObjectInputStream stream) 
                                    throws IOException, ClassNotFoundException {
-        this.fileManager = globalFileManager;
+        this.fileManager = globalFileManager.get();
         
         GetField gets = stream.readFields();
         blocks = transform(gets.get("blocks", null));
@@ -466,7 +467,7 @@ public class IncompleteFileManager implements Serializable {
                 }
                 VerifyingFile vf;
                 try {
-                    vf = verifyingFileFactory.createVerifyingFile(getCompletedSize(f));
+                    vf = verifyingFileFactory.get().createVerifyingFile(getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
                 	continue;
                 }

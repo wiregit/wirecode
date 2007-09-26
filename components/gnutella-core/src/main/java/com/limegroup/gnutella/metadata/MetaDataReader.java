@@ -22,7 +22,7 @@ public class MetaDataReader {
     private final LimeXMLSchemaRepository limeXMLSchemaRepository;
 
     @Inject
-    private MetaDataReader(LimeXMLDocumentFactory limeXMLDocumentFactory,
+    MetaDataReader(LimeXMLDocumentFactory limeXMLDocumentFactory,
             LimeXMLSchemaRepository limeXMLSchemaRepository) {
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;

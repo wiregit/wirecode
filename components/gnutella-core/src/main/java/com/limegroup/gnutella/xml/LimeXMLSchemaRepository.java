@@ -33,7 +33,7 @@ public class LimeXMLSchemaRepository {
 
     /** Creates new LimeXMLSchemaRepository */
     @Inject
-    private LimeXMLSchemaRepository(LimeXMLProperties limeXMLProperties) {
+    LimeXMLSchemaRepository(LimeXMLProperties limeXMLProperties) {
         // get the schema files
         File[] schemaFiles = limeXMLProperties.getAllXMLSchemaFiles();
 

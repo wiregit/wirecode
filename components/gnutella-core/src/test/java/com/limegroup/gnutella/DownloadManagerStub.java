@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.inject.Providers;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -24,20 +22,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 @Singleton
 public class DownloadManagerStub extends DownloadManager {
     
-
-    @Deprecated
-    public DownloadManagerStub() {
-        super(ProviderHacks.getNetworkManager(), ProviderHacks
-                .getDownloadReferencesFactory(), ProviderHacks
-                .getInNetworkCallback(),
-                ProviderHacks.getBTDownloaderFactory(), Providers
-                        .of(ProviderHacks.getDownloadCallback()), Providers
-                        .of(ProviderHacks.getMessageRouter()), ProviderHacks
-                        .getBackgroundExecutor(), Providers.of(ProviderHacks
-                        .getTorrentManager()), Providers.of(ProviderHacks
-                        .getPushDownloadManager()), ProviderHacks.getBrowseHostHandlerManager(),
-                        ProviderHacks.getGnutellaDownloaderFactory());
-    }
 	
     @Inject
     public DownloadManagerStub(NetworkManager networkManager,

@@ -13,6 +13,7 @@ import org.limewire.collection.ApproximateMatcher;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -93,7 +94,7 @@ public class AutoDownloadDetails implements Serializable {
     private int committedDLs = 0;
 
     @Inject
-    private static LimeXMLDocumentFactory globalLimeXMLDocumentFactory;
+    private static Provider<LimeXMLDocumentFactory> globalLimeXMLDocumentFactory;
     
     private transient volatile LimeXMLDocumentFactory limeXMLDocumentFactory;
     
@@ -104,7 +105,7 @@ public class AutoDownloadDetails implements Serializable {
      */
     public AutoDownloadDetails(String inQuery, String inRichQuery, 
                                MediaType inType) {
-        limeXMLDocumentFactory = globalLimeXMLDocumentFactory;
+        limeXMLDocumentFactory = globalLimeXMLDocumentFactory.get();
         query = inQuery;
         richQuery = inRichQuery;
         type = inType;
@@ -121,7 +122,7 @@ public class AutoDownloadDetails implements Serializable {
      */
     private void readObject(ObjectInputStream stream) throws IOException,
                                                     ClassNotFoundException {
-        limeXMLDocumentFactory = globalLimeXMLDocumentFactory;
+        limeXMLDocumentFactory = globalLimeXMLDocumentFactory.get();
         stream.defaultReadObject();
 
         if(mediaDesc == null)

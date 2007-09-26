@@ -14,6 +14,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -47,7 +48,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         fm = injector.getInstance(FileManager.class);
         verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         
-        IncompleteFileManager.globalFileManager = fm;
+        IncompleteFileManager.globalFileManager = Providers.of(fm);
         ifm = new IncompleteFileManager();
     }
 

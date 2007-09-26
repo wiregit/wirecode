@@ -21,6 +21,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -90,7 +91,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     private transient int _nodeSize;
     
     @Inject
-    static HashTreeNodeManager hashTreeNodeManager;
+    static Provider<HashTreeNodeManager> hashTreeNodeManager;
     
     /** Constructs an invalid HashTree. */
     private HashTree() {
@@ -121,7 +122,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         DEPTH = allNodes.size()-1;
         assert(TigerTree.log2Ceil(NODES.size()) == DEPTH);
         assert(NODES.size() * (long)nodeSize >= fileSize);
-        hashTreeNodeManager.register(this, allNodes);
+        hashTreeNodeManager.get().register(this, allNodes);
         _nodeSize = nodeSize;
     }
     
@@ -427,7 +428,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * @return all nodes.
      */
     public List<List<byte[]>> getAllNodes() {
-        return hashTreeNodeManager.getAllNodes(this);
+        return hashTreeNodeManager.get().getAllNodes(this);
     }
 
     public ThexWriter createAsyncWriter() {

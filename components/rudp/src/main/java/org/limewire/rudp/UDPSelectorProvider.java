@@ -6,13 +6,16 @@ import java.nio.channels.Pipe;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
+import org.limewire.inject.Providers;
+
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 
 public class UDPSelectorProvider extends SelectorProvider {
     /** A factory so the outside world can change the default UDPSelectorProvider. */
     @Inject
-    private static volatile UDPSelectorProviderFactory providerFactory = null;
+    private static volatile Provider<UDPSelectorProviderFactory> providerFactory = null;
     
     private final RUDPContext context;
     
@@ -56,19 +59,19 @@ public class UDPSelectorProvider extends SelectorProvider {
     /** Retrieves the default provider. */
     public static UDPSelectorProvider defaultProvider() {
         if(providerFactory != null)
-            return providerFactory.createProvider();
+            return providerFactory.get().createProvider();
         else
             return new UDPSelectorProvider();
     }
     
     /** Sets the new default provider factory. */
     public static void setDefaultProviderFactory(UDPSelectorProviderFactory factory) {
-        providerFactory = factory;
+        providerFactory = Providers.of(factory);
     }
     
     /** Gets the last provider factory. */
     public static UDPSelectorProviderFactory getDefaultProviderFactory() {
-        return providerFactory;
+        return providerFactory.get();
     }
 
 }

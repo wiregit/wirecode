@@ -14,6 +14,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.inject.Providers;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
@@ -60,7 +61,7 @@ public class HashTreeTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        HashTree.hashTreeNodeManager = new HashTreeNodeManager();
+        HashTree.hashTreeNodeManager = Providers.of(new HashTreeNodeManager());
     }
     
     public void testLargeFile()  throws Exception {

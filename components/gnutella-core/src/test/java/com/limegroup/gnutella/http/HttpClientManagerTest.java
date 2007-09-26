@@ -8,6 +8,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.limewire.inject.Providers;
 import org.limewire.nio.NIODispatcher;
 
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
@@ -42,7 +43,7 @@ public class HttpClientManagerTest extends LimeTestCase {
     
     public void setUp() throws Exception {
         
-         HttpClientManager.socketsManager = new SocketsManager();
+         HttpClientManager.socketsManager = Providers.of(new SocketsManager());
         
         httpServers = new TestBootstrapServer[11];
         tlsServers = new TestBootstrapServer[11];

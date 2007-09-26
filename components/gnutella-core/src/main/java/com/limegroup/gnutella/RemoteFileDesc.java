@@ -30,6 +30,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -201,7 +202,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     }
     
     @Inject
-    private static PushEndpointFactory globalPushEndpointFactory;
+    private static Provider<PushEndpointFactory> globalPushEndpointFactory;
     
     private transient volatile PushEndpointFactory pushEndpointFactory;    
     
@@ -380,7 +381,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
-	    this.pushEndpointFactory = globalPushEndpointFactory;
+	    this.pushEndpointFactory = globalPushEndpointFactory.get();
 	    if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -452,7 +453,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 
     private void readObject(ObjectInputStream stream) 
 		throws IOException, ClassNotFoundException {
-        pushEndpointFactory = globalPushEndpointFactory;
+        pushEndpointFactory = globalPushEndpointFactory.get();
         stream.defaultReadObject();
         //Older downloads.dat files do not have _urns, so _urns will be null
         //(the default Java value).  Hence we also initialize

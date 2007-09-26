@@ -107,7 +107,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     private transient volatile LicenseFactory licenseFactory;
     
     @Inject
-    private static LicenseFactory globalLicenseFactory;
+    private static Provider<LicenseFactory> globalLicenseFactory;
 
     private transient volatile Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
 
@@ -213,7 +213,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      */
     private void readObject(java.io.ObjectInputStream in)
       throws IOException, ClassNotFoundException {
-        licenseFactory = globalLicenseFactory;
+        licenseFactory = globalLicenseFactory.get();
         limeXMLSchemaRepository = globalLimeXMLSchemaRepository;
         in.defaultReadObject();
         scanFields();
