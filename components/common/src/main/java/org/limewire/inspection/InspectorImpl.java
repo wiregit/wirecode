@@ -7,14 +7,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+
+@Singleton
 public class InspectorImpl implements Inspector {
 
     private volatile Properties props;
+    private final Injector injector;
+    
+    @Inject
+    InspectorImpl(Injector injector) {
+        this.injector = injector;
+    }
     
     public Object inspect(String key) throws InspectionException {
         if (props == null || !props.containsKey(key))
             throw new InspectionException();
-        return InspectionUtils.inspectValue(props.getProperty(key));
+        return InspectionUtils.inspectValue(props.getProperty(key), injector);
     }
 
     public void load(File props) {

@@ -1,11 +1,15 @@
 package org.limewire.inspection;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 
 /**
@@ -45,10 +49,10 @@ public class InspectionUtils {
      * @return the object pointed to by the last field, or an Exception
      * object if such was thrown trying to get it.
      */
-    public static Object inspectValue(String encodedField) throws InspectionException {
+    public static Object inspectValue(String encodedField, Injector injector) throws InspectionException {
         try {
             List<Annotation> annotations = new ArrayList<Annotation>();
-            return inspect(getTargetObject(encodedField, annotations), annotations);
+            return inspect(getTargetObject(encodedField, annotations, injector), annotations);
         } catch (Throwable e) {
             if (e instanceof InspectionException)
                 throw (InspectionException)e;
@@ -56,14 +60,45 @@ public class InspectionUtils {
         }
     }
     
-    private static Object getTargetObject(String encodedField, List<Annotation> annotations) 
+    private static Object getTargetObject(String encodedField, List<Annotation> annotations, Injector injector) 
     throws Throwable {
         StringTokenizer t = new StringTokenizer(encodedField, ",");
         if (t.countTokens() < 2)
             throw new InspectionException();
+        
         // the first token better be fully qualified class name
-        Object instance =
-            getValue(Class.forName(t.nextToken()), t.nextToken(), annotations);
+        Class clazz = Class.forName(t.nextToken());
+        
+        
+        // try to find an instance of the object
+        Object instance;
+        
+        // check if this is an enclosed class
+        Class enclosing = clazz.getEnclosingClass();
+        if (enclosing == null) {
+            if (clazz.getAnnotation(Singleton.class) == null)
+                throw new InspectionException();
+            instance = injector.getInstance(clazz);
+        } else {
+            
+            // inner classes must be annoated properly
+            if (enclosing.getAnnotation(Singleton.class) == null)
+                throw new InspectionException();
+            if (clazz.getAnnotation(InspectableContainer.class) == null)
+                throw new InspectionException();
+            
+            // if inner, create one
+            Object enclosingObj = injector.getInstance(enclosing);
+            Constructor []constructors  = clazz.getDeclaredConstructors();
+            if (constructors.length != 1)
+                throw new InspectionException();
+            Class [] parameters = constructors[0].getParameterTypes();
+            if (parameters.length != 1 || !parameters[0].equals(enclosing)) 
+                throw new InspectionException();
+            constructors[0].setAccessible(true);
+            instance = constructors[0].newInstance(new Object[]{enclosingObj});
+        }
+        
         while (t.hasMoreTokens())
             instance = getValue(instance, t.nextToken(), annotations);
         return instance;
