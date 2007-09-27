@@ -41,7 +41,7 @@ public class MediaType implements Serializable {
     
     // These are used as resource keys to retreive descriptions in the GUI
     public static final String ANY_TYPE = I18n.marktr("All Types");
-    public static final String CUSTOM = I18n.marktr("Custom");
+    public static final String CUSTOM = I18n.marktr("_Custom");
     public static final String DOCUMENTS = I18n.marktr("Documents");
     public static final String PROGRAMS = I18n.marktr("Programs");
     public static final String AUDIO = I18n.marktr("Audio");
@@ -69,9 +69,7 @@ public class MediaType implements Serializable {
      */
     private static final MediaType TYPE_CUSTOM = 
         new MediaType(SCHEMA_CUSTOM, CUSTOM, null) {
-        // required SVUID because we're constructing an anonymous class.
-        // the id is taken from old limewire builds, versions 4.4 to 4.12
-        private static final long serialVersionUID = 8621995774682321539L; //3728385699213635375L;
+        private static final long serialVersionUID = 8621995774682821539L;
         
         public boolean matches(String ext) {
             return true;
@@ -186,9 +184,7 @@ public class MediaType implements Serializable {
      */
     private static final MediaType TYPE_OTHER =
         new MediaType(SCHEMA_OTHER, OTHER, null) {
-            // required SVUID because we're constructing an anonymous class.
-            // the id is taken from old limewire builds, versions 4.4 to 4.12
-            private static final long serialVersionUID = 8621995074682321539L; //3728385699213635375L;
+            private static final long serialVersionUID = 8625995074682321539L;
             
             public boolean matches(String ext) {
                 return true;
