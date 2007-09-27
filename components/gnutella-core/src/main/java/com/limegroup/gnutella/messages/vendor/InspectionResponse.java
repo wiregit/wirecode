@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
 
 import org.limewire.inspection.InspectionException;
-import org.limewire.inspection.InspectionUtils;
+import org.limewire.inspection.Inspector;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BEncoder;
@@ -25,13 +25,13 @@ public class InspectionResponse extends VendorMessage {
     /**
      * Creates a response for the provided inspection request.
      */
-    public InspectionResponse(InspectionRequest request) {
+    public InspectionResponse(InspectionRequest request, Inspector inspector) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_RESP, VERSION,
-                derivePayload(request));
+                derivePayload(request, inspector));
         setGUID(new GUID(request.getGUID()));
     }
     
-    private static byte[] derivePayload(InspectionRequest request) {
+    private static byte[] derivePayload(InspectionRequest request, Inspector inspector) {
         /*
          * The format is a deflated bencoded mapping from
          * the indices of the inspected fields to their values.
@@ -46,7 +46,7 @@ public class InspectionResponse extends VendorMessage {
         
         for (int i = 0; i < requested.length; i++) {
             try {
-                responses.put(i, InspectionUtils.inspectValue(requested[i]));
+                responses.put(i, inspector.inspect(requested[i]));
             } catch (InspectionException skip){}
         }
         

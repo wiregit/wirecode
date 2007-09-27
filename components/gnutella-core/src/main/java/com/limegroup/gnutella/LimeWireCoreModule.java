@@ -6,6 +6,8 @@ import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.inspection.Inspector;
+import org.limewire.inspection.InspectorImpl;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
@@ -275,6 +277,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
         bind(UDPPinger.class).to(UDPPingerImpl.class);
         bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
+        bind(Inspector.class).to(InspectorImpl.class);
         
         // TODO: statically injecting this for now...
         requestStaticInjection(SimppManager.class);

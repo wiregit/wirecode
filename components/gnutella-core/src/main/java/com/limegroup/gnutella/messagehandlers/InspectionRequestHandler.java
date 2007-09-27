@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.messagehandlers;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 
+import org.limewire.inspection.Inspector;
 import org.limewire.security.SecureMessageVerifier;
+import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -24,6 +27,8 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * return address.
  */
 public class InspectionRequestHandler extends RestrictedResponder {
+    
+    private static final String INSPECTION_FILE = "inspection.props";
 
     private static SecureMessageVerifier inspectionVerifier =
         new SecureMessageVerifier("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA" +
@@ -40,22 +45,26 @@ public class InspectionRequestHandler extends RestrictedResponder {
                 "TJRPIU4UA24I", null);
     
     private final Provider<MessageRouter> router;
+    private final Inspector inspector;
     
     @Inject
     public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager, 
             SimppManager simppManager, 
-            UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
+            UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
+            Inspector inspector) {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
                 inspectionVerifier,
                 MessageSettings.INSPECTION_VERSION, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
         this.router = router;
+        this.inspector = inspector;
+        this.inspector.load(new File(CommonUtils.getCurrentDirectory(),INSPECTION_FILE));
     }
     
     @Override
     protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
         assert msg instanceof InspectionRequest;
         InspectionRequest ir = (InspectionRequest)msg;
-        InspectionResponse r = new InspectionResponse(ir);
+        InspectionResponse r = new InspectionResponse(ir, inspector);
         if (r.shouldBeSent())
             handler.reply(r);
         router.get().forwardInspectionRequestToLeaves(ir);
