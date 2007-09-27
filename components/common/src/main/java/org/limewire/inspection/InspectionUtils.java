@@ -62,14 +62,18 @@ public class InspectionUtils {
     
     private static Object getTargetObject(String encodedField, List<Annotation> annotations, Injector injector) 
     throws Throwable {
+
+        // see if this is old-style path
+        if (encodedField.contains(":"))
+            return getTargetStaticObject(encodedField, annotations);
+        
         StringTokenizer t = new StringTokenizer(encodedField, ",");
         if (t.countTokens() < 2)
             throw new InspectionException();
         
         // the first token better be fully qualified class name
         Class clazz = Class.forName(t.nextToken());
-        
-        
+
         // try to find an instance of the object
         Object instance;
         
@@ -104,6 +108,20 @@ public class InspectionUtils {
         return instance;
     }
 
+    private static Object getTargetStaticObject(String encodedField, List<Annotation> annotations ) 
+    throws Throwable {
+        StringTokenizer t = new StringTokenizer(encodedField, ":,");
+        if (t.countTokens() < 2)
+            throw new InspectionException();
+        
+        // do it old style
+        Object instance =
+            getValue(Class.forName(t.nextToken()), t.nextToken(), annotations);
+        while (t.hasMoreTokens())
+            instance = getValue(instance, t.nextToken(), annotations);
+        return instance;
+        
+    }
     /**
      * Gets a string representation of an object.
      * 

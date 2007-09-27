@@ -1,6 +1,5 @@
 package org.limewire.inspection;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -92,6 +91,27 @@ public class InspectionUtilsTest extends BaseTestCase {
          */
         assertEquals("test",
                 InspectionUtils.inspectValue("org.limewire.inspection.TestClass,reference1,reference,reference1,reference,reference", injector));
+    }
+    
+    
+    public void testOldStyleTraversal() throws Exception {
+        NotGuiced.inspectableInt = 1;
+        NotGuiced.inspectable = new Inspectable() {
+            public Object inspect() {
+                return "asdf";
+            }
+        };
+        
+        // injector-based traversal will fail
+        try {
+            InspectionUtils.inspectValue("org.limewire.inspection.NotGuiced,inspectableInt", injector);
+        } catch (InspectionException expected){}
+        
+        // static traversal will work
+        assertEquals("asdf",
+                InspectionUtils.inspectValue("org.limewire.inspection.NotGuiced:inspectable", injector));
+        assertEquals("1",
+                InspectionUtils.inspectValue("org.limewire.inspection.NotGuiced:inspectableInt", injector));
     }
     
     public void testInspectablePrimitive() throws Exception {
@@ -261,4 +281,11 @@ class Outter implements OutterI {
             }
         };
     }
+}
+
+class NotGuiced {
+    @InspectablePrimitive("")
+    static int inspectableInt;
+    
+    static Inspectable inspectable;
 }

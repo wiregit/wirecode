@@ -44,6 +44,8 @@ import org.limewire.nio.timeout.TimeoutController;
 import org.limewire.nio.timeout.Timeoutable;
 import org.limewire.service.ErrorService;
 
+import com.google.inject.Singleton;
+
 
 /**
  * Dispatcher for <code>NIO</code>.
@@ -87,6 +89,7 @@ import org.limewire.service.ErrorService;
  * <code>IOExceptions</code> occur while handling events for an Observer, 
  * <code>handleIOException</code> is called on that Observer.
  */
+@Singleton
 public class NIODispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(NIODispatcher.class);
