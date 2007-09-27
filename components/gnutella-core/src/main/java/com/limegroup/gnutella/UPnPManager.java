@@ -22,6 +22,7 @@ import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
@@ -77,7 +78,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * 
  */
 @Singleton
-public class UPnPManager extends ControlPoint implements DeviceChangeListener, Inspectable {
+public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
@@ -582,13 +583,17 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener, I
 		}
 	}
     
-    public Object inspect() {
-        if (!isNATPresent())
-            return "N/A";
-        Map<String, Object> ret = new HashMap<String,Object>();
-        ret.put("name",_router.getFriendlyName());
-        if (mappingsExist())
-            ret.put("mappings", true);
-        return ret;
-    }
+    @InspectionPoint("upnp stats")
+    @SuppressWarnings("unused")
+	private final Inspectable UPnPStats = new Inspectable() {
+	    public Object inspect() {
+	        if (!isNATPresent())
+	            return "N/A";
+	        Map<String, Object> ret = new HashMap<String,Object>();
+	        ret.put("name",_router.getFriendlyName());
+	        if (mappingsExist())
+	            ret.put("mappings", true);
+	        return ret;
+	    }
+	};
 }

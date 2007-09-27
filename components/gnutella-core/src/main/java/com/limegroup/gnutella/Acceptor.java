@@ -131,7 +131,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionServices connectionServices;
-    private final Provider<UPnPManager> upnpManager; // TODO inspect this
+    private final Provider<UPnPManager> upnpManager; 
     
     private final boolean upnpEnabled; 
     

@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
@@ -47,7 +48,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * necessary to pass those results up to the UI.
  */
 @Singleton
-public final class SearchResultHandler implements Inspectable {
+public final class SearchResultHandler {
     
     private static final Log LOG =
         LogFactory.getLog(SearchResultHandler.class);
@@ -456,23 +457,27 @@ public final class SearchResultHandler implements Inspectable {
         }
     }
     
-    public Object inspect() {
-        Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("ver",1);
-        synchronized(cncCounter) {
-            for (GUID g : cncCounter.keySet()) {
-                Map<URN, ClassCNetworks[]> m = cncCounter.get(g);
-                List<Map<String,byte[]>> toPut = new ArrayList<Map<String,byte[]>>(2);
-                for (ClassCNetworks[] c : m.values()) {
-                    Map<String,byte[]> cStats = new HashMap<String,byte[]>();
-                    cStats.put("ip",c[0].getTopInspectable(10));
-                    cStats.put("alt",c[1].getTopInspectable(10));
-                    toPut.add(cStats);
+    @InspectionPoint("search result handler stats")
+    @SuppressWarnings("unused")
+    private final Inspectable searchResultHandler = new Inspectable() {
+        public Object inspect() {
+            Map<String, Object> ret = new HashMap<String, Object>();
+            ret.put("ver",1);
+            synchronized(cncCounter) {
+                for (GUID g : cncCounter.keySet()) {
+                    Map<URN, ClassCNetworks[]> m = cncCounter.get(g);
+                    List<Map<String,byte[]>> toPut = new ArrayList<Map<String,byte[]>>(2);
+                    for (ClassCNetworks[] c : m.values()) {
+                        Map<String,byte[]> cStats = new HashMap<String,byte[]>();
+                        cStats.put("ip",c[0].getTopInspectable(10));
+                        cStats.put("alt",c[1].getTopInspectable(10));
+                        toPut.add(cStats);
+                    }
+                    ret.put(g.toHexString(), toPut);
                 }
-                ret.put(g.toHexString(), toPut);
             }
+            return ret;
         }
-        return ret;
-    }
+    };
 
 }

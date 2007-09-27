@@ -50,20 +50,20 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
      * requests of the highest priority or non-preemptible requests
      */
     @InspectionPoint("active uploads")
-    private final List <UploadSlotRequest> active;
+    private final CountingList <UploadSlotRequest> active;
     
     /**
      * The list of queued non-resumable requests
      */
     @InspectionPoint("queued uploads")
-    private final List <HTTPSlotRequest> queued;
+    private final CountingList <HTTPSlotRequest> queued;
     
     /**
      * The list of queued resumable requests
      * (currently only Seeding BT Uploaders)
      */
     @InspectionPoint("queued resumable uploads")
-    private final List<BTSlotRequest> queuedResumable;
+    private final CountingList<BTSlotRequest> queuedResumable;
     
     private final MultiIterable<UploadSlotRequest> allRequests;
     
