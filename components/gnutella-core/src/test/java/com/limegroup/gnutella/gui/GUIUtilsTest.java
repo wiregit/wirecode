@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.gui;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.Locale;
 
@@ -59,4 +60,25 @@ public class GUIUtilsTest extends GUIBaseTestCase {
         GUIUtils.launchOrEnqueueFile(file, false);
     }
     
+    public void testHexToColor(){       
+        //test white
+        assertEquals(Color.WHITE, GUIUtils.hexToColor("FFFFFF"));
+        
+        //test blue
+        assertEquals(Color.BLUE, GUIUtils.hexToColor("0000FF"));
+        
+        //test yellow
+        assertEquals(Color.YELLOW, GUIUtils.hexToColor("FFFF00"));
+    }
+    
+    public void testColorToHex(){
+        //test white
+        assertEquals("FFFFFF",GUIUtils.colorToHex(Color.WHITE));
+        
+        //test blue       
+        assertEquals("0000FF",GUIUtils.colorToHex(Color.BLUE));
+        
+        //test yellow
+        assertEquals("FFFF00",GUIUtils.colorToHex(Color.YELLOW));
+    }
 }
