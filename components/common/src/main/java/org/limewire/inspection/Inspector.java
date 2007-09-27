@@ -13,6 +13,11 @@ public interface Inspector {
     void load(File props);
     
     /**
+     * @return true if mappings were loaded successfully
+     */
+    boolean loaded();
+    
+    /**
      * @param key human readable key to inspect
      * @return the Object from the inspection
      * @throws InspectionException if something goes wrong or key is not found

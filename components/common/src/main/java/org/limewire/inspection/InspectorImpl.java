@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -17,6 +18,8 @@ public class InspectorImpl implements Inspector {
     private volatile Properties props;
     private final Injector injector;
     
+    private final AtomicBoolean loading = new AtomicBoolean(false);
+    
     @Inject
     InspectorImpl(Injector injector) {
         this.injector = injector;
@@ -27,8 +30,15 @@ public class InspectorImpl implements Inspector {
             throw new InspectionException();
         return InspectionUtils.inspectValue(props.getProperty(key), injector);
     }
+    
+    public boolean loaded() {
+        return props != null && !props.isEmpty();
+    }
 
     public void load(File props) {
+        if (loading.getAndSet(true))
+            return;
+        
         /*
          * Ignore any and all errors as inspection is not critical functionality
          */
