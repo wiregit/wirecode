@@ -267,21 +267,15 @@ class BEObject implements Inspectable {
         return m;
     }
 }   
-class TestVerifier extends SecureMessageVerifier {
-    TestVerifier() {
-        super("asdf","asdf");
-    }
-    @Override
+class TestVerifier implements SecureMessageVerifier {
     public void verify(Verifier verifier) {
         verifier.getSecureMessageCallback().handleSecureMessage(verifier.getSecureMessage(), true);
     }
 
-    @Override
     public void verify(SecureMessage sm, SecureMessageCallback smc) {
         smc.handleSecureMessage(sm, true);
     }
 
-    @Override
     public void verify(PublicKey pubKey, String algorithm, 
             SecureMessage sm, SecureMessageCallback smc) {
         smc.handleSecureMessage(sm, true);

@@ -241,25 +241,21 @@ public class RestrictedResponderTest extends BaseTestCase {
         }
     }
     
-    private static class TestVerifier extends SecureMessageVerifier {
+    private static class TestVerifier implements SecureMessageVerifier {
         SecureMessage sm;
         SecureMessageCallback smc;
         TestVerifier() {
-            super("asdf","asdf");
         }
-        @Override
         public void verify(Verifier verifier) {
             sm = verifier.getSecureMessage();
             smc = verifier.getSecureMessageCallback();
         }
         
-        @Override
         public void verify(SecureMessage sm, SecureMessageCallback smc) {
             this.sm = sm;
             this.smc = smc;
         }
         
-        @Override
         public void verify(PublicKey pubKey, String algorithm, 
                 SecureMessage sm, SecureMessageCallback smc) {
             this.sm = sm;

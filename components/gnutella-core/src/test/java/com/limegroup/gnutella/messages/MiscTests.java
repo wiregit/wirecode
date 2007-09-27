@@ -8,6 +8,7 @@ import java.util.Random;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageVerifier;
+import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
@@ -34,7 +35,7 @@ public class MiscTests extends LimeTestCase {
         assertTrue(lime.hasSecureData());
 
         SecureMessageVerifier verifier =
-            new SecureMessageVerifier(new File(CommonUtils.getUserSettingsDir(), "secureMessage.key"));
+            new SecureMessageVerifierImpl(new File(CommonUtils.getUserSettingsDir(), "secureMessage.key"));
         StubSecureMessageCallback callback = new StubSecureMessageCallback();
         verifier.verify(reply, callback);
         callback.waitForReply();

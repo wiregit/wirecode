@@ -86,7 +86,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
     /** Tests attempting to secure with no public key. */
     public void testNoPublicKey() throws Exception {
         SecureMessage m1 = new StubSecureMessage();
-        SecureMessageVerifier vf = new SecureMessageVerifier("","") {
+        SecureMessageVerifier vf = new SecureMessageVerifierImpl("","") {
             protected PublicKey createPublicKey() {
                 return null;
             }
@@ -118,7 +118,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
     }    
 
     /** Verifier that'll use our fake public key. */
-    private static class SimpleVerifier extends SecureMessageVerifier {
+    private static class SimpleVerifier extends SecureMessageVerifierImpl {
         SimpleVerifier() {
             super("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7" +
                     "VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5" +
