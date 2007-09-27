@@ -244,7 +244,7 @@ public class ManagedDownloader extends AbstractDownloader
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
     /** The place to share completed downloads (and their metadata) */
-    private FileManager fileManager;
+    protected FileManager fileManager;
     /** The repository of incomplete files. */
     protected IncompleteFileManager incompleteFileManager;
     /** A ManagedDownloader needs to have a handle to the DownloadCallback, so
@@ -731,7 +731,8 @@ public class ManagedDownloader extends AbstractDownloader
             ErrorService.error(cause);
         }
     }
-    private void reportDiskProblem(String cause) {
+    
+    protected void reportDiskProblem(String cause) {
         if (DownloadSettings.REPORT_DISK_PROBLEMS.getBoolean())
             ErrorService.error(new DiskException(cause));
     }
@@ -2194,7 +2195,7 @@ public class ManagedDownloader extends AbstractDownloader
     /**
      * Saves the file to disk.
      */
-    private DownloadStatus saveFile(URN fileHash){
+    protected DownloadStatus saveFile(URN fileHash){
         // let the user know we're saving the file...
         setState( DownloadStatus.SAVING );
         
@@ -2216,6 +2217,12 @@ public class ManagedDownloader extends AbstractDownloader
         //from the IncompleteFileManager, though this is not strictly necessary
         //because IFM.purge() is called frequently in DownloadManager.
         
+        try {
+            saveFile = alternateFileCreation(saveFile);
+        } catch (IOException e) {
+            return DownloadStatus.DISK_PROBLEM;
+        }
+        
         // First attempt to rename it.
         boolean success = FileUtils.forceRename(incompleteFile,saveFile);
 
@@ -2233,9 +2240,34 @@ public class ManagedDownloader extends AbstractDownloader
         if (saveFile.exists())
             fileManager.removeFileIfShared(saveFile);
 
-        //Add the URN of this file to the cache so that it won't
-        //be hashed again when added to the library -- reduces
-        //the time of the 'Saving File' state.
+        // add file hash to manager for fast lookup
+        addFileHash(fileHash, saveFile);
+
+        // determine where and how to share the file
+        shareSavedFile();
+
+		return DownloadStatus.COMPLETE;
+    }
+    
+    /**
+     * Provides alternate file location based on new data obtained after downloading the file.
+     * For example, could create a folder substructure and use a template based on ID3 information
+     * for music. 
+     * 
+     * @param saveFile
+     * @return
+     * @throws IOException
+     */
+    protected File alternateFileCreation(File saveFile) throws IOException{
+        return saveFile;
+    }
+    
+    /**
+     *  Add the URN of this file to the cache so that it won't
+     *  be hashed again when added to the library -- reduces
+     *  the time of the 'Saving File' state.
+     */
+    protected void addFileHash(URN fileHash, File saveFile){
         if(fileHash != null) {
             Set<URN> urns = new UrnSet(fileHash);
             File file = saveFile;
@@ -2248,21 +2280,23 @@ public class ManagedDownloader extends AbstractDownloader
             // Notify the SavedFileManager that there is a new saved
             // file.
             savedFileManager.addSavedFile(file, urns);
-            
+            //TODO: dont need the saved trees for store
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
                 tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }
+    }
 
-        
+    /**
+     * Determine where to share the fle 
+     */
+    protected void shareSavedFile(){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
 			fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
 		else
 		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
-
-		return DownloadStatus.COMPLETE;
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 

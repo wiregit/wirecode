@@ -89,7 +89,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         });
 
         ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector.getInstance(ConnectionManager.class);
-        connectionManager.setAlwaysConnected(true);
+        connectionManager.setConnected(true);
 
         dhtNodeFetcherFactory = injector.getInstance(DHTNodeFetcherFactory.class);        
         messageFactory = injector.getInstance(MessageFactory.class);

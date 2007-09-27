@@ -53,6 +53,7 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
+import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -116,6 +117,12 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      * determing how many downloaders are active.
      */
     private int innetworkCount = 0;
+
+    /**
+     * The number of active store downloads. These are counted when determining
+     * how many downloaders are active
+     */
+    private int storeDownloadCount = 0;
 
     /** This will hold the MDs that have sent requeries.
      *  When this size gets too big - meaning bigger than active.size(), then
@@ -256,6 +263,19 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     }
     
     /**
+     * Determines if any store download exists in either active or waiting
+     */
+    public synchronized boolean hasStoreDownload() {
+        if(storeDownloadCount > 0)
+            return true;
+        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
+            if( i.next() instanceof StoreDownloader)
+                return true;
+        }
+        return false;
+    }
+    
+    /**
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
@@ -352,7 +372,14 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             } else if(md.shouldBeRemoved()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
-            } else if(hasFreeSlot() && (md.shouldBeRestarted())) {
+            }
+            // handle downloads from LWS seperately, only allow 1 at a time
+            else if( storeDownloadCount == 0 && md instanceof StoreDownloader ) {
+                    i.remove();
+                    storeDownloadCount++;
+                    active.add(md);
+                    md.startDownload();
+            } else if(hasFreeSlot() && (md.shouldBeRestarted()) && !(md instanceof StoreDownloader)) {
                 i.remove();
                 if(md instanceof InNetworkDownloader)
                     innetworkCount++;
@@ -432,8 +459,12 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
        return ret;
     }
     
+    /**
+     * Inner network traffic and downloads from the LWS don't count towards overall
+     * download activity.
+     */
     public synchronized int getNumActiveDownloads() {
-        return active.size() - innetworkCount;
+        return active.size() - innetworkCount - storeDownloadCount;
     }
    
     public synchronized int getNumWaitingDownloads() {
@@ -723,6 +754,51 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             gnutellaDownloaderFactory.createMagnetDownloader(incompleteFileManager, magnet,
                 overwrite, saveDir, fileName);
         initializeDownload(downloader);
+        return downloader;
+    }
+
+    /**
+     * Creates a new LimeWireStore download. Store downloads are handled in a similar fashion as
+     * MAGNET links except there are no alternative locations.  <tt>filename</tt> should always
+     * be specified since we have complete control over META-DATA for these downloads, it will 
+     * be used as the name of the complete file. Unlike all other downloads performed here, 
+     * saveDir is a unique directory specified in the options menu under Store Downloads
+     * 
+     * @param store - Descriptor describing the download from the store including URN
+     * @param overwrite - true if same file names should be overwritten
+     * @param saveDir - directory to save the completed file into
+     * @param fileName - name of the completed file
+     * @return
+     * @throws IllegalArgumentException
+     * @throws SaveLocationException
+     */
+    public synchronized Downloader download( RemoteFileDesc rfd,
+            boolean overwrite,
+            File saveDir,
+            String fileName)
+    throws IllegalArgumentException, SaveLocationException {
+        
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the library.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
+        //worth it.
+        incompleteFileManager.purge();
+        
+        if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir,fileName))) {
+            throw new SaveLocationException
+            (SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
+        }
+      
+        //Start download asynchronously.  This automatically moves downloader to
+        //active if it can.
+        StoreDownloader downloader =
+            gnutellaDownloaderFactory.createStoreDownloader(rfd, incompleteFileManager, 
+                                  saveDir, fileName, overwrite);
+
+        initializeDownload(downloader);
+        
         return downloader;
     }
 
@@ -1030,7 +1106,8 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() - innetworkCount < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
+        return active.size() - innetworkCount - storeDownloadCount
+            < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
     /**
@@ -1042,9 +1119,12 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      */
     public synchronized void remove(AbstractDownloader downloader, 
                                     boolean completed) {
-        active.remove(downloader);
+        boolean isRemoved = active.remove(downloader);
         if(downloader instanceof InNetworkDownloader)
             innetworkCount--;
+        // make sure an active download was removed prior to decrementing this index
+        if(downloader instanceof StoreDownloader && isRemoved)
+            storeDownloadCount--;
         
         waiting.remove(downloader);
         if(completed)

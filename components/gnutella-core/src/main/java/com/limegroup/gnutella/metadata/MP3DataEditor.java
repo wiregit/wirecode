@@ -41,6 +41,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
     static final String COMMENT_ID = "COMM";
     static final String GENRE_ID = "TCON";
     static final String LICENSE_ID = "TCOP";
+    static final String PRIV_ID = "PRIV";
     
 	/**
 	 * Actually writes the ID3 tags out to the ID3V3 section of the mp3 file

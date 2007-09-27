@@ -22,7 +22,12 @@ public class FileManagerEvent extends EventObject {
         ADD_FOLDER,
         REMOVE_FOLDER,
         FILEMANAGER_LOADING,
-        FILEMANAGER_LOADED;
+        FILEMANAGER_LOADED,
+        ADD_STORE_FILE,
+        ADD_STORE_FAILED_FILE,
+        REMOVE_STORE_FILE,
+        ADD_STORE_FOLDER,
+        REMOVE_STORE_FOLDER;
     }
     
     private final Type type;
@@ -94,6 +99,13 @@ public class FileManagerEvent extends EventObject {
      */
     public boolean isAddEvent() {
         return (type.equals(Type.ADD_FILE));
+    }
+    
+    /**
+	 * Returns true if this event is an ADD_STORE_FILE event
+	 */
+    public boolean isAddStoreEvent() {
+        return (type.equals(Type.ADD_STORE_FILE));
     }
     
     /**

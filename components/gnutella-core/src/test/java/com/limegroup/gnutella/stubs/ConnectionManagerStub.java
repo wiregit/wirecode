@@ -37,7 +37,7 @@ public class ConnectionManagerStub extends ConnectionManager {
 
     private boolean enableRemove = false;
 
-    private boolean alwaysConnected;
+    private Boolean connected;
 
     private Set<? extends Connectable> pushProxies;
 
@@ -88,7 +88,10 @@ public class ConnectionManagerStub extends ConnectionManager {
 
     @Override
     public boolean isConnected() {
-        return (alwaysConnected) ? true : super.isConnected();
+        if(connected != null)
+            return connected;
+        else
+            return super.isConnected();
     }
 
     @Override
@@ -110,8 +113,8 @@ public class ConnectionManagerStub extends ConnectionManager {
         this.enableRemove = enableRemove;
     }
 
-    public void setAlwaysConnected(boolean alwaysConnected) {
-        this.alwaysConnected = alwaysConnected;
+    public void setConnected(boolean connected) {
+        this.connected = Boolean.valueOf(connected);
     }
 
     public void setPushProxies(Set<? extends Connectable> pushProxies) {

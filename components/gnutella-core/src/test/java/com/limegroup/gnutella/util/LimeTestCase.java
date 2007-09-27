@@ -52,6 +52,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     protected static File _baseDir;
     protected static File _sharedDir;
     protected static File _savedDir;
+    protected static File _storeDir;
     protected static File _incompleteDir;
     protected static File _settingsDir;
     protected static File _xmlDir;
@@ -95,6 +96,13 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      */
     public File getSharedDirectory() {
         return _sharedDir;
+    }
+    
+    /**
+     * Get store directory
+     */
+    public File getStoreDirectory() {
+        return _storeDir;
     }
     
     /**
@@ -205,7 +213,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Sets up settings to a pristine environment for this test.
      * Ensures that no settings are saved.
      */
-    public static void setupSettings() throws Exception{
+    public static void setupSettings() throws Exception{ 
         SettingsGroupManager.instance().setShouldSave(false);
         SettingsGroupManager.instance().revertToDefault();
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
@@ -216,6 +224,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);
+        SharingSettings.setSaveLWSDirectory(_storeDir);
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
         if(!GraphicsEnvironment.getLocalGraphicsEnvironment().isHeadlessInstance())
@@ -252,6 +261,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         _savedDir = new File(_baseDir, "saved");
         _sharedDir = new File(_baseDir, "shared");
         _settingsDir = new File(_baseDir, "settings");
+        _storeDir = new File(_baseDir, "store");
         _xmlDir = new File(_settingsDir, "xml");
         _xmlDataDir = new File(_xmlDir, "data");
         _xmlSchemasDir = new File(_xmlDir, "schemas");
@@ -259,6 +269,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         _baseDir.mkdirs();
         _savedDir.mkdirs();
         _sharedDir.mkdirs();
+        _storeDir.mkdirs();
         _settingsDir.mkdirs();
         _xmlDir.mkdirs();
         _xmlDataDir.mkdirs();
