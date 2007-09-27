@@ -46,7 +46,7 @@ public class DuplicateFilter implements SpamFilter {
      */
     private Buffer<GUIDPair> guids=new Buffer<GUIDPair>(BUF_SIZE);
     /** The time, in milliseconds, allowed between similar messages. */
-    private static final int GUID_LAG=500;
+    static final int GUID_LAG=500;
     
     private int guidLag = GUID_LAG;
     
@@ -84,7 +84,7 @@ public class DuplicateFilter implements SpamFilter {
      * clear both sets.  This means that the maximum window size N can actually
      * be as high as 3*Q if there is little traffic.  
      */
-    private static final int QUERY_LAG=1500;
+    static final int QUERY_LAG=1500;
     
     private int queryLag = QUERY_LAG;
     

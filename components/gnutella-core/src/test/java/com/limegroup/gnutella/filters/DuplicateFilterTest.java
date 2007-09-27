@@ -193,13 +193,18 @@ public class DuplicateFilterTest extends LimeTestCase {
 
     // TODO, remove dependencies by mocking LimeXMLDocument
     public void testXMLDuplicate() throws Exception {
+        
+        // use default values, construction takes longer for real query results
+        filter.setQueryLag(DuplicateFilter.QUERY_LAG);
+        filter.setGUIDLag(DuplicateFilter.GUID_LAG);
+        
         // Only allowed once in the timeframe ...
         qr = queryRequestFactory.createQuery("tests");
         assertTrue(filter.allow(qr));
-        assertTrue(!filter.allow(qr));
+        assertFalse(filter.allow(qr));
         // Invalid XML, considered same as plaintext.
         qr = queryRequestFactory.createQuery("tests", "<?xml");
-        assertTrue(!filter.allow(qr));
+        assertFalse(filter.allow(qr));
         qr = queryRequestFactory.createQuery("tests",
             "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
