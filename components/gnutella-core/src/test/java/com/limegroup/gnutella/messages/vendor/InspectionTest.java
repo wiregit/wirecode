@@ -136,7 +136,7 @@ public class InspectionTest extends ServerSideTestCase {
     }
     
     public void testInvalidSig() throws Exception {
-        InspectionRequest request = new InspectionRequest(
+        InspectionRequestImpl request = new InspectionRequestImpl(
                 new RoutableGGEPMessage.GGEPSigner() {
                     public GGEP getSecureGGEP(GGEP original) {
                         GGEP ret = new GGEP(true);
@@ -178,8 +178,8 @@ public class InspectionTest extends ServerSideTestCase {
         // the one without should not be forwarded
         drainAll(LEAF);
         tryMessage(notRouted);
-        assertNull(getFirstMessageOfType(LEAF[0], InspectionRequest.class));
-        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequest.class));
+        assertNull(getFirstMessageOfType(LEAF[0], InspectionRequestImpl.class));
+        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequestImpl.class));
         
         // the one with return address should get answered 
         DatagramSocket socket2 = new DatagramSocket(20000);
@@ -194,8 +194,8 @@ public class InspectionTest extends ServerSideTestCase {
         assertEquals(2, MessageSettings.INSPECTION_VERSION.getValue());
         
         // and forwarded to the leaf that supports it.
-        InspectionRequest received = getFirstMessageOfType(LEAF[0], InspectionRequest.class);
-        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequest.class));
+        InspectionRequestImpl received = getFirstMessageOfType(LEAF[0], InspectionRequestImpl.class);
+        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequestImpl.class));
         
         // the forwarded message should be identical
         assertEquals(routed.getGUID(), received.getGUID());

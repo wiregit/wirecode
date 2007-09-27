@@ -233,7 +233,7 @@ public class VendorMessageParserBinderImpl implements VendorMessageParserBinder 
     private static class InspectionRequestVendorMessageParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version,
                 byte[] restOf, Network network) throws BadPacketException {
-            return new InspectionRequest(guid, ttl, hops, version, restOf, network);
+            return new InspectionRequestImpl(guid, ttl, hops, version, restOf, network);
         }
     }
     

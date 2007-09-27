@@ -71,6 +71,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
+import com.limegroup.gnutella.messages.vendor.InspectionRequestImpl;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
@@ -566,7 +567,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
-        setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
+        setUDPMessageHandler(InspectionRequestImpl.class, inspectionHandler);
         setUDPMessageHandler(AdvancedStatsToggle.class, advancedToggleHandlerFactory.get());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
