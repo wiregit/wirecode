@@ -72,6 +72,7 @@
 	<classpathentry kind="lib" path="tests/lib/manekineko.jar"/>
 	<classpathentry kind="lib" path="tests/lib/pmd.jar"/>
 	<classpathentry kind="lib" path="tests/lib/saxpath-1.0-fcs.jar"/>
+	<classpathentry kind="lib" path="tests/lib/xerces.jar"/>
 	<classpathentry kind="lib" path="tests/lib/bcel.jar"/>
 	<classpathentry kind="lib" path="tests/lib/inspTool.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
