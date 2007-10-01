@@ -8,7 +8,7 @@ import java.io.File;
 public interface Inspector {
     /**
      * @param props a file containing mappings
-     * from human-readable keys to encoded field.
+     * from human-readable keys to inspection point paths.
      */
     void load(File props);
     
@@ -18,9 +18,9 @@ public interface Inspector {
     boolean loaded();
     
     /**
-     * @param key human readable key to inspect
+     * @param key human readable key or actual path to inspect.  
      * @return the Object from the inspection
-     * @throws InspectionException if something goes wrong or key is not found
+     * @throws InspectionException if something goes wrong 
      */
     Object inspect(String key) throws InspectionException;
 }

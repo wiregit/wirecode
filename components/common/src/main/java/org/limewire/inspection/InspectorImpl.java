@@ -26,9 +26,12 @@ public class InspectorImpl implements Inspector {
     }
     
     public Object inspect(String key) throws InspectionException {
+        String target;
         if (props == null || !props.containsKey(key))
-            throw new InspectionException();
-        return InspectionUtils.inspectValue(props.getProperty(key), injector);
+            target = key; // assume they know what they're doing
+        else
+            target = props.getProperty(key);
+        return InspectionUtils.inspectValue(target, injector);
     }
     
     public boolean loaded() {
