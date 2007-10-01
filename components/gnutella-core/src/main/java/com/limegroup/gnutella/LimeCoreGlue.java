@@ -108,10 +108,14 @@ public class LimeCoreGlue {
                 
         // Setup SIMPP to be the settings remote manager.
         SimppManager simppManager = SimppManager.instance();
-        SimppSettingsManager settingsManager = simppManager.getSimppSettingsManager();
-        LimeProps.instance().getFactory().setRemoteSettingManager(settingsManager);
-        MojitoProps.instance().getFactory().setRemoteSettingManager(settingsManager);
-        settingsManager.updateSimppSettings(simppManager.getPropsString());
+        SimppSettingsManager core = new SimppSettingsManager();
+        SimppSettingsManager mojito = new SimppSettingsManager();
+        simppManager.addSimppSettingsManager(core);
+        simppManager.addSimppSettingsManager(mojito);
+        LimeProps.instance().getFactory().setRemoteSettingManager(core);
+        MojitoProps.instance().getFactory().setRemoteSettingManager(mojito);
+        core.updateSimppSettings(simppManager.getPropsString());
+        mojito.updateSimppSettings(simppManager.getPropsString());
         
         // Setup RouterService & ConnectionSettings.LOCAL_IS_PRIVATE to 
         // be the LocalSocketAddressProvider.

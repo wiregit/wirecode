@@ -58,7 +58,7 @@ public class SimppManager {
 
     private final ExecutorService _processingQueue;
     
-    private final SimppSettingsManager simppSettingsManager;
+    private final CopyOnWriteArrayList<SimppSettingsManager> simppSettingsManagers;
     
     private int _latestVersion;
     
@@ -66,7 +66,7 @@ public class SimppManager {
     private static Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     
     private SimppManager() {
-        this.simppSettingsManager = new SimppSettingsManager();
+        this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         boolean problem = false;
         RandomAccessFile raf = null;
         _processingQueue = ExecutorsHelper.newProcessingQueue("Simpp Handling Queue");
@@ -129,10 +129,6 @@ public class SimppManager {
         return _latestVersion;
     }
     
-    public SimppSettingsManager getSimppSettingsManager() {
-        return simppSettingsManager;
-    }
-    
     /**
      * @return the cached value of the simpp bytes. 
      */ 
@@ -186,7 +182,8 @@ public class SimppManager {
                 // 2. get the props we just read
                 String props = parser.getPropsData();
                 // 3. Update the props in "updatable props manager"
-                simppSettingsManager.updateSimppSettings(props);
+                for(SimppSettingsManager ssm : simppSettingsManagers)
+                    ssm.updateSimppSettings(props);
                 // 4. Save to disk, try 5 times
                 for (int i =0;i < 5; i++) {
                     if (save())
@@ -200,6 +197,14 @@ public class SimppManager {
         _processingQueue.execute(simppHandler);
     }
     
+    public void addSimppSettingsManager(SimppSettingsManager simppSettingsManager) {
+        simppSettingsManagers.add(simppSettingsManager);
+    }
+
+    public List<SimppSettingsManager> getSimppSettingsManagers() {
+        return simppSettingsManagers;
+    }
+        
     /**
      * Saves the simpp.xml file to the user settings directory.
      */

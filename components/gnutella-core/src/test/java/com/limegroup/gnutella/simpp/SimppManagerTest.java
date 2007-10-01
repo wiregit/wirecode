@@ -12,6 +12,7 @@ import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -466,8 +467,8 @@ public class SimppManagerTest extends LimeTestCase {
     }
     
     private static void updateSimppSettings() throws Exception {
-        ProviderHacks.getSimppManager().getSimppSettingsManager().updateSimppSettings(
-                ProviderHacks.getSimppManager().getPropsString());
+        for(SimppSettingsManager ssm : ProviderHacks.getSimppManager().getSimppSettingsManagers())
+            ssm.updateSimppSettings(SimppManager.instance().getPropsString());
     }
     
 }
