@@ -1,7 +1,13 @@
 package com.limegroup.gnutella.connection;
 
+import java.util.List;
 import java.util.Map;
 
+import org.limewire.collection.Buffer;
+import org.limewire.util.ByteOrder;
+
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -50,6 +56,10 @@ public class ConnectionStats {
     private volatile int _lastSent;
     private volatile int _lastSentDropped;
     
+    private final Buffer<Byte> responsesPerReply = new Buffer<Byte>(200);
+    private final Buffer<Byte> altsPerResponse = new Buffer<Byte>(200);
+    private final Buffer<Short> altsPerReply = new Buffer<Short>(200);
+    
     // Getters.
     public int getSent()  { return _numMessagesSent; }
     public int getReceived() { return _numMessagesReceived; }
@@ -81,9 +91,29 @@ public class ConnectionStats {
         _numMessagesReceived++;
     }
     
-    public void replyReceived() {
-        repliesReceived++;
+    public void replyReceived(QueryReply r) {
+        // parse reply outside of lock
+        byte count = (byte)r.getUniqueResultCount();
+        List<Response> responses;
+        try {
+            responses = r.getResultsAsList();
+        } catch (BadPacketException ignore){
+            return;
+        }
+
+        synchronized(this) {
+            responsesPerReply.add(count);
+            short total = 0;
+            for (Response resp : responses) {
+                byte resps = (byte)resp.getLocations().size();
+                altsPerResponse.add(resps);
+                total += resps;
+            }
+            altsPerReply.add(total);
+            repliesReceived++;
+        }
     }
+    
     public void queryReceived() {
         queriesReceived++;
     }
@@ -126,5 +156,21 @@ public class ConnectionStats {
         m.put("nqs",repliesSent);
         m.put("npr",queriesReceived);
         m.put("nps",queriesSent);
+        synchronized(this) {
+            m.put("nqr",repliesReceived);
+            byte [] resps = new byte[responsesPerReply.size()];
+            byte [] alts = new byte[altsPerResponse.size()];
+            byte [] altsReply = new byte[altsPerReply.size() * 2];
+            for (int i = 0; i < responsesPerReply.size(); i++)
+                resps[i] = responsesPerReply.get(i);
+            for (int i = 0; i < altsPerResponse.size(); i++)
+                alts[i] = altsPerResponse.get(i);
+            for (int i = 0; i < altsPerReply.size(); i++)
+                ByteOrder.short2leb(altsPerReply.get(i), altsReply, i * 2);
+            
+            m.put("respreply", resps); // 50 bytes
+            m.put("altresp", alts); // 50 bytes
+            m.put("altreply", altsReply); // 100 bytes
+        }
     }
 }
