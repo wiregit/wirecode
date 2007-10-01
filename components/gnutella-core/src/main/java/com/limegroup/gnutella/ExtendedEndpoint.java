@@ -48,7 +48,7 @@ public class ExtendedEndpoint extends Endpoint {
     /** The system time that dailyUptime was encountered, typically when this
      *  was added to the system, or -1 if we don't know (in which case we'll use
      *  DEFAULT_UPTIME_RECORDED for calculations) */
-    private long timeRecorded=-1;
+    private volatile long timeRecorded=-1;
 
 
     /** The value to use for dailyUptime if not reported by the user.
@@ -65,7 +65,7 @@ public class ExtendedEndpoint extends Endpoint {
     /** The average daily uptime in seconds, as reported by the "DU" GGEP
      *  extension, or -1 if we don't know (in which case we'll use
      *  DEFAULT_DAILY_UPTIME for calculations) */
-    private int dailyUptime=-1;
+    private volatile int dailyUptime=-1;
 
     /** The number of connection attempts (failures) to record. */
     static final int HISTORY_SIZE=3;
@@ -82,22 +82,22 @@ public class ExtendedEndpoint extends Endpoint {
     private Buffer<Long> connectFailures=new Buffer<Long>(HISTORY_SIZE);
 
     /** the locale of the client that this endpoint represents */
-    private String _clientLocale = 
+    private volatile String _clientLocale = 
         ApplicationSettings.DEFAULT_LOCALE.getValue();
     
-    private int _dhtVersion = -1;
+    private volatile int _dhtVersion = -1;
     
-    private DHTMode _dhtMode;
+    private volatile DHTMode _dhtMode;
     
     /** If this host supports TLS. */
-    private boolean tlsCapable;
+    private volatile boolean tlsCapable;
         
     /**
      * The number of times this has failed while attempting to connect
      * to a UDP host cache.
      * If -1, this is NOT a udp host cache.
      */
-    private int udpHostCacheFailures = -1;
+    private volatile int udpHostCacheFailures = -1;
     
 
     /** locale of this client */

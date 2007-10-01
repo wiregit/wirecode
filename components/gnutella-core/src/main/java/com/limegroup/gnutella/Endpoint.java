@@ -20,13 +20,13 @@ public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Seriali
 
     private static final long serialVersionUID = 4686711693494625070L; 
     
-    private InetAddress addr = null;
-    private String hostname = null;
-    private int port = 0;
+    private volatile InetAddress addr = null;
+    private volatile String hostname = null;
+    private volatile int port = 0;
     /** Number of files at the host, or -1 if unknown */
-    private long files=-1;
+    private volatile long files=-1;
     /** Size of all files on the host, or -1 if unknown */
-    private long kbytes=-1;
+    private volatile long kbytes=-1;
     
     // so subclasses can serialize.
     protected Endpoint() { }
