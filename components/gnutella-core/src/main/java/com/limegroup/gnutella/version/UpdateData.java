@@ -16,64 +16,64 @@ class UpdateData implements Cloneable, UpdateInformation {
     private static final Log LOG = LogFactory.getLog(UpdateData.class);
     
     /** The 'from' version. */
-    private Version fromVersion;
+    private volatile Version fromVersion;
     
     /** The 'to' version. */
-    private Version toVersion;
+    private volatile Version toVersion;
     
     /** The 'for' version. */
-    private Version forVersion;
+    private volatile Version forVersion;
     
     /** Is valid for pro? */
-    private boolean isPro;
+    private volatile boolean isPro;
     
     /** Is valid for free? */
-    private boolean isFree;
+    private volatile boolean isFree;
     
     /** The url to send this to. */
-    private String updateURL;
+    private volatile String updateURL;
     
     /** The style of this update. */
-    private int updateStyle;
+    private volatile int updateStyle;
     
     /** The javafrom */
-    private Version fromJava;
+    private volatile Version fromJava;
     
     /** The javato */
-    private Version toJava;
+    private volatile Version toJava;
     
     /** The OS[] this applies to. */
-    private OS[] osList;
+    private volatile OS[] osList;
     
     /** The language this applies to. */
-    private String language;
+    private volatile String language;
     
     /** The text of this message */
-    private String updateText;
+    private volatile String updateText;
     
     /** The text of button1. */
-    private String button1Text;
+    private volatile String button1Text;
     
     /** The text of button2. */
-    private String button2Text;
+    private volatile String button2Text;
     
     /** The text of the update title. */
-    private String updateTitle;
+    private volatile String updateTitle;
     
     /** The URN of the version. */
-    private URN urn;
+    private volatile URN urn;
     
     /** The Tiger Tree Root of the version. */
-    private String ttRoot;
+    private volatile String ttRoot;
     
     /** The command to run to launch the update. */
-    private String updateCommand;
+    private volatile String updateCommand;
     
     /** The filename to name the update file on disk. */
-    private String updateFileName;
+    private volatile String updateFileName;
     
     /** The size of the update on disk. */
-    private int size;
+    private volatile int size;
     
     /**
      * Constructs a new UpdateData object.
