@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -29,6 +31,8 @@ import org.limewire.collection.FixedsizeHashMap;
 import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -284,6 +288,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     /** How long to remember cached udp reply handlers. */
     private static final int UDP_REPLY_CACHE_TIME = 60 * 1000;
+    
+    @InspectionPoint("routed messages")
+    private final MessageCounter messageCounter = new MessageCounter();
     
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
@@ -649,7 +656,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
                               ManagedConnection receivingConnection) {
         // Increment hops and decrease TTL.
         msg.hop();
-	   
+        messageCounter.countMessage(msg);
         MessageHandler msgHandler = getMessageHandler(msg.getHandlerClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, null, receivingConnection);
@@ -686,6 +693,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
 	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
 	    // Increment hops and decrement TTL.
 	    msg.hop();
+        messageCounter.countMessage(msg);
 
         if(msg instanceof QueryReply) {
             // check to see if it was from the multicast map.
@@ -731,7 +739,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
         // Increment hops and decrement TTL.
         msg.hop();
-
+        messageCounter.countMessage(msg);
+        
         if (NetworkUtils.isLocalAddress(addr.getAddress())
                 && !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue()) {
             return;
@@ -3241,5 +3250,30 @@ public abstract class MessageRouterImpl implements MessageRouter {
             }
         }
         
+    }
+    
+    /**
+     * counts messages by type and network they came on. 
+     */
+    private static class MessageCounter implements Inspectable {
+        
+        private Map<Class, EnumMap<Message.Network, Integer>> counts = 
+            new HashMap<Class, EnumMap<Message.Network,Integer>>();
+        
+        public synchronized void countMessage(Message msg) {
+            EnumMap<Message.Network, Integer> m = counts.get(msg.getClass());
+            if (m == null) {
+                m = new EnumMap<Message.Network, Integer>(Message.Network.class);
+                counts.put(msg.getClass(),m);
+            }
+            Integer count = m.get(msg.getNetwork());
+            if (count == null)
+                count = 0;
+            m.put(msg.getNetwork(),++count);
+        }
+        
+        public Object inspect() {
+            return counts;
+        }
     }
 }
