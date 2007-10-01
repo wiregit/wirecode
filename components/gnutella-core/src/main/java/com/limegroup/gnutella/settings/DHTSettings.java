@@ -240,7 +240,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting ENABLE_DHT_ALT_LOC_QUERIES
         = FACTORY.createRemoteBooleanSetting("ENABLE_DHT_ALT_LOC_QUERIES", 
-                false, "DHT.EnableAltLocQueries");
+                false, "DHT.EnableAltLocQueriesV2");
     
     /**
      * The maximum number of DHT requery attempts
