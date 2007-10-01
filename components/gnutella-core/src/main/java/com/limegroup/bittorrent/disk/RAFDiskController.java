@@ -128,6 +128,11 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 			pos += file.length();
 		}
 		
+		for (RandomAccessFile raf : fos) {
+		    if (!raf.getFD().valid())
+		        throw new IOException("file was invalid: "+raf);
+		}
+            
         _fos = fos;
 		return filesToVerify;
 	}
@@ -154,7 +159,8 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	    // location as they are completed.. cool but not trivial
 	    int index = _files.indexOf(completed);
 	    _fos[index] = setReadOnly(_fos[index], completed.getPath());
-        assert _fos[index] != null;
+        if (!_fos[index].getFD().valid())
+            throw new IOException("new fd invalid "+completed);
 	}
 	
 	protected RandomAccessFile setReadOnly(RandomAccessFile f, String path) throws IOException {
