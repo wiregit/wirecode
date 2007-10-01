@@ -287,18 +287,18 @@ public class LifecycleManagerImpl implements LifecycleManager {
 	    LOG.trace("START RouterService");
 
         HttpClientManager.initialize();
-        
-        LOG.trace("START SSL Test");
-        activityCallback.get().componentLoading(I18n.marktr("Loading TLS Encryption..."));
-        SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), byteBufferCache.get());
-        if(!sslTester.go()) {
-            Throwable t = sslTester.getLastFailureCause();
-            SSLSettings.disableTLS(t);
-            if(!SSLSettings.IGNORE_SSL_EXCEPTIONS.getValue() && !sslTester.isIgnorable(t))
-                ErrorService.error(t);
+        if(SSLSettings.isIncomingTLSEnabled() || SSLSettings.isOutgoingTLSEnabled()) {
+            LOG.trace("START SSL Test");
+            activityCallback.get().componentLoading(I18n.marktr("Loading TLS Encryption..."));
+            SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), byteBufferCache.get());
+            if(!sslTester.go()) {
+                Throwable t = sslTester.getLastFailureCause();
+                SSLSettings.disableTLS(t);
+                if(!SSLSettings.IGNORE_SSL_EXCEPTIONS.getValue() && !sslTester.isIgnorable(t))
+                    ErrorService.error(t);
+            }
+            LOG.trace("END SSL Test");
         }
-        LOG.trace("END SSL Test");
-
 		// Now, link all the pieces together, starting the various threads.            
         LOG.trace("START ContentManager");
         activityCallback.get().componentLoading(I18n.marktr("Loading Safe Content Management..."));
