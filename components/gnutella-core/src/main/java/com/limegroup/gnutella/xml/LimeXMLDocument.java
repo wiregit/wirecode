@@ -102,7 +102,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     private transient List<String> CACHED_KEYWORDS = null;
     
     /** The kind of license this has. */
-    private transient LicenseType licenseType = LicenseType.NO_LICENSE;
+    private transient volatile LicenseType licenseType = LicenseType.NO_LICENSE;
 
     private transient volatile LicenseFactory licenseFactory;
     
