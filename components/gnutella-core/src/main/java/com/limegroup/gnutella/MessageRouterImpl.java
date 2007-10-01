@@ -98,6 +98,7 @@ import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.LimeSentMessageStat;
@@ -1967,6 +1968,11 @@ public abstract class MessageRouterImpl implements MessageRouter {
         if(handler == null) {
             throw new NullPointerException("null ReplyHandler");
         }
+        
+        // check the altloc count
+        if (!altCountOk(queryReply))
+            return;
+        
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
         //numbers).
@@ -2019,6 +2025,19 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
 
+    private boolean altCountOk(QueryReply qr) {
+        try {
+            for (Response r : qr.getResultsAsList()) {
+                if (r.getLocations().size() > FilterSettings.MAX_ALTS_PER_RESPONSE.getValue())
+                    return false;
+            }
+        } catch (BadPacketException bpe) {
+            // may get routed to someone who can parse it
+        }
+
+        return true;
+    }
+    
     /**
      * Checks if the <tt>QueryReply</tt> should be dropped for various reasons.
      *

@@ -125,4 +125,18 @@ public class FilterSettings extends LimeProps {
     public static final StringArraySetting HOSTILE_IPS =
         FACTORY.createRemoteStringArraySetting("HOSTILE_IPS", new String[0], 
         "FilterSettings.hostileIps");
+    
+    /**
+     * How many alts to allow per response.
+     */
+    public static final IntSetting MAX_ALTS_PER_RESPONSE =
+        FACTORY.createRemoteIntSetting("MAX_ALTS_PER_RESPONSE", 50,
+                "FilterSettings.maxAltsPerResponse", 10, 100);
+
+    /**
+     * How many alts to display in the gui.
+     */
+    public static final IntSetting MAX_ALTS_TO_DISPLAY =
+        FACTORY.createRemoteIntSetting("MAX_ALTS_TO_DISPLAY", 15,
+                "FilterSettings.maxAltsToDisplay", 5, 100);
 }
