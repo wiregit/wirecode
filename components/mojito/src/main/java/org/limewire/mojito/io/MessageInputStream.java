@@ -111,6 +111,9 @@ public class MessageInputStream extends DataInputStream {
         KUID primaryKey = readKUID();
         DHTValue value = readDHTValue(factoryManager);
         
+        // if the creator has the same KUID as the sender, use the sender as we have its external addr.
+        if (creator.getNodeID().equals(sender.getNodeID()))
+            creator = sender;
         return DHTValueEntity.createFromRemote(creator, sender, primaryKey, value);
     }
     

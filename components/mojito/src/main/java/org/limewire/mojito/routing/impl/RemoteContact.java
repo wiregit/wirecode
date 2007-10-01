@@ -103,7 +103,8 @@ public class RemoteContact implements Contact {
         this.flags = flags;
         this.state = (state != null ? state : State.UNKNOWN);
         
-        if (State.ALIVE.equals(state)) {
+        if (State.ALIVE.equals(state) ||
+                (State.UNKNOWN.equals(state) && sourceAddress != null)) {
             this.timeStamp = System.currentTimeMillis();
             
             fixSourceAndContactAddress(sourceAddress);
