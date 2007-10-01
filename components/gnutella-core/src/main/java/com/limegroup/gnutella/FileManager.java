@@ -968,7 +968,6 @@ public abstract class FileManager {
             for(int i = 0; i < dir_list.length && _revision == revision; i++)
                 updateSharedDirectories(dir_list[i], directory, revision);
         }
-            
     }
 
 
@@ -1966,9 +1965,16 @@ public abstract class FileManager {
         String userHome = System.getProperty("user.home");
         if (folder.equals(new File(userHome)))
             return true;
+        
+        String userHomeShortDir = userHome.substring(userHome.lastIndexOf(File.separator)+1);
 
         String[] sensitive;
-        if (OSUtils.isWindows()) {
+        if (OSUtils.isWindowsVista()) {
+            //Windows Vista does not have the "My" prefix for the "My Documents" folder.  It is simply "Documents"
+            sensitive = new String[] { "Documents and Settings",
+                    userHomeShortDir + "\\Documents", "Desktop", "Program Files", "Windows",
+                    "WINNT", "Users" };
+        } else if (OSUtils.isWindows()) {
             sensitive = new String[] { "Documents and Settings",
                     "My Documents", "Desktop", "Program Files", "Windows",
                     "WINNT", "Users" };
@@ -1983,10 +1989,11 @@ public abstract class FileManager {
             sensitive = new String[0];
         }
 
-        String folderName = folder.getName();
+        String folderPath = folder.getPath();
         for (String name : sensitive) {
-            if (folderName.equals(name))
+            if (folderPath.endsWith(File.separator + name)){
                 return true;
+            }
         }
 
         return false;

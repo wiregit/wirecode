@@ -1120,39 +1120,90 @@ public class FileManagerTest extends LimeTestCase {
         
         try {
             
-        setOSName("Windows");
-        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Documents and Settings")));
-        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "My Documents")));
-        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome, "Desktop")));
-        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Program Files")));
-        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Windows")));
-        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File("WINNT")));
+        setOSName("Windows XP");
+        assertTrue(OSUtils.isWindowsXP());
+        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Documents and Settings")));
+        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "My Documents")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Desktop")));
+        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Program Files")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Windows")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "WINNT")));
+        
+        setOSName("Windows NT");
+        assertTrue(OSUtils.isWindowsNT());
+        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Documents and Settings")));
+        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "My Documents")));
+        assertFalse("My Documents in c:\\ should NOT be a sensitive directory", FileManager.isSensitiveDirectory(new File("c:\\Documents")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Desktop")));
+        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Program Files")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Windows")));
+        assertFalse("Windows should not be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "NOTWINNT")));
+                
+        setOSName("Windows Vista");
+        assertTrue(OSUtils.isWindowsVista());
+        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Documents and Settings")));
+        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome + File.separator + "Documents")));
+        assertFalse("My Documents in c:\\ should NOT be a sensitive directory", FileManager.isSensitiveDirectory(new File("c:\\Documents")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Desktop")));
+        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Program Files")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Windows")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "WINNT")));
+
+        
+        setOSName("Windows 95");
+        assertTrue(OSUtils.isWindows95());
+        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Documents and Settings")));
+        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome + File.separator + "My Documents")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome+ File.separator + "Desktop")));
+        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Program Files")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Windows")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "WINNT")));
+        
+        setOSName("Windows 98");
+        assertTrue(OSUtils.isWindows98());
+        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Documents and Settings")));
+        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome + File.separator + "My Documents")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Desktop")));
+        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Program Files")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Windows")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "WINNT")));
+        
+        setOSName("Windows ME");
+        assertTrue(OSUtils.isWindowsMe());
+        assertTrue("Documents and Settings should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Documents and Settings")));
+        assertTrue("My Documents should be a sensitive directory", FileManager.isSensitiveDirectory(new File(userHome+ File.separator + "My Documents")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Desktop")));
+        assertTrue("Program Files should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Program Files")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Windows")));
+        assertTrue("Windows should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "WINNT")));
         
         setOSName("Mac OS X");
-        assertTrue("Users should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Users")));
-        assertTrue("System should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System")));
-        assertTrue("System Folder should be a sensitive directory", FileManager.isSensitiveDirectory(new File("System Folder")));
-        assertTrue("Previous Systems should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Previous Systems")));
-        assertTrue("private should be a sensitive directory", FileManager.isSensitiveDirectory(new File("private")));
-        assertTrue("Volumes should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Volumes")));
-        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Desktop")));
-        assertTrue("Applications should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Applications")));
-        assertTrue("Applications (Mac OS 9) should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Applications (Mac OS 9)")));
-        assertTrue("Network should be a sensitive directory", FileManager.isSensitiveDirectory(new File("Network")));
+        assertTrue(OSUtils.isMacOSX());
+        assertTrue("Users should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Users")));
+        assertTrue("System should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "System")));
+        assertTrue("System Folder should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "System Folder")));
+        assertTrue("Previous Systems should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Previous Systems")));
+        assertTrue("private should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "private")));
+        assertTrue("Volumes should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Volumes")));
+        assertTrue("Desktop should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Desktop")));
+        assertTrue("Applications should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Applications")));
+        assertTrue("Applications (Mac OS 9) should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Applications (Mac OS 9)")));
+        assertTrue("Network should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "Network")));
         
         setOSName("Linux");
-        assertTrue("bin should be a sensitive directory", FileManager.isSensitiveDirectory(new File("bin")));
-        assertTrue("boot should be a sensitive directory", FileManager.isSensitiveDirectory(new File("boot")));
-        assertTrue("dev should be a sensitive directory", FileManager.isSensitiveDirectory(new File("dev")));
-        assertTrue("etc should be a sensitive directory", FileManager.isSensitiveDirectory(new File("etc")));
-        assertTrue("home should be a sensitive directory", FileManager.isSensitiveDirectory(new File("home")));
-        assertTrue("mnt should be a sensitive directory", FileManager.isSensitiveDirectory(new File("mnt")));
-        assertTrue("opt should be a sensitive directory", FileManager.isSensitiveDirectory(new File("opt")));
-        assertTrue("proc should be a sensitive directory", FileManager.isSensitiveDirectory(new File("proc")));
-        assertTrue("root should be a sensitive directory", FileManager.isSensitiveDirectory(new File("root")));
-        assertTrue("sbin should be a sensitive directory", FileManager.isSensitiveDirectory(new File("sbin")));
-        assertTrue("usr should be a sensitive directory", FileManager.isSensitiveDirectory(new File("usr")));
-        assertTrue("var should be a sensitive directory", FileManager.isSensitiveDirectory(new File("var")));
+        assertTrue(OSUtils.isLinux());
+        assertTrue("bin should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "bin")));
+        assertTrue("boot should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "boot")));
+        assertTrue("dev should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "dev")));
+        assertTrue("etc should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "etc")));
+        assertTrue("home should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "home")));
+        assertTrue("mnt should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "mnt")));
+        assertTrue("opt should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "opt")));
+        assertTrue("proc should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "proc")));
+        assertTrue("root should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "root")));
+        assertTrue("sbin should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "sbin")));
+        assertTrue("usr should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "usr")));
+        assertTrue("var should be a sensitive directory", FileManager.isSensitiveDirectory(new File(File.separator + "var")));
         
         } finally {
             //  revert the os.name system property back to normal 

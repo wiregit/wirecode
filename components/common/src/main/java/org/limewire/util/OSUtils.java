@@ -16,7 +16,7 @@ public class OSUtils {
      * Variable for whether or not we're on Windows.
      */
     private static boolean _isWindows;
-
+    
     /** 
      * Variable for whether or not we're on Windows NT.
      */
@@ -26,16 +26,6 @@ public class OSUtils {
      * Variable for whether or not we're on Windows XP.
      */
     private static boolean _isWindowsXP;
-
-    /** 
-     * Variable for whether or not we're on Windows NT, 2000, or XP.
-     */
-    private static boolean _isWindowsNTor2000orXP;
-
-    /** 
-     * Variable for whether or not we're on 2000 or XP.
-     */
-    private static boolean _isWindows2000orXP;
 
     /** 
      * Variable for whether or not we're on Windows 95.
@@ -51,6 +41,11 @@ public class OSUtils {
      * Variable for whether or not we're on Windows Me.
      */
     private static boolean _isWindowsMe;
+    
+    /** 
+     * Variable for whether or not we're on Windows Me.
+     */
+    private static boolean _isWindows2000;
     
     /** 
      * Variable for whether or not we're on Windows Vista.
@@ -88,8 +83,7 @@ public class OSUtils {
      */
     public static void setOperatingSystems() {
     	_isWindows = false;
-    	_isWindowsNTor2000orXP = false;
-    	_isWindows2000orXP = false;
+    	_isWindowsVista = false;
     	_isWindowsNT = false;
     	_isWindowsXP = false;
     	_isWindows95 = false;
@@ -104,11 +98,8 @@ public class OSUtils {
     
     	// set the operating system variables
     	_isWindows = os.indexOf("windows") != -1;
-    	if (os.indexOf("windows nt") != -1 || os.indexOf("windows 2000")!= -1 || os.indexOf("windows xp")!= -1)
-    		_isWindowsNTor2000orXP = true;
-    	if (os.indexOf("windows 2000")!= -1 || os.indexOf("windows xp")!= -1)
-    		_isWindows2000orXP = true;
-    	if (os.indexOf("windows nt") != -1) 
+    	
+    	if (os.indexOf("windows nt") != -1)
     		_isWindowsNT = true;
     	if (os.indexOf("windows xp") != -1) 
     		_isWindowsXP = true;
@@ -168,26 +159,6 @@ public class OSUtils {
     }
 
     /**
-     * Returns whether or not the OS is Windows NT, 2000, or XP.
-     *
-     * @return <tt>true</tt> if the application is running on Windows NT,
-     *  2000, or XP <tt>false</tt> otherwise
-     */
-    public static boolean isWindowsNTor2000orXP() {
-    	return _isWindowsNTor2000orXP;
-    }
-
-    /**
-     * Returns whether or not the OS is 2000 or XP.
-     *
-     * @return <tt>true</tt> if the application is running on 2000 or XP,
-     *  <tt>false</tt> otherwise
-     */
-    public static boolean isWindows2000orXP() {
-    	return _isWindows2000orXP;
-    }
-
-    /**
      * Returns whether or not the OS is WinXP.
      *
      * @return <tt>true</tt> if the application is running on WinXP,
@@ -196,6 +167,35 @@ public class OSUtils {
     public static boolean isWindowsXP() {
     	return _isWindowsXP;
     }
+    
+    /**
+     * @return true if the application is running on Windows NT
+     */
+    public static boolean isWindowsNT() {
+        return _isWindowsNT;
+    }
+    
+    /**
+     * @return true if the application is running on Windows 95
+     */
+    public static boolean isWindows95() {
+        return _isWindows95;
+    }
+    
+    /**
+     * @return true if the application is running on Windows 98
+     */
+    public static boolean isWindows98() {
+        return _isWindows98;
+    }
+    
+    /**
+     * @return true if the application is running on Windows ME
+     */
+    public static boolean isWindowsMe() {
+        return _isWindowsMe;
+    }
+    
     /**
      * @return true if the application is running on Windows Vista
      */
