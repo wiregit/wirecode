@@ -962,7 +962,7 @@ BTLinkListener {
 	 */
 	public boolean shouldStop() {
 		return linkManager.getNumConnections() == 0 && _peers.size() == 0 &&
-        state.getLock() != TorrentState.SEEDING;
+        state.get() != TorrentState.SEEDING;
 	}
 	
 	/**
