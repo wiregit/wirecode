@@ -199,7 +199,7 @@ public class UDPMultiplexor extends AbstractSelector {
 
             UDPSelectionKey key = (UDPSelectionKey)channel.keyFor(this);
             if (key != null) {
-                if (key.isValid()) {
+                if (key.isValid() && channel.isOpen()) {
                     int currentOps = channel.getProcessor().readyOps();
                     int readyOps = currentOps & key.interestOps();
                     if (readyOps != 0) {
