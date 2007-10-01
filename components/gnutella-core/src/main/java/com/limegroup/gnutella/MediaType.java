@@ -39,15 +39,18 @@ public class MediaType implements Serializable {
     public static final String SCHEMA_IMAGES = "image";
     public static final String SCHEMA_OTHER = "other";
     
-    // These are used as resource keys to retreive descriptions in the GUI
+    // These are used as resource keys to retreive descriptions in the GUI 
     public static final String ANY_TYPE = I18n.marktr("All Types");
-    public static final String CUSTOM = I18n.marktr("_Custom");
+    public static final String CUSTOM = "__Custom";
     public static final String DOCUMENTS = I18n.marktr("Documents");
     public static final String PROGRAMS = I18n.marktr("Programs");
     public static final String AUDIO = I18n.marktr("Audio");
     public static final String VIDEO = I18n.marktr("Video");
     public static final String IMAGES = I18n.marktr("Images");
-    public static final String OTHER = I18n.marktr("Other");
+    public static final String OTHER = "_Other";
+    
+    public static final String CUSTOM_NAME = I18n.marktr("My Extensions");
+    public static final String OTHER_NAME = I18n.marktr("Other");
     
     /**
      * Type for 'any file'
