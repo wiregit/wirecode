@@ -44,8 +44,8 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager, @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor, 
             UDPReplyHandlerFactory udpReplyHandlerFactory, 
             UDPReplyHandlerCache udpReplyHandlerCache,
-            @Named("messageExecutor") ExecutorService dispatch) {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, dispatch);
+            @Named("messageExecutor") ExecutorService messageExecutor) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, messageExecutor);
         
         shutOff = new Periodic(new Runnable() {
             public void run (){

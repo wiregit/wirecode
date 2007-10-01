@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,12 +14,12 @@ import com.limegroup.gnutella.messages.Message;
 @Singleton
 public class MessageDispatcher {
     
-    private final ExecutorService DISPATCH;
+    private final Executor DISPATCH;
 
     private final MessageRouter messageRouter;
     
     @Inject
-    public MessageDispatcher(MessageRouter messageRouter, @Named("messageExecutor") ExecutorService dispatch) {
+    public MessageDispatcher(MessageRouter messageRouter, @Named("messageExecutor") Executor dispatch) {
         this.messageRouter = messageRouter;
         this.DISPATCH = dispatch;
     }

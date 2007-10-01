@@ -2,7 +2,7 @@ package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 import org.limewire.io.IP;
 import org.limewire.security.SecureMessage;
@@ -38,12 +38,12 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     private final NetworkManager networkManager;
     private final UDPReplyHandlerFactory udpReplyHandlerFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
-    private final ExecutorService service; 
+    private final Executor service; 
     
     public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager,
             SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
-            ExecutorService service) {
-        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache,service);
+            Executor messageExecutor) {
+        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache,messageExecutor);
     }
     
     /**
@@ -60,13 +60,20 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
             NetworkManager networkManager,
             SimppManager simppManager,
             UDPReplyHandlerFactory udpReplyHandlerFactory,
-            UDPReplyHandlerCache udpReplyHandlerCache, ExecutorService service) {
+            UDPReplyHandlerCache udpReplyHandlerCache, Executor service) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
         this.networkManager = networkManager;
         this.udpReplyHandlerFactory = udpReplyHandlerFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
+        if (service == null) {
+            service = new Executor() {
+                public void execute(Runnable r) {
+                    r.run();
+                }
+            };
+        }
         this.service = service;
         allowed = new IPList();
         allowed.add("*.*.*.*");

@@ -5,9 +5,13 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.PublicKey;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessage;
@@ -224,7 +228,8 @@ public class RestrictedResponderTest extends BaseTestCase {
         InetSocketAddress addr;
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
-            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache());
+            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache(), 
+                    new ImmediateExecutor());
         }
 
         @Override
@@ -286,6 +291,13 @@ public class RestrictedResponderTest extends BaseTestCase {
         @Override
         public IpPort getDestinationAddress() {
             return destAddr;
+        }
+    }
+    
+    private static class ImmediateExecutor implements Executor {
+
+        public void execute(Runnable command) {
+            command.run();
         }
     }
 }
