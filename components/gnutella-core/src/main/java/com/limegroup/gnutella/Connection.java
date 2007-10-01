@@ -771,7 +771,7 @@ public class Connection implements IpPort, Inspectable, Connectable {
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
-        Message msg = messageFactory.read(_in, HEADER_BUF, Network.TCP, _softMax);
+        Message msg = messageFactory.read(_in, HEADER_BUF, Network.TCP, _softMax, null);
         updateReadStatistics(msg);
         return msg;
     }

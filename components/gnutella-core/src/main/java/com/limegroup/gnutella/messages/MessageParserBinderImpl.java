@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -49,7 +50,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     public static abstract class GnutellaMessageParser implements MessageParser {
         
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, Network network) throws BadPacketException, IOException {
+                byte softMax, Network network, SocketAddress address) throws BadPacketException, IOException {
             
             // 4. Check values. These are based on the recommendations from the
             // GnutellaDev page. This also catches those TTLs and hops whose

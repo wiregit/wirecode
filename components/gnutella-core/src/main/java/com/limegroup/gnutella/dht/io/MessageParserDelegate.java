@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.dht.io;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import org.limewire.mojito.messages.MessageFactory;
@@ -26,9 +27,9 @@ class MessageParserDelegate implements MessageParser {
     }
     
     public Message parse(byte[] header, byte[] payload, 
-            byte softMax, Network network) throws BadPacketException, IOException {
+            byte softMax, Network network, SocketAddress addr) throws BadPacketException, IOException {
         
-        return (Message)factory.createMessage(null, 
+        return (Message)factory.createMessage(addr, 
                 ByteBuffer.wrap(header), 
                 ByteBuffer.wrap(payload));
     }

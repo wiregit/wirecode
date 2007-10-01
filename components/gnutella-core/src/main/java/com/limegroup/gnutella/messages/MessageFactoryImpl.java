@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,31 +69,31 @@ public class MessageFactoryImpl implements MessageFactory {
     
     public Message read(InputStream in) throws BadPacketException,
             IOException {
-        return read(in, new byte[23], Network.UNKNOWN, SOFT_MAX);
+        return read(in, new byte[23], Network.UNKNOWN, SOFT_MAX, null);
     }
 
     public Message read(InputStream in, byte softMax)
             throws BadPacketException, IOException {
-        return read(in, new byte[23], Network.UNKNOWN, softMax);
+        return read(in, new byte[23], Network.UNKNOWN, softMax, null);
     }
 
     public Message read(InputStream in, Network network)
             throws BadPacketException, IOException {
-        return read(in, new byte[23], network, SOFT_MAX);
+        return read(in, new byte[23], network, SOFT_MAX, null);
     }
 
     public Message read(InputStream in, byte[] buf, byte softMax)
             throws BadPacketException, IOException {
-        return read(in, buf, Network.UNKNOWN, softMax);
+        return read(in, buf, Network.UNKNOWN, softMax, null);
     }
 
-    public Message read(InputStream in, byte[] buf, Network network)
+    public Message read(InputStream in, byte[] buf, Network network, SocketAddress addr)
             throws BadPacketException, IOException {
-        return read(in, buf, network, SOFT_MAX);
+        return read(in, buf, network, SOFT_MAX, addr);
     }
 
     public Message read(InputStream in, byte[] buf, Network network,
-            byte softMax) throws BadPacketException, IOException {
+            byte softMax, SocketAddress addr) throws BadPacketException, IOException {
 
         // 1. Read header bytes from network. If we timeout before any
         // data has been read, return null instead of throwing an
@@ -142,11 +143,11 @@ public class MessageFactoryImpl implements MessageFactory {
             payload = DataUtils.EMPTY_BYTE_ARRAY;
         }
 
-        return createMessage(buf, payload, softMax, network);
+        return createMessage(buf, payload, softMax, network, addr);
     }
 
     public Message createMessage(byte[] header, byte[] payload,
-            byte softMax, Network network) throws BadPacketException, IOException {
+            byte softMax, Network network, SocketAddress addr) throws BadPacketException, IOException {
         if (header.length < 19) {
             throw new IllegalArgumentException("header must be >= 19 bytes.");
         }
@@ -160,7 +161,7 @@ public class MessageFactoryImpl implements MessageFactory {
             throw new BadPacketException("Unrecognized function code: " + func);
         }
         
-        return parser.parse(header, payload, softMax, network);
+        return parser.parse(header, payload, softMax, network, addr);
     }
     
 }

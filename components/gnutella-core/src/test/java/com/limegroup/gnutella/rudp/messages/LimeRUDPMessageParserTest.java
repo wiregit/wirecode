@@ -55,7 +55,7 @@ public class LimeRUDPMessageParserTest extends LimeTestCase {
         byte[] payload = new byte[b.length - 23];
         System.arraycopy(b, 0, header, 0, header.length);
         System.arraycopy(b, 23, payload, 0, payload.length);
-        Message parsed = p.parse(header, payload, (byte)1, Network.UNKNOWN);
+        Message parsed = p.parse(header, payload, (byte)1, Network.UNKNOWN, null);
         assertInstanceof(AbstractLimeRUDPMessage.class, parsed);
         assertEquals(clazz, parsed.getClass());
         assertNotSame(parsed, m);

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketAddress;
 
 import com.limegroup.gnutella.messages.Message.Network;
 
@@ -83,7 +84,7 @@ public interface MessageFactory {
      * Reads a message using the specified buffer & network and the default soft
      * max.
      */
-    public Message read(InputStream in, byte[] buf, Network network)
+    public Message read(InputStream in, byte[] buf, Network network, SocketAddress addr)
             throws BadPacketException, IOException;
 
     /**
@@ -97,7 +98,7 @@ public interface MessageFactory {
      *          useful data.
      */
     public Message read(InputStream in, byte[] buf, Network network,
-            byte softMax) throws BadPacketException, IOException;
+            byte softMax, SocketAddress addr) throws BadPacketException, IOException;
 
     /**
      * Creates a message based on the header & payload. The header, starting at
@@ -108,7 +109,7 @@ public interface MessageFactory {
      * byte[].
      */
     public Message createMessage(byte[] header, byte[] payload, byte softMax,
-            Network network) throws BadPacketException, IOException;
+            Network network, SocketAddress addr) throws BadPacketException, IOException;
 
 
     /**
@@ -116,7 +117,7 @@ public interface MessageFactory {
      */
     public interface MessageParser {
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, Network network) throws BadPacketException, IOException;
+                byte softMax, Network network, SocketAddress addr) throws BadPacketException, IOException;
     }
    
 }
