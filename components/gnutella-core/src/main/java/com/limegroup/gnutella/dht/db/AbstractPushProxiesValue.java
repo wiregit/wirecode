@@ -161,7 +161,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     }
     
     static BitNumbers getNumbersFromProxies(Set<? extends IpPort> proxies) {
-        BitNumbers tlsInfo = new BitNumbers(proxies.size());
+        BitNumbers tlsInfo = BitNumbers.synchronizedBitNumbers(new BitNumbers(proxies.size()));
         int i = 0;
         for (IpPort proxy : proxies) {
             if (proxy instanceof Connectable) {
