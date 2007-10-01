@@ -19,7 +19,7 @@ public class BitNumbers {
     private byte[] data;
     
     /** The total size of this bitNumbers. */
-    private int size;
+    private final int size;
     
     /** A convenient shared immutable empty BitNumbers. */
     public static final BitNumbers EMPTY_BN = new ImmutableBitNumbers();
@@ -161,6 +161,55 @@ public class BitNumbers {
             super(0);
         }
         
+    }
+    
+    public static BitNumbers synchronizedBitNumbers(BitNumbers delegate) {
+        return new SynchronizedBitNumbers(delegate);
+    }
+
+    private static class SynchronizedBitNumbers extends BitNumbers {
+
+        private final BitNumbers delegate;
+        private SynchronizedBitNumbers(BitNumbers delegate) {
+            super(0);
+            this.delegate = delegate;
+        }
+
+        @Override
+        public synchronized boolean isEmpty() {
+            return delegate.isEmpty();
+        }
+
+        @Override
+        public synchronized int getMax() {
+            return delegate.getMax();
+        }
+
+        @Override
+        public synchronized boolean isSet(int idx) {
+            return delegate.isSet(idx);
+        }
+
+        @Override
+        public synchronized void set(int idx) {
+            delegate.set(idx);
+        }
+
+        @Override
+        public synchronized byte[] toByteArray() {
+            return delegate.toByteArray();
+        }
+
+        @Override
+        public synchronized String toHexString() {
+            return delegate.toHexString();
+        }
+
+        @Override
+        public synchronized String toString() {
+            return delegate.toString();
+        }
+
     }
 
 }

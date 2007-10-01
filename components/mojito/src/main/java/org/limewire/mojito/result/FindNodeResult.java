@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
@@ -54,8 +56,8 @@ public class FindNodeResult extends LookupResult {
             long time, int hop, int routeTableFailureCount) {
     	super(lookupId);
         this.path = path;
-        this.collisions = collisions;
-        this.queried = queried;
+        this.collisions = new CopyOnWriteArrayList<Contact>(collisions);
+        this.queried = new CopyOnWriteArraySet<KUID>(queried);
         this.time = time;
         this.hop = hop;
         this.routeTableFailureCount = routeTableFailureCount;
