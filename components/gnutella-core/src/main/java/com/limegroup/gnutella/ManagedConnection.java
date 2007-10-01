@@ -982,7 +982,7 @@ public class ManagedConnection extends Connection
             _connectionStats.addReceivedDropped();
         } else {
             if(m instanceof QueryReply){ 
-            	_connectionStats.replyReceived();
+            	_connectionStats.replyReceived((QueryReply)m);
             	if(m.getHops() == 0)
             		clientGUID = ((QueryReply)m).getClientGUID();
             }
