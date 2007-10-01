@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
 
 import org.limewire.io.IP;
 import org.limewire.security.SecureMessage;
@@ -37,10 +38,12 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     private final NetworkManager networkManager;
     private final UDPReplyHandlerFactory udpReplyHandlerFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
+    private final ExecutorService service; 
     
     public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager,
-            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
-        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
+            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
+            ExecutorService service) {
+        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache,service);
     }
     
     /**
@@ -57,13 +60,14 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
             NetworkManager networkManager,
             SimppManager simppManager,
             UDPReplyHandlerFactory udpReplyHandlerFactory,
-            UDPReplyHandlerCache udpReplyHandlerCache) {
+            UDPReplyHandlerCache udpReplyHandlerCache, ExecutorService service) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
         this.networkManager = networkManager;
         this.udpReplyHandlerFactory = udpReplyHandlerFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
+        this.service = service;
         allowed = new IPList();
         allowed.add("*.*.*.*");
         simppManager.addListener(this);
@@ -151,10 +155,14 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
             this.handler = handler;
         }
         
-        public void handleSecureMessage(SecureMessage sm, boolean passed) {
+        public void handleSecureMessage(final SecureMessage sm, boolean passed) {
             if (!passed)
                 return;
-            processRoutableMessage((RoutableGGEPMessage)sm, addr, handler);
+            service.execute(new Runnable() {
+                public void run() {
+                    processRoutableMessage((RoutableGGEPMessage)sm, addr, handler);
+                }
+            });
         }
     }
 

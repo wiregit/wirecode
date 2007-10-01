@@ -2,10 +2,12 @@ package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
 
 import org.limewire.collection.FixedSizeExpiringSet;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPReplyHandlerCache;
@@ -34,9 +36,11 @@ public class UDPCrawlerPingHandler extends RestrictedResponder {
             SimppManager simppManager,
             UDPReplyHandlerFactory udpReplyHandlerFactory,
             UDPReplyHandlerCache udpReplyHandlerCache,
-            UDPCrawlerPongFactory udpCrawlerPongFactory) {
+            UDPCrawlerPongFactory udpCrawlerPongFactory,
+            @Named("messageExecutor") ExecutorService dispatch
+            ) {
         super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager,
-                simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
+                simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, dispatch);
         this.udpCrawlerPongFactory = udpCrawlerPongFactory;
     }
     

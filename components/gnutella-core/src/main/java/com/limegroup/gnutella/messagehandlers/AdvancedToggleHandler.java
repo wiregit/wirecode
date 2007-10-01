@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.Periodic;
@@ -40,8 +41,11 @@ public class AdvancedToggleHandler extends RestrictedResponder {
     private final Periodic shutOff;
     
     @Inject
-    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager, @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache) {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
+    public AdvancedToggleHandler(NetworkManager networkManager, SimppManager simppManager, @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor, 
+            UDPReplyHandlerFactory udpReplyHandlerFactory, 
+            UDPReplyHandlerCache udpReplyHandlerCache,
+            @Named("messageExecutor") ExecutorService dispatch) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, dispatch);
         
         shutOff = new Periodic(new Runnable() {
             public void run (){

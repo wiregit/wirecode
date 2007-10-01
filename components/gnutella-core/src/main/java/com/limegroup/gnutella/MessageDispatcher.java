@@ -3,10 +3,9 @@ package com.limegroup.gnutella;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 
-import org.limewire.concurrent.ExecutorsHelper;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.Message;
 
 /**
@@ -15,13 +14,14 @@ import com.limegroup.gnutella.messages.Message;
 @Singleton
 public class MessageDispatcher {
     
-    private final ExecutorService DISPATCH = ExecutorsHelper.newProcessingQueue("MessageDispatch");
+    private final ExecutorService DISPATCH;
 
     private final MessageRouter messageRouter;
     
     @Inject
-    public MessageDispatcher(MessageRouter messageRouter) {
+    public MessageDispatcher(MessageRouter messageRouter, @Named("messageExecutor") ExecutorService dispatch) {
         this.messageRouter = messageRouter;
+        this.DISPATCH = dispatch;
     }
     
     /** Dispatches a runnable, to allow arbitrary runnables to be processed on the message thread. */
@@ -48,10 +48,6 @@ public class MessageDispatcher {
      */
     public void dispatchTCP(Message m, ManagedConnection conn) {
         DISPATCH.execute(new TCPDispatch(messageRouter, m, conn));
-    }
-    
-    public ExecutorService getExecutorService() {
-        return DISPATCH;
     }
     
     private static class UDPDispatch implements Runnable {

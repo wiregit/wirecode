@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messagehandlers;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
 
 import org.limewire.inspection.Inspector;
 import org.limewire.security.SecureMessageVerifier;
@@ -38,10 +39,11 @@ public class InspectionRequestHandler extends RestrictedResponder {
     public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager, 
             SimppManager simppManager, 
             UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
-            Inspector inspector, @Named("inspection") SecureMessageVerifier inspectionVerifier) {
+            Inspector inspector, @Named("inspection") SecureMessageVerifier inspectionVerifier,
+            @Named("messageExecutor") ExecutorService dispatch) {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
                 inspectionVerifier,
-                MessageSettings.INSPECTION_VERSION, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache);
+                MessageSettings.INSPECTION_VERSION, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, dispatch);
         this.router = router;
         this.inspector = inspector;
         this.inspector.load(new File(CommonUtils.getCurrentDirectory(),INSPECTION_FILE));
