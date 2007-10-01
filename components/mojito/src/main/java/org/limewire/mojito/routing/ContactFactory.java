@@ -89,4 +89,10 @@ public class ContactFactory {
         return new RemoteContact(null, vendor, version, 
                 nodeId, contactAddress, 0, Contact.DEFAULT_FLAG, State.UNKNOWN);
     }
+    
+    public static Contact createUnknownContact(SocketAddress sourceAddress, Vendor vendor,
+            Version version, KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
+        return new RemoteContact(sourceAddress, vendor, version,
+                nodeId, contactAddress, instanceId, flags, State.UNKNOWN);
+    }
 }

@@ -23,10 +23,13 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.Context;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
 
@@ -44,5 +47,10 @@ abstract class AbstractResponseMessage extends AbstractDHTMessage
     public AbstractResponseMessage(Context context, OpCode opcode, 
             SocketAddress src, MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, opcode, src, messageId, msgVersion, in);
+    }
+    
+    protected final Contact createContact(SocketAddress src, Vendor vendor, Version version,
+            KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
+        return ContactFactory.createLiveContact(src, vendor, version, nodeId, contactAddress, instanceId, flags);
     }
 }
