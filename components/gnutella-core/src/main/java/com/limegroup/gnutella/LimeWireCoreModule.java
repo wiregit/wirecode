@@ -386,6 +386,7 @@ public class LimeWireCoreModule extends AbstractModule {
         // TODO: Could delay instantiation...
         //----------------------------------------------
         bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
+        bind(Executor.class).annotatedWith(Names.named("messageExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("MessageDispatch"));
  
         
         // TODO: only needed in tests, so move there eventually
