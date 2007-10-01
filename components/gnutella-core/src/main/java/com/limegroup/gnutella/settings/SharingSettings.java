@@ -11,6 +11,7 @@ import org.limewire.setting.FileSetSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.Setting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -210,6 +211,21 @@ public class SharingSettings extends LimeProps {
 		"bz;tbz;mime;taz;ua;toast;lit;rpm;deb;pkg;sxw;l6t;srt;sub;idx;mkv;"+
 		"ogm;shn;flac;fla;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
 		"pyo;pyz";
+    
+    /**
+     * The list of extensions shared by default
+     */
+    public static final String[] getDefaultExtensions() {
+        return StringArraySetting.encode(DEFAULT_EXTENSIONS_TO_SHARE); 
+    }
+    
+    /**
+     * The list of extensions shared by default
+     */
+    public static final String getDefaultExtensionsAsString() {
+        return DEFAULT_EXTENSIONS_TO_SHARE; 
+    }
+    
     
     /**
 	 * The shared directories. 
