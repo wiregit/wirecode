@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
@@ -24,6 +25,7 @@ public final class LimeWireUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
+    @InspectablePrimitive("limewire version")
 	private static final String LIMEWIRE_VERSION = "@version@";
     
     /**
@@ -31,6 +33,7 @@ public final class LimeWireUtils {
      * For an up-to-date mapping to LimeWire versions, check out
      * http://www.limewire.org/wiki/index.php?title=BitTorrentRevision
      */
+    @InspectablePrimitive("bittorrent revision")
 	public static final String BT_REVISION = "0001";
 
     /**
@@ -100,6 +103,7 @@ public final class LimeWireUtils {
     /**
      * Variable for whether or not this is a PRO version of LimeWire. 
      */
+    @InspectablePrimitive("pro")
     private static boolean _isPro = false;
 
     /** Whether or not a temporary directory is in use. */
