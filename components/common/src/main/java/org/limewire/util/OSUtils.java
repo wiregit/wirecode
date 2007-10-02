@@ -41,12 +41,7 @@ public class OSUtils {
      * Variable for whether or not we're on Windows Me.
      */
     private static boolean _isWindowsMe;
-    
-    /** 
-     * Variable for whether or not we're on Windows Me.
-     */
-    private static boolean _isWindows2000;
-    
+       
     /** 
      * Variable for whether or not we're on Windows Vista.
      */
