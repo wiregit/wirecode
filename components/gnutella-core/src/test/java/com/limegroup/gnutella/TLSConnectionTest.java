@@ -26,8 +26,6 @@ public class TLSConnectionTest extends LimeTestCase {
 
     private ConnectionManager connectionManager;
 
-    private HostCatcher hostCatcher;
-
     private ConnectionFactory connectionFactory;
 
     private HeadersFactory headersFactory;

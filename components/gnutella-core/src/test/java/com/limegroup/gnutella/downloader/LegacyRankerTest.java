@@ -4,16 +4,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.inject.Providers;
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
 
-import com.google.inject.Provider;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
