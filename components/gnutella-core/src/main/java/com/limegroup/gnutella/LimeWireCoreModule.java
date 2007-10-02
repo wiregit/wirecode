@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -26,6 +27,7 @@ import org.limewire.security.SecureMessageVerifierImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
@@ -385,8 +387,13 @@ public class LimeWireCoreModule extends AbstractModule {
         
         // TODO: Could delay instantiation...
         //----------------------------------------------
-        bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
-        bind(Executor.class).annotatedWith(Names.named("messageExecutor")).toInstance(ExecutorsHelper.newProcessingQueue("MessageDispatch"));
+        Key<ExecutorService> dhtExecutorKey = Key.get(ExecutorService.class, Names.named("dhtExecutor"));
+        bind(dhtExecutorKey).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
+        bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).to(dhtExecutorKey);
+        
+        Key<ExecutorService> messageExecutorKey = Key.get(ExecutorService.class, Names.named("messageExecutor"));
+        bind(messageExecutorKey).toInstance(ExecutorsHelper.newProcessingQueue("Message-Executor"));
+        bind(Executor.class).annotatedWith(Names.named("messageExecutor")).to(messageExecutorKey);
  
         
         // TODO: only needed in tests, so move there eventually
