@@ -27,10 +27,13 @@ import org.limewire.service.ErrorService;
 public class SimpleTimer extends AbstractExecutorService implements ScheduledExecutorService {
         
     /** Timer to be shared. */
-    private static final SimpleTimer sharedTimer = new SimpleTimer(true);
+    private static SimpleTimer sharedTimer;
     
     /** Returns a timer that can be shared amongst everything. */
-    public static SimpleTimer sharedTimer() {
+    @Deprecated
+    public static synchronized SimpleTimer sharedTimer() {
+        if(sharedTimer == null)
+            sharedTimer = new SimpleTimer(true);        
         return sharedTimer;
     }
     

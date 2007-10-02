@@ -2,9 +2,13 @@ package org.limewire.statistic;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.SimpleTimer;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * Manages recording {@link Statistic Statistics}. When a <code>Statistic</code>s
@@ -16,6 +20,8 @@ import org.limewire.concurrent.SimpleTimer;
  */
 public final class StatisticsManager implements Runnable {
 	
+    @Inject @Named("backgroundExecutor") private volatile static ScheduledExecutorService defaultExecutor;
+    
 	/**
 	 * <tt>List</tt> of all statistics classes.
 	 */
@@ -46,20 +52,25 @@ public final class StatisticsManager implements Runnable {
 	/**
 	 * Constant for the <tt>StatisticsManager</tt> instance.
 	 */
-	private static final StatisticsManager INSTANCE = new StatisticsManager();
+	private static StatisticsManager INSTANCE;
 
 	/**
 	 * Accessor for the <tt>StatisticsManager</tt> instance.
 	 * 
 	 * @return the <tt>StatisticsManager</tt> instance
 	 */
-	public static StatisticsManager instance() {return INSTANCE;}
+	public static synchronized StatisticsManager instance() {
+	    if(INSTANCE == null)
+	        INSTANCE = new StatisticsManager();
+	    return INSTANCE;
+	}
 
 	/**
 	 * Constructor the the <tt>StatisticsManager</tt> -- only accessed once.
 	 */
 	private StatisticsManager() {
-		SimpleTimer.sharedTimer().scheduleWithFixedDelay(this, 0, 1000, TimeUnit.MILLISECONDS);
+	    ScheduledExecutorService executorService = defaultExecutor != null ? defaultExecutor : SimpleTimer.sharedTimer();
+        executorService.scheduleWithFixedDelay(this, 0, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	/**

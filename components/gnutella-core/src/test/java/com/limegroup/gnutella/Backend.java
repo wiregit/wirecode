@@ -358,8 +358,8 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
             preSetUp();
             setStandardSettings(port);
             populateSharedDirectory();
-            limeWireCore = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class),
-                    new ModuleHacks()).getInstance(LimeWireCore.class);
+            limeWireCore = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class))
+                    .getInstance(LimeWireCore.class);
             limeWireCore.getLifecycleManager().start();
             if (!reject)
                 limeWireCore.getConnectionServices().connect();

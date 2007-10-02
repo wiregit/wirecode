@@ -137,7 +137,6 @@ public class LimeTestUtils {
         List<Module> list = new ArrayList<Module>();
         list.addAll(Arrays.asList(modules));
         list.add(new LimeWireCoreModule(callbackClass));
-        list.add(new ModuleHacks());
         Injector injector = Guice.createInjector(list);
         
         ProviderHacks.markUnusable();        

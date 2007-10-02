@@ -24,7 +24,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  */
 public class Main {
     public static void main(String args[]) {
-        Injector injector = Guice.createInjector(new LimeWireCoreModule(MainCallback.class), new ModuleHacks());
+        Injector injector = Guice.createInjector(new LimeWireCoreModule(MainCallback.class));
         LimeWireCore core = injector.getInstance(LimeWireCore.class);
         core.getLifecycleManager().start();        
         NetworkManager networkManager = core.getNetworkManager();

@@ -14,7 +14,7 @@ import com.limegroup.gnutella.gui.LimeWireGUIModule;
 public class LimeWireCoreModuleTest extends TestCase {
 
     public void testConnectionDispatcher() {
-        Injector injector = Guice.createInjector(new LimeWireCoreModule(), new LimeWireGUIModule(), new ModuleHacks());
+        Injector injector = Guice.createInjector(new LimeWireCoreModule(), new LimeWireGUIModule());
         ConnectionDispatcher globalInstance = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
         ConnectionDispatcher localInstance = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("local")));
         

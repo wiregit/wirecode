@@ -2,13 +2,19 @@ package org.limewire.security;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.concurrent.SimpleTimer;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * This class manages the crypto aspects of the security token infrastructure.
  */
 public class MACCalculatorRepositoryManager {
+    
+    @Inject @Named("backgroundExecutor") private volatile static ScheduledExecutorService defaultExecutor;
 
     private volatile static MACCalculatorRepositoryManager defaultRepositoryManager =
         new MACCalculatorRepositoryManager();
@@ -43,7 +49,7 @@ public class MACCalculatorRepositoryManager {
      * Creates a token smith with the specified <tt>SettingsProvider</tt>
      */
     public MACCalculatorRepositoryManager(SettingsProvider provider) {
-        repository = new MACCalculatorRotator(SimpleTimer.sharedTimer(),
+        repository = new MACCalculatorRotator(defaultExecutor != null ? defaultExecutor : SimpleTimer.sharedTimer(),
                                               new TEAMACCalculatorFactory(),
                                               provider);
     }

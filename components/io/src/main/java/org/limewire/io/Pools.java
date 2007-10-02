@@ -1,6 +1,7 @@
 package org.limewire.io;
 
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -13,6 +14,9 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.limewire.concurrent.SimpleTimer;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 
 /**
  * Contains a global pool of {@link Deflater Deflaters} and {@link Inflater Inflaters}
@@ -22,6 +26,8 @@ import org.limewire.concurrent.SimpleTimer;
 public class Pools {
     
     private static final Log LOG = LogFactory.getLog(Pools.class);
+    
+    @Inject @Named("backgroundExecutor") private volatile static ScheduledExecutorService defaultExecutor;
     
     private static volatile ObjectPool<Deflater> deflaterPool;
     private static volatile ObjectPool<Inflater> inflaterPool;
@@ -133,7 +139,8 @@ public class Pools {
             }
             if(delay > 0) {
                 _evictor = new Evictor();
-                SimpleTimer.sharedTimer().scheduleWithFixedDelay(_evictor, delay, delay, TimeUnit.MILLISECONDS);
+                ScheduledExecutorService executorService = defaultExecutor != null ? defaultExecutor : SimpleTimer.sharedTimer();
+                executorService.scheduleWithFixedDelay(_evictor, delay, delay, TimeUnit.MILLISECONDS);
             }
         }
         

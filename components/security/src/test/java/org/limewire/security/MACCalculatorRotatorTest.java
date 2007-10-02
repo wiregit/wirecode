@@ -112,7 +112,7 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
 
     private static class WrappingSchedulingTestThreadPool extends AbstractExecutorService implements ScheduledExecutorService {
         
-        private ScheduledExecutorService pool = SimpleTimer.sharedTimer();
+        private ScheduledExecutorService pool = new SimpleTimer(true);
         
         private NotifyinRunnable r;
         

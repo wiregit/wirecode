@@ -4,14 +4,18 @@ import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
+import org.limewire.io.Pools;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
+import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
 import org.limewire.rudp.RUDPContext;
@@ -22,8 +26,10 @@ import org.limewire.rudp.UDPSelectorProviderFactory;
 import org.limewire.rudp.UDPService;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
+import org.limewire.statistic.StatisticsManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -292,6 +298,9 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(AutoDownloadDetails.class);
         requestStaticInjection(HttpClientManager.class);
         requestStaticInjection(LimeXMLDocument.class);
+        requestStaticInjection(StatisticsManager.class);
+        requestStaticInjection(MACCalculatorRepositoryManager.class);
+        requestStaticInjection(Pools.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
@@ -378,12 +387,16 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(PushProxyRequestHandler.class);
         //bind(AltLocModel.class);
         //bind(PushProxiesModel.class);
-        
-        
+                
         // For NodeAssigner...
         bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(UploadManager.class);
         bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class);
-                
+        
+        Key<ExecutorService> unlimitedExecutorKey = Key.get(ExecutorService.class, Names.named("unlimitedExecutor"));
+        bind(unlimitedExecutorKey).toProvider(UnlimitedExecutorProvider.class);
+        bind(Executor.class).annotatedWith(Names.named("unlimitedExecutor")).to(unlimitedExecutorKey);
+        
+        bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toProvider(BackgroundTimerProvider.class);
         
         // TODO: Could delay instantiation...
         //----------------------------------------------
@@ -395,9 +408,14 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(messageExecutorKey).toInstance(ExecutorsHelper.newProcessingQueue("Message-Executor"));
         bind(Executor.class).annotatedWith(Names.named("messageExecutor")).to(messageExecutorKey);
  
-        
-        // TODO: only needed in tests, so move there eventually
+        //TODO: only needed in tests, so move there eventually
         bind(ConnectionFactory.class).to(ConnectionFactoryImpl.class);
+        
+        // TODO: These are hacks to workaround objects that aren't dependency injected elsewhere.
+        bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
+        bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
+        bind(SimppManager.class).toProvider(SimppManagerProvider.class);
+        bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
     }    
     
     @Singleton
@@ -481,5 +499,67 @@ public class LimeWireCoreModule extends AbstractModule {
             return downloadManager.get().getPushedSocketHandler();
         }
     };
+    
+    @Singleton
+    private static class UnlimitedExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+        protected ExecutorService createObject() {
+            return ExecutorsHelper.newThreadPool(ExecutorsHelper.daemonThreadFactory("IdleThread"));
+        }
+    }
+    
+    @Singleton
+    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
+        protected ScheduledExecutorService createObject() {
+            return new SimpleTimer(true);
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// BELOW ARE ALL HACK PROVIDERS THAT ARE NOT INTENDED TO BE USED FOR LONG!
+    
+    @Singleton
+    private static class NIODispatcherProvider implements Provider<NIODispatcher> {
+        public NIODispatcher get() {
+            return NIODispatcher.instance();
+        }
+    };
+    
+    @Singleton
+    private static class ByteBufferCacheProvider implements Provider<ByteBufferCache> {
+        private final Provider<NIODispatcher> nioDispatcher;
+        
+        @Inject
+        public ByteBufferCacheProvider(Provider<NIODispatcher> nioDispatcher) {
+            this.nioDispatcher = nioDispatcher;
+        }
+        
+        public ByteBufferCache get() {
+            return nioDispatcher.get().getBufferCache();
+        }
+    };
+    
+    @Singleton
+    private static class NIOScheduledExecutorServiceProvider implements Provider<ScheduledExecutorService> {
+        private final Provider<NIODispatcher> nioDispatcher;
+        
+        @Inject
+        public NIOScheduledExecutorServiceProvider(Provider<NIODispatcher> nioDispatcher) {
+            this.nioDispatcher = nioDispatcher;
+        }
+        
+        public ScheduledExecutorService get() {
+            return nioDispatcher.get().getScheduledExecutorService();
+        }
+    };
+    
+    @Singleton
+    private static class SimppManagerProvider implements Provider<SimppManager> {
+        public SimppManager get() {
+            return SimppManager.instance();
+        }
+    };
+    
+    ///////////////////////////////////////////////////////////////
+    // !!! DO NOT ADD THINGS BELOW HERE !!!  PUT THEM ABOVE THE HACKS!
 
 }
