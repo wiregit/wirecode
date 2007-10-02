@@ -441,7 +441,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                   supportedVendorMessage,
                   simppManager, updateHandler,
                   connectionServices, guidMapManager, spamFilterFactory,
-                  messageReaderFactory, messageFactory, applicationServices);
+                  messageReaderFactory, messageFactory, applicationServices, null);
         }
 
         public ManagedConnectionStub(Socket socket,
@@ -470,7 +470,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                     searchResultHandler, capabilitiesVMFactory, acceptor,
                     supportedVendorMessage, simppManager, updateHandler,
                     connectionServices, guidMapManager, spamFilterFactory,
-                    messageReaderFactory, messageFactory, applicationServices);
+                    messageReaderFactory, messageFactory, applicationServices, null);
             
         }
 

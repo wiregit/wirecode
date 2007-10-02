@@ -31,7 +31,6 @@ public class AnnotationsCheck extends BaseTestCase {
         Map<String, String> results = new HashMap<String, String>();
         while (st.hasMoreTokens()) 
             results.putAll(InspectionTool.generateMappings(new File(st.nextToken())));
-        
         assertFalse(results.isEmpty());
     }
 }

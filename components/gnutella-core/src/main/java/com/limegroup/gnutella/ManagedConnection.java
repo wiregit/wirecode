@@ -26,6 +26,7 @@ import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
+import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
@@ -318,6 +319,9 @@ public class ManagedConnection extends Connection
 
     private final ApplicationServices applicationServices;
     
+    @SuppressWarnings("unused")
+    private final SecureMessageVerifier secureMessageVerifier;
+    
     
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -344,7 +348,8 @@ public class ManagedConnection extends Connection
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
             MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices,
+            SecureMessageVerifier secureMessageVerifier) {
         super(host, port, type, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, messageFactory, networkManager);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -364,6 +369,7 @@ public class ManagedConnection extends Connection
         this.guidMap = guidMapManager.getMap();
         this._routeFilter = spamFilterFactory.createRouteFilter();
         this._personalFilter = spamFilterFactory.createPersonalFilter();
+        this.secureMessageVerifier = secureMessageVerifier;
     }
 
     /**
@@ -390,7 +396,8 @@ public class ManagedConnection extends Connection
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
             MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices,
+            SecureMessageVerifier secureMessageVerifier) {
         super(socket, capabilitiesVMFactory, acceptor, supportedVendorMessage, messageFactory, networkManager);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -410,6 +417,7 @@ public class ManagedConnection extends Connection
         this.guidMap = guidMapManager.getMap();
 	    this._routeFilter = spamFilterFactory.createRouteFilter();
         this._personalFilter = spamFilterFactory.createPersonalFilter();
+        this.secureMessageVerifier = secureMessageVerifier;
     }
     
     /**

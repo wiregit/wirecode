@@ -25,7 +25,7 @@ public class ManagedConnectionStub extends ManagedConnection {
                         .getUpdateHandler()), Providers.of(ProviderHacks.getConnectionServices()),
                 ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
                 ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory(),
-                ProviderHacks.getApplicationServices());
+                ProviderHacks.getApplicationServices(), ProviderHacks.getSecureMessageVerifier());
     }
 
     public void initialize() {

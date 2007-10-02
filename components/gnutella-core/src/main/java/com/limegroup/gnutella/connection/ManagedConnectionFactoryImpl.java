@@ -2,6 +2,8 @@ package com.limegroup.gnutella.connection;
 
 import java.net.Socket;
 
+import org.limewire.security.SecureMessageVerifier;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -72,6 +74,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final MessageReaderFactory messageReaderFactory;
 
     private final ApplicationServices applicationServices;
+    
+    private final Provider<SecureMessageVerifier> secureMessageVerifier;
 
     @Inject
     public ManagedConnectionFactoryImpl(Provider<ConnectionManager> connectionManager,
@@ -85,7 +89,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageFactory messageFactory,
-            MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices) {
+            MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices,
+            Provider<SecureMessageVerifier> secureMessageVerifier) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -107,6 +112,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.spamFilterFactory = spamFilterFactory;
         this.messageFactory = messageFactory;
         this.messageReaderFactory = messageReaderFactory;
+        this.secureMessageVerifier = secureMessageVerifier;
     }
 
     public ManagedConnection createManagedConnection(String host, int port) {
@@ -120,7 +126,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                         .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                applicationServices);
+                applicationServices, secureMessageVerifier.get());
     }
 
     public ManagedConnection createManagedConnection(Socket socket) {
@@ -129,7 +135,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
                         .get(), capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
-                messageReaderFactory, messageFactory, applicationServices);
+                messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier.get());
     }
 
 }
