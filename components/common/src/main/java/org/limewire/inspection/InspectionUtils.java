@@ -72,13 +72,13 @@ public class InspectionUtils {
             throw new InspectionException();
         
         // the first token better be fully qualified class name
-        Class clazz = Class.forName(t.nextToken());
+        Class<?> clazz = Class.forName(t.nextToken());
 
         // try to find an instance of the object
         Object instance;
         
         // check if this is an enclosed class
-        Class enclosing = clazz.getEnclosingClass();
+        Class<?> enclosing = clazz.getEnclosingClass();
         if (enclosing == null) {
             if (clazz.getAnnotation(Singleton.class) == null)
                 throw new InspectionException();
