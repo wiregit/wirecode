@@ -28,6 +28,11 @@
       <version>${limewire.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-inspection-tool</artifactId>
+      <version>1.0</version>
+    </dependency>
     <!-- Ibiblio Jars -->
     <dependency>
       <groupId>jaxen</groupId>
