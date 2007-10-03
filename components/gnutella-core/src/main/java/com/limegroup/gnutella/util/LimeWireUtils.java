@@ -34,7 +34,7 @@ public final class LimeWireUtils {
      * http://www.limewire.org/wiki/index.php?title=BitTorrentRevision
      */
     @InspectablePrimitive("bittorrent revision")
-	public static final String BT_REVISION = "0001";
+	public static final String BT_REVISION = "0002";
 
     /**
      * Variable used for testing only, it's value is set to whatever the test
