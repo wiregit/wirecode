@@ -20,6 +20,7 @@ public final class SpeedConstants {
     public static final int CABLE_SPEED_INT = 350;
     public static final int T1_SPEED_INT    = 1000;
     public static final int T3_SPEED_INT    = 3000;
+    public static final int STORE_SONG_SPEED_INT    = Integer.MAX_VALUE - 2;
     
     public static final int MIN_SPEED_INT	= 0;
     public static final int MAX_SPEED_INT	= 20000;
