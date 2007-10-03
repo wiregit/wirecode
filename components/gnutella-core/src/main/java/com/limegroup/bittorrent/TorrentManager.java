@@ -276,7 +276,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      * Shares the torrent by adding it to the FileManager
      */
     private synchronized void shareTorrent(ManagedTorrent t) {
-        if(!SharingSettings.SHARE_TORRENT_META_FILES.getValue()) 
+        if(!SharingSettings.SHARE_TORRENT_META_FILES.getValue() || t.getMetaInfo().isPrivate()) 
             return;
         
         final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());

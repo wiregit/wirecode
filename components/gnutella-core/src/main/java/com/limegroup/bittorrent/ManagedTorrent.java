@@ -743,7 +743,8 @@ BTLinkListener {
 		// move it to the complete location
 		state.set(TorrentState.SAVING);
 		context.getFileSystem().moveToCompleteFolder();
-		addToLibrary();
+        if (!_info.isPrivate())
+            addToLibrary();
 		LOG.trace("saved files");
 		context.initializeDiskManager(true);
 		LOG.trace("initialized folder");
