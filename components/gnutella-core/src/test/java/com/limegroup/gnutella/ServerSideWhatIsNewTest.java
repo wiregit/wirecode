@@ -592,7 +592,8 @@ public class ServerSideWhatIsNewTest
         
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
-        TestUploader uploader = new TestUploader("whatever.txt", UPLOADER_PORT, false);
+        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        uploader.start("whatever.txt", UPLOADER_PORT, false);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
         Set urns = new HashSet();
@@ -653,7 +654,8 @@ public class ServerSideWhatIsNewTest
         Long cTime[] = new Long[uploader.length];
         RemoteFileDesc rfds[] = new RemoteFileDesc[uploader.length];
         for (int i = 0; i < uploader.length; i++) {
-            uploader[i] = new TestUploader("anita.txt", UPLOADER_PORT+i, false);
+            uploader[i] = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+            uploader[i].start("anita.txt", UPLOADER_PORT+i, false);
             uploader[i].setRate(50);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);

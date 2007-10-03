@@ -50,6 +50,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -350,7 +351,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	TestFile.length();
         try {
             //Start uploader and download.
-            uploader=new TestUploader("ManagedDownloaderTest", PORT, false);
+            uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+            uploader.start("ManagedDownloaderTest", PORT, false);
             uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);
             uploader.setSendThexTree(false);

@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 
-import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.URN;
@@ -43,10 +43,8 @@ public class TestFile {
                 File tmpFile = File.createTempFile("tst", "tmp");
                 writeFile(tmpFile);
                 myHash = URN.createSHA1Urn(tmpFile);
-            } catch ( InterruptedException e) {
-                ErrorService.error(e);
-            } catch ( IOException e ) {
-                ErrorService.error(e);
+            } catch(Throwable e ) {
+                throw new RuntimeException(e);
             }
         } 
         return myHash;
@@ -59,10 +57,8 @@ public class TestFile {
                 File tmpFile = File.createTempFile("tst2", "tmp");
                 writeFile(tmpFile);
                 myTree = createHashTree(tmpFile, hash);
-            } catch(IOException e) {
-                ErrorService.error(e);
             } catch(Throwable t) {
-                ErrorService.error(t);
+                throw new RuntimeException(t);
             }
         }
         return myTree;
@@ -70,10 +66,11 @@ public class TestFile {
     
     private static void writeFile(File tmpFile) throws IOException {
         tmpFile.deleteOnExit();
-        RandomAccessFile raf = new RandomAccessFile(tmpFile, "rw");
+        BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(tmpFile));
         for(int i=0; i<TestFile.length(); i++)
-            raf.writeByte(TestFile.getByte(i));
-        raf.close();
+            os.write(TestFile.getByte(i));
+        os.flush();
+        os.close();
     }
     
     private static HashTree createHashTree(File file, URN sha1)

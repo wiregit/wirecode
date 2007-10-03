@@ -1,5 +1,10 @@
 package com.limegroup.gnutella.downloader;
 
+import static junit.framework.Assert.assertEquals;
+import static org.limewire.util.AssertComparisons.assertGreaterThan;
+import static org.limewire.util.AssertComparisons.assertLessThan;
+import static org.limewire.util.AssertComparisons.assertLessThanOrEquals;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,38 +29,28 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.BandwidthThrottle;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.AssertComparisons;
-import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Inject;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
-/**
- * Callback for whenever this uploader starts or finishes to serve
- * an http11 request.
- */
-interface HTTP11Listener {
-	public void thexRequestStarted();
-    public void thexRequestHandled();
-	public void requestStarted(TestUploader uploader);
-	public void requestHandled();
-}
-
-@SuppressWarnings("all")
-public class TestUploader extends AssertComparisons {    
+// NOT A SINGLETON!!
+public class TestUploader {    
     
     private static final Log LOG = LogFactory.getLog(TestUploader.class);
     
     /** My name, for debugging */
-    private final String name;
+    private volatile String name;
 
     /** Number of bytes uploaded */
     private volatile int fullRequestsUploaded;
@@ -73,7 +68,7 @@ public class TestUploader extends AssertComparisons {
     /** This is stopped. */
     private boolean stopped;
     
-    private Object stoppedLock = new Object();
+    private final Object stoppedLock = new Object();
     
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
@@ -81,7 +76,7 @@ public class TestUploader extends AssertComparisons {
     private float corruptPercentage;
 
 	private AlternateLocationCollection storedGoodLocs,storedBadLocs;
-	public List<AlternateLocation> incomingGoodAltLocs, incomingBadAltLocs;
+	private  List<AlternateLocation> incomingGoodAltLocs, incomingBadAltLocs;
 	private URN                         _sha1;
     private boolean http11 = true;
     private ServerSocket server;
@@ -100,17 +95,17 @@ public class TestUploader extends AssertComparisons {
     private boolean queue = false;
     private long minPollTime = -1;
     private long maxPollTime = -1;
-    final int MIN_POLL = 45000;
-    private final int MAX_POLL = 120000;
+    public final int MIN_POLL = 45000;
+    public final int MAX_POLL = 120000;
     private int partial = 0;
     private Long creationTime = null;
     
-    boolean unqueue = true;
-    volatile int queuePos = 1;
+    private boolean unqueue = true;
+    private volatile int queuePos = 1;
 
-    boolean killedByDownloader = false;
+    private boolean killedByDownloader = false;
     
-    int start,stop;
+    private int start,stop;
     /**
      * The offset for the low chunk.
      */
@@ -189,7 +184,7 @@ public class TestUploader extends AssertComparisons {
     /**
      * a callback to notify every time we start an http11 request
      */
-    HTTP11Listener _httpListener;
+    private HTTP11Listener _httpListener;
 
     /**
      * The sum of the number of bytes we need to upload across all requests.  If
@@ -197,7 +192,7 @@ public class TestUploader extends AssertComparisons {
      * IOException in handle request it means the downloader killed the
      * connection.
      */
-    int totalAmountToUpload;
+    private int totalAmountToUpload;
 
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
@@ -210,24 +205,30 @@ public class TestUploader extends AssertComparisons {
      */
     private String _proxiesString;
 
+    private final AlternateLocationFactory alternateLocationFactory;
+
+    private final FeaturesWriter featuresWriter;
+    
+    @Inject
+    public TestUploader(AlternateLocationFactory alternateLocationFactory, FeaturesWriter featuresWriter) {
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.featuresWriter = featuresWriter;
+        
+        // ensure that only local machines can connect!!
+       FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+           new String[] {"*.*.*.*"});
+       FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+           new String[] {"127.*.*.*"});
+       this.IP_FILTER = new IPFilter();
+    }
+
 
     /** 
-     * Creates a TestUploader listening on the given port.  Will upload a
+     * Starts the TestUploader listening on the given port.  Will upload a
      * special test file to any requesters via HTTP.  Non-blocking; starts
      * another thread to do the listening. 
-     * @param tls TODO
      */
-    @Deprecated // should have things injected into it.
-    public TestUploader(String name, final int port, boolean tls) {
-        super(name);
-
-         // ensure that only local machines can connect!!
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
-        this.IP_FILTER = new IPFilter();
-        
+    public void start(String name, final int port, boolean tls) {
         this.name=name;
         reset();
         
@@ -246,10 +247,7 @@ public class TestUploader extends AssertComparisons {
             server.bind(new InetSocketAddress(port));
         } catch (IOException e) {
             LOG.debug("Couldn't bind socket to port "+port+"\n");
-            
-            //System.out.println("Couldn't listen on port "+port);
-            ErrorService.error(e);
-            return;
+            throw new RuntimeException(e);
         }
         
         //spawn loop();
@@ -262,15 +260,7 @@ public class TestUploader extends AssertComparisons {
         t.start();        
     }
     
-    @Deprecated // should have things injected into it.
-    public TestUploader(String name) throws IOException{
-        super(name);
-        // ensure that only local machines can connect!!
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
-        this.IP_FILTER = new IPFilter();
+    void start(String name) throws IOException {
         this.name=name;
         reset();
         LOG.debug("starting to handle request with direct socket given");
@@ -279,11 +269,12 @@ public class TestUploader extends AssertComparisons {
             public void run() {
                 synchronized(TestUploader.this) {
                     try{
-                    while(socket==null) {LOG.debug("socket is null");
-                        TestUploader.this.wait();
-                    }
-                    }catch(InterruptedException hmm) {
-                        ErrorService.error(hmm);
+                        while(socket==null) {
+                            LOG.debug("socket is null");
+                            TestUploader.this.wait();
+                        }
+                    } catch(InterruptedException hmm) {
+                        throw new RuntimeException(hmm);
                     }
                 }
                 Runnable r = new SocketHandler(socket);
@@ -346,8 +337,8 @@ public class TestUploader extends AssertComparisons {
         queueOnThex = false;
         useBadThexResponseHeader = false;
         _httpListener = null;
-        incomingBadAltLocs = new ArrayList();
-        incomingGoodAltLocs = new ArrayList();
+        incomingBadAltLocs = new ArrayList<AlternateLocation>();
+        incomingGoodAltLocs = new ArrayList<AlternateLocation>();
         FWTPort = -1;
     }
 
@@ -843,21 +834,12 @@ public class TestUploader extends AssertComparisons {
         }
         if(interestedInFalts) {
             if (!isFirewalled) 
-                ProviderHacks.getFeaturesWriter().writeFeatures(out);
-            else {
-                boolean previous = ProviderHacks.getNetworkManager().acceptedIncomingConnection();
-                
-                try{
-                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
-                        "_acceptedIncoming",new Boolean(false));
-                    
-                    ProviderHacks.getFeaturesWriter().writeFeatures(out);
-                    
-                    PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
-                            "_acceptedIncoming",new Boolean(previous));
-                }catch(Exception bad) {
-                    ErrorService.error(bad);
-                }
+                featuresWriter.writeFeatures(out);
+            else {                
+                NetworkManagerStub stub = new NetworkManagerStub();
+                stub.setAcceptedIncomingConnection(false);
+                FeaturesWriter writer = new FeaturesWriter(stub);
+                writer.writeFeatures(out);
             }
         }
         
@@ -1046,7 +1028,7 @@ public class TestUploader extends AssertComparisons {
 	 */
 	private void readAlternateLocations (String altHeader, final boolean good) {
         String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, ProviderHacks.getAlternateLocationFactory(), new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 if(location instanceof PushAltLoc)
                     ((PushAltLoc)location).updateProxies(good);
@@ -1143,5 +1125,29 @@ public class TestUploader extends AssertComparisons {
             }//end of finally
         }
 	}
+	
+	
+    public void setUnqueue(boolean unqueue) {
+        this.unqueue = unqueue;
+    }
+
+
+    public boolean getKilledByDownloader() {
+        return killedByDownloader;
+    }
+
+
+    public List<AlternateLocation> getIncomingGoodAltLocs() {
+        return incomingGoodAltLocs;
+    }
+    
+    public List<AlternateLocation> getIncomingBadAltLocs() {
+        return incomingBadAltLocs;
+    }
+
+
+    public void setQueuePos(int queuePos) {
+        this.queuePos = queuePos;
+    }
     
 }
