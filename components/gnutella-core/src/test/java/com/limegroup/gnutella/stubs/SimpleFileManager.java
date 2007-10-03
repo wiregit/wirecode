@@ -1,17 +1,11 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.NameValue;
-import org.xml.sax.SAXException;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
