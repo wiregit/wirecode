@@ -444,7 +444,7 @@ public class HttpServiceHandlerTest extends BaseTestCase {
         assertFalse(channel.isReadInterest());
         assertTrue(channel.isWriteInterest());
 
-        // expect service handler to send response and wait for next request
+        // expect service handler to send response and close connection since it is HTTP 1.0
         conn.produceOutput(serviceHandler);
         assertTrue(conn.isClosed());
         assertTrue(session.isClosed());
@@ -468,12 +468,12 @@ public class HttpServiceHandlerTest extends BaseTestCase {
 
         conn.setHttpRequest(new BasicHttpRequest("HEAD", "/get/string", HttpVersion.HTTP_1_0));
         conn.consumeInput(serviceHandler);
-        assertTrue(conn.isClosed());
+        assertTrue(conn.isClosing());
         assertFalse(session.isClosed());
         assertFalse(channel.isReadInterest());
         assertTrue(channel.isWriteInterest());
 
-        // expect service handler to send response and wait for next request
+        // expect service handler to send response and close connection since it is HTTP 1.0
         conn.produceOutput(serviceHandler);
         assertTrue(conn.isClosed());
         assertTrue(session.isClosed());

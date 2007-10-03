@@ -37,7 +37,11 @@ public class HttpIOReactorTest extends TestCase {
     public void testShutdown() throws Exception {
         HttpParams params = new BasicHttpParams();
         HttpIOReactor reactor = new HttpIOReactor(params);
-        reactor.shutdown();
+        try {
+            reactor.shutdown();
+            fail("Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException expected) {
+        }
     }
 
     public void testConnect() {
