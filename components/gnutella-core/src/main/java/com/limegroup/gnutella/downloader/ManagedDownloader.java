@@ -1101,9 +1101,16 @@ public class ManagedDownloader extends AbstractDownloader
 			commonOutFile = verifyingFileFactory.createVerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
-			incompleteFileManager.addEntry(incompleteFile, commonOutFile);
+			addEntry();
 		}
 	}
+    
+    /**
+     * Adds an incomplete file entry into the file manager
+     */
+    protected void addEntry(){
+        incompleteFileManager.addEntry(incompleteFile, commonOutFile, false);
+    }
 
 	protected void initializeIncompleteFile() throws IOException {
         if (incompleteFile != null)
@@ -2218,7 +2225,7 @@ public class ManagedDownloader extends AbstractDownloader
         //because IFM.purge() is called frequently in DownloadManager.
         
         try {
-            saveFile = alternateFileCreation(saveFile);
+            saveFile = getSuggestedSaveLocation(saveFile);
         } catch (IOException e) {
             return DownloadStatus.DISK_PROBLEM;
         }
@@ -2254,11 +2261,11 @@ public class ManagedDownloader extends AbstractDownloader
      * For example, could create a folder substructure and use a template based on ID3 information
      * for music. 
      * 
-     * @param saveFile
-     * @return
+     * @param saveFile - the current file location to save the incomplete download to
+     * @return - the location to save the actual download to
      * @throws IOException
      */
-    protected File alternateFileCreation(File saveFile) throws IOException{
+    protected File getSuggestedSaveLocation(File saveFile) throws IOException{
         return saveFile;
     }
     
@@ -2280,17 +2287,27 @@ public class ManagedDownloader extends AbstractDownloader
             // Notify the SavedFileManager that there is a new saved
             // file.
             savedFileManager.addSavedFile(file, urns);
-            //TODO: dont need the saved trees for store
-            // save the trees!
-            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
-                tigerTreeCache.get(); // instantiate it. 
-                TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
-            }
+
+            saveTreeHash(fileHash);
+        }
+    }
+    
+    /**
+     * Upon saving a downloaded file, if the file is to be shared the tiger tree should
+     * be saved in order to speed up sharing the file across gnutella
+     * 
+     * @param fileHash - urn to save the tree of
+     */
+    protected void saveTreeHash(URN fileHash) {
+        // save the trees!
+        if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
+            tigerTreeCache.get(); // instantiate it. 
+            TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
         }
     }
 
     /**
-     * Determine where to share the fle 
+     * Shares the newly downloaded file
      */
     protected void shareSavedFile(){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
@@ -3106,4 +3123,9 @@ public class ManagedDownloader extends AbstractDownloader
 	public String getCustomIconDescriptor() {
 		return null; // always use the file icon
 	}
+
+    @Override
+    public DownloaderType getDownloadType() {
+        return DownloaderType.MANAGED;
+    }
 }

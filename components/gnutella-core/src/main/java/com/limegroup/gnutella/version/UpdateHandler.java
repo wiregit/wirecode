@@ -537,9 +537,7 @@ public class UpdateHandler implements HttpClientListener {
                 // and there's no existing InNetwork downloads & 
                 // no existing Store downloads & 
                 // we're allowed to start a new one.
-                if(md == null && !downloadManager.get().hasInNetworkDownload() 
-                		&& !downloadManager.get().hasStoreDownload() 
-                        && canStartDownload()) {
+                if(md == null && !downloadManager.get().hasInNetworkDownload() && canStartDownload()) {
                     LOG.debug("Starting a new InNetwork Download");
                     try {
                         md = (ManagedDownloader)downloadManager.get().download(next, clock.now());
@@ -716,8 +714,7 @@ public class UpdateHandler implements HttpClientListener {
         if (updates == null)
             return;
         
-        if (!downloadManager.get().hasInNetworkDownload() 
-        	&& !downloadManager.get().hasStoreDownload())
+        if (!downloadManager.get().hasInNetworkDownload())
             return;
         
         long now = clock.now();

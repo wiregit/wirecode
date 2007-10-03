@@ -151,7 +151,7 @@ public class MetaFileManager extends FileManager {
             _needRebuild = true;
         }
 
-        addFileIfShared(f, xmlDocs, false, _revision, new FileEventListener() {
+        addFile(f, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
                 // Retarget the event for the GUI.
                 FileManagerEvent newEvt = null;
@@ -167,7 +167,7 @@ public class MetaFileManager extends FileManager {
                 }
                 dispatchFileEvent(newEvt);
             }
-        });
+        }, AddType.ADD_SHARE);
     }
 
     /**
@@ -209,7 +209,6 @@ public class MetaFileManager extends FileManager {
             if (AudioMetaData.isNonLimeAudioField(nameVal.getName()))
                 id3List.add(nameVal);
         }
-
         audioDoc = fileManagerController.createLimeXMLDocument(id3List,
                 LimeXMLNames.AUDIO_SCHEMA);
         retList.add(audioDoc);

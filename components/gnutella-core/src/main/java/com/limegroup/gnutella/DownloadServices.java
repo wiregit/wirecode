@@ -62,7 +62,7 @@ public interface DownloadServices {
      * @return
      * @throws SaveLocationException
      */
-    public Downloader download(RemoteFileDesc rfd, boolean overwrite,
+    public Downloader downloadFromStore(RemoteFileDesc rfd, boolean overwrite,
             File saveDir, String fileName) throws SaveLocationException;
 
     public Downloader download(RemoteFileDesc[] files, boolean overwrite,

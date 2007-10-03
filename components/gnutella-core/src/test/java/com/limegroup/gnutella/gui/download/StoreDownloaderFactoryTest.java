@@ -26,8 +26,7 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
     
     public void testInvalidStoreDownloaderFactoryArgs(){
         try {
-            @SuppressWarnings("unused")
-            StoreDownloaderFactory store = new StoreDownloaderFactory(null, null);
+            new StoreDownloaderFactory(null, null);
             fail("StoreDescriptor cannot be null");
         }catch(NullPointerException e){};
     }

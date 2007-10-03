@@ -533,4 +533,10 @@ public class BTDownloader extends AbstractDownloader
 			return null;
 		return BITTORRENT_DOWNLOAD;
 	}
+
+    @Override
+    public DownloaderType getDownloadType() {
+        return DownloaderType.BTDOWNLOADER;
+        
+    }
 }

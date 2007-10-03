@@ -132,7 +132,7 @@ public class LimeXMLReplyCollection {
      * Initializes the map using either LimeXMLDocuments in the list of potential
      * documents, or elements stored in oldMap.  Items in potential take priority.
      */
-    LimeXMLDocument initialize(FileDesc fd, List<? extends LimeXMLDocument> potential) {
+    public LimeXMLDocument initialize(FileDesc fd, List<? extends LimeXMLDocument> potential) {
         URN urn = fd.getSHA1Urn();
         LimeXMLDocument doc = null;
         
@@ -166,7 +166,7 @@ public class LimeXMLReplyCollection {
      * Creates a LimeXMLDocument for the given FileDesc if no XML already exists
      * for it.
      */
-    LimeXMLDocument createIfNecessary(FileDesc fd) {
+    public LimeXMLDocument createIfNecessary(FileDesc fd) {
         LimeXMLDocument doc = null;
         URN urn = fd.getSHA1Urn();
         

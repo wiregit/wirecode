@@ -21,7 +21,7 @@ public enum LicenseType {
     ARTISTIC ("http://www.opensource.org/licenses/artistic-license.php"), 
     PUBLIC_DOMAIN ("http://www.public-domain.org"), 
     SHAREWARE ("http://en.wikipedia.org/wiki/Shareware"),
-    LIMEWIRE_STORE_PURCHASE("");
+    LIMEWIRE_STORE_PURCHASE("LIMEWIRE_STORE_PURCHASE");
     
     private final String keyword;
     private final List<String> indivList;

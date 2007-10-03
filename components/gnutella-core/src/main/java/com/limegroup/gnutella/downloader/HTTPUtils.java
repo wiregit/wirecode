@@ -17,6 +17,9 @@ public class HTTPUtils {
     
     
     /** Returns the length of the content at the given URL. 
+     *  NOTE: This method is blocking. It contacts the url and performs
+     *  a head request to return the content length of the file. 
+     *  
      *  @exception IOException couldn't find the length for some reason */
     public static long contentLength(URL url) throws IOException {
         try {

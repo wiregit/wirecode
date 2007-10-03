@@ -248,7 +248,8 @@ public class MP3MetaData extends AudioMetaData {
                     setGenre(frameContent);
             }
             else if (MP3DataEditor.LICENSE_ID.equals(frameID)) {
-                setLicense(frameContent);
+                if( getLicenseType() == null || !getLicenseType().equals(MAGIC_KEY))
+                    setLicense(frameContent);
                 checkLWS(frameContent );
             }
             // another key we don't care about except for searching for 
@@ -262,14 +263,12 @@ public class MP3MetaData extends AudioMetaData {
     /**
      * If the song is not a LWS already, do a substring search to see if
      * it is a LWS song
-     * @param content
+     * @param content - ID3 tag to scan for a substring
      */
     private void checkLWS(String content) {
-        if( getSongType() != LWS) {
-            //search for the substring MAGIC_KEY
+        if( getLicenseType() == null || !getLicenseType().equals(MAGIC_KEY))
             if( content.indexOf(MAGIC_KEY) != -1)
-                setSongType(LWS); 
-            }
+                setLicenseType(MAGIC_KEY);
     }
 
 	/**

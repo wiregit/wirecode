@@ -42,7 +42,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     
     /** 
      * Overrides ManagedDownloader to return quickly
-     * since we can't require the store
+     * since we can't requery the store
      */
     @Override
     protected QueryRequest newRequery(int numRequeries)
@@ -134,7 +134,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * folder substructure for saving the file
      */
     @Override
-    protected File alternateFileCreation(File saveFile) throws IOException{
+    protected File getSuggestedSaveLocation(File saveFile) throws IOException{
         // First attempt to get new save location
         final File realOutputDir = SharingSettings.getSaveLWSDirectory(incompleteFile);
 
@@ -148,27 +148,13 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
         return new File(realOutputDir, saveFile.getName());
     }
     
+   
     /**
-     *  Add the URN of this file to the cache so that it won't
-     *  be hashed again when added to the library -- reduces
-     *  the time of the 'Saving File' state.
+     * Store files aren't shared so don't bother saving the tree
+     * hash of them
      */
     @Override
-    protected void addFileHash(URN fileHash, File saveFile) {
-
-        if(fileHash != null) { 
-            Set<URN> urns = new UrnSet(fileHash);
-            File file = saveFile;
-            try {
-                file = FileUtils.getCanonicalFile(saveFile);
-            } catch(IOException ignored) {}
-            // Always cache the URN, so results can lookup to see
-            // if the file exists.
-            urnCache.addUrns(file, urns);
-            // Notify the SavedFileManager that there is a new saved
-            // file.
-            savedFileManager.addSavedFile(file, urns);
-        }
+    protected void saveTreeHash(URN fileHash) {
     }
     
     /**
@@ -177,6 +163,20 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     @Override
     protected void shareSavedFile() {
         // dont do anything
+    }
+    
+    @Override
+    public DownloaderType getDownloadType() {
+        return DownloaderType.STORE;
+    }
+    
+    /**
+     * Overrides the entry to a new download into the file manager to ensure that the 
+     * file is not shared
+     */
+    @Override
+    protected void addEntry(){
+        incompleteFileManager.addEntry(incompleteFile, commonOutFile, true);
     }
     
     /** 

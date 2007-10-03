@@ -16,6 +16,7 @@ import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -36,7 +37,8 @@ public class DownloadManagerStub extends DownloadManager {
                         .getBackgroundExecutor(), Providers.of(ProviderHacks
                         .getTorrentManager()), Providers.of(ProviderHacks
                         .getPushDownloadManager()), ProviderHacks.getBrowseHostHandlerManager(),
-                        ProviderHacks.getGnutellaDownloaderFactory());
+                        ProviderHacks.getGnutellaDownloaderFactory(),
+                        ProviderHacks.getPurchasedDownloaderFactory());
     }
 	
     @Inject
@@ -50,8 +52,9 @@ public class DownloadManagerStub extends DownloadManager {
             Provider<TorrentManager> torrentManager,
             Provider<PushDownloadManager> pushDownloadManager,
             BrowseHostHandlerManager browseHostHandlerManager,
-            GnutellaDownloaderFactory gnutellaDownloaderFactory) {
-        super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory, downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager, browseHostHandlerManager, gnutellaDownloaderFactory);
+            GnutellaDownloaderFactory gnutellaDownloaderFactory,
+            PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+        super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory, downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager, browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
     }
 
     @Override

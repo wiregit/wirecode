@@ -35,6 +35,7 @@ import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
+import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
@@ -237,6 +238,7 @@ public class ProviderHacks {
     public static LimeXMLSchemaRepository getLimeXMLSchemaRepository() { return use().getLimeXMLSchemaRepository(); }
     public static Acceptor getAcceptor() { return use().getAcceptor(); }    
     public static GnutellaDownloaderFactory getGnutellaDownloaderFactory() { return use().getGnutellaDownloaderFactory(); }
+    public static PurchasedStoreDownloaderFactory getPurchasedDownloaderFactory() { return use().getPurchasedDownloaderFactory(); }
     public static DownloadManager getDownloadManager() { return use().getDownloadManager(); }
     public static ContentManager getContentManager() { return use().getContentManager(); }
     public static BTUploaderFactory getBTUploaderFactory() { return use().getBTUploaderFactory(); }

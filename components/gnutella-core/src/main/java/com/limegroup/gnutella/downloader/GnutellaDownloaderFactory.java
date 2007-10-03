@@ -23,10 +23,6 @@ public interface GnutellaDownloaderFactory {
             IncompleteFileManager ifm, MagnetOptions magnet, boolean overwrite,
             File saveDir, String fileName) throws SaveLocationException;
 
-    public abstract StoreDownloader createStoreDownloader(
-            RemoteFileDesc rfd, IncompleteFileManager ifm, 
-            File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException;
-
     public abstract InNetworkDownloader createInNetworkDownloader(
             IncompleteFileManager incompleteFileManager,
             DownloadInformation info, File dir, long startTime)

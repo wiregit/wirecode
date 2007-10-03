@@ -49,11 +49,13 @@ import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.downloader.AbstractDownloader.DownloaderType;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -161,6 +163,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final BrowseHostHandlerManager browseHostHandlerManager;
     private final GnutellaDownloaderFactory gnutellaDownloaderFactory;
+    private final PurchasedStoreDownloaderFactory purchasedDownloaderFactory;
     
     @Inject
     public DownloadManager(NetworkManager networkManager,
@@ -173,7 +176,8 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             Provider<TorrentManager> torrentManager,
             Provider<PushDownloadManager> pushDownloadManager,
             BrowseHostHandlerManager browseHostHandlerManager,
-            GnutellaDownloaderFactory gnutellaDownloaderFactory) {
+            GnutellaDownloaderFactory gnutellaDownloaderFactory,
+            PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
         this.networkManager = networkManager;
         this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
@@ -185,6 +189,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         this.pushDownloadManager = pushDownloadManager;
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.gnutellaDownloaderFactory = gnutellaDownloaderFactory;
+        this.purchasedDownloaderFactory = purchasedDownloaderFactory;
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -255,8 +260,8 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     public synchronized boolean hasInNetworkDownload() {
         if(innetworkCount > 0)
             return true;
-        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
-            if(i.next() instanceof InNetworkDownloader)
+        for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
+            if(i.next().getDownloadType() == DownloaderType.INNETWORK)
                 return true;
         }
         return false;
@@ -264,12 +269,13 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     
     /**
      * Determines if any store download exists in either active or waiting
+     * state. 
      */
     public synchronized boolean hasStoreDownload() {
         if(storeDownloadCount > 0)
             return true;
-        for(Iterator i = waiting.iterator(); i.hasNext(); ) {
-            if( i.next() instanceof StoreDownloader)
+        for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
+            if( i.next().getDownloadType() == DownloaderType.STORE)
                 return true;
         }
         return false;
@@ -289,8 +295,8 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         
         for (Iterator<AbstractDownloader> iter = new DualIterator<AbstractDownloader>(waiting.iterator(),active.iterator());
         iter.hasNext();) {
-            Downloader d = iter.next();
-            if (d instanceof InNetworkDownloader  && 
+            AbstractDownloader d = iter.next();
+            if (d.getDownloadType() == DownloaderType.INNETWORK  && 
                     !urns.contains(d.getSHA1Urn().httpStringValue())) 
                 d.stop();
         }
@@ -374,14 +380,14 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
                 cleanupCompletedDownload(md, false);
             }
             // handle downloads from LWS seperately, only allow 1 at a time
-            else if( storeDownloadCount == 0 && md instanceof StoreDownloader ) {
+            else if( storeDownloadCount == 0 && md.getDownloadType() == DownloaderType.STORE ) {
                     i.remove();
                     storeDownloadCount++;
                     active.add(md);
                     md.startDownload();
-            } else if(hasFreeSlot() && (md.shouldBeRestarted()) && !(md instanceof StoreDownloader)) {
+            } else if(hasFreeSlot() && (md.shouldBeRestarted()) && (md.getDownloadType() != DownloaderType.STORE)) {
                 i.remove();
-                if(md instanceof InNetworkDownloader)
+                if(md.getDownloadType() == DownloaderType.INNETWORK)
                     innetworkCount++;
                 active.add(md);
                 md.startDownload();
@@ -758,7 +764,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     }
 
     /**
-     * Creates a new LimeWireStore download. Store downloads are handled in a similar fashion as
+     * Creates a new Lime Wire Store (LWS) download. Store downloads are handled in a similar fashion as
      * MAGNET links except there are no alternative locations.  <tt>filename</tt> should always
      * be specified since we have complete control over META-DATA for these downloads, it will 
      * be used as the name of the complete file. Unlike all other downloads performed here, 
@@ -772,7 +778,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      * @throws IllegalArgumentException
      * @throws SaveLocationException
      */
-    public synchronized Downloader download( RemoteFileDesc rfd,
+    public synchronized Downloader downloadFromStore( RemoteFileDesc rfd,
             boolean overwrite,
             File saveDir,
             String fileName)
@@ -794,7 +800,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         StoreDownloader downloader =
-            gnutellaDownloaderFactory.createStoreDownloader(rfd, incompleteFileManager, 
+            purchasedDownloaderFactory.createStoreDownloader(rfd, incompleteFileManager, 
                                   saveDir, fileName, overwrite);
 
         initializeDownload(downloader);
@@ -1120,10 +1126,10 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     public synchronized void remove(AbstractDownloader downloader, 
                                     boolean completed) {
         boolean isRemoved = active.remove(downloader);
-        if(downloader instanceof InNetworkDownloader)
+        if(downloader.getDownloadType() == DownloaderType.INNETWORK)
             innetworkCount--;
         // make sure an active download was removed prior to decrementing this index
-        if(downloader instanceof StoreDownloader && isRemoved)
+        if(downloader.getDownloadType() == DownloaderType.STORE && isRemoved)
             storeDownloadCount--;
         
         waiting.remove(downloader);

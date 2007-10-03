@@ -218,7 +218,7 @@ public class RequeryDownloadTest
        //Record information in IncompleteFileManager.
        VerifyingFile vf=ProviderHacks.getVerifyingFileFactory().createVerifyingFile(TestFile.length());
        vf.addInterval(Range.createRange(0, 1));  //inclusive
-       ifm.addEntry(_incompleteFile, vf);       
+       ifm.addEntry(_incompleteFile, vf, false);       
        return ifm;
     }
        

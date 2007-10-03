@@ -167,7 +167,7 @@ public class UploadTest extends LimeTestCase {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(252450);
-        fileManager.addIncompleteFile(incFile, urns, incName, 1981, vf);
+        fileManager.addIncompleteFile(incFile, urns, incName, 1981, vf, false);
 
         assertEquals(1, fileManager.getNumIncompleteFiles());
         assertEquals(2, fileManager.getNumFiles());

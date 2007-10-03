@@ -418,6 +418,13 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         else
             return null;
     }
+    
+    /**
+     *	Returns the license type of the XML document
+     */
+    public String getLicenseType() {
+        return licenseType.toString();
+    }
 
     /**
      * Returns a list of attributes and their values in the same order

@@ -161,6 +161,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
      * returns null.  Package-access and static for easy testing.
+     * 
+     * NOTE: this calls HTTPUtils.contentLength which opens a URL and calls Head on the
+     * link to determine the file length. This is a blocking call!
      */
     @SuppressWarnings("deprecation")
     private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
@@ -310,4 +313,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			super.initializeIncompleteFile();
 		}
 	}
+    
+    @Override
+    public DownloaderType getDownloadType() {
+        return DownloaderType.MAGNET;
+    }
 }

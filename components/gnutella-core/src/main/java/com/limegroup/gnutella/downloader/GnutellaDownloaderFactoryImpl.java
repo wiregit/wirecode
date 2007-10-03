@@ -57,10 +57,4 @@ public class GnutellaDownloaderFactoryImpl implements GnutellaDownloaderFactory 
                 name, size, saveLocationManager.get());
     }
 
-    public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, IncompleteFileManager ifm, 
-            File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
-        return new StoreDownloader(rfd, ifm, saveDirectory, fileName, 
-                overwrite, saveLocationManager.get());
-    }
-
 }

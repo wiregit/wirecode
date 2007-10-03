@@ -131,4 +131,9 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     public long getStartTime() {
         return startTime;
     }
+    
+    @Override
+    public DownloaderType getDownloadType() {
+        return DownloaderType.INNETWORK;
+    }
 }
