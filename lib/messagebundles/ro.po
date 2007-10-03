@@ -8,15 +8,529 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=((n == 1 ? 0: (((n % 100 > 19) || ((n % 100 "
-"== 0) && (n != 0))) ? 2: 1)));\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:03:24+0000\n"
+"Plural-Forms: nplurals=3; plural=(n == 1 ? 0: (((n % 100 > 19) || ((n % 100 "
+"== 0) && (n != 0))) ? 2: 1));\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Update-uri"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Sfarsit"
+
+#~ msgid "Loading Languages"
+#~ msgstr "Incarcare limbi"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Lipire"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Aveti publicate {0} fisiere (incarcare...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Aveti publicate {0} fisiere"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Cautare \"Ce e nou\" dupa: {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Tipul fisierului nu este recunoscut."
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Fisierul nu este gasit."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Fisierul este corupt."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Fisierul audio are o eroare necunoscuta."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Fisierul nu poate fi analizat."
+
+#~ msgid "Close the Window"
+#~ msgstr "Inchide fereastra"
+
+#~ msgid "Statistics"
+#~ msgstr "Statistici"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "A"
+
+#~ msgid "W"
+#~ msgstr "E"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Afiseaza sau ascunde tab-urile individuale"
+
+#~ msgid "G"
+#~ msgstr "I"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "&Statistics"
+#~ msgstr "&Statistici"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Afiseaza fereastra de statistici"
+
+#~ msgid "U"
+#~ msgstr "F"
+
+#~ msgid "E"
+#~ msgstr "E"
+
+#~ msgid "Results"
+#~ msgstr "Rezultate"
+
+#~ msgid "Files"
+#~ msgstr "Fisiere"
+
+#~ msgid "files"
+#~ msgstr "fisiere"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "fisiere (incarcare...)"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Recuperare esuata"
+
+#~ msgid "Querying Network"
+#~ msgstr "Reinteroghez reteaua"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Astepatare  {0}s dupa surse"
+
+#~ msgid "s for Sources"
+#~ msgstr "s dupa surse"
+
+#~ msgid "Files with this name"
+#~ msgstr "Fisiere cu acest nume"
+
+#~ msgid "Searches for files with the same file name."
+#~ msgstr "Cautari dupa fisiere cu acelasi nume"
+
+#~ msgid "Orginal query"
+#~ msgstr "Cerere orginal"
+
+#~ msgid "Performs the same search as the one which found this file previously."
+#~ msgstr ""
+#~ "Efectueaza aceeasi cautare ca aceea care a gasit acest fisier inainte."
+
+#~ msgid "Validation Required"
+#~ msgstr "Validare necesara"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Nici o linie nu este disponibila pentru produs."
+
+#~ msgid "Height:"
+#~ msgstr "Inaltime:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Apasati OK pentru a indeparta definitv licenta."
+
+#~ msgid "End Chat"
+#~ msgstr "Termina discutia"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Termina discutia cu gazda"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Incarcare setari..."
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Incarcare fereastra de statistici..."
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr ""
+#~ "Suport pentru LimeWire si continutul media independent. Obtineti PRO."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Computerul dumneavoastra nu pare a avea o conexiune activa la internet sau "
+#~ "un firewall blocheaza LimeWire sa acceseze internetul. Va rugam verificati "
+#~ "conexiunea sau setarile firewall-ului si apoi selectati \"Conectare\" din "
+#~ "meniul Fisier pentru a conecta LimeWire la retea."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Nu s-a gasit un port pentru conexiunile primite.\n"
+#~ "Specificati un port din fereastra de configurare."
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr ""
+#~ "Va rugam sa introduceti titlul fisierului pe care doriti sa-l publicati."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr ""
+#~ "Va rugam sa introduceti anul fisierului pe care odriti sa-l publicati."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Va rugam sa introduceti un URL de verificare valid pentru fisier."
+
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
+
+#~ msgid "Display:"
+#~ msgstr "Afisare:"
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Statisticile latimii de banda includ informatii complete despre toate "
+#~ "latimile de banda trimise upstresm si downstream. Facet click pe una dintre "
+#~ "categorii pentru a vedea statisticile dorite."
+
+#~ msgid "Network"
+#~ msgstr "Retea"
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Statistici despre starea curenta a retelei. Aceste statistici sunt relativ "
+#~ "inexacte din cauza dinamicii, naturii distributive a Gnutella si nu trebuie "
+#~ "luata drept referinta. Puteti primi insa, astfel, o idee generala asupra "
+#~ "starii curente a conexiunii dumneavoastra."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Statisticile avansate includ informatii detaliate pentru mesajele Gnutella "
+#~ "si traficul HTTP. Aceste informatii pot fi utile utilizatorilor avansati cat "
+#~ "si pentru cercetatorii retelei Gnutella. Statisticile avansate nu sunt "
+#~ "afisate implicit si nu sunt recomandate majoritatii utilizatorilor."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Afiseaza statistici avansate:"
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Upstream"
+#~ msgstr "Upstream"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Latimea de banda totala folosita pentru a trimite date, prin incarcari sau "
+#~ "mesaje Gnutella."
+
+#~ msgid "Downstream"
+#~ msgstr "Downstream"
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Latimea de banda totala folosita pentru a primi date, prin descarcari sau "
+#~ "mesaje Gnutella."
+
+#~ msgid "Received"
+#~ msgstr "Primite"
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr "Toate mesajele Gnutella primite de acest client."
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr "Toate mesajele Gnutella primite prin TCP, dupa tipul mesajului."
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "Toate mesajele Gnutella primite prin UDP, dupa tipul mesajului."
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr ""
+#~ "Toate mesajele Gnutella primite prin Multicast, dupa tipul mesajului."
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Toate mesajele Gnutella primite prin TCP, UDP sau Multicast."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr ""
+#~ "Numar de dubii duplicate primite prin TCP versus numar total de dubii."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Numar de dubii duplicate primite prin Multicast versus numar total de dubii."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Toate cererile primite, dupa hops."
+
+#~ msgid "All received queries, by time to live (TTL)."
+#~ msgstr "Toate cererile primite, dupa TTL"
+
+#~ msgid "Special Queries"
+#~ msgstr "Cereri speciale"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Toate cererile marcate speciale."
+
+#~ msgid "All received query hits, by hops."
+#~ msgstr "Toate cererile primite, dupa hops"
+
+#~ msgid "All received query hits, by time to live (TTL)."
+#~ msgstr "Toate cererile primite, dupa TTL"
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr ""
+#~ "Kilobiti totali pentru toate mesajele Gnutella primite de acest client."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCp, dupa tipul "
+#~ "mesajului."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin UDP, dupa tipul "
+#~ "mesajului."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin Multicast, dupa tipul "
+#~ "mesajului."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCP, UDP sau Multicast."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr ""
+#~ "Kilobiti totali in cererile duplicate primite prin TCP versus numar total de "
+#~ "cereri."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Kilobiti totali in cererile duplicate primite prin Multicast versus numar "
+#~ "total de cereri."
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
+
+#~ msgid "TCP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pinguri TCP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
+#~ "LimeWire."
+
+#~ msgid "TCP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ponguri TCP primite de la ceilalti clienti Gnutella Versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "TCP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari TCP primite de la ceilalti clienti Gnutella versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "TCP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid "TCP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Impinsaturi TCP primite de la alti clienti Gnutella versus utilizatori ai "
+#~ "LimeWire."
+
+#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pinguri UDP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
+#~ "LimeWire."
+
+#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ponguri UDP primite de la ceilalti clienti Gnutella Versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "UDP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari UDP primite de la ceilalti clienti Gnutella versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Impinsaturi UDP primite de la alti clienti Gnutella versus utilizatori ai "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pinguri Multicast primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ponguri Multicast primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari Multicast primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Impinsaturi Multicast primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid "Total kilobytes received by other LimeWires."
+#~ msgstr "Total kilobiti primiti de la ceilalti utilizatori LimeWire."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "The average size in kilobytes of received Gnutella messages."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "The average size in kilobytes of received messages from LimeWires."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Total mesaje filtrului."
+
+#~ msgid "messages"
+#~ msgstr "mesaje"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Erori Pong"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Erori Reply"
+
+#~ msgid "Push Errors"
+#~ msgstr "Erori Push"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Hard Limit"
+
+#~ msgid "No Route"
+#~ msgstr "No Route"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -1655,7 +2169,6 @@ msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
@@ -1664,7 +2177,6 @@ msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
@@ -7094,516 +7606,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Info"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Update-uri"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Sfarsit"
-
-#~ msgid "Loading Languages"
-#~ msgstr "Incarcare limbi"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Lipire"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "Aveti publicate {0} fisiere (incarcare...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Aveti publicate {0} fisiere"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "Cautare \"Ce e nou\" dupa: {0}"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr ". Tipul fisierului nu este recunoscut."
-
-#~ msgid ". The file cannot be found."
-#~ msgstr ". Fisierul nu este gasit."
-
-#~ msgid ". The file is corrupt."
-#~ msgstr ". Fisierul este corupt."
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr ". Fisierul audio are o eroare necunoscuta."
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr ". Fisierul nu poate fi analizat."
-
-#~ msgid "Close the Window"
-#~ msgstr "Inchide fereastra"
-
-#~ msgid "Statistics"
-#~ msgstr "Statistici"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "A"
-
-#~ msgid "W"
-#~ msgstr "E"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Afiseaza sau ascunde tab-urile individuale"
-
-#~ msgid "G"
-#~ msgstr "I"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "&Statistics"
-#~ msgstr "&Statistici"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Afiseaza fereastra de statistici"
-
-#~ msgid "U"
-#~ msgstr "F"
-
-#~ msgid "E"
-#~ msgstr "E"
-
-#~ msgid "Results"
-#~ msgstr "Rezultate"
-
-#~ msgid "Files"
-#~ msgstr "Fisiere"
-
-#~ msgid "files"
-#~ msgstr "fisiere"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "fisiere (incarcare...)"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "Recuperare esuata"
-
-#~ msgid "Querying Network"
-#~ msgstr "Reinteroghez reteaua"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Astepatare  {0}s dupa surse"
-
-#~ msgid "s for Sources"
-#~ msgstr "s dupa surse"
-
-#~ msgid "Files with this name"
-#~ msgstr "Fisiere cu acest nume"
-
-#~ msgid "Searches for files with the same file name."
-#~ msgstr "Cautari dupa fisiere cu acelasi nume"
-
-#~ msgid "Orginal query"
-#~ msgstr "Cerere orginal"
-
-#~ msgid "Performs the same search as the one which found this file previously."
-#~ msgstr ""
-#~ "Efectueaza aceeasi cautare ca aceea care a gasit acest fisier inainte."
-
-#~ msgid "Validation Required"
-#~ msgstr "Validare necesara"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Nici o linie nu este disponibila pentru produs."
-
-#~ msgid "Height:"
-#~ msgstr "Inaltime:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Apasati OK pentru a indeparta definitv licenta."
-
-#~ msgid "End Chat"
-#~ msgstr "Termina discutia"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Termina discutia cu gazda"
-
-#~ msgid "Loading Settings..."
-#~ msgstr "Incarcare setari..."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Incarcare fereastra de statistici..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr ""
-#~ "Suport pentru LimeWire si continutul media independent. Obtineti PRO."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Computerul dumneavoastra nu pare a avea o conexiune activa la internet sau "
-#~ "un firewall blocheaza LimeWire sa acceseze internetul. Va rugam verificati "
-#~ "conexiunea sau setarile firewall-ului si apoi selectati \"Conectare\" din "
-#~ "meniul Fisier pentru a conecta LimeWire la retea."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Nu s-a gasit un port pentru conexiunile primite.\n"
-#~ "Specificati un port din fereastra de configurare."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr ""
-#~ "Va rugam sa introduceti titlul fisierului pe care doriti sa-l publicati."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr ""
-#~ "Va rugam sa introduceti anul fisierului pe care odriti sa-l publicati."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Va rugam sa introduceti un URL de verificare valid pentru fisier."
-
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
-
-#~ msgid "Display:"
-#~ msgstr "Afisare:"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Statisticile latimii de banda includ informatii complete despre toate "
-#~ "latimile de banda trimise upstresm si downstream. Facet click pe una dintre "
-#~ "categorii pentru a vedea statisticile dorite."
-
-#~ msgid "Network"
-#~ msgstr "Retea"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Statistici despre starea curenta a retelei. Aceste statistici sunt relativ "
-#~ "inexacte din cauza dinamicii, naturii distributive a Gnutella si nu trebuie "
-#~ "luata drept referinta. Puteti primi insa, astfel, o idee generala asupra "
-#~ "starii curente a conexiunii dumneavoastra."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Statisticile avansate includ informatii detaliate pentru mesajele Gnutella "
-#~ "si traficul HTTP. Aceste informatii pot fi utile utilizatorilor avansati cat "
-#~ "si pentru cercetatorii retelei Gnutella. Statisticile avansate nu sunt "
-#~ "afisate implicit si nu sunt recomandate majoritatii utilizatorilor."
-
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Afiseaza statistici avansate:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "Upstream"
-#~ msgstr "Upstream"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Latimea de banda totala folosita pentru a trimite date, prin incarcari sau "
-#~ "mesaje Gnutella."
-
-#~ msgid "Downstream"
-#~ msgstr "Downstream"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Latimea de banda totala folosita pentru a primi date, prin descarcari sau "
-#~ "mesaje Gnutella."
-
-#~ msgid "Received"
-#~ msgstr "Primite"
-
-#~ msgid "All Gnutella messages received by this client."
-#~ msgstr "Toate mesajele Gnutella primite de acest client."
-
-#~ msgid "All Gnutella messages received over TCP, by message type."
-#~ msgstr "Toate mesajele Gnutella primite prin TCP, dupa tipul mesajului."
-
-#~ msgid "All Gnutella messages received over UDP, by message type."
-#~ msgstr "Toate mesajele Gnutella primite prin UDP, dupa tipul mesajului."
-
-#~ msgid "All Gnutella messages received over Multicast, by message type."
-#~ msgstr ""
-#~ "Toate mesajele Gnutella primite prin Multicast, dupa tipul mesajului."
-
-#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr "Toate mesajele Gnutella primite prin TCP, UDP sau Multicast."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over TCP versus the total number of "
-#~ "queries."
-#~ msgstr ""
-#~ "Numar de dubii duplicate primite prin TCP versus numar total de dubii."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Numar de dubii duplicate primite prin Multicast versus numar total de dubii."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Toate cererile primite, dupa hops."
-
-#~ msgid "All received queries, by time to live (TTL)."
-#~ msgstr "Toate cererile primite, dupa TTL"
-
-#~ msgid "Special Queries"
-#~ msgstr "Cereri speciale"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Toate cererile marcate speciale."
-
-#~ msgid "All received query hits, by hops."
-#~ msgstr "Toate cererile primite, dupa hops"
-
-#~ msgid "All received query hits, by time to live (TTL)."
-#~ msgstr "Toate cererile primite, dupa TTL"
-
-#~ msgid "Total kilobytes for all Gnutella messages received by this client."
-#~ msgstr ""
-#~ "Kilobiti totali pentru toate mesajele Gnutella primite de acest client."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCp, dupa tipul "
-#~ "mesajului."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin UDP, dupa tipul "
-#~ "mesajului."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin Multicast, dupa tipul "
-#~ "mesajului."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCP, UDP sau Multicast."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over TCP versus the total "
-#~ "number of queries."
-#~ msgstr ""
-#~ "Kilobiti totali in cererile duplicate primite prin TCP versus numar total de "
-#~ "cereri."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Kilobiti totali in cererile duplicate primite prin Multicast versus numar "
-#~ "total de cereri."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
-
-#~ msgid "TCP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pinguri TCP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
-#~ "LimeWire."
-
-#~ msgid "TCP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ponguri TCP primite de la ceilalti clienti Gnutella Versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "TCP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari TCP primite de la ceilalti clienti Gnutella versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "TCP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid "TCP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Impinsaturi TCP primite de la alti clienti Gnutella versus utilizatori ai "
-#~ "LimeWire."
-
-#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pinguri UDP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
-#~ "LimeWire."
-
-#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ponguri UDP primite de la ceilalti clienti Gnutella Versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "UDP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari UDP primite de la ceilalti clienti Gnutella versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Impinsaturi UDP primite de la alti clienti Gnutella versus utilizatori ai "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pinguri Multicast primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ponguri Multicast primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari Multicast primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Impinsaturi Multicast primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid "Total kilobytes received by other LimeWires."
-#~ msgstr "Total kilobiti primiti de la ceilalti utilizatori LimeWire."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "The average size in kilobytes of received Gnutella messages."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "The average size in kilobytes of received messages from LimeWires."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Total mesaje filtrului."
-
-#~ msgid "messages"
-#~ msgstr "mesaje"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Erori Pong"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Erori Reply"
-
-#~ msgid "Push Errors"
-#~ msgstr "Erori Push"
-
-#~ msgid "Hard Limit"
-#~ msgstr "Hard Limit"
-
-#~ msgid "No Route"
-#~ msgstr "No Route"

@@ -8,14 +8,158 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: 2007-09-24 14:21+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Rosetta-Export-Date: 2007-08-28 14:59:39+0000\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Mga Update"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Tapusin"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Ibahin ang &wika"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Ipagdikit"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Hindi makilala ang uri ng file nito."
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Hindi mahanap ang file."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Sira ang file."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ""
+#~ ". Mayroon isang hindi kilalang pagkakamali na nagmumula sa file na pang "
+#~ "awdyo."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Hindi masuri ang file."
+
+#~ msgid "Close the Window"
+#~ msgstr "Isara ang bintana."
+
+#~ msgid "I"
+#~ msgstr "G"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "T"
+
+#~ msgid "W"
+#~ msgstr "I"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Ipakita o itago ang mga bukod na pardilya."
+
+#~ msgid "G"
+#~ msgstr "K"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "&Statistics"
+#~ msgstr "Mga &bilang"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Ipakita ang statistics screen."
+
+#~ msgid "U"
+#~ msgstr "G"
+
+#~ msgid "E"
+#~ msgstr "E"
+
+#~ msgid "Results"
+#~ msgstr "Resulta"
+
+#~ msgid "Files"
+#~ msgstr "mga File"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Nabigo ang pagbabalik ng nasirang file"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Walang linya maaaring gamiting para sa panlabas."
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Itigil ang usapan ugnay ang isang ostiya."
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Nagkakarga ng bintanang pang-bilang..."
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "Tumulong sa pakikibahagi ng mga malayang media content."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Mukhang walang uri ng koneksiyon sa internet ang kompyuter o baka mayroon "
+#~ "itong firewall na hinahadlangan ang LimeWire na makakabit sa internet. Paki "
+#~ "tignan ang iyong koneksiyon o ang pagwawasto ng firewall, tapos piliin ang "
+#~ "\"Kumabit\" na makikita sa File menu para muling gamitin ang LimeWire."
+
+#~ msgid ""
+#~ "LimeWire is unable to connect to hosts on the Gnutella network. This is most "
+#~ "often due to firewalls or content-filtering software blocking access to "
+#~ "Gnutella. Please review your firewall's options to allow LimeWire to access "
+#~ "the Gnutella network or speak to your system administrator or ISP to "
+#~ "determine if Gnutella traffic is being filtered."
+#~ msgstr ""
+#~ "Hindi makakonekta ang LimeWire sa mga ostiya sa Gnutella Network. Ito'y "
+#~ "dahilan sa mga firewall o content-filtering software na gumagambala sa pag-"
+#~ "gamit ng Gnutella. Maaring paki tingnan muli ang mga detalye ng inyong "
+#~ "firewall para mapagana ng LimeWire ang Gnutella network o kaya makipag-usap "
+#~ "sa system administrator or ISP para malaman kung ang Gnutella ay "
+#~ "pinagmamasdan."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Hindi makahanap ng port na gagamitin sa mga papasok na koneksiyon.\n"
+#~ "Pumili ng isang port na mahahanap galing sa bintanang konpigurasiyon."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "seconds"
+#~ msgstr "mga segundo"
+
+#~ msgid "messages"
+#~ msgstr "mga mensahe"
+
+#~ msgid "Average"
+#~ msgstr "Karaniwang"
+
+#~ msgid "What's New?"
+#~ msgstr "Ang mga bago"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "Mga LimeWire ultrapeer"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "Mga LimeWire dahon"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -23,17 +167,17 @@ msgid ""
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
 "Hindi maisulat ng LimeWire ang kinakailangan na file dahil puno na ang iyong "
-"hard drive. Upang magpatuloy gamitin ang LimeWire, dapat bawasan ang mga "
-"laman ng iyong hard drive."
+"hard drive. Pakibawasan ang laman ng inyong hard drive upang patuloy na "
+"magamit ang LimeWire."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"Hindi mabuksan ng LimeWire ay kinakailangan na file sapagkat mayroon isang "
-"programa na kinandado ang file. Ang LimeWire ay puwedeng biglaang magsagawa "
-"hanggang sa bitawan ang file."
+"May kinakailangang file ang LimeWire na hindi nito mabuksan sapagkat "
+"ikinandado ito ng ibang programa. Maaaring kumilos sa hindi-inaasahang "
+"paraan ang LimeWire hanggat hindi napakakawalan ang file na ito."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
@@ -7050,146 +7194,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Inpo"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Mga Update"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Tapusin"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Ibahin ang &wika"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Ipagdikit"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr ". Hindi makilala ang uri ng file nito."
-
-#~ msgid ". The file cannot be found."
-#~ msgstr ". Hindi mahanap ang file."
-
-#~ msgid ". The file is corrupt."
-#~ msgstr ". Sira ang file."
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr ""
-#~ ". Mayroon isang hindi kilalang pagkakamali na nagmumula sa file na pang "
-#~ "awdyo."
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr ". Hindi masuri ang file."
-
-#~ msgid "Close the Window"
-#~ msgstr "Isara ang bintana."
-
-#~ msgid "I"
-#~ msgstr "G"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "T"
-
-#~ msgid "W"
-#~ msgstr "I"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Ipakita o itago ang mga bukod na pardilya."
-
-#~ msgid "G"
-#~ msgstr "K"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "&Statistics"
-#~ msgstr "Mga &bilang"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Ipakita ang statistics screen."
-
-#~ msgid "U"
-#~ msgstr "G"
-
-#~ msgid "E"
-#~ msgstr "E"
-
-#~ msgid "Results"
-#~ msgstr "Resulta"
-
-#~ msgid "Files"
-#~ msgstr "mga File"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "Nabigo ang pagbabalik ng nasirang file"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Walang linya maaaring gamiting para sa panlabas."
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Itigil ang usapan ugnay ang isang ostiya."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Nagkakarga ng bintanang pang-bilang..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "Tumulong sa pakikibahagi ng mga malayang media content."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Mukhang walang uri ng koneksiyon sa internet ang kompyuter o baka mayroon "
-#~ "itong firewall na hinahadlangan ang LimeWire na makakabit sa internet. Paki "
-#~ "tignan ang iyong koneksiyon o ang pagwawasto ng firewall, tapos piliin ang "
-#~ "\"Kumabit\" na makikita sa File menu para muling gamitin ang LimeWire."
-
-#~ msgid ""
-#~ "LimeWire is unable to connect to hosts on the Gnutella network. This is most "
-#~ "often due to firewalls or content-filtering software blocking access to "
-#~ "Gnutella. Please review your firewall's options to allow LimeWire to access "
-#~ "the Gnutella network or speak to your system administrator or ISP to "
-#~ "determine if Gnutella traffic is being filtered."
-#~ msgstr ""
-#~ "Hindi makakonekta ang LimeWire sa mga ostiya sa Gnutella Network. Ito'y "
-#~ "dahilan sa mga firewall o content-filtering software na gumagambala sa pag-"
-#~ "gamit ng Gnutella. Maaring paki tingnan muli ang mga detalye ng inyong "
-#~ "firewall para mapagana ng LimeWire ang Gnutella network o kaya makipag-usap "
-#~ "sa system administrator or ISP para malaman kung ang Gnutella ay "
-#~ "pinagmamasdan."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Hindi makahanap ng port na gagamitin sa mga papasok na koneksiyon.\n"
-#~ "Pumili ng isang port na mahahanap galing sa bintanang konpigurasiyon."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid "seconds"
-#~ msgstr "mga segundo"
-
-#~ msgid "messages"
-#~ msgstr "mga mensahe"
-
-#~ msgid "Average"
-#~ msgstr "Karaniwang"
-
-#~ msgid "What's New?"
-#~ msgstr "Ang mga bago"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "Mga LimeWire ultrapeer"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "Mga LimeWire dahon"

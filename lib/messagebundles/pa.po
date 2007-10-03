@@ -8,14 +8,81 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Rosetta-Export-Date: 2007-08-28 14:58:40+0000\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "ਖ਼ਤਮ"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "ਭਾਸ਼ਾ ਬਦਲੋ(Language)(&H)"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "ਚਿਪਕਾਓ"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "ਤੁਸੀਂ ਵੰਡ ਰਹੇ ਹੋ {0} ਫ਼ਾਇਲਾਂ ਲੋਡ ਹੋਰੀ ਨੇਂ"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "ਤੁਸੀਂ ਵੰਡ ਰਹੇ ਹੋ {0} ਫ਼ਾਇਲਾਂ"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "{0} ਨਵਾ ਕੀ’ਚ ਲੱਭੋ"
+
+#~ msgid "Close the Window"
+#~ msgstr "ਵਿੰਡੋ ਨੂੰ ਬੰਦ ਕਰੋ"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "V"
+
+#~ msgid "W"
+#~ msgstr "W"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "ਅਪਨੇ ਟੈਬਾਂ ਨੂੰ ਦਿਖਾਓ ਯਾਂ ਛੁਪਾਓ"
+
+#~ msgid "G"
+#~ msgstr "G"
+
+#~ msgid "&Statistics"
+#~ msgstr "ਆਂਕੜੇ(&S)"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "ਆਂਕੜੇਆਂ ਦੀ ਸਕਰੀਨ ਦਿਖਾਈ ਜਾਏ"
+
+#~ msgid "U"
+#~ msgstr "U"
+
+#~ msgid "E"
+#~ msgstr "E"
+
+#~ msgid "Results"
+#~ msgstr "ਨਤੀੱਜੇ"
+
+#~ msgid "Files"
+#~ msgstr "ਫ਼ਾਇਲਾਂ"
+
+#~ msgid "files"
+#~ msgstr "ਫ਼ਾਇਲਾਂ"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "ਫ਼ਾਇਲਾਂ ਲੋਡ ਹੋਰੀ ਨੇਂ"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -6865,69 +6932,3 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr ""
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "ਖ਼ਤਮ"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "ਭਾਸ਼ਾ ਬਦਲੋ(Language)(&H)"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "ਚਿਪਕਾਓ"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "ਤੁਸੀਂ ਵੰਡ ਰਹੇ ਹੋ {0} ਫ਼ਾਇਲਾਂ ਲੋਡ ਹੋਰੀ ਨੇਂ"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "ਤੁਸੀਂ ਵੰਡ ਰਹੇ ਹੋ {0} ਫ਼ਾਇਲਾਂ"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "{0} ਨਵਾ ਕੀ’ਚ ਲੱਭੋ"
-
-#~ msgid "Close the Window"
-#~ msgstr "ਵਿੰਡੋ ਨੂੰ ਬੰਦ ਕਰੋ"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "V"
-
-#~ msgid "W"
-#~ msgstr "W"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "ਅਪਨੇ ਟੈਬਾਂ ਨੂੰ ਦਿਖਾਓ ਯਾਂ ਛੁਪਾਓ"
-
-#~ msgid "G"
-#~ msgstr "G"
-
-#~ msgid "&Statistics"
-#~ msgstr "ਆਂਕੜੇ(&S)"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "ਆਂਕੜੇਆਂ ਦੀ ਸਕਰੀਨ ਦਿਖਾਈ ਜਾਏ"
-
-#~ msgid "U"
-#~ msgstr "U"
-
-#~ msgid "E"
-#~ msgstr "E"
-
-#~ msgid "Results"
-#~ msgstr "ਨਤੀੱਜੇ"
-
-#~ msgid "Files"
-#~ msgstr "ਫ਼ਾਇਲਾਂ"
-
-#~ msgid "files"
-#~ msgstr "ਫ਼ਾਇਲਾਂ"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "ਫ਼ਾਇਲਾਂ ਲੋਡ ਹੋਰੀ ਨੇਂ"

@@ -8,14 +8,1449 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-08-28 14:54+0000\n"
-"Last-Translator: Lime Wire <ubuntu@limewire.com>\n"
+"PO-Revision-Date: 2007-09-30 20:00+0000\n"
+"Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Rosetta-Export-Date: 2007-08-28 14:58:14+0000\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#~ msgid "International"
+#~ msgstr "International"
+
+#~ msgid "United States"
+#~ msgstr "Vereinigte Staaten"
+
+#~ msgid "English"
+#~ msgstr "Englisch"
+
+#~ msgid "Loading Languages"
+#~ msgstr "Sprache wird geladen"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "falsch"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "{0} Datei(en) freigeben (Wird geladen...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Gesamtzahl freigegebener Dateien: {0}"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "\"Was gibt''s Neues\" nach {0} durchsuchen"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Der Datei-Typ ist unbekannt."
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Die Datei konnte nicht gefunden werden."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Die Datei ist beschädigt."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Ein unbekannter Fehler mit der Audio Datei ist aufgetreten."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Die Datei kann nicht analysiert werden."
+
+#, java-format
+#~ msgid "LimeWire cannot play the file {0}. {1}"
+#~ msgstr "LimeWire konnte die Datei \"{0}\" nicht abspielen: {1}"
+
+#, fuzzy
+#~ msgid "other"
+#~ msgstr "Andere"
+
+#, fuzzy
+#~ msgid "string"
+#~ msgstr "Starte"
+
+#, fuzzy
+#~ msgid "1"
+#~ msgstr "T1"
+
+#~ msgid "Close the Window"
+#~ msgstr "Schließt dieses Fenster."
+
+#~ msgid "Statistics"
+#~ msgstr "Statistiken"
+
+#~ msgid "&New Folder"
+#~ msgstr "Neuer Ordner"
+
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "Fügt einen Ordner zum ausgewählten Verzeichnis hinzu"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "Stoppt die freigabe des ausgewählten Ordners"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "Ordner Umbennenen"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "Daten öffnen"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "Öffnet die ausgewählte(n) Datei(en)"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "Datei löschen"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "Löscht die ausgewählte(n) Datei(en)"
+
+#~ msgid "Refre&sh"
+#~ msgstr "Erneuern"
+
+#~ msgid "Reload the Library"
+#~ msgstr "Die Bibliothek neu laden"
+
+#~ msgid "E&xplore"
+#~ msgstr "Durchsuchen"
+
+#~ msgid "X"
+#~ msgstr "E"
+
+#~ msgid "V"
+#~ msgstr "A"
+
+#~ msgid "W"
+#~ msgstr "A"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Reiter anzeigen oder verstecken."
+
+#~ msgid "&Statistics"
+#~ msgstr "Statistiken"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Zeigt das Statistikfenster an."
+
+#~ msgid "News &Reader"
+#~ msgstr "Neuigkeiten"
+
+#~ msgid "Display the News Reader"
+#~ msgstr "Zeigt die Neuigkeiten an"
+
+#~ msgid "U"
+#~ msgstr "L"
+
+#~ msgid "Results"
+#~ msgstr "Resultate"
+
+#~ msgid "Only search results with a {0} are official LimeWire communications."
+#~ msgstr ""
+#~ "Nur Suchresultate mit diesem Symbol {0} sind Ofizielle LimeWire "
+#~ "veröffentlichungen"
+
+#~ msgid "Files"
+#~ msgstr "Dateien"
+
+#~ msgid "files"
+#~ msgstr "Dateien"
+
+#~ msgid "Waiting For Tracker"
+#~ msgstr "Warte auf Tracker (Server-Programm)"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Wiederherstellung fehlgeschlagen"
+
+#~ msgid "Querying Network"
+#~ msgstr "Erneute Suche"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Anfrage gesendet, warte... {0}s auf Antwort"
+
+#~ msgid "s for Sources"
+#~ msgstr "s auf Antwort"
+
+#~ msgid "Files with this name"
+#~ msgstr "Dateien mit dem Namen"
+
+#~ msgid "Searches for files with the same file name."
+#~ msgstr "Nach Dateien mit dem selben Dateinamen suchen."
+
+#~ msgid "Orginal query"
+#~ msgstr "Ursprüngliche Suchanfrage"
+
+#~ msgid "Performs the same search as the one which found this file previously."
+#~ msgstr "Führt die gleiche Suche durch, die diese Datei gefunden hat."
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr ""
+#~ "Entschuldigung, aber LimeWire war nicht in der Lage ihre alten torrents "
+#~ "wiederherzustellen."
+
+#~ msgid "Validation Required"
+#~ msgstr "Gültigkeitserklärung erforderlich"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Kein Ausgabegerät angeschlossen."
+
+#~ msgid "Height:"
+#~ msgstr "Höhe:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Bitte O.K. betätigen, um Lizenz dauerhaft zu entfernen."
+
+#~ msgid "End Chat"
+#~ msgstr "Chat beenden"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Beendet den Chat mit dem ausgewählten Rechner."
+
+#~ msgid "Loading Resources..."
+#~ msgstr "Ressourcen werden geladen..."
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Benutzereinstellungen werden geladen..."
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Statistikfenster wird geladen..."
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr ""
+#~ "Ünterstüzen Sie das Teilen von unabhängigen Medieninhalten. LimeWire Pro."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Dieser Computer scheint keine aktive Internetverbindung zu haben. Bitte "
+#~ "überprüfen Sie ihre Verbindung und wählen Sie \"Verbindung\" aus dem "
+#~ "Dateimenü, um sich mit dem LimeWire-Netz zu verbinden."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Konnte keinen Port für eingehende Verbindungen finden. Wählen Sie bitte "
+#~ "einen Port im Einstellungsfenster aus."
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr ""
+#~ "Bitte schreiben Sie den Titel der Datei die Sie veröffentlichen wollen."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr ""
+#~ "Bitte schreiben Sie das Jahr der Datei die Sie veröffentlichen wollen."
+
+#~ msgid "Please enter the copyright holder of the file you want to publish."
+#~ msgstr ""
+#~ "Bitte nennen Sie den Besitzer des Copyrights für diese Datei die Sie "
+#~ "veröffentlichen wollen."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Bitte schreiben Sie eine korrekte Überprüfungs-URL für die Lizenz."
+
+#~ msgid ""
+#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ msgstr ""
+#~ "LimeWire war nicht erfolgreich beim Download der Torrent Datei von dieser "
+#~ "URL:"
+
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
+
+#~ msgid "Check these associations when starting LimeWire:"
+#~ msgstr "Diese Verbindung überprüfen wenn LimeWire startet:"
+
+#~ msgid "Display:"
+#~ msgstr "Anzeige:"
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Die Bandbreitenstatistiken enthalten vollständige Informationen über die "
+#~ "gesamte Bandbreite, die für eingehende und ausgehende Daten verwendet wurde. "
+#~ "Klicken Sie auf eine der Kategorien, um die gewünschte Statistik anzusehen."
+
+#~ msgid "Network"
+#~ msgstr "Netzwerk"
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Statistiken über den derzeitigen Stand des Netzwerks. Diese Statistiken sind "
+#~ "aufgrund der dynamischen Art von Gnutella nicht sehr genau und sollten nicht "
+#~ "zu wörtlich genommen werden. Trotzdem können sie Ihnen einen grundlegenden "
+#~ "Überblick über den derzeitigen Stand Ihrer Verbindung geben."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Die Experten-Statistik enthält ausführliche Informationen über Gnutella-"
+#~ "Nachrichtenmenge und HTTP-traffic. Diese Informationen können sowohl für "
+#~ "fortgeschrittene Benutzer als auch für Forscher, die mit dem Gnutella-"
+#~ "Netzwerk arbeiten, sehr nützlich sein. Zum Beispiel können Forscher jede "
+#~ "Statistik in einer Datei speichern. Diese Datei wird automatisch benannt und "
+#~ "im Arbeitsverzeichnis abgelegt. Die Daten werden durch Kommas getrennt "
+#~ "ausgegeben und sind so einfach in jedem Tabellenprogramm anzusehen. Die "
+#~ "Experten-Statistik wird standardmässig nicht angezeigt und ist für die "
+#~ "meisten Benutzer nicht empfehlenswert."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Experten-Statistik anzeigen:"
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Gesamte Bandbreite für ausgehende Daten, sowohl für Uploads als auch für "
+#~ "Gnutella-Nachrichten."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Gesamte Bandbreite für eingehende Daten, sowohl für Downloads als auch für "
+#~ "Gnutella-Nachrichten."
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr ""
+#~ "Gesamt-Anzahl an Gnutella-Nachrichten, die dieser Client erhalten hat."
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr ""
+#~ "Anzahl von Gnutella-Nachrichten empfangen über TCP, sortiert nach Typ."
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "Anzahl an Gnutella-Nachrichten über TCP, sortiert nach Typ."
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr "Anzahl an Gnutella-Nachrichten über Multicast, sortiert nach Typ."
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Anzahl an Gnutella-Nachrichten über TCP, UDP oder Multicast."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr ""
+#~ "Anzahl an duplizierten Such-Anfrage, empfangen über TCP, verglichen mit "
+#~ "Gesamt-Anzahl von Such-Anfragen."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Anzahl von duplizierten Such-Anfrage, empfangen über Multicast, verglichen "
+#~ "mit Gesamt-Anzahl von Such-Anfragen."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Alle empfangenen Suchanfragen nach Hops"
+
+#~ msgid "All received queries, by time to live (TTL)."
+#~ msgstr "Alle empfangenen Suchanfragen nach Time-To-Live (TTL)."
+
+#~ msgid "Special Queries"
+#~ msgstr "Sonderanfrage"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Alle gesondert markierten Anfragen."
+
+#~ msgid "All received query hits, by hops."
+#~ msgstr "Alle empfangenen Suchantworten nach Hops."
+
+#~ msgid "All received query hits, by time to live (TTL)."
+#~ msgstr "Alle empfangenen Suchantworten nach Time-To-Live (TTL)."
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr ""
+#~ "Gesamt-Datenmenge an Gnutella-Nachrichten, die dieser Client erhalten hat."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr "Datenmenge an Gnutella-Nachrichten über TCP, sortiert nach Typ."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr "Datenmenge an Gnutella-Nachrichten über UDP, sortiert nach Typ."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr ""
+#~ "Datenmenge an Gnutella-Nachrichten über Multicast, sortiert nach Typ."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Datenmenge an Gnutella-Nachrichten über TCP und UDP."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr ""
+#~ "Datenmenge an duplizierten Such-Anfragen, erhalten über TCP, verglichen mit "
+#~ "Gesamt-Datenmenge an Such-Anfragen."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Datenmenge an duplizierten Such-Anfragen, erhalten über Multicast, "
+#~ "verglichen mit Gesamt-Datenmenge an Such-Anfragen."
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Alle empfangenen Suchanfragen in Kilobytes nach hops."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "Alle empfangenen Suchanfragen in Kilobytes nach Time-To-Live (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Alle empfangenen Suchantworten in Kilobytes nach hops."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "Alle empfangenen Suchantworten in Kilobytes nach Time-To-Live (TTL)."
+
+#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP Pings, erhalten von allen Gnutella Clients, verglichen mit denen von "
+#~ "LimeWire"
+
+#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP Pongs, erhalten von allen Gnutella Clients, gegen die von LimeWire."
+
+#~ msgid ""
+#~ "UDP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP Suchen, erhalten von allen Gnutella Clients, gegen die von LimeWire."
+
+#~ msgid ""
+#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP Such-Antworten, erhalten von allen Gnutella Clients, gegen die von "
+#~ "LimeWire."
+
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP Push Ersuchen, erhalten von allen Gnutella Clients, gegen die von "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Pings, erhalten von allen Gnutella Clients, verglichen mit denen "
+#~ "von LimeWire."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Pongs, erhalten von allen Gnutella Clients, gegen die von LimeWire."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Suchanfragen, erhalten von allen Gnutella Clients, gegen die von "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Multicast Such-Antworten, erhalten von allen Gnutella Clients, gegen die von "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Push Ersuchen, erhalten von allen Gnutella Clients, gegen die von "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Datenmenge für UDP Pings, erhalten von allen Gnutella Clients, verglichen "
+#~ "mit denen von LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Datenmenge für UDP Pongs, erhalten von allen Gnutella Clients verglichen mit "
+#~ "denen von LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "UDP Suchanfragen erhalten von allen Gnutella Clients gegen die von LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "UDP Such-Antworten, erhalten von allen Gnutella Clients gegen die von "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "UDP Push-Ersuchen, erhalten von allen Gnutella Clients gegen die von "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Multicast Pings erhalten von allen Gnutella Clients verglichen mit denen von "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Multicast Pongs, erhalten von allen Gnutella Clients, verglichen mit denen "
+#~ "von LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Multicast Suchanfragen, erhalten von allen Gnutella Clients, außer LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Multicast Such-Antworten, erhalten von allen Gnutella Clients, außer "
+#~ "LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Multicast Push-Ersuchen, erhalten von allen Gnutella Clients, außer LimeWire."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr ""
+#~ "Die durchschnittliche Größe in Kilobytes von empfangenen Gnutella "
+#~ "Nachrichten."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr ""
+#~ "Die durchschnittliche Größe in Kilobytes von empfangen LimeWire Nachrichten."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid ""
+#~ "All queries that were routed to other Ultrapeers for the last hop, using "
+#~ "query routing tables."
+#~ msgstr ""
+#~ "Alle Anfragen, die durch Nutzen von Query Routing Tabellen an andere "
+#~ "Ultrapeers für den letzten hop gesendet wurden."
+
+#~ msgid "All queries that were routed to leaves, using query routing tables."
+#~ msgstr ""
+#~ "Alle Anfragen, die unter Nutzung von Query Routing Tables an leaves geroutet "
+#~ "wurden."
+
+#~ msgid "All queries that were received from routed connections."
+#~ msgstr "Alle Anfragen, die von gerouteten Verbindungen empfangen wurden."
+
+#~ msgid "Hit"
+#~ msgstr "Treffer"
+
+#~ msgid "False Positive"
+#~ msgstr "Falsche Positive"
+
+#~ msgid "Errors"
+#~ msgstr "Fehler"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Generische Fehler"
+
+#~ msgid "Generic errors while reading messages."
+#~ msgstr "Generische Fehler beim Lesen von Nachrichten."
+
+#~ msgid "Errors while reading query messages."
+#~ msgstr "Fehler beim Lesen von Such-Anfragen."
+
+#~ msgid "Query Replies"
+#~ msgstr "Such-Antworten"
+
+#~ msgid "Errors while reading query reply messages."
+#~ msgstr "Fehler beim Lesen von Suchanfragen."
+
+#~ msgid "Ping Replies"
+#~ msgstr "Ping-Antworten"
+
+#~ msgid "Errors while reading ping replies."
+#~ msgstr "Fehler beim Lesen von Ping-Antworten."
+
+#~ msgid "Errors while reading pushes."
+#~ msgstr "Fehler beim Lesen von Pushes."
+
+#~ msgid "Vendor Messages"
+#~ msgstr "Hersteller-Nachrichten"
+
+#~ msgid "Errors while reading vendor messages."
+#~ msgstr "Fehler beim Lesen von Hersteller-Nachrichten."
+
+#~ msgid "All Gnutella messages sent out from this client."
+#~ msgstr ""
+#~ "Gesamt-Anzahl von Gnutella-Nachrichten, die dieser Client gesendet hat."
+
+#~ msgid "All Gnutella messages sent over TCP, by message type."
+#~ msgstr "Gesamt-Anzahl von Gnutella-Nachrichten über TCP, sortiert nach Typ."
+
+#~ msgid "All Gnutella messages sent over UDP, by message type."
+#~ msgstr "Gesamt-Anzahl von Gnutella-Nachrichten über UDP, sortiert nach Typ."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Gesamt-Anzahl von Gnutella-Nachrichten über Multicast, sortiert nach Typ."
+
+#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr "Gesamt-Anzahl von Gnutella-Nachrichten über TCP, UDP oder Multicast."
+
+#~ msgid "Total kilobytes for Gnutella messages sent out from this client."
+#~ msgstr ""
+#~ "Gesamt-Datenmenge an Gnutella-Nachrichten, die dieser Client gesendet hat."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgstr ""
+#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über TCP, sortiert nach Typ."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgstr ""
+#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über UDP, sortiert nach Typ."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über Multicast, sortiert nach Typ."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über TCP, UDP oder Multicast."
+
+#~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP-Pings, die von allen Gnutella-Clienten gesendet wurden, gegenüber "
+#~ "anderen LimeWires."
+
+#~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP-Ping-Antworten, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP-Such-Anfragen, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP-Such-Antworten, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP-Push-Ersuchen, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pings, die von allen Gnutella-Clienten gesendet wurden, gegenüber "
+#~ "anderen LimeWires."
+
+#~ msgid ""
+#~ "Multicast pongs sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Ping-Antorten, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Multicast queries sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Such-Anfragen, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Such-Antworten, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Push-Ersuchen, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid "Total kilobytes sent by other LimeWires."
+#~ msgstr "Gesamtkilobytes, die von anderen LimeWires gesendet wurden."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für UDP-Pings, die von allen Gnutella-Clienten gesendet wurden, "
+#~ "gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für UDP-Ping-Antworten, die von allen Gnutella-Clienten gesendet "
+#~ "wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für UDP-Such-Anfragen, die von allen Gnutella-Clienten gesendet "
+#~ "wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für UDP-Such-Antworten, die von allen Gnutella-Clienten gesendet "
+#~ "wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für UDP-Push-Ersuchen, die von allen Gnutella-Clienten gesendet "
+#~ "wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für Multicast Pings, die von allen Gnutella-Clienten gesendet "
+#~ "wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für Multicast Ping-Antworten, die von allen Gnutella-Clienten "
+#~ "gesendet wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für Multicast Such-Anfragen, die von allen Gnutella-Clienten "
+#~ "gesendet wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für Multicast Such-Antworten, die von allen Gnutella-Clienten "
+#~ "gesendet wurden, gegenüber anderen LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobytes für Multicast Push-Ersuchen, die von allen Gnutella-Clienten "
+#~ "gesendet wurden, gegenüber anderen LimeWires."
+
+#~ msgid "Handshaking"
+#~ msgstr "Handshaking"
+
+#~ msgid "Statistics for handshaking as a leaf."
+#~ msgstr "Statistiken für Handshaking als leaf."
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Statistiken für Handshaking als Ultrapeer."
+
+#~ msgid "Statistics for outgoing Gnutella connection handshaking."
+#~ msgstr "Statistiken für ausgehendes Gnutella-Verbindungshandshaking."
+
+#~ msgid "Statistics for incoming Gnutella connection handshaking."
+#~ msgstr "Statistiken für eingehendes Gnutella-Verbindungshandshaking."
+
+#~ msgid "Outgoing Server Reject"
+#~ msgstr "Zurückweisung ausgehender Server"
+
+#~ msgid ""
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
+#~ msgstr ""
+#~ "Statistiken für ausgehende Gnutella Verbindungen, deren Handshaking vom "
+#~ "Server zurückgewiesen wurde."
+
+#~ msgid "Compression"
+#~ msgstr "Kompression"
+
+#~ msgid "Statistics for compressed upstream traffic in kilobytes."
+#~ msgstr "Statistiken für den komprimierten ausgehenden Verkehr in Kilobytes."
+
+#~ msgid "Statistics for compressed downstream traffic in kilobytes."
+#~ msgstr "Statistiken für den komprimierten eingehenden Verkehr in Kilobytes."
+
+#~ msgid "Flow Control"
+#~ msgstr "Flusskontrolle"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Statistiken für kontrollierte Mitteilungen."
+
+#~ msgid "Statistics for flow controlled messages in kilobytes."
+#~ msgstr "Statistiken für kontrollierte Mitteilungen in Kilobytes."
+
+#~ msgid "Total number of errors routing messages to other clients."
+#~ msgstr "Gesamtzahl der Fehler beim Nachrichtenrouting an andere Clients."
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Such-Antwort Routingfehler"
+
+#~ msgid "Errors routing query hits."
+#~ msgstr "Gesamtzahl der Fehler beim Routing von Such-Antworten."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Gesamtzahl der gefilterten Nachrichten"
+
+#~ msgid ""
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
+#~ msgstr "Gesamtzahl von Gnutella-Verbindungsversuchen, intern oder extern."
+
+#~ msgid ""
+#~ "Total incoming requests received over time. This includes all connection "
+#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
+#~ msgstr ""
+#~ "Gesamtzahl eingehender HTTP-Anfragen. Enthält HEAD-, GET-, GIV-, CHAT-, "
+#~ "MAGNET-Kommandos usw."
+
+#~ msgid ""
+#~ "Total outgoing download connections attempts over time. This includes both "
+#~ "direct connections and pushed requests."
+#~ msgstr ""
+#~ "Alle ausgehenden Download-Verbindungen. Das beinhaltet sowohl Verbindungen "
+#~ "als auch Anforderungen."
+
+#~ msgid ""
+#~ "Total responses received from downloaders over time. This includes Busy, "
+#~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
+#~ msgstr ""
+#~ "Alle vom Downloader erhaltenen Antworten über Zeit. Das beinhaltet "
+#~ "Beschäftigt, Datei nicht gefunden, nicht freigegeben, Eingereiht, versch. IO "
+#~ "Fehler und OK Antworten."
+
+#~ msgid "Alt. Locations"
+#~ msgstr "Gültige Quellen"
+
+#~ msgid ""
+#~ "Total alternate locations received and removed over time. This includes "
+#~ "locations that we actively attempt to connect to, locations that we will "
+#~ "ignore, locations that couldn't be removed, and locations that we removed "
+#~ "permanently from attempting to connect to."
+#~ msgstr ""
+#~ "Alle empfangenen und entfernten Quellen über Zeit. Das beinhalte Quellen, zu "
+#~ "denen wir aktiv eine Verbindung aufbauen wollen, Quellen, die wir "
+#~ "ignorieren, Quellen, die nicht entfernt werden können und Quellen, die "
+#~ "permanent aus der Verbindungsliste entfernt wurden."
+
+#~ msgid "Transfers"
+#~ msgstr "Transfers"
+
+#~ msgid ""
+#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
+#~ "For HTTP1.1, values are per chunk."
+#~ msgstr ""
+#~ "Alle Transfers über Zeit. Das beinhaltet HTTP1.1 und HTTP1.0 Verbindungen. "
+#~ "Für HTTP1.1 sind die Werte pro Einheit angegeben."
+
+#~ msgid ""
+#~ "Records the time in milliseconds to establish TCP connections for downloads. "
+#~ "This can vary, for example, when servers are experiencing high loads."
+#~ msgstr ""
+#~ "Gibt die Zeit zum Aufbau von TCP-Verbindungen für Downloads in Millisekunden "
+#~ "an. Diese kann varrieren, z.B., wenn Server stark ausgelastet sind."
+
+#~ msgid "Requests"
+#~ msgstr "Anfragen"
+
+#~ msgid ""
+#~ "Total incoming upload requests. These numbers are incremented on every "
+#~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
+#~ "transfers."
+#~ msgstr ""
+#~ "Alle eingehenden Upload-Anfragen. Diese Nummern werden bei jeder Anfrage "
+#~ "erhöht und enthalten deshalb alle Einheiten für HTTP/1.1 Transfers."
+
+#~ msgid ""
+#~ "Total outgoing responses. These numbers are incremented before sending each "
+#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
+#~ "the number of requests for which we have attempted to transfer a portion of "
+#~ "a file."
+#~ msgstr ""
+#~ "Alle ausgehenden Antworten. Diese Nummern werden vor dem Versand jeder "
+#~ "Antwort erhöht und enthalten deshalb alle Einheiten für HTTP/1.1 Transfers. "
+#~ "'Normal' ist die Zahl der Anfragen, für die wir versucht haben, einen Teil "
+#~ "der Datei zu schicken."
+
+#~ msgid "Request Methods"
+#~ msgstr "Anfragemethoden"
+
+#~ msgid ""
+#~ "Total incoming request methods. These numbers are incremented either for "
+#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
+#~ "requests, after we have sent the initial GIV."
+#~ msgstr ""
+#~ "Alle eingehenden Anfrage-Methoden. Diese Nummern werden entweder bei "
+#~ "HTTP/1.1 Transfer NACH der ursprünglichen eingehenden Verbindungsanfrage "
+#~ "oder für Push-Anfragen, nachdem wir ein Anfangs-GIV gesendet haben, erhöht."
+
+#~ msgid "General"
+#~ msgstr "Gesamt"
+
+#~ msgid ""
+#~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
+#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
+#~ "counted as an interrupted upload.)"
+#~ msgstr ""
+#~ "Alle versuchten, beendeten, unterbrochenen oder blockierten Uploads. Diese "
+#~ "Nummern werden pro Verbindung, nicht pro chunk erhöht. (Blockierte Uploads "
+#~ "werden genauso gezählt wie unterbrochene Uploads.)"
+
+#~ msgid "seconds"
+#~ msgstr "Sekunden"
+
+#~ msgid "Average"
+#~ msgstr "Mittel"
+
+#~ msgid "Max"
+#~ msgstr "Max"
+
+#~ msgid "Color"
+#~ msgstr "Farbe"
+
+#~ msgid "Current"
+#~ msgstr "Aktuell"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Statistiken zu diesem Diagramm in einer Datei speichern."
+
+#~ msgid "Total Upstream"
+#~ msgstr "Ausgehend"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Eingehend"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP Gesamt"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "HTTP Header"
+
+#~ msgid "HTTP Content"
+#~ msgstr "HTTP Inhalt"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Gnutella Gesamt"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Gnutella Header"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Gnutella Nachrichten"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Ausgehend Gesamt (potentiell)"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Ausgehend Gesamt (tatsächlich)"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Eingehend Gesamt (potentiell)"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Eingehend Gesamt (tatsächlich)"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (potentiell)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP (tatsächlich)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (potentiell)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (tatsächlich)"
+
+#~ msgid "All Clients"
+#~ msgstr "Alle Clienten"
+
+#~ msgid "All Errors"
+#~ msgstr "Alle Fehler"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "Ungültige Mitteilungs-Länge"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "Ungültige Hops"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "Ungültige TTL"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "Hops > Soft Max"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(Hops + TTL) > Hard Max"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "Ungültiger Nachrichten-Code"
+
+#~ msgid "All Query Errors"
+#~ msgstr "Alle Anfragen-Fehler"
+
+#~ msgid "URN Query"
+#~ msgstr "URN Anfrage"
+
+#~ msgid "Query Too Large"
+#~ msgstr "Anfrage zu groß"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "XML Anfrage zu groß"
+
+#~ msgid "Empty Query"
+#~ msgstr "Leere Anfrage"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "Ungültige Schriftzeichen in Such-Anfrage"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "Alle Suchantworten-Fehler"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "Ungültiger Antwort-Port"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "Ungültige Antwort-Adresse"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "Ungültig Antwort-Geschwindigkeit"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "Alle Pingantworten-Fehler"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "Ungültiges Ping-Antwort-Mitteilung"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "Ungültiger Ping-Antworten-Port"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "Ungültige Ping-Antworten-Adresse"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "Ungültiger GGEP Block"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "Ungültige Hersteller-Länge"
+
+#~ msgid "All Push Errors"
+#~ msgstr "Alle Push-Fehler"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "Ungültiger Push-Port"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "Ungültige Push-Adresse"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "Ungültige Push-Mitteilung"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "Alle Herstellernachrichten-Fehler"
+
+#~ msgid "Invalid ID"
+#~ msgstr "Ungültige ID"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "Ungültiger Wähler"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "Ungültige Mitteilung"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "Unbekannte Hersteller-Nachricht"
+
+#~ msgid "All Messages"
+#~ msgstr "Alle Nachrichten"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "Routingtabelle (Patch)"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "What's New?"
+#~ msgstr "Was gibt's Neues?"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Ping-Antwort-Fehler"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Antwort-Fehler"
+
+#~ msgid "Push Errors"
+#~ msgstr "Push-Fehler"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Hard Limit"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "Hard Limit (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "Hard Limit (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "Hard Limit (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "Hard Limit (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "Hard Limit (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "Hard Limit (TTL 5 oder höher)"
+
+#~ msgid "No Route"
+#~ msgstr "Kein Routing"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Verbindungsversuche"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "Eingehende Versuche"
+
+#~ msgid "All Requests"
+#~ msgstr "Alle HTTP-Anfragen"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "HEAD-Anfragen"
+
+#~ msgid "GET Requests"
+#~ msgstr "GET-Anfragen"
+
+#~ msgid "Push Requests"
+#~ msgstr "Push-Ersuchen"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Gnutella Anfragen"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Gnutella (LimeWire) Anfragen"
+
+#~ msgid "Chat Requests"
+#~ msgstr "Chat-Anfragen"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "Magnet-Anfragen"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "Unbekannte Anfragen"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "Geblockte Rechner"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "Sofort geschlossen"
+
+#~ msgid "Accepted"
+#~ msgstr "Angenommen"
+
+#~ msgid "Busy"
+#~ msgstr "Besetzt"
+
+#~ msgid "Not Sharing Files"
+#~ msgstr "Kein Dateien freigegeben"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "Problem beim Lesen des Headers"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "Unbekannter Antwortcode"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "Inhalt URN nicht übereinstimmend"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "nicht kompatible Bereich"
+
+#~ msgid "IO Error"
+#~ msgstr "E/A Fehler"
+
+#~ msgid "Failed"
+#~ msgstr "Fehlgeschlagen"
+
+#~ msgid "Succeeded"
+#~ msgstr "Erfolgreich"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "Erfolgreich (HTTP 1.1)"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "Erfolgreich (HTTP 1.0)"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "Fehlgeschlagen (HTTP 1.1)"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "Fehlgeschlagen (HTTP 1.0)"
+
+#~ msgid "Retried Success"
+#~ msgstr "Erfolgreich bei Neuversuch"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "Gelungene Direktverbindung"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "Gelungene Push-Verbindungen"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "Fehlgeschlagene Push (unterbrochen)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "Fehlgeschlagene Push (kein GIV empfangen)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "Fehlgeschlagene Push (verlorene Verbindung)"
+
+#~ msgid "THEX Request"
+#~ msgstr "THEX-Anfrage"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "Gelungene Push-Proxy"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "Korruptes Push-Proxy"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "Fehlgeschlagenes Push-Proxy"
+
+#~ msgid "Push Proxy"
+#~ msgstr "Push-Proxy"
+
+#~ msgid "Update File"
+#~ msgstr "Datei updaten"
+
+#~ msgid "Traditional Get"
+#~ msgstr "Traditionelle GET-Anfrage"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "Unbekannte URN GET-Anfrage"
+
+#~ msgid "URN Get"
+#~ msgstr "URN GET-Anfrage"
+
+#~ msgid "Limit Reached"
+#~ msgstr "Limit erreicht"
+
+#~ msgid "Banned Client"
+#~ msgstr "Blockierter Client"
+
+#~ msgid "Freeloader"
+#~ msgstr "Freeloader"
+
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#~ msgid "Get"
+#~ msgstr "GET-Anfrage"
+
+#~ msgid "Head"
+#~ msgstr "HEAD-Anfrage"
+
+#~ msgid "Unknown"
+#~ msgstr "Unbekannt"
+
+#~ msgid "Pushed Get"
+#~ msgstr "Pushed GET-Anfrage"
+
+#~ msgid "Pushed Head"
+#~ msgstr "Pushed HEAD-Anfrage"
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "Pushed unbekannte Anfrage"
+
+#~ msgid "Push Failed"
+#~ msgstr "Push gescheitert"
+
+#~ msgid "Completed Responses"
+#~ msgstr "abgeschlossene Antworten"
+
+#~ msgid "Interrupted"
+#~ msgstr "Unterbrochen"
+
+#~ msgid "Stalled"
+#~ msgstr "Angehalten"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "Datei-Transfer beendet"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "Aus: abgelehnt (Endpunkt)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "Aus: abgelehnt (alter Ultrapeer)"
+
+#~ msgid "Out Acc."
+#~ msgstr "Aus: angenommen"
+
+#~ msgid "In Rej."
+#~ msgstr "Ein: abgelehnt"
+
+#~ msgid "In Acc."
+#~ msgstr "Ein: angenommen"
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "Aus: abgelehnt (voll)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "Aus: angenommen (befolgte Führung)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "Aus: angenommen (ignorierte Führung)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "Aus: angenommen (kein Führung)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "Ein: abgelehnt (Endpunkt)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "Ein: angenommen (Endpunkt)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "Ein: angenommen (führend zum Endpunkt)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "Ein: angenommen (Ultrapeer)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "Ein: abgelehnt (alle Kanäle besetzt)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "Ein: abgelehnt (Netwerk braucht Ultrapeer)"
+
+#~ msgid "Server Reject"
+#~ msgstr "Abgelehnter Server"
+
+#~ msgid "No Conclusion"
+#~ msgstr "Kein Abschluss"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "LimeWire Ultrapeers"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "LimeWire Endpunkte"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "Andere Ultrapeers"
+
+#~ msgid "Other Leaves"
+#~ msgstr "Andere Endpunkte"
+
+#~ msgid "Responses Requested"
+#~ msgstr "Angeforderte Antworten"
+
+#~ msgid "Responses Received"
+#~ msgstr "Empfangene Antworten"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "Ignorierte Antworten"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "OOB Erfolgsquote"
+
+#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
+#~ msgstr ""
+#~ "Anzahl der angeforderten und empfangenen Antworten über das OOB Protokoll"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -1219,11 +2654,11 @@ msgstr "Nie wieder anzeigen"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
 msgid "Change Language"
-msgstr ""
+msgstr "Sprache Ändern"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Sprach in der Statusleiste anzeigen"
 
 #. 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
@@ -1706,6 +3141,11 @@ msgid ""
 "chance of getting your file! In case a junk result appears to have a lot of "
 "sources, use the 'Junk' button to train LimeWire's junk filter."
 msgstr ""
+"Nervt es wenn die Downloads mitten drin aufhören? Es hilft wenn man in der "
+"Nr. - Spalte eine höhere Zahl nimmt. Sie ist die Anzahl von Stellen die im "
+"Netzwerk die Datei anbieten. Umso mehr Quellen, desto besser ist Chance "
+"deine Datei zu bekommen! Im Fall dass eine Müll-Datei eine hohe Anzahl an "
+"Quellen hat, benutze den Müll-Knopf um LimeWire's Müllfilter zu Trainieren."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:25
 msgid ""
@@ -1714,6 +3154,10 @@ msgid ""
 "places to download the file and automatically resume downloading if it finds "
 "any matches."
 msgstr ""
+"Wenn ein Download \"Mehr Quellen benötigt...\", können Sie ihn auswählen und "
+"im Kontextmenü \"Mehr Quellen zum Download suchen...\" klicken. LimeWire "
+"sucht dann im Netzwerk nach weiteren Rechnern, die über diese Datei "
+"verfügen, und fährt mit dem Download fort, wenn es solche findet."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:26
 msgid ""
@@ -1721,6 +3165,9 @@ msgid ""
 "the bar in the bottom-left corner will change colors. Once all bars are "
 "green (or blue!), LimeWire has completely connected."
 msgstr ""
+"Wenn LimeWire gestartet wird, muss es sich zum Netzwerk verbinden. "
+"Währenddessen ändern die Balken links in der Statuszeile ihre Farbe. Wenn "
+"alle Balken grün (oder blau) sind, ist LimeWire vollständig verbunden."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:27
 msgid ""
@@ -1730,6 +3177,10 @@ msgid ""
 "'Download into LimeWire' links, LimeWire will automatically ask if you want "
 "to use the new skin when the download completes."
 msgstr ""
+"Sie können das Aussehen von LimeWire ändern, indem Sie das Menü \"Ansicht\" "
+"öffnen und dort unter \"Motive verwenden\" ein neues Motiv auswählen. Neue "
+"Motive sind von der LimeWire Webseite erhältlich, wenn man \"Weitere "
+"Motive\" auswählt."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:28
 msgid ""
@@ -1737,6 +3188,10 @@ msgid ""
 "column to sort by is the '#' column, which can put the results that have the "
 "highest chance of downloading at the top of the list."
 msgstr ""
+"Suchergebnisse können durch einen Klick auf die Titelleiste einer Spalte. Am "
+"nützlichsten ist es, die Spalte \"Nr.\" zu sortieren, um die Ergebnisse mit "
+"den meisten Quellen zu Beginn der Liste anzuzeigen. Dies ist auch die "
+"Standardeinstellung."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:29
 msgid ""
@@ -1761,6 +3216,9 @@ msgid ""
 "the Library will count how many times LimeWire has returned a result from "
 "someone searching for that file."
 msgstr ""
+"Neugierig wieviel nach Ihren Dateien gesucht wird? Die Spalte \"Treffer\" im "
+"Dateisammlungsfenster zeigt an, wie oft eine Ihrer Dateien ein Ergebniss für "
+"eine Suche im Netzwerk war."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:32
 msgid ""
@@ -1773,12 +3231,16 @@ msgid ""
 "Looking for something rare? The more detailed your search is, the better "
 "your chances of getting a result you want!"
 msgstr ""
+"Suchen Sie etwas seltenes? Umso detaillierter Ihre Suche ist, umso besser "
+"sind die Chancen das gewünschte Resultat zu bekommen."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
 msgid ""
 "Want to open this Tip Of The Day dialog after you've closed it? Go to the "
 "Help menu and choose 'Tip of the Day'."
 msgstr ""
+"Möchten Sie den Tip des Tages Dialog noch mal lesen nach dem Sie ihn "
+"geschlossen haben? Gehe zu dem Hilfe-Menü und wähle Tip des 'Tages'"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
 msgid ""
@@ -1840,6 +3302,8 @@ msgid ""
 "Want to know more about the development of LimeWire? Visit <a "
 "href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
+"Möchten Sie mehr über die Entwicklung von LimeWire erfahren? Besuchen Sie "
+"die <a href=\"{0}\">LimeWire Open Source Website</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
 msgid ""
@@ -1894,6 +3358,8 @@ msgid ""
 "Don't know what to look for? Try a 'What's New' search and see what's "
 "recently been added to the network."
 msgstr ""
+"Keine Ahnung was suchen? Versuchen Sie die \"Was gibt's Neues?\" Suche, um "
+"herauszufinden, was kürzlich zum Netzwerk hinzugefügt wurde."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
@@ -1939,6 +3405,8 @@ msgid ""
 "Did you know? LimeWire supports two different peer-to-peer file sharing "
 "protocols: Gnutella and BitTorrent."
 msgstr ""
+"Schon bekannt? LimeWire unterstützt zwei verschiedene Peer-to-Peer "
+"Protokolle: Gnutella und BitTorrent."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:57
 msgid ""
@@ -1981,6 +3449,8 @@ msgid ""
 "If you try to download a file that you already have, LimeWire lets you know, "
 "even if the file has a different name."
 msgstr ""
+"Wenn Sie versuchen eine Datei herunterladen, die sie schon haben, teil "
+"LimeWire Ihnen das mit, selbst wenn die Dateinamen verschieden sind."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:63
 msgid ""
@@ -1994,6 +3464,8 @@ msgstr ""
 msgid ""
 "Have a lot of files? Try an instant search at the top of the Library window."
 msgstr ""
+"Haben Sie viele Dateien? Ihre freigegebenen Dateien können im Dateisammlungs "
+"Fenster durchsucht werden."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 #, java-format
@@ -2018,6 +3490,9 @@ msgid ""
 "for the globe. If there is a brick wall in front of it, your Internet "
 "connection is firewalled."
 msgstr ""
+"Sind Sie hinter einer Firewall? Am unteren Fensterrand in der Statuszeile "
+"gibt es einen Globus Symbol. Eine Steinmauer davor zeigt an, dass sich Ihr "
+"Rechner hinter einer Firewall befindet."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:68
 msgid ""
@@ -2038,6 +3513,8 @@ msgid ""
 "Don't strain your eyes to use LimeWire! You can adjust the text size by "
 "going to View &gt; Increase Font Size."
 msgstr ""
+"Belasten Sie nicht unnötig Ihre Augen, wenn Sie LimeWire benutzen. Im Menü "
+"\"Ansicht\" können sie die Font-Größe ändern."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:71
 msgid ""
@@ -2088,11 +3565,14 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:77
+#, fuzzy
 msgid ""
 "Unlike other peer-to-peer file-sharing programs, LimeWire can transfer files "
 "even if both parties are behind a firewall. You don't have to do anything "
 "extra because it happens automatically!"
 msgstr ""
+"Ungleich anderen P2P Dateifreigabeprogrammen kann LimeWire Dateien "
+"übermitteln, selbst wenn beide Parteien sich hinter einer Firewall befinden."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
 msgid ""
@@ -2114,6 +3594,8 @@ msgid ""
 "Want to share a large file? LimeWire supports file sizes up to 1 TB "
 "(terabyte)."
 msgstr ""
+"Möchten Sie eine große Datei freigeben? LimeWire unterstützt Dateien bis zu "
+"einer Größe von einem Terabyte."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
 msgid ""
@@ -7082,1437 +8564,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Informationen"
-
-#~ msgid "International"
-#~ msgstr "International"
-
-#~ msgid "United States"
-#~ msgstr "Vereinigte Staaten"
-
-#~ msgid "English"
-#~ msgstr "Englisch"
-
-#~ msgid "Loading Languages"
-#~ msgstr "Sprache wird geladen"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "falsch"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "{0} Datei(en) freigeben (Wird geladen...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Gesamtzahl freigegebener Dateien: {0}"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "\"Was gibt''s Neues\" nach {0} durchsuchen"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr ". Der Datei-Typ ist unbekannt."
-
-#~ msgid ". The file cannot be found."
-#~ msgstr ". Die Datei konnte nicht gefunden werden."
-
-#~ msgid ". The file is corrupt."
-#~ msgstr ". Die Datei ist beschädigt."
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr ". Ein unbekannter Fehler mit der Audio Datei ist aufgetreten."
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr ". Die Datei kann nicht analysiert werden."
-
-#, java-format
-#~ msgid "LimeWire cannot play the file {0}. {1}"
-#~ msgstr "LimeWire konnte die Datei \"{0}\" nicht abspielen: {1}"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "Andere"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "Starte"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
-
-#~ msgid "Close the Window"
-#~ msgstr "Schließt dieses Fenster."
-
-#~ msgid "Statistics"
-#~ msgstr "Statistiken"
-
-#~ msgid "&New Folder"
-#~ msgstr "Neuer Ordner"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "Fügt einen Ordner zum ausgewählten Verzeichnis hinzu"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "Stoppt die freigabe des ausgewählten Ordners"
-
-#~ msgid "&Rename Folder"
-#~ msgstr "Ordner Umbennenen"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "Daten öffnen"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "Öffnet die ausgewählte(n) Datei(en)"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "Datei löschen"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "Löscht die ausgewählte(n) Datei(en)"
-
-#~ msgid "Refre&sh"
-#~ msgstr "Erneuern"
-
-#~ msgid "Reload the Library"
-#~ msgstr "Die Bibliothek neu laden"
-
-#~ msgid "E&xplore"
-#~ msgstr "Durchsuchen"
-
-#~ msgid "X"
-#~ msgstr "E"
-
-#~ msgid "V"
-#~ msgstr "A"
-
-#~ msgid "W"
-#~ msgstr "A"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Reiter anzeigen oder verstecken."
-
-#~ msgid "&Statistics"
-#~ msgstr "Statistiken"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Zeigt das Statistikfenster an."
-
-#~ msgid "News &Reader"
-#~ msgstr "Neuigkeiten"
-
-#~ msgid "Display the News Reader"
-#~ msgstr "Zeigt die Neuigkeiten an"
-
-#~ msgid "U"
-#~ msgstr "L"
-
-#~ msgid "Results"
-#~ msgstr "Resultate"
-
-#~ msgid "Only search results with a {0} are official LimeWire communications."
-#~ msgstr ""
-#~ "Nur Suchresultate mit diesem Symbol {0} sind Ofizielle LimeWire "
-#~ "veröffentlichungen"
-
-#~ msgid "Files"
-#~ msgstr "Dateien"
-
-#~ msgid "files"
-#~ msgstr "Dateien"
-
-#~ msgid "Waiting For Tracker"
-#~ msgstr "Warte auf Tracker (Server-Programm)"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "Wiederherstellung fehlgeschlagen"
-
-#~ msgid "Querying Network"
-#~ msgstr "Erneute Suche"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Anfrage gesendet, warte... {0}s auf Antwort"
-
-#~ msgid "s for Sources"
-#~ msgstr "s auf Antwort"
-
-#~ msgid "Files with this name"
-#~ msgstr "Dateien mit dem Namen"
-
-#~ msgid "Searches for files with the same file name."
-#~ msgstr "Nach Dateien mit dem selben Dateinamen suchen."
-
-#~ msgid "Orginal query"
-#~ msgstr "Ursprüngliche Suchanfrage"
-
-#~ msgid "Performs the same search as the one which found this file previously."
-#~ msgstr "Führt die gleiche Suche durch, die diese Datei gefunden hat."
-
-#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr ""
-#~ "Entschuldigung, aber LimeWire war nicht in der Lage ihre alten torrents "
-#~ "wiederherzustellen."
-
-#~ msgid "Validation Required"
-#~ msgstr "Gültigkeitserklärung erforderlich"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Kein Ausgabegerät angeschlossen."
-
-#~ msgid "Height:"
-#~ msgstr "Höhe:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Bitte O.K. betätigen, um Lizenz dauerhaft zu entfernen."
-
-#~ msgid "End Chat"
-#~ msgstr "Chat beenden"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Beendet den Chat mit dem ausgewählten Rechner."
-
-#~ msgid "Loading Resources..."
-#~ msgstr "Ressourcen werden geladen..."
-
-#~ msgid "Loading Settings..."
-#~ msgstr "Benutzereinstellungen werden geladen..."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Statistikfenster wird geladen..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr ""
-#~ "Ünterstüzen Sie das Teilen von unabhängigen Medieninhalten. LimeWire Pro."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Dieser Computer scheint keine aktive Internetverbindung zu haben. Bitte "
-#~ "überprüfen Sie ihre Verbindung und wählen Sie \"Verbindung\" aus dem "
-#~ "Dateimenü, um sich mit dem LimeWire-Netz zu verbinden."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Konnte keinen Port für eingehende Verbindungen finden. Wählen Sie bitte "
-#~ "einen Port im Einstellungsfenster aus."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr ""
-#~ "Bitte schreiben Sie den Titel der Datei die Sie veröffentlichen wollen."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr ""
-#~ "Bitte schreiben Sie das Jahr der Datei die Sie veröffentlichen wollen."
-
-#~ msgid "Please enter the copyright holder of the file you want to publish."
-#~ msgstr ""
-#~ "Bitte nennen Sie den Besitzer des Copyrights für diese Datei die Sie "
-#~ "veröffentlichen wollen."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Bitte schreiben Sie eine korrekte Überprüfungs-URL für die Lizenz."
-
-#~ msgid ""
-#~ "LimeWire was unable to download the torrent file from the specified URL:"
-#~ msgstr ""
-#~ "LimeWire war nicht erfolgreich beim Download der Torrent Datei von dieser "
-#~ "URL:"
-
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
-
-#~ msgid "Check these associations when starting LimeWire:"
-#~ msgstr "Diese Verbindung überprüfen wenn LimeWire startet:"
-
-#~ msgid "Display:"
-#~ msgstr "Anzeige:"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Die Bandbreitenstatistiken enthalten vollständige Informationen über die "
-#~ "gesamte Bandbreite, die für eingehende und ausgehende Daten verwendet wurde. "
-#~ "Klicken Sie auf eine der Kategorien, um die gewünschte Statistik anzusehen."
-
-#~ msgid "Network"
-#~ msgstr "Netzwerk"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Statistiken über den derzeitigen Stand des Netzwerks. Diese Statistiken sind "
-#~ "aufgrund der dynamischen Art von Gnutella nicht sehr genau und sollten nicht "
-#~ "zu wörtlich genommen werden. Trotzdem können sie Ihnen einen grundlegenden "
-#~ "Überblick über den derzeitigen Stand Ihrer Verbindung geben."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Die Experten-Statistik enthält ausführliche Informationen über Gnutella-"
-#~ "Nachrichtenmenge und HTTP-traffic. Diese Informationen können sowohl für "
-#~ "fortgeschrittene Benutzer als auch für Forscher, die mit dem Gnutella-"
-#~ "Netzwerk arbeiten, sehr nützlich sein. Zum Beispiel können Forscher jede "
-#~ "Statistik in einer Datei speichern. Diese Datei wird automatisch benannt und "
-#~ "im Arbeitsverzeichnis abgelegt. Die Daten werden durch Kommas getrennt "
-#~ "ausgegeben und sind so einfach in jedem Tabellenprogramm anzusehen. Die "
-#~ "Experten-Statistik wird standardmässig nicht angezeigt und ist für die "
-#~ "meisten Benutzer nicht empfehlenswert."
-
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Experten-Statistik anzeigen:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Gesamte Bandbreite für ausgehende Daten, sowohl für Uploads als auch für "
-#~ "Gnutella-Nachrichten."
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Gesamte Bandbreite für eingehende Daten, sowohl für Downloads als auch für "
-#~ "Gnutella-Nachrichten."
-
-#~ msgid "All Gnutella messages received by this client."
-#~ msgstr ""
-#~ "Gesamt-Anzahl an Gnutella-Nachrichten, die dieser Client erhalten hat."
-
-#~ msgid "All Gnutella messages received over TCP, by message type."
-#~ msgstr ""
-#~ "Anzahl von Gnutella-Nachrichten empfangen über TCP, sortiert nach Typ."
-
-#~ msgid "All Gnutella messages received over UDP, by message type."
-#~ msgstr "Anzahl an Gnutella-Nachrichten über TCP, sortiert nach Typ."
-
-#~ msgid "All Gnutella messages received over Multicast, by message type."
-#~ msgstr "Anzahl an Gnutella-Nachrichten über Multicast, sortiert nach Typ."
-
-#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr "Anzahl an Gnutella-Nachrichten über TCP, UDP oder Multicast."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over TCP versus the total number of "
-#~ "queries."
-#~ msgstr ""
-#~ "Anzahl an duplizierten Such-Anfrage, empfangen über TCP, verglichen mit "
-#~ "Gesamt-Anzahl von Such-Anfragen."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Anzahl von duplizierten Such-Anfrage, empfangen über Multicast, verglichen "
-#~ "mit Gesamt-Anzahl von Such-Anfragen."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Alle empfangenen Suchanfragen nach Hops"
-
-#~ msgid "All received queries, by time to live (TTL)."
-#~ msgstr "Alle empfangenen Suchanfragen nach Time-To-Live (TTL)."
-
-#~ msgid "Special Queries"
-#~ msgstr "Sonderanfrage"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Alle gesondert markierten Anfragen."
-
-#~ msgid "All received query hits, by hops."
-#~ msgstr "Alle empfangenen Suchantworten nach Hops."
-
-#~ msgid "All received query hits, by time to live (TTL)."
-#~ msgstr "Alle empfangenen Suchantworten nach Time-To-Live (TTL)."
-
-#~ msgid "Total kilobytes for all Gnutella messages received by this client."
-#~ msgstr ""
-#~ "Gesamt-Datenmenge an Gnutella-Nachrichten, die dieser Client erhalten hat."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
-#~ msgstr "Datenmenge an Gnutella-Nachrichten über TCP, sortiert nach Typ."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
-#~ msgstr "Datenmenge an Gnutella-Nachrichten über UDP, sortiert nach Typ."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Datenmenge an Gnutella-Nachrichten über Multicast, sortiert nach Typ."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr "Datenmenge an Gnutella-Nachrichten über TCP und UDP."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over TCP versus the total "
-#~ "number of queries."
-#~ msgstr ""
-#~ "Datenmenge an duplizierten Such-Anfragen, erhalten über TCP, verglichen mit "
-#~ "Gesamt-Datenmenge an Such-Anfragen."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Datenmenge an duplizierten Such-Anfragen, erhalten über Multicast, "
-#~ "verglichen mit Gesamt-Datenmenge an Such-Anfragen."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Alle empfangenen Suchanfragen in Kilobytes nach hops."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "Alle empfangenen Suchanfragen in Kilobytes nach Time-To-Live (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Alle empfangenen Suchantworten in Kilobytes nach hops."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "Alle empfangenen Suchantworten in Kilobytes nach Time-To-Live (TTL)."
-
-#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP Pings, erhalten von allen Gnutella Clients, verglichen mit denen von "
-#~ "LimeWire"
-
-#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP Pongs, erhalten von allen Gnutella Clients, gegen die von LimeWire."
-
-#~ msgid ""
-#~ "UDP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP Suchen, erhalten von allen Gnutella Clients, gegen die von LimeWire."
-
-#~ msgid ""
-#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP Such-Antworten, erhalten von allen Gnutella Clients, gegen die von "
-#~ "LimeWire."
-
-#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP Push Ersuchen, erhalten von allen Gnutella Clients, gegen die von "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Pings, erhalten von allen Gnutella Clients, verglichen mit denen "
-#~ "von LimeWire."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Pongs, erhalten von allen Gnutella Clients, gegen die von LimeWire."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Suchanfragen, erhalten von allen Gnutella Clients, gegen die von "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Multicast Such-Antworten, erhalten von allen Gnutella Clients, gegen die von "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Push Ersuchen, erhalten von allen Gnutella Clients, gegen die von "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Datenmenge für UDP Pings, erhalten von allen Gnutella Clients, verglichen "
-#~ "mit denen von LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Datenmenge für UDP Pongs, erhalten von allen Gnutella Clients verglichen mit "
-#~ "denen von LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "UDP Suchanfragen erhalten von allen Gnutella Clients gegen die von LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "UDP Such-Antworten, erhalten von allen Gnutella Clients gegen die von "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "UDP Push-Ersuchen, erhalten von allen Gnutella Clients gegen die von "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Multicast Pings erhalten von allen Gnutella Clients verglichen mit denen von "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Multicast Pongs, erhalten von allen Gnutella Clients, verglichen mit denen "
-#~ "von LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Multicast Suchanfragen, erhalten von allen Gnutella Clients, außer LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Multicast Such-Antworten, erhalten von allen Gnutella Clients, außer "
-#~ "LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Multicast Push-Ersuchen, erhalten von allen Gnutella Clients, außer LimeWire."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr ""
-#~ "Die durchschnittliche Größe in Kilobytes von empfangenen Gnutella "
-#~ "Nachrichten."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr ""
-#~ "Die durchschnittliche Größe in Kilobytes von empfangen LimeWire Nachrichten."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
-#~ "All queries that were routed to other Ultrapeers for the last hop, using "
-#~ "query routing tables."
-#~ msgstr ""
-#~ "Alle Anfragen, die durch Nutzen von Query Routing Tabellen an andere "
-#~ "Ultrapeers für den letzten hop gesendet wurden."
-
-#~ msgid "All queries that were routed to leaves, using query routing tables."
-#~ msgstr ""
-#~ "Alle Anfragen, die unter Nutzung von Query Routing Tables an leaves geroutet "
-#~ "wurden."
-
-#~ msgid "All queries that were received from routed connections."
-#~ msgstr "Alle Anfragen, die von gerouteten Verbindungen empfangen wurden."
-
-#~ msgid "Hit"
-#~ msgstr "Treffer"
-
-#~ msgid "False Positive"
-#~ msgstr "Falsche Positive"
-
-#~ msgid "Errors"
-#~ msgstr "Fehler"
-
-#~ msgid "Generic Errors"
-#~ msgstr "Generische Fehler"
-
-#~ msgid "Generic errors while reading messages."
-#~ msgstr "Generische Fehler beim Lesen von Nachrichten."
-
-#~ msgid "Errors while reading query messages."
-#~ msgstr "Fehler beim Lesen von Such-Anfragen."
-
-#~ msgid "Query Replies"
-#~ msgstr "Such-Antworten"
-
-#~ msgid "Errors while reading query reply messages."
-#~ msgstr "Fehler beim Lesen von Suchanfragen."
-
-#~ msgid "Ping Replies"
-#~ msgstr "Ping-Antworten"
-
-#~ msgid "Errors while reading ping replies."
-#~ msgstr "Fehler beim Lesen von Ping-Antworten."
-
-#~ msgid "Errors while reading pushes."
-#~ msgstr "Fehler beim Lesen von Pushes."
-
-#~ msgid "Vendor Messages"
-#~ msgstr "Hersteller-Nachrichten"
-
-#~ msgid "Errors while reading vendor messages."
-#~ msgstr "Fehler beim Lesen von Hersteller-Nachrichten."
-
-#~ msgid "All Gnutella messages sent out from this client."
-#~ msgstr ""
-#~ "Gesamt-Anzahl von Gnutella-Nachrichten, die dieser Client gesendet hat."
-
-#~ msgid "All Gnutella messages sent over TCP, by message type."
-#~ msgstr "Gesamt-Anzahl von Gnutella-Nachrichten über TCP, sortiert nach Typ."
-
-#~ msgid "All Gnutella messages sent over UDP, by message type."
-#~ msgstr "Gesamt-Anzahl von Gnutella-Nachrichten über UDP, sortiert nach Typ."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Gesamt-Anzahl von Gnutella-Nachrichten über Multicast, sortiert nach Typ."
-
-#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr "Gesamt-Anzahl von Gnutella-Nachrichten über TCP, UDP oder Multicast."
-
-#~ msgid "Total kilobytes for Gnutella messages sent out from this client."
-#~ msgstr ""
-#~ "Gesamt-Datenmenge an Gnutella-Nachrichten, die dieser Client gesendet hat."
-
-#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
-#~ msgstr ""
-#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über TCP, sortiert nach Typ."
-
-#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
-#~ msgstr ""
-#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über UDP, sortiert nach Typ."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über Multicast, sortiert nach Typ."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Gesamt-Datenmenge an Gnutella-Nachrichten über TCP, UDP oder Multicast."
-
-#~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP-Pings, die von allen Gnutella-Clienten gesendet wurden, gegenüber "
-#~ "anderen LimeWires."
-
-#~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP-Ping-Antworten, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP-Such-Anfragen, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP-Such-Antworten, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP-Push-Ersuchen, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pings, die von allen Gnutella-Clienten gesendet wurden, gegenüber "
-#~ "anderen LimeWires."
-
-#~ msgid ""
-#~ "Multicast pongs sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Ping-Antorten, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Multicast queries sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Such-Anfragen, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Such-Antworten, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Push-Ersuchen, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid "Total kilobytes sent by other LimeWires."
-#~ msgstr "Gesamtkilobytes, die von anderen LimeWires gesendet wurden."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für UDP-Pings, die von allen Gnutella-Clienten gesendet wurden, "
-#~ "gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für UDP-Ping-Antworten, die von allen Gnutella-Clienten gesendet "
-#~ "wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für UDP-Such-Anfragen, die von allen Gnutella-Clienten gesendet "
-#~ "wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für UDP-Such-Antworten, die von allen Gnutella-Clienten gesendet "
-#~ "wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für UDP-Push-Ersuchen, die von allen Gnutella-Clienten gesendet "
-#~ "wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für Multicast Pings, die von allen Gnutella-Clienten gesendet "
-#~ "wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für Multicast Ping-Antworten, die von allen Gnutella-Clienten "
-#~ "gesendet wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für Multicast Such-Anfragen, die von allen Gnutella-Clienten "
-#~ "gesendet wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für Multicast Such-Antworten, die von allen Gnutella-Clienten "
-#~ "gesendet wurden, gegenüber anderen LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobytes für Multicast Push-Ersuchen, die von allen Gnutella-Clienten "
-#~ "gesendet wurden, gegenüber anderen LimeWires."
-
-#~ msgid "Handshaking"
-#~ msgstr "Handshaking"
-
-#~ msgid "Statistics for handshaking as a leaf."
-#~ msgstr "Statistiken für Handshaking als leaf."
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "Statistiken für Handshaking als Ultrapeer."
-
-#~ msgid "Statistics for outgoing Gnutella connection handshaking."
-#~ msgstr "Statistiken für ausgehendes Gnutella-Verbindungshandshaking."
-
-#~ msgid "Statistics for incoming Gnutella connection handshaking."
-#~ msgstr "Statistiken für eingehendes Gnutella-Verbindungshandshaking."
-
-#~ msgid "Outgoing Server Reject"
-#~ msgstr "Zurückweisung ausgehender Server"
-
-#~ msgid ""
-#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
-#~ "server."
-#~ msgstr ""
-#~ "Statistiken für ausgehende Gnutella Verbindungen, deren Handshaking vom "
-#~ "Server zurückgewiesen wurde."
-
-#~ msgid "Compression"
-#~ msgstr "Kompression"
-
-#~ msgid "Statistics for compressed upstream traffic in kilobytes."
-#~ msgstr "Statistiken für den komprimierten ausgehenden Verkehr in Kilobytes."
-
-#~ msgid "Statistics for compressed downstream traffic in kilobytes."
-#~ msgstr "Statistiken für den komprimierten eingehenden Verkehr in Kilobytes."
-
-#~ msgid "Flow Control"
-#~ msgstr "Flusskontrolle"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "Statistiken für kontrollierte Mitteilungen."
-
-#~ msgid "Statistics for flow controlled messages in kilobytes."
-#~ msgstr "Statistiken für kontrollierte Mitteilungen in Kilobytes."
-
-#~ msgid "Total number of errors routing messages to other clients."
-#~ msgstr "Gesamtzahl der Fehler beim Nachrichtenrouting an andere Clients."
-
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Such-Antwort Routingfehler"
-
-#~ msgid "Errors routing query hits."
-#~ msgstr "Gesamtzahl der Fehler beim Routing von Such-Antworten."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Gesamtzahl der gefilterten Nachrichten"
-
-#~ msgid ""
-#~ "Total number of Gnutella connection attempts, either initiated internally or "
-#~ "externally."
-#~ msgstr "Gesamtzahl von Gnutella-Verbindungsversuchen, intern oder extern."
-
-#~ msgid ""
-#~ "Total incoming requests received over time. This includes all connection "
-#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
-#~ msgstr ""
-#~ "Gesamtzahl eingehender HTTP-Anfragen. Enthält HEAD-, GET-, GIV-, CHAT-, "
-#~ "MAGNET-Kommandos usw."
-
-#~ msgid ""
-#~ "Total outgoing download connections attempts over time. This includes both "
-#~ "direct connections and pushed requests."
-#~ msgstr ""
-#~ "Alle ausgehenden Download-Verbindungen. Das beinhaltet sowohl Verbindungen "
-#~ "als auch Anforderungen."
-
-#~ msgid ""
-#~ "Total responses received from downloaders over time. This includes Busy, "
-#~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
-#~ msgstr ""
-#~ "Alle vom Downloader erhaltenen Antworten über Zeit. Das beinhaltet "
-#~ "Beschäftigt, Datei nicht gefunden, nicht freigegeben, Eingereiht, versch. IO "
-#~ "Fehler und OK Antworten."
-
-#~ msgid "Alt. Locations"
-#~ msgstr "Gültige Quellen"
-
-#~ msgid ""
-#~ "Total alternate locations received and removed over time. This includes "
-#~ "locations that we actively attempt to connect to, locations that we will "
-#~ "ignore, locations that couldn't be removed, and locations that we removed "
-#~ "permanently from attempting to connect to."
-#~ msgstr ""
-#~ "Alle empfangenen und entfernten Quellen über Zeit. Das beinhalte Quellen, zu "
-#~ "denen wir aktiv eine Verbindung aufbauen wollen, Quellen, die wir "
-#~ "ignorieren, Quellen, die nicht entfernt werden können und Quellen, die "
-#~ "permanent aus der Verbindungsliste entfernt wurden."
-
-#~ msgid "Transfers"
-#~ msgstr "Transfers"
-
-#~ msgid ""
-#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
-#~ "For HTTP1.1, values are per chunk."
-#~ msgstr ""
-#~ "Alle Transfers über Zeit. Das beinhaltet HTTP1.1 und HTTP1.0 Verbindungen. "
-#~ "Für HTTP1.1 sind die Werte pro Einheit angegeben."
-
-#~ msgid ""
-#~ "Records the time in milliseconds to establish TCP connections for downloads. "
-#~ "This can vary, for example, when servers are experiencing high loads."
-#~ msgstr ""
-#~ "Gibt die Zeit zum Aufbau von TCP-Verbindungen für Downloads in Millisekunden "
-#~ "an. Diese kann varrieren, z.B., wenn Server stark ausgelastet sind."
-
-#~ msgid "Requests"
-#~ msgstr "Anfragen"
-
-#~ msgid ""
-#~ "Total incoming upload requests. These numbers are incremented on every "
-#~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
-#~ "transfers."
-#~ msgstr ""
-#~ "Alle eingehenden Upload-Anfragen. Diese Nummern werden bei jeder Anfrage "
-#~ "erhöht und enthalten deshalb alle Einheiten für HTTP/1.1 Transfers."
-
-#~ msgid ""
-#~ "Total outgoing responses. These numbers are incremented before sending each "
-#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
-#~ "the number of requests for which we have attempted to transfer a portion of "
-#~ "a file."
-#~ msgstr ""
-#~ "Alle ausgehenden Antworten. Diese Nummern werden vor dem Versand jeder "
-#~ "Antwort erhöht und enthalten deshalb alle Einheiten für HTTP/1.1 Transfers. "
-#~ "'Normal' ist die Zahl der Anfragen, für die wir versucht haben, einen Teil "
-#~ "der Datei zu schicken."
-
-#~ msgid "Request Methods"
-#~ msgstr "Anfragemethoden"
-
-#~ msgid ""
-#~ "Total incoming request methods. These numbers are incremented either for "
-#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
-#~ "requests, after we have sent the initial GIV."
-#~ msgstr ""
-#~ "Alle eingehenden Anfrage-Methoden. Diese Nummern werden entweder bei "
-#~ "HTTP/1.1 Transfer NACH der ursprünglichen eingehenden Verbindungsanfrage "
-#~ "oder für Push-Anfragen, nachdem wir ein Anfangs-GIV gesendet haben, erhöht."
-
-#~ msgid "General"
-#~ msgstr "Gesamt"
-
-#~ msgid ""
-#~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
-#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
-#~ "counted as an interrupted upload.)"
-#~ msgstr ""
-#~ "Alle versuchten, beendeten, unterbrochenen oder blockierten Uploads. Diese "
-#~ "Nummern werden pro Verbindung, nicht pro chunk erhöht. (Blockierte Uploads "
-#~ "werden genauso gezählt wie unterbrochene Uploads.)"
-
-#~ msgid "seconds"
-#~ msgstr "Sekunden"
-
-#~ msgid "Average"
-#~ msgstr "Mittel"
-
-#~ msgid "Max"
-#~ msgstr "Max"
-
-#~ msgid "Color"
-#~ msgstr "Farbe"
-
-#~ msgid "Current"
-#~ msgstr "Aktuell"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "Statistiken zu diesem Diagramm in einer Datei speichern."
-
-#~ msgid "Total Upstream"
-#~ msgstr "Ausgehend"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Eingehend"
-
-#~ msgid "HTTP Total"
-#~ msgstr "HTTP Gesamt"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "HTTP Header"
-
-#~ msgid "HTTP Content"
-#~ msgstr "HTTP Inhalt"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Gnutella Gesamt"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "Gnutella Header"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Gnutella Nachrichten"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Ausgehend Gesamt (potentiell)"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Ausgehend Gesamt (tatsächlich)"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Eingehend Gesamt (potentiell)"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Eingehend Gesamt (tatsächlich)"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (potentiell)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP (tatsächlich)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (potentiell)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (tatsächlich)"
-
-#~ msgid "All Clients"
-#~ msgstr "Alle Clienten"
-
-#~ msgid "All Errors"
-#~ msgstr "Alle Fehler"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "Ungültige Mitteilungs-Länge"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "Ungültige Hops"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "Ungültige TTL"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "Hops > Soft Max"
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(Hops + TTL) > Hard Max"
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "Ungültiger Nachrichten-Code"
-
-#~ msgid "All Query Errors"
-#~ msgstr "Alle Anfragen-Fehler"
-
-#~ msgid "URN Query"
-#~ msgstr "URN Anfrage"
-
-#~ msgid "Query Too Large"
-#~ msgstr "Anfrage zu groß"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "XML Anfrage zu groß"
-
-#~ msgid "Empty Query"
-#~ msgstr "Leere Anfrage"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "Ungültige Schriftzeichen in Such-Anfrage"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "Alle Suchantworten-Fehler"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "Ungültiger Antwort-Port"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "Ungültige Antwort-Adresse"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "Ungültig Antwort-Geschwindigkeit"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "Alle Pingantworten-Fehler"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "Ungültiges Ping-Antwort-Mitteilung"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "Ungültiger Ping-Antworten-Port"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "Ungültige Ping-Antworten-Adresse"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "Ungültiger GGEP Block"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "Ungültige Hersteller-Länge"
-
-#~ msgid "All Push Errors"
-#~ msgstr "Alle Push-Fehler"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "Ungültiger Push-Port"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "Ungültige Push-Adresse"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "Ungültige Push-Mitteilung"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "Alle Herstellernachrichten-Fehler"
-
-#~ msgid "Invalid ID"
-#~ msgstr "Ungültige ID"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "Ungültiger Wähler"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "Ungültige Mitteilung"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "Unbekannte Hersteller-Nachricht"
-
-#~ msgid "All Messages"
-#~ msgstr "Alle Nachrichten"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "Routingtabelle (Patch)"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "What's New?"
-#~ msgstr "Was gibt's Neues?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Ping-Antwort-Fehler"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Antwort-Fehler"
-
-#~ msgid "Push Errors"
-#~ msgstr "Push-Fehler"
-
-#~ msgid "Hard Limit"
-#~ msgstr "Hard Limit"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "Hard Limit (TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "Hard Limit (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "Hard Limit (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "Hard Limit (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "Hard Limit (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "Hard Limit (TTL 5 oder höher)"
-
-#~ msgid "No Route"
-#~ msgstr "Kein Routing"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "Verbindungsversuche"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "Eingehende Versuche"
-
-#~ msgid "All Requests"
-#~ msgstr "Alle HTTP-Anfragen"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "HEAD-Anfragen"
-
-#~ msgid "GET Requests"
-#~ msgstr "GET-Anfragen"
-
-#~ msgid "Push Requests"
-#~ msgstr "Push-Ersuchen"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Gnutella Anfragen"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Gnutella (LimeWire) Anfragen"
-
-#~ msgid "Chat Requests"
-#~ msgstr "Chat-Anfragen"
-
-#~ msgid "Magnet Requests"
-#~ msgstr "Magnet-Anfragen"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "Unbekannte Anfragen"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "Geblockte Rechner"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "Sofort geschlossen"
-
-#~ msgid "Accepted"
-#~ msgstr "Angenommen"
-
-#~ msgid "Busy"
-#~ msgstr "Besetzt"
-
-#~ msgid "Not Sharing Files"
-#~ msgstr "Kein Dateien freigegeben"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "Problem beim Lesen des Headers"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "Unbekannter Antwortcode"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "Inhalt URN nicht übereinstimmend"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "nicht kompatible Bereich"
-
-#~ msgid "IO Error"
-#~ msgstr "E/A Fehler"
-
-#~ msgid "Failed"
-#~ msgstr "Fehlgeschlagen"
-
-#~ msgid "Succeeded"
-#~ msgstr "Erfolgreich"
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "Erfolgreich (HTTP 1.1)"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "Erfolgreich (HTTP 1.0)"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "Fehlgeschlagen (HTTP 1.1)"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "Fehlgeschlagen (HTTP 1.0)"
-
-#~ msgid "Retried Success"
-#~ msgstr "Erfolgreich bei Neuversuch"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "Gelungene Direktverbindung"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "Gelungene Push-Verbindungen"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "Fehlgeschlagene Push (unterbrochen)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "Fehlgeschlagene Push (kein GIV empfangen)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "Fehlgeschlagene Push (verlorene Verbindung)"
-
-#~ msgid "THEX Request"
-#~ msgstr "THEX-Anfrage"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "Gelungene Push-Proxy"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "Korruptes Push-Proxy"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "Fehlgeschlagenes Push-Proxy"
-
-#~ msgid "Push Proxy"
-#~ msgstr "Push-Proxy"
-
-#~ msgid "Update File"
-#~ msgstr "Datei updaten"
-
-#~ msgid "Traditional Get"
-#~ msgstr "Traditionelle GET-Anfrage"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "Unbekannte URN GET-Anfrage"
-
-#~ msgid "URN Get"
-#~ msgstr "URN GET-Anfrage"
-
-#~ msgid "Limit Reached"
-#~ msgstr "Limit erreicht"
-
-#~ msgid "Banned Client"
-#~ msgstr "Blockierter Client"
-
-#~ msgid "Freeloader"
-#~ msgstr "Freeloader"
-
-#~ msgid "Normal"
-#~ msgstr "Normal"
-
-#~ msgid "Get"
-#~ msgstr "GET-Anfrage"
-
-#~ msgid "Head"
-#~ msgstr "HEAD-Anfrage"
-
-#~ msgid "Unknown"
-#~ msgstr "Unbekannt"
-
-#~ msgid "Pushed Get"
-#~ msgstr "Pushed GET-Anfrage"
-
-#~ msgid "Pushed Head"
-#~ msgstr "Pushed HEAD-Anfrage"
-
-#~ msgid "Pushed Unknown"
-#~ msgstr "Pushed unbekannte Anfrage"
-
-#~ msgid "Push Failed"
-#~ msgstr "Push gescheitert"
-
-#~ msgid "Completed Responses"
-#~ msgstr "abgeschlossene Antworten"
-
-#~ msgid "Interrupted"
-#~ msgstr "Unterbrochen"
-
-#~ msgid "Stalled"
-#~ msgstr "Angehalten"
-
-#~ msgid "Completed File Transfers"
-#~ msgstr "Datei-Transfer beendet"
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "Aus: abgelehnt (Endpunkt)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "Aus: abgelehnt (alter Ultrapeer)"
-
-#~ msgid "Out Acc."
-#~ msgstr "Aus: angenommen"
-
-#~ msgid "In Rej."
-#~ msgstr "Ein: abgelehnt"
-
-#~ msgid "In Acc."
-#~ msgstr "Ein: angenommen"
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "Aus: abgelehnt (voll)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "Aus: angenommen (befolgte Führung)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "Aus: angenommen (ignorierte Führung)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "Aus: angenommen (kein Führung)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "Ein: abgelehnt (Endpunkt)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "Ein: angenommen (Endpunkt)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "Ein: angenommen (führend zum Endpunkt)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Ein: angenommen (Ultrapeer)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "Ein: abgelehnt (alle Kanäle besetzt)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "Ein: abgelehnt (Netwerk braucht Ultrapeer)"
-
-#~ msgid "Server Reject"
-#~ msgstr "Abgelehnter Server"
-
-#~ msgid "No Conclusion"
-#~ msgstr "Kein Abschluss"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "LimeWire Ultrapeers"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "LimeWire Endpunkte"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Andere Ultrapeers"
-
-#~ msgid "Other Leaves"
-#~ msgstr "Andere Endpunkte"
-
-#~ msgid "Responses Requested"
-#~ msgstr "Angeforderte Antworten"
-
-#~ msgid "Responses Received"
-#~ msgstr "Empfangene Antworten"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "Ignorierte Antworten"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "OOB Erfolgsquote"
-
-#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
-#~ msgstr ""
-#~ "Anzahl der angeforderten und empfangenen Antworten über das OOB Protokoll"

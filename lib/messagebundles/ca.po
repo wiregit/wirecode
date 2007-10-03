@@ -8,14 +8,362 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: 2007-09-30 21:21+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:00:59+0000\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Finalitza"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Carregant menus..."
+
+#~ msgid "Close the Window"
+#~ msgstr "Tanca la finestra"
+
+#~ msgid "I"
+#~ msgstr "D"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "M"
+
+#~ msgid "W"
+#~ msgstr "F"
+
+#~ msgid "D"
+#~ msgstr "D"
+
+#~ msgid "R"
+#~ msgstr "R"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "T"
+#~ msgstr "E"
+
+#~ msgid "&Statistics"
+#~ msgstr "&Estadístiques"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Mostra la pantalla d'estadístiques"
+
+#~ msgid "H"
+#~ msgstr "A"
+
+#~ msgid "U"
+#~ msgstr "C"
+
+#~ msgid "Files"
+#~ msgstr "fitxers"
+
+#~ msgid "Querying Network"
+#~ msgstr "Reenviant petició"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Petició reenviada, esperant  {0}s els resultats..."
+
+#~ msgid "End Chat"
+#~ msgstr "Atura el xat"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Atura el xat amb el servidor"
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Carregant finestra d'estadístiques..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "No s'ha trobat cap port disponible per les connexions entrants.\n"
+#~ "Si us plau, especifiqui un port a la finestra de configuració."
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Total number of messages received from other LimeWires."
+#~ msgstr "Total number of messages received from other LimeWires."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+
+#~ msgid "Total kilobytes received by other LimeWires."
+#~ msgstr "Total kilobytes received by other LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "Errors"
+
+#~ msgid "Query Replies"
+#~ msgstr "Resultats"
+
+#~ msgid "Ping Replies"
+#~ msgstr "Respostas \"pong\""
+
+#~ msgid "Compression"
+#~ msgstr "Compression"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Errors de ruta resultats"
+
+#~ msgid "Requests"
+#~ msgstr "Requests"
+
+#~ msgid "Request Methods"
+#~ msgstr "Methodes de sol·licituds"
+
+#~ msgid "seconds"
+#~ msgstr "secondes"
+
+#~ msgid "messages"
+#~ msgstr "missatges"
+
+#~ msgid "Average"
+#~ msgstr "Mitjiana"
+
+#~ msgid "Max"
+#~ msgstr "Màxim"
+
+#~ msgid "Total Upstream"
+#~ msgstr "Totals sortida"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Totals entrada"
+
+#~ msgid "HTTP Total"
+#~ msgstr "Totals HTTP"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "\"Headers\" HTTP"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Totals Gnutella"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "\"Headers\" Gnutella"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Missatges Gnutella"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Totals sortida (potential)"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Totals sortida (real)"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Totals entrada (potential)"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Totals entrada (real)"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (potential)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP (real)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (potential)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (real)"
+
+#~ msgid "All Clients"
+#~ msgstr "Qualsevol clients"
+
+#~ msgid "All Messages"
+#~ msgstr "Qualsevol missatges"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Errors de respostas \"pong\""
+
+#~ msgid "Reply Errors"
+#~ msgstr "Errors de resultats"
+
+#~ msgid "Push Errors"
+#~ msgstr "Errors de sol·licituds \"push\""
+
+#~ msgid "No Route"
+#~ msgstr "No ruta"
+
+#~ msgid "All Requests"
+#~ msgstr "Qualsevol sol·licituds"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "Sol·licituds \"HEAD\""
+
+#~ msgid "GET Requests"
+#~ msgstr "Sol·licituds \"GET\""
+
+#~ msgid "Push Requests"
+#~ msgstr "Sol·licituds Push"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Sol·licituds Gnutella"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Sol·licituds Gnutella (LimeWire)"
+
+#~ msgid "Accepted"
+#~ msgstr "Accepta"
+
+#~ msgid "Busy"
+#~ msgstr "Ocupat"
+
+#~ msgid "IO Error"
+#~ msgstr "Error E/S"
+
+#~ msgid "THEX Request"
+#~ msgstr "Sol·licituds THEX"
+
+#~ msgid "URN Get"
+#~ msgstr "GET URN"
+
+#~ msgid "Freeloader"
+#~ msgstr "Aprofitats"
+
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#~ msgid "Get"
+#~ msgstr "Sol·licituds \"GET\""
+
+#~ msgid "Head"
+#~ msgstr "Sol·licituds \"HEAD\""
+
+#~ msgid "Pushed Head"
+#~ msgstr "Sol·licituds \"HEAD\" (pushed)"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -207,7 +555,7 @@ msgstr "Programes"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:86
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr ""
+msgstr "So"
 
 #: core/com/limegroup/gnutella/MediaType.java:45
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:102
@@ -301,7 +649,7 @@ msgstr "&Fitxer"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Artist"
-msgstr ""
+msgstr "Artista"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #, fuzzy
@@ -315,7 +663,7 @@ msgstr "General"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 msgid "Track"
-msgstr ""
+msgstr "Cançó"
 
 #. *
 #. * The resource to use for the extension property.
@@ -340,7 +688,7 @@ msgstr "Mida"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 msgid "Year"
-msgstr ""
+msgstr "Any"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
@@ -369,7 +717,7 @@ msgstr "Lloc"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Copyright"
-msgstr ""
+msgstr "Drets de còpia"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
@@ -382,11 +730,11 @@ msgstr "Llicència:"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
 msgid "Director"
-msgstr ""
+msgstr "Director/a"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Producer"
-msgstr ""
+msgstr "Productor/a"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 #, fuzzy
@@ -400,7 +748,7 @@ msgstr "Connectant"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Subtitles"
-msgstr ""
+msgstr "Subtítols"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 #, fuzzy
@@ -414,7 +762,7 @@ msgstr "Encerts"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Width"
-msgstr ""
+msgstr "Amplada"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:122
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
@@ -424,7 +772,7 @@ msgstr "Imatges"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
 msgid "Description"
-msgstr ""
+msgstr "Descripció"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
@@ -444,11 +792,11 @@ msgstr "Documents"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 msgid "Topic"
-msgstr ""
+msgstr "Tema"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Author"
-msgstr ""
+msgstr "Autor/a"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:136
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
@@ -463,15 +811,15 @@ msgstr "Altres servidors"
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:52
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:218
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 msgid "Publisher"
-msgstr ""
+msgstr "Editor/a"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Platform"
-msgstr ""
+msgstr "Plataforma"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
 msgid "The selected .torrent file may contain a security hazard."
@@ -634,7 +982,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
 msgid "OK"
-msgstr ""
+msgstr "SÍ"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -762,7 +1110,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:334
 msgid "Deselect All"
-msgstr ""
+msgstr "Deselecciona-ho tot"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:336
 msgid "Deselects all Items in the List"
@@ -770,7 +1118,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
-msgstr ""
+msgstr "Buida l'historial"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:133
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
@@ -1088,7 +1436,7 @@ msgstr "Entrada"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:200
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:57
 msgid "Cancel"
-msgstr ""
+msgstr "Canceŀla"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:92
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:43
@@ -1134,7 +1482,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
 msgid "Change Language"
-msgstr ""
+msgstr "Canvia d'Idioma"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
 msgid "Show Language in status bar"
@@ -1265,7 +1613,7 @@ msgstr "Actual"
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:46
 msgid "Copy"
-msgstr ""
+msgstr "Copia"
 
 #. *
 #. * The paste action.
@@ -1284,7 +1632,7 @@ msgstr "Camí"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1266
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:119
 msgid "Delete"
-msgstr ""
+msgstr "Esborra"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 msgid "Add"
@@ -1592,7 +1940,7 @@ msgstr "Carregant"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:48
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Consell del dia"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:54
 msgid "Did You Know..."
@@ -2537,12 +2885,12 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:156
 msgid "Update Now"
-msgstr ""
+msgstr "Actualitza ara"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:159
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:192
 msgid "Visit http://www.limewire.com to update!"
-msgstr ""
+msgstr "Visita http://www.limewire.com per a actualitzar."
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:169
 msgid ""
@@ -2615,7 +2963,7 @@ msgstr "Què m'ofereix la versió PRO?"
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:172
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:200
 msgid "Later"
-msgstr ""
+msgstr "Després"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:174
 msgid "Get LimeWire PRO Later"
@@ -2707,11 +3055,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:145
 msgid "URL"
-msgstr ""
+msgstr "Adreça URL"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:159
 msgid "Paste from Clipboard"
-msgstr ""
+msgstr "Enganxa del porta-retalls"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:187
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:207
@@ -2898,7 +3246,7 @@ msgstr "Proveïdor/versió"
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:30
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:274
 msgid "Time"
-msgstr ""
+msgstr "Hora"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:90
 msgid "Compressed (I/O)"
@@ -2906,7 +3254,7 @@ msgstr "Compressa (E/S)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:96
 msgid "SSL Overhead (I/O)"
-msgstr ""
+msgstr "SSL Overhead (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:103
 msgid "QRP (%)"
@@ -2914,7 +3262,7 @@ msgstr "QRP (%/Mida)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:108
 msgid "QRP Empty"
-msgstr ""
+msgstr "QRP Buit"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:120
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:63
@@ -2968,7 +3316,7 @@ msgstr "peers"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:77
 msgid "Standard"
-msgstr ""
+msgstr "Estàndard"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:162
 msgid "Loading Connections Window..."
@@ -3000,7 +3348,7 @@ msgstr "Poor"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:389
 msgid "Use TLS:"
-msgstr ""
+msgstr "Usa TLS:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:26
 msgid "Peer"
@@ -3037,7 +3385,7 @@ msgstr "Nombre de fitxers que vosté està compartint."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:118
 msgid "Do not show this message again."
-msgstr ""
+msgstr "No tornis a mostrar aquest missatge."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:121
 msgid ""
@@ -3068,7 +3416,7 @@ msgstr "Esperant per servidor ocupat"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:78
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:71
 msgid "Complete"
-msgstr ""
+msgstr "Complet"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:84
 msgid "Aborted"
@@ -3123,7 +3471,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:157
 msgid "Pausing..."
-msgstr ""
+msgstr "Pausant..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:163
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:39
@@ -3137,7 +3485,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:171
 msgid "Resuming..."
-msgstr ""
+msgstr "Resumint..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:175
 #, fuzzy
@@ -3176,7 +3524,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:217
 msgid "Chunks"
-msgstr ""
+msgstr "Trossos"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:223
 #, fuzzy
@@ -3463,7 +3811,7 @@ msgstr "Atura descàrrega"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:955
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:100
 msgid "Pause"
-msgstr ""
+msgstr "Pausa"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:957
 #, fuzzy
@@ -3534,7 +3882,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:314
 msgid "Overwrite"
-msgstr ""
+msgstr "Sobrescriu"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:316
 msgid "Overwrite the Existing File"
@@ -3926,7 +4274,7 @@ msgstr "Pot establir el directori on es desaran els fitxers."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:370
 msgid "Configure..."
-msgstr ""
+msgstr "Configura..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:54
 #, fuzzy
@@ -3969,7 +4317,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:17
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:46
 msgid "Icon"
-msgstr ""
+msgstr "Icona"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:113
 msgid "Path"
@@ -3993,7 +4341,7 @@ msgstr "Servidors"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:154
 msgid "Last Modified"
-msgstr ""
+msgstr "Última modificació"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
@@ -4229,7 +4577,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:35
 #: gui/com/limegroup/gnutella/gui/tabs/LoggingTab.java:22
 msgid "Logging"
-msgstr ""
+msgstr "Entrant"
 
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:56
 #, fuzzy
@@ -4238,7 +4586,7 @@ msgstr "Carregant finestra d'opcions..."
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:19
 msgid "&Advanced"
-msgstr ""
+msgstr "&Avançat"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:28
 msgid "Mojito &DHT Arcs View"
@@ -4553,7 +4901,7 @@ msgstr "Desar"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:367
 msgid "Basic"
-msgstr ""
+msgstr "Bàsic"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
 msgid "Slots"
@@ -4572,7 +4920,7 @@ msgstr "Aturada"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
 msgid "Updates"
-msgstr ""
+msgstr "Actualitza"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:344
 msgid "Player"
@@ -4580,7 +4928,7 @@ msgstr "Reproductor"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 msgid "Status Bar"
-msgstr ""
+msgstr "Barra d'estat"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:349
 msgid "iTunes"
@@ -4589,7 +4937,7 @@ msgstr "iTunes"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:351
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:14
 msgid "Importing"
-msgstr ""
+msgstr "S'està important"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
 msgid "Helper Apps"
@@ -4611,7 +4959,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:363
 msgid "Autocompletion"
-msgstr ""
+msgstr "Autocompleta"
 
 #. search options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:366
@@ -4621,7 +4969,7 @@ msgstr "Cercar"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:368
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:31
 msgid "Quality"
-msgstr ""
+msgstr "Qualitat"
 
 #. filter options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:372
@@ -4641,7 +4989,7 @@ msgstr "\"Content\" HTTP"
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:442
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Junk"
-msgstr ""
+msgstr "Brossa"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:375
 msgid "Keywords"
@@ -4662,12 +5010,12 @@ msgstr "Tallafocs"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:382
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:27
 msgid "Proxy"
-msgstr ""
+msgstr "Intermediari"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
-msgstr ""
+msgstr "Interfície de xarxa"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:56
@@ -4677,7 +5025,7 @@ msgstr "Altres servidors"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:387
 msgid "Performance"
-msgstr ""
+msgstr "Rendiment"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsMediator.java:69
 msgid "Loading Options Window..."
@@ -4918,7 +5266,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:596
 msgid "Password:"
-msgstr ""
+msgstr "Contrasenya:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:20
 msgid ""
@@ -4959,7 +5307,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:22
 msgid "Capabilities"
-msgstr ""
+msgstr "Capacitats"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:24
 msgid ""
@@ -5016,7 +5364,7 @@ msgstr "Velocitat de càrrega:"
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:45
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:45
 msgid "Unlimited"
-msgstr ""
+msgstr "Sense límit"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:20
 #, fuzzy
@@ -5263,7 +5611,7 @@ msgstr "Ranures de càrrega màximes:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:46
 msgid "Media Type"
-msgstr ""
+msgstr "Tipus de mitjà"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:124
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:142
@@ -5441,7 +5789,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:36
 msgid "No Proxy"
-msgstr ""
+msgstr "Sense proxy"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:38
 msgid "Socks v4"
@@ -5461,7 +5809,7 @@ msgstr "HTTP"
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:48
 msgid "Proxy:"
-msgstr ""
+msgstr "Proxy:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:22
 msgid "You can automatically delete old incomplete download files."
@@ -5875,7 +6223,7 @@ msgstr "Llistas de reproducció (*.m3u)"
 #: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:24
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:314
 msgid "Multiple"
-msgstr ""
+msgstr "Múltiple"
 
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:82
 msgid "Option"
@@ -5910,7 +6258,7 @@ msgstr "Tot"
 
 #: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:174
 msgid "Getting Started"
-msgstr ""
+msgstr "Com començar"
 
 #: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:179
 msgid ""
@@ -5939,7 +6287,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:439
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 msgid "Not Junk"
-msgstr ""
+msgstr "No és brossa"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:255
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:367
@@ -5959,7 +6307,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:856
 msgid "More Info..."
-msgstr ""
+msgstr "Més informació..."
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:44
 #, fuzzy
@@ -6104,7 +6452,7 @@ msgstr "Bloqueja servidor"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Mark As"
-msgstr ""
+msgstr "Marca com a"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 #, fuzzy
@@ -6189,7 +6537,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:206
 msgid "Media"
-msgstr ""
+msgstr "Multimèdia"
 
 #: gui/com/limegroup/gnutella/gui/search/TableLine.java:673
 msgid ""
@@ -6212,7 +6560,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:48
 msgid "Details"
-msgstr ""
+msgstr "Detalls"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:45
 msgid "Revert To Default"
@@ -6346,7 +6694,7 @@ msgstr "Transferència interrompuda"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:77
 msgid "File Not Found"
-msgstr ""
+msgstr "No s'ha trobat el fitxer"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:83
 msgid "Queued at"
@@ -6625,7 +6973,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:335
 msgid "How does it work?"
-msgstr ""
+msgstr "Com funciona?"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:421
 msgid "ShareAlike"
@@ -6661,7 +7009,7 @@ msgstr "Empra el port:"
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:532
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
 msgid "Description:"
-msgstr ""
+msgstr "Descripció:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:553
 msgid "Please enter the copyright holder, copright year and title."
@@ -6713,11 +7061,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:148
 msgid "Copy to Clipboard"
-msgstr ""
+msgstr "Copia al portapapers"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:44
 msgid "Kind:"
-msgstr ""
+msgstr "Tipus:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:70
 msgid "Size:"
@@ -6797,7 +7145,7 @@ msgstr "Carregant"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:251
 msgid "of"
-msgstr ""
+msgstr "de"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:267
 #, fuzzy
@@ -6826,16 +7174,16 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:72
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:86
 msgid "Title:"
-msgstr ""
+msgstr "Títol:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
 msgid "Artist:"
-msgstr ""
+msgstr "Artista:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:39
 msgid "Album:"
-msgstr ""
+msgstr "Àlbum:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:40
 #, fuzzy
@@ -6845,7 +7193,7 @@ msgstr "General"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:57
 msgid "Year:"
-msgstr ""
+msgstr "Any:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:42
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:56
@@ -6854,7 +7202,7 @@ msgstr "Tipus:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
-msgstr ""
+msgstr "Pista:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
@@ -6883,7 +7231,7 @@ msgstr "SHA1:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:49
 msgid "Price:"
-msgstr ""
+msgstr "Preu:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:50
 #, fuzzy
@@ -6919,11 +7267,11 @@ msgstr "Llicència:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:64
 msgid "Director:"
-msgstr ""
+msgstr "Director/a:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:65
 msgid "Studio:"
-msgstr ""
+msgstr "Estudi:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:67
 msgid "Stars: (Please separate with comma)"
@@ -6939,19 +7287,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "Tema:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
-msgstr ""
+msgstr "Autor/a:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "Nom"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "Editor/a:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
@@ -6973,350 +7321,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr ""
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Finalitza"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Carregant menus..."
-
-#~ msgid "Close the Window"
-#~ msgstr "Tanca la finestra"
-
-#~ msgid "I"
-#~ msgstr "D"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "M"
-
-#~ msgid "W"
-#~ msgstr "F"
-
-#~ msgid "D"
-#~ msgstr "D"
-
-#~ msgid "R"
-#~ msgstr "R"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "T"
-#~ msgstr "E"
-
-#~ msgid "&Statistics"
-#~ msgstr "&Estadístiques"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Mostra la pantalla d'estadístiques"
-
-#~ msgid "H"
-#~ msgstr "A"
-
-#~ msgid "U"
-#~ msgstr "C"
-
-#~ msgid "Files"
-#~ msgstr "fitxers"
-
-#~ msgid "Querying Network"
-#~ msgstr "Reenviant petició"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Petició reenviada, esperant  {0}s els resultats..."
-
-#~ msgid "End Chat"
-#~ msgstr "Atura el xat"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Atura el xat amb el servidor"
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Carregant finestra d'estadístiques..."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "No s'ha trobat cap port disponible per les connexions entrants.\n"
-#~ "Si us plau, especifiqui un port a la finestra de configuració."
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "Total number of messages received from other LimeWires."
-#~ msgstr "Total number of messages received from other LimeWires."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-
-#~ msgid "Total kilobytes received by other LimeWires."
-#~ msgstr "Total kilobytes received by other LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid "Errors"
-#~ msgstr "Errors"
-
-#~ msgid "Query Replies"
-#~ msgstr "Resultats"
-
-#~ msgid "Ping Replies"
-#~ msgstr "Respostas \"pong\""
-
-#~ msgid "Compression"
-#~ msgstr "Compression"
-
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Errors de ruta resultats"
-
-#~ msgid "Requests"
-#~ msgstr "Requests"
-
-#~ msgid "Request Methods"
-#~ msgstr "Methodes de sol·licituds"
-
-#~ msgid "seconds"
-#~ msgstr "secondes"
-
-#~ msgid "messages"
-#~ msgstr "missatges"
-
-#~ msgid "Average"
-#~ msgstr "Mitjiana"
-
-#~ msgid "Max"
-#~ msgstr "Màxim"
-
-#~ msgid "Total Upstream"
-#~ msgstr "Totals sortida"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Totals entrada"
-
-#~ msgid "HTTP Total"
-#~ msgstr "Totals HTTP"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "\"Headers\" HTTP"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Totals Gnutella"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "\"Headers\" Gnutella"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Missatges Gnutella"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Totals sortida (potential)"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Totals sortida (real)"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Totals entrada (potential)"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Totals entrada (real)"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (potential)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP (real)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (potential)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (real)"
-
-#~ msgid "All Clients"
-#~ msgstr "Qualsevol clients"
-
-#~ msgid "All Messages"
-#~ msgstr "Qualsevol missatges"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Errors de respostas \"pong\""
-
-#~ msgid "Reply Errors"
-#~ msgstr "Errors de resultats"
-
-#~ msgid "Push Errors"
-#~ msgstr "Errors de sol·licituds \"push\""
-
-#~ msgid "No Route"
-#~ msgstr "No ruta"
-
-#~ msgid "All Requests"
-#~ msgstr "Qualsevol sol·licituds"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "Sol·licituds \"HEAD\""
-
-#~ msgid "GET Requests"
-#~ msgstr "Sol·licituds \"GET\""
-
-#~ msgid "Push Requests"
-#~ msgstr "Sol·licituds Push"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Sol·licituds Gnutella"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Sol·licituds Gnutella (LimeWire)"
-
-#~ msgid "Accepted"
-#~ msgstr "Accepta"
-
-#~ msgid "Busy"
-#~ msgstr "Ocupat"
-
-#~ msgid "IO Error"
-#~ msgstr "Error E/S"
-
-#~ msgid "THEX Request"
-#~ msgstr "Sol·licituds THEX"
-
-#~ msgid "URN Get"
-#~ msgstr "GET URN"
-
-#~ msgid "Freeloader"
-#~ msgstr "Aprofitats"
-
-#~ msgid "Normal"
-#~ msgstr "Normal"
-
-#~ msgid "Get"
-#~ msgstr "Sol·licituds \"GET\""
-
-#~ msgid "Head"
-#~ msgstr "Sol·licituds \"HEAD\""
-
-#~ msgid "Pushed Head"
-#~ msgstr "Sol·licituds \"HEAD\" (pushed)"

@@ -8,14 +8,217 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:02:31+0000\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Klára"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Hleð inn valmynd..."
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Líma"
+
+#~ msgid "Close the Window"
+#~ msgstr "Lokar forritinu."
+
+#~ msgid "D"
+#~ msgstr "N"
+
+#~ msgid "&New Folder"
+#~ msgstr "&Ný mappa"
+
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "Bæta við nýrri möppu til að velja"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "Hætta að deila möppu sem hefur verið valin"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "&Endurnefna möppu"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "Opna s&krár"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "Opna valdnar skrár"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "H&enda skrám"
+
+#~ msgid "E"
+#~ msgstr "E"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "Henda völdum skrám"
+
+#~ msgid "V"
+#~ msgstr "J"
+
+#~ msgid "W"
+#~ msgstr "F"
+
+#~ msgid "&Statistics"
+#~ msgstr "&Upplýsingar"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Sýna glugga með tölulegum upplýsingum."
+
+#~ msgid "H"
+#~ msgstr "H"
+
+#~ msgid "U"
+#~ msgstr "H"
+
+#~ msgid "A"
+#~ msgstr "U"
+
+#~ msgid "Files"
+#~ msgstr "skrár"
+
+#~ msgid "Querying Network"
+#~ msgstr "Endurtengist neti"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Óska eftir skrá, bíð  {0}sek eftir svari"
+
+#~ msgid "End Chat"
+#~ msgstr "Hætta spjalli"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Hætta spjalli við aðila."
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Hleð inn upplýsingar um notanda..."
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Ræsi upplýsingagluggann..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Fann ekki port fyrir tengingar inn til þín.\n"
+#~ "Vinsamlega tiltakið port í stillingunum."
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "messages"
+#~ msgstr "skilaboð"
+
+#~ msgid "Max"
+#~ msgstr "Hámarks"
+
+#~ msgid "Current"
+#~ msgstr "Current"
+
+#~ msgid "Total Upstream"
+#~ msgstr "Á leið út"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Á leið inn"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP heildar"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Gnutella heildar"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Gnutella skilaboð"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Heildar á leið út (potential)"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Heildar á leið út (actual)"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Heildar á leið inn (potential)"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Heildar á leið inn (actual)"
+
+#~ msgid "Duplicates Multicast"
+#~ msgstr "Duplicates Multicast queries"
+
+#~ msgid "All Messages"
+#~ msgstr "Fjöldi spurninga"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Fjöldi tengingar"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -6946,205 +7149,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Upplýsingar"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Klára"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Hleð inn valmynd..."
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Líma"
-
-#~ msgid "Close the Window"
-#~ msgstr "Lokar forritinu."
-
-#~ msgid "D"
-#~ msgstr "N"
-
-#~ msgid "&New Folder"
-#~ msgstr "&Ný mappa"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "Bæta við nýrri möppu til að velja"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "Hætta að deila möppu sem hefur verið valin"
-
-#~ msgid "&Rename Folder"
-#~ msgstr "&Endurnefna möppu"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "Opna s&krár"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "Opna valdnar skrár"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "H&enda skrám"
-
-#~ msgid "E"
-#~ msgstr "E"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "Henda völdum skrám"
-
-#~ msgid "V"
-#~ msgstr "J"
-
-#~ msgid "W"
-#~ msgstr "F"
-
-#~ msgid "&Statistics"
-#~ msgstr "&Upplýsingar"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Sýna glugga með tölulegum upplýsingum."
-
-#~ msgid "H"
-#~ msgstr "H"
-
-#~ msgid "U"
-#~ msgstr "H"
-
-#~ msgid "A"
-#~ msgstr "U"
-
-#~ msgid "Files"
-#~ msgstr "skrár"
-
-#~ msgid "Querying Network"
-#~ msgstr "Endurtengist neti"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Óska eftir skrá, bíð  {0}sek eftir svari"
-
-#~ msgid "End Chat"
-#~ msgstr "Hætta spjalli"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Hætta spjalli við aðila."
-
-#~ msgid "Loading Settings..."
-#~ msgstr "Hleð inn upplýsingar um notanda..."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Ræsi upplýsingagluggann..."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Fann ekki port fyrir tengingar inn til þín.\n"
-#~ "Vinsamlega tiltakið port í stillingunum."
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid "messages"
-#~ msgstr "skilaboð"
-
-#~ msgid "Max"
-#~ msgstr "Hámarks"
-
-#~ msgid "Current"
-#~ msgstr "Current"
-
-#~ msgid "Total Upstream"
-#~ msgstr "Á leið út"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Á leið inn"
-
-#~ msgid "HTTP Total"
-#~ msgstr "HTTP heildar"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Gnutella heildar"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Gnutella skilaboð"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Heildar á leið út (potential)"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Heildar á leið út (actual)"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Heildar á leið inn (potential)"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Heildar á leið inn (actual)"
-
-#~ msgid "Duplicates Multicast"
-#~ msgstr "Duplicates Multicast queries"
-
-#~ msgid "All Messages"
-#~ msgstr "Fjöldi spurninga"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "Fjöldi tengingar"

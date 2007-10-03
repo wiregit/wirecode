@@ -8,15 +8,63 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:01:19+0000\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Završi"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Promi&jeni jezik"
+
+#~ msgid "Close the Window"
+#~ msgstr "Zatvori prozor."
+
+#~ msgid "I"
+#~ msgstr "I"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "I"
+
+#~ msgid "W"
+#~ msgstr "I"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Prikaži ili sakrij pojedinačne tab-ove."
+
+#~ msgid "G"
+#~ msgstr "D"
+
+#~ msgid "R"
+#~ msgstr "S"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "&Statistics"
+#~ msgstr "&Statistike"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Prikaži statistike."
+
+#~ msgid "U"
+#~ msgstr "K"
+
+#~ msgid "E"
+#~ msgstr "G"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -1527,7 +1575,6 @@ msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
@@ -1536,7 +1583,6 @@ msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 #, fuzzy
@@ -6808,50 +6854,3 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr ""
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Završi"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Promi&jeni jezik"
-
-#~ msgid "Close the Window"
-#~ msgstr "Zatvori prozor."
-
-#~ msgid "I"
-#~ msgstr "I"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "I"
-
-#~ msgid "W"
-#~ msgstr "I"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Prikaži ili sakrij pojedinačne tab-ove."
-
-#~ msgid "G"
-#~ msgstr "D"
-
-#~ msgid "R"
-#~ msgstr "S"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "&Statistics"
-#~ msgstr "&Statistike"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Prikaži statistike."
-
-#~ msgid "U"
-#~ msgstr "K"
-
-#~ msgid "E"
-#~ msgstr "G"

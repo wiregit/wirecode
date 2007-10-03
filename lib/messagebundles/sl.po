@@ -8,27 +8,119 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: 2007-09-27 17:25+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
-"n%100==4 ? 2 : 3);\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:03:12+0000\n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
+"n%100==4 ? 2 : 3;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Koniec"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Zmen &jazyk"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Prilepit"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Vy zdielate {0} subory (nacitavanie...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Vy zdielate {0} subory"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Hladaj \"co je nove\": {0}"
+
+#~ msgid "Close the Window"
+#~ msgstr "Zavriet okno"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "P"
+
+#~ msgid "W"
+#~ msgstr "K"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Ukaz alebo skry jednotlive plochy"
+
+#~ msgid "G"
+#~ msgstr "Z"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "&Statistics"
+#~ msgstr "&Statistika"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Ukaz okno Statistiky"
+
+#~ msgid "U"
+#~ msgstr "P"
+
+#~ msgid "E"
+#~ msgstr "V"
+
+#~ msgid "Results"
+#~ msgstr "Vysledky"
+
+#~ msgid "Files"
+#~ msgstr "Subory"
+
+#~ msgid "files"
+#~ msgstr "subory"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "subory (nacitavanie...)"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Oprava zlyhala"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Cakanie {0}z ako zdroje"
+
+#~ msgid "s for Sources"
+#~ msgstr "z ako zdroje"
+
+#~ msgid "Files with this name"
+#~ msgstr "Subory s tymto menom"
+
+#~ msgid "Searches for files with the same file name."
+#~ msgstr "Hladaj subory s rovnokym suborovym menom."
+
+#~ msgid "Performs the same search as the one which found this file previously."
+#~ msgstr "Spusti rovnake hladanie ako to co naslo tento subor predtym."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
+"LimeWire ni uspel shraniti te datoteke ker je disk poln. Za nadaljevanje "
+"morate osvoboditi nekaj prostora."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
+"LimeWire ni uspel odpreti določene datoteke, ker jo uporablja že drug "
+"program. Prosimo, zaprite program, ki uporablja to datoteko."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
@@ -88,7 +180,7 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/DownloadManager.java:216
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr "Prepac, ale LimeWire nie je schopny restartovat stare downloady."
+msgstr "Oprostite, ampak LimeWire ni mogel ponoviti vaših starih downloadow."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 #, fuzzy
@@ -133,7 +225,7 @@ msgstr "Nacitavam pomocky..."
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
 #, fuzzy
 msgid "Loading Shared Files..."
-msgstr "Nacitavam pomocky..."
+msgstr "Nalagam datoteke v skupni rabi."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 msgid "Loading bittorrent Management..."
@@ -146,11 +238,11 @@ msgstr ""
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 #, fuzzy
 msgid "Loading Old Downloads..."
-msgstr "Spust oznacene Downloads"
+msgstr "Nalagam stare downloade."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "Preverjam posodobitve."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 #, fuzzy
@@ -175,7 +267,7 @@ msgstr "Cakanie na stabilne Pripojenie"
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 #, fuzzy
 msgid "Loading Saved Files..."
-msgstr "Nacitavam pomocky..."
+msgstr "Nalagam shranjene datoteke."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 msgid "Loading Spam Management..."
@@ -184,21 +276,21 @@ msgstr ""
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:41
 msgid "All Types"
-msgstr "Vsetky typy"
+msgstr "Vse vrste."
 
 #: core/com/limegroup/gnutella/MediaType.java:42
 msgid "Documents"
-msgstr "Dokenty"
+msgstr "Dokumenti"
 
 #: core/com/limegroup/gnutella/MediaType.java:43
 msgid "Programs"
-msgstr "Programy"
+msgstr "Programi"
 
 #: core/com/limegroup/gnutella/MediaType.java:44
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:86
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr "Audio"
+msgstr "Avdio"
 
 #: core/com/limegroup/gnutella/MediaType.java:45
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:102
@@ -209,7 +301,7 @@ msgstr "Video"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Images"
-msgstr "Obrazky"
+msgstr "Slike"
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:194
@@ -229,7 +321,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr ""
+msgstr "To datoteko si že naložil {0}."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
 #, fuzzy
@@ -240,7 +332,7 @@ msgstr "Uz mate rovnaky subor v {0}"
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 #, fuzzy
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Turbo pripojenie si mozte vychutnat cely cas s LimeWire PRO!"
+msgstr "Za Turbo-Charged iskanje si priskrbite LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
@@ -250,13 +342,13 @@ msgstr ""
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr ""
+msgstr "Kupite LimeWire PRO in nam pomagajte narediti downloadanje hitrejše."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 #, fuzzy
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Turbo pripojenie si mozte vychutnat cely cas s LimeWire PRO!"
+msgstr "Za Turbo-Charged download si priskrbite LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
@@ -272,12 +364,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
 #, fuzzy
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Turbo pripojenie si mozte vychutnat cely cas s LimeWire PRO!"
+msgstr "Za Turbo-Charged performance si priskrbite LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr ""
+msgstr "Pustite Internet prižgan. Priskrbite si LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
@@ -290,25 +382,25 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #, fuzzy
 msgid "Title"
-msgstr "&Subor"
+msgstr "Naslov"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Artist"
-msgstr ""
+msgstr "Avtor"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #, fuzzy
 msgid "Album"
-msgstr "O"
+msgstr "Album"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 msgid "Genre"
-msgstr ""
+msgstr "Zvrst"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 msgid "Track"
-msgstr ""
+msgstr "Skladba"
 
 #. *
 #. * The resource to use for the extension property.
@@ -321,24 +413,24 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SelectorsHandler.java:147
 #: gui/com/limegroup/gnutella/gui/search/SelectorsHandler.java:156
 msgid "Type"
-msgstr "Typ"
+msgstr "Vrsta"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:35
 msgid "Length"
-msgstr ""
+msgstr "Dolžina"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 msgid "Year"
-msgstr ""
+msgstr "Leto"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #, fuzzy
 msgid "Language"
-msgstr "Zmen &jazyk"
+msgstr "Jezik"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
@@ -350,7 +442,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 #, fuzzy
 msgid "Comments"
-msgstr "Dokenty"
+msgstr "Komentarji"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
@@ -362,7 +454,7 @@ msgstr "Umiestnenie"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 #, fuzzy
 msgid "Copyright"
-msgstr "Skopirovat"
+msgstr "Avtorske pravice"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
@@ -371,7 +463,7 @@ msgstr "Skopirovat"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 #, fuzzy
 msgid "License Type"
-msgstr "Licencia"
+msgstr "Vrsta licence"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
 msgid "Director"
@@ -384,16 +476,16 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 #, fuzzy
 msgid "Studio"
-msgstr "Audio"
+msgstr "Studio"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 #, fuzzy
 msgid "Stars"
-msgstr "Zacinanie"
+msgstr "Zvezde"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Subtitles"
-msgstr ""
+msgstr "Podnapisi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 #, fuzzy
@@ -412,11 +504,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 #, fuzzy
 msgid "Image"
-msgstr "Obrazky"
+msgstr "Slika"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
 msgid "Description"
-msgstr ""
+msgstr "Opis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
@@ -425,27 +517,27 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:261
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:41
 msgid "License"
-msgstr "Licencia"
+msgstr "Licenca"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:129
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 #, fuzzy
 msgid "Document"
-msgstr "Dokenty"
+msgstr "Dokument"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 msgid "Topic"
-msgstr ""
+msgstr "Tema"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Author"
-msgstr ""
+msgstr "Avtor"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:136
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 #, fuzzy
 msgid "Application"
-msgstr "Umiestnenie"
+msgstr "Aplikacija"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:364
@@ -455,12 +547,12 @@ msgstr "Umiestnenie"
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:218
 #, fuzzy
 msgid "Name"
-msgstr "Premenuj"
+msgstr "Ime"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #, fuzzy
 msgid "Publisher"
-msgstr "Zverejni..."
+msgstr "Založnik"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Platform"
@@ -502,7 +594,7 @@ msgstr ""
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:25
 #, fuzzy
 msgid "Start automatically"
-msgstr "Rozdel Automaticky"
+msgstr "Začni avtomatsko"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:35
 msgid "BitTorrent Settings"
@@ -546,7 +638,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:71
 #, fuzzy
 msgid "Internal Error"
-msgstr "&Vygenerovat error"
+msgstr "Notranja napaka"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:377
 msgid ""
@@ -567,32 +659,32 @@ msgstr ""
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:390
 #, fuzzy
 msgid "Send"
-msgstr "Vendor"
+msgstr "Pošlji"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:398
 #, fuzzy
 msgid "Review"
-msgstr "Ukazka"
+msgstr "Predogled"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:411
 msgid "Discard"
-msgstr ""
+msgstr "Zavrži"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:428
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:95
 msgid "Always Send Immediately"
-msgstr ""
+msgstr "Vedno pošlji takoj"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:429
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 #, fuzzy
 msgid "Always Ask For Review"
-msgstr "Vzdy sa spytaj"
+msgstr "Vedno vprašaj za predogled"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:430
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Discard All Errors"
-msgstr ""
+msgstr "Vedno zavrži vse napake"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:504
 msgid ""
@@ -618,7 +710,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
 msgid "OK"
-msgstr "OK"
+msgstr "Da"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -633,18 +725,18 @@ msgstr "O LimeWire"
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:34
 #, fuzzy
 msgid "LimeWire"
-msgstr "LimeWire &PRO"
+msgstr "LimeWire"
 
 #. set up close button
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:78
 #, fuzzy
 msgid "Close"
-msgstr "&Zavriet"
+msgstr "Zapri"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
-msgstr "Zavriet toto okno"
+msgstr "Zapri to okno"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -752,50 +844,50 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:73
 #, fuzzy
 msgid "Select All"
-msgstr "Zrus oznacenie vsetkych"
+msgstr "Izberi vse"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:319
 msgid "Marks all Items as Selected"
-msgstr "Oznac vsetky subory ako oznacene"
+msgstr "Označi vse izbrane datoteke"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:334
 msgid "Deselect All"
-msgstr "Zrus oznacenie vsetkych"
+msgstr "Odkljukaj vse"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:336
 msgid "Deselects all Items in the List"
-msgstr "Zrus oznacenie vsetkych suborov v liste"
+msgstr "Odkljukaj vse datoteke na listu"
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
-msgstr ""
+msgstr "Počisti zgodovino"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:133
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
 msgid "Apply"
-msgstr "Pouzit"
+msgstr "V redu"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:140
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:787
 msgid "Clear"
-msgstr ""
+msgstr "Počisti"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:147
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:115
 #, fuzzy
 msgid "Save"
-msgstr "Zdielaj"
+msgstr "Shrani"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:543
 #, fuzzy
 msgid "Save As"
-msgstr "Uloz download ako"
+msgstr "Shrani kot..."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:93
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:169
 msgid "What's New"
-msgstr "Co je nove"
+msgstr "Kaj je novega"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:122
 msgid "Creative Commons"
@@ -835,7 +927,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:464
 #, fuzzy
 msgid "Select Folder"
-msgstr "Zdielaj folder"
+msgstr "Izberite mapo"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:99
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:121
@@ -850,11 +942,11 @@ msgstr "Zdielaj folder"
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:486
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:508
 msgid "Select"
-msgstr ""
+msgstr "Izberite"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:812
 msgid "All Folders"
-msgstr "VSetky foldery"
+msgstr "Vse mape"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 msgid "Modem"
@@ -870,7 +962,7 @@ msgstr "T1"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:42
 msgid "T3 or Higher"
-msgstr "T3 a viac"
+msgstr "T3 ali boljši"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:44
 msgid "Ethernet"
@@ -889,31 +981,31 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 #, fuzzy
 msgid "&Search"
-msgstr "Hladania"
+msgstr "&Iskanje"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:121
 #, fuzzy
 msgid "&Monitor"
-msgstr "Monitorovanie"
+msgstr "&Monitor"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:122
 #, fuzzy
 msgid "&Connections"
-msgstr "Pripojenia"
+msgstr "&Povezave"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:123
 #, fuzzy
 msgid "&Library"
-msgstr "Kniznica"
+msgstr "&Knjižnjica"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:124
 #, fuzzy
 msgid "C&onsole"
-msgstr "Consola"
+msgstr "Konzola"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
 msgid "Lo&gging"
-msgstr ""
+msgstr "Vpisovanje"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
 #, java-format
@@ -1564,8 +1656,6 @@ msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
@@ -1574,8 +1664,6 @@ msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 #, fuzzy
@@ -6898,90 +6986,3 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr ""
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Koniec"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Zmen &jazyk"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Prilepit"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "Vy zdielate {0} subory (nacitavanie...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Vy zdielate {0} subory"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "Hladaj \"co je nove\": {0}"
-
-#~ msgid "Close the Window"
-#~ msgstr "Zavriet okno"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "P"
-
-#~ msgid "W"
-#~ msgstr "K"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Ukaz alebo skry jednotlive plochy"
-
-#~ msgid "G"
-#~ msgstr "Z"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "&Statistics"
-#~ msgstr "&Statistika"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Ukaz okno Statistiky"
-
-#~ msgid "U"
-#~ msgstr "P"
-
-#~ msgid "E"
-#~ msgstr "V"
-
-#~ msgid "Results"
-#~ msgstr "Vysledky"
-
-#~ msgid "Files"
-#~ msgstr "Subory"
-
-#~ msgid "files"
-#~ msgstr "subory"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "subory (nacitavanie...)"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "Oprava zlyhala"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Cakanie {0}z ako zdroje"
-
-#~ msgid "s for Sources"
-#~ msgstr "z ako zdroje"
-
-#~ msgid "Files with this name"
-#~ msgstr "Subory s tymto menom"
-
-#~ msgid "Searches for files with the same file name."
-#~ msgstr "Hladaj subory s rovnokym suborovym menom."
-
-#~ msgid "Performs the same search as the one which found this file previously."
-#~ msgstr "Spusti rovnake hladanie ako to co naslo tento subor predtym."

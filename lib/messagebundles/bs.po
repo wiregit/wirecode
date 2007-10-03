@@ -8,15 +8,1314 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Rosetta-Export-Date: 2007-08-28 14:59:16+0000\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Updates"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Završetak"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Prom&jeni jezik"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Umetni"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Broj datoteka koje ste razmjenili. {0} datoteke (Puni...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Broj datoteka koje ste razmjenili. {0} datoteke"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Traži \"Šta je novo\" za: {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Vrsta datoteke nije prepoznata"
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Datoteka nije pronađena."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Datoteka je korumpirana"
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Tu je nepoznata greška u audio datoteci."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Datoteka ne može biti rasčlanjena"
+
+#~ msgid "Close the Window"
+#~ msgstr "Zatvori ovaj prozor."
+
+#~ msgid "N"
+#~ msgstr "U"
+
+#~ msgid "V"
+#~ msgstr "P"
+
+#~ msgid "W"
+#~ msgstr "W"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Prikaži ili sakrij individualni tab."
+
+#~ msgid "G"
+#~ msgstr "V"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "&Statistics"
+#~ msgstr "&Statistika"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Pokaži statistički pano."
+
+#~ msgid "U"
+#~ msgstr "L"
+
+#~ msgid "E"
+#~ msgstr "G"
+
+#~ msgid "Results"
+#~ msgstr "Rezultati"
+
+#~ msgid "Files"
+#~ msgstr "Datoteka(e)"
+
+#~ msgid "files"
+#~ msgstr "datoteke"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "datoteke (Puni...)"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Povratak propao"
+
+#~ msgid "Querying Network"
+#~ msgstr "Ispitati mrežu"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Čekam {0}s za Izvor"
+
+#~ msgid "s for Sources"
+#~ msgstr "s za Izvor"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Nije dostupna linija za izlaz."
+
+#~ msgid "End Chat"
+#~ msgstr "Završi chat"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Zaustavi Chat sa Host računarom."
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Punjenje statistike prozora..."
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "Razmjena podrške pomoći od nezavisnih medija. Kupite PRO."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Vaš komjuter ne pokazuje da imate aktivnu internet konekciju ili je Firewall "
+#~ "blokirao LimeWire pristup internetu. Molimo vas provjerite vašu konekciju "
+#~ "ili podesite Firewall i onda u imeniku datoteke selektujte \"Konekcija\" za "
+#~ "pristup LimeWire na internet."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Ne može naći izlaz za nadolazeći priključak.\n"
+#~ "Molimo vas specifirajte izlaz na prozoru za konfiguraciju."
+
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Statistika širine trake propusnog obima uključuje i potpune informacije svih "
+#~ "poslatih obima odtoka Upstreams i dotoka Downstreams. Pritisnite na jednu od "
+#~ "kategorija da vidite željenu statistiku."
+
+#~ msgid "Network"
+#~ msgstr "Mreža"
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Statistika trenutnog stanja mreže. Ove statistike su prilično netačne za "
+#~ "prirodu dinamike i raspodijeljenosti Gnutela mreže i ne treba ih uzimati "
+#~ "suviše doslovno. One mogu samo da vam daju generalnu sliku stanja vašeg "
+#~ "trenutnog priključenja."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Dodatna statistika uključuje detaljne informacije za Gnutella poruke i HTTP "
+#~ "protok. Ove informacije mogu biti korištene za isturene korisnike kao i "
+#~ "istraživanje rada na Gnutella mreži. Dodatna statistika nije označena kao "
+#~ "standardna forma i nije preporučljiva za mnoge korisnike."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Pokažite dodatnu statistiku:"
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Ukupno korištenje protoka za slanje izlaznih podataka, takođe kroz uploads "
+#~ "ili Gnutella poruke."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Ukupno korištenje obima za primanje ulaznih podataka, takođe za downloads "
+#~ "ili Gnutella poruke."
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr "Sve Gnutella poruke primljene kod ovog klijenta"
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr "Sve Gnutella poruke primljene preko TCP, po vrsti poruke."
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "Sve Gnutella poruke primljene preko UDP, kod vrste poruke."
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr "Sve Gnutella poruke primljene preko Multicast, uz vrstu poruke."
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Ukupno Gnutella poruka primljeno preko TCP, UDP ili Multicast."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr ""
+#~ "Broj dupliciranih pitanja primljenih preko TCP u odnosu na ukupan broj "
+#~ "pitanja."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Broj dupliciranih pitanja primljenih preko Multicast u odnosu na ukupan broj "
+#~ "pitanja."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Sva primljena pitanja, o tranzitu."
+
+#~ msgid "All received queries, by time to live (TTL)."
+#~ msgstr "Sva primljena pitanja, u vremenu života (TTL)"
+
+#~ msgid "Special Queries"
+#~ msgstr "Posebna pitanja"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Sva posebno označena pitanja."
+
+#~ msgid "All received query hits, by hops."
+#~ msgstr "Svi primljeni rezultati, o tranzitu."
+
+#~ msgid "All received query hits, by time to live (TTL)."
+#~ msgstr "Sva primljena pitanja, u vremenu života (TTL)"
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za sve Gnutella poruke primljene od ovog klijenta."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko TCP, uz vrstu "
+#~ "poruke."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko UDP, uz vrstu poruke"
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko Multicast, uz vrstu "
+#~ "poruke."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko TCP, UDP ili "
+#~ "Multicast."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta u duplim pitanjima preko TCP u odnosu na ukupan broj "
+#~ "pitanja."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta u dupliciranim pitanjima primljenih preko Multicasta u "
+#~ "odnosu na ukupan broj pitanja."
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Sva primljeni pitanja u kilobajtima, kod tranzita."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "Sva primljena pitanja u kilobajtima, za vrijeme života (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Svi primljeni rezultati u kilobajtima, kod tranzita."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "Svi primljeni rezultati u kilobajtima, u vremenu života (TTL)."
+
+#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP pings primljeni od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP pongs primljeni od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "UDP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP pitanja primljena od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP rezultati primljeni od Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP pritisci primljeni od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pings primljeni od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pongs primljeni od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pitanja primljena od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Multicast rezultati primljeni od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pritisci primljeni od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pings primljeni od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pongs primljeni od svih Gnutela klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pitanja primljena od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP udarna pitanja primljeni od svih Gnutella klijenata protiv "
+#~ "drugih LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pritiske primljene od svih Gnutella klijenata protiv drugih "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pings primljeni od svih Gnutella klijenata prema "
+#~ "drugim LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pongs primljeni od svih Gnutella klijenata prema "
+#~ "drugim LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pitanja primljeni od svih Gnutella klijenata prema "
+#~ "drugim LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast udarna pitanja primljeni od svih Gnutella klijenata "
+#~ "prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pritiske primljeni od svih Gnutella klijenata prema "
+#~ "drugim LimeWires."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "Prosječna veličina primljenih Gnutella poruka u kilobajtima"
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "Prosječna veličina kilobajta primljenih poruka od LimeWires."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid ""
+#~ "All queries that were routed to other Ultrapeers for the last hop, using "
+#~ "query routing tables."
+#~ msgstr ""
+#~ "Sva pitanja koja su bila upravljana prema drugim Ultrapeers posljednjim "
+#~ "tranzitom, koristeći upit rutinskih tablica."
+
+#~ msgid "All queries that were routed to leaves, using query routing tables."
+#~ msgstr ""
+#~ "Sva ispitivanja koja su usmjerena ka izlazu, koristeći ispitivače smjernih "
+#~ "tabela."
+
+#~ msgid "All queries that were received from routed connections."
+#~ msgstr "Sva ispitivanja koja su bila primljena od usmjerenih priključaka"
+
+#~ msgid "Hit"
+#~ msgstr "Hit"
+
+#~ msgid "False Positive"
+#~ msgstr "Lažna potvrda"
+
+#~ msgid "Errors"
+#~ msgstr "Greške"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Srodne greške"
+
+#~ msgid "Generic errors while reading messages."
+#~ msgstr "Srodne greške prilikom čitanja poruka"
+
+#~ msgid "Errors while reading query messages."
+#~ msgstr "Greške prilikom čitanja pitanja u porukama."
+
+#~ msgid "Query Replies"
+#~ msgstr "Odgovori na pitanja"
+
+#~ msgid "Errors while reading query reply messages."
+#~ msgstr "Greška prilikom čitanja odgovora u porukama."
+
+#~ msgid "Ping Replies"
+#~ msgstr "Ping odgovori"
+
+#~ msgid "Errors while reading ping replies."
+#~ msgstr "Greška prilikom čitanja ping odgovora"
+
+#~ msgid "Errors while reading pushes."
+#~ msgstr "Greške prilikom čitanja pritisaka"
+
+#~ msgid "Errors while reading vendor messages."
+#~ msgstr "Greška prilikom čitanja prodajnih poruka."
+
+#~ msgid "All Gnutella messages sent out from this client."
+#~ msgstr "Sve Gnutella poruke poslate vani od ovog klijenta."
+
+#~ msgid "All Gnutella messages sent over TCP, by message type."
+#~ msgstr "Sve Gnutella poruke poslate preko TCP, uz vrstu poruke"
+
+#~ msgid "All Gnutella messages sent over UDP, by message type."
+#~ msgstr "Sve Gnutella poruke poslate preko UDP, uz vrstu poruke."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr "Sve Gnutella poruke poslate preko Multicast, uz vrstu poruke."
+
+#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr "Ukupan broj Gnutella poruka poslatih preko TCP, UDP ili Multicast."
+
+#~ msgid "Total kilobytes for Gnutella messages sent out from this client."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke poslate vani od ovog klijenta."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko TCP, uz vrstu poruke."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko UDP, uz vrstu poruke."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke odaslanih preko Multicast, uz vrstu "
+#~ "poruke."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko TCP, UDP ili "
+#~ "Multicast."
+
+#~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "UDP pings poslati od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP pongs poslati od svih Gnutella klijenata prema drugim LimeWires.."
+
+#~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDP udarna pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "UDB pritisci poslati od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pings poslati od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Multicast pongs sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pongs poslati od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Multicast queries sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid ""
+#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast udarna pitanja poslata od Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast pritisci poslati od svih Gnutella klijenata prema drugim LimeWires."
+
+#~ msgid "Total kilobytes sent by other LimeWires."
+#~ msgstr "Ukupan broj kilobajta poslatih od drugih LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pings poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pongs poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pitanja poslata od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP rezultate poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za UDP pritiske poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pings poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pongs poslati od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pitanja poslati od svih Gnutella klijenata prema "
+#~ "drugim LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast rezultate poslati od svih Gnutella klijenata prema "
+#~ "drugim LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobajti za Multicast pritiske od svih Gnutella klijenata prema drugim "
+#~ "LimeWires."
+
+#~ msgid "Handshaking"
+#~ msgstr "Rukovanje"
+
+#~ msgid "Statistics for handshaking as a leaf."
+#~ msgstr "Statistika za rukovanje kao jedna lista."
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Statistika za rukovanje kao na jedan ultrapeer."
+
+#~ msgid "Statistics for outgoing Gnutella connection handshaking."
+#~ msgstr "Statistika izlazne Gnutella konekcije rukovanja."
+
+#~ msgid "Statistics for incoming Gnutella connection handshaking."
+#~ msgstr "Statistika za ulazne Gnutella priključke rukovanjem."
+
+#~ msgid "Outgoing Server Reject"
+#~ msgstr "Izlazni server odbijen"
+
+#~ msgid ""
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
+#~ msgstr ""
+#~ "Statistika za izlazne Gnutella priključke rukovanjem odbijena od strane "
+#~ "servera."
+
+#~ msgid "Compression"
+#~ msgstr "Sabijanje"
+
+#~ msgid "Statistics for compressed upstream traffic in kilobytes."
+#~ msgstr "Statistika za sabijeni upstream promet u kilobajtima."
+
+#~ msgid "Statistics for compressed downstream traffic in kilobytes."
+#~ msgstr "Statistika za sabijeni downstream promet u kilobajtima."
+
+#~ msgid "Flow Control"
+#~ msgstr "Kontrola protoka"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Statistika za kontrolu protoka poruka."
+
+#~ msgid "Statistics for flow controlled messages in kilobytes."
+#~ msgstr "Statistika za tok kontrolisanih poruka u kilobajtima."
+
+#~ msgid "Total number of errors routing messages to other clients."
+#~ msgstr "Ukupan broj grešaka usmjerenih poruka prema drugim klijentima."
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Udar rutinskih grešaka"
+
+#~ msgid "Errors routing query hits."
+#~ msgstr "Greške usmjerenih pitanja."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Ukupan broj pročišćenih poruka."
+
+#~ msgid ""
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
+#~ msgstr ""
+#~ "Ukupan broj Gnutella pokušaja konekcije, bilo da su upućeni unutra ili vani."
+
+#~ msgid ""
+#~ "Total incoming requests received over time. This includes all connection "
+#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
+#~ msgstr ""
+#~ "Ukupan broj zahtjeva primljenih preko vremena. Ovo uključuje sve pokušaje "
+#~ "priključka (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, itd...)"
+
+#~ msgid ""
+#~ "Total outgoing download connections attempts over time. This includes both "
+#~ "direct connections and pushed requests."
+#~ msgstr ""
+#~ "Ukupan broj izlaznih pokušaja kontaktiranja downloada preko vremana. Ovo "
+#~ "uključuje oba priključna pravca kao i zahtjeve pritiska."
+
+#~ msgid ""
+#~ "Total responses received from downloaders over time. This includes Busy, "
+#~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
+#~ msgstr ""
+#~ "Ukupan broj odgovora primljenih od downloads. Ovo uključuje i zauzeto, "
+#~ "datoteka nije pronađena, nije za razmjenu, čekanje, razno. IO greške, i OK "
+#~ "odgovori."
+
+#~ msgid ""
+#~ "Total alternate locations received and removed over time. This includes "
+#~ "locations that we actively attempt to connect to, locations that we will "
+#~ "ignore, locations that couldn't be removed, and locations that we removed "
+#~ "permanently from attempting to connect to."
+#~ msgstr ""
+#~ "Ukupan broj alternativnih lokacija primljenih i pomjerenih preko vremana. "
+#~ "Ovo uključuje mjesto gdje se aktivno pokušavamo priključiti, mjesto koje "
+#~ "ćemo zanemariti, mjesto koje neće biti pomjereno, i mjesto koje smo trajno "
+#~ "odstranili od pokušaja konekcije."
+
+#~ msgid "Transfers"
+#~ msgstr "Prenošenje"
+
+#~ msgid ""
+#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
+#~ "For HTTP1.1, values are per chunk."
+#~ msgstr ""
+#~ "Ukupan prenos preko vremena. Ovo uključuje oba HTTP1.1 i HTTP1.0 prenosa. Za "
+#~ "HTTP1.0, vrijednost je po komadu."
+
+#~ msgid ""
+#~ "Records the time in milliseconds to establish TCP connections for downloads. "
+#~ "This can vary, for example, when servers are experiencing high loads."
+#~ msgstr ""
+#~ "Registrira vrijeme u milisekundama za uspostavljanje TCP priključka za "
+#~ "downloads. Ovo može varirati, na primjer, kada su serveri pod pritiskom "
+#~ "ogromnog punjenja."
+
+#~ msgid "Requests"
+#~ msgstr "Zahtjevi"
+
+#~ msgid ""
+#~ "Total incoming upload requests. These numbers are incremented on every "
+#~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
+#~ "transfers."
+#~ msgstr ""
+#~ "Ukupan broj ulaznih upload zahtjeva. Ovi se brojevi uvećavaju na svaki "
+#~ "pokušaj rasčlanjivanja zahtjeva i prema tome uključuje svaki komad kod "
+#~ "HTTP1.1 prenosa."
+
+#~ msgid ""
+#~ "Total outgoing responses. These numbers are incremented before sending each "
+#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
+#~ "the number of requests for which we have attempted to transfer a portion of "
+#~ "a file."
+#~ msgstr ""
+#~ "Ukupan broj izlaznih odgovora. Ovi podaci su dopunjeni prije slanja svakog "
+#~ "odgovora, i prema tome uključuje svaki dio za HTTP/1.1 transfer. 'Normalno' "
+#~ "je broj zahtjeva za svaki prenos koji smo pokušali transferirati za dio "
+#~ "datoteke."
+
+#~ msgid "Request Methods"
+#~ msgstr "Zahtjev metodike"
+
+#~ msgid ""
+#~ "Total incoming request methods. These numbers are incremented either for "
+#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
+#~ "requests, after we have sent the initial GIV."
+#~ msgstr ""
+#~ "Ukupan broj ulaznih metodičkih zahtjeva. Ovi podaci su dopunjeni takodje sa "
+#~ "HTTP/1.1 prenosom NAKON što je zatraženo ulazno priključenje, nakon što smo "
+#~ "poslali početni GIV."
+
+#~ msgid "General"
+#~ msgstr "Općenito"
+
+#~ msgid ""
+#~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
+#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
+#~ "counted as an interrupted upload.)"
+#~ msgstr ""
+#~ "Ukupan broj pokušaja, kompletnih, prekinutih ili zaustavljeni uploads. Ovi "
+#~ "podaci su dopunjeni po priključku, ne po komadu. (Zaustavljeni uploads biće "
+#~ "izbrojani kao prekinuti uploads.)"
+
+#~ msgid "seconds"
+#~ msgstr "sekunda"
+
+#~ msgid "messages"
+#~ msgstr "poruka"
+
+#~ msgid "Average"
+#~ msgstr "Prosjek"
+
+#~ msgid "Max"
+#~ msgstr "Max"
+
+#~ msgid "Color"
+#~ msgstr "Boja"
+
+#~ msgid "Current"
+#~ msgstr "Trenutno"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Napiši statistiku za ovu grafiku datoteka"
+
+#~ msgid "Total Upstream"
+#~ msgstr "Upstream"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Ukupno Downstream"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP Ukupno"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "HTTP zaglavlja"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Gnutella ukupno"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Gnutella zaglavlja"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Gnutella poruke"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Ukupan broj mogućih Upstream"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Ukupno aktuelnih Upstream"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Ukuapn broj mogućih Downstream"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Ukupno aktuelnih Downstream"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (potencijalno)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP (aktelno)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (potencijalno)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (aktelno)"
+
+#~ msgid "All Clients"
+#~ msgstr "Svi klijenti"
+
+#~ msgid "All Errors"
+#~ msgstr "Sve greške"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "Nevažeća Payload dužina"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "Nevažeći Hops"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "Nevažeći TTL"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "Tranzit >Mekši Max"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(Tranzit+TTL) > Tvrdi max"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "Nevažeća šifra poruke"
+
+#~ msgid "All Query Errors"
+#~ msgstr "Sva pitanja pogrešna"
+
+#~ msgid "URN Query"
+#~ msgstr "URN Pitanje"
+
+#~ msgid "Query Too Large"
+#~ msgstr "Pitanje je predugačko"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "XML pitanje je predugačko"
+
+#~ msgid "Empty Query"
+#~ msgstr "Prazno pitanje"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "Nevažeća slova u pitanju"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "Na sva pitanja odgovor pogrešan"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "Nevažeći odgovor Porte"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "Nevažeća adresa za odgovor"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "Nevažeća brzina odgovora"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "Svi ping odgovori pogrešni"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "Nevažeći ping odgovor Payload"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "Nevažeći Ping odgovor Porte"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "Nevažeći Ping Reply adresa"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "Nevažeći GGEP Block"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "Nevažeća dužina prodaje"
+
+#~ msgid "All Push Errors"
+#~ msgstr "Sve greške pritiska"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "Nevažeći pritisak na izlazu"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "Nevažeća adresa pritiska"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "Nevažeći pritisak Payload"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "Sve greške prodajnih poruka"
+
+#~ msgid "Invalid ID"
+#~ msgstr "Nevažeći ID"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "Nevažeće biranje"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "Nevažeći Payload"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "Neprepoznatljiva poruka prodavca"
+
+#~ msgid "All Messages"
+#~ msgstr "Sve poruke"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "Zakrpa tebele puta"
+
+#~ msgid "Hops 1"
+#~ msgstr "Tranzit 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Tranzit 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Tranzit 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Tranzit 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Tranzit 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Tranzit 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Tranzit 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Tranzit 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Tranzit 9"
+
+#~ msgid "What's New?"
+#~ msgstr "Šta ima novo?"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Pong Greške"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Reply greške"
+
+#~ msgid "Push Errors"
+#~ msgstr "Greške pritiska"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Tvrda granica"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "Tvrda granica (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "Tvrda granica (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "Tvrda granica (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "Tvrda granica (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "Tvrda granica (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "Tvrda granica (TTL 5 ili preko)"
+
+#~ msgid "No Route"
+#~ msgstr "Nema pravca"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Pokušaj priključenja"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "Ulazni pokušaji"
+
+#~ msgid "All Requests"
+#~ msgstr "Sve molbe"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "Glavna molba"
+
+#~ msgid "GET Requests"
+#~ msgstr "Dobiven molba"
+
+#~ msgid "Push Requests"
+#~ msgstr "Poguraj molbu"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Gnutella molba"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Gnutella (LimeWire) molba"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "Magnet molba"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "Nepoznata molba"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "Zabranjen server"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "Zatvori odmah"
+
+#~ msgid "Accepted"
+#~ msgstr "Prihvaćeno"
+
+#~ msgid "Busy"
+#~ msgstr "Zauzet"
+
+#~ msgid "Not Sharing Files"
+#~ msgstr "Ne razmjenjuj datoteke"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "Problem čitanja zaglavlja"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "Nepoznati odgovor šifre"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "Sadržina URN zbrda-zdola"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "Nesaglediv domet"
+
+#~ msgid "IO Error"
+#~ msgstr "IO Greška"
+
+#~ msgid "Failed"
+#~ msgstr "Neuspjeh"
+
+#~ msgid "Succeeded"
+#~ msgstr "Nasljeđeno"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "Uspješno HTTP 1.1"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "Uspješno HTTP 1.0"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "Neuspio HTTP 1.1"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "Neuspio HTTP 1.0"
+
+#~ msgid "Retried Success"
+#~ msgstr "Uspješan ponovni pokušaj"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "Uspješan direktni priključak"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "Uspješno priključenje pritiska"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "Neuspio pritisak (Prekinuto)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "Neuspio pritisak (GIV nije primljen)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "Neuspio pritisak (Neuspio priključak)"
+
+#~ msgid "THEX Request"
+#~ msgstr "THEX zahtjev"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "Uspješan pritisak na Proxy"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "Nakazan pritisak na Proxy"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "Neuspio pritisak na Proxy"
+
+#~ msgid "Push Proxy"
+#~ msgstr "Pritisni na Proxy"
+
+#~ msgid "Traditional Get"
+#~ msgstr "Tradicionalno postiže"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "Nepoznata URN dobit"
+
+#~ msgid "URN Get"
+#~ msgstr "URN dobit"
+
+#~ msgid "Limit Reached"
+#~ msgstr "Ograničen domet"
+
+#~ msgid "Banned Client"
+#~ msgstr "Zabranjen klijent"
+
+#~ msgid "Freeloader"
+#~ msgstr "Slobodno punjenje"
+
+#~ msgid "Normal"
+#~ msgstr "Normalno"
+
+#~ msgid "Get"
+#~ msgstr "Dobit"
+
+#~ msgid "Head"
+#~ msgstr "Glava"
+
+#~ msgid "Unknown"
+#~ msgstr "Nepoznat"
+
+#~ msgid "Pushed Get"
+#~ msgstr "Pritisak nastao"
+
+#~ msgid "Pushed Head"
+#~ msgstr "Pritisak napred"
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "Nepoznat pritisak"
+
+#~ msgid "Push Failed"
+#~ msgstr "Neuspio pritisak"
+
+#~ msgid "Completed Responses"
+#~ msgstr "Kompletirani odgovori"
+
+#~ msgid "Interrupted"
+#~ msgstr "Prekinuto"
+
+#~ msgid "Stalled"
+#~ msgstr "Zaustavljeno"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "Kompletiran prenos datoteka"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "Vanjsko odbacivanje (Liste)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "Izlazno odbacivanje (Stari Ultrapeer)"
+
+#~ msgid "Out Acc."
+#~ msgstr "Izlazno prihvatanje"
+
+#~ msgid "In Rej."
+#~ msgstr "Ulazno odbacivanje"
+
+#~ msgid "In Acc."
+#~ msgstr "Ulazno prihvatanje"
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "Izlazno odbacivanje (Potpuno)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "Izlazno prihvatanje (Praćeno navođenje)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "Izlazno prihvatanje (Ignorisano navođenje)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "Izlazno prihvaćanje (Nema navođenja)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "Ulazno odbacivanje (List)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "Ulazno prihvaćanje (List)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "Ulazno prihvaćanje (Navođenje prema listi)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "Ulazno prihvaćanje (Ultrapeer)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "Ulazno odbijanje (Sve porte zatvorene)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "Ulazno odbijanje (Mreža treba Ultrapeer)"
+
+#~ msgid "Server Reject"
+#~ msgstr "Server odbijen"
+
+#~ msgid "No Conclusion"
+#~ msgstr "Nema zaključka"
+
+#~ msgid "Crawler"
+#~ msgstr "Puzavac"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "LimeWire Ultapeers"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "Krajnja tačka LimeWirea"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "Drugi Ultapeers"
+
+#~ msgid "Other Leaves"
+#~ msgstr "Druge krajnje tačke"
+
+#~ msgid "Responses Requested"
+#~ msgstr "Zatraženi odgovori"
+
+#~ msgid "Responses Received"
+#~ msgstr "Odgovori primljeni"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "Mimoišli odgovori"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "OOB uspješna procjena"
+
+#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
+#~ msgstr "Broj reakcija pitanja primljenih preko OOB protokola."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -1625,7 +2924,6 @@ msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
@@ -1634,7 +2932,6 @@ msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
@@ -7050,1301 +8347,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Info"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Updates"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Završetak"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Prom&jeni jezik"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Umetni"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "Broj datoteka koje ste razmjenili. {0} datoteke (Puni...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Broj datoteka koje ste razmjenili. {0} datoteke"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "Traži \"Šta je novo\" za: {0}"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr ". Vrsta datoteke nije prepoznata"
-
-#~ msgid ". The file cannot be found."
-#~ msgstr ". Datoteka nije pronađena."
-
-#~ msgid ". The file is corrupt."
-#~ msgstr ". Datoteka je korumpirana"
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr ". Tu je nepoznata greška u audio datoteci."
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr ". Datoteka ne može biti rasčlanjena"
-
-#~ msgid "Close the Window"
-#~ msgstr "Zatvori ovaj prozor."
-
-#~ msgid "N"
-#~ msgstr "U"
-
-#~ msgid "V"
-#~ msgstr "P"
-
-#~ msgid "W"
-#~ msgstr "W"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Prikaži ili sakrij individualni tab."
-
-#~ msgid "G"
-#~ msgstr "V"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "&Statistics"
-#~ msgstr "&Statistika"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Pokaži statistički pano."
-
-#~ msgid "U"
-#~ msgstr "L"
-
-#~ msgid "E"
-#~ msgstr "G"
-
-#~ msgid "Results"
-#~ msgstr "Rezultati"
-
-#~ msgid "Files"
-#~ msgstr "Datoteka(e)"
-
-#~ msgid "files"
-#~ msgstr "datoteke"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "datoteke (Puni...)"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "Povratak propao"
-
-#~ msgid "Querying Network"
-#~ msgstr "Ispitati mrežu"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Čekam {0}s za Izvor"
-
-#~ msgid "s for Sources"
-#~ msgstr "s za Izvor"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Nije dostupna linija za izlaz."
-
-#~ msgid "End Chat"
-#~ msgstr "Završi chat"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Zaustavi Chat sa Host računarom."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Punjenje statistike prozora..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "Razmjena podrške pomoći od nezavisnih medija. Kupite PRO."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Vaš komjuter ne pokazuje da imate aktivnu internet konekciju ili je Firewall "
-#~ "blokirao LimeWire pristup internetu. Molimo vas provjerite vašu konekciju "
-#~ "ili podesite Firewall i onda u imeniku datoteke selektujte \"Konekcija\" za "
-#~ "pristup LimeWire na internet."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Ne može naći izlaz za nadolazeći priključak.\n"
-#~ "Molimo vas specifirajte izlaz na prozoru za konfiguraciju."
-
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Statistika širine trake propusnog obima uključuje i potpune informacije svih "
-#~ "poslatih obima odtoka Upstreams i dotoka Downstreams. Pritisnite na jednu od "
-#~ "kategorija da vidite željenu statistiku."
-
-#~ msgid "Network"
-#~ msgstr "Mreža"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Statistika trenutnog stanja mreže. Ove statistike su prilično netačne za "
-#~ "prirodu dinamike i raspodijeljenosti Gnutela mreže i ne treba ih uzimati "
-#~ "suviše doslovno. One mogu samo da vam daju generalnu sliku stanja vašeg "
-#~ "trenutnog priključenja."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Dodatna statistika uključuje detaljne informacije za Gnutella poruke i HTTP "
-#~ "protok. Ove informacije mogu biti korištene za isturene korisnike kao i "
-#~ "istraživanje rada na Gnutella mreži. Dodatna statistika nije označena kao "
-#~ "standardna forma i nije preporučljiva za mnoge korisnike."
-
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Pokažite dodatnu statistiku:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Ukupno korištenje protoka za slanje izlaznih podataka, takođe kroz uploads "
-#~ "ili Gnutella poruke."
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Ukupno korištenje obima za primanje ulaznih podataka, takođe za downloads "
-#~ "ili Gnutella poruke."
-
-#~ msgid "All Gnutella messages received by this client."
-#~ msgstr "Sve Gnutella poruke primljene kod ovog klijenta"
-
-#~ msgid "All Gnutella messages received over TCP, by message type."
-#~ msgstr "Sve Gnutella poruke primljene preko TCP, po vrsti poruke."
-
-#~ msgid "All Gnutella messages received over UDP, by message type."
-#~ msgstr "Sve Gnutella poruke primljene preko UDP, kod vrste poruke."
-
-#~ msgid "All Gnutella messages received over Multicast, by message type."
-#~ msgstr "Sve Gnutella poruke primljene preko Multicast, uz vrstu poruke."
-
-#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr "Ukupno Gnutella poruka primljeno preko TCP, UDP ili Multicast."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over TCP versus the total number of "
-#~ "queries."
-#~ msgstr ""
-#~ "Broj dupliciranih pitanja primljenih preko TCP u odnosu na ukupan broj "
-#~ "pitanja."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Broj dupliciranih pitanja primljenih preko Multicast u odnosu na ukupan broj "
-#~ "pitanja."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Sva primljena pitanja, o tranzitu."
-
-#~ msgid "All received queries, by time to live (TTL)."
-#~ msgstr "Sva primljena pitanja, u vremenu života (TTL)"
-
-#~ msgid "Special Queries"
-#~ msgstr "Posebna pitanja"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Sva posebno označena pitanja."
-
-#~ msgid "All received query hits, by hops."
-#~ msgstr "Svi primljeni rezultati, o tranzitu."
-
-#~ msgid "All received query hits, by time to live (TTL)."
-#~ msgstr "Sva primljena pitanja, u vremenu života (TTL)"
-
-#~ msgid "Total kilobytes for all Gnutella messages received by this client."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za sve Gnutella poruke primljene od ovog klijenta."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko TCP, uz vrstu "
-#~ "poruke."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko UDP, uz vrstu poruke"
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko Multicast, uz vrstu "
-#~ "poruke."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke primljene preko TCP, UDP ili "
-#~ "Multicast."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over TCP versus the total "
-#~ "number of queries."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta u duplim pitanjima preko TCP u odnosu na ukupan broj "
-#~ "pitanja."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta u dupliciranim pitanjima primljenih preko Multicasta u "
-#~ "odnosu na ukupan broj pitanja."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Sva primljeni pitanja u kilobajtima, kod tranzita."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "Sva primljena pitanja u kilobajtima, za vrijeme života (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Svi primljeni rezultati u kilobajtima, kod tranzita."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "Svi primljeni rezultati u kilobajtima, u vremenu života (TTL)."
-
-#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP pings primljeni od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP pongs primljeni od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "UDP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP pitanja primljena od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP rezultati primljeni od Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP pritisci primljeni od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pings primljeni od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pongs primljeni od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pitanja primljena od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Multicast rezultati primljeni od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pritisci primljeni od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pings primljeni od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pongs primljeni od svih Gnutela klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pitanja primljena od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP udarna pitanja primljeni od svih Gnutella klijenata protiv "
-#~ "drugih LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pritiske primljene od svih Gnutella klijenata protiv drugih "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pings primljeni od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pongs primljeni od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pitanja primljeni od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast udarna pitanja primljeni od svih Gnutella klijenata "
-#~ "prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pritiske primljeni od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "Prosječna veličina primljenih Gnutella poruka u kilobajtima"
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "Prosječna veličina kilobajta primljenih poruka od LimeWires."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
-#~ "All queries that were routed to other Ultrapeers for the last hop, using "
-#~ "query routing tables."
-#~ msgstr ""
-#~ "Sva pitanja koja su bila upravljana prema drugim Ultrapeers posljednjim "
-#~ "tranzitom, koristeći upit rutinskih tablica."
-
-#~ msgid "All queries that were routed to leaves, using query routing tables."
-#~ msgstr ""
-#~ "Sva ispitivanja koja su usmjerena ka izlazu, koristeći ispitivače smjernih "
-#~ "tabela."
-
-#~ msgid "All queries that were received from routed connections."
-#~ msgstr "Sva ispitivanja koja su bila primljena od usmjerenih priključaka"
-
-#~ msgid "Hit"
-#~ msgstr "Hit"
-
-#~ msgid "False Positive"
-#~ msgstr "Lažna potvrda"
-
-#~ msgid "Errors"
-#~ msgstr "Greške"
-
-#~ msgid "Generic Errors"
-#~ msgstr "Srodne greške"
-
-#~ msgid "Generic errors while reading messages."
-#~ msgstr "Srodne greške prilikom čitanja poruka"
-
-#~ msgid "Errors while reading query messages."
-#~ msgstr "Greške prilikom čitanja pitanja u porukama."
-
-#~ msgid "Query Replies"
-#~ msgstr "Odgovori na pitanja"
-
-#~ msgid "Errors while reading query reply messages."
-#~ msgstr "Greška prilikom čitanja odgovora u porukama."
-
-#~ msgid "Ping Replies"
-#~ msgstr "Ping odgovori"
-
-#~ msgid "Errors while reading ping replies."
-#~ msgstr "Greška prilikom čitanja ping odgovora"
-
-#~ msgid "Errors while reading pushes."
-#~ msgstr "Greške prilikom čitanja pritisaka"
-
-#~ msgid "Errors while reading vendor messages."
-#~ msgstr "Greška prilikom čitanja prodajnih poruka."
-
-#~ msgid "All Gnutella messages sent out from this client."
-#~ msgstr "Sve Gnutella poruke poslate vani od ovog klijenta."
-
-#~ msgid "All Gnutella messages sent over TCP, by message type."
-#~ msgstr "Sve Gnutella poruke poslate preko TCP, uz vrstu poruke"
-
-#~ msgid "All Gnutella messages sent over UDP, by message type."
-#~ msgstr "Sve Gnutella poruke poslate preko UDP, uz vrstu poruke."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr "Sve Gnutella poruke poslate preko Multicast, uz vrstu poruke."
-
-#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr "Ukupan broj Gnutella poruka poslatih preko TCP, UDP ili Multicast."
-
-#~ msgid "Total kilobytes for Gnutella messages sent out from this client."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke poslate vani od ovog klijenta."
-
-#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko TCP, uz vrstu poruke."
-
-#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko UDP, uz vrstu poruke."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke odaslanih preko Multicast, uz vrstu "
-#~ "poruke."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Ukupan broj kilobajta za Gnutella poruke poslate preko TCP, UDP ili "
-#~ "Multicast."
-
-#~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
-#~ msgstr "UDP pings poslati od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP pongs poslati od svih Gnutella klijenata prema drugim LimeWires.."
-
-#~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDP udarna pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "UDB pritisci poslati od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pings poslati od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Multicast pongs sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pongs poslati od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Multicast queries sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pitanja poslata od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid ""
-#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast udarna pitanja poslata od Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast pritisci poslati od svih Gnutella klijenata prema drugim LimeWires."
-
-#~ msgid "Total kilobytes sent by other LimeWires."
-#~ msgstr "Ukupan broj kilobajta poslatih od drugih LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pings poslati od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pongs poslati od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pitanja poslata od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP rezultate poslati od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za UDP pritiske poslati od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pings poslati od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pongs poslati od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pitanja poslati od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast rezultate poslati od svih Gnutella klijenata prema "
-#~ "drugim LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobajti za Multicast pritiske od svih Gnutella klijenata prema drugim "
-#~ "LimeWires."
-
-#~ msgid "Handshaking"
-#~ msgstr "Rukovanje"
-
-#~ msgid "Statistics for handshaking as a leaf."
-#~ msgstr "Statistika za rukovanje kao jedna lista."
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "Statistika za rukovanje kao na jedan ultrapeer."
-
-#~ msgid "Statistics for outgoing Gnutella connection handshaking."
-#~ msgstr "Statistika izlazne Gnutella konekcije rukovanja."
-
-#~ msgid "Statistics for incoming Gnutella connection handshaking."
-#~ msgstr "Statistika za ulazne Gnutella priključke rukovanjem."
-
-#~ msgid "Outgoing Server Reject"
-#~ msgstr "Izlazni server odbijen"
-
-#~ msgid ""
-#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
-#~ "server."
-#~ msgstr ""
-#~ "Statistika za izlazne Gnutella priključke rukovanjem odbijena od strane "
-#~ "servera."
-
-#~ msgid "Compression"
-#~ msgstr "Sabijanje"
-
-#~ msgid "Statistics for compressed upstream traffic in kilobytes."
-#~ msgstr "Statistika za sabijeni upstream promet u kilobajtima."
-
-#~ msgid "Statistics for compressed downstream traffic in kilobytes."
-#~ msgstr "Statistika za sabijeni downstream promet u kilobajtima."
-
-#~ msgid "Flow Control"
-#~ msgstr "Kontrola protoka"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "Statistika za kontrolu protoka poruka."
-
-#~ msgid "Statistics for flow controlled messages in kilobytes."
-#~ msgstr "Statistika za tok kontrolisanih poruka u kilobajtima."
-
-#~ msgid "Total number of errors routing messages to other clients."
-#~ msgstr "Ukupan broj grešaka usmjerenih poruka prema drugim klijentima."
-
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Udar rutinskih grešaka"
-
-#~ msgid "Errors routing query hits."
-#~ msgstr "Greške usmjerenih pitanja."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Ukupan broj pročišćenih poruka."
-
-#~ msgid ""
-#~ "Total number of Gnutella connection attempts, either initiated internally or "
-#~ "externally."
-#~ msgstr ""
-#~ "Ukupan broj Gnutella pokušaja konekcije, bilo da su upućeni unutra ili vani."
-
-#~ msgid ""
-#~ "Total incoming requests received over time. This includes all connection "
-#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
-#~ msgstr ""
-#~ "Ukupan broj zahtjeva primljenih preko vremena. Ovo uključuje sve pokušaje "
-#~ "priključka (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, itd...)"
-
-#~ msgid ""
-#~ "Total outgoing download connections attempts over time. This includes both "
-#~ "direct connections and pushed requests."
-#~ msgstr ""
-#~ "Ukupan broj izlaznih pokušaja kontaktiranja downloada preko vremana. Ovo "
-#~ "uključuje oba priključna pravca kao i zahtjeve pritiska."
-
-#~ msgid ""
-#~ "Total responses received from downloaders over time. This includes Busy, "
-#~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
-#~ msgstr ""
-#~ "Ukupan broj odgovora primljenih od downloads. Ovo uključuje i zauzeto, "
-#~ "datoteka nije pronađena, nije za razmjenu, čekanje, razno. IO greške, i OK "
-#~ "odgovori."
-
-#~ msgid ""
-#~ "Total alternate locations received and removed over time. This includes "
-#~ "locations that we actively attempt to connect to, locations that we will "
-#~ "ignore, locations that couldn't be removed, and locations that we removed "
-#~ "permanently from attempting to connect to."
-#~ msgstr ""
-#~ "Ukupan broj alternativnih lokacija primljenih i pomjerenih preko vremana. "
-#~ "Ovo uključuje mjesto gdje se aktivno pokušavamo priključiti, mjesto koje "
-#~ "ćemo zanemariti, mjesto koje neće biti pomjereno, i mjesto koje smo trajno "
-#~ "odstranili od pokušaja konekcije."
-
-#~ msgid "Transfers"
-#~ msgstr "Prenošenje"
-
-#~ msgid ""
-#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
-#~ "For HTTP1.1, values are per chunk."
-#~ msgstr ""
-#~ "Ukupan prenos preko vremena. Ovo uključuje oba HTTP1.1 i HTTP1.0 prenosa. Za "
-#~ "HTTP1.0, vrijednost je po komadu."
-
-#~ msgid ""
-#~ "Records the time in milliseconds to establish TCP connections for downloads. "
-#~ "This can vary, for example, when servers are experiencing high loads."
-#~ msgstr ""
-#~ "Registrira vrijeme u milisekundama za uspostavljanje TCP priključka za "
-#~ "downloads. Ovo može varirati, na primjer, kada su serveri pod pritiskom "
-#~ "ogromnog punjenja."
-
-#~ msgid "Requests"
-#~ msgstr "Zahtjevi"
-
-#~ msgid ""
-#~ "Total incoming upload requests. These numbers are incremented on every "
-#~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
-#~ "transfers."
-#~ msgstr ""
-#~ "Ukupan broj ulaznih upload zahtjeva. Ovi se brojevi uvećavaju na svaki "
-#~ "pokušaj rasčlanjivanja zahtjeva i prema tome uključuje svaki komad kod "
-#~ "HTTP1.1 prenosa."
-
-#~ msgid ""
-#~ "Total outgoing responses. These numbers are incremented before sending each "
-#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
-#~ "the number of requests for which we have attempted to transfer a portion of "
-#~ "a file."
-#~ msgstr ""
-#~ "Ukupan broj izlaznih odgovora. Ovi podaci su dopunjeni prije slanja svakog "
-#~ "odgovora, i prema tome uključuje svaki dio za HTTP/1.1 transfer. 'Normalno' "
-#~ "je broj zahtjeva za svaki prenos koji smo pokušali transferirati za dio "
-#~ "datoteke."
-
-#~ msgid "Request Methods"
-#~ msgstr "Zahtjev metodike"
-
-#~ msgid ""
-#~ "Total incoming request methods. These numbers are incremented either for "
-#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
-#~ "requests, after we have sent the initial GIV."
-#~ msgstr ""
-#~ "Ukupan broj ulaznih metodičkih zahtjeva. Ovi podaci su dopunjeni takodje sa "
-#~ "HTTP/1.1 prenosom NAKON što je zatraženo ulazno priključenje, nakon što smo "
-#~ "poslali početni GIV."
-
-#~ msgid "General"
-#~ msgstr "Općenito"
-
-#~ msgid ""
-#~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
-#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
-#~ "counted as an interrupted upload.)"
-#~ msgstr ""
-#~ "Ukupan broj pokušaja, kompletnih, prekinutih ili zaustavljeni uploads. Ovi "
-#~ "podaci su dopunjeni po priključku, ne po komadu. (Zaustavljeni uploads biće "
-#~ "izbrojani kao prekinuti uploads.)"
-
-#~ msgid "seconds"
-#~ msgstr "sekunda"
-
-#~ msgid "messages"
-#~ msgstr "poruka"
-
-#~ msgid "Average"
-#~ msgstr "Prosjek"
-
-#~ msgid "Max"
-#~ msgstr "Max"
-
-#~ msgid "Color"
-#~ msgstr "Boja"
-
-#~ msgid "Current"
-#~ msgstr "Trenutno"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "Napiši statistiku za ovu grafiku datoteka"
-
-#~ msgid "Total Upstream"
-#~ msgstr "Upstream"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Ukupno Downstream"
-
-#~ msgid "HTTP Total"
-#~ msgstr "HTTP Ukupno"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "HTTP zaglavlja"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Gnutella ukupno"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "Gnutella zaglavlja"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Gnutella poruke"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Ukupan broj mogućih Upstream"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Ukupno aktuelnih Upstream"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Ukuapn broj mogućih Downstream"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Ukupno aktuelnih Downstream"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (potencijalno)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP (aktelno)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (potencijalno)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (aktelno)"
-
-#~ msgid "All Clients"
-#~ msgstr "Svi klijenti"
-
-#~ msgid "All Errors"
-#~ msgstr "Sve greške"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "Nevažeća Payload dužina"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "Nevažeći Hops"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "Nevažeći TTL"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "Tranzit >Mekši Max"
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(Tranzit+TTL) > Tvrdi max"
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "Nevažeća šifra poruke"
-
-#~ msgid "All Query Errors"
-#~ msgstr "Sva pitanja pogrešna"
-
-#~ msgid "URN Query"
-#~ msgstr "URN Pitanje"
-
-#~ msgid "Query Too Large"
-#~ msgstr "Pitanje je predugačko"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "XML pitanje je predugačko"
-
-#~ msgid "Empty Query"
-#~ msgstr "Prazno pitanje"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "Nevažeća slova u pitanju"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "Na sva pitanja odgovor pogrešan"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "Nevažeći odgovor Porte"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "Nevažeća adresa za odgovor"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "Nevažeća brzina odgovora"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "Svi ping odgovori pogrešni"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "Nevažeći ping odgovor Payload"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "Nevažeći Ping odgovor Porte"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "Nevažeći Ping Reply adresa"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "Nevažeći GGEP Block"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "Nevažeća dužina prodaje"
-
-#~ msgid "All Push Errors"
-#~ msgstr "Sve greške pritiska"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "Nevažeći pritisak na izlazu"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "Nevažeća adresa pritiska"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "Nevažeći pritisak Payload"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "Sve greške prodajnih poruka"
-
-#~ msgid "Invalid ID"
-#~ msgstr "Nevažeći ID"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "Nevažeće biranje"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "Nevažeći Payload"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "Neprepoznatljiva poruka prodavca"
-
-#~ msgid "All Messages"
-#~ msgstr "Sve poruke"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "Zakrpa tebele puta"
-
-#~ msgid "Hops 1"
-#~ msgstr "Tranzit 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Tranzit 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Tranzit 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Tranzit 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Tranzit 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Tranzit 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Tranzit 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Tranzit 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Tranzit 9"
-
-#~ msgid "What's New?"
-#~ msgstr "Šta ima novo?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Pong Greške"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Reply greške"
-
-#~ msgid "Push Errors"
-#~ msgstr "Greške pritiska"
-
-#~ msgid "Hard Limit"
-#~ msgstr "Tvrda granica"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "Tvrda granica (TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "Tvrda granica (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "Tvrda granica (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "Tvrda granica (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "Tvrda granica (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "Tvrda granica (TTL 5 ili preko)"
-
-#~ msgid "No Route"
-#~ msgstr "Nema pravca"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "Pokušaj priključenja"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "Ulazni pokušaji"
-
-#~ msgid "All Requests"
-#~ msgstr "Sve molbe"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "Glavna molba"
-
-#~ msgid "GET Requests"
-#~ msgstr "Dobiven molba"
-
-#~ msgid "Push Requests"
-#~ msgstr "Poguraj molbu"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Gnutella molba"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Gnutella (LimeWire) molba"
-
-#~ msgid "Magnet Requests"
-#~ msgstr "Magnet molba"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "Nepoznata molba"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "Zabranjen server"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "Zatvori odmah"
-
-#~ msgid "Accepted"
-#~ msgstr "Prihvaćeno"
-
-#~ msgid "Busy"
-#~ msgstr "Zauzet"
-
-#~ msgid "Not Sharing Files"
-#~ msgstr "Ne razmjenjuj datoteke"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "Problem čitanja zaglavlja"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "Nepoznati odgovor šifre"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "Sadržina URN zbrda-zdola"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "Nesaglediv domet"
-
-#~ msgid "IO Error"
-#~ msgstr "IO Greška"
-
-#~ msgid "Failed"
-#~ msgstr "Neuspjeh"
-
-#~ msgid "Succeeded"
-#~ msgstr "Nasljeđeno"
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "Uspješno HTTP 1.1"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "Uspješno HTTP 1.0"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "Neuspio HTTP 1.1"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "Neuspio HTTP 1.0"
-
-#~ msgid "Retried Success"
-#~ msgstr "Uspješan ponovni pokušaj"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "Uspješan direktni priključak"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "Uspješno priključenje pritiska"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "Neuspio pritisak (Prekinuto)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "Neuspio pritisak (GIV nije primljen)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "Neuspio pritisak (Neuspio priključak)"
-
-#~ msgid "THEX Request"
-#~ msgstr "THEX zahtjev"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "Uspješan pritisak na Proxy"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "Nakazan pritisak na Proxy"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "Neuspio pritisak na Proxy"
-
-#~ msgid "Push Proxy"
-#~ msgstr "Pritisni na Proxy"
-
-#~ msgid "Traditional Get"
-#~ msgstr "Tradicionalno postiže"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "Nepoznata URN dobit"
-
-#~ msgid "URN Get"
-#~ msgstr "URN dobit"
-
-#~ msgid "Limit Reached"
-#~ msgstr "Ograničen domet"
-
-#~ msgid "Banned Client"
-#~ msgstr "Zabranjen klijent"
-
-#~ msgid "Freeloader"
-#~ msgstr "Slobodno punjenje"
-
-#~ msgid "Normal"
-#~ msgstr "Normalno"
-
-#~ msgid "Get"
-#~ msgstr "Dobit"
-
-#~ msgid "Head"
-#~ msgstr "Glava"
-
-#~ msgid "Unknown"
-#~ msgstr "Nepoznat"
-
-#~ msgid "Pushed Get"
-#~ msgstr "Pritisak nastao"
-
-#~ msgid "Pushed Head"
-#~ msgstr "Pritisak napred"
-
-#~ msgid "Pushed Unknown"
-#~ msgstr "Nepoznat pritisak"
-
-#~ msgid "Push Failed"
-#~ msgstr "Neuspio pritisak"
-
-#~ msgid "Completed Responses"
-#~ msgstr "Kompletirani odgovori"
-
-#~ msgid "Interrupted"
-#~ msgstr "Prekinuto"
-
-#~ msgid "Stalled"
-#~ msgstr "Zaustavljeno"
-
-#~ msgid "Completed File Transfers"
-#~ msgstr "Kompletiran prenos datoteka"
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "Vanjsko odbacivanje (Liste)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "Izlazno odbacivanje (Stari Ultrapeer)"
-
-#~ msgid "Out Acc."
-#~ msgstr "Izlazno prihvatanje"
-
-#~ msgid "In Rej."
-#~ msgstr "Ulazno odbacivanje"
-
-#~ msgid "In Acc."
-#~ msgstr "Ulazno prihvatanje"
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "Izlazno odbacivanje (Potpuno)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "Izlazno prihvatanje (Praćeno navođenje)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "Izlazno prihvatanje (Ignorisano navođenje)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "Izlazno prihvaćanje (Nema navođenja)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "Ulazno odbacivanje (List)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "Ulazno prihvaćanje (List)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "Ulazno prihvaćanje (Navođenje prema listi)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Ulazno prihvaćanje (Ultrapeer)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "Ulazno odbijanje (Sve porte zatvorene)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "Ulazno odbijanje (Mreža treba Ultrapeer)"
-
-#~ msgid "Server Reject"
-#~ msgstr "Server odbijen"
-
-#~ msgid "No Conclusion"
-#~ msgstr "Nema zaključka"
-
-#~ msgid "Crawler"
-#~ msgstr "Puzavac"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "LimeWire Ultapeers"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "Krajnja tačka LimeWirea"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Drugi Ultapeers"
-
-#~ msgid "Other Leaves"
-#~ msgstr "Druge krajnje tačke"
-
-#~ msgid "Responses Requested"
-#~ msgstr "Zatraženi odgovori"
-
-#~ msgid "Responses Received"
-#~ msgstr "Odgovori primljeni"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "Mimoišli odgovori"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "OOB uspješna procjena"
-
-#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
-#~ msgstr "Broj reakcija pitanja primljenih preko OOB protokola."

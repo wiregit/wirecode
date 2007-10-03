@@ -8,14 +8,237 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: 2007-09-11 00:24+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Rosetta-Export-Date: 2007-08-28 14:59:59+0000\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Uuendused"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Lõpeta"
+
+#~ msgid "Loading Languages"
+#~ msgstr "Laadin keeli"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Aseta"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Arv mitut faili sa jagad {0} Failid (Laen...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Arv mitut faili sa jagad {0} failid"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Osides \"Mida uut\": {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Faili ei tunta ära."
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Faili ei suudeta leida."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Fail on vigane."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Helifailil on tundmatu viga."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Faili koostisosi ei suudeta tuvastada."
+
+#~ msgid "Close the Window"
+#~ msgstr "Sulge aken."
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "V"
+
+#~ msgid "W"
+#~ msgstr "N"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Näita või peida isiklike lipikuid."
+
+#~ msgid "G"
+#~ msgstr "U"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "&Statistics"
+#~ msgstr "&Statistika"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Kuva statistika ekraan."
+
+#~ msgid "U"
+#~ msgstr "A"
+
+#~ msgid "E"
+#~ msgstr "G"
+
+#~ msgid "Results"
+#~ msgstr "Tulemused"
+
+#~ msgid "Files"
+#~ msgstr "Failid"
+
+#~ msgid "files"
+#~ msgstr "failid"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "Failid (Laen...)"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Taastamine ebaõnnestus"
+
+#~ msgid "Querying Network"
+#~ msgstr "Võrgu päring"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Ootan {0}s allikat"
+
+#~ msgid "s for Sources"
+#~ msgstr "s allikat"
+
+#~ msgid "Files with this name"
+#~ msgstr "Selle nimega failid"
+
+#~ msgid "Orginal query"
+#~ msgstr "Originaalpäring"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Ühtegi edastusviisi pole kättesaadaval."
+
+#~ msgid "End Chat"
+#~ msgstr "Lõpeta suhtlemine"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Lõpeta võõrutajaga suhtlemine."
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Laen kasutaja sätteid..."
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Laen statistika akent..."
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "Aita toetada jagada iseseisva meedia sisu. Muretse PRO."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Sinu masinal ei paista olevat ektiivset interneti ühendust või tulemüür "
+#~ "blokeerib LimeWirel internetile juurdepääsemise. Palun kontrolli oma "
+#~ "ühendust või tulemüüri sätteid ja siis vali \"Ühenda\" Faili menüüst "
+#~ "ühendamaks LimeWiret võrku."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Ei suutnud leida porti sissetulevate ühenduste jaoks.\n"
+#~ "Palun täpsusta porti konfigureerimis aknast."
+
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Ribavahelaiuse statistika sisaldab täieliku informatsiooni kogu "
+#~ "ribavahelaiuse kohta mis on kas alla või üles laetud. Kliki ühel kategoorial "
+#~ "nägemaks soovitud statistikat."
+
+#~ msgid "Network"
+#~ msgstr "Võrk"
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Statistika võrgu seisundi kohta. Need statistikad on üsna ebatäpsed tänu "
+#~ "dünamilisusele ja Gnutellale iseloomulikudele distributsioonidele ja ei "
+#~ "tasuks võtta sõna-sõnalt. Kuigi siiski võivad nad anda aimu sinu ühenduse "
+#~ "üldise seisundi kohta."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Täpsem statistika sisaldab detailset informasitsiooni Gnutella teadete ja "
+#~ "HTTP liikluse kohta. See informasitsioon võib olla kasulik oskajamatele "
+#~ "kasutajatele õppimak kuidas Gnutella võrk toimib. Määratuna vaiksettetes ei "
+#~ "edastata täpsemat statistikat ja ei ole suuremale osale inimestele vajalik."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Näita täpsemat statistikat:"
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Upstream"
+#~ msgstr "Väljavool"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Kogu ribavahelaius mida kasutataksse väljaminevate andmete saatmiseks, kas "
+#~ "üleslaadimiste või Gnutella teadete näol."
+
+#~ msgid "Downstream"
+#~ msgstr "Sissevool"
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Kogu ribavahelaius mida kasutatakse sissetulevate andmete vastuvõtmiseks, "
+#~ "kas allalaadimiste või Gnutella teadete näol."
+
+#~ msgid "Number"
+#~ msgstr "Number"
+
+#~ msgid "Kilobytes"
+#~ msgstr "Kilobaidid"
+
+#~ msgid "LimeWire Messages"
+#~ msgstr "LimeWire’I teated"
+
+#~ msgid "All Errors"
+#~ msgstr "Kõik vead"
+
+#~ msgid "URN Query"
+#~ msgstr "URN päring"
+
+#~ msgid "Empty Query"
+#~ msgstr "Tühi päring"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -175,7 +398,7 @@ msgstr "Laen vanu tirimisi..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "Programm otsib uuendusi"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
@@ -352,7 +575,7 @@ msgstr "Tüüp:"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:35
 msgid "Length"
-msgstr ""
+msgstr "Pikkus"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
@@ -468,9 +691,8 @@ msgstr "Autor"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:136
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
-#, fuzzy
 msgid "Application"
-msgstr "Hagi"
+msgstr "Rakendus"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:364
@@ -478,9 +700,8 @@ msgstr "Hagi"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:27
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:52
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:218
-#, fuzzy
 msgid "Name"
-msgstr "Nimi:"
+msgstr "Nimi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 msgid "Publisher"
@@ -488,15 +709,16 @@ msgstr "Avaldaja"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Platform"
-msgstr ""
+msgstr "Plattform"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
+#, fuzzy
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "Valitud torrenti fail võib sisaldada Turvascripte"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:101
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWare ei saa alla laadida torrenti faili valitud aadressilt."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:34
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:550
@@ -504,6 +726,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Kui sa peatad selle faili üleslaadimise, siis torrenti faili laadimine "
+"lõppeb. Kas oled kindel et tahad seda teha."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:37
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:555
@@ -532,7 +756,7 @@ msgstr "Käivita automaatselt"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:35
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Bittorrenti seaded"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:37
 msgid ""
@@ -765,7 +989,7 @@ msgstr ""
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
-msgstr ""
+msgstr "Bittorrent, <bittorrenti logo ja torrentid on Bittorrent omand"
 
 #. *
 #. * The select all action.
@@ -3624,9 +3848,8 @@ msgstr "Nimetu fail"
 
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:33
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:56
-#, fuzzy
 msgid "Active"
-msgstr "Hagi"
+msgstr "Aktiivne"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:33
 msgid "File & Protocol Associations"
@@ -3984,9 +4207,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:79
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:17
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:46
-#, fuzzy
 msgid "Icon"
-msgstr "Sissetulev"
+msgstr "Ikoon"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:113
 msgid "Path"
@@ -6994,225 +7216,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Info"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Uuendused"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Lõpeta"
-
-#~ msgid "Loading Languages"
-#~ msgstr "Laadin keeli"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Aseta"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "Arv mitut faili sa jagad {0} Failid (Laen...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Arv mitut faili sa jagad {0} failid"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "Osides \"Mida uut\": {0}"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr ". Faili ei tunta ära."
-
-#~ msgid ". The file cannot be found."
-#~ msgstr ". Faili ei suudeta leida."
-
-#~ msgid ". The file is corrupt."
-#~ msgstr ". Fail on vigane."
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr ". Helifailil on tundmatu viga."
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr ". Faili koostisosi ei suudeta tuvastada."
-
-#~ msgid "Close the Window"
-#~ msgstr "Sulge aken."
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "V"
-
-#~ msgid "W"
-#~ msgstr "N"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Näita või peida isiklike lipikuid."
-
-#~ msgid "G"
-#~ msgstr "U"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "&Statistics"
-#~ msgstr "&Statistika"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Kuva statistika ekraan."
-
-#~ msgid "U"
-#~ msgstr "A"
-
-#~ msgid "E"
-#~ msgstr "G"
-
-#~ msgid "Results"
-#~ msgstr "Tulemused"
-
-#~ msgid "Files"
-#~ msgstr "Failid"
-
-#~ msgid "files"
-#~ msgstr "failid"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "Failid (Laen...)"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "Taastamine ebaõnnestus"
-
-#~ msgid "Querying Network"
-#~ msgstr "Võrgu päring"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Ootan {0}s allikat"
-
-#~ msgid "s for Sources"
-#~ msgstr "s allikat"
-
-#~ msgid "Files with this name"
-#~ msgstr "Selle nimega failid"
-
-#~ msgid "Orginal query"
-#~ msgstr "Originaalpäring"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Ühtegi edastusviisi pole kättesaadaval."
-
-#~ msgid "End Chat"
-#~ msgstr "Lõpeta suhtlemine"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Lõpeta võõrutajaga suhtlemine."
-
-#~ msgid "Loading Settings..."
-#~ msgstr "Laen kasutaja sätteid..."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Laen statistika akent..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "Aita toetada jagada iseseisva meedia sisu. Muretse PRO."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Sinu masinal ei paista olevat ektiivset interneti ühendust või tulemüür "
-#~ "blokeerib LimeWirel internetile juurdepääsemise. Palun kontrolli oma "
-#~ "ühendust või tulemüüri sätteid ja siis vali \"Ühenda\" Faili menüüst "
-#~ "ühendamaks LimeWiret võrku."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Ei suutnud leida porti sissetulevate ühenduste jaoks.\n"
-#~ "Palun täpsusta porti konfigureerimis aknast."
-
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Ribavahelaiuse statistika sisaldab täieliku informatsiooni kogu "
-#~ "ribavahelaiuse kohta mis on kas alla või üles laetud. Kliki ühel kategoorial "
-#~ "nägemaks soovitud statistikat."
-
-#~ msgid "Network"
-#~ msgstr "Võrk"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Statistika võrgu seisundi kohta. Need statistikad on üsna ebatäpsed tänu "
-#~ "dünamilisusele ja Gnutellale iseloomulikudele distributsioonidele ja ei "
-#~ "tasuks võtta sõna-sõnalt. Kuigi siiski võivad nad anda aimu sinu ühenduse "
-#~ "üldise seisundi kohta."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Täpsem statistika sisaldab detailset informasitsiooni Gnutella teadete ja "
-#~ "HTTP liikluse kohta. See informasitsioon võib olla kasulik oskajamatele "
-#~ "kasutajatele õppimak kuidas Gnutella võrk toimib. Määratuna vaiksettetes ei "
-#~ "edastata täpsemat statistikat ja ei ole suuremale osale inimestele vajalik."
-
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Näita täpsemat statistikat:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "Upstream"
-#~ msgstr "Väljavool"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Kogu ribavahelaius mida kasutataksse väljaminevate andmete saatmiseks, kas "
-#~ "üleslaadimiste või Gnutella teadete näol."
-
-#~ msgid "Downstream"
-#~ msgstr "Sissevool"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Kogu ribavahelaius mida kasutatakse sissetulevate andmete vastuvõtmiseks, "
-#~ "kas allalaadimiste või Gnutella teadete näol."
-
-#~ msgid "Number"
-#~ msgstr "Number"
-
-#~ msgid "Kilobytes"
-#~ msgstr "Kilobaidid"
-
-#~ msgid "LimeWire Messages"
-#~ msgstr "LimeWire’I teated"
-
-#~ msgid "All Errors"
-#~ msgstr "Kõik vead"
-
-#~ msgid "URN Query"
-#~ msgstr "URN päring"
-
-#~ msgid "Empty Query"
-#~ msgstr "Tühi päring"

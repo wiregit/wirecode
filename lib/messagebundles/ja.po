@@ -10,29 +10,81 @@ msgstr ""
 "Project-Id-Version: ja\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-08-20 16:13-0400\n"
+"PO-Revision-Date: 2007-10-01 10:00+0000\n"
 "Last-Translator: Steffen Pingel <steffenp@gmx.de>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=(0);\n"
-"X-Generator: KBabel 1.11.4\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:02:45+0000\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "共有しているファイルの数 {0} ファイル（ロード中...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "共有しているファイルの数 {0} ファイル"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "\"新しい情報\"検索： {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr "ファイル形式を認識できない"
+
+#~ msgid ". The file cannot be found."
+#~ msgstr "ファイルが見つらない"
+
+#~ msgid ". The file is corrupt."
+#~ msgstr "ファイルが壊れている"
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr "音楽ファイル内に不明なエラーがある"
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr "そのファイルは解析できない"
+
+#, fuzzy
+#~ msgid "test1"
+#~ msgstr "再設定"
+
+#, fuzzy
+#~ msgid "test2"
+#~ msgstr "再設定"
+
+#, fuzzy
+#~ msgid "other"
+#~ msgstr "イーサネット"
+
+#, fuzzy
+#~ msgid "string"
+#~ msgstr "接続開始"
+
+#, fuzzy
+#~ msgid "1"
+#~ msgstr "T1"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "完了"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"ハードディスクの空き容量が足りないため、必要なファイルを保存できない状態。LimeWireの使用を続けるには、ハードディスクの空き容量を増やること。"
+"ハードディスクの空き容量が足りないため、必要なファイルを保存できません。LimeWireを今後使用するには、ハードディスクの空き容量を増やしてください。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"必要なファイルを他のプログラムが使用しているため、LimeWireはファイルを開けない状態。LimeWireは、このファイルが開くまで操作を繰返すこと。"
+"必要なファイルは他のプログラムが使用しているため、LimeWireでファイルを開けませんでした。LimeWireは、このファイルが開くまで操作を繰返します"
+"。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
@@ -40,8 +92,8 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"必要なアクセス権がないため、必要なファイルを書き込み不可。次にLimeWire "
-"が起動されたとき、選択した環境設定が保持されていない可能性有り。また、LimeWireが予期しない作動をする可能性も考えられる。"
+"必要なアクセス権がないため、必要なファイルの書き込みができません。次回のLimeWireの起動時に、変更した環境設定が保持又は完了されていない可能性が有り"
+"ます。また、LimeWireが予期しない動作をする可能性も考えられます。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:37
 msgid ""
@@ -55,15 +107,15 @@ msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"ハードディスクの空き容量が足りないため、選択したファイルをダウンロードできない状態。更にファイルをダウンロードするには、ハードディスクの空き容量を増やすこ"
-"と。"
+"ハードディスクの空き容量が足りないため、選択したファイルをダウンロードできません。今後ファイルをダウンロードするには、ハードディスクの空き容量を増やしてく"
+"ださい。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:40
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"他のプログラムがファイルを使っているため、選択したファイルをダウンロードできない状態。他のプログラムを終了させてから、ダウンロードを再開すること。"
+"他のプログラムがファイルを使っているため、選択したファイルをダウンロードできません。他のプログラムを終了させてから、もう一度ダウンロードを試してください。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:41
 msgid ""
@@ -72,15 +124,15 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"選択したダウンロードについて、未完成フォルダにアクセス権がないため、未完成ファイルを作成または書き込み不可。LimeWireを使い続けるには、他の保存先フ"
-"ォルダを選択。"
+"選択したダウンロードは、未完成（一時）フォルダにアクセス権がないため、未完成ファイルを作成または書き込みができません。今後LimeWireを使い続けるには"
+"、他の保存先フォルダを選択してください。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:42
 msgid ""
 "LimeWire was unable to open the incomplete file for the selected download "
 "because the filename contains characters which are not supported by your "
 "operating system."
-msgstr "選択したダウンロードによるファイル名に、お使いのシステムが対応していない文字があるため、不完全なファイルを開けない状況。"
+msgstr "選択したダウンロードファイル名は、お使いのシステムの対応していない文字があるため、不完全なファイルを開けない状況です。"
 
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
@@ -88,14 +140,14 @@ msgstr "選択したダウンロードによるファイル名に、お使いの
 msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
-msgstr "環境設定を保存するファイルが破損。初期設定を使用"
+msgstr "環境設定を保存するファイルが壊れています。初期設定を使用しましょう。"
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
 #: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
-msgstr "内向きの接続のポートを設定できない状態。幾つかの機能は期待した通りに働かない可能性有り。"
+msgstr "内向きの接続ポートの設定ができない状態です。特定の幾つかの機能は働かない可能性が有ります。"
 
 #: core/com/limegroup/gnutella/DownloadManager.java:216
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -104,86 +156,87 @@ msgstr "残念ながら、以前のダウンロードを再開できない状態
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 #, fuzzy
 msgid "Loading TLS Encryption..."
-msgstr "Loading HTML エンジン..."
+msgstr "TLS暗号化システムを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:289
 #, fuzzy
 msgid "Loading Safe Content Management..."
-msgstr "古くなった接続管理をロード中..."
+msgstr "コンテンツ管理マネージャーを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:294
 msgid "Loading Message Router..."
-msgstr "メッセージ・ルーターをロード中..."
+msgstr "メッセージ・ルーターを読み込み中..…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:299
 #, fuzzy
 msgid "Loading Upload Management..."
-msgstr "接続管理をロード中..."
+msgstr "アップロードマネージャーを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:308
 msgid "Loading Connection Listener..."
-msgstr "接続リスナーをロード中r..."
+msgstr "接続リスナーを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:317
 msgid "Loading Connection Management..."
-msgstr "接続管理をロード中..."
+msgstr "接続マネージャーを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:322
 #, fuzzy
 msgid "Loading Download Management..."
-msgstr "接続管理をロード中..."
+msgstr "ダウンロードマネージャーを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:327
 #, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "古くなった接続管理をロード中..."
+msgstr "Ultrapeer/DHTマネージャーの読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:332
 msgid "Locating Peers..."
-msgstr "peersの位置付け..."
+msgstr "共有者を探しています…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
 #, fuzzy
 msgid "Loading Shared Files..."
-msgstr "保存ファイルをロード中..."
+msgstr "共有ファイルを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 #, fuzzy
 msgid "Loading bittorrent Management..."
-msgstr "接続管理をロード中..."
+msgstr "ビットトレントマネージメントをロード中..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:358
 #, fuzzy
 msgid "Loading magnet Management..."
-msgstr "接続管理をロード中..."
+msgstr "マグネットマネージメントをロード中..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 msgid "Loading Old Downloads..."
-msgstr "古いダウンロードをロード中..."
+msgstr "古いダウンロードを読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
+#, fuzzy
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "最新版の有無を確認しています…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
-msgstr "出された質問をロード中ｄ..."
+msgstr "質問者を読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
 msgid "Loading Magnet Listener..."
-msgstr "マグネット・リスナーをロード中..."
+msgstr "マグネット・リスナーを探しています…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Peer Listener..."
-msgstr "相手のリスナーをロード中..."
+msgstr "相手のリスナーを探しています…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Loading Stale Connection Management..."
-msgstr "古くなった接続管理をロード中..."
+msgstr "古くなった接続管理を読み込み中…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
-msgstr "保存ファイルをロード中..."
+msgstr "保存したファイルを読み込んでいます…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 #, fuzzy
@@ -208,7 +261,7 @@ msgstr "プログラム"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 #, fuzzy
 msgid "Audio"
-msgstr "スタジオ"
+msgstr "音楽"
 
 #: core/com/limegroup/gnutella/MediaType.java:45
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:102
@@ -216,7 +269,7 @@ msgstr "スタジオ"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 #, fuzzy
 msgid "Video"
-msgstr "表示"
+msgstr "ビデオ"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Images"
@@ -235,62 +288,63 @@ msgstr ""
 msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
-msgstr "マグネット・リンクに使われているURLが無効。ファイルが正しくダウンロードできない可能性有り。"
+msgstr "マグネット・リンクに使われているURLが無効。ファイルが正しくダウンロードできない可能性があります。"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
 #, fuzzy
 msgid "You have already downloaded {0}"
-msgstr "このファイルを、\"{0}\"へ既にダウンロード開始している"
+msgstr "このファイルは、\"{0}\"へ既にダウンロードを開始しています。"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
 #, fuzzy
 msgid "You are already downloading this file to {0}"
-msgstr "このファイルを、\"{0}\"へ既にダウンロード開始している"
+msgstr "このファイルは、\"{0}\"へ既にダウンロード開始しています"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "最適化された検索にはLimeWire Pro"
+msgstr "高品質な検索にはLimeWire Proをご使用下さい"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "ここをクリックして、ピア対ピアのネットワークに関するLimeWire開発を支援"
+msgstr "PROを買って、ピア to ピアネットワークに関するLimeWire開発をサポート"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
+#, fuzzy
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr ""
+msgstr "LimeWire PROを購入して、高速なダウンロードができるようにご援助お願いします"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "最適化された検索にはLimeWire Pro"
+msgstr "高品質な検索にはLimeWire Proをご使用下さい"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
 msgid "Support open networks. Get LimeWire PRO."
-msgstr "オープンなネットワークを支援"
+msgstr "LimeWire PROを購入し、オープンなネットワークをサポート！"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "ここをクリックして、オープン・ソースとオープン・プロトコルを支援"
+msgstr "LimeWire PROを購入して、オープン・ソースとオープン・プロトコルをサポート！"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "最適化されたパフォーマンスにはLimeWire Pro"
+msgstr "最適なパフォーマンス向上にはLimeWire Pro！"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "インターネットをオープンな状態に保つ には、Proを手にして下さい。"
+msgstr "インターネットをオープンな状態に保つ には、Proをご購入下さい"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "LimeWireの開発には費用がかかるので、 Proを手にして下さい。"
+msgstr "LimeWireのソフトウェア開発には費用がかかるので、 Proをご購入下さい"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
@@ -373,7 +427,7 @@ msgstr "アクション："
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 #, fuzzy
 msgid "Copyright"
-msgstr "コピー"
+msgstr "著作権"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
@@ -382,7 +436,7 @@ msgstr "コピー"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 #, fuzzy
 msgid "License Type"
-msgstr "ライセンス"
+msgstr "ライセンスの種類"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
 msgid "Director"
@@ -423,8 +477,9 @@ msgid "Image"
 msgstr "画像"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
+#, fuzzy
 msgid "Description"
-msgstr ""
+msgstr "説明"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
@@ -444,17 +499,17 @@ msgstr "書類"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 msgid "Topic"
-msgstr ""
+msgstr "トピック"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Author"
-msgstr ""
+msgstr "著者"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:136
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 #, fuzzy
 msgid "Application"
-msgstr "アクション："
+msgstr "アプリケーション"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:364
@@ -464,30 +519,32 @@ msgstr "アクション："
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:218
 #, fuzzy
 msgid "Name"
-msgstr "名前を変更する"
+msgstr "お名前"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 msgid "Publisher"
-msgstr ""
+msgstr "出版者"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Platform"
-msgstr ""
+msgstr "プラットフォーム"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
+#, fuzzy
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "選択された.torrentファイルは、セキュリティ面で危険性があります。"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:101
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWireは、入力されたURLの.torrentファイルをダウンロードすることができませんでした。"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:34
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:550
+#, fuzzy
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
-msgstr ""
+msgstr "このアップロードを止めると、torrentのダウンロードは停止していまいます。アップロードをやめますか？"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:37
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:555
@@ -495,6 +552,8 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"このアップロードは急流です、その上、十分なアップロードをしていません。 あなたはアップロードをそれ以上にさせるべきです。 "
+"あなたは止めるのを了承していますか?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:15
 #, fuzzy
@@ -506,7 +565,7 @@ msgstr "自動的にスクロール"
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
-msgstr "部分的にダウンロードされたファイルを、共有するかしないかを選択できる"
+msgstr "断片的にダウンロードしたファイルを、共有するかしないかの選択ができます"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:25
 #, fuzzy
@@ -514,8 +573,9 @@ msgid "Start automatically"
 msgstr "自動で起動"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:35
+#, fuzzy
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "ビットトレント設定"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:37
 msgid ""
@@ -524,6 +584,8 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"LimeWireがあなたのBittorrentのプロトコル設定を管理するべきであるかどうかを選ぶことができます。 "
+"LimeWireはこの設定管理をするのを推奨します。無効もしくは不適当な値は、パフォーマンス低下やメモリー障害を引き起こす可能性があります。"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:62
 msgid ""
@@ -531,30 +593,32 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"無効もしくは不適当な設定は、パフォーマンス低下やメモリー障害を引き起こすかもしれません。本当にあなたが何をしているかわかっていないならば、あなたはLime"
+"Wireにこれらの設定管理させることを推奨します。"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:76
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
-msgstr ""
+msgstr "LimeWireにBitTorrentの設定をさせてください　(お勧め)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:84
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "トレントにつき最大のアップロード"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:90
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "トレントのための最小限のアップロード"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:96
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "安全検査"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:102
 msgid "Experimental disk access"
-msgstr ""
+msgstr "試験的なディスクアクセス"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:71
 msgid "Internal Error"
-msgstr "内部のエラー"
+msgstr "内部エラー"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:377
 msgid ""
@@ -563,9 +627,8 @@ msgid ""
 "'Send' to notify LimeWire about the problem. If desired, you can click "
 "'Review' to look at the information that will be sent. Thank you."
 msgstr ""
-"LimeWireの内部でエラーが起きました。LimeWire "
-"は復帰し正常に作動し続けられます。LimeWireのバグ修正のために\"送信\"ボタンをクリックしてください。また、エラーを再検討したければ\"見直し\""
-"ボタンをクリックしてください。ありがとうございます。"
+"LimeWireで内部エラーが起きました。LimeWireは現在回復し正常に動作できます。LimeWireのバグ修正のために\"送信\"ボタンをクリックし"
+"てください。また、エラー情報を閲覧するならば、\"見直し\"ボタンをクリックしてください。ありがとうございます。"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:379
 msgid ""
@@ -574,9 +637,9 @@ msgid ""
 "'Discard'. If desired, you can click 'Review' to look at the information "
 "about the error."
 msgstr ""
-"LimeWireの内部でエラー発生。LimeWire "
-"は復帰し正常に作動し続行。LimeWireのバグ修正のために\"送信\"ボタンをクリック。また、エラーを再検討したければ\"見直し\"ボタンをクリックする"
-"。"
+"LimeWireで内部エラーが起きました。LimeWire "
+"は現在回復し正常動作して続行しています。LimeWireのバグ修正のために\"送信\"ボタンをクリックしてください。また、エラー情報閲覧したければ\"見直"
+"し\"ボタンをクリックします。"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:390
 msgid "Send"
@@ -593,12 +656,12 @@ msgstr "破棄"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:428
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:95
 msgid "Always Send Immediately"
-msgstr "常に即時送信"
+msgstr "常にすぐ送信"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:429
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Ask For Review"
-msgstr "常に見直しを要求"
+msgstr "常にチェックを要求"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:430
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
@@ -612,7 +675,8 @@ msgid ""
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 "LimeWire "
-"のバグサーバーに接続不可。LimeWireのバグ修正のためにエラーをコピーし、bugs@limewire.comまで電子メールを送信すること。"
+"のバグサーバーに接続できませんでした。LimeWireのバグ修正のためにエラーをコピーしてbugs@limewire.comまで電子メールで送信してくださ"
+"い。ありがとうがざいます。"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:533
 msgid "Copy Report"
@@ -630,8 +694,9 @@ msgstr "レポートをコピー"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:146
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
+#, fuzzy
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -639,14 +704,14 @@ msgstr "自動的にスクロール"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:64
 msgid "About LimeWire"
-msgstr "LimeWire についての情報"
+msgstr "LimeWire について"
 
 #. set up limewire version label
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:34
 #, fuzzy
 msgid "LimeWire"
-msgstr "LimeWire &PRO"
+msgstr "LimeWire"
 
 #. set up close button
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
@@ -688,7 +753,7 @@ msgstr "LimeWireはまた当然のことながら、LimeWire開発者の長期�
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
-msgstr "ビジネス戦略と日常的な出来事は、LimeWireのビジネス開発者が裏で管理しています。"
+msgstr "ビジネス戦略と日常的な出来事は、LimeWireのビジネス開発者が陰で管理しています。"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:207
@@ -696,7 +761,7 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
-"また、LimeWireの<a "
+"LimeWireの<a "
 "href=\"http://www.limewire.com/\">ウェブサイト</a>とLimeWireのグラフィック・デザインは、LimeWireのウ"
 "ェブ・チームの努力によるものです。"
 
@@ -711,7 +776,7 @@ msgstr "尚、LimeWire PROに関する質問は、LimeWireの技術サポート�
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
-msgstr "過去にLimeWireチームで働いた開発者達は、その他プロジェクトに移動しています。"
+msgstr "過去にLimeWireチームで働いた開発者達は、その他のプロジェクトに移動しています。"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
@@ -738,7 +803,7 @@ msgstr "LimeWireはまた、アプリケーション自体とLimeWireウェブ�
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
-msgstr "グヌーテラ・コミュニティのスタッフ数名は、特別な謝辞に値します以下を参照："
+msgstr "グヌーテラ・コミュニティのスタッフ数名は、特別な謝辞をします以下を参照："
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:310
@@ -747,14 +812,14 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
-"最後ではありますが、LimeWireはプロジェクトに考え方を与えた開発者、ユーザー、その他貢献者に深くお礼を申し上げます。LimeWireのユーザー無くし"
+"最後になりましたが、LimeWireはプロジェクトに考え方を与えた開発者、ユーザー、その他貢献者に深くお礼を申し上げます。LimeWireのユーザー無くし"
 "ては、LimeWireのネットワークは存在していなかったでしょう。"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:315
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
-msgstr ""
+msgstr "BitTorrent、BitTorrentロゴ、およびTorrentはBitTorrent Inc.の商標です。"
 
 #. *
 #. * The select all action.
@@ -766,20 +831,21 @@ msgstr "すべて選択"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:319
 msgid "Marks all Items as Selected"
-msgstr ""
+msgstr "すべてのアイテムを選択された状態にマークします"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:334
 #, fuzzy
 msgid "Deselect All"
-msgstr "すべて選択"
+msgstr "全て選択解除"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:336
+#, fuzzy
 msgid "Deselects all Items in the List"
-msgstr ""
+msgstr "リストすべてのアイテムを選択解除にします"
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
-msgstr "履歴を消去"
+msgstr "履歴をクリア"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:133
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
@@ -797,9 +863,8 @@ msgid "Save"
 msgstr "保存"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:543
-#, fuzzy
 msgid "Save As"
-msgstr "保存"
+msgstr "名前を付けて保存(_A)"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:93
@@ -809,7 +874,7 @@ msgstr "新しい情報"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:122
 msgid "Creative Commons"
-msgstr "創造的で一般向け"
+msgstr "クリエイティブ・コモンズ"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:182
 msgid ""
@@ -828,9 +893,9 @@ msgid ""
 "information if you want to use this feature. Click 'Yes' to go to the patch, "
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
-"LimeWireはファイアウォールがアクセスをブロックしているために、デジタル・オーディオ・アクセス・プロトコル（iTunesでファイル共有）を開始不可。"
-" この機能を使い続けるには、｢はい｣をクリックしてファイアウォールを変更し、‘LimeWire.exe’で100％のアクセスを内向けと外向けの接続に許可。"
-" この機能を使用しない場合は、｢いいえ｣をクリック。"
+"LimeWireはファイアウォールがアクセスをブロックしていて、デジタル・オーディオ・アクセス・プロトコル（iTunesでファイル共有）を開始できません。"
+" 今後この機能を使うには、｢はい｣をクリックしてファイアウォールの設定変更し、‘LimeWire.exe’で100％のアクセスの内外の接続を許可できます。"
+" この機能を使用しない場合は、｢いいえ｣をクリックします。"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:339
 #, fuzzy
@@ -841,7 +906,7 @@ msgid ""
 "access to incoming and outgoing connections. To disable this feature, click "
 "'No'."
 msgstr ""
-"LimeWireはファイアウォールがアクセスをブロックしているために、デジタル・オーディオ・アクセス・プロトコル（iTunesでファイル共有）を開始不可。"
+"LimeWireはファイアウォールがアクセスをブロックしていて、デジタル・オーディオ・アクセス・プロトコル（iTunesでファイル共有）を開始できません。"
 " この機能を使い続けるには、｢はい｣をクリックしてファイアウォールを変更し、‘LimeWire.exe’で100％のアクセスを内向けと外向けの接続に許可。"
 " この機能を使用しない場合は、｢いいえ｣をクリック。"
 
@@ -897,12 +962,15 @@ msgstr "イーサネット"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:111
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1766
+#, fuzzy
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
 "firewall is blocking LimeWire from accessing the internet. LimeWire will "
 "automatically keep trying to connect you to the network unless you select "
 "\"Disconnect\" from the File menu."
 msgstr ""
+"あなたの機械は活発なインターネット接続をするように見えません、あるいは、ファイアウォールはインターネットにアクセスすることからLimeWireをブロックし"
+"ています。 LimeWireは自動的に、あなたがファイル・メニューから「接続解除」を選ばないかぎり、ネットワークに接続することを試み続けます。"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
@@ -945,6 +1013,7 @@ msgstr "LimeWire: オープンな情報共有を可能にする"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:393
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:397
+#, fuzzy
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -954,6 +1023,10 @@ msgid ""
 "then select 'Windows 2000' in the box below the check box. Then click the "
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
+"LimeWireはスタートアップの間、問題に遭遇して、進むことができません。あなたは、LimeWireのWindows互換モードを変えることによってこの問"
+"題を解決することができるかもしれません。あなたのデスクトップでLimeWireアイコンを右クリックして、ポップアップメニューから『プロパティ』を選んでくだ"
+"さい。トップの『互換性』タブをクリックしてください、それから、『互換モードでこのプログラムを実行する』チェックボックスをクリックしてください、それから、チ"
+"ェックボックスの下で箱で『Windows 2000』を選んでください。それから、下の『OKの』ボタンをクリックして、LimeWireを再開してください。"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:486
 msgid ""
@@ -1110,8 +1183,9 @@ msgstr "入力"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:110
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:200
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:57
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Cancel"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:92
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:43
@@ -1148,8 +1222,9 @@ msgid "Visit {0}"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
+#, fuzzy
 msgid "Remind Me Later"
-msgstr ""
+msgstr "後で通知する"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 #, fuzzy
@@ -1196,8 +1271,9 @@ msgstr "クレームされたライセンスの動きを見る"
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:442
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:500
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:568
+#, fuzzy
 msgid "View Verification Page"
-msgstr ""
+msgstr "確認ページの表示"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:447
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
@@ -1399,11 +1475,12 @@ msgid "Show Incoming Searches"
 msgstr "流れてくる検索文字"
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:77
+#, fuzzy
 msgid ""
 "Your client is a leaf node shielded by an Ultrapeer. Hence you will see few "
 "or no searches in the monitor window."
 msgstr ""
-"お使いのクライアントは Ulトラッパー により保護された Leaf node です。従いモニター・ウィンドウでは、検索文字を少しだけか全く見られません。"
+"お使いのクライアントは ウルトラピア により保護された リーフ・ノード です。そのためモニター・ウィンドウでは、検索文字をほとんど見られません。"
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:85
 msgid "Show Last"
@@ -1576,10 +1653,10 @@ msgstr "メディア・プレイヤー"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:832
-#, java-format
+#, fuzzy
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
+msgstr[0] "あなたは、｛0｝ファイルを共有しています"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
@@ -1587,6 +1664,7 @@ msgstr[0] ""
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] ""
+msgstr[1] ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
@@ -1853,10 +1931,11 @@ msgstr ""
 "ンをクリックしてください。検索結果の殆どが選択されたジャンルのファイルです。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:50
+#, fuzzy
 msgid ""
 "Don't know what to look for? Try a 'What's New' search and see what's "
 "recently been added to the network."
-msgstr ""
+msgstr "何を探したら良いかわからない？ 'What's New' で、最近何がネットワークに追加されたか探して見てみましょう。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
@@ -1898,10 +1977,12 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:56
+#, fuzzy
 msgid ""
 "Did you know? LimeWire supports two different peer-to-peer file sharing "
 "protocols: Gnutella and BitTorrent."
 msgstr ""
+"あなたは知っていましたか？LimeWireは、2つの異なるピアツーピアファイル共有プロトコルをサポートします：GnutellaとBitTorrent。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:57
 msgid ""
@@ -1940,10 +2021,13 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
+#, fuzzy
 msgid ""
 "If you try to download a file that you already have, LimeWire lets you know, "
 "even if the file has a different name."
 msgstr ""
+"あなたが既に持っているファイルをダウンロードしようとしたならば、たとえファイルに異なる名前が付けられていたとしても、LimeWireはあなたにそれを知らせ"
+"ます。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:63
 msgid ""
@@ -1956,7 +2040,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:64
 msgid ""
 "Have a lot of files? Try an instant search at the top of the Library window."
-msgstr ""
+msgstr "多くのファイルを持っていますね？ライブラリ・ウィンドウの最上部でインスタント・サーチをためしてください。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 #, java-format
@@ -2073,18 +2157,22 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
+#, fuzzy
 msgid ""
 "Want to share a large file? LimeWire supports file sizes up to 1 TB "
 "(terabyte)."
-msgstr ""
+msgstr "大きなファイルを共有したいですか？LimeWireは、1TB（テラバイト）までのファイルサイズをサポートします。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
+#, fuzzy
 msgid ""
 "Want to be an Ultrapeer? Leave LimeWire running as long as possible. If you "
 "have a fast connection without a firewall, you will be promoted to Ultrapeer "
 "status after a while. Make sure that you have not disabled Ultrapeer "
 "capabilties in the Options."
 msgstr ""
+"ウルトラピアでありたいですか？LimeWireをできるだけ長く動作させたままにしておいてください。あなたにファイアウォールなしで高速な接続があるならば、あ"
+"なたはしばらくしてウルトラピアに昇進します。あなたがOptionsでウルトラピア機能を無効にしていないことを確認してください。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:82
 msgid ""
@@ -2099,10 +2187,11 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:84
+#, fuzzy
 msgid ""
 "Ultrapeers help the network by distributing only pertinent network traffic "
 "to the leaf nodes. "
-msgstr ""
+msgstr "ウルトラピアは、関係するネットワークトラフィックだけをリーフ・ノードに配布することによって、ネットワークを助けます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:85
 msgid ""
@@ -2802,16 +2891,17 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:145
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:159
 msgid "Paste from Clipboard"
-msgstr ""
+msgstr "クリップボードから貼り付け"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:187
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:207
+#, fuzzy
 msgid "The specified URL is not valid. Please check your input."
-msgstr ""
+msgstr "指定されたURLは、有効でありません。あなたの入力をチェックしてください。"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:252
 msgid "&Close"
@@ -3033,7 +3123,7 @@ msgstr "接続された"
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:23
 #, fuzzy
 msgid "Ultrapeer"
-msgstr "Ulトラッパーの件数"
+msgstr "ウルトラピアの件数"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:62
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:20
@@ -3052,8 +3142,9 @@ msgid "Leaves"
 msgstr "Leafの件数"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:71
+#, fuzzy
 msgid "Ultrapeers"
-msgstr "Ulトラッパーの件数"
+msgstr "ウルトラピアの件数"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:74
 msgid "Peers"
@@ -3616,7 +3707,7 @@ msgstr "既存ファイルに上書き"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:334
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:42
 msgid "Save As..."
-msgstr ""
+msgstr "名前を付けて保存..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:336
 msgid "Choose a different location for the Download"
@@ -3700,17 +3791,20 @@ msgstr "選択したホストを除去する"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:68
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:73
+#, fuzzy
 msgid "Ignore all missing associations."
-msgstr ""
+msgstr "すべてのなくなった協会を無視してください。"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:70
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:75
+#, fuzzy
 msgid "Ask me what to do when an association is missing."
-msgstr ""
+msgstr "協会がなくなっているとき、何をするべきかについて、私に尋ねてください。"
 
 #: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:25
+#, fuzzy
 msgid "Content Filtering"
-msgstr ""
+msgstr "コンテンツ規制"
 
 #: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:26
 msgid ""
@@ -3804,8 +3898,9 @@ msgstr "ブラウザ"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:139
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:88
+#, fuzzy
 msgid "Choose Another Folder"
-msgstr ""
+msgstr "もう一つのフォルダを選んでください"
 
 #: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:45
 msgid "Confirm Scan"
@@ -3848,8 +3943,9 @@ msgid "Scan Hard Drive?"
 msgstr "ハードディスクを読み取り中"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:227
+#, fuzzy
 msgid "Limewire Setup Dialog"
-msgstr ""
+msgstr "Limewireセットアップダイアログ"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:478
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
@@ -3869,8 +3965,9 @@ msgstr "完了"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:131
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:74
+#, fuzzy
 msgid "Learn more about this option..."
-msgstr ""
+msgstr "このオプションについて詳しく知る..."
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:39
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:22
@@ -3920,8 +4017,9 @@ msgid "Please wait as LimeWire scans your hard drive..."
 msgstr "ハードディスクを検索するまで待機..."
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:87
+#, fuzzy
 msgid "Scan cancelled"
-msgstr ""
+msgstr "走査をキャンセルした"
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:107
 #, fuzzy
@@ -4009,14 +4107,16 @@ msgid "Search Results"
 msgstr "検索結果の速度"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:32
+#, fuzzy
 msgid "Holds the Results of the Last Search"
-msgstr ""
+msgstr "最後の検索の結果を把握"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:79
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:17
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:46
+#, fuzzy
 msgid "Icon"
-msgstr ""
+msgstr "アイコン"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:113
 msgid "Path"
@@ -4060,7 +4160,7 @@ msgstr "接続開始"
 #: gui/com/limegroup/gnutella/gui/search/SearchResultMenu.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:55
 msgid "Advanced"
-msgstr ""
+msgstr "アドバンスド"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:781
 msgid "Move to Recycle Bin"
@@ -4068,7 +4168,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:782
 msgid "Move to Trash"
-msgstr ""
+msgstr "ごみ箱へ移動"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:830
 msgid "Are you sure you want to delete the selected file(s)?"
@@ -4243,12 +4343,14 @@ msgid "Folder is fully shared including all subfolders."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:315
+#, fuzzy
 msgid "Folder is not shared and no subfolders are shared."
-msgstr ""
+msgstr "フォルダは共有されません、そして、共有されたサブフォルダはひとつもありません。"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:323
+#, fuzzy
 msgid "Folder's files and some subfolders are shared."
-msgstr ""
+msgstr "フォルダのファイルと若干のサブフォルダは、共有されます。"
 
 #: gui/com/limegroup/gnutella/gui/library/SpeciallySharedFilesDirectoryHolder.java:14
 msgid "Individually Shared Files"
@@ -4269,7 +4371,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:35
 #: gui/com/limegroup/gnutella/gui/tabs/LoggingTab.java:22
 msgid "Logging"
-msgstr ""
+msgstr "ログの出力"
 
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:56
 #, fuzzy
@@ -4277,8 +4379,9 @@ msgid "Loading Logging Window..."
 msgstr "オプション・ウィンドウをロード中..."
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:19
+#, fuzzy
 msgid "&Advanced"
-msgstr ""
+msgstr "アドバンスド(&A)"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:28
 msgid "Mojito &DHT Arcs View"
@@ -4312,8 +4415,9 @@ msgid "&Learn More..."
 msgstr "さらに検索"
 
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:22
+#, fuzzy
 msgid "Learn More about LimeWire's Content Filtering System"
-msgstr ""
+msgstr "LimeWireのコンテンツ・フィルタリング・システムについてもっと学んでください"
 
 #: gui/com/limegroup/gnutella/gui/menu/HelpMenu.java:39
 msgid "&Help"
@@ -4481,28 +4585,33 @@ msgid "C&hange Language"
 msgstr "言語を変更"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:60
+#, fuzzy
 msgid "Select your Language Prefereces"
-msgstr ""
+msgstr "あなたの言語の初期設定を選んでください"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
+#, fuzzy
 msgid "The file type is not recognized."
-msgstr ""
+msgstr "そのファイルタイプは、認められません。"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
+#, fuzzy
 msgid "The file cannot be found."
-msgstr ""
+msgstr "ファイルを見つけることができませんでした。"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
 msgid "The file is corrupt."
-msgstr ""
+msgstr "ファイルは不正です。"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
+#, fuzzy
 msgid "There is an unknown error with the audio file."
-msgstr ""
+msgstr "オーディオファイルで原因不明のエラーが発生しました。"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:164
+#, fuzzy
 msgid "The file cannot be parsed."
-msgstr ""
+msgstr "ファイルを解析することができませんでした。"
 
 #. {0}: filename, {1} cause of error (e.g. The file is corrupt.)
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:170
@@ -4585,8 +4694,9 @@ msgstr "保存"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:319
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:367
+#, fuzzy
 msgid "Basic"
-msgstr ""
+msgstr "ベーシック"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
 msgid "Slots"
@@ -4601,7 +4711,7 @@ msgstr "接続"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:338
 msgid "System Tray"
-msgstr "終了"
+msgstr "システムトレイ"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
 msgid "Updates"
@@ -4622,7 +4732,7 @@ msgstr "iTunes"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:351
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:14
 msgid "Importing"
-msgstr ""
+msgstr "インポート中"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
 msgid "Helper Apps"
@@ -4973,10 +5083,12 @@ msgid "File Already Exists Behavior"
 msgstr "既存ファイル有り"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:24
+#, fuzzy
 msgid ""
 "You can choose the default action that LimeWire will perform when you try to "
 "download a file that already exists on disk."
 msgstr ""
+"あなたは、あなたがすでにディスク上に存在するファイルをダウンロードしようとするとき、LimeWireが実行するデフォルト行動を選ぶことができます。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:48
 msgid "Always Show the 'Save As' Dialog"
@@ -4996,26 +5108,31 @@ msgid "Capabilities"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:24
+#, fuzzy
 msgid ""
 "If your computer has a fast internet connection, LimeWire may act as an "
 "\"Ultrapeer\" and/or connect to the Mojito DHT.  LimeWire can also use a "
 "secure communications mode called TLS, which may use more CPU resources.  "
 "You can disable these if needed."
 msgstr ""
+"あなたのコンピュータに高速なインターネット接続があるならば、LimeWireは「ウルトラピア」の働きをするかもしれません。あるいはMojito "
+"DHTにつながるかもしれませんしその両方かもしれません。LimeWireはTLSと呼ばれている安全な通信モードを使用することもできます。そして、それはより"
+"多くのCPU資源を使用するかもしれません。あなたは、必要ならばこれらを働かなくすることができます。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:38
+#, fuzzy
 msgid "Disable Ultrapeer Capabilities:"
-msgstr "Ulトラッパー機能を無効化："
+msgstr "ウルトラピア機能を無効化："
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:40
 #, fuzzy
 msgid "Disable Mojito DHT Capabilities:"
-msgstr "Ulトラッパー機能を無効化："
+msgstr "Mojito DHT 機能を無効化："
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:44
 #, fuzzy
 msgid "Disable TLS Capabilities:"
-msgstr "Ulトラッパー機能を無効化："
+msgstr "TLS 機能を無効化："
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:19
 msgid "OOB Searching"
@@ -5958,7 +6075,7 @@ msgstr "＃でホストからの検索結果を、ブロックしたいか？"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:856
 msgid "More Info..."
-msgstr ""
+msgstr "さらに詳しい情報..."
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:44
 msgid "Select Search Type:"
@@ -6098,7 +6215,7 @@ msgstr "ホストをブロック"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Mark As"
-msgstr ""
+msgstr "マーク"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 #, fuzzy
@@ -6333,7 +6450,7 @@ msgstr "転送は中断された"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:77
 msgid "File Not Found"
-msgstr ""
+msgstr "ファイルが見つかりません"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:83
 msgid "Queued at"
@@ -6473,7 +6590,7 @@ msgstr "ファイルシステムのエラーにより、ファイル位置を設
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:118
 msgid "The same file is already being downloaded."
-msgstr "同じエラーが既にダウンロードされている"
+msgstr "同じファイルが既にダウンロードされている"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:120
 #, java-format
@@ -6522,7 +6639,7 @@ msgstr "データを除去不可能"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:89
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:109
 msgid "Internal Document Error. Data could not be saved."
-msgstr "内部ドキュメント・エラー。データは保存できなかっ"
+msgstr "内部ドキュメント・エラー。データは保存できなかった。"
 
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:295
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:331
@@ -6570,7 +6687,7 @@ msgid ""
 msgstr "選択したファイルを本当に削除するか？"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:208
-#, java-format
+#, fuzzy
 msgid ""
 "The description for this file is too short. Please enter at least {0} words."
 msgstr ""
@@ -6645,15 +6762,16 @@ msgstr "アクション："
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:553
 msgid "Please enter the copyright holder, copright year and title."
-msgstr ""
+msgstr "著作権者、著作年とタイトルを入力してください。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:559
+#, fuzzy
 msgid "Please enter a valid year for the file you want to publish."
-msgstr ""
+msgstr "あなたが発表したいファイルのために、有効な年を入力してください。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:581
 msgid "I want to use the Internet Archive to host the file."
-msgstr ""
+msgstr "私は、ファイルのホストをつとめるためにインターネットアーカイブを使いたいです。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:584
 msgid "I want to host the verification file myself at the following URL:"
@@ -6661,12 +6779,12 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:607
 msgid "Where do you want to store the verification URL?"
-msgstr ""
+msgstr "どこで、あなたは検証URLを保存したいですか？"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:610
 #, fuzzy
 msgid "What is this?"
-msgstr "累計"
+msgstr "これは何ですか？"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:657
 msgid "The verification file is hosted at the following URL:"
@@ -6690,7 +6808,7 @@ msgstr "ライセンスの詳細"
 msgid ""
 "In order to publish your file, please insert the following code in your "
 "verification page at:"
-msgstr ""
+msgstr "あなたのファイルを発表するために、以下のコードをあなたの確認ページに付け加えてください："
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:148
 #, fuzzy
@@ -6714,6 +6832,8 @@ msgid ""
 "The default Internet Archive identifier for this file and username is "
 "allready taken. Please modify it below or press cancel to return."
 msgstr ""
+"このファイルのためのデフォルトインターネットアーカイブ識別子とユーザー名は、すでに取得済みです。それを下で修正するか、帰るために、キャンセルを押してくださ"
+"い。"
 
 #. TODO: BAD.  DO NOT CALL SWING HERE.
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:84
@@ -6723,8 +6843,9 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:97
+#, fuzzy
 msgid "Requesting Identifier..."
-msgstr ""
+msgstr "識別子を要請しています..."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:50
 #, fuzzy
@@ -6735,27 +6856,29 @@ msgstr "ハードディスクを検索するまで待機..."
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:117
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:140
 msgid "Successfully uploaded files"
-msgstr ""
+msgstr "うまくアップロードされたファイル"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:121
 msgid "There was an error while connecting to the internet archive."
-msgstr ""
+msgstr "インターネットアーカイブにつながっている間、エラーがありました。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:124
 msgid ""
 "There was an error while logging in to the Internet Archive. Please check "
 "your username and password and try again."
 msgstr ""
+"インターネットアーカイブにログインしている間、エラーがありました。あなたのユーザー名とパスワードをチェックして、もう一度ためしてください。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:127
 msgid "There was an error while trying to access the upload directory."
-msgstr ""
+msgstr "アップロードディレクトリにアクセスしようとしている間、エラーがありました。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:130
+#, fuzzy
 msgid ""
 "There was an error communicating with the Internet Archive. Please try again "
 "later."
-msgstr ""
+msgstr "インターネット・アーカイブと通信しているときにエラーがありました。後でもう一度ためしてください。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:168
 #, fuzzy
@@ -6783,7 +6906,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:267
 msgid "Checking in..."
-msgstr ""
+msgstr "内容をチェックしています..."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:311
 #, fuzzy
@@ -6800,7 +6923,7 @@ msgstr "保存するデータがない"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:63
 msgid "Multiple File Information"
-msgstr ""
+msgstr "複数のファイル情報"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:37
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:55
@@ -6919,23 +7042,24 @@ msgstr "星："
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "トピック:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
+#, fuzzy
 msgid "Author:"
-msgstr ""
+msgstr "著者："
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "名前 :"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "出版者:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr ""
+msgstr "プラットホーム："
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"
@@ -6952,54 +7076,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "情報"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "共有しているファイルの数 {0} ファイル（ロード中...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "共有しているファイルの数 {0} ファイル"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "\"新しい情報\"検索： {0}"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr "ファイル形式を認識できない"
-
-#~ msgid ". The file cannot be found."
-#~ msgstr "ファイルが見つらない"
-
-#~ msgid ". The file is corrupt."
-#~ msgstr "ファイルが壊れている"
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr "音楽ファイル内に不明なエラーがある"
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr "そのファイルは解析できない"
-
-#, fuzzy
-#~ msgid "test1"
-#~ msgstr "再設定"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "再設定"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "イーサネット"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "接続開始"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "完了"

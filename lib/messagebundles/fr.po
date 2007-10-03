@@ -10,15 +10,68 @@ msgstr ""
 "Project-Id-Version: fr\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-08-20 15:59-0400\n"
+"PO-Revision-Date: 2007-09-11 20:26+0000\n"
 "Last-Translator: Steffen Pingel <steffenp@gmx.de>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: KBabel 1.11.4\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:00:17+0000\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr ""
+#~ "Le nombre de fichiers que vous partagez actuellement. {0} fichiers "
+#~ "(chargement en cours...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Le nombre de fichiers que vous partagez actuellement. {0} fichiers"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Recherche les nouveautés de: {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Le type de fichier n’est pas reconnu."
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Le fichier n’a pas été trouvé."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Le fichier est corrompu."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Il y a une erreur inconnue dans le fichier audio."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Le format du fichier est incorrect ou non reconnu."
+
+#, fuzzy
+#~ msgid "test1"
+#~ msgstr "Ouvrir"
+
+#, fuzzy
+#~ msgid "test2"
+#~ msgstr "Ouvrir"
+
+#, fuzzy
+#~ msgid "other"
+#~ msgstr "Ethernet"
+
+#, fuzzy
+#~ msgid "string"
+#~ msgstr "connexion en cours"
+
+#, fuzzy
+#~ msgid "1"
+#~ msgstr "T1/SDSL (1-2,9 Mb/s)"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Terminer"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -1068,6 +1121,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire ne peut localiser votre navigateur web pour afficher cette page "
+"web: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1692
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1715
@@ -1155,7 +1210,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:449
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
+msgstr "Cette version Alpha a expiré. Pressez Ok pour quitter. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:455
 msgid ""
@@ -1212,9 +1267,8 @@ msgstr "Entrez"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:110
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:200
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:57
-#, fuzzy
 msgid "Cancel"
-msgstr "Annuler le parcours"
+msgstr "Annuler"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:92
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:43
@@ -1415,7 +1469,7 @@ msgstr "Coller"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1266
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:119
 msgid "Delete"
-msgstr ""
+msgstr "Supprimer"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 msgid "Add"
@@ -1705,16 +1759,16 @@ msgstr "Afficher le lecteur de médias"
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Vous êtes en train de partager {0} fichier"
+msgstr[1] "Vous êtes en train de partager {0} fichiers"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Vous êtes en train de partager {0} fichier (Chargement...)"
+msgstr[1] "Vous êtes en train de partager {0} fichiers (Chargement...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"
@@ -7444,56 +7498,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Infos"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr ""
-#~ "Le nombre de fichiers que vous partagez actuellement. {0} fichiers "
-#~ "(chargement en cours...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Le nombre de fichiers que vous partagez actuellement. {0} fichiers"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "Recherche les nouveautés de: {0}"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr ". Le type de fichier n’est pas reconnu."
-
-#~ msgid ". The file cannot be found."
-#~ msgstr ". Le fichier n’a pas été trouvé."
-
-#~ msgid ". The file is corrupt."
-#~ msgstr ". Le fichier est corrompu."
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr ". Il y a une erreur inconnue dans le fichier audio."
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr ". Le format du fichier est incorrect ou non reconnu."
-
-#, fuzzy
-#~ msgid "test1"
-#~ msgstr "Ouvrir"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "Ouvrir"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "Ethernet"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "connexion en cours"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1/SDSL (1-2,9 Mb/s)"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Terminer"

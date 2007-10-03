@@ -8,15 +8,211 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-02-10 21:31-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Rosetta-Export-Date: 2007-08-28 15:01:12+0000\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Обновления"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Закончить"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Инициализация меню..."
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Вставить"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Открыт доступ к {0} файлов (инициализация...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Открыт доступ к {0} файлов"
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Искать \"Что нового\" в: {0}"
+
+#~ msgid ". The file type is not recognized."
+#~ msgstr ". Нераспознанный тип файла."
+
+#~ msgid ". The file cannot be found."
+#~ msgstr ". Файл не найден."
+
+#~ msgid ". The file is corrupt."
+#~ msgstr ". Файл испорчен."
+
+#~ msgid ". There is an unknown error with the audio file."
+#~ msgstr ". Неизвестная ошибка."
+
+#~ msgid ". The file cannot be parsed."
+#~ msgstr ". Ошибка при разборе файла."
+
+#~ msgid "Close the Window"
+#~ msgstr "Закрыть окно."
+
+#~ msgid "I"
+#~ msgstr "I"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "V"
+
+#~ msgid "W"
+#~ msgstr "W"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Показать или скрыть отдельные закладки"
+
+#~ msgid "G"
+#~ msgstr "G"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "&Statistics"
+#~ msgstr "Статистика... (&S)"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Показать экран статистики"
+
+#~ msgid "H"
+#~ msgstr "H"
+
+#~ msgid "U"
+#~ msgstr "U"
+
+#~ msgid "E"
+#~ msgstr "E"
+
+#~ msgid "Results"
+#~ msgstr "Результаты"
+
+#~ msgid "Files"
+#~ msgstr "Файлов"
+
+#~ msgid "files"
+#~ msgstr "файлов"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "файлов (инициализация...)"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Исправить не удалось"
+
+#~ msgid "Querying Network"
+#~ msgstr "Опрашиваю сеть"
+
+#~ msgid "Waiting {0}s for Sources"
+#~ msgstr "Жду источники {0}сек."
+
+#~ msgid "s for Sources"
+#~ msgstr "сек."
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Нет доступных устройств вывода."
+
+#~ msgid "End Chat"
+#~ msgstr "Завершить чат"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Завершить разговор с хостом"
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Инициализация окна статистики..."
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "Поддержите файлообменные сети."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "LimeWire не может подключиться к файлообменной сети. Возможно вы не "
+#~ "подключены к Интернет или файрволл блокирует доступ. Пожалуйста, проверьте "
+#~ "ваше соединение или настройку файрволла. Для подключения к файлообменной "
+#~ "сети выберите пункт \"Соединиться\" из меню \"Файл\"."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Не могу назначить порт для обработки входящих соединений.\n"
+#~ "Пожалуйста, укажите порт в окне конфигурации."
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Статистика по потокам включает полную информацию по входящим и исходящим "
+#~ "данным. Щёлкните на раздел, чтобы увидеть статистику."
+
+#~ msgid "Network"
+#~ msgstr "Сеть"
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Статистика текущего состояния сети. Эта данные являются весьма "
+#~ "приблизительными в связи с динамической, распределённой природой сети "
+#~ "Gnutella и не должны приниматься как точные. Они могут, однако, дать общее "
+#~ "представление о текущем состоянии вашего соединения."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Расширенная статистика включает детальную информацию по служебным сообщениям "
+#~ "сети Gnutella и по HTTP-траффику. Эта информация может быть полезной для "
+#~ "продвинутых пользователей или для разработчиков и исследователей сети "
+#~ "Gnutella. Так как для большинства пользователей расширенная статистика не "
+#~ "нужна, то по умолчанию она не показывается."
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Upstream"
+#~ msgstr "Исходящий"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Информация об исходящем потоке, включает в себя выгрузку и исходящие "
+#~ "сообщения."
+
+#~ msgid "Downstream"
+#~ msgstr "Входящий"
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Информация об входящем потоке, включает в себя загрузку и входящие сообщения."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
 msgid ""
@@ -1610,7 +1806,6 @@ msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
@@ -1619,7 +1814,6 @@ msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] ""
 msgstr[1] ""
-msgstr[2] ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 #, fuzzy
@@ -7029,198 +7223,3 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
 msgstr "Информация"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Обновления"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Закончить"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Инициализация меню..."
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Вставить"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "Открыт доступ к {0} файлов (инициализация...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Открыт доступ к {0} файлов"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "Искать \"Что нового\" в: {0}"
-
-#~ msgid ". The file type is not recognized."
-#~ msgstr ". Нераспознанный тип файла."
-
-#~ msgid ". The file cannot be found."
-#~ msgstr ". Файл не найден."
-
-#~ msgid ". The file is corrupt."
-#~ msgstr ". Файл испорчен."
-
-#~ msgid ". There is an unknown error with the audio file."
-#~ msgstr ". Неизвестная ошибка."
-
-#~ msgid ". The file cannot be parsed."
-#~ msgstr ". Ошибка при разборе файла."
-
-#~ msgid "Close the Window"
-#~ msgstr "Закрыть окно."
-
-#~ msgid "I"
-#~ msgstr "I"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "V"
-
-#~ msgid "W"
-#~ msgstr "W"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "Показать или скрыть отдельные закладки"
-
-#~ msgid "G"
-#~ msgstr "G"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "&Statistics"
-#~ msgstr "Статистика... (&S)"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "Показать экран статистики"
-
-#~ msgid "H"
-#~ msgstr "H"
-
-#~ msgid "U"
-#~ msgstr "U"
-
-#~ msgid "E"
-#~ msgstr "E"
-
-#~ msgid "Results"
-#~ msgstr "Результаты"
-
-#~ msgid "Files"
-#~ msgstr "Файлов"
-
-#~ msgid "files"
-#~ msgstr "файлов"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "файлов (инициализация...)"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "Исправить не удалось"
-
-#~ msgid "Querying Network"
-#~ msgstr "Опрашиваю сеть"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Жду источники {0}сек."
-
-#~ msgid "s for Sources"
-#~ msgstr "сек."
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Нет доступных устройств вывода."
-
-#~ msgid "End Chat"
-#~ msgstr "Завершить чат"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "Завершить разговор с хостом"
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Инициализация окна статистики..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "Поддержите файлообменные сети."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "LimeWire не может подключиться к файлообменной сети. Возможно вы не "
-#~ "подключены к Интернет или файрволл блокирует доступ. Пожалуйста, проверьте "
-#~ "ваше соединение или настройку файрволла. Для подключения к файлообменной "
-#~ "сети выберите пункт \"Соединиться\" из меню \"Файл\"."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Не могу назначить порт для обработки входящих соединений.\n"
-#~ "Пожалуйста, укажите порт в окне конфигурации."
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Статистика по потокам включает полную информацию по входящим и исходящим "
-#~ "данным. Щёлкните на раздел, чтобы увидеть статистику."
-
-#~ msgid "Network"
-#~ msgstr "Сеть"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Статистика текущего состояния сети. Эта данные являются весьма "
-#~ "приблизительными в связи с динамической, распределённой природой сети "
-#~ "Gnutella и не должны приниматься как точные. Они могут, однако, дать общее "
-#~ "представление о текущем состоянии вашего соединения."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Расширенная статистика включает детальную информацию по служебным сообщениям "
-#~ "сети Gnutella и по HTTP-траффику. Эта информация может быть полезной для "
-#~ "продвинутых пользователей или для разработчиков и исследователей сети "
-#~ "Gnutella. Так как для большинства пользователей расширенная статистика не "
-#~ "нужна, то по умолчанию она не показывается."
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "Upstream"
-#~ msgstr "Исходящий"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Информация об исходящем потоке, включает в себя выгрузку и исходящие "
-#~ "сообщения."
-
-#~ msgid "Downstream"
-#~ msgstr "Входящий"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Информация об входящем потоке, включает в себя загрузку и входящие сообщения."
