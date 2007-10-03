@@ -26,8 +26,10 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpParamsLinker;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpExecutionContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpProcessor;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
@@ -190,14 +192,14 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
     /* Simulates the processing of request for testing. */
     public HttpResponse testProcess(HttpRequest request) throws IOException,
             HttpException {
-        HttpExecutionContext context = new HttpExecutionContext(null);
+        HttpContext context = new BasicHttpContext(null);
         HttpResponse response = responseFactory.newHttpResponse(request
-                .getRequestLine().getHttpVersion(), HttpStatus.SC_OK, context);
+                .getRequestLine().getProtocolVersion(), HttpStatus.SC_OK, context);
         HttpParamsLinker.link(response, this.params);
 
         // HttpContextParams.setLocal(context, true);
-        context.setAttribute(HttpExecutionContext.HTTP_REQUEST, request);
-        context.setAttribute(HttpExecutionContext.HTTP_RESPONSE, response);
+        context.setAttribute(ExecutionContext.HTTP_REQUEST, request);
+        context.setAttribute(ExecutionContext.HTTP_RESPONSE, response);
 
         processor.process(request, context);
 

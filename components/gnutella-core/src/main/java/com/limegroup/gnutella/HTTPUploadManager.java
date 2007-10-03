@@ -17,8 +17,8 @@ import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
@@ -681,7 +681,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 .getAttribute(SESSION_KEY);
         if (session == null) {
             HttpInetConnection conn = (HttpInetConnection) context
-                    .getAttribute(HttpExecutionContext.HTTP_CONNECTION);
+                    .getAttribute(ExecutionContext.HTTP_CONNECTION);
             InetAddress host;
             if (conn != null) {
                 host = conn.getRemoteAddress();

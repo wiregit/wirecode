@@ -132,7 +132,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         }
         assertNotNull(executionHandler.response);
         assertEquals(HttpVersion.HTTP_1_1, executionHandler.response
-                .getStatusLine().getHttpVersion());
+                .getStatusLine().getProtocolVersion());
         assertEquals(HttpStatus.SC_OK, executionHandler.response
                 .getStatusLine().getStatusCode());
         assertEquals("foobar", executionHandler.responseContent);
@@ -176,6 +176,10 @@ public class HttpIOReactorTest extends BaseTestCase {
                 throw new RuntimeException(e);
             }
             return request;
+        }
+
+        public void finalizeContext(HttpContext context) {
+            
         }
 
     }

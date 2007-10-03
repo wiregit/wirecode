@@ -14,7 +14,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
 import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.message.BasicStatusLine;
+import org.apache.http.message.BasicLineParser;
 import org.limewire.util.AssertComparisons;
 
 public class HttpUploadClient {
@@ -68,8 +68,7 @@ public class HttpUploadClient {
         // read status line
         String line = in.readLine();
         Assert.assertNotNull("Unexpected end of stream", line);
-        BasicHttpResponse response = new BasicHttpResponse(BasicStatusLine
-                .parse(line));
+        BasicHttpResponse response = new BasicHttpResponse(BasicLineParser.parseStatusLine(line, null));
 
         // read headers
         while ((line = in.readLine()) != null) {

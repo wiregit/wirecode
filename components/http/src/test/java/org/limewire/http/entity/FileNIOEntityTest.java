@@ -6,18 +6,35 @@ import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
 
 import org.apache.http.impl.io.HttpTransportMetricsImpl;
 import org.apache.http.impl.nio.codecs.IdentityEncoder;
-import org.apache.http.impl.nio.reactor.SessionOutputBuffer;
+import org.apache.http.impl.nio.reactor.SessionOutputBufferImpl;
+import org.apache.http.params.BasicHttpParams;
 import org.limewire.http.HttpTestUtils;
 import org.limewire.http.MockIOControl;
+import org.limewire.util.BaseTestCase;
 
-public class FileNIOEntityTest extends TestCase {
+public class FileNIOEntityTest extends BaseTestCase {
 
     private static final String ALPHABET = "abcdefghijklmonpqrstuvwxyz";
+    
+    private BasicHttpParams params;
 
+    public FileNIOEntityTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(FileNIOEntityTest.class);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        this.params = new BasicHttpParams();
+    }
+    
     public void testGetContentLength() throws IOException {
         File file = File.createTempFile("lime", null);
         FileNIOEntity entity = new FileNIOEntity(file, "content-type", new FileTransferMonitorAdapter());
@@ -50,7 +67,7 @@ public class FileNIOEntityTest extends TestCase {
         assertEquals(26, entity.getContentLength());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         WritableByteChannel channel = Channels.newChannel(out);
-        IdentityEncoder encoder = new IdentityEncoder(channel, new SessionOutputBuffer(0, 0), new HttpTransportMetricsImpl());
+        IdentityEncoder encoder = new IdentityEncoder(channel, new SessionOutputBufferImpl(0, 0, params), new HttpTransportMetricsImpl());
         readAllNIO(entity, encoder);
         assertTrue(encoder.isCompleted());
         assertEquals(ALPHABET, new String(out.toByteArray()));
@@ -75,7 +92,7 @@ public class FileNIOEntityTest extends TestCase {
         assertEquals(file, entity.getFile());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         WritableByteChannel channel = Channels.newChannel(out);
-        IdentityEncoder encoder = new IdentityEncoder(channel, new SessionOutputBuffer(0, 0), new HttpTransportMetricsImpl());
+        IdentityEncoder encoder = new IdentityEncoder(channel, new SessionOutputBufferImpl(0, 0, params), new HttpTransportMetricsImpl());
         readAllNIO(entity, encoder);
         assertTrue(encoder.isCompleted());
         assertEquals("cde", new String(out.toByteArray()));
@@ -111,12 +128,12 @@ public class FileNIOEntityTest extends TestCase {
         assertEquals(file, entity.getFile());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         WritableByteChannel channel = Channels.newChannel(out);
-        IdentityEncoder encoder = new IdentityEncoder(channel, new SessionOutputBuffer(0, 0), new HttpTransportMetricsImpl());
+        IdentityEncoder encoder = new IdentityEncoder(channel, new SessionOutputBufferImpl(0, 0, params), new HttpTransportMetricsImpl());
         entity.produceContent(encoder, new MockIOControl());
         assertTrue(encoder.isCompleted());
         assertEquals("", new String(out.toByteArray()));
         entity.finished();
         assertEquals("", new String(out.toByteArray()));
     }
-
+    
 }

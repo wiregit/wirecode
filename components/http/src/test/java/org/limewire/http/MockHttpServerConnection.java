@@ -3,6 +3,8 @@
  */
 package org.limewire.http;
 
+import java.io.IOException;
+
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestFactory;
 import org.apache.http.HttpResponse;
@@ -14,6 +16,8 @@ import org.apache.http.nio.util.HeapByteBufferAllocator;
 import org.apache.http.params.HttpParams;
 
 public class MockHttpServerConnection extends DefaultNHttpServerConnection {
+
+    private boolean closed;
 
     public MockHttpServerConnection(IOSession session,
             HttpRequestFactory requestFactory, HttpParams params) {
@@ -41,8 +45,13 @@ public class MockHttpServerConnection extends DefaultNHttpServerConnection {
         }
     }
  
+    @Override
+    public void close() throws IOException {
+        this.closed = true;
+    }
+    
     public boolean isClosed() {
-        return closed;
+        return this.closed;
     }
     
     public void setHasBufferedInput(boolean hasBufferedInput) {

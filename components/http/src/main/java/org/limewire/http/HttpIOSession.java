@@ -220,5 +220,9 @@ public class HttpIOSession implements IOSession {
     public void setThrottleChannel(final ThrottleWriter throttleWriter) {
         this.throttleWriter = throttleWriter;
     }
+
+    public int getStatus() {
+        throw new UnsupportedOperationException();
+    }
     
 }

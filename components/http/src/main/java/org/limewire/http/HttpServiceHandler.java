@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.8 $
- * $Date: 2007-08-29 16:30:53 $
+ * $Revision: 1.9 $
+ * $Date: 2007-10-03 15:04:11 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -50,6 +50,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.http.ProtocolException;
+import org.apache.http.ProtocolVersion;
 import org.apache.http.UnsupportedHttpVersionException;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.nio.DefaultNHttpServerConnection;
@@ -70,8 +71,8 @@ import org.apache.http.nio.util.SimpleInputBuffer;
 import org.apache.http.nio.util.SimpleOutputBuffer;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpParamsLinker;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpProcessor;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
@@ -95,8 +96,8 @@ import org.limewire.nio.NIODispatcher;
  * </pre>
  * 
  * <p>
- * Note: Based on {@link BufferingHttpServiceHandler} rev. 547966. Changes made
- * for LimeWire are marked with LW
+ * Note: Based on {@link BufferingHttpServiceHandler} rev. 573864. Changes made
+ * for LimeWire are marked with LW.
  * 
  * @author <a href="mailto:oleg at ural.ru">Oleg Kalnichevski</a>
  */
@@ -154,7 +155,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
         connState.resetInput();
         connState.setRequest(request);
         
-        HttpVersion ver = request.getRequestLine().getHttpVersion();
+        ProtocolVersion ver = request.getRequestLine().getProtocolVersion();
         if (!ver.lessEquals(HttpVersion.HTTP_1_1)) {
             // Downgrade protocol version if greater than HTTP/1.1 
             ver = HttpVersion.HTTP_1_1;
@@ -371,7 +372,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
             final HttpRequest request) throws IOException, HttpException {
         
         HttpContext context = conn.getContext();
-        HttpVersion ver = request.getRequestLine().getHttpVersion();
+        ProtocolVersion ver = request.getRequestLine().getProtocolVersion();
 
         if (!ver.lessEquals(HttpVersion.HTTP_1_1)) {
             // Downgrade protocol version if greater than HTTP/1.1 
@@ -384,9 +385,9 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
                 conn.getContext());
         HttpParamsLinker.link(response, this.params);
         
-        context.setAttribute(HttpExecutionContext.HTTP_REQUEST, request);
-        context.setAttribute(HttpExecutionContext.HTTP_CONNECTION, conn);
-        context.setAttribute(HttpExecutionContext.HTTP_RESPONSE, response);
+        context.setAttribute(ExecutionContext.HTTP_REQUEST, request);
+        context.setAttribute(ExecutionContext.HTTP_CONNECTION, conn);
+        context.setAttribute(ExecutionContext.HTTP_RESPONSE, response);
         
         try {
 

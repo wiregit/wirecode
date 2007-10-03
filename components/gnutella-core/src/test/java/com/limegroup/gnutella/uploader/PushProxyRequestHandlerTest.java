@@ -13,7 +13,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.protocol.HttpExecutionContext;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
@@ -40,7 +41,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
 
     private PushProxyRequestHandler requestHandler;
 
-    private HttpExecutionContext context;
+    private HttpContext context;
 
     private HTTPUploader uploader;
 
@@ -67,7 +68,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
         };
         sessionManager.uploader = uploader;
         requestHandler = new PushProxyRequestHandler(sessionManager, messageRouter);
-        context = new HttpExecutionContext(null);
+        context = new BasicHttpContext(null);
     }
 
     public void testHandleMalformedRequest() throws Exception {

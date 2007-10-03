@@ -14,7 +14,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.protocol.HttpExecutionContext;
+import org.apache.http.protocol.BasicHttpContext;
 import org.limewire.io.ConnectableImpl;
 
 import com.google.inject.AbstractModule;
@@ -96,7 +96,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
                 .getInstance(NetworkManager.class);
         networkManager.setCanDoFWT(true);
 
-        fileRequestHandler.handleAccept(new HttpExecutionContext(null), request, response,
+        fileRequestHandler.handleAccept(new BasicHttpContext(null), request, response,
                 uploader, fd);
         Header header = response.getFirstHeader(HTTPHeaderName.FWTPORT.httpStringValue());
         assertNotNull("expected header: " + HTTPHeaderName.FWTPORT.httpStringValue(), header);
@@ -118,7 +118,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         request.addHeader("X-Gnutella-Content-URN", urn1.httpStringValue());
         request.addHeader("X-Queue", "1.0");
 
-        fileRequestHandler.handle(request, response, new HttpExecutionContext(null));
+        fileRequestHandler.handle(request, response, new BasicHttpContext(null));
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         assertEquals(1234, uploader.getGnutellaPort());
         assertEquals("127.0.0.1", uploader.getHost());
@@ -141,7 +141,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
         HttpRequest request = new BasicHttpRequest("GET", "/get/0/abc1.txt");
         request.addHeader("Chat", "128.0.0.1:5678");
-        fileRequestHandler.handle(request, response, new HttpExecutionContext(null));
+        fileRequestHandler.handle(request, response, new BasicHttpContext(null));
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         assertEquals(5678, uploader.getGnutellaPort());
         assertEquals("128.0.0.1", uploader.getHost());

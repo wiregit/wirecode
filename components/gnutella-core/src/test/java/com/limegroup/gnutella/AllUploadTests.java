@@ -23,10 +23,10 @@ public class AllUploadTests {
         suite.addTest(UploadSlotManagerTest.suite());
         suite.addTest(UrnHttpRequestTest.suite());
         suite.addTest(HTTPAcceptorTest.suite());
-        suite.addTest(UploadQueueingTest.suite());
         suite.addTest(UploadTest.suite());
         suite.addTest(PushUploadTest.suite());
         suite.addTest(AltLocUploadTest.suite());
+        suite.addTest(UploadQueueingTest.suite());
         //$JUnit-END$
         return suite;
     }

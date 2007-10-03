@@ -57,9 +57,9 @@ public class HttpIOReactor implements ConnectingIOReactor {
         return params;
     }
     
-    public void shutdown() throws IOException {
-    }
-
+    /** 
+     * Throws {@link UnsupportedOperationException}.
+     */
     public SessionRequest connect(SocketAddress remoteAddress,
             SocketAddress localAddress, Object attachment,
             SessionRequestCallback callback) {
@@ -73,7 +73,8 @@ public class HttpIOReactor implements ConnectingIOReactor {
         return sessionRequest;
     }   
 
-    // FIXME move Sockets class to NIO component
+    // FIXME SocketsManager class needs to be moved from LimeWire core to NIO
+    // component before this can work
     protected void connect(final SessionRequestImpl sessionRequest) {
 //        try {
 //            Sockets.connect((InetSocketAddress) sessionRequest.getRemoteAddress(), 
@@ -160,6 +161,27 @@ public class HttpIOReactor implements ConnectingIOReactor {
             IOUtils.close(socket);
             return null;
         }
+    }
+
+    /** 
+     * Throws {@link UnsupportedOperationException}.
+     */
+    public int getStatus() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** 
+     * Throws {@link UnsupportedOperationException}.
+     */
+    public void shutdown() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /** 
+     * Throws {@link UnsupportedOperationException}.
+     */
+    public void shutdown(long gracePeriod) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
 }

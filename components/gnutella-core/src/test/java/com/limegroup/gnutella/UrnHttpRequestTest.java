@@ -298,7 +298,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     }
 
     private String getStatusLine(HttpResponse response) {
-        return response.getHttpVersion() + " "
+        return response.getProtocolVersion() + " "
                 + response.getStatusLine().getStatusCode() + " "
                 + response.getStatusLine().getReasonPhrase();
     }
