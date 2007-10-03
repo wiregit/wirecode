@@ -1,16 +1,36 @@
 package com.limegroup.gnutella.util;
 
-import org.limewire.inject.Providers;
+import org.limewire.security.SecureMessageVerifier;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.MessageDispatcher;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.connection.MessageReaderFactory;
+import com.limegroup.gnutella.filters.SpamFilterFactory;
+import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
  * Helper class that overrides getNumIntraUltrapeerConnections for
@@ -19,52 +39,47 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
  */
 public abstract class TestConnection extends ManagedConnection {
     
-    private boolean _queriesMustBeInRoutingTables;
+    private final boolean queriesMustBeInRoutingTables;
 
-    private final int CONNECTIONS;
+    private final int connections;
     
-    private int _numQueries = 0;
+    private int numQueries = 0;
     
-    private int _totalTTL = 0;
+    private int totalTTL = 0;
     
-    private boolean _receivedQuery;
+    private boolean receivedQuery;
     
-     /**
+    /**
      * Constant for the <tt>QueryRouteTable</tt> for this
      * connection -- can be used by subclasses.
      */
     protected QueryRouteTable QRT;
     
-    TestConnection(int connections) {
-        super("60.76.5.3", 4444, ConnectType.PLAIN, ProviderHacks
-                .getConnectionManager(), ProviderHacks.getNetworkManager(),
-                ProviderHacks.getQueryRequestFactory(), ProviderHacks
-                .getHeadersFactory(), ProviderHacks
-                .getHandshakeResponderFactory(), ProviderHacks
-                .getQueryReplyFactory(), ProviderHacks
-                .getMessageDispatcher(), ProviderHacks
-                .getNetworkUpdateSanityChecker(), 
-                ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
-                ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
-                Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
-                Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
-                ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory(),
-                ProviderHacks.getApplicationServices(), ProviderHacks.getSecureMessageVerifier());
-        CONNECTIONS = connections;
-    }
-    
-    /**
-     * @param connections2
-     * @param b
-     */
-    public TestConnection(int connections, boolean b) {
-        this(connections);
-        _queriesMustBeInRoutingTables = b;
-        // TODO Auto-generated constructor stub
+    TestConnection(int connections, boolean queriesMustBeInRoutingTable, ConnectionManager connectionManager, NetworkManager networkManager,
+            QueryRequestFactory queryRequestFactory,
+            HeadersFactory headersFactory,
+            HandshakeResponderFactory handshakeResponderFactory,
+            QueryReplyFactory queryReplyFactory,
+            MessageDispatcher messageDispatcher,
+            NetworkUpdateSanityChecker networkUpdateSanityChecker,
+            SearchResultHandler searchResultHandler,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            SocketsManager socketsManager, Acceptor acceptor,
+            MessagesSupportedVendorMessage supportedVendorMessage,
+            Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+            Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, SpamFilterFactory spamFilterFactory,
+            MessageReaderFactory messageReaderFactory,
+            MessageFactory messageFactory,
+            ApplicationServices applicationServices,
+            SecureMessageVerifier secureMessageVerifier) {
+        super("60.76.5.3", 4444, ConnectType.PLAIN, connectionManager, networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory, messageDispatcher, networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier);
+
+        this.queriesMustBeInRoutingTables = queriesMustBeInRoutingTable;
+        this.connections = connections;
     }
 
     public int getNumIntraUltrapeerConnections() {
-        return CONNECTIONS;
+        return this.connections;
     }
     
     public boolean isUltrapeerQueryRoutingConnection() {
@@ -105,26 +120,26 @@ public abstract class TestConnection extends ManagedConnection {
 
         if(!(msg instanceof QueryRequest)) return;
         
-        _receivedQuery = true;
-        _numQueries++;
+        receivedQuery = true;
+        numQueries++;
         QueryRequest qr = (QueryRequest)msg;
-        if(_queriesMustBeInRoutingTables && !shouldForwardQuery(qr))  {
+        if(queriesMustBeInRoutingTables && !shouldForwardQuery(qr))  {
             throw new IllegalArgumentException("received query that's not in table1: "+qr+" "+this);
         }
         int ttl = qr.getTTL();
-        _totalTTL += ttl;
+        totalTTL += ttl;
     }
     
     public int getNumQueries() {
-        return _numQueries;
+        return numQueries;
     }
     
     public int getTotalTTL() {
-        return _totalTTL;
+        return totalTTL;
     }
     
     public boolean receivedQuery() {
-        return _receivedQuery;
+        return receivedQuery;
     }
 }
 

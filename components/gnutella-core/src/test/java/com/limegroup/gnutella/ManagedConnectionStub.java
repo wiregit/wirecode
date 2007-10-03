@@ -13,6 +13,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
  */
 public class ManagedConnectionStub extends ManagedConnection {
     
+    @Deprecated
     public ManagedConnectionStub() {
         super("1.2.3.4", 6346, ConnectType.PLAIN, new ConnectionManagerStub(), ProviderHacks
                 .getNetworkManager(), ProviderHacks.getQueryRequestFactory(), ProviderHacks

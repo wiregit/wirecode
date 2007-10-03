@@ -120,6 +120,8 @@ public class TestConnectionManager extends ConnectionManager {
 
     private final QueryRequestFactory queryRequestFactory;
 
+    private final TestConnectionFactory testConnectionFactory;
+
     @Inject
     public TestConnectionManager(NetworkManager networkManager,
             Provider<HostCatcher> hostCatcher,
@@ -134,12 +136,14 @@ public class TestConnectionManager extends ConnectionManager {
             ConnectionServices connectionServices,
             Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
-            PingRequestFactory pingRequestFactory, QueryRequestFactory queryRequestFactory) {
+            PingRequestFactory pingRequestFactory, QueryRequestFactory queryRequestFactory,
+            TestConnectionFactory testConnectionFactory) {
         super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
                 simppManager, capabilitiesVMFactory, managedConnectionFactory,
                 messageRouter, queryUnicaster, socketsManager, connectionServices,
                 nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory);
         this.queryRequestFactory = queryRequestFactory;
+        this.testConnectionFactory = testConnectionFactory;
         configureDefaultManager();
     }
     
@@ -192,10 +196,9 @@ public class TestConnectionManager extends ConnectionManager {
         for(int i=0; i<NUM_CONNECTIONS; i++) {
             ManagedConnection curConn = null;
             if(i < numNewConnections) {
-                curConn = 
-                    new UltrapeerConnection(new String[]{ULTRAPEER_KEYWORDS[i]});
+                curConn = testConnectionFactory.createUltrapeerConnection(new String[]{ULTRAPEER_KEYWORDS[i]});
             } else {
-                curConn = new OldConnection(15); 
+                curConn = testConnectionFactory.createOldConnection(15); 
             }
             CONNECTIONS.add(curConn);            
         }
@@ -204,9 +207,9 @@ public class TestConnectionManager extends ConnectionManager {
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
             ManagedConnection conn;
             if(useVaried && i >= (NUM_LEAF_CONNECTIONS/2)) {
-                conn = LeafConnection.createAltLeafConnection();
+                conn = testConnectionFactory.createAltLeafConnection();
             } else {
-                conn = LeafConnection.createWithKeywords(new String[]{LEAF_KEYWORDS[i]});
+                conn = testConnectionFactory.createWithKeywords(new String[]{LEAF_KEYWORDS[i]});
             }
             LEAF_CONNECTIONS.add(conn);
         }

@@ -19,12 +19,11 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NewConnection;
+import com.limegroup.gnutella.util.TestConnectionFactory;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.util.TestResultCounter;
-import com.limegroup.gnutella.util.UltrapeerConnection;
 
 
 /**
@@ -34,6 +33,7 @@ public final class QueryHandlerTest extends LimeTestCase {
 
 	private QueryRequestFactory queryRequestFactory;
     private QueryHandlerFactory queryHandlerFactory;
+    private TestConnectionFactory testConnectionFactory;
 
 
     public QueryHandlerTest(String name) {
@@ -57,6 +57,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector(modules);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         queryHandlerFactory = injector.getInstance(QueryHandlerFactory.class);
+        testConnectionFactory = injector.getInstance(TestConnectionFactory.class);
         return injector;
     }
     
@@ -68,10 +69,10 @@ public final class QueryHandlerTest extends LimeTestCase {
         
         createInjector();
         
-        ReplyHandler rh = new UltrapeerConnection();        
+        ReplyHandler rh = testConnectionFactory.createUltrapeerConnection();        
         QueryRequest query = queryRequestFactory.createQuery("test", (byte)1);
         QueryHandler qh = queryHandlerFactory.createHandler(query, rh, new TestResultCounter());
-        ManagedConnection mc = new UltrapeerConnection();
+        ManagedConnection mc = testConnectionFactory.createUltrapeerConnection();
 
         qh.sendQueryToHost(query, mc);
 
@@ -81,13 +82,13 @@ public final class QueryHandlerTest extends LimeTestCase {
 
         // make sure we add the connection to the queries handlers
         // if it doesn't support probe queries and the TTL is 1
-        qh.sendQueryToHost(query, LeafConnection.createLeafConnection(false));
+        qh.sendQueryToHost(query, testConnectionFactory.createLeafConnection(false));
         hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should have added host", 1, hostsQueried.size());
 
         // make sure it adds the connection when the ttl is higher
         // than one and the connection supports probe queries
-        qh.sendQueryToHost(queryRequestFactory.createQuery("test"), new UltrapeerConnection());
+        qh.sendQueryToHost(queryRequestFactory.createQuery("test"), testConnectionFactory.createUltrapeerConnection());
         hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
         assertEquals("should have added host", 2, hostsQueried.size());
     }    
@@ -144,7 +145,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         testConnectionManager.resetAndInitialize();
         
         QueryHandler handler = queryHandlerFactory.createHandler(queryRequestFactory.createQuery("test"),
-                                       NewConnection.createConnection(),
+                                       testConnectionFactory.createNewConnection(),
                                        new TestResultCounter(0));
 
         assertTrue(testConnectionManager.getInitializedConnections().size() > 0);
@@ -207,6 +208,8 @@ public final class QueryHandlerTest extends LimeTestCase {
      * is being calculated correctly.
      */
     public void testCalculateNewHosts() throws Exception {
+        createInjector();
+        
 		Method m = 
             PrivilegedAccessor.getMethod(QueryHandler.class, 
                                          "calculateNewHosts",
@@ -214,7 +217,7 @@ public final class QueryHandlerTest extends LimeTestCase {
                                                      Byte.TYPE});
         
         // test for a degree 19, ttl 4 network
-        ManagedConnection mc = NewConnection.createConnection(19);
+        ManagedConnection mc = testConnectionFactory.createNewConnection(19);
         int horizon = 0;
         for(int i=0; i<19; i++) {
             horizon += 
@@ -224,7 +227,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         assertEquals("incorrect horizon", 117325, horizon);
 
         // test for a degree 30, ttl 3 network
-        mc = NewConnection.createConnection(30);
+        mc = testConnectionFactory.createNewConnection(30);
         horizon = 0;
         for(int i=0; i<30; i++) {
             horizon += 
@@ -246,11 +249,11 @@ public final class QueryHandlerTest extends LimeTestCase {
 		int numConnections = 15;
         List<NewConnection> connections = new ArrayList<NewConnection>();
         for(int i=0; i<numConnections; i++) {
-            connections.add(NewConnection.createConnection(10));
+            connections.add(testConnectionFactory.createNewConnection(10));
         }   
 
         QueryHandler handler = queryHandlerFactory.createHandler(queryRequestFactory.createQuery("test"),
-                                       NewConnection.createConnection(8),
+                                       testConnectionFactory.createNewConnection(8),
                                        new TestResultCounter(0));
         
         // just send queries to all connections

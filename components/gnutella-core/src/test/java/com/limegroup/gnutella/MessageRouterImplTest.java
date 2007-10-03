@@ -59,27 +59,21 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.NewConnection;
-import com.limegroup.gnutella.util.OldConnection;
 import com.limegroup.gnutella.util.TestConnection;
+import com.limegroup.gnutella.util.TestConnectionFactory;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
-/**
- * This class tests the <tt>MessageRouter</tt>.
- */
-@SuppressWarnings( { "unchecked", "cast" } )
 // TODO write test for storing bypassed results
 public final class MessageRouterImplTest extends LimeTestCase {
 
-    /**
-     * Handle to the <tt>MessageRouter</tt> for all tests to use
-     */
     private MessageRouterImpl messageRouterImpl;
     
     private TestConnectionManager connectionManager;
 
     private Mockery context;
+
+    private TestConnectionFactory testConnectionFactory;
     
     private static final int NUM_CONNECTIONS = 20;
 
@@ -114,6 +108,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
      */
     private Injector createInjectorAndInitialize(Module... modules) {
         Injector injector = LimeTestUtils.createInjector(modules);
+        testConnectionFactory = injector.getInstance(TestConnectionFactory.class);
         messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
         messageRouterImpl.initialize();
         return injector;
@@ -203,8 +198,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         uploadManager.start();
         try {
             Response[] res = new Response[20];
-            Arrays.fill(res, responseFactory.createResponse(
-                    (long) 0, (long) 10, "test"));
+            Arrays.fill(res, responseFactory.createResponse(0, 10, "test"));
             QueryRequest query = queryRequestFactory.createQuery("test");
             
             Iterable iter = messageRouterImpl.responsesToQueryReplies(res, query, 10, null); 
@@ -228,7 +222,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
 
             assertEquals("responses should have been put in 1 hits", 1, size);
 
-            iter = (Iterable) messageRouterImpl.responsesToQueryReplies(res, query, 1, null);
+            iter = messageRouterImpl.responsesToQueryReplies(res, query, 1, null);
             size = 0;
             for(@SuppressWarnings("unused") Object o : iter) {
                 size++;
@@ -283,7 +277,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
         QueryRequest qr = queryRequestFactory.createQuery("test");      
-        ReplyHandler rh = new OldConnection(10);
+        ReplyHandler rh = testConnectionFactory.createOldConnection(10);
         
         messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
         assertEquals("unexpected number of queries sent", 15, 
@@ -330,7 +324,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 
         QueryRequest qr = queryRequestFactory.createQuery("test");      
-        ReplyHandler rh = new OldConnection(10);
+        ReplyHandler rh = testConnectionFactory.createOldConnection(10);
         
         messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
         
@@ -357,7 +351,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         connectionManager.resetAndInitialize();
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);      
-        ReplyHandler rh = new OldConnection(10);
+        ReplyHandler rh = testConnectionFactory.createOldConnection(10);
 
         messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
         assertEquals("unexpected number of queries sent", 0, connectionManager.getNumUltrapeerQueries());
@@ -383,7 +377,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
         QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);
-        ReplyHandler rh = new OldConnection(10);
+        ReplyHandler rh = testConnectionFactory.createOldConnection(10);
         
         messageRouterImpl.forwardLimitedQueryToUltrapeers(qr, rh);
         // make sure we send a query from an old connection to old 
@@ -408,7 +402,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
         QueryRequest qr = queryRequestFactory.createQuery("test");
-        ReplyHandler rh = NewConnection.createConnection(10);
+        ReplyHandler rh = testConnectionFactory.createNewConnection(10);
         
         messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
@@ -431,7 +425,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
         QueryRequest qr = queryRequestFactory.createQuery("test");      
-        ReplyHandler rh = NewConnection.createConnection(10);
+        ReplyHandler rh = testConnectionFactory.createNewConnection(10);
         
         messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
         
@@ -455,7 +449,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
         QueryRequest qr = queryRequestFactory.createQuery("test");      
-        ReplyHandler rh = NewConnection.createConnection(10);
+        ReplyHandler rh = testConnectionFactory.createNewConnection(10);
         
         messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
         
@@ -480,7 +474,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 
         QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);      
-        ReplyHandler rh = NewConnection.createConnection(10);
+        ReplyHandler rh = testConnectionFactory.createNewConnection(10);
 
         messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
 
@@ -507,7 +501,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 
         QueryRequest qr = queryRequestFactory.createQuery("test", (byte)1);      
-        ReplyHandler rh = NewConnection.createConnection(10);
+        ReplyHandler rh = testConnectionFactory.createNewConnection(10);
         
         messageRouterImpl.forwardQueryToUltrapeers(qr, rh);
 
@@ -983,24 +977,27 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	assertNull(r);
     }
     
+    @SuppressWarnings("unchecked")
     private void addFreeLeafSlotHosts(HostCatcher hostCatcher, int num) throws Exception {
-        Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_LEAF_SLOTS_SET");
+        Map<ExtendedEndpoint, ExtendedEndpoint> set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_LEAF_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e =new ExtendedEndpoint("1.2.3." + i, i+1);
             set.put(e, e);
         }
     }
     
+    @SuppressWarnings("unchecked")
     private void addFreeLeafSlotHostsClassB(HostCatcher hostCatcher, int num) throws Exception {
-        Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_LEAF_SLOTS_SET");
+        Map<ExtendedEndpoint, ExtendedEndpoint> set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_LEAF_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
            set.put(e, e);
         }
     }
     
+    @SuppressWarnings("unchecked")
     private void addFreeUltrapeerSlotHostsClassB(HostCatcher hostCatcher, int num) throws Exception {
-        Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_ULTRAPEER_SLOTS_SET");
+        Map<ExtendedEndpoint, ExtendedEndpoint> set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_ULTRAPEER_SLOTS_SET");
         for(int i = 0; i < num; i++) {
             ExtendedEndpoint e = new ExtendedEndpoint("1.2." + i+".3", i+1);
            set.put(e, e);

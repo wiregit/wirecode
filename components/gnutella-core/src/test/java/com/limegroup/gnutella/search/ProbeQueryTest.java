@@ -9,25 +9,29 @@ import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NewConnection;
-import com.limegroup.gnutella.util.OldConnection;
 import com.limegroup.gnutella.util.TestConnection;
+import com.limegroup.gnutella.util.TestConnectionFactory;
 import com.limegroup.gnutella.util.TestResultCounter;
 
 
 /**
  * Tests the functionality of the <tt>QueryHandlerTest</tt> class.
  */
-@SuppressWarnings("unchecked")
 public final class ProbeQueryTest extends LimeTestCase {
 
     /**
      * Cached method for creating the probe lists.
      */
     private static Method CREATE_PROBE_LISTS;
+    private TestConnectionFactory testConnectionFactory;
+    private QueryHandlerFactory queryHandlerFactory;
+    private QueryRequestFactory queryRequestFactory;
 
 	public ProbeQueryTest(String name) {
 		super(name);
@@ -49,6 +53,13 @@ public final class ProbeQueryTest extends LimeTestCase {
                                          params);        
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        testConnectionFactory = injector.getInstance(TestConnectionFactory.class);
+        queryHandlerFactory = injector.getInstance(QueryHandlerFactory.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+    }
 
     /**
      * Tests the method for sending a probe query to make sure it is sent to
@@ -56,20 +67,18 @@ public final class ProbeQueryTest extends LimeTestCase {
      * with the proper TTL.
      */
     public void testSendProbe() throws Exception {
-      //  new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", ProviderHacks.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(ProbeQuery.class, 
                                          "sendProbe",
                                          new Class[]{});
-        List connections = new LinkedList();
+        List<NewConnection> connections = new LinkedList<NewConnection>();
         for(int i=0; i<15; i++) {
-            connections.add(NewConnection.createConnection(10));
+            connections.add(testConnectionFactory.createNewConnection(10));
         }
 
         QueryHandler handler = 
-            ProviderHacks.getQueryHandlerFactory().createHandler(ProviderHacks.getQueryRequestFactory().createQuery("test"),
-                                       NewConnection.createConnection(8),
+            queryHandlerFactory.createHandler(queryRequestFactory.createQuery("test"),
+                                       testConnectionFactory.createNewConnection(8),
                                        new TestResultCounter(0));
         
         ProbeQuery probe = new ProbeQuery(connections, handler);
@@ -92,22 +101,23 @@ public final class ProbeQueryTest extends LimeTestCase {
      * Test to make sure that the utility method for creating
      * our probe query lists is working as we expect it to.
      */
+    @SuppressWarnings("unchecked")
     public void testCreateProbeListsForSomewhatPopular() throws Exception {
-        List connections = new LinkedList();
+        List<TestConnection> connections = new LinkedList<TestConnection>();
         connections.clear();
         for(int i=0; i<20; i++) {
-            connections.add(NewConnection.createHitConnection());
+            connections.add(testConnectionFactory.createNewHitConnection());
         }           
 
         for(int i=0; i<5; i++) {
-            connections.add(NewConnection.createConnection());
+            connections.add(testConnectionFactory.createNewConnection());
         }           
         
         for(int i=0; i<5; i++) {
-            connections.add(new OldConnection(5));
+            connections.add(testConnectionFactory.createOldConnection(5));
         }                   
 
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        QueryRequest query = queryRequestFactory.createQuery("test");
         List<List> queryLists = 
             (List<List>)CREATE_PROBE_LISTS.invoke(null, 
                                               new Object[]{connections, query}); 
@@ -121,17 +131,18 @@ public final class ProbeQueryTest extends LimeTestCase {
      * our probe query lists is working as we expect it to when
      * the content we're searching for is very popular.
      */
+    @SuppressWarnings("unchecked")
     public void testCreateProbeListsForPopularContent() throws Exception {
-        List connections = new LinkedList();
+        List<TestConnection> connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(NewConnection.createHitConnection());
+            connections.add(testConnectionFactory.createNewHitConnection());
         }           
         
         for(int i=0; i<15; i++) {
-            connections.add(new OldConnection(5));
+            connections.add(testConnectionFactory.createOldConnection(5));
         }                   
 
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        QueryRequest query = queryRequestFactory.createQuery("test");
         List<List> queryLists = 
             (List<List>)CREATE_PROBE_LISTS.invoke(null, 
                                               new Object[]{connections, query}); 
@@ -155,8 +166,8 @@ public final class ProbeQueryTest extends LimeTestCase {
                                          paramTypes);                
 
         List listToAddTo = new LinkedList();
-        List list1 = new LinkedList();
-        List list2 = new LinkedList();
+        List<Integer> list1 = new LinkedList<Integer>();
+        List<Integer> list2 = new LinkedList<Integer>();
         Integer numElements = new Integer(3);
 
         Object[] params = 
@@ -167,7 +178,7 @@ public final class ProbeQueryTest extends LimeTestCase {
         Integer three = new Integer(3);
         Integer four  = new Integer(4);
 
-        List testList = new LinkedList();
+        List<Integer> testList = new LinkedList<Integer>();
         testList.add(one);
         testList.add(two);
         testList.add(three);        
