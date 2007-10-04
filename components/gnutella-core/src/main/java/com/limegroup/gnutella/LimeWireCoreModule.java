@@ -154,7 +154,6 @@ import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.AddressToken;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
