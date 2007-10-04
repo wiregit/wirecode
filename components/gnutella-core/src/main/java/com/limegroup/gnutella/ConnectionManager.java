@@ -1072,8 +1072,10 @@ public class ConnectionManager implements ConnectionAcceptor,
      *  connections headers of the remote host
      * @return <tt>true</tt> if the connection should be allowed, otherwise
      *  <tt>false</tt>
+     *  
+     *  Default access for testing.
      */
-    private static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+    static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
         if(hr.isLimeWire())
             return true;
         
@@ -1096,8 +1098,10 @@ public class ConnectionManager implements ConnectionAcceptor,
      *  headers
      * @return <tt>true</tt> if the connection should be allowed, otherwise
      *  <tt>false</tt>
+     *  
+     * Default access for testing.
      */
-    private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
+    static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
         if(hr.isLimeWire())
             return true;
         
@@ -1371,8 +1375,10 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Should only be called from a thread that has this' monitor.
      * This is called from initializeExternallyGeneratedConnection, for
      * incoming connections
+     * 
+     * Default access for testing.
      */
-    private void connectionInitializingIncoming(ManagedConnection c) {
+    void connectionInitializingIncoming(ManagedConnection c) {
         connectionInitializing(c);
     }
 
@@ -1380,8 +1386,10 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Marks a connection fully initialized, but only if that connection wasn't
      * removed from the list of open connections during its initialization.
      * Should only be called from a thread that has this' monitor.
+     * 
+     * Default access for testing.
      */
-    private boolean connectionInitialized(ManagedConnection c) {
+    boolean connectionInitialized(ManagedConnection c) {
         if(_connections.contains(c)) {
             // Double-check that we haven't improperly allowed
             // this connection.  It is possible that, because of race-conditions,

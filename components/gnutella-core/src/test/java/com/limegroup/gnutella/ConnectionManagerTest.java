@@ -3,10 +3,15 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -18,19 +23,43 @@ import junit.framework.Test;
 import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.OutputRunner;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.filters.SpamFilterFactory;
+import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.HackHostCatcher;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
@@ -39,9 +68,11 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 @SuppressWarnings("all")
 public class ConnectionManagerTest extends LimeTestCase {
 
-    private static TestHostCatcher CATCHER;
-  //  private static RouterService ROUTER_SERVICE;
-    private static ConnectionListener LISTENER;
+    private TestHostCatcher CATCHER;
+    private ConnectionListener LISTENER;
+    private ConnectionManager connectionManager;
+    private ConnectionServices connectionServices;
+    private TestManagedConnectionFactory testConnectionFactory;
 
     public ConnectionManagerTest(String name) {
         super(name);        
@@ -54,29 +85,38 @@ public class ConnectionManagerTest extends LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    
-    public static void globalSetUp() throws Exception {
-        if(true)throw new RuntimeException("fix me");
-        //ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
-        CATCHER = new TestHostCatcher();
-        LISTENER = new ConnectionListener();
-        
-        ProviderHacks.getConnectionManager().addEventListener(LISTENER);
-        
-        setSettings();
-        launchAllBackends();
-                
-      //  PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
-
-        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(),
-                                    "_catcher",CATCHER);
-             
-        ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getHostCatcher().clear();
-    }
 
     public void setUp() throws Exception {
+        doSetUp();
+    }
+    
+    private void doSetUp(Module... modules) throws Exception {
         setSettings();
+        
+        List<Module> list = new ArrayList<Module>();
+        list.addAll(Arrays.asList(modules));
+        list.add(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(HostCatcher.class).to(TestHostCatcher.class);
+            } 
+        });
+        Injector injector = LimeTestUtils.createInjector(list.toArray(new Module[0]));
+        
+        CATCHER = (TestHostCatcher)injector.getInstance(HostCatcher.class);
+        LISTENER = new ConnectionListener();
+        
+        connectionManager = injector.getInstance(ConnectionManager.class);
+        connectionManager.addEventListener(LISTENER);
+        
+        testConnectionFactory = (TestManagedConnectionFactory)injector.getInstance(TestManagedConnectionFactory.class);
+        
+        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+
+        launchAllBackends();
+                
+        lifecycleManager.start();
         
         //  Currently, there are no default EVIL_HOSTS useragents.  to test this, we need
         //      to pick on someone, so it will be Morpheus =)
@@ -87,7 +127,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         CATCHER.endpoint = null;
     }
     
-    private static void setSettings() throws Exception {
+    private void setSettings() throws Exception {
         ConnectionSettings.PORT.setValue(6346);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -102,8 +142,9 @@ public class ConnectionManagerTest extends LimeTestCase {
 
     public void tearDown() throws Exception {
         //Kill all connections
-        ProviderHacks.getConnectionServices().disconnect();
-        ProviderHacks.getHostCatcher().clear();
+        if (connectionServices != null) {
+            connectionServices.disconnect();
+        }
         Thread.sleep(500);
     }
     
@@ -113,37 +154,20 @@ public class ConnectionManagerTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testAllowUltrapeer2UltrapeerConnection() throws Exception {
-        Method m = PrivilegedAccessor.getMethod(ConnectionManager.class,
-            "allowUltrapeer2UltrapeerConnection", 
-            new Class[] {HandshakeResponse.class});
-        
-        
         HandshakeResponse hr = createTestResponse("Morpheus 3.3");
-        Object[] params = new Object[] {hr};
-        boolean allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        boolean allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
         assertFalse("connection should not have been allowed", allow);
         
         hr = createTestResponse("Bearshare 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("LimeWire 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("Shareaza 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
     }
     
@@ -153,37 +177,21 @@ public class ConnectionManagerTest extends LimeTestCase {
      * @throws Exception if an error occurs
      */
     public void testAllowUltrapeer2LeafConnection() throws Exception {
-        Method m = PrivilegedAccessor.getMethod(ConnectionManager.class,
-            "allowUltrapeer2LeafConnection", 
-            new Class[] {HandshakeResponse.class});
-        
         
         HandshakeResponse hr = createTestResponse("Morpheus 3.3");
-        Object[] params = new Object[] {hr};
-        boolean allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        boolean allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
         assertFalse("connection should not have been allowed", allow);
         
         hr = createTestResponse("Bearshare 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("LimeWire 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("Shareaza 3.3");
-        params[0] = hr;
-        allow =
-            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
-        
+        allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
         assertTrue("connection should have been allowed", allow);
     }    
 
@@ -206,7 +214,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(true);
         
-        ConnectionManager mgr = ProviderHacks.getConnectionManager();
+        ConnectionManager mgr = connectionManager;
         
         // test preconditions
         assertTrue("should not start as supernode", !mgr.isSupernode());
@@ -219,10 +227,10 @@ public class ConnectionManagerTest extends LimeTestCase {
         // construct peers
         // u ==> i should be ultrapeer
         // l ==> i should be leaf
-        ManagedConnection u1, l1, l2;
-        u1 = new SupernodeClient(true);
-        l1 = new ClientSupernode(true);
-        l2 = new ClientSupernode(true);
+        TestManagedConnection u1, l1, l2;
+        u1 = testConnectionFactory.createSupernodeClientConnection(true);
+        l1 = testConnectionFactory.createClientSupernodeConnection(true);
+        l2 = testConnectionFactory.createClientSupernodeConnection(true);
         
         // add a supernode => client connection
         initializeStart(u1);
@@ -275,17 +283,18 @@ public class ConnectionManagerTest extends LimeTestCase {
         ManagedConnection[] limePeers = new ManagedConnection[32];
         ManagedConnection[] nonLimePeers = new ManagedConnection[32];
         
-        for(int i = 0; i < limeLeaves.length; i++)
-            limeLeaves[i] = new SupernodeClient(true);
+        for(int i = 0; i < limeLeaves.length; i++) {
+            limeLeaves[i] = testConnectionFactory.createSupernodeClientConnection(true);
+        }
         for(int i = 0; i < nonLimeLeaves.length; i++)
-            nonLimeLeaves[i] = new SupernodeClient(false);
+            nonLimeLeaves[i] = testConnectionFactory.createSupernodeClientConnection(false);
         for(int i = 0; i < limePeers.length; i++)
-            limePeers[i] = new SupernodeSupernode(true);
+            limePeers[i] = testConnectionFactory.createSupernodeSupernodeConnection(true);
         for(int i = 0; i < nonLimePeers.length; i++)
-            nonLimePeers[i] = new SupernodeSupernode(false);
+            nonLimePeers[i] = testConnectionFactory.createSupernodeSupernodeConnection(false);
             
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        ConnectionManager mgr = ProviderHacks.getConnectionManager();
+        ConnectionManager mgr = connectionManager;
         setConnectTime();
         // test preconditions
         assertTrue("should start as supernode", mgr.isSupernode());
@@ -416,7 +425,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testUnreachableHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("1.2.3.4", 5000);
-        ProviderHacks.getConnectionServices().connect();
+        connectionServices.connect();
         assertTrue(CATCHER.waitForFailure(10000));
         assertEquals(0, CATCHER.getSuccessCount());
     }
@@ -427,7 +436,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testWrongProtocolHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("www.yahoo.com", 80);
-        ProviderHacks.getConnectionServices().connect();
+        connectionServices.connect();
         assertTrue(CATCHER.waitForFailure(10000));
         assertEquals(0, CATCHER.getSuccessCount());
     }
@@ -437,14 +446,14 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testGoodHost() throws Exception {
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);        
-        ProviderHacks.getConnectionServices().connect();
+        connectionServices.connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
         
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, connectionManager.getInitializedConnections().size());
+        ManagedConnection mc = connectionManager.getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
@@ -453,14 +462,14 @@ public class ConnectionManagerTest extends LimeTestCase {
         SSLSettings.TLS_OUTGOING.setValue(true);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
-        ProviderHacks.getConnectionServices().connect();
+        connectionServices.connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, connectionManager.getInitializedConnections().size());
+        ManagedConnection mc = connectionManager.getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertTrue(mc.isTLSEncoded());
     }
@@ -469,14 +478,14 @@ public class ConnectionManagerTest extends LimeTestCase {
         SSLSettings.TLS_OUTGOING.setValue(false);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
-        ProviderHacks.getConnectionServices().connect();
+        connectionServices.connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
 
         Thread.sleep(1000); // let capVM send
         
-        assertEquals(1, ProviderHacks.getConnectionManager().getInitializedConnections().size());
-        ManagedConnection mc = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
+        assertEquals(1, connectionManager.getInitializedConnections().size());
+        ManagedConnection mc = connectionManager.getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
@@ -489,7 +498,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testRejectHost() throws Exception {
         CATCHER.endpoint =  new ExtendedEndpoint("localhost", Backend.REJECT_PORT);
-        ProviderHacks.getConnectionServices().connect();
+        connectionServices.connect();
         assertTrue(CATCHER.waitForSuccess(5000));
         assertEquals(0, CATCHER.getFailureCount());
     }
@@ -498,7 +507,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(0);
         ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(0);
         ApplicationSettings.TOTAL_CONNECTIONS.setValue(0);
-        ConnectionManager mgr = ProviderHacks.getConnectionManager();
+        ConnectionManager mgr = connectionManager;
         assertFalse(mgr.isConnected());
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
@@ -536,7 +545,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertGreaterThan(averageTime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         //test time changed during session
         long now = System.currentTimeMillis();
-        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
+        PrivilegedAccessor.setValue(connectionManager, 
                 "_connectTime", new Long(now+(60L*60L*1000L)));
         mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
@@ -553,7 +562,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(30L*60L*1000L);
         ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(60L*60L*1000L);
         ApplicationSettings.TOTAL_CONNECTIONS.setValue(2);
-        ConnectionManager mgr = ProviderHacks.getConnectionManager();
+        ConnectionManager mgr = connectionManager;
         assertFalse(mgr.isConnected());
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
@@ -587,13 +596,20 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public void testClassCFiltering() throws Exception {
+        
+        doSetUp(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(HostCatcher.class).to(TestHostCatcher2.class);
+            }
+        });
+        
         ServerSocket s = new ServerSocket(10000);
         try {
             ConnectionSettings.FILTER_CLASS_C.setValue(true);
-            TestHostCatcher2 catcher = new TestHostCatcher2();
+            TestHostCatcher2 catcher = (TestHostCatcher2) this.CATCHER;
             TestConnectionObserver observer = new TestConnectionObserver();
-            ConnectionManager cm = ProviderHacks.getConnectionManager();
-            PrivilegedAccessor.setValue(cm,"_catcher",catcher);
+            ConnectionManager cm = connectionManager;
             cm.addEventListener(observer);
             cm.connect();
             EndpointObserver eo = catcher.observers.poll(1000, TimeUnit.MILLISECONDS);
@@ -663,7 +679,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     private void setConnectTime() throws Exception {
-        PrivilegedAccessor.setValue(ProviderHacks.getConnectionManager(), 
+        PrivilegedAccessor.setValue(connectionManager, 
                 "_connectTime", new Integer(0));
     }
     
@@ -671,14 +687,14 @@ public class ConnectionManagerTest extends LimeTestCase {
         //  Need to setup the _outputRunner member of c as well...
         PrivilegedAccessor.setValue(c, "_outputRunner", new NullOutputRunner() );
         
-        PrivilegedAccessor.invokeMethod( ProviderHacks.getConnectionManager(),
+        PrivilegedAccessor.invokeMethod( connectionManager,
             "connectionInitializingIncoming",
             new Object[] { c },
             new Class[] { ManagedConnection.class} );
     }
     
     private void initializeDone(ManagedConnection c) throws Exception {
-        PrivilegedAccessor.invokeMethod( ProviderHacks.getConnectionManager(),
+        PrivilegedAccessor.invokeMethod( connectionManager,
             "connectionInitialized",
             new Object[] { c },
             new Class[] { ManagedConnection.class} );            
@@ -689,15 +705,30 @@ public class ConnectionManagerTest extends LimeTestCase {
      * specify when our test framework requests endpoints to connect
      * to.
      */
-    private static class TestHostCatcher extends HackHostCatcher {
+    @Singleton
+    private static class TestHostCatcher extends HostCatcher {
         private volatile ExtendedEndpoint endpoint;
         private volatile CountDownLatch successLatch;
         private volatile CountDownLatch failureLatch;
         private volatile AtomicInteger successes;
         private volatile AtomicInteger failures;
         
-        TestHostCatcher() {
-            super();
+        @Inject
+        TestHostCatcher(
+                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                ConnectionServices connectionServices,
+                Provider<ConnectionManager> connectionManager,
+                Provider<UDPService> udpService, Provider<DHTManager> dhtManager,
+                Provider<QueryUnicaster> queryUnicaster,
+                Provider<IPFilter> ipFilter,
+                Provider<MulticastService> multicastService,
+                UniqueHostPinger uniqueHostPinger,
+                UDPHostCacheFactory udpHostCacheFactory,
+                PingRequestFactory pingRequestFactory) {
+            super(backgroundExecutor, connectionServices, connectionManager,
+                    udpService, dhtManager, queryUnicaster, ipFilter,
+                    multicastService, uniqueHostPinger, udpHostCacheFactory,
+                    pingRequestFactory);
             resetLatches();
         }
         
@@ -754,7 +785,27 @@ public class ConnectionManagerTest extends LimeTestCase {
         }
     }
     
+    @Singleton
     private static class TestHostCatcher2 extends TestHostCatcher {
+        
+        @Inject
+        TestHostCatcher2(
+                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                ConnectionServices connectionServices,
+                Provider<ConnectionManager> connectionManager,
+                Provider<UDPService> udpService, Provider<DHTManager> dhtManager,
+                Provider<QueryUnicaster> queryUnicaster,
+                Provider<IPFilter> ipFilter,
+                Provider<MulticastService> multicastService,
+                UniqueHostPinger uniqueHostPinger,
+                UDPHostCacheFactory udpHostCacheFactory,
+                PingRequestFactory pingRequestFactory) {
+            super(backgroundExecutor, connectionServices, connectionManager,
+                    udpService, dhtManager, queryUnicaster, ipFilter,
+                    multicastService, uniqueHostPinger, udpHostCacheFactory,
+                    pingRequestFactory);
+        }
+        
         final BlockingQueue<EndpointObserver> observers = 
             new ArrayBlockingQueue<EndpointObserver>(100);
         final BlockingQueue<Endpoint> endpoints = 
@@ -779,36 +830,169 @@ public class ConnectionManagerTest extends LimeTestCase {
             assertTrue(evts.offer(evt));
         }
     }
+    
+    @Singleton
+    private static class TestManagedConnectionFactory implements ManagedConnectionFactory {
+
+        private final Provider<ConnectionManager> connectionManager;
+        private final NetworkManager networkManager;
+        private final QueryRequestFactory queryRequestFactory;
+        private final HeadersFactory headersFactory;
+        private final HandshakeResponderFactory handshakeResponderFactory;
+        private final QueryReplyFactory queryReplyFactory;
+        private final Provider<MessageDispatcher> messageDispatcher;
+        private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
+        private final Provider<SearchResultHandler> searchResultHandler;
+        private final CapabilitiesVMFactory capabilitiesVMFactory;
+        private final SocketsManager socketsManager;
+        private final Provider<Acceptor> acceptor;
+        private final MessagesSupportedVendorMessage supportedVendorMessage;
+        private final Provider<SimppManager> simppManager;
+        private final Provider<UpdateHandler> updateHandler;
+        private final Provider<ConnectionServices> connectionServices;
+        private final GuidMapManager guidMapManager;
+        private final SpamFilterFactory spamFilterFactory;
+        private final MessageReaderFactory messageReaderFactory;
+        private final MessageFactory messageFactory;
+        private final ApplicationServices applicationServices;
+
+        @Inject
+        public TestManagedConnectionFactory(Provider<ConnectionManager> connectionManager, NetworkManager networkManager,
+                QueryRequestFactory queryRequestFactory,
+                HeadersFactory headersFactory,
+                HandshakeResponderFactory handshakeResponderFactory,
+                QueryReplyFactory queryReplyFactory,
+                Provider<MessageDispatcher> messageDispatcher,
+                Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
+                Provider<SearchResultHandler> searchResultHandler,
+                CapabilitiesVMFactory capabilitiesVMFactory,
+                SocketsManager socketsManager, Provider<Acceptor> acceptor,
+                MessagesSupportedVendorMessage supportedVendorMessage,
+                Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+                Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, 
+                SpamFilterFactory spamFilterFactory,
+                MessageReaderFactory messageReaderFactory,
+                MessageFactory messageFactory,
+                ApplicationServices applicationServices) {
+            this.networkManager = networkManager;
+            this.queryRequestFactory = queryRequestFactory;
+            this.headersFactory = headersFactory;
+            this.handshakeResponderFactory = handshakeResponderFactory;
+            this.connectionManager = connectionManager;
+            this.queryReplyFactory = queryReplyFactory;
+            this.messageDispatcher = messageDispatcher;
+            this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+            this.searchResultHandler = searchResultHandler;
+            this.capabilitiesVMFactory = capabilitiesVMFactory;
+            this.socketsManager = socketsManager;
+            this.acceptor = acceptor;
+            this.supportedVendorMessage = supportedVendorMessage;
+            this.simppManager = simppManager;
+            this.updateHandler = updateHandler;
+            this.connectionServices = connectionServices;
+            this.guidMapManager = guidMapManager;
+            this.spamFilterFactory = spamFilterFactory;
+            this.messageReaderFactory = messageReaderFactory;
+            this.messageFactory = messageFactory;
+            this.applicationServices = applicationServices;
+        }
+        
+        public ManagedConnection createManagedConnection(String host, int port) {
+            return createManagedConnection(host, port, ConnectType.PLAIN);
+        }
+
+        public ManagedConnection createManagedConnection(String host, int port, ConnectType type) {
+            return new TestManagedConnection(connectionManager.get(), networkManager,
+                    queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
+                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler.get()
+                            , capabilitiesVMFactory, socketsManager, acceptor.get(),
+                    supportedVendorMessage, simppManager, updateHandler, connectionServices,
+                    guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
+                    applicationServices);
+        }
+        
+        public TestManagedConnection createTestConnection() {
+            return new TestManagedConnection(connectionManager.get(), networkManager,
+                    queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
+                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler.get()
+                            , capabilitiesVMFactory, socketsManager, acceptor.get(),
+                    supportedVendorMessage, simppManager, updateHandler, connectionServices,
+                    guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
+                    applicationServices);
+        }
+        
+        public TestManagedConnection createSupernodeClientConnection(boolean lime) {
+            TestManagedConnection connection = createTestConnection();
+            connection.setIsLimeWire(lime);
+            connection.configureSupernodeClient();
+            return connection;
+        }
+        
+        public TestManagedConnection createClientSupernodeConnection(boolean lime) {
+            TestManagedConnection connection = createTestConnection();
+            connection.setIsLimeWire(lime);
+            connection.configureClientSuperNode();
+            return connection;
+        }
+        
+        public TestManagedConnection createSupernodeSupernodeConnection(boolean lime) {
+            TestManagedConnection connection = createTestConnection();
+            connection.setIsLimeWire(lime);
+            connection.configureSuperNodeSuperNode();
+            return connection;
+        }
+
+        public ManagedConnection createManagedConnection(Socket socket) {
+           return null;
+        }
+        
+    }
 
     private static class TestManagedConnection extends ManagedConnection {
         private boolean isOutgoing;
         private int sent;
         private int received;
         private static int lastHost = 0;
+        private boolean isLime;
+        private boolean isClientSupernodeConnection;
+        private boolean isSupernodeClientConnection;
+        private boolean isSupernodeSupernodeConnection;
 
-        public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN, ProviderHacks
-                    .getConnectionManager(), ProviderHacks.getNetworkManager(),
-                    ProviderHacks.getQueryRequestFactory(), ProviderHacks
-                            .getHeadersFactory(), ProviderHacks
-                            .getHandshakeResponderFactory(), ProviderHacks
-                            .getQueryReplyFactory(), ProviderHacks
-                            .getMessageDispatcher(), ProviderHacks
-                            .getNetworkUpdateSanityChecker(), 
-            ProviderHacks.getSearchResultHandler(), ProviderHacks.getCapabilitiesVMFactory(),
-            ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(),
-            Providers.of(ProviderHacks.getSimppManager()), Providers.of(ProviderHacks.getUpdateHandler()),
-            Providers.of(ProviderHacks.getConnectionServices()), ProviderHacks.getGuidMapManager(), ProviderHacks.getSpamFilterFactory(),
-            ProviderHacks.getMessageReaderFactory(), ProviderHacks.getMessageFactory(),
-            ProviderHacks.getApplicationServices(), null);
-            this.isOutgoing=isOutgoing;
-            this.sent=sent;
-            this.received=received;
+        public TestManagedConnection(ConnectionManager connectionManager, NetworkManager networkManager,
+                QueryRequestFactory queryRequestFactory,
+                HeadersFactory headersFactory,
+                HandshakeResponderFactory handshakeResponderFactory,
+                QueryReplyFactory queryReplyFactory,
+                MessageDispatcher messageDispatcher,
+                NetworkUpdateSanityChecker networkUpdateSanityChecker,
+                SearchResultHandler searchResultHandler,
+                CapabilitiesVMFactory capabilitiesVMFactory,
+                SocketsManager socketsManager, Acceptor acceptor,
+                MessagesSupportedVendorMessage supportedVendorMessage,
+                Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+                Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager, 
+                SpamFilterFactory spamFilterFactory,
+                MessageReaderFactory messageReaderFactory,
+                MessageFactory messageFactory,
+                ApplicationServices applicationServices) {
+            super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN,                 
+                    connectionManager, networkManager, queryRequestFactory, headersFactory,
+                    handshakeResponderFactory, queryReplyFactory, messageDispatcher,                           networkUpdateSanityChecker, 
+                    searchResultHandler, capabilitiesVMFactory,
+                    socketsManager, acceptor, supportedVendorMessage,
+                    simppManager, updateHandler,
+                    connectionServices, guidMapManager, spamFilterFactory,
+                    messageReaderFactory, messageFactory,
+                    applicationServices, null);
         }
 
         @Override
         public boolean isOutgoing() {
             return isOutgoing;
+        }
+        
+        public void setIsOutgoing(boolean isOutgoing) {
+            this.isOutgoing = isOutgoing; 
         }
 
         @Override
@@ -816,85 +1000,81 @@ public class ConnectionManagerTest extends LimeTestCase {
             return sent;
         }
         
+        public void setNumMessagesSent(int sent) {
+            this.sent = sent;
+        }
+        
         @Override
         public int getNumMessagesReceived() {
             return received;
         }
-    }
-    
-    private static class ClientSupernode extends TestManagedConnection {
         
-        final boolean isLime;
-        
-        ClientSupernode(boolean lime) {
-            super(false, 0, 0);
-            isLime = lime;
+        public void setNumMessagesReceived(int received) {
+            this.received = received;
         }
         
-        @Override
-        public boolean isClientSupernodeConnection() {
-            return true;
+        public void configureDefaults() {
+            setIsOutgoing(false);
+            setNumMessagesSent(0);
+            setNumMessagesReceived(0);
         }
-        @Override
-        public boolean isSupernodeClientConnection() {
-            return false;
-        }
-        @Override
-        public boolean isLimeWire() {
-            return isLime;
-        }
-    }
-    
-    private static class SupernodeClient extends TestManagedConnection {
-        final boolean isLime;
         
-        SupernodeClient(boolean lime) {
-            super(false, 0, 0);
-            isLime = lime;
+        public void configureSupernodeClient() {
+            setIsSupernodeClientConnection(true);
+            setIsClientSupernodeConnection(false);
         }
-        @Override
-        public boolean isClientSupernodeConnection() {
-            return false;
-        }
-        @Override
-        public boolean isSupernodeClientConnection() {
-            return true;
-        }
-        @Override
-        public boolean isLimeWire() {
-            return isLime;
-        }
-    }
-    
-    private static class SupernodeSupernode extends TestManagedConnection {
-        final boolean isLime;
         
-        SupernodeSupernode(boolean lime) {
-            super(false, 0, 0);
-            isLime = lime;
+        public void configureClientSuperNode() {
+            setIsSupernodeClientConnection(false);
+            setIsClientSupernodeConnection(true);   
         }
+        
+        public void configureSuperNodeSuperNode() {
+            setIsSupernodeSupernodeConnection(true);
+            setIsClientSupernodeConnection(false);
+            setIsSupernodeClientConnection(false);
+        }
+        
         @Override
         public boolean isSupernodeSupernodeConnection() {
-            return false;
+            return isSupernodeSupernodeConnection;
         }
+        
+        public void setIsSupernodeSupernodeConnection(boolean isSupernodeSupernodeConnection) {
+            this.isSupernodeSupernodeConnection = isSupernodeSupernodeConnection;
+        }
+            
         @Override
         public boolean isClientSupernodeConnection() {
-            return false;
+            return isClientSupernodeConnection;
         }
+        
+        public void setIsClientSupernodeConnection(boolean isClientSupernodeConnection) {
+            this.isClientSupernodeConnection = isClientSupernodeConnection;
+        }
+        
         @Override
         public boolean isSupernodeClientConnection() {
-            return false;
+            return isSupernodeClientConnection;
         }
+        
+        public void setIsSupernodeClientConnection(boolean isSupernodeClientConnection) {
+            this.isSupernodeClientConnection = isSupernodeClientConnection;
+        }
+        
         @Override
         public boolean isLimeWire() {
             return isLime;
+        }
+        
+        public void setIsLimeWire(boolean isLime) {
+            this.isLime = isLime;
         }
     }
     
     private void pretendConnected() throws Exception {
-        ConnectionManager mgr = ProviderHacks.getConnectionManager();
-        PrivilegedAccessor.setValue(mgr, "_disconnectTime", new Integer(0));
-        PrivilegedAccessor.invokeMethod(mgr, "setPreferredConnections");
+        PrivilegedAccessor.setValue(connectionManager, "_disconnectTime", new Integer(0));
+        PrivilegedAccessor.invokeMethod(connectionManager, "setPreferredConnections");
     }
     
     private class NullOutputRunner implements OutputRunner {
