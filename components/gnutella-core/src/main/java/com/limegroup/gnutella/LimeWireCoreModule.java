@@ -292,7 +292,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Inspector.class).to(InspectorImpl.class);
         
         // TODO: statically injecting this for now...
-        requestStaticInjection(SimppManager.class);
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
         requestStaticInjection(AddressToken.class);
         requestStaticInjection(RemoteFileDesc.class);
