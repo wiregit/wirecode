@@ -25,14 +25,11 @@ import org.limewire.util.BufferUtils;
  */
 public final class UDPConnectNIOTest extends BaseTestCase {
     
-    
-    private static UDPSelectorProviderFactory defaultFactory = null;
-    private static UDPServiceStub stubService;
-    private static UDPMultiplexor udpMultiplexor;
+    private UDPServiceStub stubService;
+    private UDPMultiplexor udpMultiplexor;
 
-    
-    private static final int PORT_1 = 6346;
-    private static final int PORT_2 = 6348;
+    private final int PORT_1 = 6346;
+    private final int PORT_2 = 6348;
 
 	public UDPConnectNIOTest(String name) {
 		super(name);
@@ -46,8 +43,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-    public static void globalSetUp() throws Exception {
-        defaultFactory = UDPSelectorProvider.getDefaultProviderFactory();
+	public void setUp() throws Exception {
         RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
         final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
@@ -61,14 +57,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
             }
         });
         NIODispatcher.instance().registerSelector(udpMultiplexor, provider.getUDPSocketChannelClass());
-    }
-
-    public static void globalTearDown() throws Exception {
-        UDPSelectorProvider.setDefaultProviderFactory(defaultFactory);
-        NIODispatcher.instance().removeSelector(udpMultiplexor);
-    }
-
-    public void setUp() throws Exception {
+        
         // Add some simulated connections to the UDPServiceStub
         stubService.addReceiver(PORT_1, PORT_2, 10, 0);
         stubService.addReceiver(PORT_2, PORT_1, 10, 0);
@@ -77,6 +66,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     public void tearDown() throws Exception {
         // Clear out the receiver parameters for the UDPServiceStub
         stubService.clearReceivers();
+        NIODispatcher.instance().removeSelector(udpMultiplexor);
     }      
     
     
