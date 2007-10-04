@@ -10,9 +10,13 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -39,7 +43,6 @@ public class VendorMessageSupportTest extends LimeTestCase {
     public static Test suite() {
         return buildTestSuite(VendorMessageSupportTest.class);
     }
-
     
     private ServerSocket _tcpSock = null;
     private DatagramSocket _udpSock = null;
@@ -49,6 +52,10 @@ public class VendorMessageSupportTest extends LimeTestCase {
     private static boolean _testHopsFlow = true;
     private static boolean _testTCPCB = true;
     private static boolean _testUDPCB = true;
+    private ConnectionFactory connectionFactory;
+    private HeadersFactory headersFactory;
+    private QueryRequestFactory queryRequestFactory;
+    private MessageFactory messageFactory;
 
     public void setUp() throws Exception {
         launchBackend();              
@@ -68,10 +75,17 @@ public class VendorMessageSupportTest extends LimeTestCase {
         qrt.add("susheel");
         qrt.add("daswani");
         qrt.add("foosball");
+        
+        Injector injector = LimeTestUtils.createInjector();
+        
+        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
 
         // Set up a connection to the host....
-        _leaf1=ProviderHacks.getConnectionFactory().createConnection(_remoteHost, _remotePort);
-        _leaf1.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders(""), new EmptyResponder(), 1000);
+        _leaf1 = connectionFactory.createConnection(_remoteHost, _remotePort);
+        _leaf1.initialize(headersFactory.createLeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.send((RouteTableMessage)iter.next());
         _leaf1.flush();
@@ -79,8 +93,8 @@ public class VendorMessageSupportTest extends LimeTestCase {
         // you support any vendor message....
         
         // Set up another connection to the host....
-        _leaf2=ProviderHacks.getConnectionFactory().createConnection(_remoteHost, _remotePort);
-        _leaf2.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders(""), new EmptyResponder(), 1000);
+        _leaf2= connectionFactory.createConnection(_remoteHost, _remotePort);
+        _leaf2.initialize(headersFactory.createLeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.send((RouteTableMessage)iter.next());
         _leaf2.flush();
@@ -145,7 +159,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         drain(_leaf1);
         drain(_leaf2);
 
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("susheel", (byte)3);
+        QueryRequest qr = queryRequestFactory.createQuery("susheel", (byte)3);
         
         // first make sure query gets through.....
         _leaf2.send(qr);
@@ -181,7 +195,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         }
         catch (Exception whatever) {}
 
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("daswani", (byte)3);
+        qr = queryRequestFactory.createQuery("daswani", (byte)3);
         _leaf2.send(qr);
         _leaf2.flush();
         
@@ -210,7 +224,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         }
         catch (InterruptedException ignored) {}
 
-        qr = ProviderHacks.getQueryRequestFactory().createQuery("foosball", (byte)3);
+        qr = queryRequestFactory.createQuery("foosball", (byte)3);
         _leaf2.send(qr);
         _leaf2.flush();
 
@@ -305,7 +319,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         try {
             _udpSock.receive(dp);  // wait for the UDP ConnectBack...
             ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
-            ProviderHacks.getMessageFactory().read(bais);
+            messageFactory.read(bais);
             fail("Did recieve UDP ConnectBack!!");
         } catch (InterruptedIOException good) {
         }
