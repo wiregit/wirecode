@@ -63,7 +63,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
         });
         
         ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
-        connectionManager.setConnected(true);;
+        connectionManager.setConnected(true);
         
         downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
         downloadManager.initialize();
@@ -125,13 +125,13 @@ public class MagnetDownloaderTest extends LimeTestCase {
 	
 		
 		// downloadable: has kt and hash
-		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xt=urn:sha1:MRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		opts = MagnetOptions.parseMagnet("magnet:?kt=test2&xt=urn:sha1:MRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 		
 		// downloadable: has dn and hash
-		opts = MagnetOptions.parseMagnet("magnet:?dn=test&xt=urn:sha1:TRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		opts = MagnetOptions.parseMagnet("magnet:?dn=test3&xt=urn:sha1:TRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		downloadManager.download(opts[0], true, null, null);
