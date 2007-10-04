@@ -392,8 +392,9 @@ public class NodeAssigner {
         
         // If we're an Ultrapeer, connect to the DHT in passive mode or if 
         // we were connected as active node before, switch to passive mode
+        // It is important to not assume that ultrapeers have the required uptime.  
         boolean isUltrapeer = connectionServices.isActiveSuperNode();
-        if (isUltrapeer) {
+        if (isUltrapeer && isPassiveDHTCapable()) {
             mode = DHTMode.PASSIVE;
         } 
         
@@ -409,7 +410,7 @@ public class NodeAssigner {
             final long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
                     ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
             
-            // This is the minimum requirement to connect to the DHT in passive mode
+            // This is the minimum requirement to connect to the DHT in passive leaf mode
             boolean passiveCapable = isPassiveLeafDHTCapable();
         
             // In order to be able to connect to the DHT in active mode you
@@ -515,15 +516,24 @@ public class NodeAssigner {
         ThreadExecutor.startThread(init, "DHT-InitializeThread");
     }
     
+    
+    /**
+     * @return whether the node is PASSIVE capable.
+     */
+    private boolean isPassiveDHTCapable() {
+        long averageTime = getAverageTime();
+        return ULTRAPEER_OS
+        && (averageTime >= DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()
+                && _currentUptime >= (DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
+                && networkManager.canReceiveSolicited();
+    }
+    
     /**
      * Returns whether ot not a Node is PASSIVE_LEAF capable
      */
     private boolean isPassiveLeafDHTCapable() {
-        long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
-                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        long averageTime = getAverageTime();
         
-        // TODO: I'm not sure if it's really necessary to be an ULTRAPEER_OS
-        // for PASSIVE_LEAF
         return ULTRAPEER_OS
                 && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
                 && _currentUptime >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
@@ -534,13 +544,17 @@ public class NodeAssigner {
      * Returns whether ot not a Node is ACTIVE capable
      */
     private boolean isActiveDHTCapable() {
-        long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
-                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        long averageTime = getAverageTime();
         
         return _isHardcoreCapable
                 && (averageTime >= DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()
                 && _currentUptime >= (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
                 && networkManager.isGUESSCapable();
+    }
+    
+    private long getAverageTime() {
+        return Math.max(connectionManager.get().getCurrentAverageUptime(),
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
     }
     
     /**

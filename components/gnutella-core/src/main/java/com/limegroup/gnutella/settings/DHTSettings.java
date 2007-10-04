@@ -87,12 +87,30 @@ public class DHTSettings extends LimeProps {
     
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
+     * as a PASSIVE node.
+     * WARNING: DO NOT MANUALLY CHANGE THIS 
+     */
+    public static final LongSetting MIN_PASSIVE_DHT_AVERAGE_UPTIME 
+        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
+                "DHT.MinPassiveAverageUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+    
+    /**
+     * The minimum current uptime (in ms) that a node must have to join the DHT
+     * as a PASSIVE node.
+     * WARNING: DO NOT MANUALLY CHANGE THIS
+     */
+    public static final LongSetting MIN_PASSIVE_DHT_INITIAL_UPTIME 
+        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
+                "DHT.MinPassiveInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+    
+    /**
+     * Setting for the minimum average uptime (in ms) required to join the DHT
      * as a PASSIVE_LEAF node.
      * WARNING: DO NOT MANUALLY CHANGE THIS 
      */
     public static final LongSetting MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinPassiveLeafAverageUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+                "DHT.MinPassiveLeafAverageUptime", 1L, 48L*60L*60L*1000L);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT
@@ -101,7 +119,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final LongSetting MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinPassiveLeafInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+                "DHT.MinPassiveLeafInitialUptime", 1L, 48L*60L*60L*1000L);
     
     /**
      * Setting for whether or not an Ultrapeer can join the DHT in active mode.
