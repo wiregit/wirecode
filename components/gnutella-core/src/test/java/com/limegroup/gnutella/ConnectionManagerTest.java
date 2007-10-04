@@ -73,6 +73,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     private ConnectionManager connectionManager;
     private ConnectionServices connectionServices;
     private TestManagedConnectionFactory testConnectionFactory;
+    private LifecycleManager lifecycleManager;
 
     public ConnectionManagerTest(String name) {
         super(name);        
@@ -111,7 +112,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         
         testConnectionFactory = (TestManagedConnectionFactory)injector.getInstance(TestManagedConnectionFactory.class);
         
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
 
         launchAllBackends();
@@ -144,6 +145,9 @@ public class ConnectionManagerTest extends LimeTestCase {
         //Kill all connections
         if (connectionServices != null) {
             connectionServices.disconnect();
+        }
+        if (lifecycleManager != null) {
+            lifecycleManager.shutdown();
         }
         Thread.sleep(500);
     }
