@@ -42,7 +42,6 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.MulticastService;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PongCacher;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
@@ -154,7 +153,7 @@ public class RequeryDownloadTest extends LimeTestCase {
         downloadManager.scheduleWaitingPump();
         boolean ok = downloadManager.readSnapshot(snapshot);
         assertTrue("Couldn't read snapshot file", ok);
-        testUploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        testUploader = injector.getInstance(TestUploader.class);
         testUploader.start("uploader 6666", 6666, false);
         testUploader.setRate(Integer.MAX_VALUE);
         
