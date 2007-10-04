@@ -109,7 +109,6 @@ public class UDPPushTest extends LimeTestCase {
                 SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "ALT",
                 proxies, now, false);
      
-        LimeCoreGlue.install(injector.getInstance(NetworkManager.class));
         injector.getInstance(LifecycleManager.class).start();
     }
 

@@ -3,6 +3,8 @@ package org.limewire.io;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import com.google.inject.Inject;
+
 /**
  * Returns local IP Address information via a {@link LocalSocketAddressProvider}.
  * <code>LocalSocketAddresService</code> returns the local address, port and if
@@ -17,7 +19,7 @@ public class LocalSocketAddressService {
     private static volatile LocalSocketAddressProvider activeService = new DefaultProvider();    
     
     /** Sets the the shared SocketAddressProvider. */
-    public static void setSocketAddressProvider(LocalSocketAddressProvider provider) {
+    @Inject public static void setSocketAddressProvider(LocalSocketAddressProvider provider) {
         activeService = provider;
     }
     

@@ -4,18 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
 import org.limewire.mojito.settings.MojitoProps;
-import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.security.SettingsProvider;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LimeProps;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.settings.SecuritySettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -28,14 +23,14 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 public class LimeCoreGlue {
     
     private static AtomicBoolean preinstalled = new AtomicBoolean(false);
-    private static AtomicBoolean installed = new AtomicBoolean(false);
+    private AtomicBoolean installed = new AtomicBoolean(false);
     
-    /** Uninstalls the glue. */
-    static void uninstall() {
-        preinstalled.set(false);
-        installed.set(false);
-    }
+    private final Provider<SimppManager> simppManager;
     
+    @Inject
+    public LimeCoreGlue(Provider<SimppManager> simppManager) {
+        this.simppManager = simppManager;
+    }    
     
     /**
      * Wires initial pieces together that are required for nearly everything.
@@ -99,55 +94,21 @@ public class LimeCoreGlue {
     }
 
     /** Wires all various components together. */
-    public static void install(final NetworkManager networkManager) {
+    public void install() {
         // Only install once.
         if(!installed.compareAndSet(false, true))
             return;
         
         preinstall(); // Ensure we're preinstalled.
                 
-        // Setup SIMPP to be the settings remote manager.
-        SimppManager simppManager = SimppManager.instance();
         SimppSettingsManager core = new SimppSettingsManager();
         SimppSettingsManager mojito = new SimppSettingsManager();
-        simppManager.addSimppSettingsManager(core);
-        simppManager.addSimppSettingsManager(mojito);
+        simppManager.get().addSimppSettingsManager(core);
+        simppManager.get().addSimppSettingsManager(mojito);
         LimeProps.instance().getFactory().setRemoteSettingManager(core);
         MojitoProps.instance().getFactory().setRemoteSettingManager(mojito);
-        core.updateSimppSettings(simppManager.getPropsString());
-        mojito.updateSimppSettings(simppManager.getPropsString());
-        
-        // Setup RouterService & ConnectionSettings.LOCAL_IS_PRIVATE to 
-        // be the LocalSocketAddressProvider.
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
-            public byte[] getLocalAddress() {
-                return networkManager.getAddress();
-            }
-
-            public int getLocalPort() {
-                return networkManager.getPort();
-            }
-
-            public boolean isLocalAddressPrivate() {
-                return ConnectionSettings.LOCAL_IS_PRIVATE.getValue();
-            }
-            
-            public boolean isTLSCapable() {
-                return SSLSettings.isIncomingTLSEnabled();
-            }
-        });
-        
-        SettingsProvider settingsProvider = new SettingsProvider() {
-            public long getChangePeriod() {
-                return SecuritySettings.CHANGE_QK_EVERY.getValue();
-            }
-
-            public long getGracePeriod() {
-                return SecuritySettings.QK_GRACE_PERIOD.getValue();
-            }
-        };
-        
-        MACCalculatorRepositoryManager.setDefaultSettingsProvider(settingsProvider);
+        core.updateSimppSettings(simppManager.get().getPropsString());
+        mojito.updateSimppSettings(simppManager.get().getPropsString());
     }
     
     /** Simple exception for failure to install. */

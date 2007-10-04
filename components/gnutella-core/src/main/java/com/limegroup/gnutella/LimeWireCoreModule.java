@@ -11,6 +11,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
+import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.io.Pools;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
@@ -29,6 +31,7 @@ import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
+import org.limewire.security.SettingsProvider;
 import org.limewire.statistic.StatisticsManager;
 
 import com.google.inject.AbstractModule;
@@ -301,6 +304,11 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(StatisticsManager.class);
         requestStaticInjection(MACCalculatorRepositoryManager.class);
         requestStaticInjection(Pools.class);
+        requestStaticInjection(LocalSocketAddressService.class);
+        requestStaticInjection(MACCalculatorRepositoryManager.class);
+        
+        bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
+        bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
@@ -378,6 +386,7 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(ExternalControl.class);
         //bind(ControlRequestAcceptor.class);
         //bind(PushDownloadManager.class);
+        //bind(SimppManager.class);
         
         //TODO: Don't need interfaces really, but listing them just 'cause I want to list everything.
         //bind(BrowseRequestHandler.class);
@@ -414,7 +423,6 @@ public class LimeWireCoreModule extends AbstractModule {
         // TODO: These are hacks to workaround objects that aren't dependency injected elsewhere.
         bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
         bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
-        bind(SimppManager.class).toProvider(SimppManagerProvider.class);
         bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
     }    
     
@@ -551,14 +559,7 @@ public class LimeWireCoreModule extends AbstractModule {
             return nioDispatcher.get().getScheduledExecutorService();
         }
     };
-    
-    @Singleton
-    private static class SimppManagerProvider implements Provider<SimppManager> {
-        public SimppManager get() {
-            return SimppManager.instance();
-        }
-    };
-    
+        
     ///////////////////////////////////////////////////////////////
     // !!! DO NOT ADD THINGS BELOW HERE !!!  PUT THEM ABOVE THE HACKS!
 

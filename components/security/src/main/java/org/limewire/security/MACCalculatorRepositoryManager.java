@@ -24,7 +24,7 @@ public class MACCalculatorRepositoryManager {
     }
     
     /** Replaces the default repository manager with one backed by the given SettingsProvider. */
-    public static void setDefaultSettingsProvider(SettingsProvider provider) {
+    @Inject public static void setDefaultSettingsProvider(SettingsProvider provider) {
         defaultRepositoryManager = new MACCalculatorRepositoryManager(provider);
     }
     

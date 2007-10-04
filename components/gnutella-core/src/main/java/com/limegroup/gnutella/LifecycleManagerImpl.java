@@ -106,6 +106,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<ConnectionServices> connectionServices;
     private final Provider<SpamServices> spamServices;
     private final Provider<ControlRequestAcceptor> controlRequestAcceptor;
+    private final Provider<LimeCoreGlue> limeCoreGlue;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -157,7 +158,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<SpamServices> spamServices,
             Provider<ControlRequestAcceptor> controlRequestAcceptor,
             Provider<IncomingConnectionHandler> incomingConnectionHandler,
-            Provider<LicenseFactory> licenseFactory) { 
+            Provider<LicenseFactory> licenseFactory,
+            Provider<LimeCoreGlue> limeCoreGlue) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -197,6 +199,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.controlRequestAcceptor = controlRequestAcceptor;
         this.incomingConnectionHandler = incomingConnectionHandler;
         this.licenseFactory = licenseFactory;
+        this.limeCoreGlue = limeCoreGlue;
     }
     
     /* (non-Javadoc)
@@ -570,7 +573,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     
     /** Runs all tasks that can be done in the background while the gui inits. */
     private void doBackgroundTasks() {
-        LimeCoreGlue.install(networkManager.get()); // ensure glue is set before running tasks.
+        limeCoreGlue.get().install(); // ensure glue is set before running tasks.
         
         //add more while-gui init tasks here
         ipFilter.get().refreshHosts(new IPFilter.IPFilterCallback() {

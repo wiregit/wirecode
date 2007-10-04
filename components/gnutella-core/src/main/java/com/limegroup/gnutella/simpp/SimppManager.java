@@ -22,6 +22,7 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
@@ -33,6 +34,7 @@ import com.limegroup.gnutella.settings.SimppSettingsManager;
  * <p>
  * Uses the singleton pattern
  */
+@Singleton
 public class SimppManager {
     
     private static final Log LOG = LogFactory.getLog(SimppManager.class);
@@ -45,9 +47,7 @@ public class SimppManager {
      * first simpp message published by limwire will start at 4.
      */
     private static int MIN_VERSION = 3;
-    
-    private static SimppManager INSTANCE;
-    
+       
     /** Listeners for simpp updates */
     private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
    
@@ -62,10 +62,11 @@ public class SimppManager {
     
     private int _latestVersion;
     
-    @Inject // DPINJ: GET RID OF STATIC INJECTION!
-    private static Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
+    private Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     
-    private SimppManager() {
+    @Inject
+    private SimppManager(Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker) {
+        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         boolean problem = false;
         RandomAccessFile raf = null;
@@ -117,14 +118,7 @@ public class SimppManager {
             }
         }
     }
-    
-
-    public static synchronized SimppManager instance() {
-        if(INSTANCE==null) 
-            INSTANCE = new SimppManager();
-        return INSTANCE;
-    }
-    
+        
     public int getVersion() {
         return _latestVersion;
     }

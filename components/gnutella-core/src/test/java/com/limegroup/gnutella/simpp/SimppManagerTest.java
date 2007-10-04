@@ -468,7 +468,7 @@ public class SimppManagerTest extends LimeTestCase {
     
     private static void updateSimppSettings() throws Exception {
         for(SimppSettingsManager ssm : ProviderHacks.getSimppManager().getSimppSettingsManagers())
-            ssm.updateSimppSettings(SimppManager.instance().getPropsString());
+            ssm.updateSimppSettings(ProviderHacks.getSimppManager().getPropsString());
     }
     
 }
