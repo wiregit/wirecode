@@ -72,7 +72,7 @@ public class DHTManagerImpl implements DHTManager {
     /**
      * List of event listeners for ConnectionLifeCycleEvents.
      */
-    private final List<DHTEventListener> dhtEventListeners = new ArrayList<DHTEventListener>();
+    private final List<DHTEventListener> dhtEventListeners = new ArrayList<DHTEventListener>(1);
     
     /** 
      * The executor to use to execute blocking DHT methods, such
@@ -90,6 +90,9 @@ public class DHTManagerImpl implements DHTManager {
     
     private final DHTControllerFactory dhtControllerFactory;
     
+    @InspectionPoint("time for dht bootstrap")
+    private final BootstrapTimer bootstrapTimer = new BootstrapTimer();
+    
     /**
      * Constructs the DHTManager, using the given Executor to invoke blocking 
      * methods. The executor MUST be single-threaded, otherwise there will be 
@@ -102,6 +105,7 @@ public class DHTManagerImpl implements DHTManager {
         this.executor = service;
         this.dispatchExecutor = ExecutorsHelper.newProcessingQueue("DHT-EventDispatch");
         this.dhtControllerFactory = dhtControllerFactory;
+        addEventListener(bootstrapTimer);
     }
     
     /*
@@ -680,5 +684,23 @@ public class DHTManagerImpl implements DHTManager {
         InetSocketAddress addr = (InetSocketAddress)node.getContactAddress();
         long masked = NetworkUtils.getClassC(addr.getAddress()) & 0xFFFFFFFFL;
         return masked;
+    }
+    
+    /**
+     * Inspection point that tells us how long did the last bootstrap take.
+     */
+    private class BootstrapTimer implements DHTEventListener, Inspectable {
+        private long start, stop;
+
+        public synchronized Object inspect() {
+            return Math.max(stop - start, 0);
+        }
+
+        public synchronized void handleDHTEvent(DHTEvent evt) {
+            if (evt.getType() == DHTEvent.Type.STARTING) 
+                start = System.currentTimeMillis();
+            else if (evt.getType() == DHTEvent.Type.CONNECTED && start != 0)
+                stop = System.currentTimeMillis();
+        }
     }
 }
