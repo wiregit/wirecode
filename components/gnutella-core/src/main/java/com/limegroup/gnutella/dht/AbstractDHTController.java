@@ -378,7 +378,8 @@ public abstract class AbstractDHTController implements DHTController {
         dhtControllerFacade.updateCapabilities();
         dhtControllerFacade.sendUpdatedCapabilities();
         
-        dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
+        if (isRunning())
+            dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
     
     /**
