@@ -13,27 +13,31 @@ import junit.framework.Test;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 @SuppressWarnings( {"unchecked", "null"})
-public class I18NSendReceiveTest 
-    extends com.limegroup.gnutella.util.LimeTestCase {
+public class I18NSendReceiveTest extends LimeTestCase {
 
     private static Connection CONN_1;
-    private static final int TEST_PORT = 6667;
+    private static int TEST_PORT = 6667;
 
   
 
@@ -60,6 +64,14 @@ public class I18NSendReceiveTest
     private static final String[] FILES = {
         FILE_0, FILE_1, FILE_2, FILE_3, FILE_4, META_FILE_0, META_FILE_1, 
         META_FILE_2};
+    private HeadersFactory headersFactory;
+    private ConnectionFactory connectionFactory;
+    private QueryRequestFactory queryRequestFactory;
+    private LifecycleManager lifecycleManager;
+    private ConnectionServices connectionServices;
+    private FileManager fileManager;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private SchemaReplyCollectionMapper schemaReplyCollectionMapper;
 
     public I18NSendReceiveTest(String name) {
         super(name);
@@ -108,26 +120,37 @@ public class I18NSendReceiveTest
 
     }
 
-    public static void globalSetUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
+        TEST_PORT++;
         doSettings();
-        if(true)throw new RuntimeException("fix me");
-      //  ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
-        ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getConnectionServices().connect();
+        
+        Injector injector = LimeTestUtils.createInjector();
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+        fileManager = injector.getInstance(FileManager.class);
+        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+        schemaReplyCollectionMapper = injector.getInstance(SchemaReplyCollectionMapper.class);
+        
+        lifecycleManager.start();
+        connectionServices.connect();
         connect();
     }
 
-    public static void globalTearDown() throws Exception {
+    @Override
+    public void tearDown() throws Exception {
         drain(CONN_1);
         CONN_1.close();
-        ProviderHacks.getConnectionServices().disconnect();
+        connectionServices.disconnect();
     }
-
-
-    private static void connect() throws Exception {
-        UltrapeerHeaders headers = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost");
+    
+    private void connect() throws Exception {
+        UltrapeerHeaders headers = headersFactory.createUltrapeerHeaders("localhost");
         headers.put(HeaderNames.X_DEGREE,"42");
-        CONN_1 = ProviderHacks.getConnectionFactory().createConnection("localhost", TEST_PORT, ConnectType.PLAIN);
+        CONN_1 = connectionFactory.createConnection("localhost", TEST_PORT, ConnectType.PLAIN);
         CONN_1.initialize(headers, new EmptyResponder(), 1000);
         drain(CONN_1);
     }
@@ -139,7 +162,7 @@ public class I18NSendReceiveTest
      */
     public void testSendReceive() throws Exception {        
         //test random query 
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("asdfadf", (byte)2);
+        QueryRequest qr = queryRequestFactory.createQuery("asdfadf", (byte)2);
         CONN_1.send(qr);
         CONN_1.flush();
         
@@ -200,7 +223,7 @@ public class I18NSendReceiveTest
         int size = expectedReply.size();
 
         QueryRequest qr 
-            = ProviderHacks.getQueryRequestFactory().createQuery(q, xml);
+            = queryRequestFactory.createQuery(q, xml);
         CONN_1.send(qr);
         CONN_1.flush();
 
@@ -275,15 +298,14 @@ public class I18NSendReceiveTest
      * add the metadata
      */
     private void addMetaData(String fname, String xmlstr) throws Exception {
-        FileManager fm = ProviderHacks.getFileManager();
+        FileManager fm = fileManager;
         FileDesc fd = 
             fm.getFileDescForFile(new File(_sharedDir, fname));
         
         LimeXMLDocument newDoc = 
-            ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(buildXMLString(xmlstr));
+            limeXMLDocumentFactory.createLimeXMLDocument(buildXMLString(xmlstr));
         
-        SchemaReplyCollectionMapper map =
-            ProviderHacks.getSchemaReplyCollectionMapper();
+        SchemaReplyCollectionMapper map = schemaReplyCollectionMapper;
         String uri = newDoc.getSchemaURI();
         LimeXMLReplyCollection collection = map.getReplyCollection(uri);
         
@@ -301,9 +323,3 @@ public class I18NSendReceiveTest
     }
 
 }
-
-
-
-
-
-
