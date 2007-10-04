@@ -18,16 +18,20 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -52,11 +56,21 @@ public class LeafRoutingTest extends LimeTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    private static Connection ultrapeer1;
-    private static Connection ultrapeer2;
-    private static Connection old1;
- //   private static RouterService rs;
+    private Connection ultrapeer1;
+    private Connection ultrapeer2;
+    private Connection old1;
 
+    private LifecycleManager lifecycleManager;
+    private ConnectionServices connectionServices;
+    private ConnectionFactory connectionFactory;
+    private PingReplyFactory pingReplyFactory;
+    private SearchServices searchServices;
+    private FileManager fileManager;
+    private QueryRequestFactory queryRequestFactory;
+    private SpamServices spamServices;
+    private UrnCache urnCache;
+    private HeadersFactory headersFactory;
+    
     public LeafRoutingTest(String name) {
         super(name);
     }
@@ -93,41 +107,47 @@ public class LeafRoutingTest extends LimeTestCase {
         FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
     }        
     
-    public static void globalSetUp() throws Exception {
-        doSettings();
-
-        ActivityCallback callback=new ActivityCallbackStub();
-       // rs=new RouterService(callback);
-        assertEquals("unexpected port",
-            SERVER_PORT, ConnectionSettings.PORT.getValue());
-        ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getConnectionServices().connect();
-        ProviderHacks.getHostCatcher().clear();
-        assertEquals("unexpected port",
-            SERVER_PORT, ConnectionSettings.PORT.getValue());
-        connect();
-    }        
-    
+    @Override
     public void setUp() throws Exception  {
         doSettings();
+        assertEquals("unexpected port", SERVER_PORT, ConnectionSettings.PORT.getValue());
+        
+        Injector injector = LimeTestUtils.createInjector();
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        searchServices = injector.getInstance(SearchServices.class);
+        fileManager = injector.getInstance(FileManager.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        spamServices = injector.getInstance(SpamServices.class);
+        urnCache = injector.getInstance(UrnCache.class);
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        
+        lifecycleManager.start();
+        connectionServices.connect();
+        assertEquals("unexpected port", SERVER_PORT, ConnectionSettings.PORT.getValue());
+        connect();
     }
     
-    public static void globalTearDown() throws Exception {
+    @Override
+    public void tearDown() throws Exception {
         shutdown();
+        lifecycleManager.shutdown();
     }
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect() throws Exception {
+     private void connect() throws Exception {
          ultrapeer1 = connect(6350, true);
          ultrapeer2 = connect(6351, true);
          old1 = connect(6352, true);
      }
      
-    private static Connection connect(int port, boolean ultrapeer) 
+    private Connection connect(int port, boolean ultrapeer) 
         throws Exception {
          ServerSocket ss=new ServerSocket(port);
-         ProviderHacks.getConnectionServices().connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
+         connectionServices.connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          
@@ -144,7 +164,7 @@ public class LeafRoutingTest extends LimeTestCase {
              responder = new EmptyResponder();
          }
          
-         Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
+         Connection con = connectionFactory.createConnection(socket);
          con.initialize(null, responder, 1000);
          replyToPing(con, ultrapeer);
          return con;
@@ -173,7 +193,7 @@ public class LeafRoutingTest extends LimeTestCase {
          throw new IOException();
      }
 
-	private static void replyToPing(Connection c, boolean ultrapeer) 
+	private void replyToPing(Connection c, boolean ultrapeer) 
         throws Exception {
         // respond to a ping iff one is given.
         Message m = null;
@@ -190,7 +210,7 @@ public class LeafRoutingTest extends LimeTestCase {
         
         Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
         PingReply reply = 
-            ProviderHacks.getPingReplyFactory().createExternal(guid, (byte)7,
+            pingReplyFactory.createExternal(guid, (byte)7,
                                      socket.getLocalPort(), 
                                      ultrapeer ? ultrapeerIP : oldIP,
                                      ultrapeer);
@@ -203,8 +223,8 @@ public class LeafRoutingTest extends LimeTestCase {
 
     public void testLeafBroadcast() 
             throws IOException, BadPacketException {
-        byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
-        ProviderHacks.getSearchServices().query(guid, "crap");
+        byte[] guid = searchServices.newQueryGUID();
+        searchServices.query(guid, "crap");
 
         while (true) {
             assertNotNull("ultrapeer1 is null", ultrapeer1);
@@ -250,7 +270,7 @@ public class LeafRoutingTest extends LimeTestCase {
         
         props.put(HeaderNames.X_ULTRAPEER, "True");
         //props.put(HeaderNames.X_PROBE_QUERIES, PROBE_VERSION);
-        Connection c = ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", SERVER_PORT);
+        Connection c = connectionFactory.createConnection("127.0.0.1", SERVER_PORT);
 
         try {
             c.initialize(props, new EmptyResponder(), 1000);
@@ -332,7 +352,7 @@ public class LeafRoutingTest extends LimeTestCase {
      * Tests to make sure that connections to old hosts are not allowed
      */
     public void testConnectionToOldDisallowed() {
-        Connection c= ProviderHacks.getConnectionFactory().createConnection("127.0.0.1", SERVER_PORT);
+        Connection c= connectionFactory.createConnection("127.0.0.1", SERVER_PORT);
         try {
             c.initialize(new Properties(), new EmptyResponder(), 1000);
             fail("handshake should not have succeeded");
@@ -345,10 +365,10 @@ public class LeafRoutingTest extends LimeTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(ProviderHacks.getFileManager().getNumFiles() == 2);
+        assertTrue(fileManager.getNumFiles() == 2);
 
         // send a query that should hit
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
+        QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
                 "berkeley", null, null, null, false, Network.UNKNOWN, false, 0);
         ultrapeer2.send(query);
         ultrapeer2.flush();
@@ -364,13 +384,13 @@ public class LeafRoutingTest extends LimeTestCase {
 
     public void testLeafAnswersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(false);
-        ProviderHacks.getSpamServices().adjustSpamFilters();
+        spamServices.adjustSpamFilters();
         URNtest();
     }
     
     public void testLeafFiltersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(true);
-        ProviderHacks.getSpamServices().adjustSpamFilters();
+        spamServices.adjustSpamFilters();
         try {
             URNtest();
             fail("did not filter URN query");
@@ -381,20 +401,20 @@ public class LeafRoutingTest extends LimeTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals(2, fileManager.getNumFiles());
 
         // get the URNS for the files
         File berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()).iterator();
+        Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
         URN berkeleyURN = (URN) iter.next();
-        iter = UrnHelper.calculateAndCacheURN(susheel, ProviderHacks.getUrnCache()).iterator();
+        iter = UrnHelper.calculateAndCacheURN(susheel, urnCache).iterator();
         URN susheelURN = (URN) iter.next();
 
         // send a query that should hit
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(berkeleyURN);
+        QueryRequest query = queryRequestFactory.createQuery(berkeleyURN);
 
         ultrapeer2.send(query);
         ultrapeer2.flush();
@@ -407,12 +427,12 @@ public class LeafRoutingTest extends LimeTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()));
+                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(berkeley, urnCache));
             }
         } while (!(m instanceof QueryReply)) ;
         
         // send another query that should hit
-        query = ProviderHacks.getQueryRequestFactory().createQuery(susheelURN);
+        query = queryRequestFactory.createQuery(susheelURN);
 
         ultrapeer2.send(query);
         ultrapeer2.flush();
@@ -425,7 +445,7 @@ public class LeafRoutingTest extends LimeTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(susheel, ProviderHacks.getUrnCache()));
+                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(susheel, urnCache));
             }
         } while (!(m instanceof QueryReply)) ;
     }
@@ -445,7 +465,7 @@ public class LeafRoutingTest extends LimeTestCase {
         return ret;
     }
 
-    private static void shutdown() throws IOException {
+    private void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
         try {
             Thread.sleep(2000);
@@ -455,10 +475,10 @@ public class LeafRoutingTest extends LimeTestCase {
         old1.close();
     }
 
-    private static class UltrapeerResponder implements HandshakeResponder {
+    private class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing) {
-            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("127.0.0.1"); 
+            Properties props = headersFactory.createUltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
