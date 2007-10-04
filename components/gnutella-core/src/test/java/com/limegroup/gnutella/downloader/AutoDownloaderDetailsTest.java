@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
 
@@ -20,6 +21,11 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.LimeT
     
     public static Test suite() {
         return buildTestSuite(AutoDownloaderDetailsTest.class);
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+        LimeTestUtils.createInjector();
     }
 
 	public void testLegacy() throws Exception {
