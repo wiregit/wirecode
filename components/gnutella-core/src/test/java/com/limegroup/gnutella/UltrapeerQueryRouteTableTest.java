@@ -3,18 +3,42 @@ package com.limegroup.gnutella;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
+import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
+import com.limegroup.gnutella.messages.PingReplyFactory;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.search.QueryDispatcher;
+import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 
 /**
@@ -50,6 +74,9 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
     private static List REPLIES = new LinkedList();
     
     private static List SENT = new LinkedList();
+    private LifecycleManager lifecycleManager;
+    private QueryRequestFactory queryRequestFactory;
+    private ConnectionServices connectionServices;
 
     public UltrapeerQueryRouteTableTest(String name) {
         super(name);
@@ -74,32 +101,38 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
     }
     
-    public static void globalSetUp() throws Exception {
+    public void setUp() throws Exception {
         setSettings();
         
         launchBackend();
 
         CALLBACK = new TestCallback();
-        MESSAGE_ROUTER = new TestMessageRouter();
-     //   ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER);
-        ProviderHacks.getLifecycleManager().start();
+
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(MessageRouter.class).to(TestMessageRouter.class);
+            }
+        });
         
-        ProviderHacks.getConnectionServices().connectToHostAsynchronously("localhost", 
+        MESSAGE_ROUTER = (TestMessageRouter) injector.getInstance(MessageRouter.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+
+        lifecycleManager.start();
+        connectionServices.connectToHostAsynchronously("localhost", 
             Backend.BACKEND_PORT, ConnectType.PLAIN);    
         
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.
-        Thread.sleep(10 * 1000);
-        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
-    }
-
-	public void setUp() throws Exception {
-        setSettings();
-        REPLIES.clear();
-        SENT.clear();
+         Thread.sleep(10 * 1000);
+        assertTrue("should be connected", connectionServices.isConnected());
 	}
 
 	public void tearDown() throws Exception {
+	    connectionServices.disconnect();
+	    lifecycleManager.shutdown();
 	}
     
     /**
@@ -107,8 +140,8 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * Ultrapeer that doesn't have a hit.
      */
     public void testSentQueryIsNotTTL1() throws Exception {
-        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(noMatch, (byte)1);
+        assertTrue("should be connected", connectionServices.isConnected());
+        QueryRequest qr = queryRequestFactory.createQuery(noMatch, (byte)1);
         sendQuery(qr);        
         Thread.sleep(2000);
         // we will send the query, but with a TTL of 2, not 1, because
@@ -128,9 +161,9 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * table for that query.
      */
     public void testDynamicQueryingWithQRPHit() throws Exception {
-        assertTrue("should be connected", ProviderHacks.getConnectionServices().isConnected());
+        assertTrue("should be connected", connectionServices.isConnected());
                 
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(
+        QueryRequest qr = queryRequestFactory.createQuery(
             "FileManagerTest.class." + Backend.SHARED_EXTENSION, (byte)1);
         sendQuery(qr);
         Thread.sleep(4000);
@@ -153,55 +186,62 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
      * The actual QueryRequest sent will not be the same (==) as this,
      * because QueryHandler creates new queries with appropriate TTLs.
      */
-    private static void sendQuery(QueryRequest qr) throws Exception {
+    private void sendQuery(QueryRequest qr) throws Exception {
       //  ResponseVerifier VERIFIER = (ResponseVerifier)PrivilegedAccessor.getValue(ROUTER_SERVICE, "VERIFIER");
      //   VERIFIER.record(qr);
         
-        MessageRouter mr = ProviderHacks.getMessageRouter();
+        MessageRouter mr = MESSAGE_ROUTER;
         mr.sendDynamicQuery(qr);
         //mr.broadcastQueryRequest(qr);
     }
     
+    @Singleton
     private static class TestMessageRouter extends StandardMessageRouter {
         
-        public TestMessageRouter() {
-            super(ProviderHacks.getNetworkManager(), ProviderHacks
-                    .getQueryRequestFactory(), ProviderHacks
-                    .getQueryHandlerFactory(),
-                    ProviderHacks.getOnDemandUnicaster(), ProviderHacks
-                            .getHeadPongFactory(), ProviderHacks
-                            .getPingReplyFactory(), ProviderHacks
-                            .getConnectionManager(), ProviderHacks
-                            .getForMeReplyHandler(), ProviderHacks
-                            .getQueryUnicaster(), ProviderHacks.getFileManager(),
-                    ProviderHacks.getContentManager(), ProviderHacks
-                            .getDHTManager(), ProviderHacks.getUploadManager(),
-                    ProviderHacks.getDownloadManager(), ProviderHacks
-                            .getUdpService(), ProviderHacks
-                            .getSearchResultHandler(), ProviderHacks
-                            .getSocketsManager(), ProviderHacks.getHostCatcher(),
-                    ProviderHacks.getQueryReplyFactory(), ProviderHacks
-                            .getStaticMessages(), Providers.of(ProviderHacks
-                            .getMessageDispatcher()), ProviderHacks
-                            .getMulticastService(), ProviderHacks
-                            .getQueryDispatcher(), Providers.of(ProviderHacks
-                            .getActivityCallback()), ProviderHacks
-                            .getConnectionServices(), ProviderHacks
-                            .getApplicationServices(), ProviderHacks
-                            .getBackgroundExecutor(), Providers
-                            .of(ProviderHacks.getPongCacher()), Providers
-                            .of(ProviderHacks.getSimppManager()), Providers
-                            .of(ProviderHacks.getUpdateHandler()),
-                            ProviderHacks.getGuidMapManager(),
-                            ProviderHacks.getUDPReplyHandlerCache(),
-                            ProviderHacks.getInspectionRequestHandlerFactory(),
-                            ProviderHacks.getUDPCrawlerPingHandlerFactory(),
-                            ProviderHacks.getAdvancedToggleHandlerFactory(),
-                            ProviderHacks.getStatistics(),
-                            ProviderHacks.getReplyNumberVendorMessageFactory(),
-                            ProviderHacks.getPingRequestFactory()
-
-            );
+        @Inject
+        public TestMessageRouter(NetworkManager networkManager,
+                QueryRequestFactory queryRequestFactory,
+                QueryHandlerFactory queryHandlerFactory,
+                OnDemandUnicaster onDemandUnicaster,
+                HeadPongFactory headPongFactory, PingReplyFactory pingReplyFactory,
+                ConnectionManager connectionManager, @Named("forMeReplyHandler")
+                ReplyHandler forMeReplyHandler, QueryUnicaster queryUnicaster,
+                FileManager fileManager, ContentManager contentManager,
+                DHTManager dhtManager, UploadManager uploadManager,
+                DownloadManager downloadManager, UDPService udpService,
+                SearchResultHandler searchResultHandler,
+                SocketsManager socketsManager, HostCatcher hostCatcher,
+                QueryReplyFactory queryReplyFactory, StaticMessages staticMessages,
+                Provider<MessageDispatcher> messageDispatcher,
+                MulticastService multicastService, QueryDispatcher queryDispatcher,
+                Provider<ActivityCallback> activityCallback,
+                ConnectionServices connectionServices,
+                ApplicationServices applicationServices,
+                @Named("backgroundExecutor")
+                ScheduledExecutorService backgroundExecutor,
+                Provider<PongCacher> pongCacher,
+                Provider<SimppManager> simppManager,
+                Provider<UpdateHandler> updateHandler,
+                GuidMapManager guidMapManager, 
+                UDPReplyHandlerCache udpReplyHandlerCache,
+                Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
+                Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
+                Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
+                Statistics statistics,
+                ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
+                PingRequestFactory pingRequestFactory) {
+            super(networkManager, queryRequestFactory, queryHandlerFactory,
+                    onDemandUnicaster, headPongFactory, pingReplyFactory,
+                    connectionManager, forMeReplyHandler, queryUnicaster,
+                    fileManager, contentManager, dhtManager, uploadManager,
+                    downloadManager, udpService, searchResultHandler,
+                    socketsManager, hostCatcher, queryReplyFactory, staticMessages,
+                    messageDispatcher, multicastService, queryDispatcher,
+                    activityCallback, connectionServices, applicationServices,
+                    backgroundExecutor, pongCacher, simppManager, updateHandler,
+                    guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
+                    udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics,
+                    replyNumberVendorMessageFactory, pingRequestFactory);
         }
         
         public boolean originateQuery(QueryRequest r, ManagedConnection c) {
