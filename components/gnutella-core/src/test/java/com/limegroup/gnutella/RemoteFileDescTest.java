@@ -12,6 +12,7 @@ import org.limewire.io.IpPortSet;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.HTTPConstants;
 
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTestCase {	  
 
 	private byte[] TEST_GUID;
+    private PushEndpointFactory pushEndpointFactory;
 
 	public RemoteFileDescTest(String name) {
 		super(name);
@@ -36,6 +38,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 	}
 
 	protected void setUp() {
+	    Injector injector = LimeTestUtils.createInjector();
+	    pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
 		TEST_GUID = GUID.makeGuid();
 	}
 
@@ -120,8 +124,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		
 		GUID g1 = new GUID(GUID.makeGuid());
 		GUID g2 = new GUID(GUID.makeGuid());
-        PushEndpoint pe = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g1.bytes(), proxies);
-        PushEndpoint pe2 = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g2.bytes(), proxies2);
+        PushEndpoint pe = pushEndpointFactory.createPushEndpoint(g1.bytes(), proxies);
+        PushEndpoint pe2 = pushEndpointFactory.createPushEndpoint(g2.bytes(), proxies2);
         
         //test an rfd with push proxies
 		 RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
@@ -151,7 +155,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		 
 		 //now create an rfd which claims to be firewalled but has no push proxies
 		 GUID g3 = new GUID(GUID.makeGuid());
-		 PushEndpoint noProxies = ProviderHacks.getPushEndpointFactory().createPushEndpoint(g3.bytes());
+		 PushEndpoint noProxies = pushEndpointFactory.createPushEndpoint(g3.bytes());
 
 		 RemoteFileDesc fwalledNotGood = 
 		 	new RemoteFileDesc(fwalled, noProxies);
