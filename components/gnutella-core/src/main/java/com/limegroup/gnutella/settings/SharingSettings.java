@@ -2,10 +2,8 @@ package com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.Set;
 
 import org.limewire.setting.BooleanSetting;
@@ -19,11 +17,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.gui.options.panes.StoreSaveTemplateProcessor;
 import com.limegroup.gnutella.gui.options.panes.StoreSaveTemplateProcessor.IllegalTemplateException;
-import com.limegroup.gnutella.metadata.MP3MetaData;
-import com.limegroup.gnutella.metadata.MetaData;
 
 /**
  * Settings for sharing
@@ -266,42 +260,41 @@ public class SharingSettings extends LimeProps {
      * @throws IllegalTemplateException 
      */
     public static final File getSaveLWSDirectory(File incompleteFile) {
-        File f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
-        final String template = getSaveLWSTemplate();
+//        final String template = getSaveLWSTemplate();
         
-        // if mp3, try to get meta-data to use template pattern when saving
-        if( incompleteFile.getName().toLowerCase().endsWith("mp3")) {
-            try {
-                final MP3MetaData data = (MP3MetaData) MetaData.parse(incompleteFile);
-                final Map<String, String> subs = new HashMap<String, String>();
-                String artist = data.getArtist();
-                if (artist == null) {
-                    artist = GUIMediator.getStringResource("Unknown Artist");
-                }
-                String album = data.getAlbum();
-                if (album == null) {
-                    album = GUIMediator.getStringResource("Unknown Album");
-                }
-                subs.put(StoreSaveTemplateProcessor.ARTIST_LABEL, artist);
-                subs.put(StoreSaveTemplateProcessor.ALBUM_LABEL, album);
-                subs.put(StoreSaveTemplateProcessor.HOME_LABEL, System.getProperty("user.dir"));
-                File outDir = null;
-                try {
-                    outDir = new StoreSaveTemplateProcessor().getOutputDirectory(template, subs, f);
-                } catch (IllegalTemplateException e) {
-                    GUIMediator.showError("Invalid Template", System.getProperty("line.separator") + e.getMessage());
-                }
-                if (outDir != null && new File(outDir.getCanonicalPath()).mkdirs()) {
-                	FileUtils.setWriteable(outDir);
-                	f = outDir; 
-                }
-            } catch (IOException e) { 
-//                LOG.error("getSaveLWSDirectory", e);
-            }
-            if( !f.isDirectory() || !f.canRead() || !f.canWrite())
-                f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
-        }
-        return f;
+//        // if mp3, try to get meta-data to use template pattern when saving
+//        if( incompleteFile.getName().toLowerCase().endsWith("mp3")) {
+//            try {
+//                final MP3MetaData data = (MP3MetaData) MetaData.parse(incompleteFile);
+//                final Map<String, String> subs = new HashMap<String, String>();
+//                String artist = data.getArtist();
+//                if (artist == null) {
+//                    artist = GUIMediator.getStringResource("Unknown Artist");
+//                }
+//                String album = data.getAlbum();
+//                if (album == null) {
+//                    album = GUIMediator.getStringResource("Unknown Album");
+//                }
+//                subs.put(StoreSaveTemplateProcessor.ARTIST_LABEL, artist);
+//                subs.put(StoreSaveTemplateProcessor.ALBUM_LABEL, album);
+//                subs.put(StoreSaveTemplateProcessor.HOME_LABEL, System.getProperty("user.dir"));
+//                File outDir = null;
+//                try {
+//                    outDir = new StoreSaveTemplateProcessor().getOutputDirectory(template, subs, f);
+//                } catch (IllegalTemplateException e) {
+//                    GUIMediator.showError("Invalid Template", System.getProperty("line.separator") + e.getMessage());
+//                }
+//                if (outDir != null && new File(outDir.getCanonicalPath()).mkdirs()) {
+//                	FileUtils.setWriteable(outDir);
+//                	f = outDir; 
+//                }
+//            } catch (IOException e) { 
+////                LOG.error("getSaveLWSDirectory", e);
+//            }
+//            if( !f.isDirectory() || !f.canRead() || !f.canWrite())
+//                f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
+//        }
+        return DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
     }
     
     /**
