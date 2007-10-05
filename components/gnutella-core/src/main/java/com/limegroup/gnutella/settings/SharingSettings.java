@@ -17,7 +17,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.gui.options.panes.StoreSaveTemplateProcessor.IllegalTemplateException;
+
 
 /**
  * Settings for sharing
