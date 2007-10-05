@@ -1916,7 +1916,7 @@ public abstract class FileManager {
             
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
         // if its a shared file
-        if( _fileToFileDescMap.containsKey(oldName)) {
+        if( _fileToFileDescMap.containsValue(toRemove)) {
     		final FileDesc removed = removeFileIfShared(oldName, false);
             assert removed == toRemove : "invariant broken.";
     		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
@@ -1945,7 +1945,7 @@ public abstract class FileManager {
             }, AddType.ADD_SHARE);
         }   
         // its a store files
-        else if( _storeToFileDescMap.containsKey(oldName)) {
+        else if( _storeToFileDescMap.containsValue(toRemove)) {
             final FileDesc removed = removeStoreFile(oldName, false);
             assert removed == toRemove : "invariant broken.";
             if (_data.SPECIAL_STORE_FILES.remove(oldName)) 
