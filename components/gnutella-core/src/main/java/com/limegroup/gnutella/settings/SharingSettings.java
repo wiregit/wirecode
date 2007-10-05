@@ -294,18 +294,14 @@ public class SharingSettings extends LimeProps {
                 } catch (IllegalTemplateException e) {
                     GUIMediator.showError("Invalid Template", System.getProperty("line.separator") + e.getMessage());
                 }
-                if (outDir != null) {
+                if (outDir != null && new File(outDir.getCanonicalPath()).mkdirs()) {
                 	FileUtils.setWriteable(outDir);
-
-           			if(outDir.canRead() && outDir.canWrite()) 
-                    	f = outDir;
+                	f = outDir; 
                 }
             } catch (IOException e) { 
                 LOG.error("getSaveLWSDirectory", e);
             }
-            if (!f.exists()) 
-                f.mkdirs();
-            if( !f.isDirectory())
+            if( !f.isDirectory() || !f.canRead() || !f.canWrite())
                 f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
         }
         return f;

@@ -143,7 +143,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
             reportDiskProblem("could not set file writeable " + 
                     getSaveFile().getParentFile());
             throw new IOException("Disk Error");
-        }
+        } 
         // move file to new folder
         return new File(realOutputDir, saveFile.getName());
     }

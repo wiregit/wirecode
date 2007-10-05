@@ -1903,20 +1903,21 @@ public abstract class FileManager {
      */
     public synchronized void renameFileIfSharedOrStore(final File oldName, final File newName, final FileEventListener callback) {
         FileDesc toRemove = getFileDescForFile(oldName);
-        if (toRemove == null) {
+        if (toRemove == null ) {
             FileManagerEvent evt = new FileManagerEvent(this, Type.ADD_FAILED_FILE, oldName);
             dispatchFileEvent(evt);
             if(callback != null)
                 callback.handleFileEvent(evt);
             return;
         }
-        
+
         if(LOG.isDebugEnabled())
             LOG.debug("Attempting to rename: " + oldName + " to: "  + newName);
             
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
-        // if its a shared file
-        if( _fileToFileDescMap.containsValue(toRemove)) {
+        
+        // if its a shared file, store files all have the same index in their filedescriptor
+        if( toRemove.getIndex() != STORE_FILEDESC_INDEX ) { 
     		final FileDesc removed = removeFileIfShared(oldName, false);
             assert removed == toRemove : "invariant broken.";
     		if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
@@ -1924,7 +1925,7 @@ public abstract class FileManager {
     			
             // Prepopulate the cache with new URNs.
             fileManagerController.addUrns(newName, removed.getUrns());
-
+            
             addFileIfSharedOrStore( newName, xmlDocs, false, _revision, new FileEventListener(){
                 public void handleFileEvent(FileManagerEvent evt) {
                     if(LOG.isDebugEnabled())
@@ -1945,7 +1946,7 @@ public abstract class FileManager {
             }, AddType.ADD_SHARE);
         }   
         // its a store files
-        else if( _storeToFileDescMap.containsValue(toRemove)) {
+        else  {
             final FileDesc removed = removeStoreFile(oldName, false);
             assert removed == toRemove : "invariant broken.";
             if (_data.SPECIAL_STORE_FILES.remove(oldName)) 
