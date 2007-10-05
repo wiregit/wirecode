@@ -128,7 +128,6 @@ public class MP3MetaData extends AudioMetaData {
     /**
      * Generates ID3Data from id3v2 data in the file.
      */
-    @SuppressWarnings("null")
     private void parseID3v2Data(File file) {
         ID3v2 id3v2Parser = null;
         try {

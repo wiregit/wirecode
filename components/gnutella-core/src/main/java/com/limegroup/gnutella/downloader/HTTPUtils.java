@@ -13,6 +13,9 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+/**
+ *  Provides common utility methods that interact with the HTTPClient
+ */
 public class HTTPUtils {
     
     

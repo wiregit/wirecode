@@ -8,6 +8,9 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 
+/**
+ * A default implementation of {@link PurchasedStoreDownloaderFactory}   
+ */
 public class PurchasedStoreDownloaderFactoryImpl implements PurchasedStoreDownloaderFactory {
 
     private final Provider<SaveLocationManager> saveLocationManager;

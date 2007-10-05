@@ -7,20 +7,17 @@ import java.util.Set;
 
 import org.limewire.collection.NameValue;
 
-import com.google.inject.AbstractModule;
+
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerController;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
 
@@ -31,19 +28,12 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
 @Singleton
 public class SimpleFileManager extends FileManager {
     LimeXMLDocumentFactory factory;
-    protected Injector injector;
     
     @Inject
-    public SimpleFileManager(FileManagerController fileManagerController) {
+    public SimpleFileManager(FileManagerController fileManagerController, 
+            LimeXMLDocumentFactory factory) {
         super(fileManagerController);
-        
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
-            }
-        });
-        factory = injector.getInstance(LimeXMLDocumentFactory.class);
+        this.factory = factory;
     }
     
     public SimpleFileManager() {

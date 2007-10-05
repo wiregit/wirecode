@@ -548,7 +548,7 @@ public class IncompleteFileManager implements Serializable {
      * Associates the incompleteFile with the VerifyingFile vf.
      * Notifies FileManager about a new Incomplete File.
      */
-    public synchronized void addEntry(File incompleteFile, VerifyingFile vf,  boolean isStoreFile) {
+    public synchronized void addEntry(File incompleteFile, VerifyingFile vf, boolean isStore) {
         // We must canonicalize the file.
         try {
             incompleteFile = canonicalize(incompleteFile);
@@ -556,7 +556,8 @@ public class IncompleteFileManager implements Serializable {
 
         blocks.put(incompleteFile,vf);
         
-        registerIncompleteFile(incompleteFile, isStoreFile);
+        if( !isStore )
+            registerIncompleteFile(incompleteFile);
     }
     
     public synchronized void addTorrentEntry(URN urn) {
@@ -590,14 +591,14 @@ public class IncompleteFileManager implements Serializable {
     public synchronized void registerAllIncompleteFiles() {
         for(File file : blocks.keySet()) {
             if (file.exists() && !isOld(file)) 
-                registerIncompleteFile(file, false);
+                registerIncompleteFile(file);
         }
     }
     
     /**
      * Notifies file manager about a single incomplete file.
      */
-    private synchronized void registerIncompleteFile(File incompleteFile, boolean isStoreFile) {
+    private synchronized void registerIncompleteFile(File incompleteFile) {
         // Only register if it has a SHA1 -- otherwise we can't share.
         Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
@@ -607,8 +608,7 @@ public class IncompleteFileManager implements Serializable {
             completeHashes,
             getCompletedName(incompleteFile),
             getCompletedSize(incompleteFile),
-            getEntry(incompleteFile),
-            isStoreFile
+            getEntry(incompleteFile)
         );
     }
 

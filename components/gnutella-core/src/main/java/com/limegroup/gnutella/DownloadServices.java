@@ -53,7 +53,7 @@ public interface DownloadServices {
             throws SaveLocationException;
 
     /**
-     * Creates a downloader for songs purchased from the LimeWire Store
+     * Creates a downloader for songs purchased from the Lime Wire Store (LWS)
      * @param store - provides information of the file to download including a URN
      * @param overwrite - whether an existing file with the same name should be overwritten
      * @param saveDir - location to store the completed download to, this may be different than

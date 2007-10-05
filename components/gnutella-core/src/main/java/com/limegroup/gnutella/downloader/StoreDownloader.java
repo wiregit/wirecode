@@ -24,7 +24,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  *  Allows the rest of LimeWire to treat this as a regular download. Handles downloading
- *  an item purchased off of the LimeWire Store website
+ *  an item purchased off of the Lime Wire Store (LWS) website
  */
 public class StoreDownloader extends ManagedDownloader implements Serializable { 
     
@@ -175,14 +175,14 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * file is not shared
      */
     @Override
-    protected void addEntry(){
+    protected void addAndRegisterIncompleteFile(){
         incompleteFileManager.addEntry(incompleteFile, commonOutFile, true);
     }
     
     /** 
-     * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
-     * is provided, issues a HEAD request to get the file size.  If this fails,
-     * returns null.  Package-access and static for easy testing.
+     * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader. File size
+     * should always be passed in, if not this method will do a lookup using the URL
+     * to retrieve HEAD which will result in this method blocking
      */
     @SuppressWarnings("deprecation")
     public static RemoteFileDesc createRemoteFileDesc(URL url,

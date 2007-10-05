@@ -1101,14 +1101,14 @@ public class ManagedDownloader extends AbstractDownloader
 			commonOutFile = verifyingFileFactory.createVerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
 			//we must add an entry in IncompleteFileManager
-			addEntry();
+			addAndRegisterIncompleteFile();
 		}
 	}
     
     /**
      * Adds an incomplete file entry into the file manager
      */
-    protected void addEntry(){
+    protected void addAndRegisterIncompleteFile(){
         incompleteFileManager.addEntry(incompleteFile, commonOutFile, false);
     }
 

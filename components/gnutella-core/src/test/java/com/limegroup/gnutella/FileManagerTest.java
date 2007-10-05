@@ -185,54 +185,7 @@ public class FileManagerTest extends LimeTestCase {
             0, files.length);
     }
  
-    
-    /**
-     * Tests adding an incomplete store file
-     */
-    public void testAddIncompleteStoreFile() throws Exception {
-        VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
-        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-      
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
-        assertEquals("unexpected pending", 0, fman.getNumPendingFiles()); 
-        assertEquals("unexpected store files", 0, fman.getNumStoreFiles());
-      
-        store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
-        URN urn = getURN(store1);
-        // add one incomplete file and make sure the numbers go up.    
-        Set<URN> urnsStore = new UrnSet();
-        urnsStore.add(urn);
-
-        fman.addIncompleteFile( store1, urnsStore, "FileManager_unit_store_test", 0,
-                verifyingFileFactory.createVerifyingFile(0), true );
-
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
-        assertEquals("unexpected store files", 0, fman.getNumStoreFiles());
-          
-        
-        assertEquals("unexpected store files", 0, fman.getNumStoreFiles());
-        assertNull("unexpected shared file desc", fman.getFileDescForFile(store1));
-
-        
-        // it is important to check the query at all bounds,
-        // including tests for case.
-        // IMPORTANT: the store files should never show up in any of these
-        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
-        assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
-        assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
-        assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
-        assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery(
-            "FileManager UNIT tEsT", (byte)3));
-        assertEquals("Unexpected number of responses", 0, responses.length);    
-          
-    }   
-    
+       
     /**
      * Creates a store folder with both store files and non store files. Since it is the selected download
      * directory of LWS and is not shared, only the LWS store songs should be displayed and none of the files
@@ -862,7 +815,7 @@ public class FileManagerTest extends LimeTestCase {
         // add one incomplete file and make sure the numbers go up.
         Set<URN> urns = new UrnSet();
         urns.add( UrnHelper.URNS[0] );
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
@@ -870,7 +823,7 @@ public class FileManagerTest extends LimeTestCase {
             
         // add another incomplete file with the same hash and same
         // name and make sure it's not added.
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
@@ -879,7 +832,7 @@ public class FileManagerTest extends LimeTestCase {
         // add another incomplete file with another hash, it should be added.
         urns = new UrnSet();
         urns.add( UrnHelper.URNS[1] );
-        fman.addIncompleteFile(new File("c"), urns, "c", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("c"), urns, "c", 0, verifyingFileFactory.createVerifyingFile(0));
 
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
@@ -898,10 +851,10 @@ public class FileManagerTest extends LimeTestCase {
             
         Set<URN> urns = new UrnSet();
         urns.add( UrnHelper.URNS[0] );
-        fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
         urns = new UrnSet();
         urns.add( UrnHelper.URNS[1] );
-        fman.addIncompleteFile(new File("b"), urns, "b", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("b"), urns, "b", 0, verifyingFileFactory.createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
             
         fman.removeFileIfShared( new File("a") );
@@ -928,7 +881,7 @@ public class FileManagerTest extends LimeTestCase {
         Set<URN> urns = new UrnSet();
         URN urn = UrnHelper.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());            
             
         QueryRequest qr = queryRequestFactory.createQuery(urn, "sambe");
@@ -953,7 +906,7 @@ public class FileManagerTest extends LimeTestCase {
         Set<URN> urns = new UrnSet();
         URN urn = UrnHelper.URNS[0];
         urns.add( urn );
-        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("sambe"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
             
         // First test that we DO get this IFD.
@@ -975,7 +928,7 @@ public class FileManagerTest extends LimeTestCase {
         urns = fd.getUrns();
         
         // now add an ifd with those urns.
-        fman.addIncompleteFile(new File("sam"), urns, "b", 0, verifyingFileFactory.createVerifyingFile(0), false);
+        fman.addIncompleteFile(new File("sam"), urns, "b", 0, verifyingFileFactory.createVerifyingFile(0));
         
         FileDesc retFD = fman.getFileDescForUrn(urn);    
         assertNotNull(retFD);
@@ -1170,7 +1123,7 @@ public class FileManagerTest extends LimeTestCase {
         //now rename one of the files
         FileManagerEvent result = renameFile(f2, f4);
         assertTrue(result.toString(), result.isRenameEvent());
-        fman.renameFile(f2, f4);
+        fman.renameFileIfSharedOrStore(f2, f4);
         qrt = fman.getQRT();
         
         //check hit with new name
@@ -1861,7 +1814,7 @@ public class FileManagerTest extends LimeTestCase {
     protected FileManagerEvent renameFile(File f1, File f2) throws Exception {
         Listener fel = new Listener();
         synchronized(fel) {
-            fman.renameFile(f1, f2, fel);
+            fman.renameFileIfSharedOrStore(f1, f2, fel);
             fel.wait(5000);
         }
         return fel.evt;

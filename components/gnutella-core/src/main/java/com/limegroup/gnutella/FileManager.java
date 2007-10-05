@@ -363,6 +363,7 @@ public abstract class FileManager {
         
         private final Type success;
         private final Type failure;
+        
         AddType(Type success, Type failure) {
             this.success = success;
             this.failure = failure;
@@ -918,7 +919,7 @@ public abstract class FileManager {
         for(File file : list) {
             if(_revision != revision)
                 break;
-            addFile(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
+            addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
         }
         
         // Update the store directory and add only files from the LWS
@@ -937,7 +938,7 @@ public abstract class FileManager {
         for(File file: storeList) {
             if(_revision != revision)
                 break;
-            addFile(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_STORE);
+            addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_STORE);
         }
         
         _isUpdating = false;
@@ -1028,7 +1029,7 @@ public abstract class FileManager {
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFile(file_list[i], EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
+            addFileIfSharedOrStore(file_list[i], EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -1097,7 +1098,7 @@ public abstract class FileManager {
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFile(file_list[i], EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_STORE);
+            addFileIfSharedOrStore(file_list[i], EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_STORE);
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -1305,7 +1306,7 @@ public abstract class FileManager {
 		if (!isFileShareable(file))
 			_data.SPECIAL_FILES_TO_SHARE.add(file);
 			
-        addFile(file, list, true, _revision, callback, AddType.ADD_SHARE);
+        addFileIfSharedOrStore(file, list, true, _revision, callback, AddType.ADD_SHARE);
 	}
 	 
 	 /**
@@ -1326,28 +1327,28 @@ public abstract class FileManager {
          _data.FILES_NOT_TO_SHARE.remove(file);
          if (!isFileShareable(file))
              _transientSharedFiles.add(file);
-         addFile(file, EMPTY_DOCUMENTS, true, _revision, callback, AddType.ADD_SHARE);
+         addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, callback, AddType.ADD_SHARE);
      }
 	
     /**
      * Adds the given file if it's shared. 
      */
    public void addFileIfShared(File file) {
-       addFile(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
+       addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
    }
    
     /**
      * Adds the given file if it's shared, notifying the given callback. 
      */
     public void addFileIfShared(File file, FileEventListener callback) {
-        addFile(file, EMPTY_DOCUMENTS, true, _revision, callback, AddType.ADD_SHARE);
+        addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, callback, AddType.ADD_SHARE);
     }
     
     /**
      * Adds the file if it's shared, using the given list of metadata.
      */
     public void addFileIfShared(File file, List<? extends LimeXMLDocument> list) {
-        addFile(file, list, true, _revision, null, AddType.ADD_SHARE);
+        addFileIfSharedOrStore(file, list, true, _revision, null, AddType.ADD_SHARE);
     }
     
     /**
@@ -1355,13 +1356,13 @@ public abstract class FileManager {
      * informing the specified listener about the status of the sharing. 
      */
     public void addFileIfShared(File file, List<? extends LimeXMLDocument> list, FileEventListener callback) {
-        addFile(file, list, true, _revision, callback, AddType.ADD_SHARE);
+        addFileIfSharedOrStore(file, list, true, _revision, callback, AddType.ADD_SHARE);
     }
     
     
     /**
-     * Adds a file to the library view. Tries to create a FileDescriptor for the file and 
-     * add it to the view. Files are handled differently depending on their AddType. 
+     * Adds a file that is either associated with the store or is shared. Tries to create 
+     * a FileDescriptor for the file and ew. Files are handled differently depending on their AddType. 
      * 
      * 
      * @param file - the file to be added
@@ -1372,10 +1373,10 @@ public abstract class FileManager {
      * @param callback - the listener to notify about the event
      * @param addType - type of add that for this file
      */
-    protected void addFile(File file, List<? extends LimeXMLDocument> metadata, boolean notify,
+    protected void addFileIfSharedOrStore(File file, List<? extends LimeXMLDocument> metadata, boolean notify,
             int revision, FileEventListener callback, AddType addFileType) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Attempting to load store file: " + file);
+            LOG.debug("Attempting to load store or shared file: " + file);
         if(callback == null)
             callback = EMPTY_CALLBACK;
 
@@ -1386,7 +1387,24 @@ public abstract class FileManager {
             callback.handleFileEvent(new FileManagerEvent(this, addFileType.getFailureType(), file));
             return;
         }
+
+        // if file is not shareable, also remove it from special files
+        // to share since in that case it's not physically shareable then
+        if (!isFileShareable(file) && !isFileLocatedStoreDirectory(file)) { 
+            _individualSharedFiles.remove(file);
+            callback.handleFileEvent(new FileManagerEvent(FileManager.this, addFileType.getFailureType(), file));
+            return;
+        }
         
+        if( isStoreFile(file)){
+            return;
+        }
+    
+        if(isFileShared(file)) {
+            callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.ALREADY_SHARED_FILE, file));
+            return;
+        }
+
         synchronized(this) {
             if (revision != _revision) {
                 callback.handleFileEvent(new FileManagerEvent(this, addFileType.getFailureType(), file));
@@ -1424,7 +1442,7 @@ public abstract class FileManager {
                     // assume the fd is being shared
                     if(!urns.isEmpty()) {
                         int fileIndex = _files.size();
-                        fd = getFileDesc(file, urns, fileIndex);
+                        fd = createFileDesc(file, urns, fileIndex);
                     }
                 }
                 
@@ -1437,17 +1455,15 @@ public abstract class FileManager {
                     return;
                 }
 
-                synchronized(FileManager.this) { 
-                    // check LimeXML to determine if is a store file
-                    if( isStoreXML(fd.getXMLDocument())){ 
-                        addStoreFile(file, urns, addFileType, notify, callback);
-                    }
-                    // if a shared request
-                    else if( addFileType == AddType.ADD_SHARE ){ 
-                        addSharedFile(file, fd, urns, addFileType, notify, callback);
-                    }
+                // check LimeXML to determine if is a store file
+                if( isStoreXML(fd.getXMLDocument())){ 
+                    addStoreFile(file, urns, addFileType, notify, callback);
                 }
-                
+                // if a shared request
+                else if( addFileType == AddType.ADD_SHARE ){ 
+                     addSharedFile(file, fd, urns, addFileType, notify, callback);
+                }
+
                 boolean finished = false;
                 synchronized (this) {
                     if(_numPendingFiles == 0) {
@@ -1486,7 +1502,7 @@ public abstract class FileManager {
         if( addFileType == AddType.ADD_SHARE)
             _data.SPECIAL_STORE_FILES.add(file);
         
-        FileDesc fileDesc = getFileDesc(file, urns, STORE_FILEDESC_INDEX);
+        FileDesc fileDesc = createFileDesc(file, urns, STORE_FILEDESC_INDEX);
         
         loadFile(fileDesc, file, EMPTY_DOCUMENTS, urns);
     
@@ -1505,24 +1521,11 @@ public abstract class FileManager {
             final boolean notify, final FileEventListener callback) {
         if(LOG.isDebugEnabled())
             LOG.debug("Sharing file: " + file);
-        
-        // if file is not shareable, also remove it from special files
-        // to share since in that case it's not physically shareable then
-        if (!isFileShareable(file)) { 
-            _individualSharedFiles.remove(file);
-            callback.handleFileEvent(new FileManagerEvent(FileManager.this, addFileType.getFailureType(), file));
-            return;
-        }
-    
-        if(isFileShared(file)) {
-            callback.handleFileEvent(new FileManagerEvent(FileManager.this, Type.ALREADY_SHARED_FILE, file));
-            return;
-        }
-        
+               
         // since we created the FD to test the XML for being an instance of LWS, check to make sure
         //  the FD is still valid before continueing
         if( fileDesc.getIndex() != _files.size()) {
-            fileDesc = getFileDesc(file, urns, _files.size());
+            fileDesc = createFileDesc(file, urns, _files.size());
         }
         
 
@@ -1592,7 +1595,7 @@ public abstract class FileManager {
      * @param index - index to use
      * @return
      */
-    private FileDesc getFileDesc(File file, Set<? extends URN> urns, int index){
+    private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
         FileDesc fileDesc = new FileDesc(file, urns, index);
         ContentResponseData r = fileManagerController.getResponseDataFor(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
@@ -1758,15 +1761,12 @@ public abstract class FileManager {
      * @param name the completed name of this incomplete file
      * @param size the completed size of this incomplete file
      * @param vf the VerifyingFile containing the ranges for this inc. file
-     * @param isStoreFile set to true if this is a download from the LWS, false otherwise.
-     *      if true, fileDesc will not be added to the list of incomplete files
      */
     public synchronized void addIncompleteFile(File incompleteFile,
                                                Set<? extends URN> urns,
                                                String name,
                                                long size,
-                                               VerifyingFile vf,
-                                               boolean isStoreFile) {
+                                               VerifyingFile vf) {
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
         } catch(IOException ioe) {
@@ -1800,30 +1800,20 @@ public abstract class FileManager {
                     return;
             }
         }
+
+        // no indices were found for any URN associated with this
+        // IncompleteFileDesc... add it.
+        int fileIndex = _files.size();
+        _incompletesShared.add(fileIndex);
+        IncompleteFileDesc ifd = new IncompleteFileDesc(
+            incompleteFile, urns, fileIndex, name, size, vf);            
+        _numIncompleteFiles++;
         
-        // if its not a store download, add it to the incomplete index for sharing
-        if( !isStoreFile ) {
-            // no indices were found for any URN associated with this
-            // IncompleteFileDesc... add it.
-            int fileIndex = _files.size();
-            _incompletesShared.add(fileIndex);
-            IncompleteFileDesc ifd = new IncompleteFileDesc(
-                incompleteFile, urns, fileIndex, name, size, vf);            
-            _numIncompleteFiles++;
-            
-            _files.add(ifd);
-            _fileToFileDescMap.put(incompleteFile, ifd);
-            this.updateUrnIndex(ifd);
-            _needRebuild = true;
-            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
-        }
-        // else is a store download, don't share the incomplete file
-        else {
-            IncompleteFileDesc ifd = new IncompleteFileDesc(
-                    incompleteFile, urns, STORE_FILEDESC_INDEX, name, size, vf); 
-            
-            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_STORE_FILE, ifd));
-        }
+        _files.add(ifd);
+        _fileToFileDescMap.put(incompleteFile, ifd);
+        this.updateUrnIndex(ifd);
+        _needRebuild = true;
+        dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
     }
 
     /**
@@ -1899,8 +1889,8 @@ public abstract class FileManager {
     /**
      * Renames a from from 'oldName' to 'newName'.
      */
-    public void renameFile(File oldName, File newName) {
-        renameFile(oldName, newName, null);
+    public void renameFileIfSharedOrStore(File oldName, File newName) {
+        renameFileIfSharedOrStore(oldName, newName, null);
     }
 
     /** 
@@ -1911,7 +1901,7 @@ public abstract class FileManager {
      * This assumes that oldName has been deleted & newName exists now.
      * @modifies this 
      */
-    public synchronized void renameFile(final File oldName, final File newName, final FileEventListener callback) {
+    public synchronized void renameFileIfSharedOrStore(final File oldName, final File newName, final FileEventListener callback) {
         FileDesc toRemove = getFileDescForFile(oldName);
         if (toRemove == null) {
             FileManagerEvent evt = new FileManagerEvent(this, Type.ADD_FAILED_FILE, oldName);
@@ -1935,7 +1925,7 @@ public abstract class FileManager {
             // Prepopulate the cache with new URNs.
             fileManagerController.addUrns(newName, removed.getUrns());
 
-            addFile( newName, xmlDocs, false, _revision, new FileEventListener(){
+            addFileIfSharedOrStore( newName, xmlDocs, false, _revision, new FileEventListener(){
                 public void handleFileEvent(FileManagerEvent evt) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Add of newFile returned callback: " + evt);
@@ -1963,7 +1953,7 @@ public abstract class FileManager {
             // Prepopulate the cache with new URNs.
             fileManagerController.addUrns(newName, removed.getUrns());
     
-            addFile(newName, xmlDocs, false, _revision, new FileEventListener() {
+            addFileIfSharedOrStore(newName, xmlDocs, false, _revision, new FileEventListener() {
                 public void handleFileEvent(FileManagerEvent evt) {
                   FileManagerEvent newEvt = null; 
                   if(evt.isAddStoreEvent()) {
@@ -2188,7 +2178,7 @@ public abstract class FileManager {
      * one of these lists when appropriate
      */
     public boolean isStoreFile(File file) {
-        if(_data.SPECIAL_STORE_FILES.contains(file) || _storeToFileDescMap.containsKey(file) || 
+        if( _storeToFileDescMap.containsKey(file) || 
                 _storeDirectories.contains(file)) {
                 return true;
         }
@@ -2219,11 +2209,16 @@ public abstract class FileManager {
 		return false;
 	}
     
+    private boolean isFileLocatedStoreDirectory(File file) {
+        return ( _storeDirectories.contains(file.getParentFile()));
+    }
+    
     /**
      * Returns true if the XML doc contains information regarding the LWS
      */
-    private boolean isStoreXML(LimeXMLDocument doc) {
-       return doc != null && doc.getLicenseType().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
+    private boolean isStoreXML(LimeXMLDocument doc) { 
+       return doc != null && doc.getLicenseString() != null &&
+               doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
     }
     
     /**
