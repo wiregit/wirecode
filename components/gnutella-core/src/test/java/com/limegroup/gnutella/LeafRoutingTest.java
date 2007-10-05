@@ -18,6 +18,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -38,6 +39,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
@@ -50,7 +52,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 @SuppressWarnings("all")
 public class LeafRoutingTest extends LimeTestCase {
     private static final int SERVER_PORT = 6669;
-    private static final int TIMEOUT=500;
+    private static final int TIMEOUT=500000;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
     private static final byte[] oldIP=
@@ -112,7 +114,17 @@ public class LeafRoutingTest extends LimeTestCase {
         doSettings();
         assertEquals("unexpected port", SERVER_PORT, ConnectionSettings.PORT.getValue());
         
-        Injector injector = LimeTestUtils.createInjector();
+        final NetworkManagerStub networkManager = new NetworkManagerStub();
+        networkManager.setAddress(new byte[] { 127, 0, 0, 1 });
+        networkManager.setPort(5454);
+        networkManager.setAcceptedIncomingConnection(true);
+        networkManager.setSolicitedGUID(new GUID());
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManager);
+            }
+        });
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         connectionFactory = injector.getInstance(ConnectionFactory.class);
@@ -133,7 +145,9 @@ public class LeafRoutingTest extends LimeTestCase {
     @Override
     public void tearDown() throws Exception {
         shutdown();
-        lifecycleManager.shutdown();
+        if (lifecycleManager != null) {
+            lifecycleManager.shutdown();
+        }
     }
 
      ////////////////////////// Initialization ////////////////////////
