@@ -18,6 +18,7 @@ import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
+import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -139,10 +140,11 @@ public class BypassedResultsCacheTest extends BaseTestCase {
                 Provider<TorrentManager> torrentManager,
                 Provider<PushDownloadManager> pushDownloadManager,
                 BrowseHostHandlerManager browseHostHandlerManager,
-                GnutellaDownloaderFactory gnutellaDownloaderFactory) {
+                GnutellaDownloaderFactory gnutellaDownloaderFactory,
+                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
             super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory,
                     downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
-                    browseHostHandlerManager, gnutellaDownloaderFactory);
+                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
         }
 
 

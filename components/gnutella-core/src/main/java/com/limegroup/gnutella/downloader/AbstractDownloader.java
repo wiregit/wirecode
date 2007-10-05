@@ -39,6 +39,10 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 
 	protected static final String FILE_SIZE = "fileSize";
 
+    public enum DownloaderType {
+        BTDOWNLOADER, INNETWORK, MAGNET, MANAGED, STORE, TORRENTFETCHER, UNKNOWN
+    };
+    
     /** LOCKING: this */
 	protected volatile Map<String, Serializable> propertiesMap;
 
@@ -172,6 +176,11 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	// TODO: See: CORE-306
 	public abstract void initialize(DownloadReferences downloadReferences);
 
+	/**
+	 * Returns the type of download
+	 */
+    public abstract DownloaderType getDownloadType();
+    
 	/**
 	 * Sets the file name and directory where the download will be saved once
 	 * complete.

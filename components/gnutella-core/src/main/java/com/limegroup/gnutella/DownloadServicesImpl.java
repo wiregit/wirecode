@@ -47,6 +47,14 @@ public class DownloadServicesImpl implements DownloadServices {
     	return downloadManager.get().download(magnet, overwrite, null, magnet.getDisplayName());
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.gnutella.DownloadServices#download(com.limegroup.store.StoreDescriptor, boolean, java.io.File, java.lang.String)
+     */
+    public Downloader downloadFromStore(RemoteFileDesc rfd, boolean overwrite, File saveDir, String fileName) throws SaveLocationException {
+        return downloadManager.get().downloadFromStore(rfd, overwrite, saveDir, fileName);
+    }
+
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadServices#download(com.limegroup.gnutella.RemoteFileDesc[], boolean, com.limegroup.gnutella.GUID)
      */

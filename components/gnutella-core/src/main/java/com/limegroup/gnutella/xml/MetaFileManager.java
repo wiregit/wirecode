@@ -144,14 +144,13 @@ public class MetaFileManager extends FileManager {
         }
 
         final FileDesc removed = removeFileIfShared(f, false);
-        assert fd == removed : "wanted to remove: " + fd + "\ndid remove: "
-                + removed;
+        assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
 
         synchronized (this) {
             _needRebuild = true;
         }
 
-        addFileIfShared(f, xmlDocs, false, _revision, new FileEventListener() {
+        addFileIfSharedOrStore(f, xmlDocs, false, _revision, new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
                 // Retarget the event for the GUI.
                 FileManagerEvent newEvt = null;
@@ -159,23 +158,22 @@ public class MetaFileManager extends FileManager {
                 if (evt.isAddEvent()) {
                     FileDesc fd = evt.getFileDescs()[0];
                     fileManagerController.fileChanged(fd.getSHA1Urn(), cTime);
-                    newEvt = new FileManagerEvent(MetaFileManager.this,
-                            Type.CHANGE_FILE, removed, fd);
+                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.CHANGE_FILE, removed,
+                            fd);
                 } else {
-                    newEvt = new FileManagerEvent(MetaFileManager.this,
-                            Type.REMOVE_FILE, removed);
+                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.REMOVE_FILE, removed);
                 }
                 dispatchFileEvent(newEvt);
             }
-        });
+        }, AddType.ADD_SHARE);
     }
 
     /**
      * Finds the audio metadata document in allDocs, and makes it's id3 fields
      * identical with the fields of id3doc (which are only id3).
      */
-    private List<LimeXMLDocument> resolveWriteableDocs(
-            List<LimeXMLDocument> allDocs, LimeXMLDocument id3Doc) {
+    private List<LimeXMLDocument> resolveWriteableDocs(List<LimeXMLDocument> allDocs,
+            LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
         LimeXMLSchema audioSchema = fileManagerController.getSchema(LimeXMLNames.AUDIO_SCHEMA);
 
@@ -209,9 +207,7 @@ public class MetaFileManager extends FileManager {
             if (AudioMetaData.isNonLimeAudioField(nameVal.getName()))
                 id3List.add(nameVal);
         }
-
-        audioDoc = fileManagerController.createLimeXMLDocument(id3List,
-                LimeXMLNames.AUDIO_SCHEMA);
+        audioDoc = fileManagerController.createLimeXMLDocument(id3List, LimeXMLNames.AUDIO_SCHEMA);
         retList.add(audioDoc);
         return retList;
     }
@@ -252,7 +248,8 @@ public class MetaFileManager extends FileManager {
         // Load up new ReplyCollections.
         String[] schemas = fileManagerController.getAvailableSchemaURIs();
         for (int i = 0; i < schemas.length; i++) {
-            fileManagerController.add(schemas[i], fileManagerController.createLimeXMLReplyCollection(schemas[i]));
+            fileManagerController.add(schemas[i], fileManagerController
+                    .createLimeXMLReplyCollection(schemas[i]));
         }
 
         super.loadStarted(revision);
@@ -265,7 +262,8 @@ public class MetaFileManager extends FileManager {
         // save ourselves to disk every minute
         if (saver == null) {
             saver = new Saver();
-            fileManagerController.scheduleWithFixedDelay(saver, 60 * 1000, 60 * 1000, TimeUnit.MILLISECONDS);
+            fileManagerController.scheduleWithFixedDelay(saver, 60 * 1000, 60 * 1000,
+                    TimeUnit.MILLISECONDS);
         }
 
         Collection<LimeXMLReplyCollection> replies = fileManagerController.getCollections();
@@ -280,8 +278,8 @@ public class MetaFileManager extends FileManager {
     /**
      * Notification that a single FileDesc has its URNs.
      */
-    protected void loadFile(FileDesc fd, File file,
-            List<? extends LimeXMLDocument> metadata, Set<? extends URN> urns) {
+    protected void loadFile(FileDesc fd, File file, List<? extends LimeXMLDocument> metadata,
+            Set<? extends URN> urns) {
         super.loadFile(fd, file, metadata, urns);
         boolean added = false;
 
@@ -313,8 +311,7 @@ public class MetaFileManager extends FileManager {
      * Creates a new array, the size of which is less than or equal to
      * normals.length + metas.length.
      */
-    private Response[] union(Response[] normals, Response[] metas,
-            LimeXMLDocument requested) {
+    private Response[] union(Response[] normals, Response[] metas, LimeXMLDocument requested) {
         if (normals == null || normals.length == 0)
             return metas;
         if (metas == null || metas.length == 0)
@@ -400,8 +397,7 @@ public class MetaFileManager extends FileManager {
         if (replyCol == null)// no matching reply collection for schema
             return null;
 
-        List<LimeXMLDocument> matchingReplies = replyCol
-                .getMatchingReplies(queryDoc);
+        List<LimeXMLDocument> matchingReplies = replyCol.getMatchingReplies(queryDoc);
         // matchingReplies = a List of LimeXMLDocuments that match the query
         int s = matchingReplies.size();
         if (s == 0) // no matching replies.

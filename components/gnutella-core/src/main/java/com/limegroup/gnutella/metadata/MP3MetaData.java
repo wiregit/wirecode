@@ -43,7 +43,6 @@ public class MP3MetaData extends AudioMetaData {
         setLength((int)mp3Info.getLengthInSeconds());
         
         parseID3v1Data(file);
-        
     }
 
     /**
@@ -130,8 +129,6 @@ public class MP3MetaData extends AudioMetaData {
      * Generates ID3Data from id3v2 data in the file.
      */
     private void parseID3v2Data(File file) {
-        
-        
         ID3v2 id3v2Parser = null;
         try {
             id3v2Parser = new ID3v2(file);
@@ -169,8 +166,19 @@ public class MP3MetaData extends AudioMetaData {
                 }
             }
 
-            if(frameContent == null || frameContent.trim().equals(""))
+            // need to check is PRIV field here since frameContent may be null in ISO_LATIN format
+            //  but not in UTF-8 format
+            if( (frameContent == null || frameContent.trim().equals("")) ) {
+                // PRIV fields in LWS songs are encoded in UTF-8 format
+                if (MP3DataEditor.PRIV_ID.equals(frameID)) {
+                    try {
+                        String content = new String(contentBytes,"UTF-8");
+                        checkLWS(content);
+                    } catch (UnsupportedEncodingException e) {
+                    }
+                }
                 continue;
+            }
             //check which tag we are looking at
             if(MP3DataEditor.TITLE_ID.equals(frameID)) 
                 setTitle(frameContent);
@@ -178,8 +186,10 @@ public class MP3MetaData extends AudioMetaData {
                 setArtist(frameContent);
             else if(MP3DataEditor.ALBUM_ID.equals(frameID)) 
                 setAlbum(frameContent);
-            else if(MP3DataEditor.YEAR_ID.equals(frameID)) 
+            else if(MP3DataEditor.YEAR_ID.equals(frameID)) {
                 setYear(frameContent);
+                checkLWS(frameContent );
+            }
             else if(MP3DataEditor.COMMENT_ID.equals(frameID)) {
                 //ID3v2 comments field has null separators embedded to encode
                 //language etc, the real content begins after the last null
@@ -195,6 +205,7 @@ public class MP3MetaData extends AudioMetaData {
                 frameContent = 
                   new String(bytes, startIndex, bytes.length-startIndex).trim();
                 setComment(frameContent);
+                checkLWS(frameContent );
             }
             else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
                 try {
@@ -236,12 +247,28 @@ public class MP3MetaData extends AudioMetaData {
                     setGenre(frameContent);
             }
             else if (MP3DataEditor.LICENSE_ID.equals(frameID)) {
+                if( getLicenseType() == null || !getLicenseType().equals(MAGIC_KEY))
                 setLicense(frameContent);
+                checkLWS(frameContent );
+            }
+            // another key we don't care about except for searching for 
+            //  protected content
+            else {
+                checkLWS(frameContent );
             }
         }
-        
     }
 
+    /**
+     * If the song is not a LWS already, do a substring search to see if
+     * it is a LWS song
+     * @param content - ID3 tag to scan for a substring
+     */
+    private void checkLWS(String content) {
+        if( getLicenseType() == null || !getLicenseType().equals(MAGIC_KEY))
+            if( content.indexOf(MAGIC_KEY) != -1)
+                setLicenseType(MAGIC_KEY);
+    }
 
 	/**
 	 * Takes a short and returns the corresponding genre string

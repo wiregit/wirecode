@@ -48,6 +48,12 @@ public class LibraryData extends AbstractSettingsGroup {
     public final Set<File> FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
     
     /**
+     * Files in a shared folder that are not the location of the LWS downloads but 
+     * were purchased from the LWS
+     */
+    public final Set<File> SPECIAL_STORE_FILES = DATA.getSet("SPECIAL_STORE_FILES");
+    
+    /**
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
     public LibraryData() {
@@ -94,6 +100,7 @@ public class LibraryData extends AbstractSettingsGroup {
 		clean(FILES_NOT_TO_SHARE, parents);
 		clean(SENSITIVE_DIRECTORIES_VALIDATED, parents);
 		clean(SENSITIVE_DIRECTORIES_NOT_TO_SHARE, parents);
+        clean(SPECIAL_STORE_FILES, parents);
 	}
 	
 	/**

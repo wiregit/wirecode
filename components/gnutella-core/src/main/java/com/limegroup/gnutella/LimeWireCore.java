@@ -49,6 +49,7 @@ import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
+import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
@@ -694,6 +695,10 @@ public class LimeWireCore {
 
     public GnutellaDownloaderFactory getGnutellaDownloaderFactory() {
         return injector.getInstance(GnutellaDownloaderFactory.class);
+    }
+
+    public PurchasedStoreDownloaderFactory getPurchasedDownloaderFactory() {
+        return injector.getInstance(PurchasedStoreDownloaderFactory.class);
     }
 
     public BTUploaderFactory getBTUploaderFactory() {

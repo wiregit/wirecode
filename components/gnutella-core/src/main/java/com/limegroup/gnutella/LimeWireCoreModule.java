@@ -105,6 +105,8 @@ import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.InNetworkCallback;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
+import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
@@ -280,6 +282,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(InstantMessengerFactory.class).to(InstantMessengerFactoryImpl.class);
         bind(SaveLocationManager.class).to(DownloadManager.class);
         bind(GnutellaDownloaderFactory.class).to(GnutellaDownloaderFactoryImpl.class);
+        bind(PurchasedStoreDownloaderFactory.class).to(PurchasedStoreDownloaderFactoryImpl.class);
         bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
         bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
         bind(IpPortContentAuthorityFactory.class).to(IpPortContentAuthorityFactoryImpl.class);

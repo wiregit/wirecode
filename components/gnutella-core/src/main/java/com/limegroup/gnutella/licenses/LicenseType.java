@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.WRMXML;
 import com.limegroup.gnutella.metadata.WeedInfo;
 
@@ -19,7 +20,8 @@ public enum LicenseType {
     FDL ("http://www.gnu.org/copyleft/fdl.html"), 
     ARTISTIC ("http://www.opensource.org/licenses/artistic-license.php"), 
     PUBLIC_DOMAIN ("http://www.public-domain.org"), 
-    SHAREWARE ("http://en.wikipedia.org/wiki/Shareware");
+    SHAREWARE ("http://en.wikipedia.org/wiki/Shareware"),
+    LIMEWIRE_STORE_PURCHASE("LIMEWIRE_STORE_PURCHASE");
     
     private final String keyword;
     private final List<String> indivList;
@@ -32,7 +34,7 @@ public enum LicenseType {
     }
     
     public boolean isDRMLicense() {
-        return this == WEED_LICENSE || this == DRM_LICENSE;
+        return this == WEED_LICENSE || this == DRM_LICENSE || this == LIMEWIRE_STORE_PURCHASE;
     }
     
     public List<String> getIndivisibleKeywords() {
@@ -49,6 +51,8 @@ public enum LicenseType {
             return WEED_LICENSE;
         if (hasDRMLicense(type))
             return DRM_LICENSE;
+        if (hasLWSLicense(type))
+            return LIMEWIRE_STORE_PURCHASE;
         
         // the other licenses do not have any special requirements 
         // for the license or type field (yet)
@@ -77,5 +81,10 @@ public enum LicenseType {
     private static boolean hasDRMLicense(String type) {
         return type != null &&
                type.startsWith(WRMXML.PROTECTED);
+    }
+    
+    private static boolean hasLWSLicense(String type) {
+        return type != null &&
+               type.startsWith(AudioMetaData.MAGIC_KEY);
     }
 }

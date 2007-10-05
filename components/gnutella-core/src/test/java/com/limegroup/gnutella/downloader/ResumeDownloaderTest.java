@@ -87,7 +87,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         incompleteFile = ifm.getFile(rfd);
         VerifyingFile vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(size);
         vf.addInterval(Range.createRange(0, amountDownloaded - 1)); // inclusive
-        ifm.addEntry(incompleteFile, vf);
+        ifm.addEntry(incompleteFile, vf, false);
         // make sure that we don't wait for network on re-query
         RequeryManager.NO_DELAY = true;
 

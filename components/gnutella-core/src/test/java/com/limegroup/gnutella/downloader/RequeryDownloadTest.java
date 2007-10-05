@@ -215,7 +215,7 @@ public class RequeryDownloadTest extends LimeTestCase {
        VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
        VerifyingFile vf= verifyingFileFactory.createVerifyingFile(TestFile.length());
        vf.addInterval(Range.createRange(0, 1));  //inclusive
-       ifm.addEntry(incompleteFile, vf);       
+       ifm.addEntry(incompleteFile, vf, false);       
        return ifm;
     }
        

@@ -597,6 +597,9 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         licenseType = LicenseType.determineLicenseType(license, type);
         if (licenseType == LicenseType.CC_LICENSE)
             fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
+        if( licenseType == LicenseType.LIMEWIRE_STORE_PURCHASE )
+            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, 
+            LicenseType.LIMEWIRE_STORE_PURCHASE.toString());
 
         if(LOG.isDebugEnabled())
             LOG.debug("Fields after setting: " + fieldToValue);

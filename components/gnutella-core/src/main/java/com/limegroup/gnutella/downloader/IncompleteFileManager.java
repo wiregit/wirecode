@@ -549,7 +549,7 @@ public class IncompleteFileManager implements Serializable {
      * Associates the incompleteFile with the VerifyingFile vf.
      * Notifies FileManager about a new Incomplete File.
      */
-    public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
+    public synchronized void addEntry(File incompleteFile, VerifyingFile vf, boolean isStore) {
         // We must canonicalize the file.
         try {
             incompleteFile = canonicalize(incompleteFile);
@@ -557,7 +557,8 @@ public class IncompleteFileManager implements Serializable {
 
         blocks.put(incompleteFile,vf);
         
-        registerIncompleteFile(incompleteFile);
+        if( !isStore )
+        	registerIncompleteFile(incompleteFile);
     }
     
     public synchronized void addTorrentEntry(URN urn) {

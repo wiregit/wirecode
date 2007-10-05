@@ -41,6 +41,7 @@ public abstract class AudioMetaData extends MetaData {
     
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
+    public static final String MAGIC_KEY = "NOT CLEARED";
     
     protected AudioMetaData() {}
 

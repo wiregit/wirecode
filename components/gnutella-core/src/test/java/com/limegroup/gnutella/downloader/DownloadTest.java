@@ -1933,7 +1933,7 @@ public class DownloadTest extends LimeTestCase {
         File incFile = ifm.getFile(rfd1);
         incFile.createNewFile();
         // add the entry, so it's added to FileManager.
-        ifm.addEntry(incFile, verifyingFileFactory.createVerifyingFile(TestFile.length()));
+        ifm.addEntry(incFile, verifyingFileFactory.createVerifyingFile(TestFile.length()), false);
         
         // Get the IncompleteFileDesc and add these alt locs to it.
         FileDesc fd =
