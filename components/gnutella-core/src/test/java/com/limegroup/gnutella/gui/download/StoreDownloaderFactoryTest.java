@@ -8,7 +8,6 @@ import junit.framework.Test;
 
 import org.limewire.util.FileUtils;
 
-import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
@@ -34,8 +33,7 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
 
     protected void setUp() {
         //must create the injector since RemoteFileDesc relies on PushEndpointFactory injection
-        @SuppressWarnings("unused")
-        Injector injector = LimeTestUtils.createInjector();
+        LimeTestUtils.createInjector();
     }
 
     public void testInvalidStoreDownloaderFactoryArgs(){
