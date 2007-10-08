@@ -8,24 +8,18 @@ import junit.framework.Test;
 
 import org.limewire.util.FileUtils;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.PushEndpointFactoryImpl;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.gui.download.StoreDownloaderFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
 public class StoreDownloaderFactoryTest extends LimeTestCase{
 
-    Injector injector;
-    
     public StoreDownloaderFactoryTest(String name) {
         super(name);
     }
@@ -33,17 +27,17 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
     public static Test suite() {
         return buildTestSuite(StoreDownloaderFactoryTest.class);
     }
-    
-    public void setup(){ 
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(PushEndpointFactory.class).to(PushEndpointFactoryImpl.class);
-            }
-        });
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
     }
 
-    
+    protected void setUp() {
+        //must create the injector since RemoteFileDesc relies on PushEndpointFactory injection
+        @SuppressWarnings("unused")
+        Injector injector = LimeTestUtils.createInjector();
+    }
+
     public void testInvalidStoreDownloaderFactoryArgs(){
         try {
             new StoreDownloaderFactory(null, null);
@@ -53,12 +47,10 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
     
     public void testStoreDownloaderFactorySetup() throws Exception{
         
-//        File file = CommonUtils.getResourceFile("build.xml");
         File file = createNewNamedTestFile(5, "test", _baseDir);
         file.deleteOnExit();
 
         URN urn = URN.createSHA1Urn(file);
-        System.out.println("file " + file);
 
         String fileName = "fileName.txt";
         long size = 100;
