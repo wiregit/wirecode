@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -25,6 +26,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.security.SecureMessageVerifier;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -32,36 +34,52 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.filters.SpamFilterFactory;
+import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
+import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionFactory;
 import com.limegroup.gnutella.util.TestConnectionManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
 // TODO write test for storing bypassed results
@@ -544,6 +562,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         Injector injector = createInjectorAndInitialize();
         StaticMessages staticMessages = injector.getInstance(StaticMessages.class);
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        ManagedConnectionStubFactory managedConnectionStubFactory = injector.getInstance(ManagedConnectionStubFactory.class);
         
         
         staticMessages.initialize();
@@ -553,16 +572,11 @@ public final class MessageRouterImplTest extends LimeTestCase {
         QueryRequest qr = queryRequestFactory.createQuery("limewire pro");
         assertTrue(qr.isQueryForLW());
         
-        final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
-        ManagedConnection mc = new ManagedConnectionStub() {
-            public void handleQueryReply(QueryReply reply, ReplyHandler rh) {
-                replyRef.set(reply);
-            }
-        };
+        ManagedConnectionStub mc = managedConnectionStubFactory.createConnectionStub();
         
         messageRouterImpl.handleMessage(qr, mc);
         
-        QueryReply sent = replyRef.get();
+        QueryReply sent = mc.replyRef.get();
         // sig & xml payload should be enough
         assertEquals(limeReply.getSecureSignature(),sent.getSecureSignature());
         assertEquals(limeReply.getXMLBytes(), sent.getXMLBytes());
@@ -954,6 +968,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         
         Injector injector = createInjectorAndInitialize();
         HeadPongFactory headPongFactory = injector.getInstance(HeadPongFactory.class);
+        ManagedConnectionStubFactory managedConnectionStubFactory = injector.getInstance(ManagedConnectionStubFactory.class);
         
     	HeadListener pinger = new HeadListener();
     	
@@ -966,7 +981,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	headRt.routeReply(ping.getGUID(),pinger);
     	HeadPong pong = headPongFactory.create(ping);
     	
-    	messageRouterImpl.handleMessage(pong, new ManagedConnectionStub());
+    	messageRouterImpl.handleMessage(pong, managedConnectionStubFactory.createConnectionStub());
     	
     	//the pinger should have gotten the identical object
     	assertNotNull(pinger._lastSent);
@@ -1046,7 +1061,142 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	}
     }
     
-    // DPINJ - testfix
+    @Singleton
+    private static class ManagedConnectionStubFactory {
+
+        private final Provider<ConnectionManager> connectionManager;
+
+        private final NetworkManager networkManager;
+
+        private final QueryRequestFactory queryRequestFactory;
+
+        private final HeadersFactory headersFactory;
+
+        private final HandshakeResponderFactory handshakeResponderFactory;
+
+        private final QueryReplyFactory queryReplyFactory;
+
+        private final Provider<MessageDispatcher> messageDispatcher;
+
+        private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
+
+        private final Provider<SearchResultHandler> searchResultHandler;
+
+        private final CapabilitiesVMFactory capabilitiesVMFactory;
+
+        private final Provider<SocketsManager> socketsManager;
+
+        private final Provider<Acceptor> acceptor;
+
+        private final MessagesSupportedVendorMessage supportedVendorMessage;
+
+        private final Provider<SimppManager> simppManager;
+
+        private final Provider<UpdateHandler> updateHandler;
+
+        private final Provider<ConnectionServices> connectionServices;
+
+        private final GuidMapManager guidMapManager;
+
+        private final SpamFilterFactory spamFilterFactory;
+
+        private final MessageFactory messageFactory;
+
+        private final MessageReaderFactory messageReaderFactory;
+
+        private final ApplicationServices applicationServices;
+        
+        private final Provider<SecureMessageVerifier> secureMessageVerifier;
+
+        @Inject
+        public ManagedConnectionStubFactory(Provider<ConnectionManager> connectionManager,
+                NetworkManager networkManager, QueryRequestFactory queryRequestFactory,
+                HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,
+                QueryReplyFactory queryReplyFactory, Provider<MessageDispatcher> messageDispatcher,
+                Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
+                Provider<SearchResultHandler> searchResultHandler,
+                CapabilitiesVMFactory capabilitiesVMFactory, Provider<SocketsManager> socketsManager,
+                Provider<Acceptor> acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
+                Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+                Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
+                SpamFilterFactory spamFilterFactory, MessageFactory messageFactory,
+                MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices,
+                Provider<SecureMessageVerifier> secureMessageVerifier) {
+            this.connectionManager = connectionManager;
+            this.networkManager = networkManager;
+            this.queryRequestFactory = queryRequestFactory;
+            this.headersFactory = headersFactory;
+            this.handshakeResponderFactory = handshakeResponderFactory;
+            this.queryReplyFactory = queryReplyFactory;
+            this.messageDispatcher = messageDispatcher;
+            this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+            this.applicationServices = applicationServices;
+            this.searchResultHandler = searchResultHandler;
+            this.capabilitiesVMFactory = capabilitiesVMFactory;
+            this.socketsManager = socketsManager;
+            this.acceptor = acceptor;
+            this.supportedVendorMessage = supportedVendorMessage;
+            this.simppManager = simppManager;
+            this.updateHandler = updateHandler;
+            this.connectionServices = connectionServices;
+            this.guidMapManager = guidMapManager;
+            this.spamFilterFactory = spamFilterFactory;
+            this.messageFactory = messageFactory;
+            this.messageReaderFactory = messageReaderFactory;
+            this.secureMessageVerifier = secureMessageVerifier;
+        }
+
+        
+        public ManagedConnectionStub createConnectionStub() {
+            return new ManagedConnectionStub("1.2.3.4", 6346, ConnectType.PLAIN, connectionManager.get(), networkManager,
+                    queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
+                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
+                            .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
+                    supportedVendorMessage, simppManager, updateHandler, connectionServices,
+                    guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
+                    applicationServices, secureMessageVerifier.get());
+        }
+        
+    }
+    
+    private static class ManagedConnectionStub extends ManagedConnection {
+        
+        final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
+
+        public ManagedConnectionStub(String host, int port, ConnectType type,
+                ConnectionManager connectionManager, NetworkManager networkManager,
+                QueryRequestFactory queryRequestFactory, HeadersFactory headersFactory,
+                HandshakeResponderFactory handshakeResponderFactory,
+                QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
+                NetworkUpdateSanityChecker networkUpdateSanityChecker,
+                SearchResultHandler searchResultHandler,
+                CapabilitiesVMFactory capabilitiesVMFactory, SocketsManager socketsManager,
+                Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
+                Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
+                Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
+                SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
+                MessageFactory messageFactory, ApplicationServices applicationServices,
+                SecureMessageVerifier secureMessageVerifier) {
+            super(host, port, type, connectionManager, networkManager, queryRequestFactory, headersFactory,
+                    handshakeResponderFactory, queryReplyFactory, messageDispatcher,
+                    networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager,
+                    acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices,
+                    guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
+                    applicationServices, secureMessageVerifier);
+            
+        }
+        
+        @Override
+        public void initialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
+        }
+        
+        @Override
+        public void handleQueryReply(QueryReply queryReply, ReplyHandler receivingConnection) {
+            replyRef.set(queryReply);
+        }
+        
+    }
+    
     private static class TestDHTManager implements DHTManager {
 
         public List<IpPort> getActiveDHTNodes(int maxNodes){
