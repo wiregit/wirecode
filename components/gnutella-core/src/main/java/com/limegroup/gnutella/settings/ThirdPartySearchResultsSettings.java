@@ -7,12 +7,12 @@ import org.limewire.setting.evt.SettingListener;
 import com.limegroup.gnutella.gui.search.SearchMediator;
 
 /**
- * Settings for the store song search results. This is used by
+ * Settings for The Lime Wire Store&#8482; song search results. This is used by
  * {@link RemoteStringBasicSpecialResultsDatabaseImpl} to store the search
  * index.
  */
-public final class StoreSongSearchResultsSettings extends LimeProps {
-    private StoreSongSearchResultsSettings() {}
+public final class ThirdPartySearchResultsSettings extends LimeProps {
+    private ThirdPartySearchResultsSettings() {}
 
     /**
      * The total time this user has been connected to the network (in seconds).
@@ -23,7 +23,7 @@ public final class StoreSongSearchResultsSettings extends LimeProps {
     /**
      * Right now we will just populate it with dummy data.
      * 
-     * @return correctly formatted data that will work with the current {@link StoreSongResultsDatabase}
+     * @return correctly formatted data that will work with the current {@link ThirdPartyResultsDatabase}
      */
     private static String readTemporary() {
         final StringBuffer sb = new StringBuffer();

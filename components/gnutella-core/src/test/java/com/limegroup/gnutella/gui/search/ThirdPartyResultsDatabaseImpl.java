@@ -8,9 +8,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A default implementation of {@link StoreSongResultsDatabase} for testing.
+ * A default implementation of {@link ThirdPartyResultsDatabase} for testing.
  */
-final class StoreSongResultsDatabaseImpl extends SimpleSpecialResultsDatabaseImpl {
+final class ThirdPartyResultsDatabaseImpl extends SimpleSpecialResultsDatabaseImpl {
        
     private final static Map<String,List<Map<String,String>>> keywords2limeXMLs 
     = new HashMap<String,List<Map<String,String>>>();
