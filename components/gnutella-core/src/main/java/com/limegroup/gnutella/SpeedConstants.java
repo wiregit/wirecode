@@ -16,10 +16,11 @@ public final class SpeedConstants {
 	 * INTS ASSOCIATED WITH CONNECTION SPEED NAMES.  See 
 	 * SettingsManager.setKeepAlive and setMaxConn before changing.
 	 */
-    public static final int MODEM_SPEED_INT = 56;
-    public static final int CABLE_SPEED_INT = 350;
-    public static final int T1_SPEED_INT    = 1000;
-    public static final int T3_SPEED_INT    = 3000;
+    public static final int MODEM_SPEED_INT         = 56;
+    public static final int CABLE_SPEED_INT         = 350;
+    public static final int T1_SPEED_INT            = 1000;
+    public static final int T3_SPEED_INT            = 3000;
+    public static final int THIRD_PARTY_SPEED_INT   = Integer.MAX_VALUE - 2;
     
     public static final int MIN_SPEED_INT	= 0;
     public static final int MAX_SPEED_INT	= 20000;
