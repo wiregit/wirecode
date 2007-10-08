@@ -3,7 +3,7 @@ package org.limewire.rudp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 /** 
- *  Calculate and control the timing of data writing.
+ *  Calculates and controls the timing for data writing.
  */
 public class WriteRegulator {
 
@@ -68,7 +68,7 @@ public class WriteRegulator {
     public void hitZeroWindow() {
         _zeroCount++;
         if ( (!_limitHit || _limitCount >= 10) && _zeroCount > 4) { 
-            // Doing nothing for now since this is irrelevent to the skipping
+            // Doing nothing for now since this is irrelevant to the skipping
             //
 
             //_limitHit = true;
@@ -87,7 +87,7 @@ public class WriteRegulator {
     public long getSleepTime(long currTime, int receiverWindowSpace) {
 
         //------------- Sleep ------------------------
-
+        //rtt = Round Trip Time
         // Sleep a fraction of rtt for specified window increment
         int  usedSpots   = _sendWindow.getUsedSpots(); 
         int  windowSize  = _sendWindow.getWindowSize(); 
@@ -196,7 +196,7 @@ public class WriteRegulator {
 
 
             // If we are starting to affect the RTT, 
-            // then ratchet down the accelorator
+            // then ratchet down the accelerator
             /*
             if ( realRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
                 _limitHit = true;

@@ -24,12 +24,12 @@ import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.service.ErrorService;
 
 /**
- * A default implementation of UDPService.
- * This implementation is very basic and will not work in the real world.
+ * Provides a default implementation of <code>UDPService</code>.
+ * This implementation is basic and will not work in the real world.
  * You must provide an implementation that implements these methods correctly.
- * 
- * Messages are created using the DefaultMessageFactory 
- * and handed off to the UDPMultiplexor.
+ * <p>
+ * Messages are created using the <code>DefaultMessageFactory</code> 
+ * and handed off to the <code>UDPMultiplexor</code>.
  */
 public class DefaultUDPService implements UDPService, ReadWriteObserver {
     

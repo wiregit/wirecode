@@ -7,16 +7,23 @@ import org.limewire.rudp.messages.DataMessage;
 
 
 /**
- *  This class defines a DataWindow for sending or receiving data 
- *  using UDP with possible out of order data.  Within a certain window 
- *  size, this data will be accepted.  Data that has not been acknowledged,
- *  will remain.  For readers, the data can be passed on once any holes are 
- *  received. For the writer, if the round trip time for acks of the older data 
- *  is greatly exceeded, the data can be resent to try and receive an ack.
- *
- *  All methods in this class rely on external synchronization of access.
- * 
- *  TODO: DataMessage timing still requires work.
+ * Defines a variable sized block of packets to send or receive using UDP. 
+ * The block has a possibility to be out of order data. Data is accepted 
+ * within a certain window size.
+ * <p>
+ * Acknowledged data is released, whereas un-acknowledge data is maintained in
+ * the <code>DataWindow</code>
+ * <p>
+ * For readers, the data can be forwarded once missing data (aka holes) within the 
+ * window is received. 
+ * <p>
+ * For the writer, if the round trip time (RTT) for ACK messages of the older 
+ * data is greatly exceeded ({@link #getRTTVar()}), the data can be resent to 
+ * try to receive an ACK message.
+ *<p>
+ * All methods in this class rely on external synchronization of access.
+ */ 
+ /*  TODO: DataMessage timing still requires work.
  */
 public class DataWindow
 {
@@ -95,7 +102,7 @@ public class DataWindow
 
     /** 
      *  Get the start of the data window. The start will generally be the
-     *  sequence number of the lowest unacked message.
+     *  sequence number of the lowest un-ACK'ed message.
      */
     public long getWindowStart() {
         return windowStart;
@@ -109,7 +116,7 @@ public class DataWindow
 	}
 
     /** 
-     *  Get the number of slots in use.  This excludes read data.
+     *  Get the number of slots in use. This excludes read data.
      */
     public int getUsedSpots() {
         DataRecord d;
@@ -155,7 +162,7 @@ public class DataWindow
 
     /** 
      *  Clear out the acknowledged blocks at the beginning and advance the 
-     *  window forward.  Return the number of acked blocks.
+     *  window forward. Return the number of un-ACK'ed blocks.
      */
 	public int clearLowAckedBlocks(ChunkReleaser releaser) {
         DataRecord d;
@@ -189,10 +196,10 @@ public class DataWindow
     }
 
     /** 
-     *  Count the number of acks from higher number blocks.
+     *  Count the number of ACKs from higher number blocks.
      *  This should give you a hint that a block went missing.
-     *  Note that this assumes that the low block isn't acked since
-     *  it would get cleared if it was acked.
+     *  Note that this assumes that the low block isn't ACK'ed since
+     *  it would get cleared if it was ACK'ed.
      */
     public int countHigherAckBlocks() {
         DataRecord d;
@@ -207,9 +214,11 @@ public class DataWindow
     }
 
     /** 
-     *  If the sent data has not been acked for some multiple of 
-     *  the RTO, it looks like a message was lost.
+     *  If the sent data has not been ACK'ed for some multiple of 
+     *  the RTO it looks like a message was lost.
      */
+    //For more information on Computing TCP's Retransmission Timer, see
+    //http://www.ietf.org/rfc/rfc2988.txt
     public boolean acksAppearToBeMissing(long time, int multiple) {
 		int irto = (int)rto;
 		// Check for first record being old
@@ -225,21 +234,28 @@ public class DataWindow
     }
 
     /** 
-     *  Return the RTO based on window data and acks.
+     *  Return the RTO based on window data and ACKs.
+     *  <p>
+     *  The RTO is the duration of the retransmission timer which ensures data
+     *  delivery in the absence of any feedback from the remote data receiver.
      */
     public int getRTO() {
         return (int)rto;
     }
 
     /** 
-     *  Return the rttvar which is a measure of the range of rtt values
+     *  Return the Round-Trip Time Variation (RTTVar) which is a measure of the
+     *  range of Round-Trip Time (RTT) values.
      */
     public float getRTTVar() {
         return rttvar;
     }
 
     /** 
-     *  Return the srtt estimate
+     *  Returns the SRRT estimate. The "smoothed" round-trip time estimate 
+     *  is an attempt to predict future round-trip times by sampling 
+     *  the behavior of packets sent over a connection and averaging those 
+     *  samples.
      */
     public float getSRTT() {
         return srtt;
@@ -255,7 +271,7 @@ public class DataWindow
 
 
     /** 
-     *  Record that a block was acked and calculate the 
+     *  Record that a block was ACK'ed and calculate the 
      *  round trip time and averages from it.
      */
 	public void ackBlock(long pnum) {
@@ -322,7 +338,7 @@ public class DataWindow
 	}
 
     /** 
-     *  Record an ack if not yet present for blocks up to the receiving 
+     *  Record an ACK if not yet present for blocks up to the receiving 
 	 *  windowStart sent from the receiving connection.
      */
 	public void pseudoAckToReceiverWindow(long wStart) {
@@ -344,7 +360,7 @@ public class DataWindow
 	}
 
     /** 
-     *  Get the oldest unacked block.
+     *  Get the oldest un-ACK'ed block.
      */
     public DataRecord getOldestUnackedBlock() {
         DataRecord d;
@@ -364,8 +380,8 @@ public class DataWindow
     }
     
     /**
-     * Checks if we have atleast one block that can be read (in order).
-     * Specifically, this will return false if there is atleast one null or
+     * Checks if we have at least one block that can be read (in order).
+     * Specifically, this will return false if there is at least one null or
      * already-read block nearer to the windowStart than the first non-null non-read
      * block.
      */
@@ -374,7 +390,7 @@ public class DataWindow
     }
 
     /** 
-     *  Get a readable block.  This will return the first unread block starting from
+     *  Get a readable block. This will return the first unread block starting from
      *  windowStart.  
      */
     public DataRecord getReadableBlock() {
@@ -443,7 +459,7 @@ public class DataWindow
 	}
 
     /** 
-     *  Find the record that has been acked the most.
+     *  Find the record that has been ACK'ed the most.
      */
 //	public DataRecord findMostAcked() {
 //        DataRecord d;
@@ -480,7 +496,7 @@ public class DataWindow
 	}
 
     /** 
-     *  Find the number of unacked records
+     *  Find the number of un-ACK'ed records
      */
 //	public int numNotAcked() {
 //        DataRecord d;
@@ -501,9 +517,9 @@ public class DataWindow
 	
 /**
  *  Record information about data messages either getting written to the 
- *  network or  getting read from the network.  In the first case, the 
- *  acks is important.  In the second case, the read state is important.  
- *  For writing, the  sentTime and the ackTime form the basis for the 
+ *  network or getting read from the network. In the first case, the 
+ *  ACKs is important. In the second case, the read state is important.  
+ *  For writing, the sentTime and the ackTime form the basis for the 
  *  round trip time and a calculation for timeout resends.
  */
 class DataRecord {

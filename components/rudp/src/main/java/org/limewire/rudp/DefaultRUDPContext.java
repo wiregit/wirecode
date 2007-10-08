@@ -5,7 +5,7 @@ import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 
 /**
- * Contains all factories for a given RUDPContext.
+ * Implements the <code>RUDPContext</code> interface.
  */
 public class DefaultRUDPContext implements RUDPContext {
     

@@ -2,6 +2,10 @@ package org.limewire.rudp.messages;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Defines an interface for a data message. The data message is used to 
+ * communicate data on the connection.
+ */
 public interface DataMessage extends RUDPMessage {
 
     /** The maximum amount of data a message can hold. */

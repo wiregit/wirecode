@@ -22,8 +22,8 @@ import org.limewire.rudp.messages.SynMessage;
 
 
 /** 
- *  Manage the assignment of connectionIDs and the routing of 
- *  UDPConnectionMessages. 
+ *  Manages the assignment of connection IDs and the routing of 
+ *  {@link RUDPMessage RUDPMessages}. 
  */
 public class UDPMultiplexor extends AbstractSelector {
 
@@ -77,9 +77,9 @@ public class UDPMultiplexor extends AbstractSelector {
     }
 
     /**
-     *  Route a message to the UDPConnectionProcessor identified in the messages
-	 *  connectionID;
-	 *  Notifies the provided listener (if any) if the channel is ready to produce events
+     *  Route a message to the {@link UDPConnectionProcessor} identified via the message's
+	 *  connection ID.
+	 *  Notifies the provided listener (if any) if the channel is ready to produce events.
      */
 	public void routeMessage(RUDPMessage msg, InetSocketAddress addr) {
         UDPSocketChannel[] array = _channels;
@@ -157,7 +157,7 @@ public class UDPMultiplexor extends AbstractSelector {
     }
 
     /**
-     * Returns all SelectionKeys this Selector is currently in control of.
+     * Returns all {@link SelectionKey SelectionKeys} this Selector is currently in control of.
      */
     public Set<SelectionKey> keys() {
         UDPSocketChannel[] channels = _channels;

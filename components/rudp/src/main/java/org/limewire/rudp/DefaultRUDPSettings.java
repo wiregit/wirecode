@@ -1,6 +1,6 @@
 package org.limewire.rudp;
 
-/** Some default values for the settings. */
+/** Provides default values for the RUDP settings. */
 public class DefaultRUDPSettings implements RUDPSettings {
 
     public int getMaxSkipAcks() {

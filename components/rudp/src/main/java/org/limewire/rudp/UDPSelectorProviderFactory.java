@@ -1,6 +1,6 @@
 package org.limewire.rudp;
 
-/** A factory for creating selector providers. */
+/** Defines an interface that creates selector providers. */
 public interface UDPSelectorProviderFactory {
 
     /** Returns a new selector provider. */

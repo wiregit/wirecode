@@ -5,7 +5,8 @@ import java.net.InetSocketAddress;
 import org.limewire.rudp.messages.RUDPMessage;
 
 /**
- * Dispatches incoming messages to the correct multiplexor.
+ * Defines an interface that dispatches incoming messages to the correct 
+ * multiplexor.
  */
 public interface MessageDispatcher {
 

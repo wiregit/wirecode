@@ -2,8 +2,8 @@ package org.limewire.rudp;
 
 
 /**
- * Settings to control the RUDP algorithm.
- * Currently only supports controlling the skip ack algorithm.
+ * Defines the interface of settings to control the RUDP algorithm.
+ * Currently only supports the ACK skipping algorithm.
  */
 public interface RUDPSettings {
 

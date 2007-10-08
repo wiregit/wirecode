@@ -50,7 +50,7 @@ import java.util.Set;
  * {@link SelectableChannel}. This is necessary so that <code>Throttle</code> 
  * can match up <code>SelectionKey</code> ready events with 
  * <code>ThrottleListener</code> interest.
- *             
+ * <p>            
  * The flow of a <code>Throttle</code> works like:
 <pre>
  * 

@@ -6,8 +6,8 @@ import java.nio.ByteOrder;
 import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.SynMessage;
 
-/** The Syn message begins a reliable udp connection by pinging the other host
- *  and by communicating the desired identifying connectionID.
+/** Begins a reliable UDP connection by pinging the other host
+ *  and by communicating the desired identifying connection ID.
  */
 public class SynMessageImpl extends RUDPMessageImpl implements SynMessage {
 

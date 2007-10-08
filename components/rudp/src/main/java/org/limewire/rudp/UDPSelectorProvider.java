@@ -11,7 +11,10 @@ import org.limewire.inject.Providers;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-
+/**
+ * Service-provider class for {@link UDPMultiplexor} selectors and 
+ * {@link UDPSocketChannel} selectable channels.
+ */
 public class UDPSelectorProvider extends SelectorProvider {
     /** A factory so the outside world can change the default UDPSelectorProvider. */
     @Inject

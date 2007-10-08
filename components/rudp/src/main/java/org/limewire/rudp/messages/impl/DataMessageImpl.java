@@ -12,7 +12,7 @@ class DataMessageImpl extends RUDPMessageImpl implements DataMessage {
 	private final ByteBuffer chunk;
 
     /**
-     * Construct a new DataMessage with the specified data.
+     * Construct a new <code>DataMessage</code> with the specified data.
      */
     DataMessageImpl(byte connectionID, long sequenceNumber, ByteBuffer chunk) {
         super(connectionID, OpCode.OP_DATA, sequenceNumber, chunk.array(), chunk.remaining());
@@ -32,7 +32,7 @@ class DataMessageImpl extends RUDPMessageImpl implements DataMessage {
     }
 
     /**
-     * Construct a new DataMessage from the network.
+     * Construct a new <code>DataMessage</code> from the network.
      */
     DataMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
       throws MessageFormatException {

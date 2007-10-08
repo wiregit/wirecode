@@ -1,4 +1,4 @@
-package org.limewire.rudp;
+    package org.limewire.rudp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,7 +19,7 @@ import org.limewire.rudp.messages.SynMessage;
 import org.limewire.service.ErrorService;
 
 /** 
- *  Manage a reliable udp connection for the transfer of data.
+ *  Manages a reliable UDP connection to transfer data.
  */
 public class UDPConnectionProcessor {
 
@@ -466,7 +466,7 @@ public class UDPConnectionProcessor {
     }
 
     /**
-     *  Make sure any firewall or nat stays open by scheduling a keepalive 
+     *  Make sure any firewall or NAT (Network Address Translation) stays open by scheduling a keepalive 
      *  message before the connection should close.
      *
      *  This just fires and reschedules itself appropriately so that we 

@@ -1,9 +1,9 @@
 package org.limewire.rudp;
 
 /**
- *  This class keeps track of state for the purpose of modifying incoming 
- *  sequenceNumbers so that they can be physically communicated with 2 bytes
- *  but can in fact represent 8 bytes.
+ *  Tracks state for the purpose of modifying incoming 
+ *  sequence numbers so they can be physically communicated with two bytes
+ *  but can in fact represent eight bytes.
  **/
 public class SequenceNumberExtender {
 
@@ -24,7 +24,7 @@ public class SequenceNumberExtender {
     
     /** The upper bound on sequence numbers where the HIGH_BASE_SWITCH_POINT test
      * is still valid.  This must be used instead of LOW_BASE_SWITCH_POINT when
-     * determing if a switch should be pending, or values in the area of the switch
+     * determining if a switch should be pending, or values in the area of the switch
      * being resent would trigger another switch to occur. */
      private static final long BASE_MIDPOINT = HIGH_BASE_SWITCH_POINT + ((LOW_BASE_SWITCH_POINT - HIGH_BASE_SWITCH_POINT)/2);
 

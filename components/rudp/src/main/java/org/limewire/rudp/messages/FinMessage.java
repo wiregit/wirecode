@@ -1,5 +1,10 @@
 package org.limewire.rudp.messages;
 
+/**
+ * Defines an interface to signal the data transport finished. Additionally,
+ * the interface includes constants to describe the cause when the transport
+ * completed.
+ */
 public interface FinMessage extends RUDPMessage {
 
     public static final byte REASON_NORMAL_CLOSE = 0x0;

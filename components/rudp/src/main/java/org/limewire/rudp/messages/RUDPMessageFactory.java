@@ -3,7 +3,7 @@ package org.limewire.rudp.messages;
 import java.nio.ByteBuffer;
 
 /**
- * Creates every kind of RUDPMessage.
+ * Creates every kind of <code>RUDPMessage</code>.
  */
 public interface RUDPMessageFactory {
 

@@ -3,7 +3,7 @@ package org.limewire.rudp.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/** All RUDP messages derive from this interface. */
+/** Defines the interface in which all RUDP messages derive.  */
 public interface RUDPMessage {
 
     /** The main functor of an RUDP message. */
@@ -12,6 +12,9 @@ public interface RUDPMessage {
     // The version number of the protocol to allow for future improvements
     public static final short PROTOCOL_VERSION_NUMBER = 0;
     
+    /** Used to specify a message type (either SYN, ACK, KEEPALIVE, DATA or 
+     * FIN).
+     */
     public static enum OpCode {
         OP_SYN(0x0),
         OP_ACK(0x1),

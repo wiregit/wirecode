@@ -5,7 +5,9 @@ import java.net.SocketAddress;
 
 import org.limewire.rudp.messages.RUDPMessage;
 
-/** Allows RUDP messages to be sent & received over UDP. */
+/** Defines an interface to allow {@link RUDPMessage RUDPMessages} to be sent 
+ * and received over UDP. 
+ */
 public interface UDPService {
 
     /** Determines if the service is listening for incoming messages. */

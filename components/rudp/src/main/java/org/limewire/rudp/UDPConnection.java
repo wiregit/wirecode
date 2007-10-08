@@ -12,7 +12,7 @@ import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 
 /** 
- *  Create a reliable udp connection interface.
+ *  Creates a reliable UDP connection.
  */
 public class UDPConnection extends AbstractNBSocket {
     
@@ -29,7 +29,7 @@ public class UDPConnection extends AbstractNBSocket {
     private final RUDPContext context;
 
     /**
-     * Creates an unconnected UDPConnection. You must call connect(...) to connect.
+     * Creates an unconnected <code>UDPConnection</code>. You must call {@link #connect(SocketAddress) connect(...)} to connect.
      */
     public UDPConnection() {
         this(UDPSelectorProvider.defaultProvider());
@@ -44,7 +44,7 @@ public class UDPConnection extends AbstractNBSocket {
     }
     
     /**
-     *  Create a UDPConnection connected to the given IP/Port.
+     *  Create a <code>UDPConnection</code> connected to the given IP/Port.
      */
     public UDPConnection(String ip, int port) throws IOException {
         // Handle the real work in the processor
@@ -52,28 +52,30 @@ public class UDPConnection extends AbstractNBSocket {
     }     
 
     /**
-     *  Creates a UDPConnection connected to the given IP/Port.
+     *  Creates a <code>UDPConnection</code> connected to the given IP/Port.
      */
     public UDPConnection(InetAddress ip, int port) throws IOException {
 		this();
         connect(new InetSocketAddress(ip, port));
     }
 
-    /** Returns the UDPSocketChannel, since it already implements InterestReadChannel. */
+    /** Returns the <code>UDPSocketChannel</code>, since it already implements 
+     * <code>InterestReadChannel</code>. */
     protected InterestReadableByteChannel getBaseReadChannel() {
         return channel;
     }
     
-    /** Returns the UDPSocketChannel, since it already implements InterestWriteChannel. */
+    /** Returns the <code>UDPSocketChannel</code>, since it already implements 
+     * <code>InterestWriteChannel</code>. */
     protected InterestWritableByteChannel getBaseWriteChannel() {
         return channel;
     }
 
-    /** Does nothing. */
+    /** Doesn't do anything. */
     protected void shutdownImpl() {
     }
 
-    /** Sets the soTimeout this socket should use. */
+    /** Sets the read timeout this socket should use. */
 	public void setSoTimeout(int timeout) {
         soTimeout = timeout;
 	}

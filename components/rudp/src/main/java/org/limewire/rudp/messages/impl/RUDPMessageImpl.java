@@ -9,8 +9,8 @@ import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.util.BufferUtils;
 
-/** Outline of message to allow a reliable udp protocol to be built on top of
- *  Gnutella messages.
+/** Abstract message class to allow a reliable UDP 
+ * protocol to be built on top of Gnutella messages.
  */
 public abstract class RUDPMessageImpl implements RUDPMessage {
 

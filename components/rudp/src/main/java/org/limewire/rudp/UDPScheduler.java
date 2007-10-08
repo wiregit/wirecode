@@ -7,12 +7,15 @@ import org.limewire.concurrent.ManagedThread;
 
 
 /** 
- *  Manage the timing of messages within UDPConnection processing. To use the
- *  scheduler, you must first register and then schedule an event.  Unregister 
- *  events when you are finally done with them.  Recall scheduleEvent if the
- *  time of your event changes.  Events are submitted as 
- *  objects that extend UDPTimerEvent with a handleEvent method defined.
+ *  Manages the timing of messages within {@link UDPConnection} processing. 
+ *  <p>
+ *  To use the scheduler, you must first register and then schedule an event.
+ *  Events are submitted as objects that extend {@link UDPTimerEvent} with 
+ *  a {@link UDPTimerEvent#handleEvent()} method defined.
+ *  Re-call {@link #scheduleEvent(UDPTimerEvent)} if the time of your event changes. 
  */
+//  Finally, unregister events when you are done with them (how? I don't notice a way).
+
 public class UDPScheduler extends ManagedThread {
     
    // private static final Log LOG = LogFactory.getLog(UDPScheduler.class);
@@ -46,7 +49,7 @@ public class UDPScheduler extends ManagedThread {
     private final Object _mainThreadLock = new Object();
 
     /**
-     *  Return the UDPScheduler singleton.
+     *  Return the <code>UDPScheduler</code> singleton.
      */
     public static synchronized UDPScheduler instance() {
 		// Create the singleton if it doesn't yet exist
@@ -57,7 +60,7 @@ public class UDPScheduler extends ManagedThread {
     }
 
     /**
-     *  Initialize the UDPScheduler.
+     *  Initialize the <code>UDPScheduler</code>.
      */
     private UDPScheduler() {
         super(NAME_OF_THREAD);
@@ -69,7 +72,7 @@ public class UDPScheduler extends ManagedThread {
     }
 
     /**
-     *  Register a UDPTimerEvent for scheduling events
+     *  Register a <code>UDPTimerEvent</code> for scheduling events
      */
 	public void register(UDPTimerEvent evt) {
         

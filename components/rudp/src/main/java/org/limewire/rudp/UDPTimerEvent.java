@@ -5,10 +5,9 @@ import java.lang.ref.WeakReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
-
 /**
- * A timed task to be repeated and rescheduled as needed.
+ * An abstract class that provides a timed task to be repeated and rescheduled 
+ * as needed.
  */
 public abstract class UDPTimerEvent implements Comparable<UDPTimerEvent> {
 	
@@ -61,7 +60,7 @@ public abstract class UDPTimerEvent implements Comparable<UDPTimerEvent> {
     }
 
    /**
-    *  Return the time that an event should take place in millis.
+    *  Return the time that an event should take place in milliseconds.
     */
     public long getEventTime() {
         return _eventTime;
@@ -83,7 +82,7 @@ public abstract class UDPTimerEvent implements Comparable<UDPTimerEvent> {
     protected abstract void doActualEvent(UDPConnectionProcessor proc);
 
     /** 
-     * Compares event times
+     * Compares event times.
      */
     public int compareTo(UDPTimerEvent x) {
         long ret = x._eventTime - _eventTime;

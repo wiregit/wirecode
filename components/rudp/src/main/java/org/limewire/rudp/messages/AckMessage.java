@@ -1,9 +1,12 @@
 package org.limewire.rudp.messages;
 
+/**
+ * Defines an interface for an ACK message. 
+ */
 public interface AckMessage extends RUDPMessage {
 
     /**
-     *  The windowStart is equivalent to the lowest unreceived sequenceNumber
+     *  The windowStart is equivalent to the lowest un-received sequenceNumber
      *  coming from the receiving end of the connection.  It is saying, I have 
      *  received everything up to one minus this. (Note: it rolls)
      */
