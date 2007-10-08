@@ -26,6 +26,7 @@ import org.limewire.util.SystemUtils;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.SHA1;
+import com.limegroup.gnutella.security.TigerTree;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
@@ -50,6 +51,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
         
         /** UrnType for a bitprint URN */
         BITPRINT("bitprint:"),
+        
+        /** UrnType for a Tiger Tree root URN */
+        TTROOT("ttroot:"),
         
         /** UrnType for any kind of URN. */
         ANY_TYPE(""),
@@ -238,8 +242,20 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static URN createSHA1Urn(File file) 
 		throws IOException, InterruptedException {
-		return new URN(createSHA1String(file), Type.SHA1);
+		return new URN(createURNStrings(file)[0], Type.SHA1);
 	}
+    
+    /**
+     * @return a Set<URN> containing a TTROOT and a SHA1 urns.
+     */
+    public static UrnSet createSHA1AndTTRootUrns(File file) 
+    throws IOException, InterruptedException {
+        String [] urns = createURNStrings(file);
+        UrnSet ret = new UrnSet();
+        ret.add(new URN(urns[0], Type.SHA1));
+        ret.add(new URN(urns[1], Type.TTROOT));
+        return ret;
+    }
 
 	/**
 	 * Creates a new <tt>URN</tt> instance from the specified string.
@@ -348,6 +364,17 @@ public final class URN implements HTTPHeaderValue, Serializable {
         
         String hash = Base32.encode(bytes);
         return createSHA1UrnFromString("urn:sha1:" + hash);
+    }
+    
+    /**
+     * Creates a TTROOT URN from a byte[].
+     */
+    public static URN createTTRootFromBytes(byte [] bytes) throws IOException {
+        if(bytes == null || bytes.length != 24)
+            throw new IOException("invalid bytes!");
+        
+        String hash = Base32.encode(bytes);
+        return new URN(Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+hash, Type.TTROOT);
     }
 
 	/**
@@ -477,6 +504,15 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	public boolean isSHA1() {
 		return _urnType == Type.SHA1;
 	}
+    
+    /**
+     * Returns whether or not this URN is a Tiger Tree Root URN.
+     *
+     * @return <tt>true</tt> if this is a SHA1 URN, <tt>false</tt> otherwise
+     */
+    public boolean isTTRoot() {
+        return _urnType == Type.TTROOT;
+    }
 
     /**
      * Checks for URN equality.  For URNs to be equal, their URN strings must
@@ -703,9 +739,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
      *  interrupted while hashing.  (This method can take a while to
      *  execute.)
 	 */
-	private static String createSHA1String(final File file) 
+	private static String[] createURNStrings(final File file) 
       throws IOException, InterruptedException {
 		MessageDigest md = new SHA1();
+        TigerTree tt = new TigerTree();
         byte[] buffer = threadLocal.get();
         int read;
         IntWrapper progress = new IntWrapper(0);
@@ -719,6 +756,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
             while ((read=fis.read(buffer))!=-1) {
                 long start = System.nanoTime();
                 md.update(buffer,0,read);
+                tt.update(buffer,0,read);
                 progress.addInt( read );
                 if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
                     long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
@@ -734,12 +772,15 @@ public final class URN implements HTTPHeaderValue, Serializable {
         }
 
 		byte[] sha1 = md.digest();
+        byte[] ttroot = tt.digest();
 
 		// preferred casing: lowercase "urn:sha1:", uppercase encoded value
 		// note that all URNs are case-insensitive for the "urn:<type>:" part,
 		// but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
 		// insensitive)
-		return Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(sha1);
+        return new String[]{Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(sha1),
+                Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+Base32.encode(ttroot)    
+        };
 	}
 
 	/**
@@ -800,7 +841,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// checks to make sure that it either is the length of a 32 
 		// character SHA1 NSS, or is the length of a 72 character
 		// bitprint NSS
-		if((length != 32) && (length != 72)) {
+		if((length != 32) && (length != 72) && (length != 39)) {
 			return false;
 		}
 		return true;
@@ -832,7 +873,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
             type = Type.createFromDescriptor(((UrnType)type).getType());        
         _urnType = (Type)type;
         
-        if(_urnType != URN.Type.SHA1)
+        if(_urnType != URN.Type.SHA1 && _urnType != URN.Type.TTROOT)
             throw new InvalidObjectException("invalid urn type: " + type);
 
         if (!URN.isValidUrn(_urnString))

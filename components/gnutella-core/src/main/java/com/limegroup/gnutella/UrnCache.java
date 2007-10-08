@@ -171,7 +171,7 @@ public final class UrnCache {
      * set.
      */
     public Set<URN> calculateUrns(File file) throws IOException, InterruptedException {
-        return new UrnSet(URN.createSHA1Urn(file));
+        return URN.createSHA1AndTTRootUrns(file);
 	}
     
     /**

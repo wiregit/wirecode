@@ -191,6 +191,40 @@ public final class UrnSetTest extends BaseTestCase {
         assertEquals(a, i.next());
         i.remove();
         assertTrue(s.isEmpty());
+        
+        // iterate, remove the ttroot
+        s.clear();
+        s.add(a);
+        URN ttroot = ttroot();
+        s.add(ttroot);
+        assertEquals(2,s.size());
+        i = s.iterator();
+        assertTrue(i.hasNext());
+        assertEquals(a,i.next());
+        assertTrue(i.hasNext());
+        assertEquals(ttroot,i.next());
+        assertFalse(i.hasNext());
+        i.remove();
+        assertEquals(1,s.size());
+        assertTrue(s.contains(a));
+        assertFalse(s.contains(ttroot));
+        
+        // iterate, remove the sha1
+        s.clear();
+        s.add(a);
+        ttroot = ttroot();
+        s.add(ttroot);
+        assertEquals(2,s.size());
+        i = s.iterator();
+        assertTrue(i.hasNext());
+        assertEquals(a,i.next());
+        i.remove();
+        assertTrue(i.hasNext());
+        assertEquals(ttroot,i.next());
+        assertFalse(i.hasNext());
+        assertEquals(1,s.size());
+        assertFalse(s.contains(a));
+        assertTrue(s.contains(ttroot));
     }
     
     public void testSerializing() throws Exception {
@@ -207,8 +241,10 @@ public final class UrnSetTest extends BaseTestCase {
         assertTrue(s.isEmpty());
         
         URN a = sha1();
+        URN b = ttroot();
         s.add(a);
-        assertEquals(1, s.size());
+        s.add(b);
+        assertEquals(2, s.size());
         out.reset();
         oos = new ObjectOutputStream(out);
         oos.writeObject(s);
@@ -218,9 +254,11 @@ public final class UrnSetTest extends BaseTestCase {
         s = (UrnSet)ois.readObject();
         assertInstanceof(UrnSet.class, s);
         assertFalse(s.isEmpty());
-        assertEquals(1, s.size());
+        assertEquals(2, s.size());
         assertTrue(s.contains(a));
+        assertTrue(s.contains(b));
         assertFalse(s.contains(sha1()));
+        assertFalse(s.contains(ttroot()));
     }
     
     /** Generates a random sha1. */
@@ -228,5 +266,11 @@ public final class UrnSetTest extends BaseTestCase {
         byte[] b = new byte[20];
         RND.nextBytes(b);
         return URN.createSHA1UrnFromBytes(b);
+    }
+    
+    private URN ttroot() throws Exception {
+        byte []b = new byte[24];
+        RND.nextBytes(b);
+        return URN.createTTRootFromBytes(b);
     }
 }
