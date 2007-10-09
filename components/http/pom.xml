@@ -55,12 +55,12 @@
 	<dependency>
 	  <groupId>org.apache.httpcomponents</groupId>
 	  <artifactId>httpcore</artifactId>
-      <version>4.0-alpha6-20071003.114838-7</version>
+      <version>4.0-alpha6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-nio</artifactId>
-      <version>4.0-alpha6-20071003.114838-7</version>
+      <version>4.0-alpha6</version>
     </dependency>
      <!-- Customized LimeWire Jars -->
     <dependency>
