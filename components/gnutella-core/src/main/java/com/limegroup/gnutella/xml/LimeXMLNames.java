@@ -3,7 +3,8 @@ package com.limegroup.gnutella.xml;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.limegroup.gnutella.I18n;
+import org.limewire.i18n.I18nMarker;
+
 
 public class LimeXMLNames {
 
@@ -83,62 +84,62 @@ public class LimeXMLNames {
         if (displayNameByKey == null) {
             displayNameByKey = new HashMap<String, String>();
             
-            displayNameByKey.put(AUDIO, I18n.marktr("Audio"));
-            displayNameByKey.put(AUDIO_TITLE, I18n.marktr("Title"));
-            displayNameByKey.put(AUDIO_ARTIST, I18n.marktr("Artist"));
-            displayNameByKey.put(AUDIO_ALBUM, I18n.marktr("Album"));
-            displayNameByKey.put(AUDIO_GENRE, I18n.marktr("Genre"));
-            displayNameByKey.put(AUDIO_TRACK, I18n.marktr("Track"));
-            displayNameByKey.put(AUDIO_TYPE, I18n.marktr("Type"));
-            displayNameByKey.put(AUDIO_SECONDS, I18n.marktr("Length"));
-            displayNameByKey.put(AUDIO_YEAR, I18n.marktr("Year"));
-            displayNameByKey.put(AUDIO_LANGUAGE, I18n.marktr("Language"));
-            displayNameByKey.put(AUDIO_BITRATE, I18n.marktr("Bitrate"));
-            displayNameByKey.put(AUDIO_COMMENTS, I18n.marktr("Comments"));
-            displayNameByKey.put(AUDIO_ACTION, I18n.marktr("Action"));
-            displayNameByKey.put(AUDIO_LICENSE, I18n.marktr("Copyright"));
-            displayNameByKey.put(AUDIO_LICENSETYPE, I18n.marktr("License Type"));
+            displayNameByKey.put(AUDIO, I18nMarker.marktr("Audio"));
+            displayNameByKey.put(AUDIO_TITLE, I18nMarker.marktr("Title"));
+            displayNameByKey.put(AUDIO_ARTIST, I18nMarker.marktr("Artist"));
+            displayNameByKey.put(AUDIO_ALBUM, I18nMarker.marktr("Album"));
+            displayNameByKey.put(AUDIO_GENRE, I18nMarker.marktr("Genre"));
+            displayNameByKey.put(AUDIO_TRACK, I18nMarker.marktr("Track"));
+            displayNameByKey.put(AUDIO_TYPE, I18nMarker.marktr("Type"));
+            displayNameByKey.put(AUDIO_SECONDS, I18nMarker.marktr("Length"));
+            displayNameByKey.put(AUDIO_YEAR, I18nMarker.marktr("Year"));
+            displayNameByKey.put(AUDIO_LANGUAGE, I18nMarker.marktr("Language"));
+            displayNameByKey.put(AUDIO_BITRATE, I18nMarker.marktr("Bitrate"));
+            displayNameByKey.put(AUDIO_COMMENTS, I18nMarker.marktr("Comments"));
+            displayNameByKey.put(AUDIO_ACTION, I18nMarker.marktr("Action"));
+            displayNameByKey.put(AUDIO_LICENSE, I18nMarker.marktr("Copyright"));
+            displayNameByKey.put(AUDIO_LICENSETYPE, I18nMarker.marktr("License Type"));
 
-            displayNameByKey.put(VIDEO, I18n.marktr("Video"));
-            displayNameByKey.put(VIDEO_TITLE, I18n.marktr("Title"));
-            displayNameByKey.put(VIDEO_DIRECTOR, I18n.marktr("Director"));
-            displayNameByKey.put(VIDEO_PRODUCER, I18n.marktr("Producer"));
-            displayNameByKey.put(VIDEO_STUDIO, I18n.marktr("Studio"));
-            displayNameByKey.put(VIDEO_STARS, I18n.marktr("Stars"));
-            displayNameByKey.put(VIDEO_TYPE, I18n.marktr("Type"));
-            displayNameByKey.put(VIDEO_LENGTH, I18n.marktr("Length"));
-            displayNameByKey.put(VIDEO_YEAR, I18n.marktr("Year"));
-            displayNameByKey.put(VIDEO_LANGUAGE, I18n.marktr("Language"));
-            displayNameByKey.put(VIDEO_SUBTITLES, I18n.marktr("Subtitles"));
-            displayNameByKey.put(VIDEO_RATING, I18n.marktr("Rating"));
-            displayNameByKey.put(VIDEO_COMMENTS, I18n.marktr("Comments"));
-            displayNameByKey.put(VIDEO_ACTION, I18n.marktr("Action"));
-            displayNameByKey.put(VIDEO_LICENSE, I18n.marktr("Copyright"));
-            displayNameByKey.put(VIDEO_LICENSETYPE, I18n.marktr("License Type"));
-            displayNameByKey.put(VIDEO_HEIGHT, I18n.marktr("Height"));
-            displayNameByKey.put(VIDEO_WIDTH, I18n.marktr("Width"));
-            displayNameByKey.put(VIDEO_BITRATE, I18n.marktr("Bitrate"));
+            displayNameByKey.put(VIDEO, I18nMarker.marktr("Video"));
+            displayNameByKey.put(VIDEO_TITLE, I18nMarker.marktr("Title"));
+            displayNameByKey.put(VIDEO_DIRECTOR, I18nMarker.marktr("Director"));
+            displayNameByKey.put(VIDEO_PRODUCER, I18nMarker.marktr("Producer"));
+            displayNameByKey.put(VIDEO_STUDIO, I18nMarker.marktr("Studio"));
+            displayNameByKey.put(VIDEO_STARS, I18nMarker.marktr("Stars"));
+            displayNameByKey.put(VIDEO_TYPE, I18nMarker.marktr("Type"));
+            displayNameByKey.put(VIDEO_LENGTH, I18nMarker.marktr("Length"));
+            displayNameByKey.put(VIDEO_YEAR, I18nMarker.marktr("Year"));
+            displayNameByKey.put(VIDEO_LANGUAGE, I18nMarker.marktr("Language"));
+            displayNameByKey.put(VIDEO_SUBTITLES, I18nMarker.marktr("Subtitles"));
+            displayNameByKey.put(VIDEO_RATING, I18nMarker.marktr("Rating"));
+            displayNameByKey.put(VIDEO_COMMENTS, I18nMarker.marktr("Comments"));
+            displayNameByKey.put(VIDEO_ACTION, I18nMarker.marktr("Action"));
+            displayNameByKey.put(VIDEO_LICENSE, I18nMarker.marktr("Copyright"));
+            displayNameByKey.put(VIDEO_LICENSETYPE, I18nMarker.marktr("License Type"));
+            displayNameByKey.put(VIDEO_HEIGHT, I18nMarker.marktr("Height"));
+            displayNameByKey.put(VIDEO_WIDTH, I18nMarker.marktr("Width"));
+            displayNameByKey.put(VIDEO_BITRATE, I18nMarker.marktr("Bitrate"));
 
-            displayNameByKey.put(IMAGE, I18n.marktr("Image"));
-            displayNameByKey.put(IMAGE_TITLE, I18n.marktr("Title"));
-            displayNameByKey.put(IMAGE_DESCRIPTION, I18n.marktr("Description"));
-            displayNameByKey.put(IMAGE_ARTIST, I18n.marktr("Artist"));
-            displayNameByKey.put(IMAGE_LICENSE, I18n.marktr("License"));
-            displayNameByKey.put(IMAGE_LICENSETYPE, I18n.marktr("License Type"));
+            displayNameByKey.put(IMAGE, I18nMarker.marktr("Image"));
+            displayNameByKey.put(IMAGE_TITLE, I18nMarker.marktr("Title"));
+            displayNameByKey.put(IMAGE_DESCRIPTION, I18nMarker.marktr("Description"));
+            displayNameByKey.put(IMAGE_ARTIST, I18nMarker.marktr("Artist"));
+            displayNameByKey.put(IMAGE_LICENSE, I18nMarker.marktr("License"));
+            displayNameByKey.put(IMAGE_LICENSETYPE, I18nMarker.marktr("License Type"));
 
-            displayNameByKey.put(DOCUMENT, I18n.marktr("Document"));
-            displayNameByKey.put(DOCUMENT_TITLE, I18n.marktr("Title"));
-            displayNameByKey.put(DOCUMENT_TOPIC, I18n.marktr("Topic"));
-            displayNameByKey.put(DOCUMENT_AUTHOR, I18n.marktr("Author"));
-            displayNameByKey.put(DOCUMENT_LICENSE, I18n.marktr("License"));
-            displayNameByKey.put(DOCUMENT_LICENSETYPE, I18n.marktr("License Type"));
+            displayNameByKey.put(DOCUMENT, I18nMarker.marktr("Document"));
+            displayNameByKey.put(DOCUMENT_TITLE, I18nMarker.marktr("Title"));
+            displayNameByKey.put(DOCUMENT_TOPIC, I18nMarker.marktr("Topic"));
+            displayNameByKey.put(DOCUMENT_AUTHOR, I18nMarker.marktr("Author"));
+            displayNameByKey.put(DOCUMENT_LICENSE, I18nMarker.marktr("License"));
+            displayNameByKey.put(DOCUMENT_LICENSETYPE, I18nMarker.marktr("License Type"));
 
-            displayNameByKey.put(APPLICATION, I18n.marktr("Application"));
-            displayNameByKey.put(APPLICATION_NAME, I18n.marktr("Name"));
-            displayNameByKey.put(APPLICATION_PUBLISHER, I18n.marktr("Publisher"));
-            displayNameByKey.put(APPLICATION_PLATFORM, I18n.marktr("Platform"));
-            displayNameByKey.put(APPLICATION_LICENSETYPE, I18n.marktr("License Type"));
-            displayNameByKey.put(APPLICATION_LICENSE, I18n.marktr("License"));        
+            displayNameByKey.put(APPLICATION, I18nMarker.marktr("Application"));
+            displayNameByKey.put(APPLICATION_NAME, I18nMarker.marktr("Name"));
+            displayNameByKey.put(APPLICATION_PUBLISHER, I18nMarker.marktr("Publisher"));
+            displayNameByKey.put(APPLICATION_PLATFORM, I18nMarker.marktr("Platform"));
+            displayNameByKey.put(APPLICATION_LICENSETYPE, I18nMarker.marktr("License Type"));
+            displayNameByKey.put(APPLICATION_LICENSE, I18nMarker.marktr("License"));        
         }
         
         return displayNameByKey.get(key);

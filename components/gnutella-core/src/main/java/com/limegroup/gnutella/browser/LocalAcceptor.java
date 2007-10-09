@@ -2,6 +2,7 @@ package com.limegroup.gnutella.browser;
 
 import java.io.IOException;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.service.MessageService;
@@ -9,7 +10,6 @@ import org.limewire.service.MessageService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.I18n;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches threads
@@ -32,7 +32,7 @@ public class LocalAcceptor {
      */
     public void start() {
         if (!bind(FIRST_PORT)) {
-            MessageService.showError(I18n.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
+            MessageService.showError(I18nMarker.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
         }
     }
     

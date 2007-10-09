@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
@@ -30,7 +31,6 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.DownloadServices;
-import com.limegroup.gnutella.I18n;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -191,13 +191,13 @@ public class ExternalControl {
                     LOG.warn("Invalid magnet: " + curOpt);
                 }
 				msg = msg != null ? msg : curOpt.toString();
-                MessageService.showError(I18n.marktr("Could not process bad MAGNET link {0}"), msg);
+                MessageService.showError(I18nMarker.marktr("Could not process bad MAGNET link {0}"), msg);
                 return;	
             }
             
             // Warn the user that the link was slightly invalid
             if( msg != null )
-                MessageService.showError(I18n.marktr("One or more URLs in the MAGNET link were invalid. Your file may not download correctly."));
+                MessageService.showError(I18nMarker.marktr("One or more URLs in the MAGNET link were invalid. Your file may not download correctly."));
             
             try {
             	downloadServices.download(curOpt, false);
@@ -208,11 +208,11 @@ public class ExternalControl {
 			catch (SaveLocationException sle) {
 				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
                 MessageService.showError(
-                    I18n.marktr("You have already downloaded {0}"), sle.getFile().getName());
+                    I18nMarker.marktr("You have already downloaded {0}"), sle.getFile().getName());
 				}
 				else if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_DOWNLOADING) {
 					MessageService.showError(
-		                    I18n
+		                    I18nMarker
                                     .marktr("You are already downloading this file to {0}"), sle.getFile().getName());	
 				}
 			}

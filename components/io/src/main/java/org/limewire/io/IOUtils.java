@@ -15,6 +15,7 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
@@ -31,15 +32,15 @@ public class IOUtils {
     
     // mark message strings for translation
     static {
-        I18n.marktr("LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.");
-		I18n.marktr("LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.");
-		I18n.marktr("LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.");
-		I18n.marktr("LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.");
+        I18nMarker.marktr("LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.");
+		I18nMarker.marktr("LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.");
+		I18nMarker.marktr("LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.");
+		I18nMarker.marktr("LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.");
 
-        I18n.marktr("LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.");
-		I18n.marktr("LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.");
-		I18n.marktr("LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder.");
-		I18n.marktr("LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.");
+        I18nMarker.marktr("LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.");
+		I18nMarker.marktr("LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.");
+		I18nMarker.marktr("LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder.");
+		I18nMarker.marktr("LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.");
     }
     
     /**

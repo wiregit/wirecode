@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.service.MessageService;
@@ -225,7 +226,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             // only show the error if the files existed but couldn't be read.
             } else if(backup.exists() || real.exists()) {
                 LOG.debug("Reading both downloads files failed.");
-                MessageService.showError(I18n.marktr("Sorry, but LimeWire was unable to restart your old downloads."));
+                MessageService.showError(I18nMarker.marktr("Sorry, but LimeWire was unable to restart your old downloads."));
             }   
         } else {
             LOG.debug("Reading downloads.dat worked!");
