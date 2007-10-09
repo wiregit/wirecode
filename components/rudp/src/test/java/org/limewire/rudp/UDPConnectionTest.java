@@ -24,9 +24,8 @@ public final class UDPConnectionTest extends BaseTestCase {
 
     private static final int TIMEOUT = 10 * 1000;
 
-    private static UDPSelectorProviderFactory defaultFactory = null;
-    private static UDPServiceStub stubService;
-    private static UDPMultiplexor udpMultiplexor;
+    private UDPServiceStub stubService;
+    private UDPMultiplexor udpMultiplexor;
 
     private volatile UDPConnection uconn1;
     private volatile UDPConnection uconn2;
@@ -49,8 +48,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-    public static void globalSetUp() throws Exception {
-        defaultFactory = UDPSelectorProvider.getDefaultProviderFactory();
+    public void setUp() throws Exception {
         RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
         final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
@@ -64,17 +62,6 @@ public final class UDPConnectionTest extends BaseTestCase {
             }
         });
         NIODispatcher.instance().registerSelector(udpMultiplexor, provider.getUDPSocketChannelClass());
-    }
-
-    public static void globalTearDown() throws Exception {
-        UDPSelectorProvider.setDefaultProviderFactory(defaultFactory);
-        NIODispatcher.instance().removeSelector(udpMultiplexor);
-    }
-
-    public void setUp() throws Exception {
-        if (defaultFactory == null) {
-            globalSetUp();
-        }
         
         // Add some simulated connections to the UDPServiceStub
         stubService.addReceiver(6346, 6348, 10, 0);
@@ -91,6 +78,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         
         // Clear out the receiver parameters for the UDPServiceStub
         stubService.clearReceivers();
+        NIODispatcher.instance().removeSelector(udpMultiplexor);
     }  
 
     /**
