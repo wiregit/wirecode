@@ -19,19 +19,19 @@ import org.limewire.util.ByteOrder;
  * 
  <pre>
     IntervalSet is = new IntervalSet();
-    
-    is.add(new Interval(1,4)); 
-    is.add(new Interval(11,14)); 
-    is.add(new Interval(21,24)); 
+                    
+    is.add(Range.createRange(1,4));
+    is.add(Range.createRange(11,14));
+    is.add(Range.createRange(21,24));
     System.out.println("Set is " + is + " intervals: " + 
-            is.getNumberOfIntervals());
+                is.getNumberOfIntervals());
 
-    is.add(new Interval(5,10)); 
+    is.add(Range.createRange(5,10));
     System.out.println("Set is " + is + " intervals: " + 
-            is.getNumberOfIntervals());
+                is.getNumberOfIntervals());
     IntervalSet is2 = is.invert(50);
     System.out.println("Set is " + is2 + " intervals: " + 
-            is2.getNumberOfIntervals());
+                is2.getNumberOfIntervals());
 
     Output:
         Set is [1-4, 11-14, 21-24] intervals: 3
@@ -131,7 +131,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     /**
-     * Adds a whole IntervalSet into this IntervalSet.
+     * Adds a whole <code>IntervalSet</code> into this <code>IntervalSet</code>.
      */
     public void add(IntervalSet set) {
         for(Range interval : set)
@@ -196,8 +196,8 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     /**
-     * Returns the first element without modifying this IntervalSet.
-     * @throws NoSuchElementException if no intervals exist.
+     * Returns the first element without modifying this <code>IntervalSet</code>.
+     * @throws <code>NoSuchElementException</code> if no intervals exist.
      */
     public Range getFirst() throws NoSuchElementException {
         if(intervals.isEmpty())
@@ -207,8 +207,8 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     /**
-     * Returns the last element without modifying this IntervalSet.
-     * @throws NoSuchElementException if no intervals exist.
+     * Returns the last element without modifying this <code>IntervalSet</code>.
+     * @throws <code>NoSuchElementException</code> if no intervals exist.
      */
     public Range getLast() throws NoSuchElementException {
         if(intervals.isEmpty())
@@ -218,13 +218,13 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         return ret;
     }
     
-    /** @return the number of Intervals in this IntervalSet */
+    /** @return The number of Intervals in this <code>IntervalSet</code>. */
     public int getNumberOfIntervals() {
         return intervals.size();
     }
 
 	/**
-	 * @return whether this interval set contains fully the given interval
+	 * @return Whether this interval set contains fully the given interval.
 	 */
 	public boolean contains(Range i) {
 	    int [] range = narrowStart(i);
@@ -239,12 +239,12 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     /**
-     * narrows the index range where an interval would be found.
+     * Narrows the index range where an interval would be found.
      * @return integer array with the start index at position 0 and end index at position 1.
      */
     private int [] narrowStart(Range i) {
         int size = intervals.size();
-        // not worth doing binary search if too smal
+        // not worth doing binary search if too small
         if (size < LINEAR) 
             return new int[]{0,size};
         int point = Collections.binarySearch(intervals, i,IntervalComparator.INSTANCE);
@@ -256,9 +256,9 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     /**
-     * narrows the index range where any interval overlapping with the provided interval 
+     * Narrows the index range where any interval overlapping with the provided interval 
      * would be found.
-     * @return integer array with the start index at position 0 and end index at position 1.
+     * @return Integer array with the start index at position 0 and end index at position 1.
      */
     private int [] narrowRange(Range i) {
         int size = intervals.size();
@@ -277,7 +277,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     /**
-     * @return whether this interval set contains any part of the given interval
+     * @return whether this interval set contains any part of the given interval.
      */
     public boolean containsAny(Range i) {
         long low = i.getLow();
@@ -302,9 +302,10 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
 	
     /**
-     *@return a List of intervals that overlap checkInterval. For example
-     * if Intervals contains{[1-4],[6-10]} and checkInterval is [3-8],
-     * this method should return a list of 2 intervals {[3-4],[6-8]}
+     *@return a <code>List</code> of intervals that overlap 
+     *<code>checkInterval</code>. For example
+     * if Intervals contains{[1-4],[6-10]} and <code>checkInterval</code> is 
+     * [3-8], this method returns a list of 2 intervals {[3-4],[6-8]}.
      * If there are no overlaps, this method returns an empty List.
      */
     public List<Range> getOverlapIntervals(Range checkInterval) {
@@ -374,9 +375,9 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
 
     /**
-     * This method creates an IntervalSet that is the negative to this 
-     * IntervalSet
-     * @return IntervalSet containing all ranges not contained in this
+     * Creates an <code>IntervalSet</code> that is the negative to this 
+     * <code>IntervalSet</code>.
+     * @return <code>IntervalSet</code> containing all ranges not contained in this
      */
     public IntervalSet invert(long maxSize) {
         IntervalSet ret = new IntervalSet();
@@ -425,17 +426,17 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
         
     /**
-     * @return an iterator or intervals needed to fill in the holes in this
-     * IntervalSet. Note that the IntervalSet does not know the maximum value of
-     * all the intervals.
+     * @return An iterator or intervals needed to fill in the holes in this
+     * <code>IntervalSet</code>. Note that the <code>IntervalSet</code> does 
+     * not know the maximum value of all the intervals.
      */
     public Iterator<Range> getNeededIntervals(long maxSize) {
         return this.invert(maxSize).getAllIntervals();
     }
 
     /**
-     * Clones the IntervalSet.  The underlying intervals are the same
-     * (so they should never be modified), but the TreeSet this is
+     * Clones the <code>IntervalSet</code>. The underlying intervals are the same
+     * (so they should never be modified), but the <code>TreeSet</code> this is
      * backed off of is new.
      */
     public IntervalSet clone() {
@@ -491,7 +492,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         return intervals.toString();
     }
     
-    /** Compares two IntervalSets */
+    /** Compares two <code>IntervalSet</code>s */
     public boolean equals(Object o) {
         if(o == this) {
             return true;
@@ -536,7 +537,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     }
     
     /**
-     * parses an IntervalSet from a byte array.  At position 0 are
+     * Parses an <code>IntervalSet</code> from a byte array. At position 0 are
      * intervals that fit in 31 bits, at position 1 are those that
      * need 40 bits.
      */
@@ -583,6 +584,62 @@ public class IntervalSet implements Iterable<Range>, Serializable{
             "Post Fixing: " + postIntervals));
     }
     
+    /**
+     * Allows you to keep int and long intervals in the same 
+     * location. Lets you know how many bytes are needed to represent the set 
+     * of ranges.
+     *<pre>
+        try{
+        
+            IntervalSet set = new IntervalSet();
+    
+            set.add(Range.createRange(55, 58));
+            set.add(Range.createRange(90, 97));
+            set.add(Range.createRange(3, 7));
+            set.add(Range.createRange(52, 53));
+            set.add(Range.createRange(28, 33));
+            set.add(Range.createRange(60, 73));
+            
+            IntervalSet.ByteIntervals asByte = set.toBytes();
+        
+            System.out.println("Length of set = " + set.getSize() 
+            + " and interval as a list " + set.getAllIntervalsAsList() );     
+            
+            //A length of zero means there haven't been any longs added to the set yet.
+            System.out.println("Length of asByte's long =" + asByte.longs.length);
+            
+            //create a long range
+            set.add(Range.createRange(0xFFFFFFFFF0l, 0xFFFFFFFFFFl));
+            asByte = set.toBytes();
+            System.out.println("New length of asByte's long =" 
+                                + asByte.longs.length);
+
+            System.out.println("Length of asByte=" + asByte.length() );
+
+            //Now there will be one one long range from 
+            //3 until 0xFFFFFFFFFFl (size: 10)
+            set.add(Range.createRange(3, 0xFFFFFFFFFFl));
+            asByte = set.toBytes();
+
+            System.out.println("Length of set= " + set.getSize() 
+            + " and interval as a list " + set.getAllIntervalsAsList() );
+            
+            System.out.println("Length of asByte=" + asByte.length() );
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        Output:
+            Length of set = 39 and interval as a list [3-7, 28-33, 52-53, 55-58, 60-73, 90-97]
+            Length of asByte's long =0
+            New length of asByte's long =10
+            Length of asByte=58
+            Length of set= 1099511627773 and interval as a list [3-1099511627775]
+            Length of asByte=10
+     *
+     </pre>
+     */
     public static class ByteIntervals {
         public final byte[] ints, longs;
         private ByteIntervals(byte[] ranges, byte []ranges5) {
