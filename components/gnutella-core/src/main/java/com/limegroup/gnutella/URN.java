@@ -47,29 +47,36 @@ public final class URN implements HTTPHeaderValue, Serializable {
     /** The range of all types for URNs. */
     public static enum Type {        
         /** UrnType for a SHA1 URN */
-        SHA1("sha1:"),
+        SHA1("sha1:",32),
         
         /** UrnType for a bitprint URN */
-        BITPRINT("bitprint:"),
+        BITPRINT("bitprint:",72),
         
         /** UrnType for a Tiger Tree root URN */
-        TTROOT("ttroot:"),
+        TTROOT("ttroot:",39),
         
         /** UrnType for any kind of URN. */
-        ANY_TYPE(""),
+        ANY_TYPE("",-1),
 
         /** UrnType for an invalid Urn Type. */
-        INVALID("Invalid");
+        INVALID("Invalid",-1);
         
         private final String descriptor;
         
-        private Type(String descriptor) {
+        private final int length;
+        
+        private Type(String descriptor, int length) {
             this.descriptor = descriptor;
+            this.length = length;
         }
         
         /** Returns the descriptor used for printing out a URN of this type. */
         public String getDescriptor() {
             return descriptor;
+        }
+        
+        public int getLength() {
+            return length;
         }
 
         /** A set of types that allow only SHA1s. */
@@ -242,21 +249,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static URN createSHA1Urn(File file) 
 		throws IOException, InterruptedException {
-		return new URN(createURNStrings(file)[0], Type.SHA1);
+		return createSHA1AndTTRootUrns(file).getSHA1();
 	}
     
-    /**
-     * @return a Set<URN> containing a TTROOT and a SHA1 urns.
-     */
-    public static UrnSet createSHA1AndTTRootUrns(File file) 
-    throws IOException, InterruptedException {
-        String [] urns = createURNStrings(file);
-        UrnSet ret = new UrnSet();
-        ret.add(new URN(urns[0], Type.SHA1));
-        ret.add(new URN(urns[1], Type.TTROOT));
-        return ret;
-    }
-
 	/**
 	 * Creates a new <tt>URN</tt> instance from the specified string.
 	 * The resulting URN can have any Namespace Identifier and any
@@ -739,10 +734,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
      *  interrupted while hashing.  (This method can take a while to
      *  execute.)
 	 */
-	private static String[] createURNStrings(final File file) 
+	public static UrnSet createSHA1AndTTRootUrns(final File file) 
       throws IOException, InterruptedException {
 		MessageDigest md = new SHA1();
-        TigerTree tt = new TigerTree();
+        MessageDigest tt = new TigerTree();
         byte[] buffer = threadLocal.get();
         int read;
         IntWrapper progress = new IntWrapper(0);
@@ -771,16 +766,17 @@ public final class URN implements HTTPHeaderValue, Serializable {
             IOUtils.close(fis);
         }
 
-		byte[] sha1 = md.digest();
-        byte[] ttroot = tt.digest();
 
 		// preferred casing: lowercase "urn:sha1:", uppercase encoded value
 		// note that all URNs are case-insensitive for the "urn:<type>:" part,
 		// but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
 		// insensitive)
-        return new String[]{Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(sha1),
-                Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+Base32.encode(ttroot)    
-        };
+        UrnSet ret = new UrnSet();
+        URN sha1 = new URN(Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(md.digest()), Type.SHA1);
+        URN ttroot = new URN(Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+Base32.encode(tt.digest()), Type.TTROOT);
+        ret.add(sha1);
+        ret.add(ttroot);
+        return ret;
 	}
 
 	/**
@@ -821,32 +817,14 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		    return false;
 		
 		String urnType = urnString.substring(0, colon2Index+1);
-		if(!Type.isSupportedUrnType(urnType) ||
-		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
-			return false;
-		}
+        Type type = Type.createUrnType(urnType);
+        if (type == null)
+            return false;
+        if (type.getLength() != urnString.substring(colon2Index+1).length())
+            return false;
 		return true;
 	}
-
-	/**
-	 * Returns whether or not the specified Namespace Specific String (NSS) 
-	 * is a valid NSS.
-	 *
-	 * @param nss the Namespace Specific String for a URN
-	 * @return <tt>true</tt> if the NSS is valid, <tt>false</tt> otherwise
-	 */
-	private static boolean isValidNamespaceSpecificString(final String nss) {
-		int length = nss.length();
-
-		// checks to make sure that it either is the length of a 32 
-		// character SHA1 NSS, or is the length of a 72 character
-		// bitprint NSS
-		if((length != 32) && (length != 72) && (length != 39)) {
-			return false;
-		}
-		return true;
-	}
-
+    
 	/**
 	 * Serializes this instance.
 	 *

@@ -56,6 +56,13 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         return sha1 == null ? 0 : sha1.hashCode();
     }
     
+    URN getSHA1() {
+        return sha1;
+    }
+    
+    URN getTTRoot() {
+        return ttroot;
+    }
     
     /**
      * Determines if this set contains all the same objects
@@ -136,12 +143,8 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
             return false;
         
         boolean ret = true;
-        Iterator<?> i = c.iterator();
-        while(ret && sha1 != null && i.hasNext())
-            ret &= sha1.equals(i.next());
-        i = c.iterator();
-        while(ret && ttroot != null && i.hasNext())
-            ret &= ttroot.equals(i.next());
+        for (Object o : c)
+            ret &= contains(o);
         return ret;
     }
 
@@ -174,6 +177,8 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         boolean ret = false;
         for(Object o : c) {
             ret |= remove(o);
+            if (isEmpty())
+                break;
         }
         
         return ret;
@@ -219,10 +224,15 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         if (a.length < size)
             a = (T[])Array.newInstance(a.getClass().getComponentType(), size);
         
-        if(size > 0)
+        switch(size) {
+        case 1 :
+            URN present = sha1 != null ? sha1 : ttroot;
+                    a[0] = (T)present;
+                    break;
+        case 2 :
             a[0] = (T)sha1;
-        if(size > 1)
             a[1] = (T)ttroot;
+        }
         
         if(a.length > size)
             a[size] = null;
