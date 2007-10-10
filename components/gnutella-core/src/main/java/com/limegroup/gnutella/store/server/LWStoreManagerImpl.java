@@ -157,11 +157,20 @@ public final class LWStoreManagerImpl implements LWStoreManager,
             for (Listener l : ls) l.handle(args);
         }
         if (!handled) {
+            //
+            // we couldn't find a handler
+            //
             return null;
         } else {
             if (res == null) {
+                //
+                // we had a handler but perhaps no result, that's fine
+                //
                 return "OK";
             } else {
+                //
+                // handled and have a result
+                //
                 return res;
             }
         }

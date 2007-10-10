@@ -53,19 +53,7 @@ import org.limewire.store.server.Dispatcher;
  * </pre>
  */
 public interface LWStoreManager extends ConnectionListener.HasSome {
-
-//    /**
-//     * Holds the default instance and lazily creates it. 
-//     */
-//    Holder HOLDER = new Holder() {
-//        private LWStoreManagerImpl instance;       
-//        public LWStoreManagerImpl instance() {
-//            if (instance == null) instance = LWStoreManagerImpl.newInstance();
-//            return instance;
-//        }        
-//    };
-    
-    
+       
     /**
      * The prefix to all requests. This will be stripped off when sending to our
      * handlers.
@@ -99,19 +87,6 @@ public interface LWStoreManager extends ConnectionListener.HasSome {
      * @return
      */
     boolean registerListener(String cmd, Listener lis);    
-    
-//    /**
-//     * Is able to return and possibly construct an instance.
-//     */
-//    public interface Holder {
-//        
-//        /**
-//         * Returns and possibly constructs the single instance.
-//         * 
-//         * @return and possibly constructs the single instance
-//         */
-//        LWStoreManager instance();
-//    }
 
     /**
      * Handles commands.
