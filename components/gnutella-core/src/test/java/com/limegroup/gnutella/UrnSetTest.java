@@ -4,8 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
@@ -191,14 +194,18 @@ public final class UrnSetTest extends BaseTestCase {
         assertEquals(a, i.next());
         i.remove();
         assertTrue(s.isEmpty());
-        
+    }
+    
+    public void testIteration() throws Exception {
+        UrnSet s = new UrnSet();
+        URN a = sha1();
         // iterate, remove the ttroot
         s.clear();
         s.add(a);
         URN ttroot = ttroot();
         s.add(ttroot);
         assertEquals(2,s.size());
-        i = s.iterator();
+        Iterator<URN> i = s.iterator();
         assertTrue(i.hasNext());
         assertEquals(a,i.next());
         assertTrue(i.hasNext());
@@ -225,6 +232,98 @@ public final class UrnSetTest extends BaseTestCase {
         assertEquals(1,s.size());
         assertFalse(s.contains(a));
         assertTrue(s.contains(ttroot));
+    }
+    
+    public void testContainsAll() throws Exception {
+        UrnSet a = new UrnSet();
+        UrnSet b = new UrnSet();
+        
+        URN sha1 = sha1();
+        URN ttroot = ttroot();
+        a.add(sha1);
+        a.add(ttroot);
+        b.add(sha1);
+        
+        assertTrue(a.containsAll(b));
+        assertFalse(b.containsAll(a));
+        
+        Set<URN> regular = new HashSet<URN>();
+        regular.add(sha1);
+        
+        assertTrue(a.containsAll(regular));
+        assertTrue(b.containsAll(regular));
+        assertTrue(regular.containsAll(b));
+        assertFalse(regular.containsAll(a));
+        
+        regular.add(ttroot);
+        assertTrue(a.containsAll(regular));
+        assertFalse(b.containsAll(regular));
+        assertTrue(regular.containsAll(b));
+        assertTrue(regular.containsAll(a));
+    }
+    
+    public void testRemoveAll() throws Exception {
+        UrnSet a = new UrnSet();
+        
+        URN sha1 = sha1();
+        URN ttroot = ttroot();
+        a.add(sha1);
+        a.add(ttroot);
+        
+        List<URN> l = new ArrayList<URN>();
+        l.add(sha1);l.add(sha1);l.add(sha1());l.add(sha1());
+        
+        assertEquals(2,a.size());
+        assertTrue(a.removeAll(l));
+        assertEquals(1,a.size());
+        assertFalse(a.contains(sha1));
+        assertTrue(a.contains(ttroot));
+        
+        l.add(ttroot);
+        a.removeAll(l);
+        assertTrue(a.isEmpty());
+    }
+    
+    public void testToArray() throws Exception {
+        UrnSet a = new UrnSet();
+        
+        URN sha1 = sha1();
+        URN ttroot = ttroot();
+        a.add(sha1);
+        a.add(ttroot);
+        
+        URN [] u = new URN[0];
+        u = a.toArray(u);
+        assertEquals(2,u.length);
+        
+        assertSame(u[0], sha1);
+        assertSame(u[1], ttroot);
+        
+        a.remove(ttroot);
+        u = a.toArray(u);
+        assertEquals(2,u.length);
+        
+        assertSame(u[0], sha1);
+        assertNull(u[1]);
+        
+        a.add(ttroot);
+        a.remove(sha1);
+        
+        u = a.toArray(u);
+        assertEquals(2,u.length);
+        assertSame(u[0], ttroot);
+        assertNull(u[1]);
+        
+        u = new URN[10];
+        Arrays.fill(u, ttroot);
+        a.clear();
+        a.add(sha1);
+        u = a.toArray(u);
+        assertEquals(10,u.length);
+        assertSame(sha1,u[0]);
+        assertNull(u[1]);
+        for (int i = 2; i < 10; i++)
+            assertSame(u[i],ttroot);
     }
     
     public void testSerializing() throws Exception {
