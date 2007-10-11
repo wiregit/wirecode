@@ -28,25 +28,25 @@ public class AudioPlayerListenerTest extends BaseTestCase {
     }
     
     public void testStateUpdated(){
-        player.fireStateUpdated( new AudioPlayerEvent(null, PlayerState.OPENED, 0) );
+        player.fireStateUpdated( new AudioPlayerEvent(PlayerState.OPENED, 0) );
     
         assertEquals(1, listener.recievedEvents.size());
 
         player.removeAudioPlayerListener(listener);
         
-        player.fireStateUpdated(new AudioPlayerEvent(null, PlayerState.OPENED, 0) );
+        player.fireStateUpdated(new AudioPlayerEvent(PlayerState.OPENED, 0) );
         
         assertEquals(1, listener.recievedEvents.size());
     }
     
     public void testOpened(){
-        player.fireOpened(null, null);
+        player.fireOpened(null);
         
         assertEquals(1, listener.recievedEvents.size());
         
         player.removeAudioPlayerListener(listener);
         
-        player.fireOpened(null, null);
+        player.fireOpened(null);
         
         assertEquals(1, listener.recievedEvents.size());
     }
@@ -67,8 +67,8 @@ public class AudioPlayerListenerTest extends BaseTestCase {
 
         List<Object> recievedEvents = new ArrayList<Object>();
         
-        public void opened(AudioSource audioSource, Map<String, Object> properties) {
-            recievedEvents.add(new opened(audioSource,properties));
+        public void opened(Map<String, Object> properties) {
+            recievedEvents.add(new opened(properties));
         }
 
         public void progress(int bytesread) {
@@ -82,7 +82,6 @@ public class AudioPlayerListenerTest extends BaseTestCase {
     
     private class progress{
         int b;
-        AudioBuffer buff;
         Map<String,Object>m;
         
         public progress(int bytes){
@@ -91,11 +90,9 @@ public class AudioPlayerListenerTest extends BaseTestCase {
     }
     
     private class opened{
-        AudioSource s;
         Map<String,Object> m;
         
-        public opened(AudioSource source, Map<String,Object> props){
-            s = source;
+        public opened(Map<String,Object> props){
             m = props;
         }
     }
