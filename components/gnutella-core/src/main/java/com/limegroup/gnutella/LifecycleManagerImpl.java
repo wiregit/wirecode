@@ -39,8 +39,10 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.gui.GuiCoreMediator;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -426,6 +428,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Network Listeners..."));
         initializeConnectionDispatcher();
         LOG.trace("STOP register connection dispatchers");
+        
+        LOG.trace("START StoreServer");
+        localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  GuiCoreMediator.getStoreManager().getHandler());
+        LOG.trace("END StoreServer");         
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();
