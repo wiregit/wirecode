@@ -391,11 +391,15 @@ public class DHTManagerImpl implements DHTManager {
                 DHTMode mode = getDHTMode();
                 boolean running = isRunning();
                 boolean bootstrapped = isBootstrapped();
+                boolean waiting = isWaitingForNodes();
+                boolean enabled= isEnabled();
                 Version version = getVersion();
                 data.put("mode", Byte.valueOf(mode.byteValue())); // 4
                 data.put("v", Integer.valueOf(version.shortValue())); // 4
                 data.put("r", running);
                 data.put("b", bootstrapped);
+                data.put("w", waiting);
+                data.put("e", enabled);
                 MojitoDHT dht = getMojitoDHT();
                 if (dht != null) {
                     data.put("s", dht.size().toByteArray()); // 3
@@ -697,7 +701,11 @@ public class DHTManagerImpl implements DHTManager {
         private long start, stop;
 
         public synchronized Object inspect() {
-            return Math.max(stop - start, 0);
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("ver",1);
+            ret.put("start",start);
+            ret.put("stop",stop);
+            return ret;
         }
 
         public synchronized void handleDHTEvent(DHTEvent evt) {
