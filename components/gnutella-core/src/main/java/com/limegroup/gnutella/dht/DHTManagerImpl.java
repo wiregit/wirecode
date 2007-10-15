@@ -389,9 +389,13 @@ public class DHTManagerImpl implements DHTManager {
                 Map<String, Object> data = new HashMap<String, Object>();
                 addVersion(data);
                 DHTMode mode = getDHTMode();
+                boolean running = isRunning();
+                boolean bootstrapped = isBootstrapped();
                 Version version = getVersion();
                 data.put("mode", Byte.valueOf(mode.byteValue())); // 4
                 data.put("v", Integer.valueOf(version.shortValue())); // 4
+                data.put("r", running);
+                data.put("b", bootstrapped);
                 MojitoDHT dht = getMojitoDHT();
                 if (dht != null) {
                     data.put("s", dht.size().toByteArray()); // 3
