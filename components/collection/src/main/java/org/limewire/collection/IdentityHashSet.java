@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
-    The following sample code demonstrates how to use an <code>IdentityHashSet</code>.
+    A set equivalent of {@link IdentityHashMap}.
 <pre>
     IdentityHashSet&lt;String&gt; ihs = new IdentityHashSet&lt;String&gt;(4);
 

@@ -5,7 +5,10 @@ import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 
 /**
- * Implements the <code>RUDPContext</code> interface.
+ * Aggregates key RUDP classes. <code>DefaultRUDPContext</code> contains
+ * a {@link RUDPMessageFactory}, a {@link TransportListener},
+ * {@link UDPService}, {@link RUDPSettings} and a {@link MessageDispatcher},
+ * along with getters for each object.
  */
 public class DefaultRUDPContext implements RUDPContext {
     

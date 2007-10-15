@@ -7,14 +7,17 @@ import org.limewire.concurrent.ManagedThread;
 
 
 /** 
- *  Manages the timing of messages within {@link UDPConnection} processing. 
- *  <p>
+ *  <p>Manages the timing of messages within {@link UDPConnection} processing. 
+ *  </p><p>
  *  To use the scheduler, you must first register and then schedule an event.
  *  Events are submitted as objects that extend {@link UDPTimerEvent} with 
  *  a {@link UDPTimerEvent#handleEvent()} method defined.
+ *  </p><p>
  *  Re-call {@link #scheduleEvent(UDPTimerEvent)} if the time of your event changes. 
+ *  </p>
+ *  The events must be unregister when you are done with them via 
+ *  {@link UDPTimerEvent#unregister()}. 
  */
-//  Finally, unregister events when you are done with them (how? I don't notice a way).
 
 public class UDPScheduler extends ManagedThread {
     

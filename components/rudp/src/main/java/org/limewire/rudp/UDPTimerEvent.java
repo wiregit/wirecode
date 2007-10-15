@@ -5,9 +5,12 @@ import java.lang.ref.WeakReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-/**
+/**<p>
  * An abstract class that provides a timed task to be repeated and rescheduled 
- * as needed.
+ * as needed. You must implement {@link #doActualEvent(UDPConnectionProcessor)}
+ * to call an appropriate {@link UDPConnectionProcessor} method.
+ * </p>
+ * When done with the event, unregister it.
  */
 public abstract class UDPTimerEvent implements Comparable<UDPTimerEvent> {
 	

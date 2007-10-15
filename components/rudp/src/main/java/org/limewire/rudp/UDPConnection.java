@@ -12,7 +12,7 @@ import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 
 /** 
- *  Creates a reliable UDP connection.
+ *  A reliable UDP connection.
  */
 public class UDPConnection extends AbstractNBSocket {
     

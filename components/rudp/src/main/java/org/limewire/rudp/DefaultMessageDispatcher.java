@@ -8,8 +8,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.rudp.messages.RUDPMessage;
 
-/** Provides a default implementation of the message dispatcher. The multiplexor
- * is of type {@link UDPMultiplexor}.
+/** 
+ * Dispatches messages.
  */
 public class DefaultMessageDispatcher implements MessageDispatcher {
     

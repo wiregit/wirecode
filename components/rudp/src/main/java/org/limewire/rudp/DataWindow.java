@@ -6,21 +6,20 @@ import org.limewire.collection.LongHashMap;
 import org.limewire.rudp.messages.DataMessage;
 
 
-/**
- * Defines a variable sized block of packets to send or receive using UDP. 
- * The block has a possibility to be out of order data. Data is accepted 
- * within a certain window size.
- * <p>
- * Acknowledged data is released, whereas un-acknowledge data is maintained in
- * the <code>DataWindow</code>
- * <p>
+/**<p>
+ * A variable sized block of packets to send or receive using UDP with 
+ * a possible out of order data. Data is accepted within a certain window size.
+ * </p>
+ * <p>Acknowledged data is released, whereas un-acknowledge data is maintained in
+ * the <code>DataWindow</code>.
+ * </p><p>
  * For readers, the data can be forwarded once missing data (aka holes) within the 
  * window is received. 
- * <p>
+ * </p><p>
  * For the writer, if the round trip time (RTT) for ACK messages of the older 
  * data is greatly exceeded ({@link #getRTTVar()}), the data can be resent to 
  * try to receive an ACK message.
- *<p>
+ *</p>
  * All methods in this class rely on external synchronization of access.
  */ 
  /*  TODO: DataMessage timing still requires work.
@@ -219,6 +218,8 @@ public class DataWindow
      */
     //For more information on Computing TCP's Retransmission Timer, see
     //http://www.ietf.org/rfc/rfc2988.txt
+    //DataWindow is not TCP, but the rfc document is a good
+    //resource to find similar methods.
     public boolean acksAppearToBeMissing(long time, int multiple) {
 		int irto = (int)rto;
 		// Check for first record being old
