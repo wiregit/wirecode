@@ -420,13 +420,13 @@ public class DHTManagerImpl implements DHTManager {
                 if (dht != null) {
                     RouteTable routeTable = dht.getRouteTable();
                     synchronized(routeTable) {
-                        BigInteger local = routeTable.getLocalNode().getNodeID().toBigInteger();
-                        List<BigInteger> activeContacts = getBigInts(routeTable.getActiveContacts());
-                        data.put("acc", StatsUtils.quickStatsBigInt(activeContacts).getMap()); // 5*20 + 4
-                        data.put("accx",StatsUtils.quickStatsBigInt(getXorDistances(local, activeContacts)).getMap()); // 5*20 + 4
-                        List<BigInteger> cachedContacts = getBigInts(routeTable.getCachedContacts());
-                        data.put("ccc", StatsUtils.quickStatsBigInt(cachedContacts).getMap()); // 5*20 + 4
-                        data.put("cccx", StatsUtils.quickStatsBigInt(getXorDistances(local, cachedContacts)).getMap()); // 5*20 + 4
+                        double local = getDoubleKUID(routeTable.getLocalNode().getNodeID());
+                        List<Double> activeContacts = getDouble(routeTable.getActiveContacts());
+                        data.put("acc", StatsUtils.quickStatsDouble(activeContacts).getMap()); // 5*20 + 4
+                        data.put("accx",StatsUtils.quickStatsDouble(getXorDistances(local, activeContacts)).getMap()); // 5*20 + 4
+                        List<Double> cachedContacts = getDouble(routeTable.getCachedContacts());
+                        data.put("ccc", StatsUtils.quickStatsDouble(cachedContacts).getMap()); // 5*20 + 4
+                        data.put("cccx", StatsUtils.quickStatsDouble(getXorDistances(local, cachedContacts)).getMap()); // 5*20 + 4
                         
                         List<Double> activeIps = new ArrayList<Double>();
                         List<Double> cachedIps = new ArrayList<Double>();
@@ -491,12 +491,12 @@ public class DHTManagerImpl implements DHTManager {
                 if (dht != null) {
                     RouteTable routeTable = dht.getRouteTable();
                     synchronized(routeTable) {
-                        BigInteger local = routeTable.getLocalNode().getNodeID().toBigInteger();
+                        double local = getDoubleKUID(routeTable.getLocalNode().getNodeID());
                         Collection<Bucket> buckets = routeTable.getBuckets();
                         
                         List<Double> depths = new ArrayList<Double>(buckets.size());
                         List<Double> sizes = new ArrayList<Double>(buckets.size());
-                        List<BigInteger> kuids = new ArrayList<BigInteger>(buckets.size());
+                        List<Double> kuids = new ArrayList<Double>(buckets.size());
                         List<Double> times = new ArrayList<Double>(buckets.size());
                         
                         double fresh = 0;
@@ -504,15 +504,15 @@ public class DHTManagerImpl implements DHTManager {
                         for (Bucket bucket : buckets) {
                             depths.add((double)bucket.getDepth()); 
                             sizes.add((double)bucket.size());
-                            kuids.add(bucket.getBucketID().toBigInteger());
+                            kuids.add(getDoubleKUID(bucket.getBucketID()));
                             times.add((double)(now - bucket.getTimeStamp()));
                             if (!bucket.isRefreshRequired())
                                 fresh++;
                         }
                         
                         // bucket kuid distribution *should* be similar to the others, but is it?
-                        data.put("bk", StatsUtils.quickStatsBigInt(kuids).getMap()); // 5*20 + 4
-                        data.put("bkx", StatsUtils.quickStatsBigInt(getXorDistances(local, kuids)).getMap()); // 5*20 + 4
+                        data.put("bk", StatsUtils.quickStatsDouble(kuids).getMap()); // 5*20 + 4
+                        data.put("bkx", StatsUtils.quickStatsDouble(getXorDistances(local, kuids)).getMap()); // 5*20 + 4
                         data.put("bd", StatsUtils.quickStatsDouble(depths).getMap()); // 5*(should be one byte) + 4
                         data.put("bs", StatsUtils.quickStatsDouble(sizes).getMap()); // 5*(should be one byte) + 4
                         data.put("bt", StatsUtils.quickStatsDouble(times).getMap()); // 5*(should be one byte) + 4
@@ -557,37 +557,36 @@ public class DHTManagerImpl implements DHTManager {
                 MojitoDHT dht = getMojitoDHT();
                 if (dht != null) {
                     Database database = dht.getDatabase();
-                    BigInteger local = dht.getLocalNodeID().toBigInteger();
+                    Double local = getDoubleKUID(dht.getLocalNodeID());
                     
-                    List<BigInteger> primaryKeys = null;
+                    List<Double> primaryKeys = null;
                     List<Double> requestLoads = null;
-                    List<BigInteger> distanceToLoad = null;
+                    List<Double> distanceToLoad = null;
                     synchronized (database) {
                         data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
                         Set<KUID> keys = database.keySet();
                         
-                        primaryKeys = new ArrayList<BigInteger>(keys.size());
+                        primaryKeys = new ArrayList<Double>(keys.size());
                         requestLoads = new ArrayList<Double>(keys.size());
-                        distanceToLoad = new ArrayList<BigInteger>(keys.size());
+                        distanceToLoad = new ArrayList<Double>(keys.size());
                         
                         for (KUID primaryKey : keys) {
-                            BigInteger big = primaryKey.toBigInteger();
+                            Double big = getDoubleKUID(primaryKey);
                             double load = database.getRequestLoad(primaryKey, false);
                             primaryKeys.add(big);
                             requestLoads.add(load);
-                            if (local.equals(big))
+                            if (local == big)
                                 continue;
-                            big = local.xor(big);
-                            long bigLoad = (long) (load * Integer.MAX_VALUE);
-                            distanceToLoad.add(big.subtract(BigInteger.valueOf(bigLoad)));
+                            big = (double)(local.longValue() ^ big.longValue());
+                            distanceToLoad.add(big - load * Integer.MAX_VALUE);
                         }
                     }
 
-                    List<BigInteger> storedXorDistances = getXorDistances(local, primaryKeys);
-                    data.put("dsk", StatsUtils.quickStatsBigInt(primaryKeys).getMap()); // 5*20 + 4
+                    List<Double> storedXorDistances = getXorDistances(local, primaryKeys);
+                    data.put("dsk", StatsUtils.quickStatsDouble(primaryKeys).getMap()); // 5*20 + 4
                     data.put("drl", StatsUtils.quickStatsDouble(requestLoads).getMap()); // 5*4 + 4
-                    data.put("dskx", StatsUtils.quickStatsBigInt(storedXorDistances).getMap()); // 5*20 + 4
-                    data.put("dxlt", StatsUtils.quickStatsBigInt(distanceToLoad).getTTestMap());
+                    data.put("dskx", StatsUtils.quickStatsDouble(storedXorDistances).getMap()); // 5*20 + 4
+                    data.put("dxlt", StatsUtils.quickStatsDouble(distanceToLoad).getTTestMap());
                 }
                 return data;
             }
@@ -662,14 +661,14 @@ public class DHTManagerImpl implements DHTManager {
     }
     
     /**
-     * @return a list of XOR distances from a provided bigint
+     * @return a list of XOR distances from a provided node
      */
-    private static List<BigInteger> getXorDistances(BigInteger local, List<BigInteger> others) {
-        List<BigInteger> distances = new ArrayList<BigInteger>(others.size());
-        for (BigInteger bi : others) {
+    private static List<Double> getXorDistances(Double local, List<Double> others) {
+        List<Double> distances = new ArrayList<Double>(others.size());
+        for (Double l : others) {
             // Skip the local Node!
-            if (!local.equals(bi)) 
-                distances.add(local.xor(bi));
+            if (l != local)
+                distances.add((double)((local.longValue() ^ l.longValue())));
         }
         return distances;
     }
@@ -677,11 +676,24 @@ public class DHTManagerImpl implements DHTManager {
     /**
      * @return a list of big integers from a collection of contacts
      */
-    private static List<BigInteger> getBigInts(Collection <? extends Contact> nodes) {
-        List<BigInteger> bigints = new ArrayList<BigInteger>(nodes.size());
+    private static List<Double> getDouble(Collection <? extends Contact> nodes) {
+        List<Double> doubles = new ArrayList<Double>(nodes.size());
         for (Contact node : nodes) 
-            bigints.add(node.getNodeID().toBigInteger());
-        return bigints;
+            doubles.add(getDoubleKUID(node.getNodeID()));
+        return doubles;
+    }
+    
+    /**
+     * @return the 32 most significant bits from a KUID as a double primitive.
+     */
+    private static double getDoubleKUID(KUID k) {
+        byte [] b = k.getBytes();
+        long x = b[0];
+        for (int i = 1; i < 4; i++) {
+            x >>>= 8;
+            x |= b[i];
+        }
+        return x;
     }
     
     /**

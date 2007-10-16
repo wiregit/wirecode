@@ -37,52 +37,6 @@ public class StatsUtils {
     
     /**
      * @return the number, average, variance, min, median and max of a
-     * list of BigIntegers
-     */
-    public static BigIntStats quickStatsBigInt(List<BigInteger> l) {
-        BigIntStats ret = new BigIntStats();
-        ret.number = l.size();
-        if (ret.number < 2)
-            return ret;
-        Collections.sort(l);
-        ret.min = l.get(0);
-        ret.max = l.get(l.size() - 1);
-        ret.med = getQuartile(Quartile.MED, l);
-        if (ret.number > 6) {
-            ret.q1 = getQuartile(Quartile.Q1, l);
-            ret.q3 = getQuartile(Quartile.Q3, l);
-        }
-        
-        BigInteger sum = BigInteger.valueOf(0);
-        for (BigInteger bi : l) 
-            sum = sum.add(bi);
-        
-        ret.avg = sum.divide(BigInteger.valueOf(l.size()));
-        ret.st = BigInteger.valueOf(0);
-        
-        sum = BigInteger.valueOf(0);
-        BigInteger sum3 = BigInteger.valueOf(0);
-        BigInteger sum4 = BigInteger.valueOf(0);
-        for (BigInteger bi : l) {
-            if (bi.compareTo(ret.avg) > 0)
-                ret.st = ret.st.add(BigInteger.valueOf(1));
-            BigInteger dist = bi.subtract(ret.avg);
-            BigInteger dist2 = dist.multiply(dist);
-            BigInteger dist3 = dist2.multiply(dist);
-            BigInteger dist4 = dist2.multiply(dist2);
-            sum = sum.add(dist2);
-            sum3 = sum3.add(dist3);
-            sum4 = sum4.add(dist4);
-        }
-        BigInteger div = BigInteger.valueOf(l.size() - 1);
-        ret.m2 = sum.divide(div);
-        ret.m3 = sum3.divide(div);
-        ret.m4 = sum4.divide(div);
-        return ret;
-    }
-    
-    /**
-     * @return the number, average, variance, min, median and max of a
      * list of Integers
      */
     public static DoubleStats quickStatsDouble(List<Double> l) {
@@ -151,29 +105,6 @@ public class StatsUtils {
         return ret;
     }
     
-    /**
-     * the a specified quartile of a list of BigIntegers. It uses
-     * type 6 of the quantile() function in R as explained in the
-     * R help: 
-     * 
-     * "Type 6: p(k) = k / (n + 1). Thus p(k) = E[F(x[k])]. 
-     * This is used by Minitab and by SPSS." 
-     */
-    private static BigInteger getQuartile(Quartile quartile, List<BigInteger> l) {
-        double q1 = (l.size()+1) * (quartile.getType() / 4.0);
-        int q1i = (int)q1;
-        if (q1 - q1i == 0) 
-            return l.get(q1i - 1);
-        
-        int quart = (int)(4 * (q1 - q1i));
-        BigInteger q1a = l.get(q1i - 1);
-        BigInteger q1b = l.get(q1i);
-        q1b = q1b.subtract(q1a);
-        q1b = q1b.multiply(BigInteger.valueOf(quart)); //1st multiply, then divide
-        q1b = q1b.divide(BigInteger.valueOf(4)); // less precision is lost that way
-        q1a = q1a.add(q1b);
-        return q1a;
-    }
     
     /**
      * the a specified quartile of a list of Integers. It uses
@@ -237,6 +168,8 @@ public class StatsUtils {
         BigInteger max = Collections.max(data);
         BigInteger range = max.subtract(min).add(BigInteger.valueOf(1));
         BigInteger step = range.divide(BigInteger.valueOf(breaks));
+        if (step.equals(BigInteger.ZERO))
+            return Collections.emptyList(); // too small 
         for (BigInteger point : data) {
             int index = point.subtract(min).divide(step).intValue();
             // Math.min necessary because rounding error -> AIOOBE
@@ -411,46 +344,6 @@ public class StatsUtils {
         }
     }
 
-    /**
-     * Extension of <code>Stats</code> using {@link BigInteger}. 
-     */
-    public static class BigIntStats extends Stats {
-        public BigIntStats(){}
-        BigInteger min, max, med, q1, q3, avg, m2, m3, m4, mode, st;
-        public Object getMin() {
-            return min.toByteArray();
-        }
-        public Object getMax() {
-            return max.toByteArray();
-        }
-        public Object getMed() {
-            return med.toByteArray();
-        }
-        public Object getQ1() {
-            return q1.toByteArray();
-        }
-        public Object getQ3() {
-            return q3.toByteArray();
-        }
-        public Object getAvg() {
-            return avg.toByteArray();
-        }
-        public Object getM2() {
-            return m2.toByteArray();
-        }
-        public Object getM3() {
-            return m3.toByteArray();
-        }
-        public Object getM4() {
-            return m4.toByteArray();
-        }
-        public Object getMode() {
-            return mode.toByteArray();
-        }
-        public Object getST() {
-            return st.toByteArray();
-        }
-    }
 
     /**
      * @return list of sample ranks
