@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-09-29 21:21+0000\n"
+"PO-Revision-Date: 2007-10-13 10:17+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Norwegian Bokmal <nb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
@@ -912,8 +912,9 @@ msgid "Display the {0} Screen"
 msgstr "Vis {0} Sjermen"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
+#, fuzzy
 msgid "LimeWire: Enabling Open Information Sharing"
-msgstr ""
+msgstr "LimeWire Muligjør: \"Åpen Informasjons deling\""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:393
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:397
@@ -2967,206 +2968,210 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:115
 msgid "No, Share Nothing"
-msgstr ""
+msgstr "Nei, Ikke Del Noe"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:118
 msgid "Do not show this message again."
-msgstr ""
+msgstr "Ikke vis denne meldingen igjen."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:121
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
 "try again?"
 msgstr ""
+"Du valgte OK, men valgte ikke noen filer til å bli delt. Vil du prøve igjen?"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadButtons.java:49
 msgid "Queue"
-msgstr ""
+msgstr "Kø"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:57
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:58
 msgid "Queued"
-msgstr ""
+msgstr "Lagt i kø"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:66
 #, java-format
 msgid "Connecting ({0} hosts tried)..."
-msgstr ""
+msgstr "Kobler til ({0} verter prøvd)..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:72
 msgid "Waiting On Busy Hosts"
-msgstr ""
+msgstr "Venter på Opptatt Vert"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:78
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:71
 msgid "Complete"
-msgstr ""
+msgstr "Fullført"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:84
 msgid "Aborted"
-msgstr ""
+msgstr "Avbrutt"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:90
 msgid "Awaiting Sources"
-msgstr ""
+msgstr "Venter på Kilder"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:96
 msgid "Downloading from"
-msgstr ""
+msgstr "Laster ned Fra"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:103
 msgid "Disk Problem"
-msgstr ""
+msgstr "Disk Problem"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:109
 msgid "File Corrupted"
-msgstr ""
+msgstr "Filen er Ødelagt"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:115
 msgid "Waiting"
-msgstr ""
+msgstr "Venter"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:121
 msgid "Need More Sources"
-msgstr ""
+msgstr "Trenger Flere Kilder"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:127
 msgid "Waiting for Stable Connections"
-msgstr ""
+msgstr "Venter på Stabil Tilkobling"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:133
 msgid "Waiting in Line, Position"
-msgstr ""
+msgstr "Venter i Kø, Posisjon"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:139
 msgid "Verifying File Contents..."
-msgstr ""
+msgstr "Vertifiserer Innhold..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:145
 msgid "Saving File..."
-msgstr ""
+msgstr "Lagrer Fil..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:151
 msgid "Recovering Corrupted File"
-msgstr ""
+msgstr "Reparerer Ødelagt Fil"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:157
 msgid "Pausing..."
-msgstr ""
+msgstr "Går i Pausemodus..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:163
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:39
 msgid "Paused"
-msgstr ""
+msgstr "Satt på pause"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:167
 msgid "Content Removed"
-msgstr ""
+msgstr "Innhold Fjernet"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:171
 msgid "Resuming..."
-msgstr ""
+msgstr "Gjennopptar..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:175
 msgid "Downloading .torrent file..."
-msgstr ""
+msgstr "Laster ned .torrent fil..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:181
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:125
 msgid "Average Bandwidth"
-msgstr ""
+msgstr "Gjennomsnittlig Båndbredde"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:187
 msgid "Valid Alternate Locations"
-msgstr ""
+msgstr "Gyldige Alternative Steder"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:193
 msgid "Invalid Alternate Locations"
-msgstr ""
+msgstr "Ugyldige Alternative Steder"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:199
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:131
 msgid "Started On"
-msgstr ""
+msgstr "Startet"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:205
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:137
 msgid "Finished On"
-msgstr ""
+msgstr "Avsluttet"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:211
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:143
 msgid "Time Spent"
-msgstr ""
+msgstr "Tid Brukt"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:217
 msgid "Chunks"
-msgstr ""
+msgstr "Småfiler"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:223
 msgid "Lost To Corruption"
-msgstr ""
+msgstr "Tapt til Korrupsjon"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:235
 msgid "hosts"
-msgstr ""
+msgstr "verter"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:238
 msgid "host"
-msgstr ""
+msgstr "vert"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:244
 msgid "A more specific search may be required..."
-msgstr ""
+msgstr "Et mer Spesifisert søk kan være Nødvendig..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:248
 msgid ""
 "The owner of this content has requested that this file be removed from the "
 "network. To learn more, double-click on the download (or click preview)."
 msgstr ""
+"Eieren av dette Innholdet har sendt en forespørsel om at filen skal bli "
+"slettet fra Nettverket. For å lære mer, dobbelklikk på nedlastingen (eller "
+"trykk Kjør Fil)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:254
 msgid "Possible Hosts"
-msgstr ""
+msgstr "Mulige Verter"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:257
 msgid "Busy Hosts"
-msgstr ""
+msgstr "Opptatte Verter"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:260
 msgid "Remotely Queued"
-msgstr ""
+msgstr "Avstandsplassert i Kø"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:263
 msgid "Locating Sources..."
-msgstr ""
+msgstr "Finner Kilder..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:266
 msgid "LimeWire cannot download this torrent.  The tracker responded"
-msgstr ""
+msgstr "LimeWire kan ikke laste ned denne torrenten. Trackeren svarte"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:356
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:372
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:96
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:62
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:234
 msgid "Size"
-msgstr ""
+msgstr "Størrelse"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:388
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:342
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:72
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:250
 msgid "Chat"
-msgstr ""
+msgstr "Chat"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:396
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:258
 msgid "Progress"
-msgstr ""
+msgstr "Fremgang"
 
 #. *
 #. * The resource to use for the speed property.
@@ -3179,7 +3184,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SelectorsHandler.java:157
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:266
 msgid "Speed"
-msgstr ""
+msgstr "Hastighet"
 
 #. connectionsPane.add(new AutoConnectPaneItem("AUTO_CONNECT"));
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
@@ -3187,69 +3192,69 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:950
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:328
 msgid "BitTorrent"
-msgstr ""
+msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1011
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:793
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1229
 msgid "Launch"
-msgstr ""
+msgstr "Start"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1013
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1231
 msgid "Launch Selected Files"
-msgstr ""
+msgstr "Kjør Valgte Filer"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1030
 msgid "Show in Library"
-msgstr ""
+msgstr "Vis i Bibliotek"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1032
 msgid "Show Download in Library"
-msgstr ""
+msgstr "Vis Nedlasting i Biblioteket"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:186
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:315
 msgid "Downloads"
-msgstr ""
+msgstr "Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:226
 msgid "Loading Download Window..."
-msgstr ""
+msgstr "Laster Nedlastinger..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:259
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:769
 msgid "Find More Sources for Download"
-msgstr ""
+msgstr "Finn Flere Kilder for Nedlasting"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:261
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:771
 msgid "Find Sources"
-msgstr ""
+msgstr "Finn Kilder"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:263
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:773
 msgid "Try to Find Additional Sources for Downloads"
-msgstr ""
+msgstr "Prøv å Finn Ekstra Kilder for Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:267
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:776
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
 msgid "Resume Download"
-msgstr ""
+msgstr "Fortsett Nedlasting"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:269
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:778
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:938
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1322
 msgid "Resume"
-msgstr ""
+msgstr "Gjenoppta"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:271
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:780
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:940
 msgid "Reattempt Selected Downloads"
-msgstr ""
+msgstr "Prøv Valgte Nedlastinger Om Igjen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:380
 #, java-format
@@ -3258,21 +3263,24 @@ msgid ""
 "clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
 "list of available skins."
 msgstr ""
+"Du har lastet ned et Tema ved navn \"{0}\", du kan aktivere det nye temaet "
+"ved å trykke \"{1}\" i \"{2}\"->\"{3}\" menyen og så velge det fra listen "
+"over tilgjengelige Temaer."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:382
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:179
 msgid "&Refresh Skins"
-msgstr ""
+msgstr "&Oppdater Temaer"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:383
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:26
 msgid "&View"
-msgstr ""
+msgstr "&Vis"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:384
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
 msgid "&Apply Skins"
-msgstr ""
+msgstr "&Velg Tema"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:388
 #, java-format
@@ -3280,6 +3288,7 @@ msgid ""
 "You have downloaded a new skin titled {0}. Would you like to use this new "
 "skin?"
 msgstr ""
+"Du har lastet ned et nytt Tema kalt \"{0}.\" Vil du bruke dette Temaet?"
 
 #. could not read torrent file or bad torrent file.
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:455
@@ -3287,139 +3296,143 @@ msgid ""
 "LimeWire was unable to load the specified torrent file, - it may be "
 "malformed or LimeWire does not have permission to access this file."
 msgstr ""
+"LimeWire klarte ikke og laste den spesifisere torrent filen, - den kan være "
+"... eller at LimeWire ikke har rettigheter til og bruke denne filen."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:614
 msgid "Choose Save Location"
-msgstr ""
+msgstr "Velg et Lagrings Sted"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:713
 msgid "Search..."
-msgstr ""
+msgstr "Søker..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
 msgid "Clear Download"
-msgstr ""
+msgstr "Fjern Nedlasting"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:789
 msgid "Clear Selected Downloads"
-msgstr ""
+msgstr "Fjern Valgte Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:791
 msgid "Launch Download"
-msgstr ""
+msgstr "Kjør Nedlasting"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:795
 msgid "Launch Selected Downloads"
-msgstr ""
+msgstr "Kjør Valgte Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:799
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:860
 msgid "Cancel Download"
-msgstr ""
+msgstr "Avbryt Nedlasting"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:803
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:864
 msgid "Cancel Selected Downloads"
-msgstr ""
+msgstr "Avbryt Valgte Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:805
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:918
 msgid "Preview Download"
-msgstr ""
+msgstr "Forhåndsvis Nedlasting"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:807
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:920
 msgid "Preview"
-msgstr ""
+msgstr "Forhåndsvisning"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:809
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:922
 msgid "Preview Selected Downloads"
-msgstr ""
+msgstr "Forhåndsvis Valgte Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:877
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:46
 msgid "Chat with Host"
-msgstr ""
+msgstr "Snakk med Vert"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:889
 msgid "Clear All Inactive Downloads"
-msgstr ""
+msgstr "Fjern alle Inaktive Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:891
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 msgid "Clear Inactive"
-msgstr ""
+msgstr "Fjern Inaktive"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:893
 msgid "Remove Inactive Downloads"
-msgstr ""
+msgstr "Fjern Inaktive Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:953
 msgid "Pause Download"
-msgstr ""
+msgstr "Pause Nedlasting"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:955
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:100
 msgid "Pause"
-msgstr ""
+msgstr "Pause"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:957
 msgid "Pause Selected Downloads"
-msgstr ""
+msgstr "Pause Valgte Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:969
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:971
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:855
 msgid "Explore"
-msgstr ""
+msgstr "Utforsk"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:973
 msgid "Open Folder Containing the File"
-msgstr ""
+msgstr "Åpne Målmappen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:986
 msgid "Move the Selected Download Closer to Becoming Active"
-msgstr ""
+msgstr "Flytt den valgte Nedlastingen nærmere å bli Aktiv"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1005
 msgid "Move the Selected Download Further from Becoming Active"
-msgstr ""
+msgstr "Flytt den valgte Nedlastingen lengre fra å bli Aktiv"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1024
+#, fuzzy
 msgid "Change File Location..."
-msgstr ""
+msgstr "Endre Fil Lokalisjon..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1027
 msgid "Edit the Final Filename of the Download"
-msgstr ""
+msgstr "Endre det Endelige Filnavnet til Nedlastingen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:127
 msgid "Always Save As..."
-msgstr ""
+msgstr "Alltid Lagre Som..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:129
 msgid "Always Append (#)"
-msgstr ""
+msgstr "Legg Alltid Til (#)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:131
 msgid "Always Ask"
-msgstr ""
+msgstr "Alltid Spørr"
 
 #. default action settings panel
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:142
+#, fuzzy
 msgid "Choose a Default Action:"
-msgstr ""
+msgstr "Velg en Standar Aksjon:"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:213
 #, java-format
 msgid "Warning: {0}"
-msgstr ""
+msgstr "Advarsel: {0}"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:219
 #, java-format
 msgid "Error: {0}"
-msgstr ""
+msgstr "Feil: {0}"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:227
 #, java-format
@@ -3427,86 +3440,90 @@ msgid ""
 "<b>Note</b>: A file with the same content already exists in the library at "
 "{0}"
 msgstr ""
+"<b>Merk</b>: En fil med samme innhold finnes allerede i Biblioteket {0}"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:314
 msgid "Overwrite"
-msgstr ""
+msgstr "Overskriv"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:316
 msgid "Overwrite the Existing File"
-msgstr ""
+msgstr "Overskriv den Ekstisterende Filen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:334
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:42
 msgid "Save As..."
-msgstr ""
+msgstr "Lagre Som..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:336
 msgid "Choose a different location for the Download"
-msgstr ""
+msgstr "Velg et annet sted å laste ned Filen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:362
 msgid "Append (#)"
-msgstr ""
+msgstr "Legg Til (#)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:364
 msgid "Appends (#) to filename"
-msgstr ""
+msgstr "Legg (#) til Filnavnet"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:378
 msgid "Cancel the Download"
-msgstr ""
+msgstr "Avbryt Nedlastingen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:134
 msgid ""
 "LimeWire may not be able to start the download you have selected unless you "
 "start a search for it."
 msgstr ""
+"LimeWire kan ikke starte nedlastingen du har valgt med mindre du søker etter "
+"den."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:185
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1020
 #, java-format
 msgid "You are already downloading this file to \"{0}\"."
-msgstr ""
+msgstr "Du laster allerede ned filen til \"{0}\"."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:223
 #, java-format
 msgid "You already have the exact same file at {0}"
-msgstr ""
+msgstr "Du har allerede akkurat samme filen på {0}"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:226
 msgid "Do you want to continue downloading anyway?"
-msgstr ""
+msgstr "Vil du fortsette å laste ned uansett?"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:228
 msgid "Continue"
-msgstr ""
+msgstr "Fortsett"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:242
 msgid "Same File Already In Library"
-msgstr ""
+msgstr "Samme fil finnes allerede i Biblioteket"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:255
 msgid "Save Download As"
-msgstr ""
+msgstr "Lagre Nedlasting Som"
 
 #: gui/com/limegroup/gnutella/gui/download/MagnetDownloaderFactory.java:32
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:282
 msgid "No Filename"
-msgstr ""
+msgstr "Inget Filnavn"
 
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:33
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:56
 msgid "Active"
-msgstr ""
+msgstr "Aktiv"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:33
+#, fuzzy
 msgid "File & Protocol Associations"
-msgstr ""
+msgstr "Fil & Protocol Samarbeid"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:33
 msgid "What type of resources should LimeWire open?"
-msgstr ""
+msgstr "Hvilke utviklinger skal LimeWire åpne?"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:64
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:69

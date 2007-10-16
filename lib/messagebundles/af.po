@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-09-17 00:29+0000\n"
+"PO-Revision-Date: 2007-10-06 13:26+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -115,6 +115,9 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"LimeWire was nie instaat om die onkomplete Dokument vir die geselekteerde "
+"aflaai-sessie te skryf nie, omdat U nie regte het om in die onkomplete leêr "
+"te werk nie. Om verder te werk selekteer asseblief `n ander leêr."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:42
 msgid ""
@@ -122,6 +125,9 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"LimeWire was nie instaat om die onkomplete dokument vir die geselkteerde "
+"aflaai-sessie ooptemaak nie, omdat die dokument karakters bevat wat U "
+"Operateringstelsel nie aanvaar nie."
 
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
@@ -130,6 +136,8 @@ msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
 msgstr ""
+"Die dokument wat gebruik word om U persoonlike voorkeure in te stoor is "
+"beskadig, LimeWire sal nou die oorspronklike keuses gebruik"
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
 #: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
@@ -137,6 +145,8 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
+"LimeWire was nie instaat om `n weg ooptemaak om vir inkomende konneksies te "
+"luister nie, Sommige van LimeWire se funksies mag nie werk soos verwag nie."
 
 #: core/com/limegroup/gnutella/DownloadManager.java:216
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -145,7 +155,7 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 msgid "Loading TLS Encryption..."
-msgstr ""
+msgstr "Laai \"TLS\" Enkripsie"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:289
 #, fuzzy
@@ -154,7 +164,7 @@ msgstr "Laai Veilige Inhoud Bestuur"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:294
 msgid "Loading Message Router..."
-msgstr ""
+msgstr "Laai Boodskap Wysiger"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:299
 msgid "Loading Upload Management..."
@@ -162,11 +172,11 @@ msgstr "Laai Oplaai Bestuur"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:308
 msgid "Loading Connection Listener..."
-msgstr ""
+msgstr "Laai Konneksie Opsoeker"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:317
 msgid "Loading Connection Management..."
-msgstr ""
+msgstr "Laai Konneksie Bestuur"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:322
 msgid "Loading Download Management..."
@@ -186,7 +196,7 @@ msgstr "Laai Gedeelde Leërs..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 msgid "Loading bittorrent Management..."
-msgstr ""
+msgstr "Laai Bittorrent Bestuur..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:358
 msgid "Loading magnet Management..."
@@ -194,27 +204,27 @@ msgstr "Laai magnet Bestuur..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 msgid "Loading Old Downloads..."
-msgstr ""
+msgstr "Laai vooraf afgelaaide dokumente..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "Kyk Vir Opgedateerde Weergawe"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
-msgstr ""
+msgstr "Laai Gewysigde Opsoeker"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
 msgid "Loading Magnet Listener..."
-msgstr ""
+msgstr "Laai \"Magnet\" Opsoeker..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Peer Listener..."
-msgstr ""
+msgstr "Laai Eweknieë Opsoeker..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Loading Stale Connection Management..."
-msgstr ""
+msgstr "Laai Ou Konneksie Bestuur..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
@@ -222,12 +232,12 @@ msgstr "Laai Gestoorde Leërs..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 msgid "Loading Spam Management..."
-msgstr ""
+msgstr "Laai \"Spam\" Bestuur..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:41
 msgid "All Types"
-msgstr "Enige Iets"
+msgstr "Enige Tipe"
 
 #: core/com/limegroup/gnutella/MediaType.java:42
 msgid "Documents"
@@ -235,7 +245,7 @@ msgstr "Dokumente"
 
 #: core/com/limegroup/gnutella/MediaType.java:43
 msgid "Programs"
-msgstr "Programmatuur"
+msgstr "Programme"
 
 #: core/com/limegroup/gnutella/MediaType.java:44
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:86
@@ -248,7 +258,7 @@ msgstr "Klank"
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
-msgstr "Video"
+msgstr "Video-Beeld"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Images"
@@ -268,21 +278,24 @@ msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
+"Een of meer van die URL`s in die MAGNET Skakel Was Foutief, U Dokument mag "
+"dalk nie korrek aflaai nie."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr "U het klaar {0} afgelaai"
+msgstr "U het klaar Die Dokument Afgelaai {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
-#, java-format
+#, fuzzy
 msgid "You are already downloading this file to {0}"
-msgstr ""
+msgstr "U is alreeds besig om die dokument aftelaai na {0}"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
+#, fuzzy
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr ""
+msgstr "Vir Beter dienste kry LimeWire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
@@ -296,8 +309,9 @@ msgstr "Koop LimeWire PRO  en help ons om aflaai spoed te verbeter."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
+#, fuzzy
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr ""
+msgstr "Vir beter aflaai opsies kry LimeWire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
@@ -306,13 +320,16 @@ msgstr "Ondersteun oop netwerke. Kry LimeWire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
+#, fuzzy
 msgid "Support open source and open protocols. Get LimeWire PRO."
 msgstr ""
+"Ondersteun Open source-sagteware en Open Source-Protokole. Kry LimeWire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
+#, fuzzy
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr ""
+msgstr "Vir Beter Spoed. Kry LimeWire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
@@ -330,24 +347,24 @@ msgstr "Ontwikkeling van LimeWire kos geld. Kry PRO."
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #, fuzzy
 msgid "Title"
-msgstr "&Lêer"
+msgstr "Titel:"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Artist"
-msgstr ""
+msgstr "Kunstenaar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 msgid "Album"
-msgstr ""
+msgstr "Album"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 msgid "Genre"
-msgstr ""
+msgstr "Kategorie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 msgid "Track"
-msgstr ""
+msgstr "Snit"
 
 #. *
 #. * The resource to use for the extension property.
@@ -366,83 +383,91 @@ msgstr "Tipe"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:35
 msgid "Length"
-msgstr ""
+msgstr "Lengte"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 msgid "Year"
-msgstr ""
+msgstr "Jaar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #, fuzzy
 msgid "Language"
-msgstr "Vera&nder Taal"
+msgstr "Taal:"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:43
 msgid "Bitrate"
-msgstr ""
+msgstr "Bistempo"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 #, fuzzy
 msgid "Comments"
-msgstr "Dokumente"
+msgstr "Kommentaar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 #, fuzzy
 msgid "Action"
-msgstr "Lokasie"
+msgstr "Aksie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
+#, fuzzy
 msgid "Copyright"
-msgstr ""
+msgstr "Kopiereg"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
+#, fuzzy
 msgid "License Type"
-msgstr ""
+msgstr "Lisensie Tipe"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
 #, fuzzy
 msgid "Director"
-msgstr "Connect Direk"
+msgstr "Direkteur"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
+#, fuzzy
 msgid "Producer"
-msgstr ""
+msgstr "Vervaardiger"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 #, fuzzy
 msgid "Studio"
-msgstr "Audio"
+msgstr "Ateljee"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
+#, fuzzy
 msgid "Stars"
-msgstr ""
+msgstr "Sterre"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
+#, fuzzy
 msgid "Subtitles"
-msgstr ""
+msgstr "Subtitels"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
+#, fuzzy
 msgid "Rating"
-msgstr ""
+msgstr "Klassifikasie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
+#, fuzzy
 msgid "Height"
-msgstr ""
+msgstr "Hoogte"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
+#, fuzzy
 msgid "Width"
-msgstr ""
+msgstr "Wydte"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:122
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
@@ -451,8 +476,9 @@ msgid "Image"
 msgstr "Prente"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
+#, fuzzy
 msgid "Description"
-msgstr ""
+msgstr "Omskrywing"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
@@ -460,8 +486,9 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:148
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:261
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:41
+#, fuzzy
 msgid "License"
-msgstr ""
+msgstr "Lisensie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:129
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
@@ -470,18 +497,20 @@ msgid "Document"
 msgstr "Dokumente"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
+#, fuzzy
 msgid "Topic"
-msgstr ""
+msgstr "Onderwerp"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
+#, fuzzy
 msgid "Author"
-msgstr ""
+msgstr "Outeur"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:136
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 #, fuzzy
 msgid "Application"
-msgstr "Lokasie"
+msgstr "Applikasie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:364
@@ -489,24 +518,28 @@ msgstr "Lokasie"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:27
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:52
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:218
+#, fuzzy
 msgid "Name"
 msgstr "Naam"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
+#, fuzzy
 msgid "Publisher"
-msgstr ""
+msgstr "Uitgewer"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Platform"
-msgstr ""
+msgstr "Basis"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
 msgid "The selected .torrent file may contain a security hazard."
 msgstr ""
+"Die gesellekteerde .torrent dokument mag dalk `n sekuriteits bedreiging bevat"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:101
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
+"LimeWire kon nie `n .torrent dokument aflaai vanaf die gesekteerde URL nie"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:34
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:550
@@ -514,6 +547,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Indie U die gesellekteerde oplaai sessie stop sal U die Torrent ook stop, is "
+"U seker U wil?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:37
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:555
@@ -521,16 +556,20 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Hierdie oplaai sessie is `n Toorent, dit het nog nie genoeg versprei nie, is "
+"U seker U wil dit Stop?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:15
 msgid "Automatically start torrents"
-msgstr ""
+msgstr "Begin Torrents outomaties"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:17
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
+"U Kan Sellekteer of U wil hê Torrents moet ouomaties begin wat van Gnutella "
+"afkom"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:25
 #, fuzzy
@@ -539,7 +578,7 @@ msgstr "Sort Automaties"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:35
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "BiTtorrent Opsies"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:37
 msgid ""

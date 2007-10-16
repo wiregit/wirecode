@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-10-11 12:32+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1541,7 +1541,7 @@ msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
 msgstr ""
-"Un file usate per il salvataggio dell preferenze è danneggiato. Limewire "
+"Un file usato per il salvataggio delle preferenze è danneggiato. Limewire "
 "userà i valori predefiniti."
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
@@ -1555,7 +1555,7 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/DownloadManager.java:216
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr "Mi dispiace ma Limewire non può riavviare i vecchi ricezioni."
+msgstr "Spiacenti, ma Limewire non può riavviare i vecchi download."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 msgid "Loading TLS Encryption..."
@@ -1594,9 +1594,8 @@ msgid "Locating Peers..."
 msgstr "Localizzazione nodi..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
-#, fuzzy
 msgid "Loading Shared Files..."
-msgstr "Caricamento file salvati..."
+msgstr "Caricamento file condivisi..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
 msgid "Loading bittorrent Management..."
@@ -1608,12 +1607,11 @@ msgstr "Caricamento Gestore magnet..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
 msgid "Loading Old Downloads..."
-msgstr "Caricamento vecchi ricezioni..."
+msgstr "Caricamento vecchi file in ricezione..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
-#, fuzzy
 msgid "Checking for Updates..."
-msgstr "Verifica..."
+msgstr "Controllo aggiornamenti disponibili..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
@@ -1621,15 +1619,15 @@ msgstr "Caricamento code dirette..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
 msgid "Loading Magnet Listener..."
-msgstr "caricamento analizzatore MAGNET..."
+msgstr "Caricamento Analizzatore Magnet..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Peer Listener..."
-msgstr "caricamento analizzatore nodi..."
+msgstr "Caricamento Analizzatore Nodi..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Loading Stale Connection Management..."
-msgstr "Caricamento gestore connessioni..."
+msgstr "Caricamento Gestore Connessioni..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
@@ -1642,7 +1640,7 @@ msgstr "Caricamento Gestore Spam..."
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:41
 msgid "All Types"
-msgstr "Tutti tipi"
+msgstr "Tutti i tipi"
 
 #: core/com/limegroup/gnutella/MediaType.java:42
 msgid "Documents"
@@ -1657,7 +1655,7 @@ msgstr "Programmi"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 #, fuzzy
 msgid "Audio"
-msgstr "Studio"
+msgstr "Audio"
 
 #: core/com/limegroup/gnutella/MediaType.java:45
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:102
@@ -1665,7 +1663,7 @@ msgstr "Studio"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 #, fuzzy
 msgid "Video"
-msgstr "Interfaccia utente"
+msgstr "Video"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Images"
@@ -1706,12 +1704,14 @@ msgstr "Per le ricerche con Turbo acquista Limewire Pro."
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Supporta lo sviluppa di Limewire. acquista la versione PRO."
+msgstr "Supporta lo sviluppa di Limewire. Acquista la versione PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
+#, fuzzy
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Acquistando Limewire Pro ci aiuterai ad avere ricezioni più veloci."
+msgstr ""
+"Acquista Limewire Pro per aiutarci a rendere più veloci i tuoi downloads."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
@@ -1725,8 +1725,9 @@ msgstr "Supporta le reti aperte. Acquista Limewire Pro."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
+#, fuzzy
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "Supporta i sorgenti e i protocolli aperti. Acquista Limewire Pro."
+msgstr "Supporta l'open source e i protocolli aperti. Acquista Limewire Pro."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
@@ -1736,7 +1737,7 @@ msgstr "Per performance Turbo acquista Limewire Pro."
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "mantieni internet libera. Acquista Limewire Pro."
+msgstr "Mantieni Internet ibera. Acquista Limewire Pro."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
@@ -1787,7 +1788,7 @@ msgstr "Tipo:"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:35
 msgid "Length"
-msgstr ""
+msgstr "Durata"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
@@ -1928,6 +1929,7 @@ msgstr "Piattaforma"
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
 msgid "The selected .torrent file may contain a security hazard."
 msgstr ""
+"Il file .torrent selezionato potrebbe essere un rischio per la sicurezza"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:101
 msgid "LimeWire could not download a .torrent file from the provided URL."
@@ -2683,11 +2685,11 @@ msgstr "Non mostrare più"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
 msgid "Change Language"
-msgstr ""
+msgstr "Cambia Lingua"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Mostra Lingua nella barra di stato"
 
 #. 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
@@ -2834,7 +2836,7 @@ msgstr "Incolla"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1266
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:119
 msgid "Delete"
-msgstr ""
+msgstr "Cancellare"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 msgid "Add"

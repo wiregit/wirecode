@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-09-28 15:49+0000\n"
+"PO-Revision-Date: 2007-10-16 08:07+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -787,7 +787,7 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:76
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
-msgstr ""
+msgstr "Pozwól LimeWire zarządzać ustawieniami BitTorrent."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:84
 msgid "Maximum uploads per torrent"
@@ -1019,7 +1019,7 @@ msgstr "Zaznacz wszystko"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:319
 msgid "Marks all Items as Selected"
-msgstr ""
+msgstr "Zaznacz wszystkie elementy jako Wybrane"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:334
 #, fuzzy
@@ -1218,6 +1218,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire nie mógł zlokalizować Twojej przeglądarki aby wyświetlić stronę: "
+"{0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1692
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1715
@@ -1426,16 +1428,16 @@ msgstr "Zmiana języka nastąpi po ponownym uruchomieniu programu."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:383
 msgid "Verify"
-msgstr ""
+msgstr "Weryfikuj"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:427
 msgid "LimeWire was unable to locate the details of this license."
-msgstr ""
+msgstr "LimeWire nie jest wstanie zlokalizować szczegółów tej licencji."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:432
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:558
 msgid "You can try validating this license again by clicking 'Verify'."
-msgstr ""
+msgstr "Możesz sprawdzić tą licencje przez kliknięcie na 'Weryfikuj'."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:437
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:563
@@ -1446,13 +1448,13 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:500
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:568
 msgid "View Verification Page"
-msgstr ""
+msgstr "Zobacz karte weryfikacji"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:447
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:573
 msgid "License Details:"
-msgstr ""
+msgstr "Szczegóły licencji:"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:452
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:578
@@ -1462,7 +1464,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:457
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:583
 msgid "LimeWire is currently locating the details of this license."
-msgstr ""
+msgstr "LimeWire lokalizuje szczegóły tej licencji."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:462
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:588
@@ -1470,6 +1472,8 @@ msgid ""
 "LimeWire has not yet verified this license.\n"
 "Click 'verify' to locate the details of this Creative Commons license."
 msgstr ""
+"LimeWire nie sprawdziło jeszcze tej licencji.\n"
+"Kliknij 'sprawdź' aby zlokalizować szczegóły licencji."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:467
 msgid "Creative Commons Details"
@@ -1481,7 +1485,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:490
 msgid "You can try looking up the details again by clicking 'Verify'."
-msgstr ""
+msgstr "Możesz zobaczyć szczegóły przez kliknięcie 'Weryfikuj'."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:495
 msgid "View Weedshare Usage Rights"
@@ -1489,12 +1493,13 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:510
 msgid "View Usage Rights"
-msgstr ""
+msgstr "Zobacz prawa użytkownika"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:515
 msgid ""
 "LimeWire is contacting www.weedshare.com for the details of this file."
 msgstr ""
+"LimeWire łączy się z www.weedshare.com aby sprawdzić szczegóły tego pliku."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:520
 msgid ""
@@ -2035,6 +2040,8 @@ msgid ""
 "You can preview downloaded files to make sure they're what you expect. Just "
 "select the download and click 'Preview'!"
 msgstr ""
+"Moższ przeglądać pobierane pliki aby upewnić się że spełniają Twoje "
+"oczekiwania. Zaznacz plik i kliknij 'Przeglądaj'!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:44
 msgid ""
@@ -7185,7 +7192,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "Temat:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
@@ -7193,7 +7200,7 @@ msgstr "Autor:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "Imię:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 #, fuzzy
@@ -7220,4 +7227,4 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 #, fuzzy
 msgid "Info"
-msgstr ""
+msgstr "Nie tłumaczenie"

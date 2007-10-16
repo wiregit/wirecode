@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-10-14 22:39+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n == 1 ? 0: (((n % 100 > 19) || ((n % 100 "
 "== 0) && (n != 0))) ? 2: 1));\n"
-"X-Launchpad-Export-Date: 2007-10-03 18:14+0000\n"
+"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -873,7 +873,7 @@ msgstr "Tip:"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:35
 msgid "Length"
-msgstr ""
+msgstr "Lungime"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
@@ -1014,11 +1014,12 @@ msgstr "Platforma:"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "Fisierul .torrent selectionat poate prezenta risc pentru securitate."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:101
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
+"LimeWire nu poate descarca un fisier .torrent de la adresa URL indicata."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:34
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:550
@@ -1026,6 +1027,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Oprind acest transfer, descarcarea torentului va fi oprita. Sunteti sigur ca "
+"doriti aceasta?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:37
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:555
@@ -1054,15 +1057,20 @@ msgstr "Start automat"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:35
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Setarile BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:37
+#, fuzzy
 msgid ""
 "You can choose whether or not LimeWire should manage your Bittorrent "
 "protocol settings. It is highly recommended that LimeWire manage these "
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Puteti alege daca doriti sau nu ca LimeWire sa regleze parametrii "
+"protocolului BitTorent. Este recomandat cu caldura sa permiteti LimeWire sa "
+"regleze aceste optiuni. Valorile gresite sai inadecvate pot cauza probleme "
+"grave ale performantei si/sau ale memoriei."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:62
 msgid ""
@@ -1070,10 +1078,13 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Valorile invalide sau inadecvate pot cauza probleme severe ale performantei "
+"si/sau memoriei. Daca nu sunteti sigur de ceea ce faceti, este recomandat cu "
+"caldura sa lasati LimeWire sa regleze aceste setari."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:76
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
-msgstr ""
+msgstr "Las LimeWire sa regleze setarile mele BitTorrent (Recomandat)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:84
 msgid "Maximum uploads per torrent"
@@ -1519,6 +1530,7 @@ msgstr "LimeWire: Permite schimbul deschis de informatii"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:393
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:397
+#, fuzzy
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -1528,6 +1540,14 @@ msgid ""
 "then select 'Windows 2000' in the box below the check box. Then click the "
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
+"LimeWire a intampinat o problema in timpul pornirii si nu poate continua. "
+"Puteti rezolva aceasta problema modificand Compatibilitatea Windows pentru "
+"LimeWire. Faceti click-dreapta pe iconul LimeWire de pe Desktop si selectati "
+"optiunea Proprietati (Properties) din meniu. Activati fereastra "
+"Compatibilitati (Compatibility) de sus, apoi bifati optiunea 'Run this "
+"program in compatibility mode for' si selectati optiunea \"Windows 2000\" "
+"din lista de dedesupt. Apoi apasati butonul 'OK' din partea de jos si "
+"reporniti LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:486
 msgid ""
@@ -1547,6 +1567,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire nu a putut localiza navigatorul web pentru a afisa aceasta pagina: "
+"{0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1692
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1715
@@ -1555,12 +1577,15 @@ msgstr "LimeWire nu va porni fisierul specificat din motive de securitate."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1694
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1717
-#, java-format
+#, fuzzy
 msgid ""
 "LimeWire could not launch the specified file.\n"
 "\n"
 "Executed command: {0}."
 msgstr ""
+"LimeWire nu a putut porni fisierul specificat.\n"
+"\n"
+"Comanda executata: {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1697
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1720
@@ -1602,10 +1627,13 @@ msgid "Loading Core Components..."
 msgstr "Incarcare componente esentiale..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:339
+#, fuzzy
 msgid ""
 "LimeWire was unable to create your settings directory and is using a "
 "temporary directory.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"LimeWire nu a putut crea directorul Dvs cu setari si foloseste un director "
+"temporar. Setarile Dvs pot fi sterse cand veti inchide LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:367
 msgid "Loading Icons..."
@@ -1631,7 +1659,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:449
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
+msgstr "Aceasta versiune Alpha a expirat. Apasati Ok pentru a iesi. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:455
 msgid ""
@@ -1646,6 +1674,7 @@ msgstr ""
 "reporniti LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:461
+#, fuzzy
 msgid ""
 "LimeWire could not create a temporary preferences directory.\n"
 "\n"
@@ -1656,6 +1685,14 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"LimeWire nu a putut crea un director temporar pentru preferinte.\n"
+"\n"
+"Aceasta se intampla, in general, datorita unei lipse de permisiune. "
+"Asigurati-va ca LimeWire (si Dvs) aveti permisiunea sa creati "
+"fisiere/foldere pe calculatorul Dvs. Daca problema persista, va rugam "
+"vizitati www.limewire.com si accesati linkul 'Support'\n"
+"\n"
+"LimeWire se va inchide acum. Va multumim."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:471
 #: gui/com/limegroup/gnutella/gui/MessageService.java:97
@@ -1704,11 +1741,15 @@ msgid "Cancel Operation"
 msgstr "Revocarea operatiei"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:70
+#, fuzzy
 msgid ""
 "You are currently using a beta or pre-release version of Java 1.6.0. This "
 "version is known to have caused problems with LimeWire. Please upgrade to "
 "the final 1.6.0 release.\n"
 msgstr ""
+"Folositi o versiune beta a programului Java 1.6.0. Aceasta versiune se "
+"cunoaste pentru creerea de conflicte cu LimeWire. Va rugam sa faceti upgrade "
+"la versiunea finala 1.6.0.\n"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
 #, fuzzy
@@ -1723,11 +1764,11 @@ msgstr "Informatii despre fisier multiplu"
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
 msgid "Visit {0}"
-msgstr ""
+msgstr "Vizitati {0}"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Aminteste-mi mai tarziu"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 #, fuzzy
@@ -1736,7 +1777,7 @@ msgstr "Publicare descarcare"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
 msgid "Change Language"
-msgstr ""
+msgstr "Alegeti limba"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
 msgid "Show Language in status bar"
@@ -2244,11 +2285,15 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:28
+#, fuzzy
 msgid ""
 "You can sort your search results by clicking on a column. The most useful "
 "column to sort by is the '#' column, which can put the results that have the "
 "highest chance of downloading at the top of the list."
 msgstr ""
+"Puteti tria rezultatele cautarii facand click pe numele unei coloane. Cea "
+"mai utila coloana pentru a tria este cea cu semnul '#', care pune "
+"rezultatele care au cea mai mare sansa de a fi descarcate primele pe lista."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:29
 msgid ""
@@ -2257,6 +2302,10 @@ msgid ""
 "stars and a speed of 'Ethernet'. These results have the greatest chance of "
 "completing successfully."
 msgstr ""
+"Cu cat un rezultat are mai multe stele, cu atat sansele de a il descarca "
+"complet cu succes sunt mai mari! Unele rezultate ale cautari pot apare chiar "
+"cu patru stele albastre si cu o viteza 'Ethernet'. Aceste rezultate au cele "
+"mai mari sanse de a fi descarcate cu succes."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:30
 msgid ""
@@ -2266,6 +2315,10 @@ msgid ""
 "that file, and 'X' is the number of people that have successfully uploaded "
 "it."
 msgstr ""
+"Puteti afla de cate ori cineva a incarcat un fisier alegand tabul 'Library' "
+"si uitandu-va la coloana Uploads. Informatia este prezentata ca 'X/Y', unde "
+"'Y' reprezinta numarul de persoane care au incercat sa incarce fisierul, iar "
+"'X' este numarul celor care l-au incarcat cu succes."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -2273,24 +2326,34 @@ msgid ""
 "the Library will count how many times LimeWire has returned a result from "
 "someone searching for that file."
 msgstr ""
+"Curios cate persoane cauta fisierele Dvs? Coloana 'hits' din Library va "
+"contoriza de cate ori LimeWire a returnat un rezultat pentru cineva care a "
+"cautat acel fisier."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:32
 msgid ""
 "It helps the network if you keep your LimeWire running. Others will connect "
 "to the network easier and searches will perform better. "
 msgstr ""
+"Ajutati reteaua sa functioneze mai bine daca lasati LimeWire sa functioneze. "
+"Altii se vor conecta la retea mai usoriar cautarile vor fi mai performante. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
 msgid ""
 "Looking for something rare? The more detailed your search is, the better "
 "your chances of getting a result you want!"
 msgstr ""
+"Cautati ceva rar? Cu cat cautarea Dvs e mai detaliata, cu atat cresc sansele "
+"de a obtine ceea ce doriti!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
+#, fuzzy
 msgid ""
 "Want to open this Tip Of The Day dialog after you've closed it? Go to the "
 "Help menu and choose 'Tip of the Day'."
 msgstr ""
+"Doriti sa deschideti acest Tip Of The Day dupa ce l-ati inchis in prealabil? "
+"Mergeti in meniul 'Ajutor' (Help) si alegeti 'Tip Of The Day'"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
 msgid ""
