@@ -8,36 +8,38 @@ import java.net.SocketAddress;
 import org.limewire.util.ByteOrder;
 
 /**
- * A token that embeds an IP address and port, allowing one side to generate
- * a token for a specific addr/port pair that cannot be easily guessed.
+ * A token that embeds an IP address and port, allowing one side to 
+ * generate a token for a specific IP address/port pair that cannot be easily 
+ * guessed.
  */
 public final class AddressSecurityToken extends AbstractSecurityToken {
 
-    /** As detailed by the GUESS spec. */
+    /** As detailed by the GUESS specification 
+     * (<a href="https://www.limewire.org/fisheye/viewrep/~raw,r=1.2/limecvs/core/guess_01.html">
+     * Gnutella UDP Extension for Scalable Searches</a> ). */
     public static final int MIN_QK_SIZE_IN_BYTES = 4;
-    /** As detailed by the GUESS spec. */
+    /** As detailed by the GUESS specification. */
     public static final int MAX_QK_SIZE_IN_BYTES = 16;
     
     /** Cached value to make hashCode() much faster. */
     private final int _hashCode;
 
-    /** Generates a AddressSecurityToken for a given SocketAddress.
-     *  For a given SocketAddress, using a different SecretKey and/or SecretPad
-     *  will result in a different AddressSecurityToken.  The return value is constructed
-     *  with prepareForNet equal to true.
+    /** Generates a <code>AddressSecurityToken</code> for a given 
+     * <code>SocketAddress</code>. For a given <code>SocketAddress</code>, 
+     * using a different SecretKey and/or SecretPad will result in a different 
+     * <code>AddressSecurityToken</code>. The return value is constructed
+     * with prepareForNet equal to true.
      *  
-     * @param ip the IP address of the other node
-     * @param port the port of the other node
      */
     public AddressSecurityToken (SocketAddress address) {
         this(((InetSocketAddress)address).getAddress(),
                 ((InetSocketAddress)address).getPort());
     }
     
-    /** Generates a AddressSecurityToken for a given IP:Port combo.
+    /** Generates a <code>AddressSecurityToken</code> for a given IP:Port combo.
      *  For a given IP:Port combo, using a different SecretKey and/or SecretPad
-     *  will result in a different AddressSecurityToken.  The return value is constructed
-     *  with prepareForNet equal to true.
+     *  will result in a different <code>AddressSecurityToken</code>. The 
+     *  return value is constructed with prepareForNet equal to true.
      *  
      * @param ip the IP address of the other node
      * @param port the port of the other node
@@ -100,7 +102,8 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
        return _hashCode;
     }
 
-    /** Returns a String with the AddressSecurityToken represented in hexadecimal.
+    /** Returns a String with the <code>AddressSecurityToken</code> represented 
+     * in hexadecimal.
      */
     public String toString() {
         return "{AddressSecurityToken: " + (new BigInteger(1, getBytes())).toString(16) + "}";
@@ -110,7 +113,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
     //--- PUBLIC STATIC CONSTRUCTION METHODS
 
     /**
-     * Determines if the bytes are valid for a qkey.
+     * Determines if the bytes are valid for a <code>key</code>.
      */
     public static boolean isValidSecurityTokenBytes(byte[] key) {
         return key != null &&
@@ -122,7 +125,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
         return isValidSecurityTokenBytes(key);
     }
     
-    /** Embeds the address into data. */
+    /** Embeds the IP address. */
     public static class AddressTokenData implements SecurityToken.TokenData {
         protected final byte[] data;
         

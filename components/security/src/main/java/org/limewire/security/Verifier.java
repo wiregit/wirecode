@@ -10,7 +10,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * An abstract base class to verifiy SecureMessages.
+ * An abstract base class to verify {@link SecureMessage SecureMessages}. The
+ * callback, a {@link SecureMessageCallback} receives notification if the 
+ * message is verified.
  */
 public abstract class Verifier implements Runnable {
     
@@ -26,24 +28,24 @@ public abstract class Verifier implements Runnable {
     }
     
     /**
-     * Returns the PublicKey that is used to verify the signature
+     * Returns the <code>PublicKey</code> that is used to verify the signature.
      */
     public abstract PublicKey getPublicKey();
     
     /**
-     * Returns the algorithm of the signature
+     * Returns the algorithm of the signature.
      */
     public abstract String getAlgorithm();
     
     /**
-     * Returns the SecureMessage
+     * Returns the <code>SecureMessage</code>.
      */
     public SecureMessage getSecureMessage() {
         return message;
     }
     
     /**
-     * Returns the SecureMessageCallback
+     * Returns the <code>SecureMessageCallback</code>.
      */
     public SecureMessageCallback getSecureMessageCallback() {
         return callback;

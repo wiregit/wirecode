@@ -55,7 +55,7 @@ import org.limewire.util.ByteOrder;
     /* package */ TEAMACCalculator(int k0, int k1, int k2, int k3,
             int preRotate, int postRotate) {
         
-        // Set cyclic shifts to allow getting at differet
+        // Set cyclic shifts to allow getting at different
         // parts of the output
         PRE_ROTATE = preRotate & 0x3F;
         POST_ROTATE = postRotate & 0x3F;
@@ -69,7 +69,7 @@ import org.limewire.util.ByteOrder;
     
     /**
      * Returns the raw bytes for a AddressSecurityToken, which will not contain
-     * 0x1C and 0x00, to accomidate clients that poorly parse GGEP.
+     * 0x1C and 0x00, to accommodate clients that poorly parse GGEP.
      */
     public byte[] getMACBytes(TokenData tokenData) {
         byte [] data = tokenData.getData();
@@ -80,7 +80,7 @@ import org.limewire.util.ByteOrder;
         // while to try and make a botnet out of the Gnutella network
         byte[] qkBytes = new byte[ST_LENGTH];
         
-        // Copy bytes that arent 0x00 or 0x1C into output
+        // Copy bytes that aren't 0x00 or 0x1C into output
         int outIndex = ST_LENGTH - 1;
         for (int left=(int)(key64 >> 32), right=(int)key64; outIndex>=0; left >>>= 8) {
             if (left == 0) {

@@ -3,8 +3,10 @@ package org.limewire.security;
 import java.io.IOException;
 
 /**
- * Exception thrown by security tokens when they are constructed with
- * invalid data from, for example from the network. 
+ * Thrown by {@link SecurityToken SecurityTokens} when a security token is 
+ * created with invalid data. For example, throw 
+ * <code>InvalidSecurityTokenException</code> upon invalid data from the 
+ * network.
  */
 public class InvalidSecurityTokenException extends IOException {
 

@@ -5,8 +5,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 /**
- * An abstract implementation of a security token that can write itself to
- * an output stream and queries the default token smith for its validity.
+ * Implements a security token that can write itself to
+ * an output stream and queries for its validity.
  */
 public abstract class AbstractSecurityToken implements SecurityToken {
 
@@ -49,8 +49,9 @@ public abstract class AbstractSecurityToken implements SecurityToken {
     }
 
     /**
-     * Determines if the given TokenData is valid for this SecurityToken.
-     * By default, all TokenDatas are valid.
+     * Determines if the given <code>TokenData</code> is valid for this 
+     * <code>SecurityToken</code>. By default, all <code>TokenDatas</code> are 
+     * valid.
      */
     protected boolean isValidTokenData(TokenData data) {
         return true;
@@ -77,9 +78,6 @@ public abstract class AbstractSecurityToken implements SecurityToken {
     /**
      * Determines if the given data bytes are valid.
      * By default, all non-null and non-empty bytes are valid.
-     * 
-     * @param network
-     * @return
      */
     protected boolean isValidBytes(byte[] network) {
         return network != null && network.length > 0;
@@ -89,7 +87,8 @@ public abstract class AbstractSecurityToken implements SecurityToken {
     /**
      * Should not be used if it is possible to call
      * {@link #isFor(org.limewire.security.SecurityToken.TokenData)} which
-     * takes all possible MACCalculatorRepositories into account.
+     * takes all possible {@link MACCalculatorRepository MACCalculatorRepositories}
+     * into account.
      */
     @Override
     public boolean equals(Object obj) {

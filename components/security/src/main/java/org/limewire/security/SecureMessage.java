@@ -4,11 +4,16 @@ import java.security.Signature;
 import java.security.SignatureException;
 
 
-/** Allows a message to be secured. */
+/** 
+ * Defines the interface to allow a message to be secured.
+ */
 public interface SecureMessage {
     
+    /** A message that has not been verified.    */
     public static final int INSECURE = 0;
+    /** A message that was attempted to be verified but failed verification.  */
     public static final int FAILED = 1;
+    /** A message that was attempted to be verified and passed verification.  */
     public static final int SECURE = 2;
     
     /** Sets whether or not the message is verified. */

@@ -17,7 +17,10 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 
-
+/**
+ * Verifies a {@link Signature} given a public key and an 
+ * encryption algorithm. 
+ */
 public class SignatureVerifier {
     
     private static final Log LOG = LogFactory.getLog(SignatureVerifier.class);
@@ -71,7 +74,7 @@ public class SignatureVerifier {
     }
 
     /**
-     * Retrieves the data from a byte[] containing both the signature & content,
+     * Retrieves the data from a byte[] containing both the signature and content,
      * returning the data only if it is verified.
      */
     public static String getVerifiedData(byte[] data, File keyFile, String alg, String dig) {

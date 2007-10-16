@@ -5,34 +5,36 @@ import java.io.OutputStream;
 import java.net.SocketAddress;
 
 /**
- * A SecurityToken authenticates a host based on its IP:Port or a other
- * pieces of data.
+ * Defines the interface to authenticate a host based on its IP address, port 
+ * or other pieces of data.
  * 
  */
 public interface SecurityToken {
     
     /**
-     * Returns the SecurityToken as byte array
+     * Returns the <code>SecurityToken</code> as byte array.
      */
     public byte[] getBytes();
     
     /**
-     * Writes the SecurityToken to the output stream
+     * Writes the <code>SecurityToken</code> to the output stream.
      */
     public void write(OutputStream out) throws IOException;
     
     /** 
-     * Validates that a SecurityToken was generated for the given TokenData
+     * Validates that a <code>SecurityToken</code> was generated for the given 
+     * <code>TokenData</code>.
      */
     public boolean isFor(TokenData data);
     
     /**
-     * The TokenProvider is a factory interface to create SecurityTokens
+     * Defines a factory interface to create {@link SecurityToken SecurityTokens}.
      */
     public static interface TokenProvider {
         
         /**
-         * Creates and returns a {@link SecurityToken} for the given SocketAddress
+         * Creates and returns a {@link SecurityToken} for the given 
+         * <code>SocketAddress</code>.
          */
         public SecurityToken getSecurityToken(SocketAddress dst);
         
@@ -42,13 +44,19 @@ public interface SecurityToken {
         public TokenData getTokenData(SocketAddress src);
     }
     
-    /** A wrapper for data that this SecurityToken uses. */
+    /**<p> 
+     * Defines the interface to get data as a byte[].
+     * </p>
+     * One use case for <code>TokenData</code> is to 
+     * implement a constructor to convert the IP address in an encrypted way 
+     * into the byte[]. Calls to get that data return the encrypted IP address.
+     */
     public static interface TokenData {
         public byte[] getData();
     }
     
     /**
-     * A TokenProvider implementation that creates AddressSecurityTokens.
+     * Creates a <code>SecurityToken</code> from a <code>SocketAddress</code>.
      */
     public static class AddressSecurityTokenProvider implements TokenProvider {
         public SecurityToken getSecurityToken(SocketAddress addr) {

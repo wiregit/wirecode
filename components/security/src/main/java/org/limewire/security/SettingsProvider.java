@@ -1,8 +1,12 @@
 package org.limewire.security;
 
-/**
- * The AddressSecurityToken.SettingsProvider provides Settings 
- * for the AddressSecurityToken class
+/**<p>
+ * Defines the interface to provide settings for the 
+ * {@link AddressSecurityToken} class. A rule of thumb is to ensure the change 
+ * period is longer than the grace period when you implement this interface.
+ * </p>
+ * A typical use case for <code>SettingsProvider</code> is to coordinate when 
+ * to create a new {@link MACCalculator}.
  */
 public interface SettingsProvider {
     

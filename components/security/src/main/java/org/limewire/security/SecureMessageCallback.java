@@ -1,7 +1,9 @@
 package org.limewire.security;
 
 
-/** Callback notifying something that the security of the message has been processed. */
+/** Defines a callback interface that notifies an entity
+ * that the security of the message has been processed.
+ */
 public interface SecureMessageCallback {
     public void handleSecureMessage(SecureMessage sm, boolean passed);
 }

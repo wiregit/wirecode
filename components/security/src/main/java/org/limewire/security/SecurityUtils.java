@@ -8,19 +8,14 @@ import java.security.SecureRandom;
 
 import org.limewire.util.FileUtils;
 
-/**
- *  A collection of utility methods related to 
- *  com.limegroup.gnutella.security or java.security
- *
- */
+/** Provides a non-blocking cryptographically strong random number generator. */
 public class SecurityUtils {
 
     /**
-     * On some OSes, creating a new SeucureRandom instance
+     * On some OSes, creating a new <code>SeucureRandom</code> instance
      * with the default constructor may block if the OS's
-     * internal entropy pool runs low.  On MS Windows,
-     * OS X, and Linux, and pretty much any modern
-     * Unix, this method will not block.
+     * internal entropy pool runs low. On MS Windows, OS X, and Linux, and 
+     * pretty much any modern Unix, this method will not block.
      */
     public static SecureRandom createSecureRandomNoBlock() {
         File urandom = new File("/dev/urandom");
