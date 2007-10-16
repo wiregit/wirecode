@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
@@ -183,7 +184,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
                 }
                 //it was the "file or directory corrupted" exception
                 SETTINGS_FILE.delete();//revert to defaults
-                MessageService.showError(I18n.marktr("A file used to save your preferences was corrupted. LimeWire will use default values."));
+                MessageService.showError(I18nMarker.marktr("A file used to save your preferences was corrupted. LimeWire will use default values."));
             }
         } catch(IOException e) {
             ErrorService.error(e);
