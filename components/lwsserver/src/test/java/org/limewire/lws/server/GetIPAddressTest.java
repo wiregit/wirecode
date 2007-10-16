@@ -3,7 +3,7 @@ package org.limewire.lws.server;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
@@ -23,14 +23,14 @@ public class GetIPAddressTest extends BaseTestCase {
 
     public void testNull() {
         InetAddress addr = null;
-        String ip = Util.getIPAddress(addr);
+        String ip = LWSServerUtil.getIPAddress(addr);
         assertNull(ip);
     }
 
     public void testSimple() {
         try {
             InetAddress addr = InetAddress.getByName("localhost");
-            String ip = Util.getIPAddress(addr);
+            String ip = LWSServerUtil.getIPAddress(addr);
             assertEquals("127.0.0.1", ip);
         } catch (UnknownHostException e) {
             e.printStackTrace();

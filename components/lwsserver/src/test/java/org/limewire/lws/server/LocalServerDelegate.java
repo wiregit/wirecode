@@ -1,5 +1,6 @@
 package org.limewire.lws.server;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,8 +10,7 @@ import java.net.Socket;
 import java.util.Map;
 
 import org.limewire.lws.server.DispatcherSupport;
-import org.limewire.lws.server.SendsMessagesToServer;
-import org.limewire.lws.server.URLSocketOpenner;
+import org.limewire.lws.server.SenderOfMessagesToServer;
 import org.limewire.service.ErrorService;
 
 /**
@@ -18,7 +18,7 @@ import org.limewire.service.ErrorService;
  * local server, but this takes care of the debugging stuff and sending
  * messages.
  */
-final class LocalServerDelegate implements SendsMessagesToServer {
+final class LocalServerDelegate implements SenderOfMessagesToServer {
 
     private final int port;
     private final DispatcherSupport.OpensSocket openner;
@@ -34,7 +34,7 @@ final class LocalServerDelegate implements SendsMessagesToServer {
         this(host, port, new URLSocketOpenner());
     }
 
-    public String sendMsgToRemoteServer(final String msg, final Map<String, String> args) {
+    public String semdMessageToServer(final String msg, final Map<String, String> args) {
         try {
             int tmpPort = port;
             Socket tmpSock = null;
@@ -43,10 +43,7 @@ final class LocalServerDelegate implements SendsMessagesToServer {
                 if (tmpSock != null) break;
             }
             final Socket sock = tmpSock;
-            System.out.println("sending on " + tmpPort + ":" + sock);
-            System.out.println(" --- " + msg + ":" + args + " ---");
-            BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(sock
-                    .getOutputStream()));
+            BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
             String message = msg;
             String params = null;
             for (String key : args.keySet()) {
@@ -57,8 +54,7 @@ final class LocalServerDelegate implements SendsMessagesToServer {
                 }
                 params += key + "=" + args.get(key);
             }
-            if (params != null)
-                message += params;
+            if (params != null)message += params;
             wr.write("GET /" + message + " HTTP/1.1\n\r\n\r");
             wr.flush();
             BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));

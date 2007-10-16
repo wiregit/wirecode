@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,15 +15,26 @@ import java.util.TimeZone;
 import org.limewire.service.ErrorService;
 
 /**
- * Fine, here's a note.
+ * Utility methods for this package.
  */
-public final class Util {
+public final class LWSServerUtil {
 
+    private final static String ERROR_START = "ERROR:";
+    
     final static Map<String, String> EMPTY_MAP_OF_STRING_X_STRING = new HashMap<String, String>();
 
-    private Util() {
+    private LWSServerUtil() {
+        // nothing
     }
 
+    /**
+     * Returns <code>true</code> if <code>s</code> is <code>null</code> or
+     * <code>""</code>, otherwise <code>false</code>.
+     * 
+     * @param s {@link String} in question
+     * @return <code>true</code> if <code>s</code> is <code>null</code> or
+     *         <code>""</code>, otherwise <code>false</code>.
+     */
     static boolean isEmpty(final String s) {
         return s == null || s.equals("");
     }
@@ -62,7 +74,7 @@ public final class Util {
     private static Map<String, String> genericParse(final String rest,
             final String delim) {
         if (isEmpty(rest))
-            return EMPTY_MAP_OF_STRING_X_STRING;
+            return Collections.emptyMap();
         final Map<String, String> res = new HashMap<String, String>(3);
         for (StringTokenizer st = new StringTokenizer(rest, delim, false); st
                 .hasMoreTokens();) {
@@ -105,13 +117,13 @@ public final class Util {
         return ilastDot == -1 ? s : s.substring(ilastDot + 1);
     }
 
-    private final static String ERROR_START = "ERROR:";
+    
 
     /**
-     * Returns error code fonud in {@link ErrorCodes} or <tt>null</tt> if it's
+     * Returns the error code found in {@link ErrorCodes} or <tt>null</tt> if it's
      * not an error.
      * 
-     * @param line
+     * @param line {@link String} containing an error to unwrap
      * @return error code fonud in {@link ErrorCodes} or <tt>null</tt> if it's
      *         not an error
      */
@@ -156,7 +168,17 @@ public final class Util {
     private static boolean isValidKey(final String key) {
         if (key == null)
             return false;
-        return key.length() == DispatcherSupport.Constants.KEY_LENGTH;
+        //
+        // Check the length
+        //
+        if (key.length() != DispatcherSupport.Constants.KEY_LENGTH) return false;
+        //
+        // No periods, this is an indication of an error
+        //
+        for (int i=0, I=key.length(); i<I; i++) {
+            if (key.charAt(i) == '.') return false;
+        }
+        return true;
     }
 
     /**
@@ -272,10 +294,16 @@ public final class Util {
         return newCmd;
 
     }
-    
-    static String getArg(final Map<String, String> args, final String key) {
-        final String res = args.get(key);
-        return res == null ? "" : res;
-    }    
 
+    /**
+     * Returns <code>true</code> is <code>res</code> isn't <code>null</code>
+     * and starts with {@link #ERROR_START}.
+     * 
+     * @param res the {@link String} in question
+     * @return <code>true</code> is <code>res</code> isn't <code>null</code>
+     *         and starts with {@link #ERROR_START}
+     */
+    static boolean isError(String res) {
+        return res != null && res.startsWith(ERROR_START);
+    }
 }

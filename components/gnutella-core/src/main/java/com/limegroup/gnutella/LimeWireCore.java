@@ -726,7 +726,7 @@ public class LimeWireCore {
         return injector.getInstance(LicenseVerifier.class);
     }
     
-    public LWSManager getStoreManger() {
+    public LWSManager getLWSManger() {
         return injector.getInstance(LWSManager.class);
     }
     

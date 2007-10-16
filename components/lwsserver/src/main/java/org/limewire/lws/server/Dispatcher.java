@@ -17,7 +17,7 @@ import org.limewire.http.AsyncHttpRequestHandler;
  * </blockquote> providing the correct arguments.
  * 
  * One can add {@link Handler}s and {@link Listener}s to an instance by
- * calling the following methods
+ * calling the following methods:
  * <ul>
  * <li>{@link #registerHandler(String, com.limegroup.gnutella.store.storeserver.StoreManager.Handler)}</li>
  * <li>{@link #registerListener(String, com.limegroup.gnutella.store.storeserver.StoreManager.Listener)}</li>
@@ -27,13 +27,13 @@ import org.limewire.http.AsyncHttpRequestHandler;
  * at least one handler or listener will be registered for every command.
  * 
  */
-public interface Dispatcher extends AsyncHttpRequestHandler, ConnectionListener.HasSome, SendsMessagesToServer {
+public interface Dispatcher extends AsyncHttpRequestHandler, ConnectionListener.HasSome, SenderOfMessagesToServer {
     
     /**
      * The {@link #Creator} creator that will create a new instance.
      */
     Creator CREATOR = new Creator() {
-        public Dispatcher newInstance(SendsMessagesToServer sender, Dispatchee dispatchee) {
+        public Dispatcher newInstance(SenderOfMessagesToServer sender, Dispatchee dispatchee) {
             final LWSServerDispatcher s = new LWSServerDispatcher(sender);
             s.setDispatchee(dispatchee);
             return s;
@@ -63,7 +63,7 @@ public interface Dispatcher extends AsyncHttpRequestHandler, ConnectionListener.
          *         world with <code>send</code> and dispatch all messages
          *         after authentication to <code>dispatchee</code>.
          */
-        Dispatcher newInstance(SendsMessagesToServer sender, Dispatchee dispatchee);
+        Dispatcher newInstance(SenderOfMessagesToServer sender, Dispatchee dispatchee);
     }
 
 }

@@ -3,7 +3,7 @@ package org.limewire.lws.server;
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
 
 /**
  * Tests that we can send a 'StartCom' message to start a communication session.
@@ -23,7 +23,7 @@ public class StartComTest extends AbstractCommunicationTest {
     }
     public void testStartCom() {
         final String publicKey = getPublicKey();
-        assertTrue(publicKey, Util.isValidPublicKey(publicKey));
+        assertTrue(publicKey, LWSServerUtil.isValidPublicKey(publicKey));
     }
 
 }

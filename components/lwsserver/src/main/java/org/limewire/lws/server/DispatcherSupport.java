@@ -3,10 +3,12 @@
  */
 package org.limewire.lws.server;
 
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,13 +19,13 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.lws.server.Server;
+import org.limewire.lws.server.LocalServer;
 
 /**
  * Instances of this class will receive HTTP requests and are responsible to
  * doling them out to listeners.
  */
-abstract class DispatcherSupport implements Dispatcher {
+public abstract class DispatcherSupport implements Dispatcher {
     
     private final static Log LOG = LogFactory.getLog(DispatcherSupport.class);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
@@ -68,7 +70,7 @@ abstract class DispatcherSupport implements Dispatcher {
     /* (non-Javadoc)
      * @see org.limewire.store.server.Dispatcher#sendMsgToRemoteServer(java.lang.String, java.util.Map)
      */
-    public abstract String sendMsgToRemoteServer(String msg, Map<String, String> args);
+    public abstract String semdMessageToServer(String msg, Map<String, String> args) throws IOException;
     
     /**
      * Override this to create the {@link Handler}s to use.
@@ -124,8 +126,7 @@ abstract class DispatcherSupport implements Dispatcher {
      * @return the message <tt>error</tt> in the call back
      */
     public static final String report(final String error) {
-        return wrapCallback(DispatcherSupport.Constants.ERROR_CALLBACK, Util
-                .wrapError(error));
+        return wrapCallback(DispatcherSupport.Constants.ERROR_CALLBACK, LWSServerUtil.wrapError(error));
     }
     
     /**
@@ -137,14 +138,14 @@ abstract class DispatcherSupport implements Dispatcher {
      */
     static Map<String, String> getArgs(final String request) {
         if (request == null || request.length() == 0) {
-            return Util.EMPTY_MAP_OF_STRING_X_STRING;
+            return Collections.emptyMap();
         }
         final int ihuh = request.indexOf('?');
         if (ihuh == -1) {
-            return Util.EMPTY_MAP_OF_STRING_X_STRING;
+            return Collections.emptyMap();
         }
         final String rest = request.substring(ihuh + 1);
-        return Util.parseArgs(rest);
+        return LWSServerUtil.parseArgs(rest);
     }
 
     /**
@@ -153,14 +154,15 @@ abstract class DispatcherSupport implements Dispatcher {
      * {@link Constants.CALLBACK_QUOTE}s and all quotes in the message,
      * {@link Constants.CALLBACK_QUOTE}, are escaped.
      * 
-     * @param callback the function in which <tt>msg</tt> is wrapped
+     * @param callback the function in which <tt>msg</tt> is wrapped, this can
+     *        be <code>null</code>
      * @param msg the message
      * @return the message <tt>msg</tt> using callback function
      *         <tt>callback</tt>
      */
     protected static final String wrapCallback(final String callback,
             final String msg) {
-        if (Util.isEmpty(callback)) {
+        if (LWSServerUtil.isEmpty(callback)) {
             return msg;
         } else {
             char q = DispatcherSupport.Constants.CALLBACK_QUOTE;
@@ -237,21 +239,6 @@ abstract class DispatcherSupport implements Dispatcher {
          * @return the unique name of this instance
          */
         String name();
-        
-        public interface CanRegister {
-            /**
-             * Register a handler for the command <tt>cmd</tt>, and returns
-             * <tt>true</tt> on success and <tt>false</tt> on failure. There
-             * can be only <b>one</b> {@link LWSManager.Handler} for every
-             * command.
-             * 
-             * @param cmd String that invokes this listener
-             * @param lis handler
-             * @return <tt>true</tt> if we added, <tt>false</tt> for a
-             *         problem or if this command is already registered
-             */
-            boolean register(String cmd, Handler lis);
-        }
     }
     
     /**
@@ -272,23 +259,7 @@ abstract class DispatcherSupport implements Dispatcher {
          * 
          * @return the unique name of this instance
          */
-        String name();
-        
-         interface CanRegister {
-
-            /**
-             * Register a listener for the command <tt>cmd</tt>, and returns
-             * <tt>true</tt> on success and <tt>false</tt> on failure. There
-             * can be only <b>one</b> {@link LWSManager.Handler} for every
-             * command.
-             * 
-             * @param cmd String that invokes this listener
-             * @param lis listener
-             * @return <tt>true</tt> if we added, <tt>false</tt> for a
-             *         problem or if this command is already registered
-             */
-            boolean register(String cmd, Listener lis);
-        }        
+        String name();     
     }    
     
     /**
@@ -300,6 +271,9 @@ abstract class DispatcherSupport implements Dispatcher {
         }
         protected AbstractHandler() {
             super();
+        }
+        protected String report(String msg) {
+            return DispatcherSupport.report(msg);
         }
     }
     
@@ -322,11 +296,20 @@ abstract class DispatcherSupport implements Dispatcher {
     protected abstract class HandlerWithCallback extends AbstractHandler {
 
         public final String handle(final Map<String, String> args) {
-            String callback = Util.getArg(args, DispatcherSupport.Parameters.CALLBACK);
+            String callback = args.get(DispatcherSupport.Parameters.CALLBACK);
             if (callback == null) {
                 return report(DispatcherSupport.ErrorCodes.MISSING_CALLBACK_PARAMETER);
             }
-            return DispatcherSupport.wrapCallback(callback, handleRest(args));
+            //
+            // We want to make sure to check if the result is an error.  In which case
+            // we want to wrap it in the error callback, rather than the normal one
+            //
+            String res = handleRest(args);
+            if (LWSServerUtil.isError(res)) {
+                return DispatcherSupport.wrapCallback(Constants.ERROR_CALLBACK, res);
+            } else {
+                return DispatcherSupport.wrapCallback(callback, res);
+            }
         }
 
         /**
@@ -336,10 +319,26 @@ abstract class DispatcherSupport implements Dispatcher {
          * callback, nor should it be called from any other method except this
          * abstract class.
          * 
+         * <br/><br/>
+         * 
+         * Instances of this class
+         * must not use {@link #report(String)}, and <b>must</b> only pass back
+         * error codes from {@link ErrorCodes}.  To ensure that {@link #report(String)}
+         * is implemented to throw a {@link RuntimeException}.
+         * 
          * @param args original, untouched arguments
          * @return result <b>IN PLAIN TEXT</b>
          */
         protected abstract String handleRest(Map<String, String> args);
+        
+        /**
+         * Overrides {@link AbstractHandler#report(String)} by simply wrapping
+         * the error with the error prefix as defined in {@link LWSServerUtil#wrapError(String)}
+         * so that we don't wrap it in a callback.
+         */
+        protected final String report(String error) {
+            return LWSServerUtil.wrapError(error);
+        }
     }
     
     /**
@@ -366,7 +365,7 @@ abstract class DispatcherSupport implements Dispatcher {
     /**
      * Collection of all the commands we send.
      */
-    interface Commands {
+    public interface Commands {
     
         /**
          * Sent from Code to Local with no parameters.
@@ -376,8 +375,8 @@ abstract class DispatcherSupport implements Dispatcher {
         /**
          * Sent from Local to Remote with parameters.
          * <ul>
-         * <li>{@link Server.Parameters#PUBLIC}</li>
-         * <li>{@link Server.Parameters#PRIVATE}</li>
+         * <li>{@link LocalServer.Parameters#PUBLIC}</li>
+         * <li>{@link LocalServer.Parameters#PRIVATE}</li>
          * </ul>
          */
         String STORE_KEY = "StoreKey";
@@ -385,7 +384,7 @@ abstract class DispatcherSupport implements Dispatcher {
         /**
          * Sent from Code to Remote with parameters.
          * <ul>
-         * <li>{@link Server.Parameters#PRIVATE}</li>
+         * <li>{@link LocalServer.Parameters#PRIVATE}</li>
          * </ul>
          */
         String GIVE_KEY = "GiveKey";
@@ -398,7 +397,7 @@ abstract class DispatcherSupport implements Dispatcher {
         /**
          * Sent from Code to Local with parameters.
          * <ul>
-         * <li>{@link Server.Parameters#PRIVATE}</li>
+         * <li>{@link LocalServer.Parameters#PRIVATE}</li>
          * </ul>
          */
         String AUTHENTICATE = "Authenticate";
@@ -408,7 +407,7 @@ abstract class DispatcherSupport implements Dispatcher {
         /**
          * Sent from Code to Local with parameters.
          * <ul>
-         * <li>{@link Server.Parameters#MSG}</li>
+         * <li>{@link LocalServer.Parameters#MSG}</li>
          * </ul>
          */
         String ECHO = "Echo";
@@ -424,7 +423,7 @@ abstract class DispatcherSupport implements Dispatcher {
     /**
      * Parameter names.
      */
-    interface Parameters {
+    public interface Parameters {
     
         /**
          * Name of the callback function.
@@ -467,7 +466,7 @@ abstract class DispatcherSupport implements Dispatcher {
     /**
      * Codes that are sent to the code (javascript) when an error occurs.
      */
-    interface ErrorCodes {
+    public interface ErrorCodes {
     
         /**
          * Indicating an invalid public key.
@@ -525,7 +524,7 @@ abstract class DispatcherSupport implements Dispatcher {
     /**
      * Reponses sent back from servers.
      */
-    interface Responses {
+    public interface Responses {
     
         /**
          * Success.
@@ -549,7 +548,7 @@ abstract class DispatcherSupport implements Dispatcher {
     /**
      * A general place for constants.
      */
-   interface Constants {
+    public interface Constants {
     
         /**
          * The length of the public and private keys generated.

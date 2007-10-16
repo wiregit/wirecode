@@ -3,8 +3,15 @@
  */
 package org.limewire.lws.server;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
+
+import com.limegroup.gnutella.lws.server.LWSManagerImpl;
 
 /**
  * Dispatches commands after going through an authentication phase explained
@@ -32,13 +39,13 @@ import java.util.Map;
  * &lt;pre&gt;
  * 
  */
-final class LWSServerDispatcher extends DispatcherSupport implements SendsMessagesToServer {
-    
-    private final SendsMessagesToServer sender;
+final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMessagesToServer {
+       
+    private final SenderOfMessagesToServer sender;
     private String publicKey;
     private String privateKey;
     
-    public LWSServerDispatcher(SendsMessagesToServer sender) {
+    public LWSServerDispatcher(SenderOfMessagesToServer sender) {
         this.sender = sender;
     }
 
@@ -62,8 +69,8 @@ final class LWSServerDispatcher extends DispatcherSupport implements SendsMessag
     }
 
     private void regenerateKeys() {
-        publicKey = Util.generateKey();
-        privateKey = Util.generateKey();
+        publicKey = LWSServerUtil.generateKey();
+        privateKey = LWSServerUtil.generateKey();
         note("public key  : {0}", publicKey);
         note("private key : {0}", privateKey);
     }
@@ -76,14 +83,14 @@ final class LWSServerDispatcher extends DispatcherSupport implements SendsMessag
      * A {@link Handler} that needs both a callback and private
      * key.
      */
-    protected abstract class HandlerWithCallbackWithPrivateKey extends
-            HandlerWithCallback {
+    protected abstract class HandlerWithCallbackWithPrivateKey extends HandlerWithCallback {
 
         protected final String handleRest(final Map<String, String> args) {
-            if (getPrivateKey() == null) {
+            String privateKey = getPrivateKey();
+            if (privateKey == null) {
                 return report(DispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY);
             }
-            final String herPrivateKey = Util.getArg(args, DispatcherSupport.Parameters.PRIVATE);
+            String herPrivateKey = args.get(DispatcherSupport.Parameters.PRIVATE);
             if (herPrivateKey == null) {
                 return report(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER);
             }
@@ -118,7 +125,11 @@ final class LWSServerDispatcher extends DispatcherSupport implements SendsMessag
             final Map<String, String> sendArgs = new HashMap<String, String>();
             sendArgs.put(DispatcherSupport.Parameters.PRIVATE, privateKey);
             sendArgs.put(DispatcherSupport.Parameters.PUBLIC, publicKey);
-            sendMsgToRemoteServer(DispatcherSupport.Commands.STORE_KEY, sendArgs);
+            try {
+                semdMessageToServer(DispatcherSupport.Commands.STORE_KEY, sendArgs);
+            } catch (IOException e) {
+                ErrorService.error(e, "StartCom.handleRest");
+            }
             return publicKey;
         }
     }
@@ -127,8 +138,7 @@ final class LWSServerDispatcher extends DispatcherSupport implements SendsMessag
      * Sent from code with private key to authenticate.
      */
     class Authenticate extends HandlerWithCallbackWithPrivateKey {
-        protected String handleRest(final String privateKey,
-                final Map<String, String> args) {
+        protected String handleRest(String privateKey, Map<String, String> args) {
             getDispatchee().setConnected(true);
             return DispatcherSupport.Responses.OK;
         }
@@ -138,7 +148,7 @@ final class LWSServerDispatcher extends DispatcherSupport implements SendsMessag
      * Send from code to end session.
      */
     class Detatch extends HandlerWithCallback {
-        protected String handleRest(final Map<String, String> args) {
+        protected String handleRest(Map<String, String> args) {
             privateKey = null;
             publicKey = null;
             getDispatchee().setConnected(false);
@@ -152,14 +162,13 @@ final class LWSServerDispatcher extends DispatcherSupport implements SendsMessag
     class Msg extends HandlerWithCallbackWithPrivateKey {
         protected String handleRest(final String privateKey,
                 final Map<String, String> args) {
-            String cmd = Util.getArg(args, DispatcherSupport.Parameters.COMMAND);
+            String cmd = args.get(DispatcherSupport.Parameters.COMMAND);
             if (cmd == null) {
                 return report(DispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER);
             }
             if (getDispatchee() != null) {
-                final Map<String, String> newArgs = new HashMap<String, String>(
-                        args);
-                String newCmd = Util.addURLEncodedArguments(cmd, newArgs);
+                final Map<String, String> newArgs = new HashMap<String, String>(args);
+                String newCmd = LWSServerUtil.addURLEncodedArguments(cmd, newArgs);
                 return getDispatchee().dispatch(newCmd, newArgs);
             }
             return DispatcherSupport.Responses.NO_DISPATCHEE;
@@ -172,14 +181,14 @@ final class LWSServerDispatcher extends DispatcherSupport implements SendsMessag
     class Echo extends HandlerWithCallbackWithPrivateKey {
         protected String handleRest(final String privateKey,
                 final Map<String, String> args) {
-            String msg = Util.getArg(args, DispatcherSupport.Parameters.MSG);
+            String msg = args.get(DispatcherSupport.Parameters.MSG);
             return msg;
         }
     }
 
     @Override
-    public String sendMsgToRemoteServer(String msg, Map<String, String> args) {
-        return sender.sendMsgToRemoteServer(msg, args);
+    public String semdMessageToServer(String msg, Map<String, String> args) throws IOException {
+        return sender.semdMessageToServer(msg, args);
     }
 
 }

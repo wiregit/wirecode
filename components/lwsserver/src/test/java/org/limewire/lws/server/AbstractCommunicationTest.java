@@ -1,116 +1,190 @@
 package org.limewire.lws.server;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.lws.server.DispatcherSupport;
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
+import org.limewire.util.BaseTestCase;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
  * each aspect of this communication separately.
  */
-abstract class AbstractCommunicationTest extends DemoSupport {
+abstract class AbstractCommunicationTest extends BaseTestCase {
+    
+    public final static int LOCAL_PORT  = LocalServerForTesting.PORT;
+    public final static int REMOTE_PORT = RemoteServerForTesting.PORT;
+
+    private LocalServerForTesting localServer;
+    private RemoteServerForTesting remoteServer;
+    private FakeJavascriptCodeInTheWebpage code;
+    
+    private Thread localThread;
+    private Thread remoteThread;    
 
     protected AbstractCommunicationTest(String s) {
         super(s);
     }
+    
+    // -------------------------------------------------------
+    // Access
+    // -------------------------------------------------------
+    
+    protected final ServerImpl getLocalServer() {
+        return this.localServer;
+    }
+
+    protected final AbstractRemoteServer getRemoteServer() {
+        return this.remoteServer;
+    }
+
+    protected final FakeJavascriptCodeInTheWebpage getCode() {
+        return this.code;
+    }
+
+    protected static final Map<String, String> NULL_ARGS = new HashMap<String,String>(); //Collections.emptyMap();
+    
+    protected static final Map<String, String> DUMMY_CALLBACK_ARGS;
+    static {
+        DUMMY_CALLBACK_ARGS = new HashMap<String,String>();
+        DUMMY_CALLBACK_ARGS.put(DispatcherSupport.Parameters.CALLBACK, "dummy");        
+    }
+
+
+    /** Override with functionality <b>after</b> {@link #setUp()}. */
+    protected void beforeSetup() { }
+
+    /** Override with functionality <b>after</b> {@link #setUp()}. */
+    protected void afterSetup() { }
+
+    /** Override with functionality <b>after</b> {@link #tearDown()}. */
+    protected void beforeTearDown() { }
+
+    /** Override with functionality <b>after</b> {@link #tearDown()}. */
+    protected void afterTearDown() { }
+
+    /**
+     * Returns a handler that ensures that the response returned is
+     * <tt>code</tt>.
+     * 
+     * @param want expected code
+     * @return a handler that ensures that the response returned is
+     *         <tt>code</tt>
+     */
+    protected final FakeJavascriptCodeInTheWebpage.Handler errorHandler(final String want) {
+        return new FakeJavascriptCodeInTheWebpage.Handler() {
+            public void handle(final String res) {
+                //
+                // We first have to remove the parens and single quotes
+                // from around the message, because we always pass a
+                // callback back to javascript
+                //
+                final String have = LWSServerUtil.unwrapError(LWSServerUtil.removeCallback(res));
+                assertEquals(want, have);
+            }
+        };
+    }
+
+    protected final Thread getLocalThread() {
+        return localThread;
+    }
+
+    protected final Thread getRemoteThread() {
+        return remoteThread;
+    }
+
+    @Override
+    protected final void setUp() throws Exception {
+
+        beforeSetup();
+
+        localServer = new LocalServerForTesting("localhost", REMOTE_PORT);
+        remoteServer = new RemoteServerForTesting(LOCAL_PORT);
+        localThread = AbstractServer.start(localServer);
+        remoteThread = AbstractServer.start(remoteServer);
+        code = new FakeJavascriptCodeInTheWebpage(localServer, remoteServer);
+
+        afterSetup();
+    }
+
+    @Override
+    protected final void tearDown() throws Exception {
+
+        beforeTearDown();
+
+        stop(localServer);
+        stop(remoteServer);
+
+        localThread = null;
+        remoteThread = null;
+
+        afterTearDown();
+    }    
 
     // -------------------------------------------------------
     // Convenience
     // -------------------------------------------------------
-
-    protected final String doEcho(final String privateKey, final String msg) {
-        final Map<String, String> args = new HashMap<String, String>();
-        args.put(DispatcherSupport.Parameters.PRIVATE, privateKey);
-        args.put(DispatcherSupport.Parameters.MSG, msg);
-        return sendLocalMsg(DispatcherSupport.Commands.ECHO, args);
-    }
 
     protected final String doAuthenticate() {
         return doAuthenticate(getPrivateKey());
     }
 
     protected final String doAuthenticate(final String privateKey) {
-        final Map<String, String> args = new HashMap<String, String>();
+        Map<String, String> args = new HashMap<String, String>();
         args.put(DispatcherSupport.Parameters.PRIVATE, privateKey);
-        return sendLocalMsg(DispatcherSupport.Commands.AUTHENTICATE, args);
+        return sendMessageFromWebpageToClient(DispatcherSupport.Commands.AUTHENTICATE, args);
     }
 
     protected final String getPrivateKey() {
-        final String publicKey = getPublicKey();
-        System.out.println("have public key: " + publicKey);
+        String publicKey = getPublicKey();
         try {
             Thread.sleep(500);
         } catch (Exception e) {
+            //
+            // Not crucial, but would like to see the error
+            //
             e.printStackTrace();
         }
-        final Map<String, String> args = new HashMap<String, String>();
+        Map<String, String> args = new HashMap<String, String>();
         args.put(DispatcherSupport.Parameters.PUBLIC, publicKey);
-        return sendRemoteMsg(DispatcherSupport.Commands.GIVE_KEY, args);
+        return sendMessageFromClientToRemoteServer(DispatcherSupport.Commands.GIVE_KEY, args);
     }
 
     protected final String getPublicKey() {
-        final Map<String, String> args = new HashMap<String, String>();
-        return sendLocalMsg(DispatcherSupport.Commands.START_COM, args);
+        return sendMessageFromWebpageToClient(DispatcherSupport.Commands.START_COM, NULL_ARGS);
     }
 
     // -----------------------------------------------------------
     // Private
     // -----------------------------------------------------------
 
-    private String sendLocalMsg(final String cmd, final Map<String, String> args) {
+    private String sendMessageFromWebpageToClient(final String cmd, final Map<String, String> args) {
         args.put(DispatcherSupport.Parameters.CALLBACK, "dummy");
         final String[] result = new String[1];
-        final Object lock = new Object();
-        final boolean[] shouldWait = new boolean[] { true };
-        getCode().sendLocalMsg(cmd, args, new FakeCode.Handler() {
+        getCode().sendLocalMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {
-                final String msg = Util.removeCallback(res);
-                result[0] = msg;
-                synchronized (lock) {
-                    lock.notify();
-                    shouldWait[0] = false;
-                }
+                result[0] = LWSServerUtil.removeCallback(res);
             }
         });
-        if (shouldWait[0]) {
-            synchronized (lock) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
         return result[0];
     }
 
-    private String sendRemoteMsg(final String cmd,
-            final Map<String, String> args) {
+    private String sendMessageFromClientToRemoteServer(final String cmd, final Map<String, String> args) {
         args.put(DispatcherSupport.Parameters.CALLBACK, "dummy");
         final String[] result = new String[1];
-        final Object lock = new Object();
-        final boolean[] shouldWait = new boolean[] { true };
-        getCode().sendRemoteMsg(cmd, args, new FakeCode.Handler() {
+        getCode().sendRemoteMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {
-                final String msg = Util.removeCallback(res);
-                result[0] = msg;
-                synchronized (lock) {
-                    lock.notify();
-                    shouldWait[0] = false;
-                }
+                result[0] = LWSServerUtil.removeCallback(res);
             }
         });
-        if (shouldWait[0]) {
-            synchronized (lock) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
         return result[0];
     }
+    
+    private void stop(final AbstractServer t) {
+        if (t != null) {
+          t.shutDown();
+        }
+    }    
 }

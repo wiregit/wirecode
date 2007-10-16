@@ -2,7 +2,7 @@ package org.limewire.lws.server;
 
 import java.util.regex.Pattern;
 
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
@@ -16,13 +16,12 @@ public class CreateCookieDateTest extends BaseTestCase {
         return buildTestSuite(KeyGenTest.class);
     }
     
-    
     public static void main(String[] args) {
         TestRunner.run(suite());
     }
 
 	public void test() {
-		String str = Util.createCookieDate();
+		String str = LWSServerUtil.createCookieDate();
 		//
 		// Wdy, DD-Mon-YYYY HH:MM:SS GMT
 		// Thu, 10-05-2007 15:53:12 GMT

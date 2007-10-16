@@ -110,6 +110,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<SpamServices> spamServices;
     private final Provider<ControlRequestAcceptor> controlRequestAcceptor;
     private final Provider<LimeCoreGlue> limeCoreGlue;
+    private final Provider<LWSManager> lwsManager;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -162,7 +163,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<ControlRequestAcceptor> controlRequestAcceptor,
             Provider<IncomingConnectionHandler> incomingConnectionHandler,
             Provider<LicenseFactory> licenseFactory,
-            Provider<LimeCoreGlue> limeCoreGlue) { 
+            Provider<LimeCoreGlue> limeCoreGlue,
+            Provider<LWSManager> lwsManager) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -203,6 +205,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.incomingConnectionHandler = incomingConnectionHandler;
         this.licenseFactory = licenseFactory;
         this.limeCoreGlue = limeCoreGlue;
+        this.lwsManager = lwsManager;
     }
     
     /* (non-Javadoc)
@@ -430,7 +433,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP register connection dispatchers");
         
         LOG.trace("START StoreServer");
-        localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  GuiCoreMediator.getStoreManager().getHandler());
+        //localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  GuiCoreMediator.getStoreManager().getHandler());
+        localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  lwsManager.get().getHandler());
         LOG.trace("END StoreServer");         
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())

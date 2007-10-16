@@ -8,10 +8,10 @@ import org.limewire.setting.StringSetting;
  * {@link LWSManagerImpl} for the host name to which we connect for
  * authentication.
  */
-public final class StoreSettings extends LimeProps {
+public final class LWSSettings extends LimeProps {
     
     
-    private StoreSettings() {}
+    private LWSSettings() {}
 
     /**
      * The hostname to which we connect for authentication.
@@ -23,6 +23,5 @@ public final class StoreSettings extends LimeProps {
      * The on which we connect for authentication.  This can be <code><= 0</code> for no port.
      */    
     public static final IntSetting AUTHENTICATION_PORT =
-        FACTORY.createRemoteIntSetting("AUTHENTICATION_PORT", 8080, "authenticationPort", -Integer.MIN_VALUE, 10000);    
-  
+        FACTORY.createRemoteIntSetting("AUTHENTICATION_PORT", 8080, "authenticationPort", -Integer.MIN_VALUE, 10000);  
 }

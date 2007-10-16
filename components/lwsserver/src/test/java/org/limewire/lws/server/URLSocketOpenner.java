@@ -1,12 +1,14 @@
 package org.limewire.lws.server;
 
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.limewire.lws.server.DispatcherSupport;
+
 /**
- * A simple class to implement {@link #open(String, int)} by
- * <code>return new URL(url).openStream();</code>.
+ * A simple class to implement {@link DispatcherSupport.OpensSocket#open(String, int)}.
  */
 public class URLSocketOpenner implements DispatcherSupport.OpensSocket {
 

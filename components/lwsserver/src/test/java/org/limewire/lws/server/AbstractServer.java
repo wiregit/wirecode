@@ -8,17 +8,13 @@ import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.lws.server.Dispatcher;
-import org.limewire.lws.server.DispatcherSupport;
-import org.limewire.lws.server.Util;
 import org.limewire.service.ErrorService;
 
 /**
@@ -35,8 +31,8 @@ public abstract class AbstractServer implements Runnable  {
 
     private boolean done = false;
 
-    private final List<Thread> threads = new ArrayList<Thread>(NUM_WORKERS);
-    private final List<Worker> workers = new ArrayList<Worker>(NUM_WORKERS);
+    private final List<Thread> threads = new Vector<Thread>(NUM_WORKERS);
+    private final List<Worker> workers = new Vector<Worker>(NUM_WORKERS);
     
     private Dispatcher dispatcher;
 
@@ -116,8 +112,8 @@ public abstract class AbstractServer implements Runnable  {
             return;
         hasShutDown = true;
         setDone(true);
-        for (Iterator<Thread> it = threads.iterator(); it.hasNext();) {
-            stop(it.next(), millis);
+        for (int i=0, N=threads.size(); i<N; i++) {
+            stop(threads.get(i), millis);
         }
         stop(runner, millis);
         runner = null;
@@ -188,7 +184,6 @@ public abstract class AbstractServer implements Runnable  {
                 if (tmpSocket != null) break;
             }
             final ServerSocket ss = tmpSocket;
-            System.out.println("connected on " + tmpPort + ":" + ss);
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 public void run() {
                     shutDown();
@@ -342,7 +337,7 @@ public abstract class AbstractServer implements Runnable  {
                 if (request.startsWith(File.separator)) {
                     request = request.substring(1);
                 }
-                final String ip = Util.getIPAddress(s.getInetAddress());
+                final String ip = LWSServerUtil.getIPAddress(s.getInetAddress());
                 //
                 // add the ip address
                 //
@@ -358,7 +353,7 @@ public abstract class AbstractServer implements Runnable  {
                 ps.print(" OK");
                 ps.write(NEWLINE);
                 ps.print("Last-modified: ");
-                println(ps, Util.createCookieDate()); // todo wrong
+                println(ps, LWSServerUtil.createCookieDate()); // todo wrong
                 ps.print("Server: ");
                 ps.print(getName());
                 ps.write(NEWLINE);

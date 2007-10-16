@@ -28,7 +28,7 @@ public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationTes
     public void testBadMessageBeforeAuthentication() {
         final Map<String, String> args = new HashMap<String, String>();
         args.put(DispatcherSupport.Parameters.MSG, "badMsg");
-        getCode().sendLocalMsg("Msg", args,
-                errorHandler(DispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
+        args.put(DispatcherSupport.Parameters.CALLBACK, "callback");
+        getCode().sendLocalMsg("Msg", args,errorHandler(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
     }
 }

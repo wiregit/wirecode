@@ -1,11 +1,12 @@
-package org.limewire.lws.server;
+package org.limewire.lws.server.demos;
 
 import java.util.Map;
 
 import org.limewire.lws.server.AbstractDispatchee;
 import org.limewire.lws.server.AbstractRemoteServer;
 import org.limewire.lws.server.AbstractServer;
-import org.limewire.lws.server.DemoLocalServer;
+import org.limewire.lws.server.LocalServerForTesting;
+import org.limewire.lws.server.RemoteServerForTesting;
 import org.limewire.lws.server.ServerImpl;
 
 /**
@@ -31,8 +32,8 @@ public class Demo {
     }
 
     Demo() {
-        localServer = new DemoLocalServer("localhost", DemoRemoteServer.PORT);
-        remoteServer = new DemoRemoteServer(DemoLocalServer.PORT);
+        localServer = new LocalServerForTesting("localhost", RemoteServerForTesting.PORT);
+        remoteServer = new RemoteServerForTesting(LocalServerForTesting.PORT);
     }
 
     public void start() {

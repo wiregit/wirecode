@@ -3,12 +3,10 @@ package org.limewire.lws.server;
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
 
 /**
  * Tests basic communication.
- * 
- * @author jpalm
  */
 public class GiveKeyTest extends AbstractCommunicationTest {
 
@@ -26,7 +24,7 @@ public class GiveKeyTest extends AbstractCommunicationTest {
 
     public void testGiveKey() {
         final String privateKey = getPrivateKey();
-        assertTrue(privateKey, Util.isValidPrivateKey(privateKey));
+        assertTrue(privateKey, LWSServerUtil.isValidPrivateKey(privateKey));
     }
 
 }

@@ -11,9 +11,9 @@ import org.limewire.lws.server.Dispatcher;
  * The interface to which GUI and other units program for the store server. This
  * class contains an instance of {@link HttpRequestHandler} which can attach to
  * an acceptor.
- * 
+ * <br/><br/>
  * One can add {@link Handler}s and {@link Listener}s to an instance by
- * calling the following methods
+ * calling the following methods:
  * <ul>
  * <li>{@link #registerHandler(String, com.limegroup.gnutella.store.storeserver.LWSManager.Handler)}</li>
  * <li>{@link #registerListener(String, com.limegroup.gnutella.store.storeserver.LWSManager.Listener)}</li>
@@ -24,29 +24,29 @@ import org.limewire.lws.server.Dispatcher;
  * <br>
  * Here is an example of registering handlers, in which we want to control the music player from a web page:
  * <pre>
- *        RouterService.getStoreManager().registerHandler("Back", new StoreManager.AbstractHandler.OK("Back") {
+ *        LimeWireCore.getLWSManger().registerHandler("Back", new StoreManager.AbstractHandler.OK("Back") {
  *            protected void doHandle(Map<String, String> args) {
  *                MediaPlayerComponent.instance().backSong();
  *            }
  *        });
- *        RouterService.getStoreManager().registerHandler("Stop", new StoreManager.AbstractHandler.OK("Stop") {
+ *        LimeWireCore.getLWSManger().registerHandler("Stop", new StoreManager.AbstractHandler.OK("Stop") {
  *            protected void doHandle(Map<String, String> args) {
  *                MediaPlayerComponent.instance().doStopSong();
  *            }
  *        });
- *        RouterService.getStoreManager().registerHandler("Play", new StoreManager.AbstractHandler.OK("Play") {
+ *        LimeWireCore.getLWSManger().registerHandler("Play", new StoreManager.AbstractHandler.OK("Play") {
  *            protected void doHandle(Map<String, String> args) {
  *                MediaPlayerComponent.instance().playSong();
  *            }
  *        });
- *        RouterService.getStoreManager().registerHandler("Next", new StoreManager.AbstractHandler.OK("Next") {
+ *        LimeWireCore.getLWSManger().registerHandler("Next", new StoreManager.AbstractHandler.OK("Next") {
  *            protected void doHandle(Map<String, String> args) {
  *                MediaPlayerComponent.instance().nextSong();
  *            }
  *        }); 
  * </pre>
  */
-public interface LWSManager extends ConnectionListener.HasSome {
+public interface LWSManager {
        
     /**
      * The prefix to all requests. This will be stripped off when sending to our
@@ -55,35 +55,36 @@ public interface LWSManager extends ConnectionListener.HasSome {
     String PREFIX = Dispatcher.PREFIX;
     
     /**
-     * Returns the instance of {@link HttpRequestHandler} responsible for passing along messages.
+     * Returns the instance of {@link HttpRequestHandler} responsible for
+     * passing along messages.
      * 
-     * @return the instance of {@link HttpRequestHandler} responsible for passing along messages
+     * @return the instance of {@link HttpRequestHandler} responsible for
+     *         passing along messages
      */
     HttpRequestHandler getHandler();
     
     /**
-     * Register a listener for the command <tt>cmd</tt>, and returns <tt>true</tt> on success
-     * and <tt>false</tt> on failure.  There can be only <b>one</b> {@link LWSManager.Handler} for
-     * every command.
+     * Returns <tt>true</tt> if <tt>lis</tt> was added as a listener,
+     * <tt>false</tt> otherwise.
      * 
-     * @param cmd   String that invokes this listener
-     * @param lis   listener
-     * @return <tt>true</tt> if we added, <tt>false</tt> for a problem or if this command
-     *         is already registered
+     * @param lis new listener
+     * @return <tt>true</tt> if <tt>lis</tt> was added as a listener,
+     *         <tt>false</tt> otherwise.
      */
-    boolean registerHandler(String cmd, Handler lis);
+    boolean addConnectionListener(ConnectionListener lis);
 
     /**
-     * Registers a listener for the command <tt>cmd</tt>.  There can be multiple listeners
+     * Returns <tt>true</tt> if <tt>lis</tt> was removed as a listener,
+     * <tt>false</tt> otherwise.
      * 
-     * @param cmd
-     * @param lis
-     * @return
+     * @param lis old listener
+     * @return <tt>true</tt> if <tt>lis</tt> was removed as a listener,
+     *         <tt>false</tt> otherwise.
      */
-    boolean registerListener(String cmd, Listener lis);    
-
+    boolean removeConnectionListener(ConnectionListener lis);    
+    
     /**
-     * Handles commands.
+     * Defines the interface to handle commands sent to a {@link LWSManager}.
      */
     public interface Handler {
     
@@ -102,25 +103,24 @@ public interface LWSManager extends ConnectionListener.HasSome {
          * @return the unique name of this instance
          */
         String name();
-        
-        public interface CanRegister {
-            /**
-             * Register a handler for the command <tt>cmd</tt>, and returns
-             * <tt>true</tt> on success and <tt>false</tt> on failure. There
-             * can be only <b>one</b> {@link LWSManager.Handler} for every
-             * command.
-             * 
-             * @param cmd String that invokes this listener
-             * @param lis handler
-             * @return <tt>true</tt> if we added, <tt>false</tt> for a
-             *         problem or if this command is already registered
-             */
-            boolean registerHandler(String cmd, Handler lis);
-        }
     }
+    
+    /**
+     * Register a handler for the command <tt>cmd</tt>, and returns
+     * <tt>true</tt> on success and <tt>false</tt> on failure. There
+     * can be only <b>one</b> {@link LWSManager.Handler} for every
+     * command.
+     * 
+     * @param cmd String that invokes this listener
+     * @param lis handler
+     * @return <tt>true</tt> if we added, <tt>false</tt> for a
+     *         problem or if this command is already registered
+     */
+    boolean registerHandler(String cmd, Handler lis);
 
     /**
-     * Handles commands, but does NOT return a result.
+     * Defines the interface to handle commands, but does <b>NOT</b> return a
+     * result.
      */
     public interface Listener {
     
@@ -137,27 +137,22 @@ public interface LWSManager extends ConnectionListener.HasSome {
          * 
          * @return the unique name of this instance
          */
-        String name();
-        
-        public interface CanRegister {
-    
-            /**
-             * Register a listener for the command <tt>cmd</tt>, and returns
-             * <tt>true</tt> on success and <tt>false</tt> on failure. There
-             * can be only <b>one</b> {@link Handler} for every
-             * command.
-             * 
-             * @param cmd String that invokes this listener
-             * @param lis listener
-             * @return <tt>true</tt> if we added, <tt>false</tt> for a
-             *         problem or if this command is already registered
-             */
-            boolean registerListener(String cmd, Listener lis);
-        }        
+        String name();      
     }
     
     /**
-     * An abstract implementation of {@link Handler} that abstract away
+     * Registers a {@link LWSManager.Listener} for the command <tt>cmd</tt>.
+     * There can be multiple {@link LWSManager.Listener}s.
+     * 
+     * @param cmd String that invokes this listener
+     * @param lis listener to register
+     * @return <tt>true</tt> if we added, <tt>false</tt> for a problem or if
+     *         this command is already registered
+     */
+    boolean registerListener(String cmd, Listener lis);  
+    
+    /**
+     * An abstract implementation of {@link Handler} that abstracts away
      * {@link #name()}.
      */
     public abstract class AbstractHandler implements Handler {
@@ -171,34 +166,35 @@ public interface LWSManager extends ConnectionListener.HasSome {
         public final String name() {
             return name;
         }
-
-        /**
-         * An abstract implementation of {@link AbstractHandler} that abstract away
-         * returning a value from {@link #handle(Map)}.
-         */
-        public abstract static class OK extends AbstractHandler {
-
-            public OK(String name) {
-                super(name);
-            }
-
-            public final String handle(Map<String, String> args) {
-                doHandle(args);
-                return "OK";
-            }
-
-            /**
-             * Override this to do some work, but return nothing.
-             * 
-             * @param args unchanged CGI parameters passed in to
-             *        {@link #handle(Map)}
-             */
-            abstract void doHandle(Map<String, String> args);
-        }
     }
     
     /**
-     * An abstract implementation of {@link Listener} that abstract away {@link #name()}.
+     * An abstract implementation of {@link AbstractHandler} that abstracts away
+     * returning a value from {@link #handle(Map)}.
+     */
+    public abstract static class OK extends AbstractHandler {
+
+        public OK(String name) {
+            super(name);
+        }
+
+        public final String handle(Map<String, String> args) {
+            doHandle(args);
+            return "OK";
+        }
+
+        /**
+         * Override this to do some work, but return nothing.
+         * 
+         * @param args unchanged CGI parameters passed in to
+         *        {@link #handle(Map)}
+         */
+        abstract void doHandle(Map<String, String> args);
+    }    
+    
+    /**
+     * An abstract implementation of {@link Listener} that abstracts away
+     * {@link #name()}.
      */
     public abstract class AbstractListener implements Listener {
 

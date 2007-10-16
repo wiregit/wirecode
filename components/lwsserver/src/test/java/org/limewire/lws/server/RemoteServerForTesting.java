@@ -4,37 +4,36 @@ import java.util.Map;
 
 import org.limewire.lws.server.AbstractRemoteServer;
 import org.limewire.lws.server.AbstractServer;
-import org.limewire.lws.server.DemoLocalServer;
+import org.limewire.lws.server.LocalServerForTesting;
 import org.limewire.lws.server.Dispatcher;
 import org.limewire.lws.server.DispatcherSupport;
 import org.limewire.lws.server.LocalServerDelegate;
-import org.limewire.lws.server.URLSocketOpenner;
 
 /**
  * A simple remote server.
  */
-public class DemoRemoteServer extends AbstractRemoteServer implements
+public class RemoteServerForTesting extends AbstractRemoteServer implements
         RemoteServer {
 
     public final static int PORT = 8091;
 
     private final LocalServerDelegate del;
 
-    public DemoRemoteServer(final int otherPort,
+    public RemoteServerForTesting(final int otherPort,
             final DispatcherSupport.OpensSocket openner) {
         super(PORT, null);
         Dispatcher d = new DispatcherImpl() {
             @Override
-            public String sendMsgToRemoteServer(String msg,
+            public String semdMessageToServer(String msg,
                     Map<String, String> args) {
-                return del.sendMsgToRemoteServer(msg, args);
+                return del.semdMessageToServer(msg, args);
             }
         };
         setDispatcher(d);
         this.del = new LocalServerDelegate("localhost", otherPort, openner);
     }
 
-    public DemoRemoteServer(final int otherPort) {
+    public RemoteServerForTesting(final int otherPort) {
         this(otherPort, new URLSocketOpenner());
     }
 
@@ -63,7 +62,7 @@ public class DemoRemoteServer extends AbstractRemoteServer implements
     // ---------------------------------------------------------------
     
     public static void main(String[] args) {
-        AbstractServer.start(new DemoRemoteServer(DemoLocalServer.PORT));
+        AbstractServer.start(new RemoteServerForTesting(LocalServerForTesting.PORT));
     }
 
 

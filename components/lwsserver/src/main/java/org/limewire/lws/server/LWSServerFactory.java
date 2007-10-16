@@ -13,7 +13,7 @@ public class LWSServerFactory {
      * @param dispatchee    responsible for acting on commands sent from the web page
      * @return              a new {@link Dispatcher}
      */
-    public static Dispatcher createDispatcher(final SendsMessagesToServer sender, Dispatchee dispatchee) {
+    public static Dispatcher createDispatcher(final SenderOfMessagesToServer sender, Dispatchee dispatchee) {
         final LWSServerDispatcher s = new LWSServerDispatcher(sender);
         s.setDispatchee(dispatchee);
         return s;

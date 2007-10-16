@@ -1,4 +1,4 @@
-package org.limewire.lws.server;
+package org.limewire.lws.server.demos;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;

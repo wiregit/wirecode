@@ -2,7 +2,7 @@ package org.limewire.lws.server;
 
 import java.util.Map;
 
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;
@@ -25,11 +25,11 @@ public class ParseHeaderTest extends AbstractParseTestCase {
 
 	@Override
 	Map<String, String> parse(String line) {
-		return Util.parseHeader(line);
+		return LWSServerUtil.parseHeader(line);
 	}
 
 	@Override
-	String sep() {
+	String getNameValuePairSeparator() {
 		return ";";
 	}
 }

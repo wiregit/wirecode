@@ -1,7 +1,5 @@
 package org.limewire.lws.server;
 
-import org.limewire.lws.server.DispatcherSupport;
-
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
@@ -23,11 +21,9 @@ public class GoodMessageBeforeAuthenticationTest extends AbstractCommunicationTe
     }
 
     public void testGoodMessageBeforeAuthentication() {
-        getCode()
-                .sendLocalMsg(
-                        DispatcherSupport.Commands.AUTHENTICATE,
-                        NULLARGS,
-                        errorHandler(DispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
+        getCode().sendLocalMsg(DispatcherSupport.Commands.AUTHENTICATE,
+                               DUMMY_CALLBACK_ARGS,
+                               errorHandler(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
     }
 
 

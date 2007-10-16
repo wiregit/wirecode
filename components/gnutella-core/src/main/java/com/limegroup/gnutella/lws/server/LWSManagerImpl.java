@@ -9,19 +9,17 @@ import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.AbstractDispatchee;
 import org.limewire.lws.server.ConnectionListener;
 import org.limewire.lws.server.Dispatcher;
-import org.limewire.lws.server.SendsMessagesToServer;
 import org.limewire.lws.server.LWSServerFactory;
+import org.limewire.lws.server.SenderOfMessagesToServer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.settings.StoreSettings;
+import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -30,12 +28,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * Encapsulates a local server and dispatchee.
  */
 @Singleton
-public final class LWSManagerImpl implements LWSManager, 
-                                        LWSManager.Handler.CanRegister, 
-                                        LWSManager.Listener.CanRegister,
-                                        SendsMessagesToServer {
-    
-    private final static Log LOG = LogFactory.getLog(LWSManagerImpl.class);
+public final class LWSManagerImpl implements LWSManager,
+                                        SenderOfMessagesToServer {
     
     /** The page for making commands to The Lime Wire Store server. */
     private final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
@@ -45,7 +39,7 @@ public final class LWSManagerImpl implements LWSManager,
     private final Map<String, Handler> commands2handlers = new HashMap<String, Handler>();
     private final Map<String, List<Listener>> commands2listenerLists = new HashMap<String, List<Listener>>();
     
-    /** This is provided by {@link StoreSettings}. */
+    /** This is provided by {@link LWSSettings}. */
     private final String hostNameAndPort;
     
     @Inject
@@ -65,17 +59,12 @@ public final class LWSManagerImpl implements LWSManager,
         
         // Construct the hostname and port to which we connect for authentication
         // from remote settings
-        StringBuffer hostNameAndPortBuffer = new StringBuffer(StoreSettings.AUTHENTICATION_HOSTNAME.getValue());
-        int port = StoreSettings.AUTHENTICATION_PORT.getValue();
+        StringBuffer hostNameAndPortBuffer = new StringBuffer(LWSSettings.AUTHENTICATION_HOSTNAME.getValue());
+        int port = LWSSettings.AUTHENTICATION_PORT.getValue();
         if (port > 0) hostNameAndPortBuffer.append(":").append(port);
         this.hostNameAndPort = hostNameAndPortBuffer.toString();
     }
-    
-    
-    // -----------------------------------------------------------------
-    // Implementation of ConnectionListener.HasSome
-    // -----------------------------------------------------------------
-
+ 
     public final boolean addConnectionListener(ConnectionListener lis) {
         return dispatcher.addConnectionListener(lis);
     }
@@ -89,25 +78,15 @@ public final class LWSManagerImpl implements LWSManager,
     // Implementation of StoreManager
     // -----------------------------------------------------------------
 
-    public HttpRequestHandler getHandler() {
+    public final HttpRequestHandler getHandler() {
         return dispatcher;
     }
-    
-    
-    // -----------------------------------------------------------------
-    // Implementation of StoreManager.Handler.CanRegister
-    // -----------------------------------------------------------------
-    
+  
     public final boolean registerHandler(String cmd, Handler lis) {
         String hash = hash(cmd);
         return commands2handlers.get(hash) != null ? false : commands2handlers.put(hash, lis) != null;
     }
-    
-      
-    // -----------------------------------------------------------------
-    // Implementation of StoreManager.Listener.CanRegister
-    // -----------------------------------------------------------------
-    
+ 
     public final boolean registerListener(String cmd, Listener lis) {
         String hash = hash(cmd);
         List<Listener> lst = commands2listenerLists.get(hash);
@@ -115,7 +94,7 @@ public final class LWSManagerImpl implements LWSManager,
         return lst.contains(lis) ? false : lst.add(lis);
     }    
     
-    public String sendMsgToRemoteServer(final String msg, final Map<String, String> args) {
+    public final String semdMessageToServer(final String msg, final Map<String, String> args) throws IOException {
         String url = constructURL(msg, args);
         HttpClient client = HttpClientManager.getNewClient();
         GetMethod get = new GetMethod(url);
@@ -124,9 +103,6 @@ public final class LWSManagerImpl implements LWSManager,
             HttpClientManager.executeMethodRedirecting(client, get);
             final String res = get.getResponseBodyAsString();
             return res;
-        } catch(IOException ioe) {
-            LOG.warn("Can't contact store server: " + url, ioe);
-            return null;
         } finally {
             get.releaseConnection();
         }

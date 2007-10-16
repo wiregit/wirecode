@@ -5,10 +5,7 @@ import org.limewire.lws.server.LWSServerDispatcher;
 /**
  * Base class for local servers.
  */
-public abstract class ServerImpl extends AbstractServer implements Server {
-
-    /** Whether we're using the watcher of not. */
-    private final static boolean USING_WATCHER = true;
+public abstract class ServerImpl extends AbstractServer implements LocalServer {
 
     public final void start() {
         start(this);

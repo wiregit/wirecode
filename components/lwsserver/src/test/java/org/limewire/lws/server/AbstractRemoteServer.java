@@ -3,7 +3,7 @@ package org.limewire.lws.server;
 import java.util.Map;
 
 import org.limewire.lws.server.DispatcherSupport;
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
 
 
 /**
@@ -40,19 +40,19 @@ public abstract class AbstractRemoteServer extends AbstractServer {
         class StoreKey extends AbstractHandler {
 
             public String handle(final Map<String, String> args) {
-                String publicKey = Util.getArg(args, DispatcherSupport.Parameters.PUBLIC);
+                String publicKey = args.get(DispatcherSupport.Parameters.PUBLIC);
                 if (publicKey == null) {
                     return report(DispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
                 }
-                String privateKey = Util.getArg(args, DispatcherSupport.Parameters.PRIVATE);
+                String privateKey = args.get(DispatcherSupport.Parameters.PRIVATE);
                 if (privateKey == null) {
                     return report(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER);
                 }
-                String ip = Util.getArg(args, DispatcherSupport.Parameters.IP);
+                String ip = args.get(DispatcherSupport.Parameters.IP);
                 if (ip == null) {
                     return report(DispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER);
                 }                
-                if (Util.isEmpty(publicKey)) {
+                if (LWSServerUtil.isEmpty(publicKey)) {
                     return DispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY;
                 }
                 note("StoreKey: " + publicKey + " -> " + ip + "," + privateKey);
@@ -69,11 +69,11 @@ public abstract class AbstractRemoteServer extends AbstractServer {
         class GiveKey extends HandlerWithCallback {
 
             public String handleRest(final Map<String, String> args) {
-                String publicKey = Util.getArg(args, DispatcherSupport.Parameters.PUBLIC);
+                String publicKey = args.get(DispatcherSupport.Parameters.PUBLIC);
                 if (publicKey == null) {
                     return report(DispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER);
                 }
-                String ip = Util.getArg(args, DispatcherSupport.Parameters.IP);
+                String ip = args.get(DispatcherSupport.Parameters.IP);
                 if (ip == null) {
                     return report(DispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER);
                 }                

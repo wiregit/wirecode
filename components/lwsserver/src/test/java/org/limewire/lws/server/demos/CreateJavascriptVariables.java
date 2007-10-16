@@ -1,4 +1,4 @@
-package org.limewire.lws.server;
+package org.limewire.lws.server.demos;
 
 import java.lang.reflect.Field;
 import java.util.Date;

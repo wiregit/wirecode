@@ -6,16 +6,7 @@ import org.limewire.lws.server.DispatcherSupport;
 /**
  * This represents an instance of a local server.
  */
-public interface Server {
-
-    /**
-     * Single instance of {@link Factory}.
-     */
-    public final static Factory FACTORY = new Factory() {
-        public Server newInstance(int port, DispatcherSupport.OpensSocket openner) {
-            return new DemoLocalServer("localhost", 8090, openner);
-        }
-    };
+public interface LocalServer {
     
     /**
      * Returns the instance {@link DispatcherSupport}.
@@ -48,12 +39,12 @@ public interface Server {
     public interface Factory {
 
         /**
-         * Constructs a new {@link Server} on port <code>port</code>
+         * Constructs a new {@link LocalServer} on port <code>port</code>
          * 
          * @param port port on which to construct the server
          * @param openner delegate which opens streams on our behalf
-         * @return a new instance of {@link Server}, not started
+         * @return a new instance of {@link LocalServer}, not started
          */
-        Server newInstance(int port, DispatcherSupport.OpensSocket openner);
+        LocalServer newInstance(int port, DispatcherSupport.OpensSocket openner);
     }
 }

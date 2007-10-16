@@ -3,7 +3,7 @@ package org.limewire.lws.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.lws.server.Util;
+import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
@@ -24,7 +24,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
     public void testNull() {
         String cmd = null;
         Map<String, String> args = new HashMap<String, String>();
-        String have = Util.addURLEncodedArguments(cmd, args);
+        String have = LWSServerUtil.addURLEncodedArguments(cmd, args);
         assertNull(have);
     }
     
@@ -33,7 +33,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         String wantString = "cmd";
         Map<String, String> wantArgs = new HashMap<String, String>();
         Map<String, String> haveArgs = new HashMap<String, String>();
-        String haveString = Util.addURLEncodedArguments(cmd, haveArgs);
+        String haveString = LWSServerUtil.addURLEncodedArguments(cmd, haveArgs);
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     }    
@@ -43,7 +43,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         String wantString = "cmd";
         Map<String, String> wantArgs = new HashMap<String, String>();
         Map<String, String> haveArgs = new HashMap<String, String>();
-        String haveString = Util.addURLEncodedArguments(cmd, haveArgs);
+        String haveString = LWSServerUtil.addURLEncodedArguments(cmd, haveArgs);
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     } 
@@ -54,7 +54,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         Map<String, String> wantArgs = new HashMap<String, String>();
         wantArgs.put("one", "1");
         Map<String, String> haveArgs = new HashMap<String, String>();
-        String haveString = Util.addURLEncodedArguments(cmd, haveArgs);
+        String haveString = LWSServerUtil.addURLEncodedArguments(cmd, haveArgs);
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     } 
@@ -65,7 +65,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         Map<String, String> wantArgs = new HashMap<String, String>();
         wantArgs.put("one", null);
         Map<String, String> haveArgs = new HashMap<String, String>();
-        String haveString = Util.addURLEncodedArguments(cmd, haveArgs);
+        String haveString = LWSServerUtil.addURLEncodedArguments(cmd, haveArgs);
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     } 
@@ -76,7 +76,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         Map<String, String> wantArgs = new HashMap<String, String>();
         wantArgs.put("one", "");
         Map<String, String> haveArgs = new HashMap<String, String>();
-        String haveString = Util.addURLEncodedArguments(cmd, haveArgs);
+        String haveString = LWSServerUtil.addURLEncodedArguments(cmd, haveArgs);
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     } 
@@ -88,7 +88,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         wantArgs.put("one", "1");
         wantArgs.put("two", "2");
         Map<String, String> haveArgs = new HashMap<String, String>();
-        String haveString = Util.addURLEncodedArguments(cmd, haveArgs);
+        String haveString = LWSServerUtil.addURLEncodedArguments(cmd, haveArgs);
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     } 
@@ -100,7 +100,7 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         wantArgs.put("one", null);
         wantArgs.put("two", null);
         Map<String, String> haveArgs = new HashMap<String, String>();
-        String haveString = Util.addURLEncodedArguments(cmd, haveArgs);
+        String haveString = LWSServerUtil.addURLEncodedArguments(cmd, haveArgs);
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     } 
