@@ -45,16 +45,13 @@
 	<classpathentry kind="lib" path="lib/jars/id3v2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jl011.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/jars/looks.jar"/>
-	<classpathentry kind="lib" path="lib/jars/mp3sp14.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/MRJAdapter.jar"/>
 	<classpathentry kind="lib" path="lib/jars/other/themes.jar"/>
 	<classpathentry kind="lib" path="lib/jars/ProgressTabs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
-	<classpathentry kind="lib" path="lib/jars/vorbis.jar"/>
 	<classpathentry kind="lib" path="lib/jars/gettext-commons.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jmock/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="tests/lib/jmock/cglib-src.jar"/>
@@ -85,5 +82,11 @@
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jflac.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jogg.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jorbis.jar"/>
+	<classpathentry kind="lib" path="lib/jars/mp3spi.jar"/>
+	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
