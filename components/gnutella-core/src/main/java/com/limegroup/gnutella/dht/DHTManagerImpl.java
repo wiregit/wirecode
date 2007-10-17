@@ -377,8 +377,9 @@ public class DHTManagerImpl implements DHTManager {
         /*
          * 1 - initial version, doubles reported as long * Integer.MAX_VALUE
          * 2 - doubles reported as Double.doubleToLongBits
+         * 3 - Remove the BigInteger stats, use the 32 MSBits instead.
          */
-        private static final int VERSION = 2;
+        private static final int VERSION = 3;
         
         private void addVersion(Map<String, Object> m) {
             m.put("sv",VERSION);
