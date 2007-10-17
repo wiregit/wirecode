@@ -1,6 +1,5 @@
 package org.limewire.lws.server;
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,8 +8,6 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Map;
 
-import org.limewire.lws.server.DispatcherSupport;
-import org.limewire.lws.server.SenderOfMessagesToServer;
 import org.limewire.service.ErrorService;
 
 /**
@@ -34,7 +31,7 @@ final class LocalServerDelegate implements SenderOfMessagesToServer {
         this(host, port, new URLSocketOpenner());
     }
 
-    public String semdMessageToServer(final String msg, final Map<String, String> args) {
+    public void sendMessageToServer(final String msg, final Map<String, String> args, StringCallback cb) {
         try {
             int tmpPort = port;
             Socket tmpSock = null;
@@ -54,7 +51,7 @@ final class LocalServerDelegate implements SenderOfMessagesToServer {
                 }
                 params += key + "=" + args.get(key);
             }
-            if (params != null)message += params;
+            if (params != null) message += params;
             wr.write("GET /" + message + " HTTP/1.1\n\r\n\r");
             wr.flush();
             BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -68,11 +65,10 @@ final class LocalServerDelegate implements SenderOfMessagesToServer {
             in.close();
             wr.close();
             sock.close();
-            return res;
+            cb.process(res);
         } catch (IOException e) {
             ErrorService.error(e, host + ":" + port);
         }
-        return null;
     }
 
-}
+}    

@@ -55,8 +55,7 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
                 new StartCom(),
                 new Authenticate(), 
                 new Detatch(), 
-                new Msg(), 
-                new Echo() 
+                new Msg() 
          };
     }
     
@@ -85,19 +84,22 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
      */
     protected abstract class HandlerWithCallbackWithPrivateKey extends HandlerWithCallback {
 
-        protected final String handleRest(final Map<String, String> args) {
+        protected final void handleRest(final Map<String, String> args, StringCallback cb) {
             String privateKey = getPrivateKey();
             if (privateKey == null) {
-                return report(DispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY);
+                cb.process(report(DispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
+                return;
             }
             String herPrivateKey = args.get(DispatcherSupport.Parameters.PRIVATE);
             if (herPrivateKey == null) {
-                return report(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER);
+                cb.process(report(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
+                return;
             }
             if (!herPrivateKey.equals(getPrivateKey())) {
-                return report(DispatcherSupport.ErrorCodes.INVALID_PRIVATE_KEY);
+                cb.process(report(DispatcherSupport.ErrorCodes.INVALID_PRIVATE_KEY));
+                return;
             }
-            return handleRest(herPrivateKey, args);
+            handleRest(herPrivateKey, args, cb);
         }
 
         /**
@@ -110,14 +112,14 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
          * @return result <b>IN PLAIN TEXT</b> using the private key,
          *         <tt>privateKey</tt>
          */
-        abstract String handleRest(String privateKey,Map<String, String> args);
+        abstract void handleRest(String privateKey,Map<String, String> args, StringCallback cb);
     }
 
     /**
      * Issues a command to start authentication.
      */
     class StartCom extends HandlerWithCallback {
-        protected String handleRest(final Map<String, String> args) {
+        protected void handleRest(final Map<String, String> args, final StringCallback cb) {
             regenerateKeys();
             //
             // send the keys to the Server and wait for a response
@@ -126,11 +128,14 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
             sendArgs.put(DispatcherSupport.Parameters.PRIVATE, privateKey);
             sendArgs.put(DispatcherSupport.Parameters.PUBLIC, publicKey);
             try {
-                semdMessageToServer(DispatcherSupport.Commands.STORE_KEY, sendArgs);
+                sendMessageToServer(DispatcherSupport.Commands.STORE_KEY, sendArgs, new StringCallback() {
+                    public void process(String response) {
+                        cb.process(publicKey);
+                    }
+                });
             } catch (IOException e) {
                 ErrorService.error(e, "StartCom.handleRest");
             }
-            return publicKey;
         }
     }
 
@@ -138,9 +143,9 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
      * Sent from code with private key to authenticate.
      */
     class Authenticate extends HandlerWithCallbackWithPrivateKey {
-        protected String handleRest(String privateKey, Map<String, String> args) {
+        protected void handleRest(String privateKey, Map<String, String> args, StringCallback cb) {
             getDispatchee().setConnected(true);
-            return DispatcherSupport.Responses.OK;
+            cb.process(DispatcherSupport.Responses.OK);
         }
     }
 
@@ -148,11 +153,11 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
      * Send from code to end session.
      */
     class Detatch extends HandlerWithCallback {
-        protected String handleRest(Map<String, String> args) {
+        protected void handleRest(Map<String, String> args, StringCallback cb) {
             privateKey = null;
             publicKey = null;
             getDispatchee().setConnected(false);
-            return DispatcherSupport.Responses.OK;
+            cb.process(DispatcherSupport.Responses.OK);
         }
     }
 
@@ -160,35 +165,28 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
      * Sent from code with parameter {@link Parameters#COMMAND}.
      */
     class Msg extends HandlerWithCallbackWithPrivateKey {
-        protected String handleRest(final String privateKey,
-                final Map<String, String> args) {
+        protected void handleRest(String privateKey,
+                                    Map<String, String> args,
+                                    StringCallback cb) {
             String cmd = args.get(DispatcherSupport.Parameters.COMMAND);
             if (cmd == null) {
-                return report(DispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER);
+                cb.process(report(DispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER));
+                return;
             }
             if (getDispatchee() != null) {
                 final Map<String, String> newArgs = new HashMap<String, String>(args);
                 String newCmd = LWSServerUtil.addURLEncodedArguments(cmd, newArgs);
-                return getDispatchee().dispatch(newCmd, newArgs);
+                cb.process(getDispatchee().receiveCommand(newCmd, newArgs));
+                return;
             }
-            return DispatcherSupport.Responses.NO_DISPATCHEE;
-        }
-    }
-
-    /**
-     * Sent from code with parameter {@link Parameters#MSG}.
-     */
-    class Echo extends HandlerWithCallbackWithPrivateKey {
-        protected String handleRest(final String privateKey,
-                final Map<String, String> args) {
-            String msg = args.get(DispatcherSupport.Parameters.MSG);
-            return msg;
+            cb.process(DispatcherSupport.Responses.NO_DISPATCHEE);
         }
     }
 
     @Override
-    public String semdMessageToServer(String msg, Map<String, String> args) throws IOException {
-        return sender.semdMessageToServer(msg, args);
+    public void sendMessageToServer(String msg, Map<String, String> args, 
+                                    StringCallback callback) throws IOException {
+        sender.sendMessageToServer(msg, args, callback);
     }
 
 }

@@ -4,9 +4,8 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
-import org.limewire.lws.server.AbstractRemoteServer;
 import org.limewire.lws.server.LocalServerDelegate;
-import org.limewire.lws.server.ServerImpl;
+import org.limewire.lws.server.LocalServerImpl;
 
 
 /**
@@ -29,17 +28,25 @@ final class FakeJavascriptCodeInTheWebpage {
 		void handle(String res);
 	}
 	
-	FakeJavascriptCodeInTheWebpage(ServerImpl local, AbstractRemoteServer remote) {
+	FakeJavascriptCodeInTheWebpage(LocalServerImpl local, RemoteServerImpl remote) {
 		this.toLocalServer = new LocalServerDelegate("localhost", local.getPort());
 		this.toRemoteServer = new LocalServerDelegate("localhost", remote.getPort());
 	}
 	
-	protected final void sendLocalMsg(String msg, Map<String, String> args, Handler h) {
-		h.handle(removeHeaders(toLocalServer.semdMessageToServer(msg, args)));
+	protected final void sendLocalMsg(String msg, Map<String, String> args, final Handler h) {
+        toLocalServer.sendMessageToServer(msg, args, new StringCallback() {
+            public void process(String response) {
+                h.handle(removeHeaders(response));
+            }
+        });
 	}
 
-	protected final void sendRemoteMsg(String msg, Map<String, String> args, Handler h) {
-		h.handle(removeHeaders(toRemoteServer.semdMessageToServer(msg, args)));
+	protected final void sendRemoteMsg(String msg, Map<String, String> args, final Handler h) {
+        toRemoteServer.sendMessageToServer(msg, args, new StringCallback() {
+            public void process(String response) {
+                h.handle(removeHeaders(response));
+            }
+        });
 	}
 	
 	private String removeHeaders(String response) {

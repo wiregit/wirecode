@@ -8,28 +8,33 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.limewire.lws.server.AbstractDispatchee;
+import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.ConnectionListener;
 import org.limewire.lws.server.Dispatcher;
-import org.limewire.lws.server.LWSServerFactory;
+import org.limewire.lws.server.LWSDispatcherFactory;
 import org.limewire.lws.server.SenderOfMessagesToServer;
+import org.limewire.lws.server.StringCallback;
+import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.gui.GuiCoreMediator;
+import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
- * Encapsulates a local server and dispatchee.
+ * Encapsulates a {@link Dispatcher} and {@link ReceivesCommandsFromDispatcher}.
  */
 @Singleton
-public final class LWSManagerImpl implements LWSManager,
-                                        SenderOfMessagesToServer {
+public final class LWSManagerImpl implements LWSManager, SenderOfMessagesToServer {
     
     /** The page for making commands to The Lime Wire Store server. */
     private final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
@@ -44,9 +49,9 @@ public final class LWSManagerImpl implements LWSManager,
     
     @Inject
     public LWSManagerImpl() {
-        this.dispatcher = LWSServerFactory.createDispatcher(this, new  AbstractDispatchee() {
+        this.dispatcher = LWSDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
 
-            public String dispatch(String cmd, Map<String, String> args) {
+            public String receiveCommand(String cmd, Map<String, String> args) {
                 return LWSManagerImpl.this.dispatch(cmd, args);
             }
 
@@ -94,18 +99,32 @@ public final class LWSManagerImpl implements LWSManager,
         return lst.contains(lis) ? false : lst.add(lis);
     }    
     
-    public final String semdMessageToServer(final String msg, final Map<String, String> args) throws IOException {
+    public final void sendMessageToServer(final String msg, 
+                                          final Map<String, String> args, 
+                                          final StringCallback cb) throws IOException {
         String url = constructURL(msg, args);
-        HttpClient client = HttpClientManager.getNewClient();
-        GetMethod get = new GetMethod(url);
+        final GetMethod get = new GetMethod(url);
         get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
-        try {
-            HttpClientManager.executeMethodRedirecting(client, get);
-            final String res = get.getResponseBodyAsString();
-            return res;
-        } finally {
-            get.releaseConnection();
-        }
+            //
+            // we don't care what this response is, because we are
+            // always talking to the remote web server, so process it
+            // right away
+            //
+            cb.process("ok");
+            final HttpExecutor exe = GuiCoreMediator.getHttpExecutor();
+            exe.execute(get, new HttpClientListener() {
+
+                public boolean requestComplete(HttpMethod method) {
+                    exe.releaseResources(get);
+                    return false;
+                }
+
+                public boolean requestFailed(HttpMethod method, IOException exc) {
+                    exe.releaseResources(get);
+                    return false;
+                }
+                
+            }, 1000);
     }
     
     private String constructURL(final String msg, final Map<String, String> args) {

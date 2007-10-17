@@ -6,8 +6,8 @@ package org.limewire.lws.server;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +20,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.lws.server.LocalServer;
+import org.limewire.service.ErrorService;
 
 /**
  * Instances of this class will receive HTTP requests and are responsible to
@@ -29,7 +30,7 @@ public abstract class DispatcherSupport implements Dispatcher {
     
     private final static Log LOG = LogFactory.getLog(DispatcherSupport.class);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
-    private Dispatchee dispatchee;
+    private ReceivesCommandsFromDispatcher dispatchee;
     
     public DispatcherSupport() {
         Handler[] hs = createHandlers();
@@ -44,33 +45,38 @@ public abstract class DispatcherSupport implements Dispatcher {
     // Interface
     // ------------------------------------------------------
     
-    public void handle(HttpRequest httpReq, HttpResponse res, HttpContext c) throws HttpException, IOException {
+    public void handle(HttpRequest httpReq, final HttpResponse res, HttpContext c) throws HttpException, IOException {
         String request = httpReq.getRequestLine().getUri();
-        final String req = makeFile(request);
+        final String req = getOnlytheFileRequestPortionOfURL(request);
         final Handler h = names2handlers.get(req.toLowerCase());
-        final String str;
         if (h == null) {
             LOG.error("Couldn't create a handler for " + req);
-            str = report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
-        } else {
-            LOG.debug("have handler: " + h.name());
-            final Map<String, String> args = DispatcherSupport.getArgs(request);
-            str = h.handle(args);
+            String str = report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
+            res.setEntity(new StringEntity(str));
+            return;
         }
-        res.setEntity(new StringEntity(str));        
+        LOG.debug("have handler: " + h.name());
+        final Map<String, String> args = DispatcherSupport.getArgs(request);
+        h.handle(args, new StringCallback() {
+
+            public void process(String response) {
+                try {
+                    res.setEntity(new StringEntity(response));
+                } catch (UnsupportedEncodingException e) {
+                    ErrorService.error(e);
+                }
+            }
+            
+        });
     }
+    
     public final boolean addConnectionListener(ConnectionListener lis) {
         return getDispatchee().addConnectionListener(lis);
     }
 
     public final boolean removeConnectionListener(ConnectionListener lis) {
         return getDispatchee().removeConnectionListener(lis);
-    }  
-    
-    /* (non-Javadoc)
-     * @see org.limewire.store.server.Dispatcher#sendMsgToRemoteServer(java.lang.String, java.util.Map)
-     */
-    public abstract String semdMessageToServer(String msg, Map<String, String> args) throws IOException;
+    }
     
     /**
      * Override this to create the {@link Handler}s to use.
@@ -82,16 +88,16 @@ public abstract class DispatcherSupport implements Dispatcher {
     /* (non-Javadoc)
      * @see org.limewire.store.server.Dispatcher#setDispatchee(org.limewire.store.server.Dispatchee)
      */
-    public final void setDispatchee(Dispatchee dispatchee) {
+    public final void setDispatchee(ReceivesCommandsFromDispatcher dispatchee) {
         this.dispatchee = dispatchee;
     }
 
     /**
-     * Returns the {@link Dispatchee} instance.
+     * Returns the {@link ReceivesCommandsFromDispatcher} instance.
      * 
-     * @return the {@link Dispatchee} instance
+     * @return the {@link ReceivesCommandsFromDispatcher} instance
      */
-    final Dispatchee getDispatchee() {
+    final ReceivesCommandsFromDispatcher getDispatchee() {
         return dispatchee;
     }
     
@@ -99,21 +105,21 @@ public abstract class DispatcherSupport implements Dispatcher {
      * Create an instance of Handler from the top level name as well as trying a
      * static inner class and calls its {@link Handler#handle()} method.
      */
-    final String handle(final String request, final PrintStream out) {
-        final String req = makeFile(request);
+    final void handle(String request,  PrintStream out, StringCallback callback) {
+        final String req = getOnlytheFileRequestPortionOfURL(request);
         final Handler h = names2handlers.get(req.toLowerCase());
         if (h == null) {
             LOG.error("Couldn't create a handler for " + req);
-            return report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
+            callback.process(report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND));
         }
         LOG.debug("have handler: " + h.name());
         final Map<String, String> args = DispatcherSupport.getArgs(request);
-        final String res = h.handle(args);
-        return res;
+        h.handle(args, callback);
     }    
 
-    final void note(final String pattern, final Object... os) {
-        if (LOG.isDebugEnabled()) LOG.info(MessageFormat.format(pattern, os));
+    final void note(String pattern, Object... os) {
+        //if (LOG.isDebugEnabled()) LOG.info(MessageFormat.format(pattern, os));
+        System.out.println(pattern);
     }    
    
     /**
@@ -125,7 +131,7 @@ public abstract class DispatcherSupport implements Dispatcher {
      * @param error the error message
      * @return the message <tt>error</tt> in the call back
      */
-    public static final String report(final String error) {
+    public static final String report(String error) {
         return wrapCallback(DispatcherSupport.Constants.ERROR_CALLBACK, LWSServerUtil.wrapError(error));
     }
     
@@ -136,11 +142,11 @@ public abstract class DispatcherSupport implements Dispatcher {
      * @param request may be <code>null</code>
      * @return the arguments to the right of the <code>?</code>
      */
-    static Map<String, String> getArgs(final String request) {
+    static Map<String, String> getArgs(String request) {
         if (request == null || request.length() == 0) {
             return Collections.emptyMap();
         }
-        final int ihuh = request.indexOf('?');
+        int ihuh = request.indexOf('?');
         if (ihuh == -1) {
             return Collections.emptyMap();
         }
@@ -174,7 +180,7 @@ public abstract class DispatcherSupport implements Dispatcher {
     /**
      * Removes hash and other stuff.
      */
-    private String makeFile(final String s) {
+    private String getOnlytheFileRequestPortionOfURL(final String s) {
         int iprefix = s.indexOf(PREFIX);
         String res = iprefix == -1 ? s : s.substring(iprefix + PREFIX.length());
         final char[] cs = { '#', '?' };
@@ -228,10 +234,9 @@ public abstract class DispatcherSupport implements Dispatcher {
          * Perform some operation on the incoming message and return the result.
          * 
          * @param args CGI params
-         * @return the result of performing some operation on the incoming
-         *         message
+         * @param callback TODO
          */
-        String handle(Map<String, String> args);
+        void handle(Map<String, String> args, StringCallback callback);
 
         /**
          * Returns the unique name of this instance.
@@ -295,21 +300,29 @@ public abstract class DispatcherSupport implements Dispatcher {
      */
     protected abstract class HandlerWithCallback extends AbstractHandler {
 
-        public final String handle(final Map<String, String> args) {
-            String callback = args.get(DispatcherSupport.Parameters.CALLBACK);
+        public final void handle(final Map<String, String> args, final StringCallback cb) {
+            final String callback = args.get(DispatcherSupport.Parameters.CALLBACK);
             if (callback == null) {
-                return report(DispatcherSupport.ErrorCodes.MISSING_CALLBACK_PARAMETER);
+                cb.process(report(DispatcherSupport.ErrorCodes.MISSING_CALLBACK_PARAMETER));
+                return;
             }
             //
             // We want to make sure to check if the result is an error.  In which case
             // we want to wrap it in the error callback, rather than the normal one
             //
-            String res = handleRest(args);
-            if (LWSServerUtil.isError(res)) {
-                return DispatcherSupport.wrapCallback(Constants.ERROR_CALLBACK, res);
-            } else {
-                return DispatcherSupport.wrapCallback(callback, res);
-            }
+            handleRest(args, new StringCallback() {
+
+                public void process(String res) {
+                    String str;
+                    if (LWSServerUtil.isError(res)) {
+                        str = DispatcherSupport.wrapCallback(Constants.ERROR_CALLBACK, res);
+                    } else {
+                        str = DispatcherSupport.wrapCallback(callback, res);
+                    }  
+                    cb.process(str);
+                }
+                
+            });
         }
 
         /**
@@ -329,7 +342,7 @@ public abstract class DispatcherSupport implements Dispatcher {
          * @param args original, untouched arguments
          * @return result <b>IN PLAIN TEXT</b>
          */
-        protected abstract String handleRest(Map<String, String> args);
+        protected abstract void handleRest(Map<String, String> args, StringCallback callback);
         
         /**
          * Overrides {@link AbstractHandler#report(String)} by simply wrapping
@@ -401,23 +414,6 @@ public abstract class DispatcherSupport implements Dispatcher {
          * </ul>
          */
         String AUTHENTICATE = "Authenticate";
-    
-        /* Testing */
-    
-        /**
-         * Sent from Code to Local with parameters.
-         * <ul>
-         * <li>{@link LocalServer.Parameters#MSG}</li>
-         * </ul>
-         */
-        String ECHO = "Echo";
-        
-        /**
-         * Sent from Code to Local with unknown parameters
-         */
-        String MSG = "Msg";
-    
-        public final static String ALERT = "Alert";
     }
 
     /**
@@ -441,7 +437,7 @@ public abstract class DispatcherSupport implements Dispatcher {
         String PUBLIC = "public";
     
         /**
-         * Name of the command to send to the {@link Dispatchee}.
+         * Name of the command to send to the {@link ReceivesCommandsFromDispatcher}.
          */
         String COMMAND = "command";
     
@@ -533,12 +529,12 @@ public abstract class DispatcherSupport implements Dispatcher {
     
         /**
          * When there was a command sent to the local host, but no
-         * {@link Dispatchee} was set up to handle it.
+         * {@link ReceivesCommandsFromDispatcher} was set up to handle it.
          */
         String NO_DISPATCHEE = "no.dispatcher";
     
         /**
-         * When there was a {@link Dispatchee} to handle this command, but it
+         * When there was a {@link ReceivesCommandsFromDispatcher} to handle this command, but it
          * didn't understand it.
          */
         String UNKNOWN_COMMAND = "unknown.command";

@@ -43,19 +43,6 @@ public abstract class AbstractServer implements Runnable  {
     // Interface
     // --------------------------------------------------------
 
-    /**
-     * Returns and starts a {@link Thread} for <tt>s</tt>.
-     * 
-     * @param s the server in questions
-     * @return a {@link Thread} for <tt>s</tt>
-     */
-    public static Thread start(final AbstractServer s) {
-        Thread t = new ManagedThread(s);
-        t.start();
-        s.runner = t;
-        return t;
-    }
-
     public AbstractServer(final int port, final String name, final DispatcherSupport dispatcher) {
         this.port = port;
         this.name = name;
@@ -65,6 +52,13 @@ public abstract class AbstractServer implements Runnable  {
     
     public AbstractServer(final int port, final String name) {
         this(port, name, null);        
+    }
+    
+    public final Thread start() {
+        Thread t = new ManagedThread(this);
+        t.start();
+        this.runner = t;
+        return t;
     }
 
     /**
@@ -102,14 +96,13 @@ public abstract class AbstractServer implements Runnable  {
     }
     
     /**
-     * Attempts to join this thread and then set Done to <tt>true</tt>.
+     * Attempts to join this thread and then set Done to <code>true</code>.
      * 
      * @param millis milliseconds to wait for a join
      */
     public final void shutDown(final long millis) {
         getDispatcher().note("shutting down");
-        if (hasShutDown)
-            return;
+        if (hasShutDown) return;
         hasShutDown = true;
         setDone(true);
         for (int i=0, N=threads.size(); i<N; i++) {
@@ -269,7 +262,7 @@ public abstract class AbstractServer implements Runnable  {
 
         private void handleClient() throws IOException {
             InputStream is = new BufferedInputStream(s.getInputStream());
-            PrintStream ps = new PrintStream(s.getOutputStream(), true);
+            final PrintStream ps = new PrintStream(s.getOutputStream(), true);
             /*
              * we will only block in read for this many milliseconds before we
              * fail with java.io.InterruptedIOException, at which point we will
@@ -347,22 +340,32 @@ public abstract class AbstractServer implements Runnable  {
                     request += "&";
                 }
                 request += "ip=" + ip;
-                String res = getDispatcher().handle(request, ps);
-                ps.print("HTTP/1.1 ");
-                ps.print(HttpURLConnection.HTTP_OK);
-                ps.print(" OK");
-                ps.write(NEWLINE);
-                ps.print("Last-modified: ");
-                println(ps, LWSServerUtil.createCookieDate()); // todo wrong
-                ps.print("Server: ");
-                ps.print(getName());
-                ps.write(NEWLINE);
-                ps.print("Date: " + new Date());
-                ps.write(NEWLINE);
-                ps.print("Content-length: ");
-                println(ps, String.valueOf(res.length()));
-                ps.write(NEWLINE);
-                ps.print(res);
+                getDispatcher().handle(request, ps, new StringCallback() {
+
+                    public void process(String res) {
+                        ps.print("HTTP/1.1 ");
+                        ps.print(HttpURLConnection.HTTP_OK);
+                        ps.print(" OK");
+                        try {
+                            ps.write(NEWLINE);
+                            ps.print("Last-modified: ");
+                            println(ps, LWSServerUtil.createCookieDate()); // todo wrong
+                            ps.print("Server: ");
+                            ps.print(getName());
+                            ps.write(NEWLINE);
+                            ps.print("Date: " + new Date());
+                            ps.write(NEWLINE);
+                            ps.print("Content-length: ");
+                            println(ps, String.valueOf(res.length()));
+                            ps.write(NEWLINE);
+                            ps.print(res);
+                        } catch (IOException e) {
+                            ErrorService.error(e);
+                        }
+                    }
+                    
+                });
+
             } finally {
                 s.close();
             }
@@ -387,7 +390,7 @@ public abstract class AbstractServer implements Runnable  {
     }
 
     /**
-     * Calls {@link #shutDown(long)} with <tt>1000</tt>.
+     * Calls {@link #shutDown(long)} with <code>1000</code>.
      */
     public final void shutDown() {
         shutDown(100);

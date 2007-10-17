@@ -6,8 +6,14 @@ import java.util.List;
 
 /**
  * This is what receives actual commands from an {@link DispatcherSupport}.
+ * This class abstract out the
+ * {@link #addConnectionListener(ConnectionListener adding},
+ * {@link #removeConnectionListener(ConnectionListener removing}, and
+ * {@link #setConnected(boolean notifying} of {@link ConnectionListener}s and
+ * leaves subclasses responsible for implementing the
+ * {@link ReceivesCommandsFromDispatcher#receiveCommand(String, java.util.Map command handling).
  */
-public abstract class AbstractDispatchee implements Dispatchee {
+public abstract class AbstractReceivesCommandsFromDispatcher implements ReceivesCommandsFromDispatcher {
 
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
     private boolean isConnected;

@@ -10,40 +10,45 @@ import org.limewire.lws.server.Dispatcher;
 /**
  * The interface to which GUI and other units program for the store server. This
  * class contains an instance of {@link HttpRequestHandler} which can attach to
- * an acceptor.
- * <br/><br/>
- * One can add {@link Handler}s and {@link Listener}s to an instance by
- * calling the following methods:
+ * an acceptor. <br/><br/> One can add {@link Handler}s and {@link Listener}s
+ * to an instance by calling the following methods:
  * <ul>
  * <li>{@link #registerHandler(String, com.limegroup.gnutella.store.storeserver.LWSManager.Handler)}</li>
  * <li>{@link #registerListener(String, com.limegroup.gnutella.store.storeserver.LWSManager.Listener)}</li>
  * </ul>
  * with the rules that only <u>one</u> handler may be registered per command
  * and zero or more listeners may be added for every command. It's expected that
- * at least one handler or listener will be registered for every command.
- * <br>
- * Here is an example of registering handlers, in which we want to control the music player from a web page:
+ * at least one handler or listener will be registered for every command. <br>
+ * 
+ * <br/>
+ * <br/>
+ * 
+ * Here is an example of registering handlers, in whichthe
+ * example we want to control the music player from a web page.  The actions inside
+ * <code>doHandle</code> may become outdated as the rest of the code outside
+ * this package changes, but it's meant to exemplify using this class:
+ * 
  * <pre>
- *        LimeWireCore.getLWSManger().registerHandler("Back", new StoreManager.AbstractHandler.OK("Back") {
- *            protected void doHandle(Map<String, String> args) {
- *                MediaPlayerComponent.instance().backSong();
- *            }
- *        });
- *        LimeWireCore.getLWSManger().registerHandler("Stop", new StoreManager.AbstractHandler.OK("Stop") {
- *            protected void doHandle(Map<String, String> args) {
- *                MediaPlayerComponent.instance().doStopSong();
- *            }
- *        });
- *        LimeWireCore.getLWSManger().registerHandler("Play", new StoreManager.AbstractHandler.OK("Play") {
- *            protected void doHandle(Map<String, String> args) {
- *                MediaPlayerComponent.instance().playSong();
- *            }
- *        });
- *        LimeWireCore.getLWSManger().registerHandler("Next", new StoreManager.AbstractHandler.OK("Next") {
- *            protected void doHandle(Map<String, String> args) {
- *                MediaPlayerComponent.instance().nextSong();
- *            }
- *        }); 
+ * LimeWireCore.getLWSManger().registerHandler(&quot;Back&quot;, new StoreManager.AbstractHandler.OK(&quot;Back&quot;) {
+ *     protected void doHandle(Map&lt;String, String&gt; args) {
+ *         MediaPlayerComponent.instance().backSong();
+ *     }
+ * });
+ * LimeWireCore.getLWSManger().registerHandler(&quot;Stop&quot;, new StoreManager.AbstractHandler.OK(&quot;Stop&quot;) {
+ *     protected void doHandle(Map&lt;String, String&gt; args) {
+ *         MediaPlayerComponent.instance().doStopSong();
+ *     }
+ * });
+ * LimeWireCore.getLWSManger().registerHandler(&quot;Play&quot;, new StoreManager.AbstractHandler.OK(&quot;Play&quot;) {
+ *     protected void doHandle(Map&lt;String, String&gt; args) {
+ *         MediaPlayerComponent.instance().playSong();
+ *     }
+ * });
+ * LimeWireCore.getLWSManger().registerHandler(&quot;Next&quot;, new StoreManager.AbstractHandler.OK(&quot;Next&quot;) {
+ *     protected void doHandle(Map&lt;String, String&gt; args) {
+ *         MediaPlayerComponent.instance().nextSong();
+ *     }
+ * });
  * </pre>
  */
 public interface LWSManager {

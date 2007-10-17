@@ -16,9 +16,11 @@ public interface LocalServer {
     Dispatcher getDispatcher();
 
     /**
-     * Starts up the server.
+     * Returns the {@link Thread} that started this server, after starting it.
+     * 
+     * @return the {@link Thread} that started this server, after starting it
      */
-    void start();
+    Thread start();
 
     /**
      * Shuts down the server, waiting for <code>millis</code> milliseconds.
@@ -36,15 +38,4 @@ public interface LocalServer {
      */
     String report(String msg);    
 
-    public interface Factory {
-
-        /**
-         * Constructs a new {@link LocalServer} on port <code>port</code>
-         * 
-         * @param port port on which to construct the server
-         * @param openner delegate which opens streams on our behalf
-         * @return a new instance of {@link LocalServer}, not started
-         */
-        LocalServer newInstance(int port, DispatcherSupport.OpensSocket openner);
-    }
 }

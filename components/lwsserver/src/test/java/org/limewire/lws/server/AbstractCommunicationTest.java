@@ -1,6 +1,5 @@
 package org.limewire.lws.server;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,11 +13,11 @@ import org.limewire.util.BaseTestCase;
  */
 abstract class AbstractCommunicationTest extends BaseTestCase {
     
-    public final static int LOCAL_PORT  = LocalServerForTesting.PORT;
-    public final static int REMOTE_PORT = RemoteServerForTesting.PORT;
+    public final static int LOCAL_PORT  = LocalServerImpl.PORT;
+    public final static int REMOTE_PORT = RemoteServerImpl.PORT;
 
-    private LocalServerForTesting localServer;
-    private RemoteServerForTesting remoteServer;
+    private LocalServerImpl localServer;
+    private RemoteServerImpl remoteServer;
     private FakeJavascriptCodeInTheWebpage code;
     
     private Thread localThread;
@@ -32,11 +31,11 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
     // Access
     // -------------------------------------------------------
     
-    protected final ServerImpl getLocalServer() {
+    protected final LocalServerImpl getLocalServer() {
         return this.localServer;
     }
 
-    protected final AbstractRemoteServer getRemoteServer() {
+    protected final RemoteServerImpl getRemoteServer() {
         return this.remoteServer;
     }
 
@@ -44,7 +43,11 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
         return this.code;
     }
 
-    protected static final Map<String, String> NULL_ARGS = new HashMap<String,String>(); //Collections.emptyMap();
+    /**
+     * This is not a {@link Collections#emptyMap()} because we may want to add
+     * to it.
+     */
+    protected static final Map<String, String> NULL_ARGS = new HashMap<String,String>();
     
     protected static final Map<String, String> DUMMY_CALLBACK_ARGS;
     static {
@@ -100,11 +103,11 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
 
         beforeSetup();
 
-        localServer = new LocalServerForTesting("localhost", REMOTE_PORT);
-        remoteServer = new RemoteServerForTesting(LOCAL_PORT);
-        localThread = AbstractServer.start(localServer);
-        remoteThread = AbstractServer.start(remoteServer);
-        code = new FakeJavascriptCodeInTheWebpage(localServer, remoteServer);
+        localServer     = new LocalServerImpl("localhost", REMOTE_PORT);
+        remoteServer    = new RemoteServerImpl(LOCAL_PORT);
+        localThread     = localServer.start();
+        remoteThread    = remoteServer.start();
+        code            = new FakeJavascriptCodeInTheWebpage(localServer, remoteServer);
 
         afterSetup();
     }
