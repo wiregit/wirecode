@@ -12,6 +12,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.RouteTableSettings;
 
 public class ContextTest extends MojitoTestCase {
     
@@ -102,11 +103,19 @@ public class ContextTest extends MojitoTestCase {
         try {
             for (int i = 0; i < (2*expected); i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(new InetSocketAddress(2000 + i));
+                InetSocketAddress addr = new InetSocketAddress("localhost",2000 + i); 
+                dht.bind(addr);
                 dht.start();
                 
                 if (i > 0) {
+                    // bootstrap from the node 0, but make sure node 0
+                    // pings back to mark the new node as ALIVE.
                     dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
+                    dhts.get(0).ping(addr).get();
+                    
+                    // make sure after the first k nodes bootstrap the rest have at least k nodes in the rt
+                    if (i > k)
+                        assertGreaterThanOrEquals(k, dht.getRouteTable().getContacts().size());
                 }
                 dhts.add(dht);
             }
@@ -115,7 +124,7 @@ public class ContextTest extends MojitoTestCase {
             
             // Shutdown a random MojitoDHT instance
             Random generator = new Random();
-            int index = generator.nextInt(dhts.size());
+            int index = generator.nextInt(dhts.size() / 2) + k;
             MojitoDHT down = dhts.get(index);
             down.close();
             
