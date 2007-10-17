@@ -96,8 +96,12 @@ public class HostileFilter implements SpamFilter {
     
     private boolean allowLogged(IP ip) {
         boolean yes = allowImpl(ip);
-        if (LOG.isDebugEnabled())
-            LOG.debug("" + (yes ? "" : "NOT ")+" allowing "+ip);
+        
+        if (yes && LOG.isDebugEnabled())
+            LOG.debug("allowing "+ip);
+        else if (!yes && LOG.isInfoEnabled())
+            LOG.info("NOT allowing "+ip);
+        
         return yes;
     }
     
