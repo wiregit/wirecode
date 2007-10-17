@@ -20,6 +20,8 @@ import org.limewire.util.StringUtils;
  
 public class StringArraySetting extends Setting {
     
+    public static final char SEPARATOR = ';';
+    
     private String[] value;
 
 	/**
@@ -68,7 +70,7 @@ public class StringArraySetting extends Setting {
             return (new String[0]);
         }
         
-        return StringUtils.split(src, ";");
+        return StringUtils.split(src, SEPARATOR);
     }
     
     /**
@@ -82,7 +84,7 @@ public class StringArraySetting extends Setting {
         
         StringBuilder buffer = new StringBuilder();
         for(String str : src) {
-            buffer.append(str).append(';');
+            buffer.append(str).append(SEPARATOR);
         }
         
         if (buffer.length() > 0) {

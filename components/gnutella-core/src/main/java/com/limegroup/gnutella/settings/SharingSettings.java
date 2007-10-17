@@ -328,10 +328,17 @@ public class SharingSettings extends LimeProps {
 		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;flac;fla;"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4a;idx;bz2;sea;pf;arc;arj;"+
+		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4a;bz2;sea;pf;arc;arj;"+
 		"bz;tbz;mime;taz;ua;toast;lit;rpm;deb;pkg;sxw;l6t;srt;sub;idx;mkv;"+
-		"ogm;shn;flac;fla;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
+		"ogm;shn;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
 		"pyo;pyz";
+    
+    /**
+     * Default disabled extensions.
+     */
+    private static final String DEFAULT_EXTENSIONS_TO_DISABLE =
+        "doc";
+        
     
     /**
      * The list of extensions shared by default
@@ -345,6 +352,20 @@ public class SharingSettings extends LimeProps {
      */
     public static final String getDefaultExtensionsAsString() {
         return DEFAULT_EXTENSIONS_TO_SHARE; 
+    }
+    
+    /**
+     * The list of extensions disabled by default in the file types sharing screen
+     */
+    public static final String[] getDefaultDisabledExtensions() {
+        return StringArraySetting.encode(DEFAULT_EXTENSIONS_TO_DISABLE); 
+    }
+    
+    /**
+     * The list of extensions disabled by default in the file types sharing screen
+     */
+    public static final String getDefaultDisabledExtensionsAsString() {
+        return DEFAULT_EXTENSIONS_TO_DISABLE; 
     }
     
     
@@ -377,7 +398,36 @@ public class SharingSettings extends LimeProps {
 	 */
     public static final StringSetting EXTENSIONS_TO_SHARE =
         FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
-                                            
+    
+    // New Settings for extension management
+
+    /**
+     * Used to flag the first use of the new database type to migrate the 
+     *  extensions database across into the new settings 
+     */
+    public static final BooleanSetting EXTENSIONS_MIGRATE = 
+        FACTORY.createBooleanSetting("EXTENSIONS_MIGRATE", true);
+    
+    /**
+     * List of Extra file extensions.
+     */
+    public static final StringSetting EXTENSIONS_LIST_CUSTOM =
+         FACTORY.createStringSetting("EXTENSIONS_LIST_CUSTOM", "");
+    
+    /**
+     * File extensions that are not shared.
+     */
+    public static final StringSetting EXTENSIONS_LIST_UNSHARED =
+         FACTORY.createStringSetting("EXTENSIONS_LIST_UNSHARED", "");
+    
+    
+    
+    /**
+     * If to not force disable sensitive extensions.
+     */
+    public static final BooleanSetting DISABLE_SENSITIVE =
+        FACTORY.createBooleanSetting("DISABLE_SENSITIVE_EXTS", true);
+    
     /**
      * Sets the probability (expressed as a percentage) that an incoming
      * freeloader will be accepted.   For example, if allowed==50, an incoming
