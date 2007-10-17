@@ -376,13 +376,12 @@ public final class UDPConnectionTest extends BaseTestCase {
      * UDPConnections.
      */
     public void testConnection() throws Exception {
-        final int NUM_BYTES = 10000000;
+        final int NUM_BYTES = 10 * 1000 * 1000;
 
         // Clear out my standard setup
         stubService.clearReceivers();
 
         // Add some simulated connections to the UDPServiceStub
-        // Make the connections 5% flaky
         stubService.addReceiver(6346, 6348, 0, 0);
         stubService.addReceiver(6348, 6346, 0, 0);
 
