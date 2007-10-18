@@ -29,6 +29,7 @@ import java.util.Map;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 
@@ -53,10 +54,18 @@ public class CollisionTest extends MojitoTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         setLocalIsPrivate(false);
+        /*
+         * replacement of ALIVE nodes will work only if the previous node properly
+         * sent a shut down message or incoming requests generate ALIVE contacts.
+         */
+        ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
+        // or set
+        // RouteTableSettings.INCOMING_REQUESTS_UNKNOWN.setValue(false);
     }
 
     public void testSpoof() throws Exception {
         RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
+        ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
         
         MojitoDHT bootstrap = null, original = null, spoofer = null;
         

@@ -12,7 +12,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.settings.RouteTableSettings;
 
 public class ContextTest extends MojitoTestCase {
     
