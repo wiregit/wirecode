@@ -140,7 +140,7 @@ public class CacheForwardTest extends MojitoTestCase {
     
     public void testCacheForward() throws Exception {
         
-        final long waitForNodes = 500; // ms
+        final long waitForNodes = 1000; // ms
 
         //ContextSettings.SEND_SHUTDOWN_MESSAGE.setValue(false);
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
