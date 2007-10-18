@@ -26,7 +26,6 @@ public class PlayListItemTest extends BaseTestCase {
         URL url = null;
         try {
             url = new URL("http://test.txt");
-            System.out.println(url);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -34,7 +33,7 @@ public class PlayListItemTest extends BaseTestCase {
         assert(url != null );
         URI uri = url.toURI();
 
-        PlayListItem item = new PlayListItem(uri, "test", false, false);
+        PlayListItem item = new PlayListItem(uri, new AudioSource(url),"test", false, false);
         
         assertEquals(item.getURI(), uri);
         assertEquals(item.getName(), "test");
@@ -83,7 +82,7 @@ public class PlayListItemTest extends BaseTestCase {
         assert(url != null );
         URI uri = url.toURI();
         
-        PlayListItem item = new PlayListItem(uri, "test", false, true, map);
+        PlayListItem item = new PlayListItem(uri, new AudioSource(url),"test", false, true, map);
         
         assertEquals(item.getURI(), uri);
         assertEquals(item.getName(), "test");
