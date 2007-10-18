@@ -1,5 +1,8 @@
 package org.limewire.nio.channel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;
 
@@ -13,7 +16,27 @@ public class FakeThrottle implements Throttle {
     private boolean didRequest;
     private boolean didRelease;
     
+    private List<ThrottleListener> tl = new ArrayList<ThrottleListener>();
+    
     public void interest(ThrottleListener writer) {
+        if(tl.size() == 0){
+            tl.add(interests, writer);
+        }//don't want to add the same ThrottleListener twice so check uniqueness
+        else{
+            boolean unique = false;
+            for(int i = 0; i < tl.size() - 1; i++){
+                ThrottleListener o = tl.get(i);
+                if(o.equals(writer)){
+                    unique = false;
+                    break;
+                }
+                else
+                    unique = true;
+            }
+            if(unique){
+                tl.add(interests, writer);                
+            }
+        }        
         interests++;
     }
     
@@ -36,6 +59,11 @@ public class FakeThrottle implements Throttle {
     public boolean didRequest() { return didRequest; }
     public boolean didRelease() { return didRelease; }
     void clear() { available = 0; interests = 0; didRequest = false; didRelease = false; }
+
+    ThrottleListener getListener(int pos){
+        return tl.get(pos);
+    }
+    public int listeners(){return tl.size();} 
     
     public void setRate(float rate) {}
     public long nextTickTime() {return 0;}

@@ -5,9 +5,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.nio.ThrottleListener;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.PrivilegedAccessor;
 
 /**
  * Tests that ThrottleWriter throttles data correctly.
@@ -46,7 +44,8 @@ public final class ThrottleWriterTest extends BaseTestCase {
         assertEquals(1, THROTTLE.interests());
 	    assertFalse(SINK.interested());
 	    
-	    bandwidthAvailable(WRITER);
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).bandwidthAvailable();	        
 	    assertTrue(SINK.interested());
     }
     
@@ -54,7 +53,8 @@ public final class ThrottleWriterTest extends BaseTestCase {
         // Test when data is still left after available.
 
         // set up writer & SINK.
-        bandwidthAvailable(WRITER);
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).bandwidthAvailable();           
         assertTrue(SINK.interested());
         assertEquals(0, SINK.written());
         
@@ -81,7 +81,8 @@ public final class ThrottleWriterTest extends BaseTestCase {
         assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(550);        
 
-        bandwidthAvailable(WRITER);
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).bandwidthAvailable();           
         assertTrue(SINK.interested());
         
         assertFalse(doWrite()); // all data written
@@ -95,7 +96,10 @@ public final class ThrottleWriterTest extends BaseTestCase {
         SOURCE.setBuffer(buffer(data(200)));
         assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(200);
-        bandwidthAvailable(WRITER);
+
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).bandwidthAvailable();           
+
         assertEquals(0, SINK.written());
         assertTrue(SINK.interested());
         assertFalse(doWrite());
@@ -112,7 +116,9 @@ public final class ThrottleWriterTest extends BaseTestCase {
         SINK.resize(100);
         SOURCE.setBuffer(buffer(data(250)));
         THROTTLE.setAvailable(300);
-        bandwidthAvailable(WRITER);
+
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).bandwidthAvailable();           
         assertEquals(1, THROTTLE.interests());
         
         assertTrue(doWrite()); // data still leftover.
@@ -125,7 +131,9 @@ public final class ThrottleWriterTest extends BaseTestCase {
         SINK.resize(150);
         THROTTLE.clear();
         THROTTLE.setAvailable(200);
-        bandwidthAvailable(WRITER);
+
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).bandwidthAvailable();           
         assertEquals(0, THROTTLE.interests());
         assertFalse(doWrite());
         assertEquals(150, SINK.written());
@@ -136,13 +144,18 @@ public final class ThrottleWriterTest extends BaseTestCase {
     
     public void testBandwidthAvailableWhenClosed() throws Exception {
         assertFalse(SINK.interested());
-        assertTrue(bandwidthAvailable(WRITER));
+        
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            assertTrue(THROTTLE.getListener(i).bandwidthAvailable());           
+        
         assertTrue(SINK.interested());
         
         SINK.interestWrite(null, false);
         assertFalse(SINK.interested());
         SINK.close();
-        assertFalse(bandwidthAvailable(WRITER));
+
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            assertFalse(THROTTLE.getListener(i).bandwidthAvailable());           
         assertFalse(SINK.interested());
     }   
     
@@ -150,7 +163,8 @@ public final class ThrottleWriterTest extends BaseTestCase {
     // interest is turned off.
     public void testInterestOffNoBW() throws Exception {
     	// pretend there is bandwidth available
-        bandwidthAvailable(WRITER);
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).bandwidthAvailable();           
     	assertTrue(SINK.interested());
     	
     	// handleWrite calls come directly from the selector
@@ -162,8 +176,9 @@ public final class ThrottleWriterTest extends BaseTestCase {
     public void testeHasBufferedOutput() throws Exception {
         SINK.resize(10);
         THROTTLE.setAvailable(2);
-        requestBandwidth(WRITER);
-        
+
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).requestBandwidth();
         assertFalse(WRITER.hasBufferedOutput());
         WRITER.handleWrite();
         assertFalse(WRITER.hasBufferedOutput());
@@ -186,22 +201,14 @@ public final class ThrottleWriterTest extends BaseTestCase {
 	    return ByteBuffer.wrap(data);
 	}
 	
-    private boolean bandwidthAvailable(Object o) throws Exception {
-        return ((ThrottleListener)PrivilegedAccessor.getValue(o, "throttleListener")).bandwidthAvailable();
-    }
-    
-    private void requestBandwidth(Object o) throws Exception {
-        ((ThrottleListener)PrivilegedAccessor.getValue(o, "throttleListener")).requestBandwidth();
-    }
-    
-    private void releaseBandwidth(Object o) throws Exception {
-        ((ThrottleListener)PrivilegedAccessor.getValue(o, "throttleListener")).releaseBandwidth();
-    }	
     
     private boolean doWrite() throws Exception {
-        requestBandwidth(WRITER);
+        
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).requestBandwidth();
         boolean ret = WRITER.handleWrite();
-        releaseBandwidth(WRITER);
+        for(int i = 0; i < THROTTLE.listeners(); i++)
+            THROTTLE.getListener(i).releaseBandwidth();
         return ret;
     }
 }
