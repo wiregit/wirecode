@@ -41,6 +41,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.CollectionUtils;
@@ -169,7 +170,7 @@ public class DefaultMessageHandler {
             Contact existing = routeTable.get(nodeId);
             
             if (existing == null
-                    || !existing.isAlive()
+                    || existing.isDead()
                     || existing.getInstanceID() != node.getInstanceID()) {
                 
                 // Store forward only if we're bootstrapped
@@ -273,17 +274,16 @@ public class DefaultMessageHandler {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         RouteTable routeTable = context.getRouteTable();
         List<Contact> nodes = CollectionUtils.toList(
-                routeTable.select(valueId, k, SelectMode.ALIVE_WITH_LOCAL));
+                routeTable.select(valueId, k, SelectMode.ALL));
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);
         
-        //System.out.println(CollectionUtils.toString(nodes));
-        //System.out.println("RT nearest: " + closest);
-        //System.out.println("RT furthest: " + furthest);
-        //System.out.println(context.getLocalNode());
-        //System.out.println(node);
-        //System.out.println(CollectionUtils.toString(nodes));
-        //System.out.println();
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("ME: "+context.getLocalNode()+"\n");
+//        sb.append("Them: "+node).append("\n");
+//        sb.append("RT nearest: " + closest).append("\n");
+//        sb.append("RT furthest: " + furthest).append("\n");
+//        sb.append(CollectionUtils.toString(nodes)).append("\n");
         
         // We store forward if:
         // #1 We're the nearest Node of the k-closest Nodes to
@@ -314,12 +314,12 @@ public class DefaultMessageHandler {
             //    or better
             if (nodeId.equals(furthestId) 
                     || nodeId.isNearerTo(valueId, furthestId)) {
-                
-                //System.out.println("CONDITION B (FORWARD)");
-                //System.out.println("Local (from): " + context.getLocalNode());
-                //System.out.println("Remote (to): " + node);
-                //System.out.println(CollectionUtils.toString(nodes));
-                //System.out.println();
+        
+//                sb.append("CONDITION B (FORWARD)").append("\n");
+//                sb.append("Local (from): " + context.getLocalNode()).append("\n");
+//                sb.append("Remote (to): " + node).append("\n");
+//                sb.append(CollectionUtils.toString(nodes)).append("\n");
+//                System.out.println(sb.toString());
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
@@ -342,21 +342,21 @@ public class DefaultMessageHandler {
         //    k-closest Nodes and makes it the (k+1)-closest Node.
         //    
         // #4 The new Node is nearer to the given valueId then
-        //    the furthest away Node (we).
+            //    the furthest away Node (we).
         } else if (nodes.size() >= k 
-                && context.isLocalNode(furthest)
-                && (existing == null || !existing.isAlive())) {
+                && context.isLocalNode(furthest) 
+                && (existing == null || existing.isDead())) {
             
             KUID nodeId = node.getNodeID();
             KUID furthestId = furthest.getNodeID();
                 
             if (nodeId.isNearerTo(valueId, furthestId)) {
-                //System.out.println("CONDITION C");
-                //System.out.println(valueId);
-                //System.out.println(context.getLocalNode());
-                //System.out.println(node);
-                //System.out.println(CollectionUtils.toString(nodes));
-                //System.out.println();
+//                sb.append("CONDITION C").append("\n");
+//                sb.append("ME:").append(context.getLocalNode()).append("\n");
+//                sb.append("VALUE:").append(valueId).append("\n");
+//                sb.append("NODE:").append(node).append("\n");
+//                sb.append(CollectionUtils.toString(nodes)).append("\n");
+//                System.out.println(sb.toString());
                 
                 return Operation.DELETE;
             }

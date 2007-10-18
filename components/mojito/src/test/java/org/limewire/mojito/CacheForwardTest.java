@@ -22,6 +22,7 @@ package org.limewire.mojito;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,8 +47,10 @@ import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
 
@@ -76,6 +79,7 @@ public class CacheForwardTest extends MojitoTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         setLocalIsPrivate(false);
+        RouteTableSettings.INCOMING_REQUESTS_UNKNOWN.setValue(true);
     }
 
     @SuppressWarnings("unchecked")
@@ -155,6 +159,8 @@ public class CacheForwardTest extends MojitoTestCase {
                 
                 if (i > 0) {
                     dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
+                    // the bootstrapper needs to ping every joining node.
+                    first.ping(new InetSocketAddress("localhost", PORT+i)).get();
                 } else {
                     first = dht;
                 }
@@ -184,7 +190,6 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // Use the furthest Node as the creator.
             MojitoDHT creator = dhts.get(idsByXorDistance.get(idsByXorDistance.size()-1));
-            
             // Store the value
             DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
             StoreResult evt = creator.put(valueId, value).get();
@@ -225,6 +230,7 @@ public class CacheForwardTest extends MojitoTestCase {
             nearest.start();
             bootstrap(nearest, dhts.values());
             
+            
             // Give everybody time to figure out whether to forward
             // a value or to remove it
             Thread.sleep(waitForNodes);
@@ -255,7 +261,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 
                 if (dht != furthest) {
-                    assertEquals(1, dht.getDatabase().getKeyCount());
+                    assertEquals("I dont have it?? "+dht.getLocalNodeID(),1, dht.getDatabase().getKeyCount());
                     assertEquals(1, dht.getDatabase().getValueCount());
                     for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
                         assertEquals(valueId, dhtValue.getPrimaryKey());
@@ -378,7 +384,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertNotNull(furthest);
             
             // Check the intial state
-            assertEquals(1, furthest.getDatabase().getKeyCount());
+            assertEquals("dont have it " + furthest.getLocalNodeID(),1, furthest.getDatabase().getKeyCount());
             assertEquals(1, furthest.getDatabase().getValueCount());
             
             // Clear the Database but don't change the instanceId yet
@@ -476,6 +482,7 @@ public class CacheForwardTest extends MojitoTestCase {
             if (dht2 != null) { dht2.close(); }
         }
     }
+    
     
     /**
      * Bootstraps the given Node from one of the other Nodes and makes sure a
