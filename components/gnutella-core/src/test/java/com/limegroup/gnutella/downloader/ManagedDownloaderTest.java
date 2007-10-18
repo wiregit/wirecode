@@ -50,7 +50,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -62,6 +61,7 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -286,8 +286,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
     }
     
     /** Tests that the progress is retained for deserialized downloaders. */
-    public void testSerializedProgress() throws Exception {     
+    public void testSerializedProgress() throws Exception {
         LOG.info("test serialized progress");
+        
+        networkManager.setAddress(new byte[] { 127, 0, 0, 1 });
+        
         IncompleteFileManager ifm=new IncompleteFileManager();
         RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
@@ -351,7 +354,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	TestFile.length();
         try {
             //Start uploader and download.
-            uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+            uploader = new TestUploader(injector.getInstance(AlternateLocationFactory.class), injector.getInstance(FeaturesWriter.class));
             uploader.start("ManagedDownloaderTest", PORT, false);
             uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);
