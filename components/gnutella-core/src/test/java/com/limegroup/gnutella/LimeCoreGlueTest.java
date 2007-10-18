@@ -44,8 +44,6 @@ public class LimeCoreGlueTest extends BaseTestCase {
                             {"com.limegroup.gnutella.LimeCoreGlue", 
                              "com.limegroup.gnutella.LimeCoreGlue$InstallFailedException",
                              "org.limewire.setting.RemoteSettingManager",
-                             "org.limewire.io.LocalSocketAddressProvider",
-                             "org.limewire.security.SettingsProvider", 
                              "com.limegroup.gnutella.util.LimeWireUtils", 
                              "org.limewire.util.CommonUtils", 
                              "org.limewire.util.FileUtils", 
