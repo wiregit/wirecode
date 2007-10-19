@@ -25,8 +25,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.util.DatabaseUtils;
 
 /**
- * An default implementation of {@link Evictor} which delegates to 
- * {@link DatabaseUtils#isExpired(org.limewire.mojito.routing.RouteTable, DHTValueEntity)}.
+ * Decides whether a {@link DHTValueEntity} is expired for a given {@link RouteTable}.
  */
 public class DefaultEvictor implements Evictor {
 

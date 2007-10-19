@@ -29,7 +29,7 @@ import org.limewire.mojito.db.DatabaseSecurityConstraint;
 import org.limewire.mojito.settings.DatabaseSettings;
 
 /**
- * A default implementation of DatabaseSecurityConstraint
+ * Determines when it is acceptable to store a {@link DHTValueEntity} in a {@link Database}.
  */
 public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstraint {
     
@@ -60,7 +60,7 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
                 return true;
             }
             
-            // Prioritze values that were stored by non-firewalled Nodes
+            // Prioritize values that were stored by non-firewalled Nodes
             if (entity.getCreator().isFirewalled()) {
                 return false;
             }
@@ -81,8 +81,8 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
     }
     
     /**
-     * Returns true if it's OK to replace the existing value with
-     * the new value
+     * Returns <code>true</code> if it's OK to replace the existing value with
+     * the new value.
      */
     private boolean allowReplace(Database database, Map<KUID, DHTValueEntity> bag, 
             DHTValueEntity existing, DHTValueEntity entity) {

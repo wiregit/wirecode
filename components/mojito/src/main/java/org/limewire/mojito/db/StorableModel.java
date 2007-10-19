@@ -24,22 +24,23 @@ import java.util.Collection;
 import org.limewire.mojito.result.StoreResult;
 
 /**
- * The StorableModel provides an interface for StorablePublisher
+ * Defines an interface for returning {@link Storable Storables}, storing the
+ * result of a store and for handling contact changes.
  */
 public interface StorableModel {
     
     /**
-     * Returns all Storables that need to be published now
+     * Returns all <code>Storables</code> that need to be published now.
      */
     public Collection<Storable> getStorables();
     
     /**
-     * Called for every successful STORE
+     * Called for every successful STORE.
      */
     public void handleStoreResult(Storable value, StoreResult result);
     
     /**
-     * Notifies the StorableModel that the local Contact's
+     * Notifies the <code>StorableModel</code> that the local Contact's
      * contact information changed (Node ID, external Address).
      */
     public void handleContactChange();

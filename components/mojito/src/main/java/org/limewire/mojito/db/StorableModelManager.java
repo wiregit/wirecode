@@ -32,7 +32,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.result.StoreResult;
 
 /**
- * The StorableModelManager manges StorableModels
+ * Manages <code>StorableModels</code>.
  */
 public class StorableModelManager {
     
@@ -42,7 +42,7 @@ public class StorableModelManager {
         = Collections.synchronizedMap(new HashMap<DHTValueType, StorableModel>());
     
     /**
-     * Registers a StorableModel under the given DHTValueType.
+     * Registers a <code>StorableModel</code> under the given <code>DHTValueType</code>.
      */
     public StorableModel addStorableModel(DHTValueType valueType, StorableModel model) {
         if (valueType == null) {
@@ -57,8 +57,8 @@ public class StorableModelManager {
     }
     
     /**
-     * Removes and returns a StorableModel that is registered under the
-     * given DHTValueType.
+     * Removes and returns a <code>StorableModel</code> that is registered under the
+     * given <code>DHTValueType</code>.
      */
     public StorableModel removeStorableModel(DHTValueType valueType) {
         if (valueType == null) {
@@ -69,7 +69,7 @@ public class StorableModelManager {
     }
     
     /**
-     * Returns all Storables
+     * Returns all <code>Storables</code>.
      */
     Collection<Storable> getStorables() {
         List<Storable> values = new ArrayList<Storable>();
@@ -118,7 +118,7 @@ public class StorableModelManager {
     }
     
     /**
-     * Notifies all StorableModels that the local
+     * Notifies all <code>StorableModels</code> that the local
      * Contact's contact information changed
      */
     public void handleContactChange(Context context) {

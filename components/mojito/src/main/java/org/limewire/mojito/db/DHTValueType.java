@@ -26,7 +26,7 @@ import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.mojito.util.FixedSizeHashMap;
 
 /**
- * DHTValueType specifies the type of a DHTValue
+ * Specifies the type of a <code>DHTValue</code>.
  */
 public final class DHTValueType implements Comparable<DHTValueType>, Serializable {
     

@@ -11,8 +11,23 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 
-/**
- * An abstract Painter to draw graphical representations of the DHT
+/**<p>
+ * Draws graphical representations of the DHT. <code>Painter</code> creates 
+ * different dash patterns depending on the DHT message type.
+ * </p><p>
+ * You need to implement:
+ * <ul>
+ * <li> {@link #paint(Component, Graphics2D)}: <code>paint</code> uses a 
+ * {@link Graphics2D} object to draw.</li>
+ * <li>    
+ * <code>handle(EventType, KUID, SocketAddress, OpCode, boolean)</code>: 
+ * takes care of messages sent or received, the socket
+ * address and the DHT message code. <code>handle</code> 
+ * can accumulate the information and later <code>paint</code> that information.</li>
+ * <li>
+ * {@link #clear()}: removes the accumulated information in which 
+ * <code>handle</code> stores.</li>
+ * </ul>
  */
 public abstract class Painter {
     

@@ -54,7 +54,12 @@ import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.CollectionUtils;
 
-
+/**
+ * Executes various features of the Mojito DHT. <code>CommandHandler</code>
+ * is useful in running the Mojito DHT from the command line.
+ * Additionally, <code>CommandHandler</code> writes information about 
+ * the {@link MojitoDHT} to a {@link PrintWriter}. 
+ */
 public class CommandHandler {
     
     private static final String[] COMMANDS = {

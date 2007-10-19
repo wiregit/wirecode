@@ -28,7 +28,9 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 
 /**
- * A small framework to paint different representations of the DHT
+ * Paints different representations of the Distributed Hash Table (DHT). 
+ * <code>ArcsVisualizer</code> is a small framework for visually representing 
+ * the DHT messages distinguished by color and dash patterns.
  */
 public class ArcsVisualizer extends JPanel implements MessageDispatcherListener {
 

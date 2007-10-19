@@ -23,12 +23,12 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 /**
- * A factory interface to create DHTValues
+ * Defines a factory interface to create <code>DHTValues</code>.
  */
 public interface DHTValueFactory<T extends DHTValue> {
     
     /**
-     * Creates a DHTValue
+     * Creates a <code>DHTValue</code>.
      * 
      * @param type The type of the value
      * @param version The version of the value

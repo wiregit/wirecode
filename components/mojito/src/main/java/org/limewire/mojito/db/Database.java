@@ -27,16 +27,17 @@ import java.util.Set;
 import org.limewire.mojito.KUID;
 
 
-/**
- * An interface to implement Databases. Mojito ships
- * with an in-memory Database but you may use this
- * interface to implement a custom Database that is
+/**<p>
+ * Defines an interface to implement databases. 
+ * </p>
+ * Mojito ships with an in-memory database but you may use this
+ * interface to implement a custom <code>Database</code> that is
  * build on top of BDBJE for example.
  */
 public interface Database extends Serializable {
     
     /**
-     * Sets the DatabaseSecurityConstraint. Use null to reset 
+     * Sets the <code>DatabaseSecurityConstraint</code>. Use null to reset 
      * the default constraint.
      * 
      * @param securityConstraint The security constraint 
@@ -45,7 +46,7 @@ public interface Database extends Serializable {
             DatabaseSecurityConstraint securityConstraint);
     
     /**
-     * Adds or removes the given DHTValue depending on
+     * Adds or removes the given <code>DHTValue</code> depending on
      * whether or not it's empty. 
      * 
      * @param entity DHTValue to store (add or remove)
@@ -59,7 +60,7 @@ public interface Database extends Serializable {
     //public boolean add(DHTValueEntity entity);
     
     /**
-     * Removes the given DHTValue from the Database
+     * Removes the given <code>DHTValue</code> from the Database
      * 
      * @param DHTValueImpl to remove
      * @return Whether or not the given DHTValue was removed
@@ -67,15 +68,15 @@ public interface Database extends Serializable {
     public DHTValueEntity remove(KUID primaryKey, KUID secondaryKey);
     
     /**
-     * Returns whether or not the given DHTValue is stored in our
+     * Returns whether or not the given <code>DHTValue</code> is stored in our
      * Database
      */
     public boolean contains(KUID primaryKey, KUID secondaryKey);
     
     /**
-     * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
+     * Returns a <code>DHTValueBag</code> for the given ValueID, or null if no bag exists.
      * 
-     * @param primaryKey The KUID of the value to lookup in the database
+     * @param primaryKey The <code>KUID</code> of the value to lookup in the database
      */
     public Map<KUID, DHTValueEntity> get(KUID primaryKey);
     
@@ -85,17 +86,17 @@ public interface Database extends Serializable {
     public float getRequestLoad(KUID primaryKey, boolean incrementLoad);
     
     /**
-     * Returns all Keys
+     * Returns all <code>Keys</code>.
      */
     public Set<KUID> keySet();
     
     /**
-     * Returns a Collection of DHTValueEntities 
+     * Returns a Collection of <code>DHTValueEntities</code>.
      */
     public Collection<DHTValueEntity> values();
     
     /**
-     * Returns the number of Keys in the Database
+     * Returns the number of <code>Keys</code> in the Database.
      */
     public int getKeyCount();
     
@@ -106,7 +107,7 @@ public interface Database extends Serializable {
     public int getValueCount();
     
     /**
-     * Clears the Database
+     * Clears the Database.
      */
     public void clear();
 }

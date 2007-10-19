@@ -30,7 +30,7 @@ import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 
 /**
- * The DatabaseCleaner removes expired values from the local Database.
+ * Removes expired values from the local database.
  */
 public class DatabaseCleaner implements Runnable {
     
@@ -49,7 +49,7 @@ public class DatabaseCleaner implements Runnable {
     }
     
     /**
-     * Starts the DatabaseCleaner
+     * Starts the <code>DatabaseCleaner</code>.
      */
     public synchronized void start() {
         if (future == null) {
@@ -62,7 +62,7 @@ public class DatabaseCleaner implements Runnable {
     }
     
     /**
-     * Stops the DatabaseCleaner
+     * Stops the <code>DatabaseCleaner</code>.
      */
     public synchronized void stop() {
         if (future != null) {
@@ -72,7 +72,7 @@ public class DatabaseCleaner implements Runnable {
     }
     
     /**
-     * Removes all expired DHTValueEntities from the Database
+     * Removes all expired <code>DHTValueEntities</code> from the <code>Database</code>.
      */
     private void cleanupDatabase() {
         EvictorManager evictorManager = context.getEvictorManager();

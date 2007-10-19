@@ -23,7 +23,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.result.StoreResult;
 
 /**
- * A Storable is a Key-Value pair that can be stored in the DHT.
+ * A Key-Value pair that can be stored in the DHT.
  */
 public class Storable {
     
@@ -41,28 +41,28 @@ public class Storable {
     }
     
     /**
-     * Returns the primary key of the Storable value
+     * Returns the primary key of the <code>Storable</code> value.
      */
     public KUID getPrimaryKey() {
         return primaryKey;
     }
     
     /**
-     * Returns the value
+     * Returns the value.
      */
     public DHTValue getValue() {
         return value;
     }
     
     /**
-     * Returns the time when this value was stored
+     * Returns the time when this value was stored.
      */
     public synchronized long getPublishTime() {
         return publishTime;
     }
     
     /**
-     * Sets the time when this value was stored
+     * Sets the time when this value was stored.
      */
     public synchronized void setPublishTime(long publishTime) {
         if (publishTime < 0L) {
@@ -73,14 +73,14 @@ public class Storable {
     }
     
     /**
-     * Returns the location count
+     * Returns the location count.
      */
     public synchronized int getLocationCount() {
         return locationCount;
     }
     
     /**
-     * Sets the location count
+     * Sets the location count.
      */
     public synchronized void setLocationCount(int locationCount) {
         if (locationCount < 0) {
@@ -91,7 +91,7 @@ public class Storable {
     }
     
     /**
-     * Called by StorablePublisher
+     * Called by <code>StorablePublisher</code>.
      */
     protected synchronized void handleStoreResult(StoreResult result) {
         setPublishTime(System.currentTimeMillis());

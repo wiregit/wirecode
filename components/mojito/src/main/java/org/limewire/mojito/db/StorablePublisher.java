@@ -21,7 +21,7 @@ import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.service.ErrorService;
 
 /**
- * The StorablePublisher publishes Storeable values in the DHT
+ * Publishes {@link Storable} values in the DHT.
  */
 public class StorablePublisher implements Runnable {
     
@@ -42,7 +42,7 @@ public class StorablePublisher implements Runnable {
     }
     
     /**
-     * Starts the DHTValuePublisher
+     * Starts the <code>DHTValuePublisher</code>.
      */
     public void start() {
         synchronized (publishTask) {
@@ -57,7 +57,7 @@ public class StorablePublisher implements Runnable {
     }
     
     /**
-     * Stops the DHTValuePublisher
+     * Stops the <code>DHTValuePublisher</code>.
      */
     public void stop() {
         synchronized (publishTask) {
@@ -95,7 +95,7 @@ public class StorablePublisher implements Runnable {
     
     /**
      * The RepublishTask publishes DHTValue(s) one-by-one by going
-     * through a List of DHTValues. Everytime a store finishes it
+     * through a List of DHTValues. Every time a store finishes it
      * continues with the next DHTValue until all DHTValues have
      * been republished
      */
@@ -125,7 +125,7 @@ public class StorablePublisher implements Runnable {
         }
         
         /**
-         * Starts the republishing
+         * Starts the republishing.
          */
         public synchronized void start() {
             assert (isDone());
@@ -146,7 +146,7 @@ public class StorablePublisher implements Runnable {
         }
         
         /**
-         * Republishes the next DHTValue
+         * Republishes the next <code>DHTValue</code>.
          */
         private synchronized boolean next() {
             if (isDone()) {
@@ -167,7 +167,7 @@ public class StorablePublisher implements Runnable {
         }
         
         /**
-         * Publishes or expires the given DHTValue
+         * Publishes or expires the given <code>DHTValue</code>.
          */
         private boolean publish(Storable storable) {
             

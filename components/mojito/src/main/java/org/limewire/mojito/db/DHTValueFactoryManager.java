@@ -28,7 +28,7 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 /**
- * The DHTValueFactoryManager manages DHTValueFactories
+ * Manages {@link DHTValueFactory DHTValueFactories}.
  */
 public class DHTValueFactoryManager {
     
@@ -38,7 +38,7 @@ public class DHTValueFactoryManager {
         = Collections.synchronizedMap(new HashMap<DHTValueType, DHTValueFactory>());
     
     /**
-     * Adds a new DHTValueFactory
+     * Adds a new <code>DHTValueFactory</code>.
      */
     public DHTValueFactory addValueFactory(DHTValueType valueType, DHTValueFactory factory) {
         if (valueType == null) {
@@ -53,7 +53,8 @@ public class DHTValueFactoryManager {
     }
     
     /**
-     * Removes a DHTValueFactory that is registed under the given DHTValueType
+     * Removes a <code>DHTValueFactory</code> that is registered under the given 
+     * <code>DHTValueType</code>.
      */
     public DHTValueFactory removeValueFactory(DHTValueType valueType) {
         if (valueType == null) {
@@ -64,8 +65,9 @@ public class DHTValueFactoryManager {
     }
     
     /**
-     * Returns a DHTValueFactory for the given DHTValueType or the defaultFactory
-     * if none exists
+     * Returns a <code>DHTValueFactory</code> for the given 
+     * <code>DHTValueType</code> or the <code>defaultFactory</code> if none 
+     * exists.
      */
     public DHTValueFactory getValueFactory(DHTValueType valueType) {
         if (valueType == null) {
@@ -82,8 +84,8 @@ public class DHTValueFactoryManager {
     }
     
     /**
-     * Creates a DHTValue from the given arguments. This
-     * method takes care of empty values!
+     * Creates a <code>DHTValue</code> from the given arguments. This
+     * method takes care of empty values.
      */
     public DHTValue createDHTValue(DHTValueType valueType, 
             Version version, byte[] value) throws DHTValueException {

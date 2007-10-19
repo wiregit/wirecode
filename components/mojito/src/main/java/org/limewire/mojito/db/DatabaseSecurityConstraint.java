@@ -25,13 +25,14 @@ import java.util.Map;
 import org.limewire.mojito.KUID;
 
 /**
- * An interface that controls the Database store policy 
+ * Defines an interface that controls the <code>Database</code> storing policy.
  */
 public interface DatabaseSecurityConstraint extends Serializable {
     
     /**
-     * Returns true if it's OK to store the given DHTValue in the 
-     * Database and DHTValueBag respectively.
+     * Returns <code>true</code> if it's OK to store the given 
+     * <code>DHTValue</code> in the <code>Database</code> and 
+     * <code>DHTValueBag</code> respectively.
      */
     public boolean allowStore(Database database, Map<KUID, DHTValueEntity> bag, DHTValueEntity entity);
 }

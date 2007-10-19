@@ -63,9 +63,10 @@ import org.limewire.mojito.util.ContactUtils;
  */
 
 /**
- * This is a simple implementation of the Database interface.
- * 
- * TODO: For more advanced features we need some definition for
+ * Adds, removes and stores {@link DHTValueEntity DHTValueEntities} in an 
+ * in-memory database. 
+ */ 
+ /* TODO: For more advanced features we need some definition for
  * DHTValues (non-signed values cannot replace signed values and
  * what not).
  */
@@ -151,8 +152,8 @@ public class DatabaseImpl implements Database {
     }
     
     /**
-     * Adds the given DHTValue to the Database. Returns
-     * true if the operation succeeded.
+     * Adds the given <code>DHTValue</code> to the Database. Returns
+     * <code>true</code> if the operation succeeded.
      */
     public synchronized boolean add(DHTValueEntity entity) {
         KUID primaryKey = entity.getPrimaryKey();
@@ -198,7 +199,7 @@ public class DatabaseImpl implements Database {
     
     /**
      * Returns the number of values that are currently stored under
-     * the same Class C Network
+     * the same Class C Network.
      */
     public synchronized int getValuesPerNetwork(DHTValueEntity entity) {
         return getValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
@@ -206,7 +207,7 @@ public class DatabaseImpl implements Database {
     
     /**
      * Returns the number of values that are currently stored under
-     * the same IP Address
+     * the same IP Address.
      */
     public synchronized int getValuesPerAddress(DHTValueEntity entity) {
         return getValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
@@ -214,7 +215,7 @@ public class DatabaseImpl implements Database {
     
     /**
      * A helper method to get the number of values that are currently stored
-     * under a certain masked IP address
+     * under a certain masked IP address.
      */
     private static int getValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
         if (entity.isLocalValue()) {
@@ -236,7 +237,7 @@ public class DatabaseImpl implements Database {
     
     /**
      * Increments and returns the number of values that are stored under the
-     * same Class C Network
+     * same Class C Network.
      */
     private int incrementValuesPerNetwork(DHTValueEntity entity) {
         return incrementValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
@@ -244,15 +245,15 @@ public class DatabaseImpl implements Database {
     
     /**
      * Increments and returns the number of values that are stored under the
-     * same IP address
+     * same IP address.
      */
     private int incrementValuesPerAddress(DHTValueEntity entity) {
         return incrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
     /**
-     * A halper method to increment the number of values that are stored
-     * under a certain masked IP address
+     * A helper method to increment the number of values that are stored
+     * under a certain masked IP address.
      */
     private static int incrementValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
         if (entity.isLocalValue()) {
@@ -277,7 +278,7 @@ public class DatabaseImpl implements Database {
     
     /**
      * Decrements and returns the number of values that are currently
-     * stored under the same Class C Network
+     * stored under the same Class C Network.
      */
     private int decrementValuesPerNetwork(DHTValueEntity entity) {
         return decrementValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
@@ -285,15 +286,15 @@ public class DatabaseImpl implements Database {
     
     /**
      * Decrements and returns the number of values that are currently
-     * stored under the same IP address
+     * stored under the same IP address.
      */
     private int decrementValuesPerAddress(DHTValueEntity entity) {
         return decrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
     /**
-     * A halper method to decrement the number of values that are stored
-     * under a certain masked IP address
+     * A helper method to decrement the number of values that are stored
+     * under a certain masked IP address.
      */
     private static int decrementValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
         if (entity.isLocalValue()) {
@@ -332,8 +333,8 @@ public class DatabaseImpl implements Database {
     
     /**
      * An internal helper method that checks for possible flooding 
-     * and then delegates calls to the DatabaseSecurityConstraint instance 
-     * if possible
+     * and then delegates calls to the <code>DatabaseSecurityConstraint</code> instance 
+     * if possible.
      */
     private boolean allowStore(DHTValueEntity entity) {
         if (entity.isLocalValue()) {

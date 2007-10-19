@@ -25,6 +25,10 @@ import java.io.Serializable;
 
 import org.limewire.mojito.routing.Version;
 
+/**
+ * Defines an interface for a DHT value encapsulating the {@link DHTValueType}, 
+ * {@link Version} and value. 
+ */
 public interface DHTValue extends Serializable {
 
     /**
@@ -35,22 +39,22 @@ public interface DHTValue extends Serializable {
     public static final DHTValue EMPTY_VALUE = new EmptyValue();
     
     /**
-     * Returns the type of the value
+     * Returns the type of the value.
      */
     public DHTValueType getValueType();
 
     /**
-     * Returns the version of the value
+     * Returns the version of the value.
      */
     public Version getVersion();
 
     /**
-     * Returns the actual value (a copy) as bytes
+     * Returns the actual value (a copy) as bytes.
      */
     public byte[] getValue();
 
     /**
-     * Writes the value to the OutputStream
+     * Writes the value to the <code>OutputStream</code>.
      */
     public void write(OutputStream out) throws IOException;
 
@@ -60,7 +64,7 @@ public interface DHTValue extends Serializable {
     public int size();
 
     /**
-     * An implementation of DHTValue that has no payload
+     * An implementation of <code>DHTValue</code> that has no payload.
      */
     static final class EmptyValue implements DHTValue {
         

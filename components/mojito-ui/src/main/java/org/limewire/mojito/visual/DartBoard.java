@@ -18,7 +18,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 
-public class DartBoard extends Painter {
+class DartBoard extends Painter {
     
     private static final float DOT_SIZE = 6f;
     

@@ -31,7 +31,7 @@ import org.limewire.mojito.util.ArrayUtils;
 
 
 /**
- * A DHTValue is a type, version and value triple
+ * A <code>DHTValue</code> {@link DHTValueType}, {@link Version} and value triple.
  */
 public class DHTValueImpl implements DHTValue {
     

@@ -75,6 +75,10 @@ class SnowMan extends Painter {
     }
     
     public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
+        if (nodeId == null) {
+            return;
+        }
+        
         synchronized (nodes) {
             nodes.add(new Node(dot, type, nodeId, opcode, request));
         }

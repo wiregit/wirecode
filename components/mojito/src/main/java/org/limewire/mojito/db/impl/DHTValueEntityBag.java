@@ -28,7 +28,9 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.settings.DatabaseSettings;
-
+/**
+ * Stores {@link DHTValueEntity DHTValueEntities} in a map.
+ */
 public class DHTValueEntityBag implements Serializable {
     
     private static final long serialVersionUID = -439172537233232473L;

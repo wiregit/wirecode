@@ -26,7 +26,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * An Entity is a row in a Database. 
+ * A <code>DHTValueEntity</code> is a row in a {@link Database}. 
  */
 public class DHTValueEntity implements Serializable {
     
@@ -74,7 +74,7 @@ public class DHTValueEntity implements Serializable {
     private final int hashCode;
     
     /**
-     * Creates and returns DHTValueEntity from a Storable
+     * Creates and returns <code>DHTValueEntity</code> from a <code>Storable</code>.
      */
     public static DHTValueEntity createFromStorable(Context context, Storable storable) {
         return new DHTValueEntity(context.getLocalNode(), context.getLocalNode(), 
@@ -82,7 +82,8 @@ public class DHTValueEntity implements Serializable {
     }
 
     /**
-     * Creates and returns DHTValueEntity for the given primary key and value
+     * Creates and returns <code>DHTValueEntity</code> for the given primary 
+     * key and value.
      */
     public static DHTValueEntity createFromValue(Context context, KUID primaryKey, DHTValue value) {
         return new DHTValueEntity(context.getLocalNode(), context.getLocalNode(), 
@@ -90,7 +91,7 @@ public class DHTValueEntity implements Serializable {
     }
     
     /**
-     * Creates and returns DHTValueEntity from arguments that were created 
+     * Creates and returns <code>DHTValueEntity</code> from arguments that were created.
      */
     public static DHTValueEntity createFromRemote(Contact creator, Contact sender, 
             KUID primaryKey, DHTValue value) {
@@ -114,42 +115,42 @@ public class DHTValueEntity implements Serializable {
     }
     
     /**
-     * Returns the creator of this value
+     * Returns the creator of this value.
      */
     public Contact getCreator() {
         return creator;
     }
     
     /**
-     * Returns the sender of this value
+     * Returns the sender of this value.
      */
     public Contact getSender() {
         return sender;
     }
     
     /**
-     * Returns the primary key of this value
+     * Returns the primary key of this value.
      */
     public KUID getPrimaryKey() {
         return primaryKey;
     }
     
     /**
-     * Returns the secondary key of this value
+     * Returns the secondary key of this value.
      */
     public KUID getSecondaryKey() {
         return secondaryKey;
     }
     
     /**
-     * Returns the value
+     * Returns the value.
      */
     public DHTValue getValue() {
         return value;
     }
    
     /**
-     * Returns the creation time
+     * Returns the creation time.
      */
     public long getCreationTime() {
         return creationTime;
@@ -160,7 +161,7 @@ public class DHTValueEntity implements Serializable {
     }*/
     
     /**
-     * Returns true if this entity was sent by
+     * Returns <code>true</code> if this entity was sent by
      * the creator of the value. In other words
      * if the creator and sender are equal.
      */
