@@ -122,6 +122,8 @@ import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
+import com.limegroup.gnutella.lws.server.LWSManager;
+import com.limegroup.gnutella.lws.server.LWSManagerImpl;
 import com.limegroup.gnutella.messages.LocalPongInfo;
 import com.limegroup.gnutella.messages.LocalPongInfoImpl;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -292,6 +294,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPPinger.class).to(UDPPingerImpl.class);
         bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
         bind(Inspector.class).to(InspectorImpl.class);
+        bind(LWSManager.class).to(LWSManagerImpl.class);
         
         // TODO: statically injecting this for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
