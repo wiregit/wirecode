@@ -39,7 +39,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.gui.GuiCoreMediator;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.lws.server.LWSManager;
