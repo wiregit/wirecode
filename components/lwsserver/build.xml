@@ -11,7 +11,7 @@
 	<import file="../common/build.xml" />
 
 	<target name="initialize" depends="lw-common.initialize, lw-http.initialize">
-		<do.setup-properties component="lws">
+		<do.setup-properties component="lwsserver">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar" />
 				<pathelement location="${limewire.lib.jars}/commons-pool.jar" />
