@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.limewire.lws.server.AbstractServer;
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LocalServerDelegate;
 
 /**
@@ -27,7 +27,7 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
         return "Remote Server";
     }
     
-    public final class DispatcherImpl extends DispatcherSupport {
+    public final class DispatcherImpl extends LWSDispatcherSupport {
 
         @Override
         protected final Handler[] createHandlers() {
@@ -47,28 +47,28 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
         class StoreKey extends AbstractHandler {
 
             public void handle(final Map<String, String> args, StringCallback cb) {
-                String publicKey = args.get(DispatcherSupport.Parameters.PUBLIC);
+                String publicKey = args.get(LWSDispatcherSupport.Parameters.PUBLIC);
                 if (publicKey == null) {
-                    cb.process(report(DispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER));
+                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER));
                     return;
                 }
-                String privateKey = args.get(DispatcherSupport.Parameters.PRIVATE);
+                String privateKey = args.get(LWSDispatcherSupport.Parameters.PRIVATE);
                 if (privateKey == null) {
-                    cb.process(report(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
+                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
                     return;
                 }
-                String ip = args.get(DispatcherSupport.Parameters.IP);
+                String ip = args.get(LWSDispatcherSupport.Parameters.IP);
                 if (ip == null) {
-                    cb.process(report(DispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));
+                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));
                     return;
                 }                
                 if (LWSServerUtil.isEmpty(publicKey)) {
-                    cb.process(DispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY);
+                    cb.process(LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY);
                     return;
                 }
                 note("StoreKey: " + publicKey + " -> " + ip + "," + privateKey);
                 storeKeys(publicKey, privateKey, ip);
-                cb.process(DispatcherSupport.Responses.OK);
+                cb.process(LWSDispatcherSupport.Responses.OK);
             }
         }
 
@@ -80,14 +80,14 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
         class GiveKey extends HandlerWithCallback {
 
             public void handleRest(final Map<String, String> args, StringCallback cb) {
-                String publicKey = args.get(DispatcherSupport.Parameters.PUBLIC);
+                String publicKey = args.get(LWSDispatcherSupport.Parameters.PUBLIC);
                 if (publicKey == null) {
-                    cb.process(report(DispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER));
+                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER));
                     return;
                 }
-                String ip = args.get(DispatcherSupport.Parameters.IP);
+                String ip = args.get(LWSDispatcherSupport.Parameters.IP);
                 if (ip == null) {
-                    cb.process(report(DispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));
+                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));
                     return;
                 }                
                 String privateKey = lookupPrivateKey(publicKey, ip);
@@ -143,7 +143,7 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
         Pair p = new Pair(publicKey, ip);
         String privateKey = pairs2privateKeys.get(p);
         String res = privateKey == null 
-                ? DispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP
+                ? LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP
                 : privateKey;
         return res;
     }

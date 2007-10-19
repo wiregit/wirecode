@@ -1,6 +1,6 @@
 package org.limewire.lws.server;
 
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.util.BaseTestCase;
 
@@ -19,7 +19,7 @@ public class RemoveCallbackTest extends BaseTestCase {
         TestRunner.run(suite());
     }
 	
-	final static char Q = DispatcherSupport.Constants.CALLBACK_QUOTE;
+	final static char Q = LWSDispatcherSupport.Constants.CALLBACK_QUOTE;
 	
 	public void testNull() {
 		String s = null;

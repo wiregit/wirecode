@@ -3,7 +3,7 @@ package org.limewire.lws.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.util.BaseTestCase;
 
@@ -52,7 +52,7 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
     protected static final Map<String, String> DUMMY_CALLBACK_ARGS;
     static {
         DUMMY_CALLBACK_ARGS = new HashMap<String,String>();
-        DUMMY_CALLBACK_ARGS.put(DispatcherSupport.Parameters.CALLBACK, "dummy");        
+        DUMMY_CALLBACK_ARGS.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");        
     }
 
 
@@ -136,12 +136,12 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
 
     protected final String doAuthenticate(final String privateKey) {
         Map<String, String> args = new HashMap<String, String>();
-        args.put(DispatcherSupport.Parameters.PRIVATE, privateKey);
-        return sendMessageFromWebpageToClient(DispatcherSupport.Commands.AUTHENTICATE, args);
+        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
+        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.AUTHENTICATE, args);
     }
 
     protected final String getPrivateKey() {
-        String publicKey = getPublicKey();
+        String publicKey = getPublicKey(); 
         try {
             Thread.sleep(500);
         } catch (Exception e) {
@@ -151,12 +151,12 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
             e.printStackTrace();
         }
         Map<String, String> args = new HashMap<String, String>();
-        args.put(DispatcherSupport.Parameters.PUBLIC, publicKey);
-        return sendMessageFromClientToRemoteServer(DispatcherSupport.Commands.GIVE_KEY, args);
+        args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
+        return sendMessageFromClientToRemoteServer(LWSDispatcherSupport.Commands.GIVE_KEY, args);
     }
 
     protected final String getPublicKey() {
-        return sendMessageFromWebpageToClient(DispatcherSupport.Commands.START_COM, NULL_ARGS);
+        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
     }
 
     // -----------------------------------------------------------
@@ -164,7 +164,7 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
     // -----------------------------------------------------------
 
     private String sendMessageFromWebpageToClient(final String cmd, final Map<String, String> args) {
-        args.put(DispatcherSupport.Parameters.CALLBACK, "dummy");
+        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");
         final String[] result = new String[1];
         getCode().sendLocalMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {
@@ -175,7 +175,7 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
     }
 
     private String sendMessageFromClientToRemoteServer(final String cmd, final Map<String, String> args) {
-        args.put(DispatcherSupport.Parameters.CALLBACK, "dummy");
+        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");
         final String[] result = new String[1];
         getCode().sendRemoteMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {

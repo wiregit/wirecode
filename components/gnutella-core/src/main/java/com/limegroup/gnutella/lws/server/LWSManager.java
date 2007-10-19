@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.ConnectionListener;
-import org.limewire.lws.server.Dispatcher;
+import org.limewire.lws.server.LWSDispatcher;
 
 /**
  * The interface to which GUI and other units program for the store server. This
@@ -57,7 +57,7 @@ public interface LWSManager {
      * The prefix to all requests. This will be stripped off when sending to our
      * handlers.
      */
-    String PREFIX = Dispatcher.PREFIX;
+    String PREFIX = LWSDispatcher.PREFIX;
     
     /**
      * Returns the instance of {@link HttpRequestHandler} responsible for

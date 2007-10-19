@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,15 +25,16 @@ import org.limewire.service.ErrorService;
 
 /**
  * Instances of this class will receive HTTP requests and are responsible to
- * doling them out to listeners.
+ * doling them out to listeners.  This is abstract so we can have test
+ * cases using some of the logic.
  */
-public abstract class DispatcherSupport implements Dispatcher {
+public abstract class LWSDispatcherSupport implements LWSDispatcher {
     
-    private final static Log LOG = LogFactory.getLog(DispatcherSupport.class);
+    private final static Log LOG = LogFactory.getLog(LWSDispatcherSupport.class);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
     private ReceivesCommandsFromDispatcher dispatchee;
     
-    public DispatcherSupport() {
+    public LWSDispatcherSupport() {
         Handler[] hs = createHandlers();
         LOG.debug("creating " + hs.length + " handler(s)...");
         for (Handler h : hs) {
@@ -51,12 +53,12 @@ public abstract class DispatcherSupport implements Dispatcher {
         final Handler h = names2handlers.get(req.toLowerCase());
         if (h == null) {
             LOG.error("Couldn't create a handler for " + req);
-            String str = report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
+            String str = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
             res.setEntity(new StringEntity(str));
             return;
         }
         LOG.debug("have handler: " + h.name());
-        final Map<String, String> args = DispatcherSupport.getArgs(request);
+        final Map<String, String> args = LWSDispatcherSupport.getArgs(request);
         h.handle(args, new StringCallback() {
 
             public void process(String response) {
@@ -110,16 +112,15 @@ public abstract class DispatcherSupport implements Dispatcher {
         final Handler h = names2handlers.get(req.toLowerCase());
         if (h == null) {
             LOG.error("Couldn't create a handler for " + req);
-            callback.process(report(DispatcherSupport.ErrorCodes.UNKNOWN_COMMAND));
+            callback.process(report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND));
         }
         LOG.debug("have handler: " + h.name());
-        final Map<String, String> args = DispatcherSupport.getArgs(request);
+        final Map<String, String> args = LWSDispatcherSupport.getArgs(request);
         h.handle(args, callback);
     }    
 
     final void note(String pattern, Object... os) {
-        //if (LOG.isDebugEnabled()) LOG.info(MessageFormat.format(pattern, os));
-        System.out.println(pattern);
+        if (LOG.isDebugEnabled()) LOG.info(MessageFormat.format(pattern, os));
     }    
    
     /**
@@ -132,7 +133,7 @@ public abstract class DispatcherSupport implements Dispatcher {
      * @return the message <tt>error</tt> in the call back
      */
     public static final String report(String error) {
-        return wrapCallback(DispatcherSupport.Constants.ERROR_CALLBACK, LWSServerUtil.wrapError(error));
+        return wrapCallback(LWSDispatcherSupport.Constants.ERROR_CALLBACK, LWSServerUtil.wrapError(error));
     }
     
     /**
@@ -171,8 +172,8 @@ public abstract class DispatcherSupport implements Dispatcher {
         if (LWSServerUtil.isEmpty(callback)) {
             return msg;
         } else {
-            char q = DispatcherSupport.Constants.CALLBACK_QUOTE;
-            String s = DispatcherSupport.Constants.CALLBACK_QUOTE_STRING;
+            char q = LWSDispatcherSupport.Constants.CALLBACK_QUOTE;
+            String s = LWSDispatcherSupport.Constants.CALLBACK_QUOTE_STRING;
             return callback + "(" + q + msg.replace(s, "\\" + s) + q + ")";
         }
     }
@@ -278,7 +279,7 @@ public abstract class DispatcherSupport implements Dispatcher {
             super();
         }
         protected String report(String msg) {
-            return DispatcherSupport.report(msg);
+            return LWSDispatcherSupport.report(msg);
         }
     }
     
@@ -301,9 +302,9 @@ public abstract class DispatcherSupport implements Dispatcher {
     protected abstract class HandlerWithCallback extends AbstractHandler {
 
         public final void handle(final Map<String, String> args, final StringCallback cb) {
-            final String callback = args.get(DispatcherSupport.Parameters.CALLBACK);
+            final String callback = args.get(LWSDispatcherSupport.Parameters.CALLBACK);
             if (callback == null) {
-                cb.process(report(DispatcherSupport.ErrorCodes.MISSING_CALLBACK_PARAMETER));
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_CALLBACK_PARAMETER));
                 return;
             }
             //
@@ -315,9 +316,9 @@ public abstract class DispatcherSupport implements Dispatcher {
                 public void process(String res) {
                     String str;
                     if (LWSServerUtil.isError(res)) {
-                        str = DispatcherSupport.wrapCallback(Constants.ERROR_CALLBACK, res);
+                        str = LWSDispatcherSupport.wrapCallback(Constants.ERROR_CALLBACK, res);
                     } else {
-                        str = DispatcherSupport.wrapCallback(callback, res);
+                        str = LWSDispatcherSupport.wrapCallback(callback, res);
                     }  
                     cb.process(str);
                 }

@@ -2,7 +2,7 @@ package org.limewire.lws.server;
 
 import java.util.Map;
 
-import org.limewire.lws.server.LWSServerDispatcher;
+import org.limewire.lws.server.LWSMainDispatcher;
 
 /**
  * Base class for local servers.
@@ -16,7 +16,7 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
 
     public LocalServerImpl(String host, int otherPort) {
         super(PORT, "Local Server");
-        LWSServerDispatcher ssd = new LWSServerDispatcher(new SenderOfMessagesToServer() {
+        LWSMainDispatcher ssd = new LWSMainDispatcher(new SenderOfMessagesToServer() {
             public void sendMessageToServer(String msg, Map<String, String> args, StringCallback cb) {
                 del.sendMessageToServer(msg, args, cb);
             }

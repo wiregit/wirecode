@@ -7,7 +7,7 @@ import org.limewire.http.AsyncHttpRequestHandler;
  * authentication scheme and export and interface so they we can attach
  * instances of {@link HttpRequestHandler} to http acceptors.
  */
-public interface Dispatcher extends AsyncHttpRequestHandler, SenderOfMessagesToServer {
+public interface LWSDispatcher extends AsyncHttpRequestHandler {
     
     /**
      * The prefix to all requests. This will be stripped off when sending to our

@@ -18,10 +18,10 @@ import org.limewire.service.ErrorService;
 final class LocalServerDelegate implements SenderOfMessagesToServer {
 
     private final int port;
-    private final DispatcherSupport.OpensSocket openner;
+    private final LWSDispatcherSupport.OpensSocket openner;
     private final String host;
 
-    public LocalServerDelegate(String host, int port, DispatcherSupport.OpensSocket openner) {
+    public LocalServerDelegate(String host, int port, LWSDispatcherSupport.OpensSocket openner) {
         this.host = host;
         this.port = port;
         this.openner = openner;
@@ -56,10 +56,30 @@ final class LocalServerDelegate implements SenderOfMessagesToServer {
             wr.flush();
             BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             StringBuffer sb = new StringBuffer();
+            //
+            // We will have a similar response and can only give
+            // StringCallbacks the actual response
+            //
+            //   HTTP/1.1 200 OK
+            //   Last-modified: Fri, 19-10-2007 14:38:54 GMT
+            //   Server: null
+            //   Date: Fri Oct 19 14:38:54 EDT 2007
+            //   Content-length: 2
+            //   
+            //   ok
+            //
+            // So just extract the 'ok'
+            //
             String ln;
+            boolean reading = false;
             while ((ln = in.readLine()) != null) {
-                sb.append(ln);
-                sb.append("\n");
+                if (reading) {
+                    sb.append(ln);
+                    sb.append("\n");                    
+                } else if (ln.startsWith("Content-length")) {
+                    in.readLine();
+                    reading = true;
+                }
             }
             String res = sb.toString();
             in.close();

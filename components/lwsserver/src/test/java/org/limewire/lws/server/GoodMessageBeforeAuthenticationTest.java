@@ -21,9 +21,9 @@ public class GoodMessageBeforeAuthenticationTest extends AbstractCommunicationTe
     }
 
     public void testGoodMessageBeforeAuthentication() {
-        getCode().sendLocalMsg(DispatcherSupport.Commands.AUTHENTICATE,
+        getCode().sendLocalMsg(LWSDispatcherSupport.Commands.AUTHENTICATE,
                                DUMMY_CALLBACK_ARGS,
-                               errorHandler(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
+                               errorHandler(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
     }
 
 

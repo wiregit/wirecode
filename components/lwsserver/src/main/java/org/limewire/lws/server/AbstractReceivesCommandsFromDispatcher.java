@@ -5,7 +5,7 @@ import java.util.List;
 
 
 /**
- * This is what receives actual commands from an {@link DispatcherSupport}.
+ * This is what receives actual commands from an {@link LWSDispatcherSupport}.
  * This class abstract out the
  * {@link #addConnectionListener(ConnectionListener adding},
  * {@link #removeConnectionListener(ConnectionListener removing}, and

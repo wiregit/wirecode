@@ -34,7 +34,7 @@ public abstract class AbstractServer implements Runnable  {
     private final List<Thread> threads = new Vector<Thread>(NUM_WORKERS);
     private final List<Worker> workers = new Vector<Worker>(NUM_WORKERS);
     
-    private Dispatcher dispatcher;
+    private LWSDispatcher dispatcher;
 
     private boolean hasShutDown;
     private Thread runner;
@@ -43,7 +43,7 @@ public abstract class AbstractServer implements Runnable  {
     // Interface
     // --------------------------------------------------------
 
-    public AbstractServer(final int port, final String name, final DispatcherSupport dispatcher) {
+    public AbstractServer(final int port, final String name, final LWSDispatcherSupport dispatcher) {
         this.port = port;
         this.name = name;
         this.dispatcher = dispatcher;
@@ -71,8 +71,8 @@ public abstract class AbstractServer implements Runnable  {
         go();
     }
     
-    public final DispatcherSupport getDispatcher() {
-        return (DispatcherSupport)this.dispatcher;
+    public final LWSDispatcherSupport getDispatcher() {
+        return (LWSDispatcherSupport)this.dispatcher;
     }
 
     public final void setDone(final boolean done) {
@@ -92,7 +92,7 @@ public abstract class AbstractServer implements Runnable  {
     }
     
     public final String report(String error) {
-        return DispatcherSupport.report(error);
+        return LWSDispatcherSupport.report(error);
     }
     
     /**
@@ -129,9 +129,9 @@ public abstract class AbstractServer implements Runnable  {
      * because it needs to know about the server, you <b>must</b> call this
      * in the constructor.
      * 
-     * @param dispatcher new {@link DispatcherSupport}
+     * @param dispatcher new {@link LWSDispatcherSupport}
      */
-    protected final void setDispatcher(Dispatcher dispatcher) {
+    protected final void setDispatcher(LWSDispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
 

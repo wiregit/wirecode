@@ -1,7 +1,7 @@
 package org.limewire.lws.server;
 
-import org.limewire.lws.server.Dispatcher;
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcher;
+import org.limewire.lws.server.LWSDispatcherSupport;
 
 /**
  * This represents an instance of a local server.
@@ -9,11 +9,11 @@ import org.limewire.lws.server.DispatcherSupport;
 public interface LocalServer {
     
     /**
-     * Returns the instance {@link DispatcherSupport}.
+     * Returns the instance {@link LWSDispatcherSupport}.
      * 
-     * @return the instance {@link DispatcherSupport}
+     * @return the instance {@link LWSDispatcherSupport}
      */
-    Dispatcher getDispatcher();
+    LWSDispatcher getDispatcher();
 
     /**
      * Returns the {@link Thread} that started this server, after starting it.

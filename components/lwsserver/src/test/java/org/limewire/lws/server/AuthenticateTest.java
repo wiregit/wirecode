@@ -1,6 +1,6 @@
 package org.limewire.lws.server;
 
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;
@@ -22,7 +22,7 @@ public class AuthenticateTest extends AbstractCommunicationTest {
 
   public void testAuthenticate() {
     final String res = doAuthenticate();
-    assertEquals(DispatcherSupport.Responses.OK, res);
+    assertEquals(LWSDispatcherSupport.Responses.OK, res);
   }
 
 }

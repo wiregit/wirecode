@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport;
 
 /**
- * A simple class to implement {@link DispatcherSupport.OpensSocket#open(String, int)}.
+ * A simple class to implement {@link LWSDispatcherSupport.OpensSocket#open(String, int)}.
  */
-public class URLSocketOpenner implements DispatcherSupport.OpensSocket {
+public class URLSocketOpenner implements LWSDispatcherSupport.OpensSocket {
 
     public Socket open(String host, int port) throws IOException {
         final Socket res = new Socket();

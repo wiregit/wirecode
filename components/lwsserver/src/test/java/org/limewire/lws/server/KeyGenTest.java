@@ -1,6 +1,6 @@
 package org.limewire.lws.server;
 
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.util.BaseTestCase;
 
@@ -23,7 +23,7 @@ public class KeyGenTest extends BaseTestCase {
         final char[] badChars = { ' ', '\t', '\b', '\r', ';' };
         for (int i = 0; i < 5; i++) {
             String k = LWSServerUtil.generateKey();
-            assertTrue(k.length() == DispatcherSupport.Constants.KEY_LENGTH);
+            assertTrue(k.length() == LWSDispatcherSupport.Constants.KEY_LENGTH);
             for (char c : badChars)
                 assertTrue(k, k.indexOf(c) == -1);
         }

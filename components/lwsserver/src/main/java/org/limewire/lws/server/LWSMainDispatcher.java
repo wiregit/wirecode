@@ -7,11 +7,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.lws.server.LWSManagerImpl;
 
 /**
  * Dispatches commands after going through an authentication phase explained
@@ -39,13 +36,13 @@ import com.limegroup.gnutella.lws.server.LWSManagerImpl;
  * &lt;pre&gt;
  * 
  */
-final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMessagesToServer {
+final class LWSMainDispatcher extends LWSDispatcherSupport {
        
     private final SenderOfMessagesToServer sender;
     private String publicKey;
     private String privateKey;
     
-    public LWSServerDispatcher(SenderOfMessagesToServer sender) {
+    public LWSMainDispatcher(SenderOfMessagesToServer sender) {
         this.sender = sender;
     }
 
@@ -87,16 +84,16 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
         protected final void handleRest(final Map<String, String> args, StringCallback cb) {
             String privateKey = getPrivateKey();
             if (privateKey == null) {
-                cb.process(report(DispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
                 return;
             }
-            String herPrivateKey = args.get(DispatcherSupport.Parameters.PRIVATE);
+            String herPrivateKey = args.get(LWSDispatcherSupport.Parameters.PRIVATE);
             if (herPrivateKey == null) {
-                cb.process(report(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
                 return;
             }
             if (!herPrivateKey.equals(getPrivateKey())) {
-                cb.process(report(DispatcherSupport.ErrorCodes.INVALID_PRIVATE_KEY));
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.INVALID_PRIVATE_KEY));
                 return;
             }
             handleRest(herPrivateKey, args, cb);
@@ -125,12 +122,12 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
             // send the keys to the Server and wait for a response
             //
             final Map<String, String> sendArgs = new HashMap<String, String>();
-            sendArgs.put(DispatcherSupport.Parameters.PRIVATE, privateKey);
-            sendArgs.put(DispatcherSupport.Parameters.PUBLIC, publicKey);
+            sendArgs.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
+            sendArgs.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
             try {
-                sendMessageToServer(DispatcherSupport.Commands.STORE_KEY, sendArgs, new StringCallback() {
+                sender.sendMessageToServer(LWSDispatcherSupport.Commands.STORE_KEY, sendArgs, new StringCallback() {
                     public void process(String response) {
-                        cb.process(publicKey);
+                        cb.process(Responses.OK.equals(response.trim()) ? publicKey : "0");
                     }
                 });
             } catch (IOException e) {
@@ -145,7 +142,7 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
     class Authenticate extends HandlerWithCallbackWithPrivateKey {
         protected void handleRest(String privateKey, Map<String, String> args, StringCallback cb) {
             getDispatchee().setConnected(true);
-            cb.process(DispatcherSupport.Responses.OK);
+            cb.process(LWSDispatcherSupport.Responses.OK);
         }
     }
 
@@ -157,7 +154,7 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
             privateKey = null;
             publicKey = null;
             getDispatchee().setConnected(false);
-            cb.process(DispatcherSupport.Responses.OK);
+            cb.process(LWSDispatcherSupport.Responses.OK);
         }
     }
 
@@ -168,9 +165,9 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
         protected void handleRest(String privateKey,
                                     Map<String, String> args,
                                     StringCallback cb) {
-            String cmd = args.get(DispatcherSupport.Parameters.COMMAND);
+            String cmd = args.get(LWSDispatcherSupport.Parameters.COMMAND);
             if (cmd == null) {
-                cb.process(report(DispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER));
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER));
                 return;
             }
             if (getDispatchee() != null) {
@@ -179,14 +176,8 @@ final class LWSServerDispatcher extends DispatcherSupport implements SenderOfMes
                 cb.process(getDispatchee().receiveCommand(newCmd, newArgs));
                 return;
             }
-            cb.process(DispatcherSupport.Responses.NO_DISPATCHEE);
+            cb.process(LWSDispatcherSupport.Responses.NO_DISPATCHEE);
         }
-    }
-
-    @Override
-    public void sendMessageToServer(String msg, Map<String, String> args, 
-                                    StringCallback callback) throws IOException {
-        sender.sendMessageToServer(msg, args, callback);
     }
 
 }

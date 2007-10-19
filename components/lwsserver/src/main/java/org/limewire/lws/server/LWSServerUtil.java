@@ -46,37 +46,10 @@ public final class LWSServerUtil {
      * @return CGI arguments from <tt>rest</tt>
      */
     static Map<String, String> parseArgs(final String rest) {
-        return genericParse(rest, "&");
-    }
-
-    /**
-     * This is the grammar. <br>
-     * <br>
-     * 
-     * <pre>
-     * header             = [ element ] *( &quot;,&quot; [ element ] ) 
-     * element            = name [ &quot;=&quot; [ value ] ] *( &quot;;&quot; [ param ] )
-     * param              = name [ &quot;=&quot; [ value ] ] name = token value = ( token | quoted-string ) 
-     * token              = 1*&lt;any
-     * char except &quot; = &quot;, &quot;,&quot;, &quot;;&quot;, &lt;&quot;&gt; and white space&gt; 
-     * quoted-string      = &lt;&quot;&gt; *( text | quoted-char ) &lt;&quot;&gt;
-     * text               = any char except &lt;&quot;&gt; 
-     * quoted-char        = &quot;\&quot; char
-     * </pre>
-     * 
-     * @param rest the part <b>after</b> the <tt>&lt;name&gt; ':'</tt>
-     * @return
-     */
-    static Map<String, String> parseHeader(final String rest) {
-        return genericParse(rest, ";");
-    }
-
-    private static Map<String, String> genericParse(final String rest,
-            final String delim) {
         if (isEmpty(rest))
             return Collections.emptyMap();
         final Map<String, String> res = new HashMap<String, String>(3);
-        for (StringTokenizer st = new StringTokenizer(rest, delim, false); st
+        for (StringTokenizer st = new StringTokenizer(rest, "&", false); st
                 .hasMoreTokens();) {
             final String pair = st.nextToken();
             final int ieq = pair.indexOf('=');
@@ -152,16 +125,13 @@ public final class LWSServerUtil {
      * @return
      */
     static String removeCallback(final String res) {
-        if (res == null)
-            return null;
-        final String start = "(" + DispatcherSupport.Constants.CALLBACK_QUOTE_STRING;
-        final String end = DispatcherSupport.Constants.CALLBACK_QUOTE_STRING + ")";
+        if (res == null) return null;
+        String start = "(" + LWSDispatcherSupport.Constants.CALLBACK_QUOTE_STRING;
+        String end = LWSDispatcherSupport.Constants.CALLBACK_QUOTE_STRING + ")";
         int istart = res.indexOf(start);
-        if (istart == -1)
-            return res;
+        if (istart == -1) return res;
         int iend = res.lastIndexOf(end);
-        if (iend == -1)
-            return res;
+        if (iend == -1) return res;
         return res.substring(istart + start.length(), iend);
     }
 
@@ -171,7 +141,7 @@ public final class LWSServerUtil {
         //
         // Check the length
         //
-        if (key.length() != DispatcherSupport.Constants.KEY_LENGTH) return false;
+        if (key.length() != LWSDispatcherSupport.Constants.KEY_LENGTH) return false;
         //
         // No periods, this is an indication of an error
         //
@@ -228,7 +198,7 @@ public final class LWSServerUtil {
      */
     static String generateKey() {
         final StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < DispatcherSupport.Constants.KEY_LENGTH;) {
+        for (int i = 0; i < LWSDispatcherSupport.Constants.KEY_LENGTH;) {
             final int r = 'A' + (int) (Math.random() * ('Z' - 'A'));
             final char c = (char) r;
             if (c == ';')

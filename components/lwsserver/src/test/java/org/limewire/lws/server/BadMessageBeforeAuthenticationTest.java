@@ -3,7 +3,7 @@ package org.limewire.lws.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.lws.server.DispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;
@@ -27,8 +27,8 @@ public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationTes
 
     public void testBadMessageBeforeAuthentication() {
         final Map<String, String> args = new HashMap<String, String>();
-        args.put(DispatcherSupport.Parameters.MSG, "badMsg");
-        args.put(DispatcherSupport.Parameters.CALLBACK, "callback");
-        getCode().sendLocalMsg("Msg", args,errorHandler(DispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
+        args.put(LWSDispatcherSupport.Parameters.MSG, "badMsg");
+        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "callback");
+        getCode().sendLocalMsg("Msg", args,errorHandler(LWSDispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
     }
 }
