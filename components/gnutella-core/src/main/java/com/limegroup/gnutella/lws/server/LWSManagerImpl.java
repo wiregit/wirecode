@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -18,13 +17,10 @@ import org.limewire.lws.server.LWSDispatcherFactory;
 import org.limewire.lws.server.SenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
-import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.gui.GuiCoreMediator;
 import com.limegroup.gnutella.http.HttpClientListener;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.EncodingUtils;
@@ -48,8 +44,11 @@ public final class LWSManagerImpl implements LWSManager, SenderOfMessagesToServe
     /** This is provided by {@link LWSSettings}. */
     private final String hostNameAndPort;
     
+    private final HttpExecutor exe;
+    
     @Inject
-    public LWSManagerImpl() {
+    public LWSManagerImpl(HttpExecutor exe) {
+        this.exe = exe;
         this.dispatcher = LWSDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
 
             public String receiveCommand(String cmd, Map<String, String> args) {
@@ -112,7 +111,6 @@ public final class LWSManagerImpl implements LWSManager, SenderOfMessagesToServe
         // right away
         //
         //
-        final HttpExecutor exe = GuiCoreMediator.getHttpExecutor();
         cb.process(Responses.OK);
         exe.execute(get, new HttpClientListener() {
             

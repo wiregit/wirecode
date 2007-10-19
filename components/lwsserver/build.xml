@@ -10,7 +10,7 @@
 	<import file="../common/build-macros.xml" />
 	<import file="../common/build.xml" />
 
-	<target name="initialize" depends="lw-common.initialize, lw-http.initialize">
+	<target name="initialize" depends="lw-common.initialize">
 		<do.setup-properties component="lwsserver">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar" />

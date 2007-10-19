@@ -41,6 +41,7 @@
 			    <path refid="tests.limewire.components.resources.classpath"/>
 			    <path refid="tests.limewire.components.http.classpath"/>
 			    <path refid="tests.limewire.components.net.classpath"/>
+				<path refid="tests.limewire.components.lwsserver.classpath"/>
 			    <!-- Add as components are added. -->
 		    </tests-classpath>
         </do.setup-properties>    
@@ -58,6 +59,7 @@
 			<pathelement location="${build.limewire.components.mojito.classes}"/>
  			<pathelement location="${build.limewire.components.http.classes}"/>
  			<pathelement location="${build.limewire.components.net.classes}"/>
+ 			<pathelement location="${build.limewire.components.lwsserver.classes}"/>
             <!-- test-util not added purposely, as the classes are required for tests only -->
             
             <!-- Add as core components are added. -->
@@ -99,6 +101,7 @@
 			<include name="${limewire.components.mojito-ui.relative.antglob.tests}"/>
 	     	<include name="${limewire.components.http.relative.antglob.tests}"/>    
 	     	<include name="${limewire.components.net.relative.antglob.tests}"/>    
+	     	<include name="${limewire.components.lwsserver.relative.antglob.tests}"/>    
     		<!-- Add as components are added! -->
 		</fileset>
     
@@ -191,7 +194,7 @@
     			<fileset dir="${build.limewire.components.mojito.tests}" includes="**/*Test.class"/>
                	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
                	<fileset dir="${build.limewire.components.http.tests}" includes="**/*Test.class"/>
-               	<fileset dir="${build.limewire.components.net.tests}" includes="**/*Test.class"/>
+               	<fileset dir="${build.limewire.components.lwsserver.tests}" includes="**/*Test.class"/>
 	            <!-- Add as tests are added. -->
 	         </testLocations>
 	    </do.test-all>
@@ -221,6 +224,7 @@
     	    	<fileset dir="${limewire.components.resources.src.resources}" />
     	    	<fileset dir="${build.limewire.components.http.classes}" />
     	    	<fileset dir="${build.limewire.components.net.classes}" />
+    	    	<fileset dir="${build.limewire.components.lwsserver.classes}" />
 			    <!-- Add as components & resources are added. -->
 			</more-jar-elements>
         </do.jar>
