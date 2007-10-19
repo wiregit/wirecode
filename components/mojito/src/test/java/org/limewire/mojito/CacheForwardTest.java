@@ -143,7 +143,7 @@ public class CacheForwardTest extends MojitoTestCase {
         final long waitForNodes = 1000; // ms
 
         //ContextSettings.SEND_SHUTDOWN_MESSAGE.setValue(false);
-        DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
+        DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(false);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
@@ -170,11 +170,6 @@ public class CacheForwardTest extends MojitoTestCase {
             
             first.bootstrap(new InetSocketAddress("localhost", PORT+1)).get();
             
-            /*for (MojitoDHT dht : dhts.values()) {
-                if (!dht.isBootstrapped()) {
-                    dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
-                }
-            }*/
             
             // Sort all KUIDs by XOR distance and use the Node as 
             // creator that's furthest away from the value ID so
@@ -200,7 +195,6 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // And check the initial state
             Context closest = null;
-            Context furthest = null;
             for (Contact remote : evt.getLocations()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 assertEquals(1, dht.getDatabase().getKeyCount());
@@ -215,8 +209,6 @@ public class CacheForwardTest extends MojitoTestCase {
                 if (closest == null) {
                     closest = dht;
                 }
-                
-                furthest = dht;
             }
             
             // Create a Node with the nearest possible Node ID
@@ -238,37 +230,16 @@ public class CacheForwardTest extends MojitoTestCase {
             // The Node with the nearest possible ID should have the value
             assertEquals(1, nearest.getDatabase().getValueCount());
             
-            // And the Node with the furthest ID shouldn't unless the furthest
-            // Node happens to be the creator of the value in which case we're
-            // not removing the value (see init loop, we changed the creator's
-            // node ID so that it cannot be member of the k-closest nodes).
-            //assertEquals(0, furthest.getValues().size());
-            Collection before = furthest.getDatabase().values();
-            if (before.size() != 0) {
-                StringBuilder buffer = new StringBuilder();
-                buffer.append("Furthest: ").append(furthest.getLocalNode()).append("\n");
-                buffer.append("Creator: ").append(creator.getLocalNode()).append("\n");
-                
-                buffer.append("Before: ").append(before).append("\n");
-                Thread.sleep(10000); // Race condition?
-                buffer.append("After: ").append(furthest.getDatabase().values()).append("\n");
-                
-                buffer.append("IDs: ").append(idsByXorDistance.subList(0, k+1)).append("\n");
-                fail(buffer.toString());
-            }
-            
             for (Contact remote : evt.getLocations()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
-                
-                if (dht != furthest) {
-                    assertEquals("I dont have it?? "+dht.getLocalNodeID(),1, dht.getDatabase().getKeyCount());
-                    assertEquals(1, dht.getDatabase().getValueCount());
-                    for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
-                        assertEquals(valueId, dhtValue.getPrimaryKey());
-                        assertEquals(value, dhtValue.getValue());
-                        assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
-                        assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
-                    }
+
+                assertEquals("I dont have it?? "+dht.getLocalNodeID(),1, dht.getDatabase().getKeyCount());
+                assertEquals(1, dht.getDatabase().getValueCount());
+                for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
+                    assertEquals(valueId, dhtValue.getPrimaryKey());
+                    assertEquals(value, dhtValue.getValue());
+                    assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
+                    assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
                 }
             }
             
@@ -359,66 +330,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());
             }
             
-            // Change the instanceId the previous furthest Node
-            // and it shouldn't get the value
-            furthest.getLocalNode().nextInstanceID();
-            bootstrap(furthest, dhts.values());
-            Thread.sleep(waitForNodes);
-            
-            assertEquals(0, furthest.getDatabase().getKeyCount());
-            assertEquals(0, furthest.getDatabase().getValueCount());
-            
-            // Same test with the current furthest Node but with
-            // the exception that the current furthest Node will
-            // receive the value from the nearest Node again.
-            // First step: Get the current furthest Nodes
-            index = 0;
-            furthest = null;
-            for (Contact node : evt.getLocations()) {
-                if (index == evt.getLocations().size()-2) {
-                    furthest = (Context)dhts.get(node.getNodeID());
-                    break;
-                }
-                index++;
-            }
-            assertNotNull(furthest);
-            
-            // Check the intial state
-            assertEquals("dont have it " + furthest.getLocalNodeID(),1, furthest.getDatabase().getKeyCount());
-            assertEquals(1, furthest.getDatabase().getValueCount());
-            
-            // Clear the Database but don't change the instanceId yet
-            furthest.getDatabase().clear();
-            assertEquals(0, furthest.getDatabase().getKeyCount());
-            assertEquals(0, furthest.getDatabase().getValueCount());
-            bootstrap(furthest, dhts.values());
-            Thread.sleep(waitForNodes);
-            
-            assertEquals(0, furthest.getDatabase().getKeyCount());
-            assertEquals(0, furthest.getDatabase().getValueCount());
-            
-            // Change the instanceId 
-            furthest.getLocalNode().nextInstanceID();
-            bootstrap(furthest, dhts.values());
-            Thread.sleep(waitForNodes);
-            
-            // And we should have the value now
-            assertEquals(1, furthest.getDatabase().getKeyCount());
-            assertEquals(1, furthest.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : furthest.getDatabase().values()) {
-                assertEquals(valueId, dhtValue.getPrimaryKey());
-                assertEquals(value, dhtValue.getValue());
-                assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
-                
-                // The nearest Node send us the value
-                assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());
-            }
-            
-            nearest.getLocalNode().nextInstanceID();
-            bootstrap(furthest, dhts.values());
-            Thread.sleep(waitForNodes);
-            
-            // Check the final state. k Nodes should have the value!
+            // Check the final state. k + 1 Nodes should have the value!
             int count = 0;
             dhts.put(nearest.getLocalNodeID(), nearest);
             for (MojitoDHT dht : dhts.values()) {
@@ -434,13 +346,23 @@ public class CacheForwardTest extends MojitoTestCase {
                 }
             }
             
-            assertEquals(k, count);
+            assertEquals(k + 1, count);
             
         } finally {
             for (MojitoDHT dht : dhts.values()) {
                 dht.close();
             }
         }
+    }
+    
+    /**
+     * This test will fail if the deletion step of store-forwarding
+     * is enabled.  Its a reminder to test that functionality if
+     * we ever decide to enable it.
+     */
+    public void testCacheForwardAndDelete() {
+        DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.revertToDefault();
+        assertFalse(DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue());
     }
     
     public void testStoreMultipleValues() throws Exception {
