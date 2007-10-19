@@ -3,8 +3,8 @@
 <project name="lw-lwsserver" basedir="." default="compile-src">
 
 	<description>
-		LimeWire component 'lws'.
-	    This component contains utility classes for dealing with I/O.
+		LimeWire component 'lwsserver'.
+			Store communication.
 	</description>
 
 	<import file="../common/build-macros.xml" />
@@ -23,63 +23,58 @@
 	</target>
 
 	<target name="clean" depends="lw-common.clean">
-		<do.clean component="lws" />
+		<do.clean component="lwsserver" />
 	</target>
 
 	<target name="compile" depends="lw-common.compile">
-		<do.compile component="lws" />
+		<do.compile component="lwsserver" />
 	</target>
 
 	<target name="compile-src" depends="lw-common.compile-src">
-		<do.compile-src component="lws" />
+		<do.compile-src component="lwsserver" />
 	</target>
 
 	<target name="clean-src" depends="lw-common.clean-src">
-		<do.clean-src component="lws" />
+		<do.clean-src component="lwsserver" />
 	</target>
 
 	<target name="compile-tests" depends="lw-common.compile-tests">
-		<do.compile-tests component="lws" />
+		<do.compile-tests component="lwsserver" />
 	</target>
 	<target name="clean-tests" depends="lw-common.clean-tests">
-		<do.clean-tests component="lws" />
+		<do.clean-tests component="lwsserver" />
 	</target>
 
 	<target name="test" if="class" depends="compile">
-		<do.test component="lws" class="${class}" />
+		<do.test component="lwsserver" class="${class}" />
 	</target>
 
 	<target name="test-package" if="package" depends="compile">
-		<do.test-package component="lws" package="${package}" />
+		<do.test-package component="lwsserver" package="${package}" />
 	</target>
 
 	<target name="test-all" depends="compile">
-		<do.test-all component="lws" />
+		<do.test-all component="lwsserver" />
 	</target>
 
 	<target name="jar" depends="initialize, compile-src">
-		<do.jar component="lws" />
+		<do.jar component="lwsserver" />
 	</target>
 
 	<target name="javadoc" depends="initialize, compile-src">
-		<do.javadoc component="lws" />
+		<do.javadoc component="lwsserver" />
 	</target>
 
 	<target name="clean-dist" depends="initialize">
-		<do.clean-dist component="lws" />
+		<do.clean-dist component="lwsserver" />
 	</target>
 
 	<target name="with.clover" depends="initialize">
-		<do.clover-setup component="lws" />
+		<do.clover-setup component="lwsserver" />
 	</target>
 
 	<target name="clover2html" depends="initialize">
-		<do.clover2html component="lws" />
+		<do.clover2html component="lwsserver" />
 	</target>
-	
-	<target name="demoserver" depends="compile-tests" description="Runs the demo remote server">
-		<java classname="org.limewire.store.lws.local.LocalRemoteServer"
-					classpathref="build.limewire.components.lws.tests.classpath" />
-	</target>	
 
 </project>

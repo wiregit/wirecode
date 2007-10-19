@@ -20,7 +20,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.lws.server.LocalServer;
 import org.limewire.service.ErrorService;
 
 /**
