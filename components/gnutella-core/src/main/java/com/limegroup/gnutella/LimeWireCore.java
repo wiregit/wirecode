@@ -54,7 +54,6 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.SourceRankerFactory;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
-import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
@@ -334,11 +333,11 @@ public class LimeWireCore {
     }
 
     public IPFilter getIpFilter() {
-        return injector.getInstance(IPFilter.class);
+        return injector.getInstance(Key.get(IPFilter.class,Names.named("ipFilter")));
     }
 
-    public HostileFilter getHostileFilter() {
-        return injector.getInstance(HostileFilter.class);
+    public IPFilter getHostileFilter() {
+        return injector.getInstance(Key.get(IPFilter.class,Names.named("hostileFilter")));
     }
 
     public NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() {

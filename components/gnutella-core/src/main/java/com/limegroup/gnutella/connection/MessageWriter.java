@@ -109,7 +109,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
         int dropped = queue.resetDropped();
         stats.addSentDropped(dropped);
             
-        if(channel != null)
+        if(channel != null) 
             channel.interestWrite(this, true);
     }
         

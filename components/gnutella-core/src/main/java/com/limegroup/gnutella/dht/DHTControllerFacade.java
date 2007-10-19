@@ -42,8 +42,6 @@ public interface DHTControllerFacade {
 
     boolean allow(SocketAddress addr);
 
-    void ban(SocketAddress addr);
-
     void reloadIPFilter();
 
     DHTBootstrapper getDHTBootstrapper(DHTController dhtController);

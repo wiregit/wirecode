@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
 
+import org.limewire.io.IP;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
@@ -49,7 +52,7 @@ public class AddressToken extends AbstractToken {
     private volatile transient Provider<IPFilter> ipFilter;
     
     @Inject
-    private static Provider<IPFilter> globalIpFilter;
+    private static @Named("ipFilter") Provider<IPFilter> globalIpFilter;
 
 	public AddressToken(byte[] address, int port) {
 		this.ipFilter = globalIpFilter;
@@ -69,7 +72,7 @@ public class AddressToken extends AbstractToken {
         }
         // this initial value is an
         _good = INITIAL_GOOD;
-        int logDistance = ipFilter.get().logMinDistanceTo(_address);
+        int logDistance = ipFilter.get().logMinDistanceTo(new IP(_address));
         
         // Constants 1600 and 3.3 chosen such that:
         // Same /24 subnet as a banned IP results in a rating of 0.07

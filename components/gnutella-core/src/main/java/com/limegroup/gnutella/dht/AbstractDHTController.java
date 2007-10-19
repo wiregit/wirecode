@@ -501,11 +501,6 @@ public abstract class AbstractDHTController implements DHTController {
         public boolean allow(SocketAddress addr) {
             return dhtControllerFacade.allow(addr);
         }
-
-        public void ban(SocketAddress addr) {
-            dhtControllerFacade.ban(addr);
-            dhtControllerFacade.reloadIPFilter();
-        }
     }
 
 }

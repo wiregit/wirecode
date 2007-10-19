@@ -331,7 +331,7 @@ public class HostCatcher {
             Provider<ConnectionManager> connectionManager,
             Provider<UDPService> udpService, Provider<DHTManager> dhtManager,
             Provider<QueryUnicaster> queryUnicaster,
-            Provider<IPFilter> ipFilter,
+            @Named("hostileFilter") Provider<IPFilter> ipFilter, // TODO: check if ipFilter isn't more appropriate
             Provider<MulticastService> multicastService,
             UniqueHostPinger uniqueHostPinger,
             UDPHostCacheFactory udpHostCacheFactory,

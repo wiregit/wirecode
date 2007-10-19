@@ -219,7 +219,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 SocketsManager socketsManager,
                 ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner,
-                Provider<IPFilter> ipFilter,
+                @Named("ipFilter") Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
                 PingRequestFactory pingRequestFactory) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
@@ -374,7 +374,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 SocketsManager socketsManager,
                 ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner,
-                Provider<IPFilter> ipFilter,
+                @Named("ipFilter") Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
                 PingRequestFactory pingRequestFactory) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,

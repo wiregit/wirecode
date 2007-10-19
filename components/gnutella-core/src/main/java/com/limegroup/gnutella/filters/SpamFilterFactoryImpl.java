@@ -12,12 +12,12 @@ public class SpamFilterFactoryImpl implements SpamFilterFactory {
     
     private final Provider<MutableGUIDFilter> mutableGUIDFilter;
     private final Provider<HostileFilter> hostileFilter;
-    private final Provider<IPFilter> ipFilter;
+    private final Provider<LocalIPFilter> ipFilter;
 
     @Inject
     public SpamFilterFactoryImpl(Provider<MutableGUIDFilter> mutableGUIDFilter, 
             Provider<HostileFilter> hostileFilter,
-            Provider<IPFilter> ipFilter) {
+            Provider<LocalIPFilter> ipFilter) {
         this.mutableGUIDFilter = mutableGUIDFilter;
         this.hostileFilter = hostileFilter;
         this.ipFilter = ipFilter;
@@ -31,7 +31,7 @@ public class SpamFilterFactoryImpl implements SpamFilterFactory {
         Vector<SpamFilter> buf=new Vector<SpamFilter>();
 
         //1. IP-based techniques.
-        IPFilter ipFilter = this.ipFilter.get();
+        LocalIPFilter ipFilter = this.ipFilter.get();
         if(ipFilter.hasBlacklistedHosts())
             buf.add(ipFilter);
 

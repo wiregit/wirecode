@@ -202,7 +202,7 @@ public class ConnectionServicesImpl implements ConnectionServices {
                 return;
         }
     
-        if (!acceptor.get().isBannedIP(cIP)) {
+        if (spamServices.get().isAllowed(addr)) {
             connectionManager.get().createConnectionAsynchronously(hostname, portnum, type);
     	}
     }

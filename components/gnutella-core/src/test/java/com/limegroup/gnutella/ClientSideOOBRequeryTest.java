@@ -586,7 +586,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
@@ -702,7 +703,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         URN urn = TestFile.hash();
@@ -821,7 +823,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         ((MyCallback)getCallback()).clearGUID();
 
         // create a new Uploader to service the download
-        TestUploader uploader2 = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader2 = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader2.start("whatever", UPLOADER_PORT+1, false);
         uploader2.setRate(100);
 
@@ -888,7 +891,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
@@ -1025,12 +1029,14 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         
-        TestUploader uploader2 = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader2 = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader2.start("whatever", UPLOADER_PORT*2, false);
         uploader2.setBusy(true);
         RemoteFileDesc rfd2 = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
@@ -1149,7 +1155,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");

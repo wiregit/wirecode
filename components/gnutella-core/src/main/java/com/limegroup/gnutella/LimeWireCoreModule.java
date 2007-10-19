@@ -110,6 +110,8 @@ import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
+import com.limegroup.gnutella.filters.HostileFilter;
+import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
@@ -348,7 +350,9 @@ public class LimeWireCoreModule extends AbstractModule {
         //bind(SearchResultHandler.class);
         //bind(AltLocManager.class);
         //bind(ContentManager.class);
-        bind(IPFilter.class).toProvider(IPFilterProvider.class);
+        bind(IPFilter.class).annotatedWith(Names.named("ipFilter")).to(LocalIPFilter.class);
+        bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).to(HostileFilter.class);
+//        bind(IPFilter.class).toProvider(IPFilterProvider.class);
         //bind(HostileFilter.class);
         //bind(NetworkUpdateSanityChecker.class);
         bind(BandwidthManager.class).to(BandwidthManagerImpl.class);
@@ -429,14 +433,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
         bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
     }    
-    
-    @Singleton
-    private static class IPFilterProvider extends AbstractLazySingletonProvider<IPFilter> {
-        @Override
-        protected IPFilter createObject() {
-            return new IPFilter(false);
-        }
-    }
     
     @Singleton
     private static class SecureMessageVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {

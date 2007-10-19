@@ -77,7 +77,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
             Provider<SavedFileManager> savedFileManager,
             Provider<VerifyingFileFactory> verifyingFileFactory,
             Provider<DiskController> diskController,
-            Provider<IPFilter> ipFilter,
+            @Named("ipFilter") Provider<IPFilter> ipFilter,
             Provider<RequeryManagerFactory> requeryManagerFactory,
             Provider<BTContextFactory> btContextFactory,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,

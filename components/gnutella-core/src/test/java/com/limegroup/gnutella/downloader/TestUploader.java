@@ -31,6 +31,7 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -210,7 +211,8 @@ public class TestUploader {
     private final FeaturesWriter featuresWriter;
     
     @Inject
-    public TestUploader(AlternateLocationFactory alternateLocationFactory, FeaturesWriter featuresWriter) {
+    public TestUploader(AlternateLocationFactory alternateLocationFactory, FeaturesWriter featuresWriter,
+            @Named("ipFilter") IPFilter filter) {
         this.alternateLocationFactory = alternateLocationFactory;
         this.featuresWriter = featuresWriter;
         
@@ -219,7 +221,8 @@ public class TestUploader {
            new String[] {"*.*.*.*"});
        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
            new String[] {"127.*.*.*"});
-       this.IP_FILTER = new IPFilter();
+       this.IP_FILTER = filter;
+       IP_FILTER.refreshHosts();
     }
 
 

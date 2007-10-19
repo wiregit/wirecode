@@ -592,7 +592,8 @@ public class ServerSideWhatIsNewTest
         
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
-        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                ProviderHacks.getIpFilter());
         uploader.start("whatever.txt", UPLOADER_PORT, false);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
@@ -654,7 +655,8 @@ public class ServerSideWhatIsNewTest
         Long cTime[] = new Long[uploader.length];
         RemoteFileDesc rfds[] = new RemoteFileDesc[uploader.length];
         for (int i = 0; i < uploader.length; i++) {
-            uploader[i] = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter());
+            uploader[i] = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
+                    ProviderHacks.getIpFilter());
             uploader[i].start("anita.txt", UPLOADER_PORT+i, false);
             uploader[i].setRate(50);
             cTime[i] = new Long(5+i);

@@ -294,7 +294,8 @@ public class ConnectionManager implements ConnectionAcceptor,
             Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager,
             ConnectionServices connectionServices,
-            Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
+            Provider<NodeAssigner> nodeAssigner, 
+            @Named("ipFilter") Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
             PingRequestFactory pingRequestFactory) {
         this.networkManager = networkManager;
@@ -2368,7 +2369,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         
         /** Returns true if we are able to make a connection attempt to this host. */
         private boolean isConnectableHost(IpPort host) {
-            return ipFilter.get().allow(host)
+            return ipFilter.get().allow(host.getAddress())
                 && !isConnectedTo(host.getAddress()) 
                 && !isConnectingTo(host);
         }

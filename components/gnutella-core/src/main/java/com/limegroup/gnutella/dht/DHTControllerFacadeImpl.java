@@ -46,7 +46,8 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     @Inject
     public DHTControllerFacadeImpl(NetworkManager networkManager,
             Provider<ConnectionManager> connectionManager,
-            Provider<IPFilter> ipFilter, SpamServices spamServices,
+            @Named("ipFilter") Provider<IPFilter> ipFilter, // TODO: maybe hostileFilter here 
+            SpamServices spamServices,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             CapabilitiesVMFactory capabilitiesVMFactory,
             ConnectionServices connectionServices,
@@ -73,10 +74,6 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     
     public boolean allow(SocketAddress addr) {
         return ipFilter.get().allow(addr);
-    }
-    
-    public void ban(SocketAddress addr) {
-        ipFilter.get().ban(addr);
     }
     
     public byte[] getAddress() {

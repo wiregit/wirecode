@@ -2,13 +2,24 @@ package com.limegroup.gnutella.filters;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.concurrent.Executor;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.io.IP;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -20,10 +31,8 @@ public class IPFilterTest extends LimeTestCase {
 
     private byte[] whiteListedAddress;
     private byte[] blackListedAddress;
-    private byte[] toBanAddress;
     private InetAddress whiteListedIP;
     private InetAddress blackListedIP;
-    private InetAddress toBanIP;
     
     private Mockery context;
     
@@ -45,8 +54,22 @@ public class IPFilterTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    private Injector injector;
+    
     @Override
     protected void setUp() throws Exception {
+        Module m = new AbstractModule() {
+            public void configure() {
+                bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).toInstance(new StubFilter());
+                bind(Executor.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(new Executor() {
+                    public void execute(Runnable r) {
+                        r.run();
+                    }
+                });
+                
+            }
+        };
+        injector = LimeTestUtils.createInjector(m);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "18.239.0.*", "13.0.0.0" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES
@@ -55,11 +78,9 @@ public class IPFilterTest extends LimeTestCase {
         
         whiteListedAddress = new byte[] { (byte) 18, (byte) 239, (byte) 0, (byte) 144 };
         blackListedAddress = new byte[] { (byte) 18, (byte) 239, (byte) 0, (byte) 143 };
-        toBanAddress       = new byte[] { (byte) 66, (byte) 66, (byte) 66, (byte) 66 };
         
         whiteListedIP = InetAddress.getByAddress(whiteListedAddress);
         blackListedIP = InetAddress.getByAddress(blackListedAddress);
-        toBanIP       =  InetAddress.getByAddress(toBanAddress);
         
         context = new Mockery();
         
@@ -67,26 +88,16 @@ public class IPFilterTest extends LimeTestCase {
         queryReply   = context.mock(QueryReply.class);
         queryRequest = context.mock(QueryRequest.class);
         
-        filter = new IPFilter();
-    }
-
-    
-    public void testFilterWithBan() {
-        IPFilter filter = new IPFilter();
-        InetSocketAddress toBanSock = new InetSocketAddress(toBanIP, 666);
-        assertTrue(filter.allow(toBanSock.getAddress().getHostAddress()));
-        filter.ban(toBanSock);    
-        
-        // This has to be called before the filter applies, is it correct?
+        filter = getFilter();
         filter.refreshHosts();
-        
-        assertFalse(filter.allow(toBanSock.getAddress().getHostAddress()));
-        
+    }
+    
+    private IPFilter getFilter() {
+        return injector.getInstance(Key.get(IPFilter.class,Names.named("ipFilter")));
     }
 
     
     public void testFilterByAddress() {
-        IPFilter filter = new IPFilter();
         assertTrue(filter.allow("18.240.0.0"));
         assertFalse(filter.allow("18.239.0.142"));
         assertTrue(filter.allow("18.239.0.144"));
@@ -95,7 +106,6 @@ public class IPFilterTest extends LimeTestCase {
     }
 
     public void testFilterByPingReplyWhiteListed() {
-        IPFilter filter = new IPFilter();
      
         context.checking(new Expectations()
         {{ allowing (pingReply).getTTL();
@@ -113,7 +123,6 @@ public class IPFilterTest extends LimeTestCase {
     }
     
     public void testFilterByPingReplyBlackListed() {
-        IPFilter filter = new IPFilter();
         
         context.checking(new Expectations()
         {{ allowing (pingReply).getTTL();
@@ -172,6 +181,44 @@ public class IPFilterTest extends LimeTestCase {
         PushRequest push2 = new PushRequest(new byte[16], (byte) 3,
                 new byte[16], 0l, blackListedAddress, 6346);
         assertFalse(filter.allow(push2));
+    }
+    
+    private static class StubFilter implements IPFilter {
+
+        public boolean allow(byte[] addr) {
+            return true;
+        }
+
+        public boolean allow(IP ip) {
+            return true;
+        }
+
+        public boolean allow(SocketAddress addr) {
+            return true;
+        }
+
+        public boolean allow(String addr) {
+            return true;
+        }
+
+        public boolean hasBlacklistedHosts() {
+            return true;
+        }
+
+        public int logMinDistanceTo(IP ip) {
+            return 0;
+        }
+
+        public void refreshHosts() {
+        }
+
+        public void refreshHosts(IPFilterCallback callback) {
+        }
+
+        public boolean allow(Message m) {
+            return true;
+        }
+        
     }
         
 }

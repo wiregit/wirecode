@@ -9,7 +9,7 @@ import org.limewire.collection.Comparators;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.filters.HostileFilter;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -18,18 +18,15 @@ import com.limegroup.gnutella.settings.FilterSettings;
 public class SpamServicesImpl implements SpamServices {
     
     private final Provider<ConnectionManager> connectionManager;
-    private final Provider<HostileFilter> hostilesFilter;
     private final Provider<IPFilter> ipFilter;
     private final SpamFilterFactory spamFilterFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
 
     @Inject
     public SpamServicesImpl(Provider<ConnectionManager> connectionManager,
-            Provider<HostileFilter> hostilesFilter,
-            Provider<IPFilter> ipFilter, SpamFilterFactory spamFilterFactory,
+            @Named("ipFilter")Provider<IPFilter> ipFilter, SpamFilterFactory spamFilterFactory,
             UDPReplyHandlerCache udpReplyHandlerCache) {
         this.connectionManager = connectionManager;
-        this.hostilesFilter = hostilesFilter;
         this.ipFilter = ipFilter;
         this.spamFilterFactory = spamFilterFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
@@ -41,7 +38,7 @@ public class SpamServicesImpl implements SpamServices {
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
         for(ManagedConnection c : connectionManager.get().getConnections()) {
-            if(ipFilter.get().allow(c)) {
+            if(ipFilter.get().allow(c.getAddress())) {
                 c.setPersonalFilter(spamFilterFactory.createPersonalFilter());
                 c.setRouteFilter(spamFilterFactory.createRouteFilter());
             } else {
@@ -59,12 +56,11 @@ public class SpamServicesImpl implements SpamServices {
                 adjustSpamFilters();
             }
         });
-        hostilesFilter.get().refreshHosts();
     }
 
 
     public boolean isAllowed(InetAddress host) {
-        return ipFilter.get().allow(host);
+        return ipFilter.get().allow(host.getAddress());
     }
 
     public void blockHost(String host) {

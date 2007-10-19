@@ -124,7 +124,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<ConnectionDispatcher> localConnectionDispatcher;
 
     @Inject
-    public LifecycleManagerImpl(Provider<IPFilter> ipFilter,
+    public LifecycleManagerImpl(
+            @Named("ipFilter") Provider<IPFilter> ipFilter,
             Provider<SimppManager> simppManager, Provider<Acceptor> acceptor,
             Provider<ActivityCallback> activityCallback,
             Provider<ContentManager> contentManager,

@@ -31,9 +31,4 @@ public interface HostFilter {
      * the given SocketAddress
      */
     public boolean allow(SocketAddress addr);
-    
-    /**
-     * Bans the given SocketAddress
-     */
-    public void ban(SocketAddress addr);
 }

@@ -40,7 +40,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
             BTLinkManagerFactory linkManagerFactory,
             BTConnectionFetcherFactory connectionFetcherFactory,
             Provider<ContentManager> contentManager,
-            Provider<IPFilter> ipFilter,
+            @Named("ipFilter") Provider<IPFilter> ipFilter,
             Provider<TorrentManager> torrentManager,
             Provider<FileManager> fileManager) {
         this.eventDispatcher = eventDispatcher;

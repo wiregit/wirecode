@@ -34,10 +34,12 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
@@ -61,6 +63,7 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -354,7 +357,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	TestFile.length();
         try {
             //Start uploader and download.
-            uploader = new TestUploader(injector.getInstance(AlternateLocationFactory.class), injector.getInstance(FeaturesWriter.class));
+            uploader = new TestUploader(injector.getInstance(AlternateLocationFactory.class), injector.getInstance(FeaturesWriter.class),
+                    injector.getInstance(Key.get(IPFilter.class,Names.named("ipFilter"))));
             uploader.start("ManagedDownloaderTest", PORT, false);
             uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);

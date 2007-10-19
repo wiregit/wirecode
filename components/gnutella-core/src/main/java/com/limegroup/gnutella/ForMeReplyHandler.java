@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -62,12 +63,12 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<SearchResultHandler> searchResultHandler;
     private final Provider<DownloadManager> downloadManager;
-    private final Provider<Acceptor> acceptor;
     private final Provider<PushManager> pushManager;
     private final ScheduledExecutorService backgroundExecutor;
     private final ApplicationServices applicationServices;
     private final ConnectionServices connectionServices;
     private final LimeXMLDocumentHelper limeXMLDocumentHelper;
+    private final Provider<IPFilter> ipFilterProvider;
 
     @Inject
     ForMeReplyHandler(NetworkManager networkManager,
@@ -79,18 +80,19 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ApplicationServices applicationServices,
             ConnectionServices connectionServices,
-            LimeXMLDocumentHelper limeXMLDocumentHelper) {
+            LimeXMLDocumentHelper limeXMLDocumentHelper,
+            @Named("ipFilter")Provider<IPFilter> ipFilterProvider) {
         this.networkManager = networkManager;
         this.secureMessageVerifier = secureMessageVerifier;
         this.connectionManager = connectionManager;
         this.searchResultHandler = searchResultHandler;
         this.downloadManager = downloadManager;
-        this.acceptor = acceptor;
         this.pushManager = pushManager;
         this.backgroundExecutor = backgroundExecutor;
         this.applicationServices = applicationServices;
         this.connectionServices = connectionServices;
         this.limeXMLDocumentHelper = limeXMLDocumentHelper;
+        this.ipFilterProvider = ipFilterProvider;
     	    
 	    //Clear push requests every 30 seconds.
         //TODO: move to initializer
@@ -258,7 +260,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         }
         
         // if the IP is banned, don't accept it
-        if (acceptor.get().isBannedIP(ip))
+        if (!ipFilterProvider.get().allow(ip))
             return;
 
         int port = pushRequest.getPort();

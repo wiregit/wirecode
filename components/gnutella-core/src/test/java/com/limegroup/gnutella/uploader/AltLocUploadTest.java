@@ -923,7 +923,7 @@ public class AltLocUploadTest extends LimeTestCase {
      */
     public void testExpiredAltsRemoved() throws Exception {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*.*.*" });
-        injector.getInstance(IPFilter.class).refreshHosts();
+        injector.getInstance(Key.get(IPFilter.class, Names.named("ipFilter"))).refreshHosts();
         // set the expiration values to the bare minimum
         UploadSettings.LEGACY_BIAS.setValue(0f);
         UploadSettings.PING_BIAS.setValue(0f);

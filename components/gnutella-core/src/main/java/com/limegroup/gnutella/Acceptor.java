@@ -132,7 +132,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionServices connectionServices;
-    private final Provider<UPnPManager> upnpManager; 
+    private final Provider<UPnPManager> upnpManager;
     
     private final boolean upnpEnabled; 
     
@@ -144,7 +144,8 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<ActivityCallback> activityCallback,
             Provider<ConnectionManager> connectionManager,
-            Provider<IPFilter> ipFilter, ConnectionServices connectionServices,
+            @Named("ipFilter")Provider<IPFilter> ipFilter, 
+            ConnectionServices connectionServices,
             Provider<UPnPManager> upnpManager) {
         this.networkManager = networkManager;
         this.udpService = udpService;
@@ -623,7 +624,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         		!NetworkUtils.isValidPort(client.getPort())) {
             IOUtils.close(client);
             LOG.warn("connection closed while accepting");
-        } else if (isBannedIP(address.getAddress())) {
+        } else if (!ipFilter.get().allow(address.getAddress())) {
             if (LOG.isWarnEnabled())
                 LOG.warn("Ignoring banned host: " + address);
             HTTPStat.BANNED_REQUESTS.incrementStat();
@@ -685,16 +686,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         return !connectionServices.isConnectedTo(addr) &&
                !NetworkUtils.isLocalAddress(addr);
 	}
-
-    /**
-     * Returns whether <tt>ip</tt> is a banned address.
-     * 
-     * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
-     * @return true iff ip is a banned address.
-     */
-    public boolean isBannedIP(byte[] addr) {        
-        return !ipFilter.get().allow(addr);
-    }
     
     /**
      * Resets the last connectback time.

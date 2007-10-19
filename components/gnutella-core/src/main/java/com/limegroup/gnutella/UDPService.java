@@ -30,7 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.filters.HostileFilter;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -155,7 +155,7 @@ public class UDPService implements ReadWriteObserver {
     
     private final NetworkManager networkManager;
     private final Provider<MessageDispatcher> messageDispatcher;
-    private final Provider<HostileFilter> hostileFilter;
+    private final Provider<IPFilter> hostileFilter;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<Acceptor> acceptor;
@@ -172,7 +172,7 @@ public class UDPService implements ReadWriteObserver {
 	@Inject
     public UDPService(NetworkManager networkManager,
             Provider<MessageDispatcher> messageDispatcher,
-            Provider<HostileFilter> hostileFilter,
+            @Named("hostileFilter") Provider<IPFilter> hostileFilter,
             Provider<ConnectionManager> connectionManager,
             Provider<MessageRouter> messageRouter, Provider<Acceptor> acceptor,
             Provider<QueryUnicaster> queryUnicaster,
@@ -343,7 +343,7 @@ public class UDPService implements ReadWriteObserver {
                     continue;
 
                 // don't go further if filtered.
-                if (!hostileFilter.get().allow(addr.getAddress()))
+                if (!hostileFilter.get().allow(addr.getAddress().getAddress()))
                     return;
                 
                 byte[] data = BUFFER.array();
