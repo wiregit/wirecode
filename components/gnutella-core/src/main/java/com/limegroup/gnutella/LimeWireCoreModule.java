@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LocalSocketAddressProvider;
@@ -34,9 +35,7 @@ import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SettingsProvider;
 import org.limewire.statistic.StatisticsManager;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
-import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
@@ -111,8 +110,8 @@ import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
 import com.limegroup.gnutella.filters.HostileFilter;
-import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
@@ -187,8 +186,8 @@ import com.limegroup.gnutella.xml.MetaFileManager;
  * ActivityCallback.
  */
 public class LimeWireCoreModule extends AbstractModule {
-    
-    private final Class<? extends ActivityCallback> activityCallbackClass;
+ 
+	private final Class<? extends ActivityCallback> activityCallbackClass;
     
     public LimeWireCoreModule() {
         this(null);
@@ -204,8 +203,10 @@ public class LimeWireCoreModule extends AbstractModule {
         
         if(activityCallbackClass != null) {
             bind(ActivityCallback.class).to(activityCallbackClass);
-        }
-        
+        }        
+
+        bind(DownloadCallback.class).to(ActivityCallback.class);
+        bind(DownloadCallback.class).annotatedWith(Names.named("inNetwork")).to(InNetworkCallback.class);        
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
         bind(DHTControllerFactory.class).to(DHTControllerFactoryImpl.class);
@@ -297,7 +298,29 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
         bind(Inspector.class).to(InspectorImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);
+        bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
+        bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
+        bind(ReplyHandler.class).annotatedWith(Names.named("forMeReplyHandler")).to(ForMeReplyHandler.class);
+        bind(MessageRouter.class).to(StandardMessageRouter.class);
+        bind(IPFilter.class).annotatedWith(Names.named("ipFilter")).to(LocalIPFilter.class);
+        bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).to(HostileFilter.class);
+        bind(UploadSlotManager.class).to(UploadSlotManagerImpl.class);
+        bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);
+        bind(BandwidthManager.class).to(BandwidthManagerImpl.class);
+        bind(SecureMessageVerifier.class).toProvider(SecureMessageVerifierProvider.class);
+        bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).toProvider(InspectionVerifierProvider.class);
+        bind(PongCacher.class).to(PongCacherImpl.class);        
+        bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(UploadManager.class);     // For NodeAssigner.
+        bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class); // For NodeAssigner.
+        bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
+        bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
         
+        bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
+        bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
+        bindAll(Names.named("dhtExecutor"), ExecutorService.class, DHTExecutorProvider.class, Executor.class);
+        bindAll(Names.named("messageExecutor"), ExecutorService.class, MessageExecutorProvider.class, Executor.class);
+        bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
+
         // TODO: statically injecting this for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
         requestStaticInjection(AddressToken.class);
@@ -312,9 +335,6 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(Pools.class);
         requestStaticInjection(LocalSocketAddressService.class);
         requestStaticInjection(MACCalculatorRepositoryManager.class);
-        
-        bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
-        bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
         bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
@@ -322,117 +342,11 @@ public class LimeWireCoreModule extends AbstractModule {
         
         // TODO: Need to add interface to these classes
         //----------------------------------------------
-        //bind(UDPService.class)
-        //bind(Acceptor.class);
-        //bind(ConnectionManager.class);
-        //bind(TorrentManager.class);
-        //bind(HTTPHeaderUtils.class)
-        //bind(FeaturesWriter.class);
         bind(FileManager.class).to(MetaFileManager.class);
-        bind(UploadSlotManager.class).to(UploadSlotManagerImpl.class);
-        //bind(SourceRankerFactory.class);
-        //bind(SocketsManager.class);
-        //bind(VerifyingFileFactory.class);
-        //bind(DiskController.class);
-        bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);
-        //bind(ForMeReplyHandler.class);
-        bind(ReplyHandler.class).annotatedWith(Names.named("forMeReplyHandler")).to(ForMeReplyHandler.class);
-        //bind(QueryUnicaster.class);
-        //bind(OnDemandUnicaster.class);
-        bind(MessageRouter.class).to(StandardMessageRouter.class);
-        //bind(DownloadManager.class);
-        //bind(AltLocFinder.class);
-        //bind(HTTPAcceptor.class); //the one in browser
-        //bind(HostCatcher.class);
-        //bind(HTTPAcceptor.class); // the one in gnutella
-        //bind(PushManager.class);
-        //bind(ResponseVerifier.class);
-        //bind(SearchResultHandler.class);
-        //bind(AltLocManager.class);
-        //bind(ContentManager.class);
-        bind(IPFilter.class).annotatedWith(Names.named("ipFilter")).to(LocalIPFilter.class);
-        bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).to(HostileFilter.class);
-//        bind(IPFilter.class).toProvider(IPFilterProvider.class);
-        //bind(HostileFilter.class);
-        //bind(NetworkUpdateSanityChecker.class);
-        bind(BandwidthManager.class).to(BandwidthManagerImpl.class);
-        //bind(QueryStats.class);
-        //bind(NodeAssigner.class);
-        bind(SecureMessageVerifier.class).toProvider(SecureMessageVerifierProvider.class);
-        bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).toProvider(InspectionVerifierProvider.class);
-        //bind(CreationTimeCache.class);
-        //bind(UrnCache.class);
-        //bind(StaticMessages.class);
-        //bind(SavedFileManager.class);
-        bind(DownloadCallback.class).to(ActivityCallback.class);
-        bind(DownloadCallback.class).annotatedWith(Names.named("inNetwork")).to(InNetworkCallback.class);
-        //bind(InNetworkCallback.class);
-        //bind(MessageDispatcher.class);
-        //bind(MulticastService.class);        
-        //bind(ChatManager.class);
-        //bind(BTLinkManagerFactory.class);
-        //bind(ChokerFactory.class);
-        //bind(DiskManagerFactory.class);
-        //bind(BTConnectionFetcherFactory.class);
-        //bind(IncomingConnectionHandler.class);
-        //bind(ConnectionWatchdog.class);
-        //bind(Pinger.class);
-        bind(PongCacher.class).to(PongCacherImpl.class);
-        //bind(UPnPManager.class);
-        //bind(MutableGUIDFilter.class);
-        //bind(LicenseCache.class);
-        //bind(MessagesSupportedVendorMessage.class);
-        //bind(QueryDispatcher.class);
-        //bind(RatingTable.class);
-        //bind(SpamManager.class);
-        //bind(HashTreeNodeManager.class);
-        //bind(TigerTreeCache.class);
-        //bind(UpdateHandler.class);
-        //bind(LimeXMLProperties.class);
-        //bind(LimeXMLSchemaRepository.class);
-        //bind(SchemaReplyCollectionMapper.class);      
-        //bind(ExternalControl.class);
-        //bind(ControlRequestAcceptor.class);
-        //bind(PushDownloadManager.class);
-        //bind(SimppManager.class);
-        
-        //TODO: Don't need interfaces really, but listing them just 'cause I want to list everything.
-        //bind(BrowseRequestHandler.class);
-        //bind(FileRequestHandler.class);
-        //bind(FreeLoaderRequestHandler.class);
-        //bind(LimitReachedRequestHandler.class); // Not really bound, because factory creates it
-        //bind(PushProxyRequestHandler.class);
-        //bind(AltLocModel.class);
-        //bind(PushProxiesModel.class);
-                
-        // For NodeAssigner...
-        bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(UploadManager.class);
-        bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class);
-        
-        Key<ExecutorService> unlimitedExecutorKey = Key.get(ExecutorService.class, Names.named("unlimitedExecutor"));
-        bind(unlimitedExecutorKey).toProvider(UnlimitedExecutorProvider.class);
-        bind(Executor.class).annotatedWith(Names.named("unlimitedExecutor")).to(unlimitedExecutorKey);
-        
-        bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toProvider(BackgroundTimerProvider.class);
-        
-        // TODO: Could delay instantiation...
-        //----------------------------------------------
-        Key<ExecutorService> dhtExecutorKey = Key.get(ExecutorService.class, Names.named("dhtExecutor"));
-        bind(dhtExecutorKey).toInstance(ExecutorsHelper.newProcessingQueue("DHT-Executor"));
-        bind(Executor.class).annotatedWith(Names.named("dhtExecutor")).to(dhtExecutorKey);
-        
-        Key<ExecutorService> messageExecutorKey = Key.get(ExecutorService.class, Names.named("messageExecutor"));
-        bind(messageExecutorKey).toInstance(ExecutorsHelper.newProcessingQueue("Message-Executor"));
-        bind(Executor.class).annotatedWith(Names.named("messageExecutor")).to(messageExecutorKey);
- 
+       
         //TODO: only needed in tests, so move there eventually
         bind(ConnectionFactory.class).to(ConnectionFactoryImpl.class);
-        
-        // TODO: These are hacks to workaround objects that aren't dependency injected elsewhere.
-        bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
-        bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
-        bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toProvider(NIOScheduledExecutorServiceProvider.class);
-    }    
+    }
     
     @Singleton
     private static class SecureMessageVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
@@ -453,6 +367,7 @@ public class LimeWireCoreModule extends AbstractModule {
         }
     };
     
+    @Singleton
     private static class InspectionVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
         protected SecureMessageVerifier createObject() {
             return new SecureMessageVerifierImpl("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA" +
@@ -522,8 +437,23 @@ public class LimeWireCoreModule extends AbstractModule {
         }
     }
     
+    @Singleton
+    private static class MessageExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+        protected ExecutorService createObject() {
+            return ExecutorsHelper.newProcessingQueue("Message-Executor");
+        }
+    }
+
+    @Singleton
+    private static class DHTExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+        protected ExecutorService createObject() {
+            return ExecutorsHelper.newProcessingQueue("DHT-Executor");
+        }
+    }    
+    
     ///////////////////////////////////////////////////////////////////////////
-    /// BELOW ARE ALL HACK PROVIDERS THAT ARE NOT INTENDED TO BE USED FOR LONG!
+    /// BELOW ARE ALL HACK PROVIDERS THAT NEED TO BE UPDATED TO CONSTRUCT OBJECTS!
+    // (This needs to wait till components are injected and stop using singletons too.)
     
     @Singleton
     private static class NIODispatcherProvider implements Provider<NIODispatcher> {
@@ -562,5 +492,4 @@ public class LimeWireCoreModule extends AbstractModule {
         
     ///////////////////////////////////////////////////////////////
     // !!! DO NOT ADD THINGS BELOW HERE !!!  PUT THEM ABOVE THE HACKS!
-
 }
