@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,21 +32,21 @@ public final class LocalIPFilter extends AbstractIPFilter {
     private final IPList hostilesTXTHosts = new IPList();
     
     private final IPFilter delegate;
-    private final Executor ipLoader;
+    private final ScheduledExecutorService ipLoader;
     /** Marker for whether or not hostiles have been loaded. */
     private volatile boolean loadedHostiles = false;
     
     /** Constructs an IPFilter that automatically loads the content. */
     @Inject
     public LocalIPFilter(@Named("hostileFilter") IPFilter delegate, 
-            @Named("backgroundExecutor") Executor ipLoader) {
+            @Named("backgroundExecutor") ScheduledExecutorService ipLoader) {
         this(true, delegate, ipLoader);
     }
     
     /** Constructs an IPFilter that can optionally load the content. */
     public LocalIPFilter(boolean load, 
             @Named("hostileFilter") IPFilter delegate, 
-            @Named("backgroundExecutor") Executor ipLoader) {
+            @Named("backgroundExecutor") ScheduledExecutorService ipLoader) {
         this.delegate = delegate;
         this.ipLoader = ipLoader;
         if(load) {
