@@ -23,7 +23,7 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
     private Thread localThread;
     private Thread remoteThread;    
 
-    protected AbstractCommunicationTest(String s) {
+    public AbstractCommunicationTest(String s) {
         super(s);
     }
     
@@ -69,14 +69,18 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
     protected void afterTearDown() { }
 
     /**
-     * Returns a handler that ensures that the response returned is
-     * <tt>code</tt>.
+     * Returns a handler that ensures that the response returned is one of
+     * the <tt>code</tt>s.
      * 
-     * @param want expected code
+     * @param wants expected codes
      * @return a handler that ensures that the response returned is
-     *         <tt>code</tt>
+     *         on of the <tt>code</tt>
      */
     protected final FakeJavascriptCodeInTheWebpage.Handler errorHandler(final String want) {
+        return errorHandler(new String[]{want});
+    }
+    
+    protected final FakeJavascriptCodeInTheWebpage.Handler errorHandler(final String[] wants) {
         return new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {
                 //
@@ -85,7 +89,19 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
                 // callback back to javascript
                 //
                 final String have = LWSServerUtil.unwrapError(LWSServerUtil.removeCallback(res));
-                assertEquals(want, have);
+                //
+                // Make sure it's *one* of the expected results
+                //
+                boolean haveIt = false;
+                for (String want: wants) {
+                    if (have.equals(want)) {
+                        haveIt = true;
+                        break;
+                    }
+                }
+                if (!haveIt) {
+                    fail("didn't received one message of: " + unwrap(wants));
+                }
             }
         };
     }
@@ -162,6 +178,18 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
     // -----------------------------------------------------------
     // Private
     // -----------------------------------------------------------
+    
+    private String unwrap(String[] ss) {
+        StringBuffer sb = new StringBuffer("{ ");
+        if (ss != null) {
+            for (String s : ss) {
+                sb.append(String.valueOf(s));
+                sb.append(" ");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 
     private String sendMessageFromWebpageToClient(final String cmd, final Map<String, String> args) {
         args.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");
