@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -16,22 +18,35 @@ import org.limewire.io.IpPortSet;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.XMLDocFilterTest;
+import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
 /**
  * This class tests the Response class.
  */
 @SuppressWarnings("unchecked")
+// TODO should be renamed to response factory test maybe
 public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase {
 
-	/**
+	private QueryReplyFactory queryReplyFactory;
+    private ResponseFactoryImpl responseFactoryImpl;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private AlternateLocationFactory alternateLocationFactory;
+    private LimeXMLDocumentHelper limeXMLDocumentHelper;
+
+    /**
 	 * Constructs a new test instance for responses.
 	 */
 	public ResponseTest(String name) {
@@ -48,6 +63,24 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+	
+	@Override
+	protected void setUp() throws Exception {
+	    Injector injector = LimeTestUtils.createInjector();
+	    queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+	    responseFactoryImpl = (ResponseFactoryImpl) injector.getInstance(ResponseFactory.class);
+	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
+	    alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+	    
+	    final CountDownLatch latch = new CountDownLatch(1);
+	    injector.getInstance(LocalIPFilter.class).refreshHosts(new IPFilterCallback() {
+            public void ipFiltersLoaded() {
+                latch.countDown();
+            }
+        });
+	    assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
+	}
 
 
 	/**
@@ -55,7 +88,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	 * the Response class.
 	 */
 	public void testLegacyResponseUnitTest() throws Exception {
-        Response r = ProviderHacks.getResponseFactory().createResponse(3, 4096, "A.mp3");
+        Response r = responseFactoryImpl.createResponse(3, 4096, "A.mp3");
         assertEquals("A.mp3", r.getName());
         assertNull(r.getDocument());
 
@@ -98,13 +131,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         String xml2 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Speech\" bitrate=\"150\"></audio></audios>";
         
         //create documents.
-        LimeXMLDocumentFactory factory = ProviderHacks.getLimeXMLDocumentFactory();
+        LimeXMLDocumentFactory factory = limeXMLDocumentFactory;
         LimeXMLDocument d1 = null;
         LimeXMLDocument d2 = null;
         d1 = factory.createLimeXMLDocument(xml1);
         d2 = factory.createLimeXMLDocument(xml2);
-        Response ra = ProviderHacks.getResponseFactory().createResponse(12, 231, "def1.txt", d1);
-        Response rb = ProviderHacks.getResponseFactory().createResponse(13, 232, "def2.txt", d2);
+        Response ra = responseFactoryImpl.createResponse(12, 231, "def1.txt", d1);
+        Response rb = responseFactoryImpl.createResponse(13, 232, "def2.txt", d2);
 		assertEquals("problem with doc constructor", d1, ra.getDocument());
 		assertEquals("problem with doc constructor", d2, rb.getDocument());
 	}
@@ -128,7 +161,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -165,12 +198,12 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
 	    
-	    r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 2181, r.getIndex());
 	    assertEquals("wrong size", 1981, r.getSize());
 	    assertEquals("wrong name", "s.a.b", r.getName());
@@ -198,7 +231,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -227,7 +260,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -256,7 +289,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -292,7 +325,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -325,7 +358,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -362,7 +395,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sammy", r.getName());
@@ -403,7 +436,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -440,7 +473,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         byte[] output = baos.toByteArray();
         ByteArrayInputStream in = new ByteArrayInputStream(output);
-        Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+        Response r = responseFactoryImpl.createFromStream(in);
         assertEquals("wrong index", 257, r.getIndex());
         assertEquals("wrong size", 1029, r.getSize());
         assertEquals("wrong name", "sam", r.getName());
@@ -494,7 +527,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -531,7 +564,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -579,7 +612,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    byte[] output = baos.toByteArray();
 	    ByteArrayInputStream in = new ByteArrayInputStream(output);
-	    Response r = ProviderHacks.getResponseFactory().createFromStream(in);
+	    Response r = responseFactoryImpl.createFromStream(in);
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
@@ -620,7 +653,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         AlternateLocationCollection alc =
             AlternateLocationCollection.create(urn);
         for(int i = 0; i < 20; i++) {
-            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i + ":1", urn);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3." + i + ":1", urn);
             alc.add(al);
         }
         
@@ -662,7 +695,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // First create a bunch of alts.
         AlternateLocationCollection alc = AlternateLocationCollection.create(urn);
         for(int i = 0; i < 10; i++) {
-            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i + ":1", urn, i % 3 == 0);
+            AlternateLocation al = alternateLocationFactory.create("1.2.3." + i + ":1", urn, i % 3 == 0);
             alc.add(al);
         }
         
@@ -709,20 +742,20 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         data = new byte[20]; // not % 6.
         ggep.put("ALT", data);
-        locs = getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("shouldn't have locs", 0, locs.size());
         
         data = new byte[18]; // multiple of 6, but all blank (invalid)
         ggep.put("ALT", data);
-        locs = getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("shouldn't have locs", 0, locs.size());
 
         // multiple of 6, but same        
         byte[] d1 = {1, 2, 3, 4, 1, 0, 1, 2, 3, 4, 1, 0};
         ggep.put("ALT", d1);
-        locs = getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 1, locs.size());
         assertEquals("wrong endpoint", 0,
@@ -731,7 +764,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // multiple of 6, diff            
         byte[] d2 = {1, 2, 3, 4, 1, 0, 1, 2, 3, 4, 2, 0};
         ggep.put("ALT", d2);
-        locs = getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 2, locs.size());
         Set eps = new IpPortSet();
@@ -742,13 +775,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // ctime.
         ggep = new GGEP(true);
         ggep.put("CT", 5341L);
-        ctime = getGGEP(ggep).createTime;
+        ctime = responseFactoryImpl.getGGEP(ggep).createTime;
         assertEquals(5341000, ctime);
         
         // alt & ctime.
         ggep.put("CT", 1243L);
         ggep.put("ALT", d2);
-        container = getGGEP(ggep);
+        container = responseFactoryImpl.getGGEP(ggep);
         assertNotNull(container);
         assertNotNull(container.locations);
         assertEquals(2, container.locations.size());
@@ -758,7 +791,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // invalid alt, valid ctime
         ggep.put("ALT", new byte[0]);
         ggep.put("CT", 3214);
-        container = getGGEP(ggep);
+        container = responseFactoryImpl.getGGEP(ggep);
         assertEquals(0, container.locations.size());
         assertEquals(3214000, container.createTime);
         
@@ -766,47 +799,47 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         ggep.put("ALT", d2);
         // use 9 bytes (1 byte over the max for a long)
         ggep.put("CT", new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 } );
-        container = getGGEP(ggep);
+        container = responseFactoryImpl.getGGEP(ggep);
         assertEquals(2, container.locations.size());
         assertEquals(eps, container.locations);
         assertEquals(-1, container.createTime);
     }
     
     public void testHashCode() {
-        Response r1 = ProviderHacks.getResponseFactory().createResponse(0, 0, "name");
-        Response r2 = ProviderHacks.getResponseFactory().createResponse(0, 1, "name");
+        Response r1 = responseFactoryImpl.createResponse(0, 0, "name");
+        Response r2 = responseFactoryImpl.createResponse(0, 1, "name");
         assertNotEquals(r1.hashCode(), r2.hashCode());
         
-        Response r3 = ProviderHacks.getResponseFactory().createResponse(1, 0, "name");
+        Response r3 = responseFactoryImpl.createResponse(1, 0, "name");
         assertNotEquals(r1.hashCode(), r3.hashCode());
         assertNotEquals(r2.hashCode(), r3.hashCode());
         
-        assertEquals(r1.hashCode(), ProviderHacks.getResponseFactory().createResponse(0, 0, "name").hashCode());
+        assertEquals(r1.hashCode(), responseFactoryImpl.createResponse(0, 0, "name").hashCode());
         
         // max int values
-        r1 = ProviderHacks.getResponseFactory()
+        r1 = responseFactoryImpl
                 .createResponse(Integer.MAX_VALUE, Integer.MAX_VALUE, "name");
-        r2 = ProviderHacks.getResponseFactory().createResponse(0, Integer.MAX_VALUE, "name");
+        r2 = responseFactoryImpl.createResponse(0, Integer.MAX_VALUE, "name");
         assertNotEquals(r1.hashCode(), r2.hashCode());
     }
     
     public void testIllegalFilenamesInInputStream() throws Exception {
         // illegal filename
-        Response resp = ProviderHacks.getResponseFactory().createResponse(1, 2, "a;lksdflkfj../");
+        Response resp = responseFactoryImpl.createResponse(1, 2, "a;lksdflkfj../");
         assertResponseParsingFails(resp);
-        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(1, 4545, "s;lkdf\n\n\n"));
-        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
-        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(4545, 3454, ""));
-        assertResponseParsingFails(ProviderHacks.getResponseFactory().createResponse(1454, 3245, "dlksdf\r"));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(1, 4545, "s;lkdf\n\n\n"));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(4545, 3454, ""));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(1454, 3245, "dlksdf\r"));
     }
     
     public void testLargeFiles() throws Exception {
-        Response resp = ProviderHacks.getResponseFactory().createResponse(1, Constants.MAX_FILE_SIZE, "asdf");
+        Response resp = responseFactoryImpl.createResponse(1, Constants.MAX_FILE_SIZE, "asdf");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         resp.writeToStream(baos);
         byte [] data = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
-        Response read = ProviderHacks.getResponseFactory().createFromStream(bais);
+        Response read = responseFactoryImpl.createFromStream(bais);
         assertEquals(Constants.MAX_FILE_SIZE, read.getSize());
         
         // also check the data manually
@@ -823,7 +856,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         // if the file is too large, we do not construct
         try {
-            resp = ProviderHacks.getResponseFactory().createResponse(1, Constants.MAX_FILE_SIZE + 1, "asdf");
+            resp = responseFactoryImpl.createResponse(1, Constants.MAX_FILE_SIZE + 1, "asdf");
             fail("constructed too large file");
         } catch (IllegalArgumentException expected){}
         
@@ -836,13 +869,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         baos.write(0x0);
         bais = new ByteArrayInputStream(baos.toByteArray());
         try {
-            ProviderHacks.getResponseFactory().createFromStream(bais);
+            responseFactoryImpl.createFromStream(bais);
             fail("read a response with too large file");
         } catch (IOException expected){}
     }
     
-    private static void assertResponseParsingFails(Response r) throws Exception {
-        QueryReply qr = XMLDocFilterTest.createReply(r, 5555, new byte[] { 127, 0, 0, 1 });
+    private void assertResponseParsingFails(Response r) throws Exception {
+        QueryReply qr = XMLDocFilterTest.createReply(r, 5555, new byte[] { 127, 0, 0, 1 }, queryReplyFactory, limeXMLDocumentHelper);
         try {
             qr.getResultsArray();
             fail("Expected bad packet exception");
@@ -853,18 +886,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     
     private Set getAsIpPorts(AlternateLocationCollection col)
       throws Exception {
-        return (Set)PrivilegedAccessor.invokeMethod(ProviderHacks.getResponseFactory(),
+        return (Set)PrivilegedAccessor.invokeMethod(responseFactoryImpl,
             "getAsIpPorts", new Object[] { col } );
     }
     
     private void addGGEP(OutputStream os, ResponseFactoryImpl.GGEPContainer gc) throws Exception {
-        PrivilegedAccessor.invokeMethod(ProviderHacks.getResponseFactory(), "addGGEP",
+        PrivilegedAccessor.invokeMethod(responseFactoryImpl, "addGGEP",
             new Object[] { os, gc },
             new Class[] { OutputStream.class, ResponseFactoryImpl.GGEPContainer.class } );
     }
-    
-    private ResponseFactoryImpl.GGEPContainer getGGEP(GGEP info) throws Exception {
-        return (ResponseFactoryImpl.GGEPContainer)PrivilegedAccessor.invokeMethod(
-                ProviderHacks.getResponseFactory(), "getGGEP", new Object[] { info } );
-    }    
 }

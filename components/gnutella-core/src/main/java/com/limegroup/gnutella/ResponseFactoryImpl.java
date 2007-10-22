@@ -433,8 +433,10 @@ public class ResponseFactoryImpl implements ResponseFactory {
     /**
      * Returns a <tt>Set</tt> of other endpoints described in one of the GGEP
      * arrays.
+     * 
+     * Default access for testing.
      */
-    private GGEPContainer getGGEP(GGEP ggep) {
+    GGEPContainer getGGEP(GGEP ggep) {
         if (ggep == null)
             return GGEPContainer.EMPTY;
 

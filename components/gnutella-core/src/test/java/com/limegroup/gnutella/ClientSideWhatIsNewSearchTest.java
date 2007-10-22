@@ -6,32 +6,33 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.XMLDocFilterTest;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-
-/*
- * import statements for the createReply methods - will delete once ClientSideWhatisNewSearchTest is refactored
- */
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
 
 /**
  * Tests the client's WhatIsNewSearch behavior.
  */
 public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
 
-    private static StoreRepliesActivityCallback callback = new StoreRepliesActivityCallback();
-    protected byte[] address;
-    
+    private StoreRepliesActivityCallback callback;
+    private SearchServices searchServices;
+    private ResponseFactory responseFactory;
+    private QueryReplyFactory queryReplyFactory;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
+        
     public ClientSideWhatIsNewSearchTest(String name) {
         super(name);
     }
@@ -41,14 +42,22 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
     }
 
     @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector(StoreRepliesActivityCallback.class);
+        super.setUp(injector);
+        
+        callback = (StoreRepliesActivityCallback) injector.getInstance(ActivityCallback.class);
+        searchServices = injector.getInstance(SearchServices.class);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+    }
+    
+    @Override
     public int getNumberOfPeers() {
         return 1;
     }
 
-    public static ActivityCallback getActivityCallback() {
-        return callback;
-    }
- 
     /**
      * Ensure all results come through if filtering is disabled. 
      */
@@ -70,21 +79,21 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         drainAll();
         
         GUID guid = new GUID();
-        ProviderHacks.getSearchServices().queryWhatIsNew(guid.bytes(), MediaType.getAnyTypeMediaType());
+        searchServices.queryWhatIsNew(guid.bytes(), MediaType.getAnyTypeMediaType());
         
         assertQuery(testUP[0], guid);
         
         // send back a result that will be filtered
-        Response resp = ProviderHacks.getResponseFactory().createResponse(101, 1019, "sex");
+        Response resp = responseFactory.createResponse(101, 1019, "sex");
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_TYPE, "adult");
+        resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_TYPE, "adult", responseFactory, limeXMLDocumentFactory);
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_RATING, "NC-17");
+        resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_RATING, "NC-17", responseFactory, limeXMLDocumentFactory);
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = ProviderHacks.getResponseFactory().createResponse(105, 345, "harmless");
+        resp = responseFactory.createResponse(105, 345, "harmless");
         sendAndAssertResponse(resp, guid, false);
     }
     
@@ -113,6 +122,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         return qr;
     }
     
+    @Singleton
     private static class StoreRepliesActivityCallback extends ActivityCallbackStub {
         
         RemoteFileDesc desc = null;
@@ -135,7 +145,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         }
     }
        
-    public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {
+    public QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {
         String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(new Response [] { resp } );
         if (xmlCollectionString == null)
             xmlCollectionString = "";
@@ -151,7 +161,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         else //there is no XML
             xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
         
-        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid.bytes(), (byte)1,
+        return queryReplyFactory.createQueryReply(guid.bytes(), (byte)1,
                 port, address, 0, new Response[] { resp }, GUID.makeGuid(), xmlCompressed, false,
                 false, true, true, true, false);
     }   

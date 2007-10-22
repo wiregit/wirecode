@@ -21,7 +21,7 @@ public final class MutableGUIDFilter implements SpamFilter {
     }
     
     MutableGUIDFilter() { 
-        this(new KeywordFilter());
+        this(new XMLDocFilter());
         FILTER.disallowAdult(); 
     }
     /**

@@ -9,14 +9,18 @@ import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
@@ -24,6 +28,10 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 public class XMLDocFilterTest extends LimeTestCase {
 
     protected byte[] address;
+    private ResponseFactory responseFactory;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private QueryReplyFactory queryReplyFactory;
+    private LimeXMLDocumentHelper limeXMLDocumentHelper;
     
     public XMLDocFilterTest(String name) {
         super(name);
@@ -40,6 +48,11 @@ public class XMLDocFilterTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         address = InetAddress.getLocalHost().getAddress();
+        Injector injector = LimeTestUtils.createInjector();
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+        limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
     }
     
     public void testDisallowAdultXML() throws Exception {
@@ -79,7 +92,7 @@ public class XMLDocFilterTest extends LimeTestCase {
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "NR");
         assertTrue(filter.allow(qr));
         
-        qr = createReply("Adult Film");
+        qr = createReply("Adult Film", responseFactory);
         assertFalse(filter.allow(qr));
         
         qr = createXMLReply(LimeXMLNames.VIDEO_RATING, "Adults Only");
@@ -90,34 +103,32 @@ public class XMLDocFilterTest extends LimeTestCase {
         return createXMLReply(field, values, 5555, address);
     }
     
-    public static QueryReply createXMLReply(String field, String values, int port, byte[] address) throws Exception {
+    public QueryReply createXMLReply(String field, String values, int port, byte[] address) throws Exception {
         
-        Response resp = createXMLResponse("filename", field, values);
+        Response resp = createXMLResponse("filename", field, values, responseFactory, limeXMLDocumentFactory);
         
-        return createReply(resp, port, address);
+        return createReply(resp, port, address, queryReplyFactory, limeXMLDocumentHelper);
     }
     
-
-    
-    public static QueryReply createReply(Response resp, int port, byte[] address) throws Exception {
-        QueryReply qr = createReply(resp, new GUID(), port, address);
+    public static QueryReply createReply(Response resp, int port, byte[] address, QueryReplyFactory queryReplyFactory,
+            LimeXMLDocumentHelper limeXMLDocumentHelper) throws Exception {
+        QueryReply qr = createReply(resp, new GUID(), port, address, queryReplyFactory);
 
         // write out to network so it is parsed again and xml docs are constructed
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         qr.writePayload(out);
-        qr = ProviderHacks.getQueryReplyFactory().createFromNetwork(GUID.makeGuid(), (byte) 1,
-                (byte) 1, out.toByteArray());
+        qr = queryReplyFactory.createFromNetwork(GUID.makeGuid(), (byte) 1, (byte) 1, out.toByteArray());
         
         // hack, query replies have to be equipped with xml again
-        ForMeReplyHandler.addXMLToResponses(qr, ProviderHacks.getLimeXMLDocumentHelper());
+        ForMeReplyHandler.addXMLToResponses(qr, limeXMLDocumentHelper);
         return qr;
     }
     
-    protected QueryReply createReply(String response) {
-        return createReply(ProviderHacks.getResponseFactory().createResponse(5, 5, response), new GUID(), 5555, address); 
+    protected QueryReply createReply(String response, ResponseFactory responseFactory) {
+        return createReply(responseFactory.createResponse(5, 5, response), new GUID(), 5555, address, queryReplyFactory); 
     }
     
-    public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address) {
+    public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address, QueryReplyFactory queryReplyFactory) {
         String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(new Response [] { resp } );
         if (xmlCollectionString == null)
             xmlCollectionString = "";
@@ -133,15 +144,15 @@ public class XMLDocFilterTest extends LimeTestCase {
         else //there is no XML
             xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
         
-        return ProviderHacks.getQueryReplyFactory().createQueryReply(guid.bytes(), (byte)1,
+        return queryReplyFactory.createQueryReply(guid.bytes(), (byte)1,
                 port, address, 0, new Response[] { resp }, GUID.makeGuid(), xmlCompressed, false,
                 false, true, true, true, false);
     }   
     
-    public static Response createXMLResponse(String fileName, String field, String values) throws Exception {
+    public static Response createXMLResponse(String fileName, String field, String values, ResponseFactory responseFactory, LimeXMLDocumentFactory limeXMLDocumentFactory) throws Exception {
         NameValue<String> nameValue = new NameValue<String>(field, values);
-        LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(Collections.singletonList(nameValue),
+        LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(Collections.singletonList(nameValue),
                 LimeXMLNames.VIDEO_SCHEMA);
-        return ProviderHacks.getResponseFactory().createResponse(101, 1340, fileName, doc);
+        return responseFactory.createResponse(101, 1340, fileName, doc);
     }
 }
