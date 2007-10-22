@@ -107,7 +107,7 @@ public class UDPService implements ReadWriteObserver {
     private long _lastConnectBackTime = System.currentTimeMillis();
     void resetLastConnectBackTime() {
         _lastConnectBackTime = 
-             System.currentTimeMillis() - Acceptor.INCOMING_EXPIRE_TIME;
+             System.currentTimeMillis() - acceptor.get().getIncomingExpireTime();
     }
     
     /** Whether our NAT assigns stable ports for successive connections 
@@ -203,8 +203,8 @@ public class UDPService implements ReadWriteObserver {
      */
     protected void scheduleServices() {
         backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(), 
-                               Acceptor.TIME_BETWEEN_VALIDATES,
-                               Acceptor.TIME_BETWEEN_VALIDATES, TimeUnit.MILLISECONDS);
+                               acceptor.get().getTimeBetweenValidates(),
+                               acceptor.get().getTimeBetweenValidates(), TimeUnit.MILLISECONDS);
         backgroundExecutor.scheduleWithFixedDelay(new PeriodicPinger(), 0, PING_PERIOD, TimeUnit.MILLISECONDS);
     }
     
@@ -769,11 +769,11 @@ public class UDPService implements ReadWriteObserver {
             if (
                 (_acceptedUnsolicitedIncoming && //1)
                  ((currTime - _lastUnsolicitedIncomingTime) > 
-                  Acceptor.INCOMING_EXPIRE_TIME)) 
+                  acceptor.get().getIncomingExpireTime())) 
                 || 
                 (!_acceptedUnsolicitedIncoming && //2)
                  ((currTime - _lastConnectBackTime) > 
-                  Acceptor.INCOMING_EXPIRE_TIME))
+                 acceptor.get().getIncomingExpireTime()))
                 ) {
                 
                 final GUID cbGuid = new GUID(GUID.makeGuid());
@@ -795,8 +795,8 @@ public class UDPService implements ReadWriteObserver {
                             }
                         };
                     backgroundExecutor.scheduleWithFixedDelay(checkThread, 
-                                           Acceptor.WAIT_TIME_AFTER_REQUESTS,
-                                           0, TimeUnit.MILLISECONDS);
+                            acceptor.get().getWaitTimeAfterRequests(),
+                            0, TimeUnit.MILLISECONDS);
                 }
                 else
                     messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);

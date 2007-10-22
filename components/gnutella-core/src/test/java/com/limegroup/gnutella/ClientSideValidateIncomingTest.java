@@ -8,33 +8,44 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Random;
-import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
+import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Checks whether leaves request redirects properly.  
  * The test includes a leaf attached to two ultrapeers.
  */
 public class ClientSideValidateIncomingTest extends ClientSideTestCase {
-    protected static final int PORT=6669;
-    protected static int TIMEOUT=1000; // should override super
+    
+    protected final int PORT=6669;
+    
+    {
+        TIMEOUT = 1000; // should override super
+    }
+    
     private static final long MY_EXPIRE_TIME = 6 * 1000;
     private static final long MY_WAIT_TIME = 500;
     private static final long MY_VALIDATE_TIME = 3 * 1000;
 
     private static byte[] cbGuid = null;
+    private Acceptor acceptor;
+    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
+    private NetworkManager networkManager;
+    private UDPService udpService;
+    private ConnectionManager connectionManager;
+    private PingRequestFactory pingRequestFactory;
+    private ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
 
     public ClientSideValidateIncomingTest(String name) {
         super(name);
@@ -49,19 +60,37 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     }
     
     public void setUp() throws Exception {
-        super.setUp();
+        Injector injector = LimeTestUtils.createInjector();
+        acceptor = injector.getInstance(Acceptor.class);
+        
+        // set values before everything is initialized
+        acceptor.setIncomingExpireTime(MY_EXPIRE_TIME);
+        acceptor.setWaitTimeAfterRequests(MY_WAIT_TIME);
+        acceptor.setTimeBetweenValidates(MY_VALIDATE_TIME);
+        
+        super.setUp(injector);
+        
+        messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
+        networkManager = injector.getInstance(NetworkManager.class);
+        udpService = injector.getInstance(UDPService.class);
+        connectionManager = injector.getInstance(ConnectionManager.class);
+        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        replyNumberVendorMessageFactory = injector.getInstance(ReplyNumberVendorMessageFactory.class);
+
+        exchangeSupportedMessages();
+    }
+    
+    @Override
+    public void setSettings() throws Exception {
         ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
-    
-    ///////////////////////// Actual Tests ////////////////////////////
-    
-    // THIS TEST SHOULD BE RUN FIRST!!
-    public void testConnectBackRequestsSent() throws Exception {
+
+    private void exchangeSupportedMessages() throws Exception {
         // send a MessagesSupportedMessage
-        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
+        testUP[0].send(messagesSupportedVendorMessage);
         testUP[0].flush();
-        testUP[1].send(ProviderHacks.getMessagesSupportedVendorMessage());
+        testUP[1].send(messagesSupportedVendorMessage);
         testUP[1].flush();
 
         // we expect to get a TCPConnectBack request
@@ -84,7 +113,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     public void testTCPExpireRequestsNotSent() throws Exception {
         drainAll();
         for (int i = 0; i < 2; i++) {
-            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
+            assertFalse(networkManager.acceptedIncomingConnection());
 
             try {
                 testUP[0].receive(TIMEOUT);
@@ -92,7 +121,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             catch (InterruptedIOException expected) {}
             
             Thread.sleep(MY_EXPIRE_TIME+MY_VALIDATE_TIME);
-            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
+            assertFalse(networkManager.acceptedIncomingConnection());
             Thread.sleep(100);
             // now we should get the connect backs cuz it has been a while
             Message m = null;
@@ -111,20 +140,20 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             s.close();
             Thread.sleep(100); 
             // Socket must have said CONNECT BACK
-            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
+            assertFalse(networkManager.acceptedIncomingConnection());
             
             s = new Socket("localhost", PORT);
             s.getOutputStream().write("CONNECT BACK\r\r".getBytes());
             Thread.sleep(500);
             s.close(); 
             // Socket must have said CONNECT BACK
-            assertTrue(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
+            assertTrue(networkManager.acceptedIncomingConnection());
             
             // wait until the expire time is realized
             Thread.sleep(MY_EXPIRE_TIME + MY_VALIDATE_TIME + 1000);
             
             // it should send off more requests
-            assertFalse(ProviderHacks.getNetworkManager().acceptedIncomingConnection());
+            assertFalse(networkManager.acceptedIncomingConnection());
             Message m = null;
             do {
                 m = testUP[0].receive(TIMEOUT);
@@ -146,10 +175,10 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         readNumConnectBacks(1,testUP[1], TIMEOUT);
         
         // leave only one connection open
-        assertGreaterThan(1,ProviderHacks.getConnectionManager().getNumInitializedConnections());
+        assertGreaterThan(1,connectionManager.getNumInitializedConnections());
         testUP[1].close();
         Thread.sleep(500);
-        assertEquals(1,ProviderHacks.getConnectionManager().getNumInitializedConnections());
+        assertEquals(1,connectionManager.getNumInitializedConnections());
         
         drainAll();
         // sleep
@@ -179,7 +208,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     // back messages are NOT sent
     public void testUDPExpireRequestsNotSent() throws Exception {
         drainAll();
-        UDPService udpServ = ProviderHacks.getUdpService();
+        UDPService udpServ = udpService;
         for (int i = 0; i < 2; i++) {
             assertFalse(udpServ.canReceiveUnsolicited());
 
@@ -204,7 +233,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     // it asks for a connect back again
     public void testUDPExpireRequestsSent() throws Exception {
         drainAll();
-        UDPService udpServ = ProviderHacks.getUdpService();
+        UDPService udpServ = udpService;
         for (int i = 0; i < 2; i++) {
             // wait until the expire time is realized
             
@@ -232,7 +261,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             // now connect back and it should switch on unsolicited
             DatagramSocket s = new DatagramSocket();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(cbGuid, (byte)1,
+            PingRequest ping = pingRequestFactory.createPingRequest(cbGuid, (byte)1,
                     (byte)1);
             ping.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -251,14 +280,14 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     // it asks for a connect back again
     public void testUDPInterleavingRequestsSent() throws Exception {
         drainAll();
-        UDPService udpServ = ProviderHacks.getUdpService();
+        UDPService udpServ = udpService;
         Random rand = new Random();
         for (int i = 0; i < 6; i++) {
             if (rand.nextBoolean()) {
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ReplyNumberVendorMessage vm  = 
-                    ProviderHacks.getReplyNumberVendorMessageFactory().create(
+                    replyNumberVendorMessageFactory.create(
                         new GUID(cbGuid), 1);
                 vm.write(baos);
                 DatagramPacket pack = 
@@ -279,7 +308,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ReplyNumberVendorMessage vm  = 
-                    ProviderHacks.getReplyNumberVendorMessageFactory().create(
+                    replyNumberVendorMessageFactory.create(
                         new GUID(cbGuid), 1);
                 vm.write(baos);
                 DatagramPacket pack = 
@@ -309,7 +338,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 // now connect back and it should switch on unsolicited
                 DatagramSocket s = new DatagramSocket();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(cbGuid,
+                PingRequest ping = pingRequestFactory.createPingRequest(cbGuid,
                         (byte)1, (byte)1);
                 ping.write(baos);
                 DatagramPacket pack = 
@@ -322,36 +351,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         }
     }
 
-
-
-    //////////////////////////////////////////////////////////////////
-    @Override
-    public void setSettings() throws Exception {
-        PrivilegedAccessor.setValue(Acceptor.class, "INCOMING_EXPIRE_TIME",
-                                    new Long(MY_EXPIRE_TIME));
-        PrivilegedAccessor.setValue(Acceptor.class, "WAIT_TIME_AFTER_REQUESTS",
-                                    new Long(MY_WAIT_TIME));
-        PrivilegedAccessor.setValue(Acceptor.class, "TIME_BETWEEN_VALIDATES",
-                                    new Long(MY_VALIDATE_TIME));
-    }
-
     public int getNumberOfPeers() {
         return 2;
     }
-
-    public static class MyActivityCallback extends ActivityCallbackStub {
-        private RemoteFileDesc rfd = null;
-        public RemoteFileDesc getRFD() {
-            return rfd;
-        }
-
-        public void handleQueryResult(RemoteFileDesc rfd,
-                                      HostData data,
-                                      Set locs) {
-            this.rfd = rfd;
-        }
-    }
-
-
 }
 

@@ -51,10 +51,15 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
 
+    public static final long DEFAULT_INCOMING_EXPIRE_TIME = 30 * 60 * 1000; // 30 minutes
+    
+    public static final long DEFAULT_WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
+    public static final long DEFAULT_TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
+    
     // various time delays for checking of firewalled status.
-    static long INCOMING_EXPIRE_TIME = 30 * 60 * 1000;   // 30 minutes
-    static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
-    static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
+    private long incomingExpireTime = DEFAULT_INCOMING_EXPIRE_TIME;
+    private long waitTimeAfterRequests = DEFAULT_WAIT_TIME_AFTER_REQUESTS;
+    private long timeBetweenValidates = DEFAULT_TIME_BETWEEN_VALIDATES;
     
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -349,7 +354,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         multicastService.get().start();
         udpService.get().start();
         backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(),
-                TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES,
+                timeBetweenValidates, timeBetweenValidates,
                 TimeUnit.MILLISECONDS);
         connectionDispatcher.get().addConnectionAcceptor(this, false, "CONNECT", "\n\n");
         _started = true;
@@ -692,7 +697,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      */
     void resetLastConnectBackTime() {
         _lastConnectBackTime = 
-             System.currentTimeMillis() - INCOMING_EXPIRE_TIME - 1;
+             System.currentTimeMillis() - incomingExpireTime - 1;
     }
 
     /**
@@ -726,10 +731,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             final long currTime = System.currentTimeMillis();
             if (
                 (_acceptedIncoming && //1)
-                 ((currTime - _lastIncomingTime) > INCOMING_EXPIRE_TIME)) 
+                 ((currTime - _lastIncomingTime) > incomingExpireTime)) 
                 || 
                 (!_acceptedIncoming && //2)
-                 ((currTime - _lastConnectBackTime) > INCOMING_EXPIRE_TIME))
+                 ((currTime - _lastConnectBackTime) > incomingExpireTime))
                 ) {
                 // send a connectback request to a few peers and clear
                 // _acceptedIncoming IF some requests were sent.
@@ -748,10 +753,43 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                         }
                     };
                     backgroundExecutor.scheduleWithFixedDelay(resetter, 
-                                           WAIT_TIME_AFTER_REQUESTS, 0, TimeUnit.MILLISECONDS);
+                                           waitTimeAfterRequests, 0, TimeUnit.MILLISECONDS);
                 }
             }
         }
+    }
+
+    long getIncomingExpireTime() {
+        return incomingExpireTime;
+    }
+
+    /**
+     * Only used for testing.
+     */
+    void setIncomingExpireTime(long incomingExpireTime) {
+        this.incomingExpireTime = incomingExpireTime;
+    }
+
+    long getWaitTimeAfterRequests() {
+        return waitTimeAfterRequests;
+    }
+
+    /**
+     * Only used for testing.
+     */
+    void setWaitTimeAfterRequests(long waitTimeAfterRequests) {
+        this.waitTimeAfterRequests = waitTimeAfterRequests;
+    }
+
+    /**
+     * Only used for testing.
+     */
+    long getTimeBetweenValidates() {
+        return timeBetweenValidates;
+    }
+
+    void setTimeBetweenValidates(long timeBetweenValidates) {
+        this.timeBetweenValidates = timeBetweenValidates;
     }
     
 }
