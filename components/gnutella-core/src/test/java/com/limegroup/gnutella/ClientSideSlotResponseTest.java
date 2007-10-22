@@ -9,15 +9,22 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /**
  * Tests how the availability of upload slots affects responses, as well
@@ -59,25 +66,65 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
         FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
-        ProviderHacks.getFileManager().addFileAlways(textFile, waiter);
-        ProviderHacks.getFileManager().addFileAlways(torrentFile, waiter);
-        ProviderHacks.getFileManager().addFileAlways(userTorrentFile, waiter);
-        ProviderHacks.getFileManager().addFileAlways(appTextFile, waiter);
-        ProviderHacks.getFileManager().addFileAlways(appTorrentFile, waiter);
+        fileManager.addFileAlways(textFile, waiter);
+        fileManager.addFileAlways(torrentFile, waiter);
+        fileManager.addFileAlways(userTorrentFile, waiter);
+        fileManager.addFileAlways(appTextFile, waiter);
+        fileManager.addFileAlways(appTorrentFile, waiter);
         waiter.waitForLoad();
-    	assertEquals(5, ProviderHacks.getFileManager().getNumFiles());
+    	assertEquals(5, fileManager.getNumFiles());
     }
+    
+    private UploadManagerStub uploadManagerStub;
+
+    private FileManager fileManager;
+
+    private NetworkManagerStub networkManagerStub;
+
+    private QueryRequestFactory queryRequestFactory;
+    
+    public void setUp() throws Exception {
+        networkManagerStub = new NetworkManagerStub();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(UploadManager.class).to(UploadManagerStub.class);
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        // done before super.setUp since needed in setSettings which is called from there
+        fileManager = injector.getInstance(FileManager.class);
+        super.setUp(injector);
+        
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        uploadManagerStub = (UploadManagerStub) injector.getInstance(UploadManager.class);
+        
+        uploadManagerStub.isServiceable = true;
+        uploadManagerStub.mayBeServiceable = true;
+
+        networkManagerStub.setAcceptedIncomingConnection(true);
+        
+        assertTrue("should be open", testUP[0].isOpen());
+        assertTrue("should be up -> leaf",
+                testUP[0].isSupernodeClientConnection());
+        drain(testUP[0], 500);
+    }
+
     
     @Override
     public int getNumberOfPeers() {
         return 3;
     }
 
+    @Singleton
     private static class UploadManagerStub extends HTTPUploadManager {
-    	boolean isServiceable, mayBeServiceable;
-    	UploadManagerStub() {
-    		super(new UploadSlotManagerImpl(), ProviderHacks.getHttpRequestHandlerFactory(), Providers.of(ProviderHacks.getContentManager()),
-    		        Providers.of(ProviderHacks.getHTTPUploadAcceptor()), Providers.of(ProviderHacks.getFileManager()), Providers.of(ProviderHacks.getActivityCallback()));
+    	
+        boolean isServiceable, mayBeServiceable;
+    	
+        @Inject
+        UploadManagerStub(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<ContentManager> contentManager,
+                Provider<HTTPAcceptor> httpAcceptor, Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback) {
+            super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor, fileManager, activityCallback);
     	}
 		@Override
 		public synchronized boolean isServiceable() {
@@ -89,28 +136,15 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
 		}
     }
     
-    private static UploadManagerStub uStub = new UploadManagerStub();
     
-    public void setUp() throws Exception {
-    	super.setUp();
-    	assertTrue("should be open", testUP[0].isOpen());
-    	assertTrue("should be up -> leaf",
-    			testUP[0].isSupernodeClientConnection());
-    	drain(testUP[0], 500);
-    	uStub.isServiceable = true;
-    	uStub.mayBeServiceable = true;
-    	//PrivilegedAccessor.setValue(rs, "uploadManager", uStub);
-    	PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
-    }
-
     /**
      * tests that if there are enough slots, responses are processed and
      * returned. 
      */
     public void testResponsesSent() throws Exception {
-    	uStub.isServiceable = true;
-    	uStub.mayBeServiceable = true;
-    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
+    	uploadManagerStub.isServiceable = true;
+    	uploadManagerStub.mayBeServiceable = true;
+    	QueryRequest query = queryRequestFactory.createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -126,8 +160,8 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
      * Tests that if no queries can be serviceable nothing gets returned.
      */
     public void testNothingSent() throws Exception {
-    	uStub.mayBeServiceable = false;
-    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
+    	uploadManagerStub.mayBeServiceable = false;
+    	QueryRequest query = queryRequestFactory.createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -140,9 +174,9 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
      * there are no metafile results, nothing gets returned.
      */
     public void testAllFiltered() throws Exception {
-    	uStub.mayBeServiceable = true;
-    	uStub.isServiceable = false;
-    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(TEXT_FILE);
+    	uploadManagerStub.mayBeServiceable = true;
+    	uploadManagerStub.isServiceable = false;
+    	QueryRequest query = queryRequestFactory.createQuery(TEXT_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -155,9 +189,9 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
      * all results are for metafiled, nothing gets filetered
      */
     public void testNoneFiltered() throws Exception {
-    	uStub.mayBeServiceable = true;
-    	uStub.isServiceable = false;
-    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(OTHER_TORRENT);
+    	uploadManagerStub.mayBeServiceable = true;
+    	uploadManagerStub.isServiceable = false;
+    	QueryRequest query = queryRequestFactory.createQuery(OTHER_TORRENT);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -173,9 +207,9 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
      * only results about application-shared metafiles are returned. 
      */
     public void testMetaFilesSent() throws Exception {
-    	uStub.isServiceable = false;
-    	uStub.mayBeServiceable = true;
-    	QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery(SOME_FILE);
+    	uploadManagerStub.isServiceable = false;
+    	uploadManagerStub.mayBeServiceable = true;
+    	QueryRequest query = queryRequestFactory.createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
