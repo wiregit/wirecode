@@ -108,7 +108,6 @@ public class FWTDetectionTest extends LimeTestCase {
         networkManager.setAddress(InetAddress.getLocalHost().getAddress());
         networkManager.setExternalAddress(InetAddress.getLocalHost().getAddress());
         networkManager.setSolicitedGUID(udpService.getSolicitedGUID());
-        networkManager.setIpPortValid(true);
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         ponger1 = new UDPPonger(REMOTE_PORT1, messageFactory, pingReplyFactory);

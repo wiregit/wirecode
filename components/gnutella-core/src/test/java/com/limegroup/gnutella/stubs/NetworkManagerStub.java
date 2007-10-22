@@ -2,6 +2,8 @@ package com.limegroup.gnutella.stubs;
 
 import java.io.IOException;
 
+import org.limewire.io.NetworkUtils;
+
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
@@ -11,7 +13,6 @@ public class NetworkManagerStub implements NetworkManager {
     private boolean acceptedIncomingConnection;
     private byte[] address = new byte[] { 127, 0, 0, 1 };
     private int port = 5555;
-    private boolean ipPortValid;
     private GUID solicitedGUID = new GUID();
     private boolean canReceiveSolicited;
     private boolean canReceiveUnsolicited;
@@ -19,6 +20,7 @@ public class NetworkManagerStub implements NetworkManager {
     private byte[] externalAddress;
     private boolean canDoFWT;
     private GUID udpConnectBackGUI = new GUID();
+    private boolean oobCapable;
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -107,16 +109,16 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public boolean isIpPortValid() {
-        return ipPortValid;
+        return (NetworkUtils.isValidAddress(getAddress()) &&
+                NetworkUtils.isValidPort(getPort()));
     }
     
-    public void setIpPortValid(boolean ipPortValid) {
-        this.ipPortValid = ipPortValid;
-    }
-
     public boolean isOOBCapable() {
-        // TODO Auto-generated method stub
-        return false;
+        return oobCapable;
+    }
+    
+    public void setOOBCapable(boolean capable) {
+        oobCapable = capable;
     }
 
     public void setListeningPort(int port) throws IOException {

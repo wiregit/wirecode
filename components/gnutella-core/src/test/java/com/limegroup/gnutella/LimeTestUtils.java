@@ -15,10 +15,12 @@ import java.util.concurrent.Future;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class LimeTestUtils {
 
@@ -175,4 +177,17 @@ public class LimeTestUtils {
         return createInjectorAndStart(ActivityCallbackStub.class, modules);
     }
 
+    public static class NetworkManagerStubModule extends AbstractModule {
+        
+        private final NetworkManagerStub networkManagerStub;
+
+        public NetworkManagerStubModule(NetworkManagerStub networkManagerStub) {
+            this.networkManagerStub = networkManagerStub;
+        }
+        
+        @Override
+        protected void configure() {
+            bind(NetworkManager.class).toInstance(networkManagerStub);
+        }
+    }
 }

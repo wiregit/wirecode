@@ -590,7 +590,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setAddress(new byte[] { (byte) 192, (byte) 168, 0, 1 });
         networkManagerStub.setPort(5555);
-        networkManagerStub.setIpPortValid(true);
         networkManagerStub.setSolicitedGUID(new GUID());
                 
         Injector injector = createInjectorAndInitialize(new AbstractModule() {
@@ -801,7 +800,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setAddress(new byte[] { (byte) 192, (byte) 168, 0, 1 });
         networkManagerStub.setPort(5555);
-        networkManagerStub.setIpPortValid(true);
         networkManagerStub.setSolicitedGUID(new GUID());
         
         final TestDHTManager testDHTManager = new TestDHTManager();
