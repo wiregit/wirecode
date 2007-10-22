@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -22,6 +23,7 @@ import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
+import org.limewire.service.ErrorService;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -29,6 +31,7 @@ import com.google.inject.name.Names;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.SocketsManager;
 
 public class AcceptorTest extends LimeTestCase {
     
@@ -36,6 +39,8 @@ public class AcceptorTest extends LimeTestCase {
     
     private Acceptor acceptor;
     private ConnectionDispatcher connectionDispatcher;
+
+    private SocketsManager socketsManager;
 
     public AcceptorTest(String name) {
         super(name);
@@ -56,6 +61,7 @@ public class AcceptorTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector();
         
         connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        socketsManager = injector.getInstance(SocketsManager.class);
         
         acceptor = injector.getInstance(Acceptor.class);
         acceptor.start();
@@ -163,6 +169,36 @@ public class AcceptorTest extends LimeTestCase {
         }
         catch (IOException good) {}
     }
+     
+     public void testAcceptedIncoming() throws Exception {
+         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+         int port = bindAcceptor();
+         assertFalse(acceptor.acceptedIncoming());
+         // open up incoming to the test node
+         {
+             Socket sock = null;
+             OutputStream os = null;
+             try {
+                 sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                                      port), 12);
+                 os = sock.getOutputStream();
+                 os.write("\n\n".getBytes());
+             } catch (IOException ignored) {
+             } catch (SecurityException ignored) {
+             } catch (Throwable t) {
+                 ErrorService.error(t);
+             } finally {
+                 if(sock != null)
+                     try { sock.close(); } catch(IOException ignored) {}
+                 if(os != null)
+                     try { os.close(); } catch(IOException ignored) {}
+             }
+         }        
+
+         Thread.sleep(250);
+         // test on acceptor since network manager is stubbed
+         assertTrue(acceptor.acceptedIncoming());
+     }
      
      public void testIncomingTLSHomemadeTLS() throws Exception {
          int port = bindAcceptor();
