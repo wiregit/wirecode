@@ -8,7 +8,7 @@ import junit.textui.TestRunner;
 /**
  * Tests basic authentication.
  */
-public class AuthenticateTest extends AbstractCommunicationTest {
+public class AuthenticateTest extends AbstractCommunicationSupport {
     
   public AuthenticateTest(String s) { super(s); }
   

@@ -11,7 +11,7 @@ import junit.textui.TestRunner;
 /**
  * Tests that we handle a bad message correctly.
  */
-public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationTest {
+public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationSupport {
 
     public BadMessageBeforeAuthenticationTest(String s) {
         super(s);

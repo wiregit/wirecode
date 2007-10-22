@@ -8,7 +8,7 @@ import org.limewire.lws.server.LWSServerUtil;
 /**
  * Tests that we can send a 'StartCom' message to start a communication session.
  */
-public class StartComTest extends AbstractCommunicationTest {
+public class StartComTest extends AbstractCommunicationSupport {
 
     public StartComTest(String s) {
         super(s);

@@ -8,7 +8,7 @@ import org.limewire.lws.server.LWSServerUtil;
 /**
  * Tests basic communication.
  */
-public class GiveKeyTest extends AbstractCommunicationTest {
+public class GiveKeyTest extends AbstractCommunicationSupport {
 
     public GiveKeyTest(String s) {
         super(s);

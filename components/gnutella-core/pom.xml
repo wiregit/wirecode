@@ -70,6 +70,11 @@
       <artifactId>lw-http</artifactId>
       <version>${limewire.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-lwsserver</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
 	<!-- Customized LimeWire Jars --> 
 	<dependency>
       <groupId>org.limewire</groupId>

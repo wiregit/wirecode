@@ -6,7 +6,7 @@ import junit.textui.TestRunner;
 /**
  * Tests the proper way to handle a bad message.
  */
-public class GoodMessageBeforeAuthenticationTest extends AbstractCommunicationTest {
+public class GoodMessageBeforeAuthenticationTest extends AbstractCommunicationSupport {
 
     public GoodMessageBeforeAuthenticationTest(String s) {
         super(s);
