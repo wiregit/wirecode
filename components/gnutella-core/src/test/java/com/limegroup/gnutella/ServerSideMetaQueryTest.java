@@ -12,9 +12,12 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -24,6 +27,8 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  */
 @SuppressWarnings( { "unchecked", "cast" } )
 public class ServerSideMetaQueryTest extends ClientSideTestCase {
+
+    private QueryRequestFactory queryRequestFactory;
 
     public ServerSideMetaQueryTest(String name) {
         super(name);
@@ -66,18 +71,24 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         CommonUtils.getResourceFile("com/limegroup/gnutella/MediaTypeTest.java");
         // now move them to the share dir
         FileUtils.copy(mp3, new File(_sharedDir, "meta program txt.bin"));
-    }   
+    }
     
-    //////////////////////////////////////////////////////////////////
 
     public int getNumberOfPeers() {
         return 3;
     }
 
-    public static ActivityCallback getActivityCallback() {
-        return new MyCallback();
+    
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector(MyCallback.class);
+        super.setUp(injector);
+        
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        injector.getInstance(FileManager.class).loadSettingsAndWait(500);
     }
-
+    
+    @Singleton
     public static class MyCallback extends ActivityCallbackStub {
         public GUID aliveGUID = null;
 
@@ -96,7 +107,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
     public void testMediaTypeAggregator() throws Exception {
         {
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "whatever", "", null, null, true, Network.TCP, false, 0, false, 0);
        
         MediaType.Aggregator filter = MediaType.getAggregator(query);
@@ -136,7 +147,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     private void testAggregator(int flag) throws Exception {
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "whatever", "", null, null, true, Network.TCP, false, 0, false,
                 flag);
        
@@ -172,7 +183,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with no meta flag info
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "berkeley", "", null, null, false, Network.TCP, false, 0, false, 0);
         
         testUP[0].send(query);
@@ -192,7 +203,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // test a query for audio
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "berkeley", "", null, null, false, Network.TCP, false, 0, false,
                 0 | QueryRequest.AUDIO_MASK);
         
@@ -214,7 +225,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // test a query for documents
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "berkeley", "", null, null, false, Network.TCP, false, 0, false,
                 0 | QueryRequest.DOC_MASK);
         
@@ -240,7 +251,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "meta", "", null, null, false, Network.TCP, false, 0, false,
                 0 | 
                  QueryRequest.AUDIO_MASK | 
@@ -274,7 +285,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "meta", "", null, null, false, Network.TCP, false, 0, false,
                 0 | 
                  QueryRequest.AUDIO_MASK | 
@@ -306,7 +317,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "txt", "", null, null, false, Network.TCP, false, 0, false,
                 0 | 
                  QueryRequest.DOC_MASK |
@@ -335,7 +346,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "txt", "", null, null, false, Network.TCP, false, 0, false,
                 0 | 
                  QueryRequest.LIN_PROG_MASK |
@@ -366,7 +377,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "susheel", "", null, null, false, Network.TCP, false, 0, false,
                 0 | QueryRequest.AUDIO_MASK);
         
@@ -388,7 +399,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.TCP, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0);
         
@@ -409,7 +420,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.TCP, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.AUDIO_MASK);
         
@@ -435,7 +446,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.TCP, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.DOC_MASK);
         
@@ -462,7 +473,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         {
         // first test a normal query with several meta flags
         QueryRequest query = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.TCP, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.LIN_PROG_MASK);
         
