@@ -80,6 +80,15 @@ abstract class AbstractCommunicationTest extends BaseTestCase {
         return errorHandler(new String[]{want});
     }
     
+    protected final FakeJavascriptCodeInTheWebpage.Handler errorHandlerAny() {
+        return new FakeJavascriptCodeInTheWebpage.Handler() {
+            public void handle(final String res) {
+                final String have = LWSServerUtil.unwrapError(LWSServerUtil.removeCallback(res));
+                assertTrue(have.indexOf('.') != -1);
+            }
+        };
+    }
+    
     protected final FakeJavascriptCodeInTheWebpage.Handler errorHandler(final String[] wants) {
         return new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {

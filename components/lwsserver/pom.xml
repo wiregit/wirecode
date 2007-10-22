@@ -8,10 +8,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>lw-lwsswer</artifactId>
+  <artifactId>lw-lwsserver</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
-  <name>LimeWire LWSERVER Component</name>
+  <name>LimeWire LWSSERVER Component</name>
 
   <repositories>
     <repository>
