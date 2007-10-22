@@ -32,6 +32,7 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -39,6 +40,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**
@@ -108,10 +110,13 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
         CALLBACK = new TestCallback();
 
+        final ResponseVerifier testVerifier = new TestResponseVerifier();
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(MessageRouter.class).to(TestMessageRouter.class);
+                bind(ResponseVerifier.class).toInstance(testVerifier);
+                bind(ActivityCallback.class).toInstance(CALLBACK);
             }
         });
         
@@ -126,8 +131,11 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.
-         Thread.sleep(10 * 1000);
+         Thread.sleep(5 * 1000);
         assertTrue("should be connected", connectionServices.isConnected());
+        
+        SENT.clear();
+        REPLIES.clear();
 	}
 
 	public void tearDown() throws Exception {
@@ -164,7 +172,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         assertTrue("should be connected", connectionServices.isConnected());
                 
         QueryRequest qr = queryRequestFactory.createQuery(
-            "FileManagerTest.class." + Backend.SHARED_EXTENSION, (byte)1);
+            "Acceptor.class." + Backend.SHARED_EXTENSION, (byte)1);
         sendQuery(qr);
         Thread.sleep(4000);
         assertTrue("should have sent query", !SENT.isEmpty());
@@ -246,7 +254,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         
         public boolean originateQuery(QueryRequest r, ManagedConnection c) {
             SENT.add(r);
-            super.sendQueryRequest(r, c);
+            super.originateQuery(r, c);
             return true;
         }
 	}
@@ -257,5 +265,31 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
                                       Set locs) {
             REPLIES.add(new Object());
         }
+    }
+    
+    private class TestResponseVerifier implements ResponseVerifier {
+        
+        public boolean isMandragoreWorm(byte[] guid, Response response) {
+            return false;
+        }
+
+        public boolean matchesQuery(byte[] guid, Response response) {
+            return true;
+        }
+
+        public boolean matchesType(byte[] guid, Response response) {
+            return true;
+        }
+
+        public void record(QueryRequest qr, MediaType type) {
+        }
+
+        public void record(QueryRequest qr) {
+        }
+
+        public int score(String query, LimeXMLDocument richQuery, RemoteFileDesc response) {
+            return FilterSettings.MIN_MATCHING_WORDS.getValue() + 10 ;
+        }
+        
     }
 }

@@ -17,7 +17,7 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.ResponseVerifier;
+import com.limegroup.gnutella.ResponseVerifierImpl;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
@@ -177,7 +177,8 @@ public class AutoDownloadDetails implements Serializable {
                 }
             }
             // make sure the score for this file isn't too low....
-            int score = ResponseVerifier.score(query, xmlDoc, toAdd);
+            // TODO: DPINJ: fix this 
+            int score = ResponseVerifierImpl.score(query, xmlDoc, toAdd);
             if (score < LOW_SCORE) {
                 retVal = false;
             }

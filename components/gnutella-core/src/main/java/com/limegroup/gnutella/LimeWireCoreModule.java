@@ -314,6 +314,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(DownloadManager.class); // For NodeAssigner.
         bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
         bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
+        bind(ResponseVerifier.class).to(ResponseVerifierImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

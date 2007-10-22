@@ -20,6 +20,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.ResponseVerifier;
+import com.limegroup.gnutella.ResponseVerifierImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -156,7 +157,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     @Singleton
-    private static class StubVerifier extends ResponseVerifier {
+    private static class StubVerifier extends ResponseVerifierImpl {
 
         public synchronized boolean matchesQuery(byte[] guid, Response response) {
             return true;
