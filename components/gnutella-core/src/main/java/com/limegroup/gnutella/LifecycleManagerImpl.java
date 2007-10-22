@@ -23,6 +23,8 @@ import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
+import org.limewire.util.SystemUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -542,7 +544,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
         shutdown();
         if (toExecute != null) {
             try {
-                Runtime.getRuntime().exec(toExecute);
+                if (OSUtils.isWindowsVista()) {
+                    SystemUtils.openFile(toExecute);
+                }
+                else {
+                    Runtime.getRuntime().exec(toExecute);
+                }
             } catch (IOException tooBad) {}
         }
     }
