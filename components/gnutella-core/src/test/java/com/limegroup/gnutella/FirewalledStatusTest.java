@@ -6,7 +6,6 @@ import junit.framework.Test;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -30,11 +29,10 @@ public class FirewalledStatusTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() {
+    public void setUp() throws Exception {
         injector = LimeTestUtils.createInjector();
-        
+        super.setUp(injector);
         networkManager = injector.getInstance(NetworkManager.class);
-        
     }
     
     @Override
@@ -46,7 +44,6 @@ public class FirewalledStatusTest extends ClientSideTestCase {
     
     public void testStillFirewalledAfterLocalConnect() throws Exception {
 
-        
         assertFalse(networkManager.acceptedIncomingConnection());
 
         Socket incoming = new Socket("localhost", SERVER_PORT);
@@ -62,12 +59,5 @@ public class FirewalledStatusTest extends ClientSideTestCase {
     public int getNumberOfPeers() {
         return 1;
     }
-
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-
-
-
 }
 
