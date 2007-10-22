@@ -138,8 +138,12 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         }
     }
 
+    public void testRememberToRefactorAndFixThisTestCase() {
+        fail("testAdvancedGuidance1 and testAdvancedGuidance2 only work when testBasicGuidance is called before them");
+    }
 
     public void testAdvancedGuidance1() throws Exception {
+        
         for (int i = 0; i < testUP.length; i++)
             drain(testUP[i]);
         
@@ -207,7 +211,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
 
     public void testAdvancedGuidance2() throws Exception {
-
+        
         Message m = null;
 
         for (int i = 0; i < testUP.length; i++)
