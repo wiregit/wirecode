@@ -1,9 +1,8 @@
 package com.limegroup.gnutella.filters;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.concurrent.Executor;
+import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -39,6 +38,7 @@ public class IPFilterTest extends LimeTestCase {
     PingReply pingReply;
     QueryReply queryReply;
     QueryRequest queryRequest;
+    IPFilter hostileFilter;
     
     IPFilter filter;
 
@@ -58,18 +58,6 @@ public class IPFilterTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Module m = new AbstractModule() {
-            public void configure() {
-                bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).toInstance(new StubFilter());
-                bind(Executor.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(new Executor() {
-                    public void execute(Runnable r) {
-                        r.run();
-                    }
-                });
-                
-            }
-        };
-        injector = LimeTestUtils.createInjector(m);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "18.239.0.*", "13.0.0.0" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES
@@ -83,13 +71,32 @@ public class IPFilterTest extends LimeTestCase {
         blackListedIP = InetAddress.getByAddress(blackListedAddress);
         
         context = new Mockery();
-        
+
         pingReply    = context.mock(PingReply.class);
         queryReply   = context.mock(QueryReply.class);
         queryRequest = context.mock(QueryRequest.class);
-        
+        hostileFilter = context.mock(IPFilter.class);
+
+        Module m = new AbstractModule() {
+            public void configure() {
+                bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).toInstance(hostileFilter);
+            }
+        };
+        context.checking(new Expectations(){{
+            atLeast(1).of(hostileFilter).refreshHosts();
+        }});
+	
+        injector = LimeTestUtils.createInjector(m);
         filter = getFilter();
-        filter.refreshHosts();
+        final CountDownLatch loaded = new CountDownLatch(1);
+        IPFilterCallback ipfc = new IPFilter.IPFilterCallback() {
+            public void ipFiltersLoaded() {
+                loaded.countDown();
+            }
+        };
+        filter.refreshHosts(ipfc);
+        loaded.await();
+        context.assertIsSatisfied();
     }
     
     private IPFilter getFilter() {
@@ -98,11 +105,33 @@ public class IPFilterTest extends LimeTestCase {
 
     
     public void testFilterByAddress() {
+        context.checking(new Expectations() {{
+            one(hostileFilter).allow(new IP("18.240.0.0"));
+            will(returnValue(Boolean.TRUE));
+            one(hostileFilter).allow(new IP("13.0.0.1"));
+            will(returnValue(Boolean.TRUE));
+        }});
         assertTrue(filter.allow("18.240.0.0"));
         assertFalse(filter.allow("18.239.0.142"));
         assertTrue(filter.allow("18.239.0.144"));
         assertFalse(filter.allow("13.0.0.0"));
         assertTrue(filter.allow("13.0.0.1"));
+        context.assertIsSatisfied();
+    }
+    
+    public void testDelegatesToHostile() {
+        context.checking(new Expectations() {{
+            one(hostileFilter).allow(new IP("18.240.0.0"));
+            will(returnValue(Boolean.FALSE));
+            one(hostileFilter).allow(new IP("13.0.0.1"));
+            will(returnValue(Boolean.FALSE));
+        }});
+        assertFalse(filter.allow("18.240.0.0"));
+        assertFalse(filter.allow("18.239.0.142"));
+        assertTrue(filter.allow("18.239.0.144"));
+        assertFalse(filter.allow("13.0.0.0"));
+        assertFalse(filter.allow("13.0.0.1"));
+        context.assertIsSatisfied();
     }
 
     public void testFilterByPingReplyWhiteListed() {
