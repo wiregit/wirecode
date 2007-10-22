@@ -1,21 +1,27 @@
 package com.limegroup.gnutella;
 
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
+import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 
 /**
  * Tests Message Listener usage in MessageRouter.
  */
 public class MessageListenerTest extends ClientSideTestCase {
-    protected static final int PORT=6669;
-    protected static int TIMEOUT=1000; // should override super
+    
+    final int PORT = 6669;
+    private PingReplyFactory pingReplyFactory;
+    private MessageRouterImpl messageRouter;
+    
+    { 
+        TIMEOUT = 1000; // should override super
+    }
 
     public MessageListenerTest(String name) {
         super(name);
@@ -29,14 +35,22 @@ public class MessageListenerTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
+    }
+    
     public void testMessageListener() throws Exception {
         final GUID guid = new GUID(GUID.makeGuid());
         final MLImpl ml = new MLImpl();
 
-        PingReply pong = ProviderHacks.getPingReplyFactory().create(guid.bytes(), (byte) 2);
+        PingReply pong = pingReplyFactory.create(guid.bytes(), (byte) 2);
 
-        ProviderHacks.getMessageRouter().registerMessageListener(guid.bytes(), ml);
-        Map map = getMap();
+        messageRouter.registerMessageListener(guid.bytes(), ml);
+        Map<byte[], List<MessageListener>> map = getMap();
         assertEquals(1, map.size());
         assertEquals(0, ml.count);
         assertTrue(ml.registered);
@@ -46,7 +60,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         testUP[0].flush();
         Thread.sleep(2000);
         
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid.bytes(), ml);
+        messageRouter.unregisterMessageListener(guid.bytes(), ml);
         map = getMap();
         assertEquals(0, map.size());
         assertEquals(1, ml.count);
@@ -58,11 +72,11 @@ public class MessageListenerTest extends ClientSideTestCase {
         final MLImpl ml1 = new MLImpl();
         final MLImpl ml2 = new MLImpl();
         
-        PingReply pong = ProviderHacks.getPingReplyFactory().create(guid.bytes(), (byte) 2);
+        PingReply pong = pingReplyFactory.create(guid.bytes(), (byte) 2);
 
-        ProviderHacks.getMessageRouter().registerMessageListener(guid.bytes(), ml1);
-        ProviderHacks.getMessageRouter().registerMessageListener(guid.bytes(), ml2);
-        Map map = getMap();
+        messageRouter.registerMessageListener(guid.bytes(), ml1);
+        messageRouter.registerMessageListener(guid.bytes(), ml2);
+        Map<byte[], List<MessageListener>> map = getMap();
         assertEquals(1, map.size());
         assertEquals(0, ml1.count);
         assertEquals(0, ml2.count);        
@@ -77,7 +91,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(1, ml2.count);
         
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid.bytes(), ml1);
+        messageRouter.unregisterMessageListener(guid.bytes(), ml1);
         assertTrue(ml1.unregistered);
         assertFalse(ml2.unregistered);
         map = getMap();
@@ -91,7 +105,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(2, ml2.count);
 
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid.bytes(), ml2);
+        messageRouter.unregisterMessageListener(guid.bytes(), ml2);
         assertTrue(ml2.unregistered);
         map = getMap();
         assertEquals(0, map.size());
@@ -103,12 +117,12 @@ public class MessageListenerTest extends ClientSideTestCase {
         final MLImpl ml1 = new MLImpl();
         final MLImpl ml2 = new MLImpl();
         
-        PingReply pong1 = ProviderHacks.getPingReplyFactory().create(guid1.bytes(), (byte) 2);
-        PingReply pong2 = ProviderHacks.getPingReplyFactory().create(guid2.bytes(), (byte) 2);
+        PingReply pong1 = pingReplyFactory.create(guid1.bytes(), (byte) 2);
+        PingReply pong2 = pingReplyFactory.create(guid2.bytes(), (byte) 2);
 
-        ProviderHacks.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
-        ProviderHacks.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);
-        Map map = getMap();
+        messageRouter.registerMessageListener(guid1.bytes(), ml1);
+        messageRouter.registerMessageListener(guid2.bytes(), ml2);
+        Map<byte[], List<MessageListener>> map = getMap();
         assertEquals(2, map.size());
         assertEquals(0, ml1.count);
         assertEquals(0, ml2.count);        
@@ -131,7 +145,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(1, ml2.count);        
         
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
+        messageRouter.unregisterMessageListener(guid1.bytes(), ml1);
         assertTrue(ml1.unregistered);
         assertFalse(ml2.unregistered);
         map = getMap();
@@ -145,7 +159,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(1, ml2.count);
 
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml2);
+        messageRouter.unregisterMessageListener(guid2.bytes(), ml2);
         assertTrue(ml2.unregistered);
         map = getMap();
         assertEquals(0, map.size());
@@ -157,12 +171,12 @@ public class MessageListenerTest extends ClientSideTestCase {
         final MLImpl ml1 = new MLImpl();
         final MLImpl ml2 = new MLImpl();
         
-        PingReply pong1 = ProviderHacks.getPingReplyFactory().create(guid1.bytes(), (byte) 2);
-        PingReply pong2 = ProviderHacks.getPingReplyFactory().create(guid2.bytes(), (byte) 2);
+        PingReply pong1 = pingReplyFactory.create(guid1.bytes(), (byte) 2);
+        PingReply pong2 = pingReplyFactory.create(guid2.bytes(), (byte) 2);
 
-        ProviderHacks.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
-        ProviderHacks.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);
-        Map map = getMap();
+        messageRouter.registerMessageListener(guid1.bytes(), ml1);
+        messageRouter.registerMessageListener(guid2.bytes(), ml2);
+        Map<byte[], List<MessageListener>> map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
         assertTrue(ml2.registered);
@@ -176,7 +190,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(0, ml2.count);        
         
         // add ml1 again to ml1 -- should be notified twice per message now
-        ProviderHacks.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
+        messageRouter.registerMessageListener(guid1.bytes(), ml1);
         map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
@@ -191,7 +205,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(0, ml2.count);        
         
         // remove ml1 -- should be notified just once on the next send.
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
+        messageRouter.unregisterMessageListener(guid1.bytes(), ml1);
         map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
@@ -207,7 +221,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(0, ml2.count);
         
         // try removing ml1 from guid2's bytes, nothing should happen.
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml1);
+        messageRouter.unregisterMessageListener(guid2.bytes(), ml1);
         map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
@@ -231,10 +245,10 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml2.count);
         
         // and unregister the two of'm.
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
+        messageRouter.unregisterMessageListener(guid1.bytes(), ml1);
         map = getMap();
         assertEquals(1, map.size());
-        ProviderHacks.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml2);
+        messageRouter.unregisterMessageListener(guid2.bytes(), ml2);
         map = getMap();
         assertEquals(0, map.size());
         assertTrue(ml2.unregistered);
@@ -250,9 +264,8 @@ public class MessageListenerTest extends ClientSideTestCase {
     }
     //////////////////////////////////////////////////////////////////
     
-    private final Map getMap() throws Exception {
-        return (Map) PrivilegedAccessor.getValue(ProviderHacks.getMessageRouter(),
-                                          "_messageListeners");
+    private final Map<byte[], List<MessageListener>> getMap() throws Exception {
+        return messageRouter.getMessageListenerMap(); 
     }
     
     private class MLImpl implements MessageListener {
@@ -276,7 +289,4 @@ public class MessageListenerTest extends ClientSideTestCase {
         return 1;
     }
 
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
 }

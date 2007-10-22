@@ -2785,7 +2785,14 @@ public abstract class MessageRouterImpl implements MessageRouter {
             else
                 pingee.reply(new HeadPing(ping)); 
         }
-   } 
+   }
+    
+    /**
+     * Pure testing method. 
+     */
+    Map<byte[], List<MessageListener>> getMessageListenerMap() {
+        return _messageListeners;
+    }
     
     
     /** 
