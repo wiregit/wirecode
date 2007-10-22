@@ -92,7 +92,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // we should now be guess capable and tcp incoming capable....
         assertTrue(ProviderHacks.getNetworkManager().isGUESSCapable());
         
-        keepAllAlive(testUP);
+        keepAllAlive(testUP, ProviderHacks.getPingReplyFactory());
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -230,7 +230,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now stop the query
         ProviderHacks.getSearchServices().stopQuery(queryGuid);
-        keepAllAlive(testUP);
+        keepAllAlive(testUP, ProviderHacks.getPingReplyFactory());
         drainAll();
 
         // send another ReplyNumber
@@ -270,7 +270,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // results are recieved) we don't request OOB replies for it
         
         // clear up messages before we test.
-        keepAllAlive(testUP);
+        keepAllAlive(testUP, ProviderHacks.getPingReplyFactory());
 
         // first of all, we should confirm that we are sending out a OOB query.
         GUID queryGuid = new GUID(ProviderHacks.getSearchServices().newQueryGUID());

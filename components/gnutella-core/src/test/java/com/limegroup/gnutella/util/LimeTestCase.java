@@ -29,6 +29,7 @@ import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -355,10 +356,11 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     
     /**
      * Sends a pong through all connections to keep them alive.
+     * @param pingReplyFactory 
      */
-    public static void keepAllAlive(Connection[] cs) throws IOException {
+    public static void keepAllAlive(Connection[] cs, PingReplyFactory pingReplyFactory) throws IOException {
         for(int i = 0; i < cs.length; i++) {
-            PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1);
+            PingReply pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1);
             cs[i].send(pr);
             cs[i].flush();
         }
