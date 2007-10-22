@@ -39,7 +39,9 @@ public class ClientSideInitialMessagesTest extends ClientSideTestCase {
     
     public static void setUpQRPTables() {}
     
-    public void setUp() {
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
         _queue=new ArrayList(10);
     }
 

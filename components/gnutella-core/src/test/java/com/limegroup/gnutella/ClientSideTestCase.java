@@ -134,6 +134,11 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         return true;
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        this.setUp(LimeTestUtils.createInjector());
+    }
+    
     public void setUp(Injector injector) throws Exception {
         doSettings();
         
