@@ -66,7 +66,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     }
     
     @Override
-    public void doSettings() {
+    public void setSettings() {
         TIMEOUT = 4000;
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella

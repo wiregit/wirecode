@@ -76,7 +76,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     }
     
     @SuppressWarnings("unused")
-    protected void doSettings() throws Exception {
+    public final void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});

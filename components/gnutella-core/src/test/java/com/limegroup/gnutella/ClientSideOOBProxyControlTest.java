@@ -4,17 +4,27 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessageStubHelper;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * First ultrapeer supports new out-of-band proxying control protocol.
  * 
+ * Methods that are tested by this integration test include:
+ * 
+ * {@link MessageRouterImpl#originateLeafQuery(QueryRequest)} and
+ * {@link ManagedConnection#originateQuery(QueryRequest)}.
  */
 public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
+
+    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
+    private QueryRequestFactory queryRequestFactory;
+    private MessageRouter messageRouter;
 
     public ClientSideOOBProxyControlTest(String name) {
         super(name);
@@ -25,25 +35,21 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
     }
 
     @Override
-    public void doSettings() {
-        SearchSettings.DISABLE_OOB_V2.setBoolean(false);
-    }
-    
-    @Override
-    public int getNumberOfPeers() {
-        return 2;
-    }
-
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-    
-    public void testQueryV2Disabled() throws Exception {
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        messageRouter = injector.getInstance(MessageRouter.class);
         
+        setUpProxyControlSupport();
+    }
+    
+    private void setUpProxyControlSupport() throws Exception {
         drainAll();
         
         // send client a message that we support proxy control for OOB v3
-        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
+        testUP[0].send(messagesSupportedVendorMessage);
         testUP[0].flush();
         
         // send client a message that we support leaf guidance and everything
@@ -52,16 +58,28 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         testUP[1].flush();
         
         Thread.sleep(250);
+    }
+    
+    @Override
+    public void setSettings() {
+        SearchSettings.DISABLE_OOB_V2.setBoolean(false);
+    }
+    
+    @Override
+    public int getNumberOfPeers() {
+        return 2;
+    }
+
+    public void testQueryV2Disabled() throws Exception {
         
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt");
+        QueryRequest query = queryRequestFactory.createQuery("txt");
         assertFalse(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         
-        // send query through router service
-   //     PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-    //            query, MediaType.getDocumentMediaType());
+        // send query through messagerouter
+        messageRouter.sendDynamicQuery(query);
         
         Thread.sleep(250);
         
@@ -75,18 +93,15 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
     
     public void testOOBQueryV2Disabled()  throws Exception {
         
-        drainAll();
-        
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
+        QueryRequest query = queryRequestFactory.createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
         
         assertTrue(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         
-        // send query through router service
-      //  PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-     //           query, MediaType.getDocumentMediaType());
+        // send query through message router
+        messageRouter.sendDynamicQuery(query);
         Thread.sleep(250);
         
         // new ultrapeer should not get do_not_proxy
@@ -97,19 +112,16 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
     }
     
     public void testOOBQueryV2Enabled()  throws Exception {
-        
-        drainAll();
-        
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
+
+        QueryRequest query = queryRequestFactory.createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
         
         assertTrue(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         
-        // send query through router service
-      //  PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-      //          query, MediaType.getDocumentMediaType());
+        // send query through message router
+        messageRouter.sendDynamicQuery(query);
         Thread.sleep(250);
         
         // new ultrapeer should not get do_not_proxy
@@ -121,17 +133,14 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
     
     public void testQueryV2Enabled() throws Exception {
         
-        drainAll();
-        
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("txt");
+        QueryRequest query = queryRequestFactory.createQuery("txt");
         assertFalse(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         
-        // send query through router service
-   //     PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
-   //             query, MediaType.getDocumentMediaType());
+        // send query through message router
+        messageRouter.sendDynamicQuery(query);
         Thread.sleep(250);
         
         // new ultrapeer should not get do_not_proxy
