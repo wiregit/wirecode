@@ -6,25 +6,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.Iterator;
 
 import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**
  * Checks whether a leaf node handles GUESS queries correctly.  Tests the
@@ -42,6 +44,18 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
      */
     private static DatagramSocket UDP_ACCESS;
 
+    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
+
+    private NetworkManagerStub networkManagerStub;
+
+    private PingRequestFactory pingRequestFactory;
+
+    private QueryRequestFactory queryRequestFactory;
+
+    private UrnCache urnCache;
+
+    private MessageFactory messageFactory;
+
     public ServerSideLeafGuessTest(String name) {
         super(name);
     }
@@ -54,55 +68,42 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() {
-        try {   //  Wait between each test so dup GUIDs don't trigger msg drops
-         Thread.sleep(1000*10);     
-        } catch (Exception ignored) {}
-    }
-    
-    ///////////////////////// Actual Tests ////////////////////////////
+    public void setUp() throws Exception {
+        networkManagerStub = new NetworkManagerStub();
+        Injector injector = LimeTestUtils.createInjector(new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        super.setUp(injector);
+        
+        messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
+        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        urnCache = injector.getInstance(UrnCache.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
 
-    // MUST RUN THIS TEST FIRST
-    public void testBasicProtocol() throws Exception {
+        // first we need to set up GUESS capability
+        networkManagerStub.setCanReceiveSolicited(true);
+        networkManagerStub.setCanReceiveUnsolicited(true);
+        networkManagerStub.setGuessCapable(true);
+        networkManagerStub.setAcceptedIncomingConnection(true);
+        
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(1000 * 20);
 
         for (int i = 0; i < testUP.length; i++) {
             drain(testUP[i]);
             // OOB client side needs server side leaf guidance
-            testUP[i].send(ProviderHacks.getMessagesSupportedVendorMessage());
+            testUP[i].send(messagesSupportedVendorMessage);
             testUP[i].flush();
         }
 
-        // first we need to set up GUESS capability
-        // ----------------------------------------
-        // set up solicited UDP support
-        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
-        // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
-        
-        // you also have to set up TCP incoming....
-        {
-            Socket sock = null;
-            OutputStream os = null;
-            try {
-                sock = ProviderHacks.getSocketsManager().connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
-                                       SERVER_PORT), 1200);
-                os = sock.getOutputStream();
-                os.write("CONNECT BACK\r\n\r\n".getBytes());
-                os.flush();
-            } catch (IOException ignored) {
-            } finally {
-                if(sock != null)
-                    try { sock.close(); } catch(IOException ignored) {}
-                if(os != null)
-                    try { os.close(); } catch(IOException ignored) {}
-            }
-        }        
+    }
+    
+    ///////////////////////// Actual Tests ////////////////////////////
 
+    // MUST RUN THIS TEST FIRST
+    public void testBasicProtocol() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a AddressSecurityToken request....
-        send(ProviderHacks.getPingRequestFactory().createQueryKeyRequest(), localHost, SERVER_PORT);
+        send(pingRequestFactory.createQueryKeyRequest(), localHost, SERVER_PORT);
 
         // we should get a AddressSecurityToken....
         Message m = null;
@@ -119,7 +120,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertNotNull(qkToUse);
 
         // we should be able to send a query
-        QueryRequest goodQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", 
+        QueryRequest goodQuery = queryRequestFactory.createQueryKeyQuery("susheel", 
                                                                   qkToUse);
         byte[] guid = goodQuery.getGUID();
         send(goodQuery, localHost, SERVER_PORT);
@@ -141,7 +142,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     public void testGoodURNQuery() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a AddressSecurityToken request....
-        send(ProviderHacks.getPingRequestFactory().createQueryKeyRequest(), localHost, SERVER_PORT);
+        send(pingRequestFactory.createQueryKeyRequest(), localHost, SERVER_PORT);
 
         // we should get a AddressSecurityToken....
         Message m = null;
@@ -159,11 +160,11 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
         // now send a URN query, make sure that works....
         File berkeley = CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()).iterator();
+        Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
         URN berkeleyURN = (URN) iter.next();
         
         // we should be able to send a URN query
-        QueryRequest goodQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery(berkeleyURN, 
+        QueryRequest goodQuery = queryRequestFactory.createQueryKeyQuery(berkeleyURN, 
                                                                   qkToUse);
         byte[] guid = goodQuery.getGUID();
         send(goodQuery, localHost, SERVER_PORT);
@@ -181,14 +182,14 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
         iter = qRep.getResults();
         Response first = (Response) iter.next();
-        assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(berkeley, ProviderHacks.getUrnCache()));
+        assertEquals(UrnHelper.calculateAndCacheURN(berkeley, urnCache), first.getUrns());
     }
 
 
     public void testQueryWithNoHit() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a AddressSecurityToken request....
-        send(ProviderHacks.getPingRequestFactory().createQueryKeyRequest(), localHost, SERVER_PORT);
+        send(pingRequestFactory.createQueryKeyRequest(), localHost, SERVER_PORT);
 
         // we should get a AddressSecurityToken....
         Message m = null;
@@ -205,7 +206,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertNotNull(qkToUse);
 
         // send a query that shouldn't get results....
-        QueryRequest goodQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("anita", 
+        QueryRequest goodQuery = queryRequestFactory.createQueryKeyQuery("anita", 
                                                                   qkToUse);
         byte[] guid = goodQuery.getGUID();
         send(goodQuery, localHost, SERVER_PORT);
@@ -233,7 +234,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
         {
             // we shouldn't get any response to our query...
-            QueryRequest badQuery = ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", 
+            QueryRequest badQuery = queryRequestFactory.createQueryKeyQuery("susheel", 
                                                                       qkToUse);
             send(badQuery, localHost, SERVER_PORT);
             
@@ -257,7 +258,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         byte[] data = datagram.getData();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = ProviderHacks.getMessageFactory().read(in);		
+        Message message = messageFactory.read(in);		
         return message;
     }
 
