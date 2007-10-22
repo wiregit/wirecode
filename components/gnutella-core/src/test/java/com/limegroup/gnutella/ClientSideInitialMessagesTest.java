@@ -12,7 +12,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 @SuppressWarnings("unchecked")
 public class ClientSideInitialMessagesTest extends ClientSideTestCase {
@@ -28,16 +27,14 @@ public class ClientSideInitialMessagesTest extends ClientSideTestCase {
         return buildTestSuite(ClientSideInitialMessagesTest.class);
     }    
    
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
     
-    public static Boolean shouldRespondToPing() {
-        return Boolean.FALSE;
-    }
-    
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
+    @Override
+    public boolean shouldRespondToPing() {
+        return false;
     }
     
     public static void setUpQRPTables() {}

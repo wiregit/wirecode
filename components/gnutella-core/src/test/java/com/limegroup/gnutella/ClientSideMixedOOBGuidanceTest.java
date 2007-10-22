@@ -48,7 +48,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
     /** @return The first QueryRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
-    private static QueryStatusResponse getFirstQueryStatus(Connection c) 
+    private QueryStatusResponse getFirstQueryStatus(Connection c) 
                                        throws IOException, BadPacketException {
         return (QueryStatusResponse)
             getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
@@ -193,15 +193,10 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         return new byte[] { (byte)127, (byte)0, 0, 1 };
     }
 
-    public static Integer numUPs() {
-        return new Integer(3);
+    public int getNumberOfPeers() {
+        return 3;
     }
 
-    public static ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
-    }
-
-    
     public static class MyActivityCallback extends ActivityCallbackStub {
         private RemoteFileDesc rfd = null;
         public RemoteFileDesc getRFD() {

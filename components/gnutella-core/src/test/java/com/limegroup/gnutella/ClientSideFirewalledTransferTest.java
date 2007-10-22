@@ -17,6 +17,8 @@ import java.net.Socket;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -26,18 +28,25 @@ import org.limewire.io.IpPortSet;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.Base32;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -51,7 +60,19 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     /**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS;
+    private DatagramSocket UDP_ACCESS;
+    private NetworkManagerStub networkManagerStub;
+    private FileManager fileManager;
+    private QueryRequestFactory queryRequestFactory;
+    private ConnectionManager connectionManager;
+    private ApplicationServices applicationServices;
+    private MessageFactory messageFactory;
+    private SearchServices searchServices;
+    private ResponseFactory responseFactory;
+    private QueryReplyFactory queryReplyFactory;
+    private MyActivityCallback callback;
+    private DownloadServices downloadServices;
+    private Injector injector;
 
     public ClientSideFirewalledTransferTest(String name) {
         super(name);
@@ -65,33 +86,68 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public static void doSettings() {
+    public void setSettings() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
 
     public static void globalSetUp() throws Exception {
-        UDP_ACCESS = new DatagramSocket(9000);
-        UDP_ACCESS.setSoTimeout(TIMEOUT*2);
+
     }
     
     public void setUp() throws Exception {
+        UDP_ACCESS = new DatagramSocket(9000);
+        UDP_ACCESS.setSoTimeout(TIMEOUT*2);
+        networkManagerStub = new NetworkManagerStub();
+        injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            } 
+        });
+        super.setUp(injector);
+
+        fileManager = injector.getInstance(FileManager.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        connectionManager = injector.getInstance(ConnectionManager.class);
+        applicationServices = injector.getInstance(ApplicationServices.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+        searchServices = injector.getInstance(SearchServices.class);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        callback = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
+        downloadServices = injector.getInstance(DownloadServices.class);
+        
         //  NOTE: UDPService will not change state when a UDP ping or pong is received 
         //      from a conneected host.  Therefore, since UDPServiceTest should be testing
         //      that UDPService functions properly, we will assume that it does and simply
         //      set the flag saying we can support solicited and unsolicited UDP.  This way,
         //      testing can procede as normal...
-        doSettings();
+        networkManagerStub.setCanReceiveSolicited(true);
+        networkManagerStub.setCanReceiveUnsolicited(true);
+        networkManagerStub.setCanDoFWT(true);
+        // has to be false otherwise the client doesn't send fwt results
+        networkManagerStub.setAcceptedIncomingConnection(false);
+        networkManagerStub.setExternalAddress(new byte[] {(byte) 10, (byte) 07,
+                (byte) 19, (byte) 76});
+        networkManagerStub.setPort(PORT);
         
-        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedSolicitedIncoming", new Boolean(true) );
-        PrivilegedAccessor.setValue( ProviderHacks.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true) );
+        exchangePushProxyMesssages();
     }
     
-    ///////////////////////// Actual Tests ////////////////////////////
+    @Override
+    protected void tearDown() throws Exception {
+        // important superclass impl has to be called
+        super.tearDown();
+        UDP_ACCESS.close();
+    }
     
-    // THIS TEST SHOULD BE RUN FIRST!!
-    public void testPushProxySetup() throws Exception {
+    /**
+     * This is needed to provide the client with a valid push proxy it
+     * can send along in fwt query replies. 
+     */
+    private void exchangePushProxyMesssages() throws Exception {
         // send a MessagesSupportedMessage
-        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
+        testUP[0].send(injector.getInstance(MessagesSupportedVendorMessage.class));
         testUP[0].flush();
 
         // we expect to get a PushProxy request
@@ -109,36 +165,33 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // client side seems to follow the setup process A-OK
         // set up solicted support (see note in setUp())
-        Thread.sleep(1000);
-        assertTrue(ProviderHacks.getUdpService().canReceiveSolicited());
     }
-
+    
+    
+    ///////////////////////// Actual Tests ////////////////////////////
+    
     public void testStartsUDPTransfer() throws Exception {
-
-        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),
-                                    "_externalAddress",
-                                    new byte[] {(byte) 10, (byte) 07,
-                                                (byte) 19, (byte) 76});
-
         drain(testUP[0]);
         drainUDP();
 
         // make sure leaf is sharing
-        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals(2, fileManager.getNumFiles());
 
         // send a query that should be answered
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+        QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
                  QueryRequest.SPECIAL_FIREWALL_MASK |
                  QueryRequest.SPECIAL_FWTRANS_MASK, "berkeley", "", null, null, false, Network.UNKNOWN,
                 false, 0, false, 0);
+        assertTrue(query.canDoFirewalledTransfer());
+        
         testUP[0].send(query);
         testUP[0].flush();
 
         // await a response
         Message m = null;
         do {
-            m = testUP[0].receive(TIMEOUT);
+            m = testUP[0].receive(TIMEOUT * 120);
         } while (!(m instanceof QueryReply)) ;
 
         // confirm it has proxy info
@@ -156,7 +209,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         assertEquals(ppi.getPort(), 6355);
         
         assertEquals(ppi.getInetAddress(), 
-                ((Connection)ProviderHacks.getConnectionManager().getConnections().get(0)).getInetAddress() 
+                ((Connection)connectionManager.getConnections().get(0)).getInetAddress() 
                 );
 
         // set up a ServerSocket to get give on
@@ -166,7 +219,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // test that the client responds to a PushRequest
         PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
-                                         ProviderHacks.getApplicationServices().getMyGUID(),
+                                         applicationServices.getMyGUID(),
                                          PushRequest.FW_TRANS_INDEX, 
                                          InetAddress.getLocalHost().getAddress(),
                                          9000);
@@ -186,7 +239,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = ProviderHacks.getMessageFactory().read(in);
+            Message syn = messageFactory.read(in);
             if (syn instanceof SynMessage) break;
         }
 
@@ -207,7 +260,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        ProviderHacks.getSearchServices().query(guid, "boalt.org");
+        searchServices.query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;
@@ -224,16 +277,14 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         Set proxies = new IpPortSet();
         proxies.add(new IpPortImpl("127.0.0.1", 7000));
         Response[] res = new Response[1];
-        res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
-        m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 9000,
+        res[0] = responseFactory.createResponse(10, 10, "boalt.org");
+        m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 9000,
                 myIP(), 0, res, clientGUID, new byte[0], true, false, true,
                 true, false, false, true, proxies, null);
         testUP[0].send(m);
         testUP[0].flush();
 
-        // wait a while for Leaf to process result
-        Thread.sleep(1000);
-        final RemoteFileDesc rfd =((MyActivityCallback)getCallback()).getRFD(); 
+        final RemoteFileDesc rfd = callback.getRFD(); 
         assertNotNull(rfd);
         assertNotNull(rfd.getPushAddr());
         assertTrue(rfd.needsPush());
@@ -245,7 +296,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             public void run() {
                 try {
                     Thread.sleep(2000);
-                    ProviderHacks.getDownloadServices().download((new RemoteFileDesc[]{rfd}), 
+                    downloadServices.download((new RemoteFileDesc[]{rfd}), 
                                            true, fGuid);
                 }
                 catch (Exception damn) {
@@ -289,8 +340,8 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        assertEquals(addr.getAddress(), ProviderHacks.getNetworkManager().getExternalAddress());
-        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+        assertEquals(networkManagerStub.getExternalAddress(), addr.getAddress());
+        assertEquals(PORT, Integer.parseInt(st.nextToken()));
 
         // send back a 202 and make sure no PushRequest is sent via the normal
         // way
@@ -315,7 +366,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = ProviderHacks.getMessageFactory().read(in);
+            Message syn = messageFactory.read(in);
             if (syn instanceof SynMessage) break;
         }
 
@@ -333,21 +384,23 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
 
     //////////////////////////////////////////////////////////////////
-    public static Integer numUPs() {
-        return new Integer(1);
-    }
-
-    public static ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
+    public int getNumberOfPeers() {
+        return 1;
     }
 
     private static byte[] myIP() {
         return new byte[] { (byte)127, (byte)0, 0, 1 };
     }
 
+    @Singleton
     public static class MyActivityCallback extends ActivityCallbackStub {
-        private RemoteFileDesc rfd = null;
-        public RemoteFileDesc getRFD() {
+        
+        private volatile RemoteFileDesc rfd = null;
+        
+        private final CountDownLatch latch = new CountDownLatch(1);
+
+        public RemoteFileDesc getRFD() throws InterruptedException {
+            latch.await(1, TimeUnit.SECONDS);
             return rfd;
         }
 
@@ -355,6 +408,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
                                       HostData data,
                                       Set locs) {
             this.rfd = rfd;
+            latch.countDown();
         }
     }
 
@@ -369,7 +423,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            ProviderHacks.getMessageFactory().read(in);
+            messageFactory.read(in);
         }
     }
 }

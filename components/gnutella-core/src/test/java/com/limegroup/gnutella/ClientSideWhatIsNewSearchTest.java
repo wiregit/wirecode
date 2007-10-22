@@ -40,13 +40,9 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         return buildTestSuite(ClientSideWhatIsNewSearchTest.class);
     }
 
-    @SuppressWarnings("unused")
-    private static void doSettings() {
-        
-    }
-    
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
 
     public static ActivityCallback getActivityCallback() {

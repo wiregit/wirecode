@@ -44,7 +44,9 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 @SuppressWarnings( { "unchecked", "cast" } )
 public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
-    private static final int UPLOADER_PORT = 10000;    
+    private static final int UPLOADER_PORT = 10000;
+    
+    private MyCallback callback;
 
     /**
      * Ultrapeer 1 UDP connection.
@@ -63,8 +65,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    @SuppressWarnings("unused")
-    private static void doSettings() {
+    @Override
+    public void doSettings() {
         TIMEOUT = 4000;
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
@@ -123,7 +125,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -171,7 +173,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             ProviderHacks.getSearchServices().stopQuery(new GUID(qr.getGUID()));
             assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
-        ((MyCallback)getCallback()).clearGUID();
+        callback.clearGUID();
     }
 
 
@@ -188,7 +190,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "berkeley");
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -274,7 +276,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             new File(_sharedDir, "berkeley.txt").exists());
         
         ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
-        ((MyCallback)getCallback()).clearGUID();
+        callback.clearGUID();
         
         // sleep to make sure the download starts 
         Thread.sleep(10000);
@@ -309,7 +311,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "berkeley");
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -435,7 +437,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "metadata");
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -526,7 +528,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         UploadSettings.UPLOAD_SPEED.setValue(5);
 
         ProviderHacks.getSearchServices().stopQuery(new GUID(guid));
-        ((MyCallback)getCallback()).clearGUID();
+        callback.clearGUID();
 
         {
             // download still in progress, don't purge
@@ -564,7 +566,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -654,7 +656,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         Thread.sleep(guessWaitTime+2000);
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 
-        ((MyCallback)getCallback()).clearGUID();
+        callback.clearGUID();
         downloader.stop();
 
         Thread.sleep(1000);
@@ -681,7 +683,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -820,7 +822,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         Thread.sleep(timeoutVal > 0 ? timeoutVal : 0);
         assertEquals(DownloadStatus.BUSY, downloader.getState());
         // purge front end of query
-        ((MyCallback)getCallback()).clearGUID();
+        callback.clearGUID();
 
         // create a new Uploader to service the download
         TestUploader uploader2 = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
@@ -869,7 +871,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -980,7 +982,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 
-        ((MyCallback)getCallback()).clearGUID();
+        callback.clearGUID();
         downloader.stop();
 
         Thread.sleep(1000);
@@ -1007,7 +1009,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -1086,7 +1088,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             if (i == MAX_TRIES) fail("didn't GUESS!!");
         }
 
-        ((MyCallback)getCallback()).clearGUID();  // isQueryAlive == false 
+        callback.clearGUID();  // isQueryAlive == false 
         downloader.stop();
 
         Thread.sleep(500);
@@ -1133,7 +1135,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         byte[] guid = ProviderHacks.getSearchServices().newQueryGUID();
         ProviderHacks.getSearchServices().query(guid, "whatever");
         // i need to pretend that the UI is showing the user the query still
-        ((MyCallback)getCallback()).setGUID(new GUID(guid));
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
@@ -1285,7 +1287,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 
-        ((MyCallback)getCallback()).clearGUID();
+        callback.clearGUID();
         downloader.stop();
 
         Thread.sleep(1000);
@@ -1320,16 +1322,13 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         return makeRFD(urn, UPLOADER_PORT);
     }
 
-    public static Integer numUPs() {
-        return new Integer(3);
+    @Override
+    public int getNumberOfPeers() {
+        return 3;
     }
     
     private static byte[] myIP() {
         return new byte[] { (byte)127, (byte)0, 0, 1 };
-    }
-
-    public static ActivityCallback getActivityCallback() {
-        return new MyCallback();
     }
 
     public static class MyCallback extends ActivityCallbackStub {

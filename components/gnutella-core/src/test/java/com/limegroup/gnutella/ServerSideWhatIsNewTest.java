@@ -51,8 +51,8 @@ public class ServerSideWhatIsNewTest
         return new ActivityCallbackStub();
     }
     
-    public static Integer numUPs() {
-        return new Integer(1);
+    public int getNumberOfPeers() {
+        return 1;
     }
 
     public static Test suite() {
@@ -73,7 +73,7 @@ public class ServerSideWhatIsNewTest
         } catch (InterruptedException unused) {}
     }
     
-    private static void doSettings() throws Exception {
+    public void setSettings() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
@@ -106,7 +106,8 @@ public class ServerSideWhatIsNewTest
         doSettings();
     }
     
-    public static boolean shouldRespondToPing() {
+    @Override
+    public boolean shouldRespondToPing() {
         return false;
     }
 
@@ -117,19 +118,19 @@ public class ServerSideWhatIsNewTest
     // just test that What Is New support is advertised
     public void testSendsCapabilitiesMessage() throws Exception {
         //testUP = connect(rs, 6355, true);
-        Connection testUP = ClientSideTestCase.testUP[0];
+        Connection connection = testUP[0];
 
         // send a MessagesSupportedMessage and capabilities VM
-        testUP.send(ProviderHacks.getMessagesSupportedVendorMessage());
-        testUP.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
-        testUP.flush();
+        connection.send(ProviderHacks.getMessagesSupportedVendorMessage());
+        connection.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
+        connection.flush();
 
         Thread.sleep(100);
         
         // we expect to get a CVM back
         Message m = null;
         do {
-            m = testUP.receive(TIMEOUT);
+            m = connection.receive(TIMEOUT);
         } while (!(m instanceof CapabilitiesVM)) ;
         assertTrue(((CapabilitiesVM)m).supportsWhatIsNew());
 
@@ -198,22 +199,22 @@ public class ServerSideWhatIsNewTest
 
     // make sure that a what is new query is answered correctly
     public void testWhatIsNewQueryBasic() throws Exception {
-        Connection testUP = ClientSideTestCase.testUP[0];
-        drain(testUP);
+        Connection connection = testUP[0];
+        drain(connection);
 
         QueryRequest whatIsNewQuery = 
             ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         whatIsNewQuery.hop();
-        testUP.send(whatIsNewQuery);
-        testUP.flush();
+        connection.send(whatIsNewQuery);
+        connection.flush();
 
         // give time to process
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(testUP,
+            (QueryReply) getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(2, reply.getResultCount());
@@ -229,8 +230,8 @@ public class ServerSideWhatIsNewTest
 
     // make sure that a what is new query meta query is answered correctly
     public void testWhatIsNewQueryMeta() throws Exception {
-        Connection testUP = ClientSideTestCase.testUP[0];
-        drain(testUP);
+        Connection connection = testUP[0];
+        drain(connection);
 
         {
         QueryRequest whatIsNewQuery = 
@@ -238,14 +239,14 @@ public class ServerSideWhatIsNewTest
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.AUDIO_MASK);
         whatIsNewQuery.hop();
-        testUP.send(whatIsNewQuery);
-        testUP.flush();
+        connection.send(whatIsNewQuery);
+        connection.flush();
 
         // give time to process
         Thread.sleep(2000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(testUP,
+            (QueryReply) getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNull(reply);
         }
@@ -256,14 +257,14 @@ public class ServerSideWhatIsNewTest
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.DOC_MASK);
         whatIsNewQuery.hop();
-        testUP.send(whatIsNewQuery);
-        testUP.flush();
+        connection.send(whatIsNewQuery);
+        connection.flush();
 
         // give time to process
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(testUP,
+            (QueryReply) getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(2, reply.getResultCount());
@@ -343,21 +344,21 @@ public class ServerSideWhatIsNewTest
     // test that after the sharing of additional files, the what is new query
     // results in something else
     public void testWhatIsNewQueryNewFiles() throws Exception {
-        Connection testUP = ClientSideTestCase.testUP[0];
-        drain(testUP);
+        Connection connection = testUP[0];
+        drain(connection);
 
         QueryRequest whatIsNewQuery = 
             ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
-        testUP.send(whatIsNewQuery);
-        testUP.flush();
+        connection.send(whatIsNewQuery);
+        connection.flush();
 
         // give time to process
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(testUP,
+            (QueryReply) getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());
@@ -408,21 +409,21 @@ public class ServerSideWhatIsNewTest
 
         // now just send another What Is New query and make sure everything
         // is kosher - probably overkill but whatever....
-        Connection testUP = ClientSideTestCase.testUP[0];
-        drain(testUP);
+        Connection connection = testUP[0];
+        drain(connection);
 
         QueryRequest whatIsNewQuery = 
             ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
-        testUP.send(whatIsNewQuery);
-        testUP.flush();
+        connection.send(whatIsNewQuery);
+        connection.flush();
 
         // give time to process
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(testUP,
+            (QueryReply) getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());
@@ -476,21 +477,21 @@ public class ServerSideWhatIsNewTest
 
         // now just send another What Is New query and make sure everything
         // is kosher - probbably overkill but whatever....
-        Connection testUP = ClientSideTestCase.testUP[0];
-        drain(testUP);
+        Connection connection = testUP[0];
+        drain(connection);
 
         QueryRequest whatIsNewQuery = 
             ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
-        testUP.send(whatIsNewQuery);
-        testUP.flush();
+        connection.send(whatIsNewQuery);
+        connection.flush();
 
         // give time to process
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(testUP,
+            (QueryReply) getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());

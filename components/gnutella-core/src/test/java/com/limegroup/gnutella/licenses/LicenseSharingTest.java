@@ -8,29 +8,37 @@ import junit.framework.Test;
 
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ActivityCallback;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 import com.limegroup.gnutella.ClientSideTestCase;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
 public final class LicenseSharingTest extends ClientSideTestCase {
 
-    LimeXMLDocumentFactory factory;
+    private FileManager fileManager;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private Injector injector;
+    private QueryRequestFactory queryRequestFactory;
+    private NetworkManagerStub networkManagerStub;
+    private LimeXMLDocumentHelper limeXMLDocumentHelper;
     
 	public LicenseSharingTest(String name) {
 		super(name);
@@ -43,20 +51,14 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
     }
-   
-    // needed by ClientSideTestCase
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-    
-    // needed by ClientSideTestCase
-    public static Integer numUPs() {
-        return new Integer(3);
+
+	@Override
+    public int getNumberOfPeers() {
+        return 3;
     }
 	
-	// used by ClientSideTestCase
-	@SuppressWarnings("unused")
-    private static void doSettings() {
+	@Override	
+    public void setSettings() {
 	    SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;ogg;wma");
         // get the resource file for com/limegroup/gnutella
         File cc1 = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.mp3");
@@ -79,21 +81,31 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	
 	@Override
 	public void setUp() throws Exception {
-	    super.setUp();
-	    ProviderHacks.getFileManager().loadSettingsAndWait(4000);
-	    factory = ProviderHacks.getLimeXMLDocumentFactory();
+	    networkManagerStub = new NetworkManagerStub();
+	    injector = LimeTestUtils.createInjector(new AbstractModule() {
+	        @Override
+	        protected void configure() {
+	            bind(NetworkManager.class).toInstance(networkManagerStub);
+	        }
+	    });
+        super.setUp(injector);
+	    fileManager = injector.getInstance(FileManager.class);
+	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+	    queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
+
+	    fileManager.loadSettingsAndWait(4000);
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    FileManager fm = ProviderHacks.getFileManager();
-	    FileDesc[] fds = fm.getAllSharedFileDescriptors();
+	    FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
 	    assertEquals(5, fds.length);
 	    for(int i = 0; i < fds.length; i++)
 	        assertTrue(fds[i].toString(), fds[i].isLicensed());
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals(5, fileManager.getNumFiles());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());
@@ -123,27 +135,32 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         // send a query that should hit in the qrt
         // Check CC
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"creativecommons.org/licenses/\"/></audios>";
-        factory.createLimeXMLDocument(richQuery); // make sure it can be constructed.
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
+        limeXMLDocumentFactory.createLimeXMLDocument(richQuery); // make sure it can be constructed.
+        QueryRequest query = queryRequestFactory.createQuery("", richQuery);
         assertTrue(qrt.contains(query));
         
         // Check Weed
         richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
-        factory.createLimeXMLDocument(richQuery); // make sure it can be constructed.
-        query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
+        limeXMLDocumentFactory.createLimeXMLDocument(richQuery); // make sure it can be constructed.
+        query = queryRequestFactory.createQuery("", richQuery);
         assertTrue(qrt.contains(query));
     }
     
     
     public void testCCResultsXMLSearch() throws Exception {
+        
         setAcceptedIncoming();
 
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"creativecommons.org/licenses/\"/></audios>";
-        factory.createLimeXMLDocument(richQuery);
+        limeXMLDocumentFactory.createLimeXMLDocument(richQuery);
         // we should send a query to the leaf and get results.
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
+        Thread.sleep(5 * 1000);
+        
+        QueryRequest query = queryRequestFactory.createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
+        
+        Thread.sleep(5 * 1000);
 
         QueryReply reply = getFirstQueryReply(testUP[1]);
         assertNotNull(reply);
@@ -167,9 +184,9 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         setAcceptedIncoming();
 
         String richQuery = "<?xml version=\"1.0\"?><audios><audio licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
-        factory.createLimeXMLDocument(richQuery);
+        limeXMLDocumentFactory.createLimeXMLDocument(richQuery);
         // we should send a query to the leaf and get results.
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
+        QueryRequest query = queryRequestFactory.createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
 
@@ -199,10 +216,10 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 		setAcceptedIncoming();
 		
 		String richQuery = "<?xml version=\"1.0\"?><audios><audio title=\"love\" licensetype=\"http://www.shmedlic.com/license/3play.aspx\"/></audios>";
-        factory.createLimeXMLDocument(richQuery);
+        limeXMLDocumentFactory.createLimeXMLDocument(richQuery);
 
         // we should send a query to the leaf and get results.
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
+        QueryRequest query = queryRequestFactory.createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
 
@@ -232,10 +249,10 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 		setAcceptedIncoming();
 		
 		String richQuery = "<?xml version=\"1.0\"?><audios><audio title=\"love\"/></audios>";
-        factory.createLimeXMLDocument(richQuery);
+        limeXMLDocumentFactory.createLimeXMLDocument(richQuery);
 
         // we should send a query to the leaf and get results.
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("", richQuery);
+        QueryRequest query = queryRequestFactory.createQuery("", richQuery);
         testUP[1].send(query);
         testUP[1].flush();
 
@@ -257,13 +274,11 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	}
     
     private void setAcceptedIncoming() throws Exception {
-        Acceptor ac = ProviderHacks.getAcceptor();
-        PrivilegedAccessor.setValue(ac, "_acceptedIncoming", Boolean.TRUE);
+        networkManagerStub.setAcceptedIncomingConnection(true);
     }
     
     private boolean addXMLToResponses(QueryReply qr) throws Exception {
-        return ((Boolean)PrivilegedAccessor.invokeMethod(
-                    ProviderHacks.getForMeReplyHandler(), "addXMLToResponses", qr)).booleanValue();
+        return ForMeReplyHandler.addXMLToResponses(qr, limeXMLDocumentHelper);
     }
 }
             

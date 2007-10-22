@@ -325,7 +325,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
 
 
     //////////////////////////////////////////////////////////////////
-    public static void doSettings() throws Exception {
+    @Override
+    public void setSettings() throws Exception {
         PrivilegedAccessor.setValue(Acceptor.class, "INCOMING_EXPIRE_TIME",
                                     new Long(MY_EXPIRE_TIME));
         PrivilegedAccessor.setValue(Acceptor.class, "WAIT_TIME_AFTER_REQUESTS",
@@ -334,12 +335,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                                     new Long(MY_VALIDATE_TIME));
     }
 
-    public static Integer numUPs() {
-        return new Integer(2);
-    }
-
-    public static ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
+    public int getNumberOfPeers() {
+        return 2;
     }
 
     public static class MyActivityCallback extends ActivityCallbackStub {

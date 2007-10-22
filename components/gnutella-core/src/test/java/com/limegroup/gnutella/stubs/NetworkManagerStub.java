@@ -9,15 +9,16 @@ import com.limegroup.gnutella.NetworkManager;
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
     private boolean acceptedIncomingConnection;
-    private byte[] address;
-    private int port;
+    private byte[] address = new byte[] { 127, 0, 0, 1 };
+    private int port = 5555;
     private boolean ipPortValid;
-    private GUID solicitedGUID;    
+    private GUID solicitedGUID = new GUID();
     private boolean canReceiveSolicited;
     private boolean canReceiveUnsolicited;
     private boolean guessCapable;
     private byte[] externalAddress;
     private boolean canDoFWT;
+    private GUID udpConnectBackGUI = new GUID();
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -52,6 +53,10 @@ public class NetworkManagerStub implements NetworkManager {
         this.address = address;
     }
     
+    /**
+     * Returns whatever is set in {@link #setAddress(byte[])} by default
+     * 127.0.0.1.
+     */
     public byte[] getAddress() {
         return address;
     }
@@ -74,13 +79,22 @@ public class NetworkManagerStub implements NetworkManager {
         this.port = port;
     }
     
+    /**
+     * Returns whatever is set by {@link #setPort(int)}, by default 5555.
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * Returns a random but the same GUID across calls.
+     */
     public GUID getUDPConnectBackGUID() {
-        // TODO Auto-generated method stub
-        return null;
+        return udpConnectBackGUI;
+    }
+    
+    public void setUDPConnectBackGUID(GUID guid) {
+        udpConnectBackGUI = guid;
     }
 
     public boolean incomingStatusChanged() {
@@ -107,13 +121,16 @@ public class NetworkManagerStub implements NetworkManager {
 
     public void setListeningPort(int port) throws IOException {
         // TODO Auto-generated method stub
-        
     }
 
     public int getStableUDPPort() {
         return 0;
     }
 
+    /**
+     * Returns whatever is set by {@link #setSolicitedGUID(GUID)}, by default
+     * a random GUID that does not change.
+     */
     public GUID getSolicitedGUID() {
         return solicitedGUID;
     }
@@ -123,7 +140,6 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public int supportsFWTVersion() {
-        // TODO Auto-generated method stub
         return 0;
     }
 

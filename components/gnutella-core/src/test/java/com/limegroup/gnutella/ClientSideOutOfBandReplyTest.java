@@ -55,8 +55,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    @SuppressWarnings("unused")
-    private static void doSettings() {
+    @Override
+    public void setSettings() {
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
     }
     
@@ -507,8 +507,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     
     //////////////////////////////////////////////////////////////////
 
-    public static Integer numUPs() {
-        return new Integer(3);
+    public int getNumberOfPeers() {
+        return 3;
     }
 
     public static ActivityCallback getActivityCallback() {

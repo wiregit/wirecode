@@ -140,8 +140,9 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         }
     }
 
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
 
     public static ActivityCallback getActivityCallback() {

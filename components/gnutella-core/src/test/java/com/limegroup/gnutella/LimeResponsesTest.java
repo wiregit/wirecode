@@ -29,11 +29,13 @@ public class LimeResponsesTest extends ClientSideTestCase {
         return new ActivityCallbackStub();
     }
     
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
     
-    private static void doSettings() throws Exception {
+    @Override
+    public void setSettings() throws Exception {
         PrivilegedAccessor.setValue(FileManager.class, "QRP_DELAY", 1000);
         SearchSettings.LIME_QRP_ENTRIES.setValue(new String[]{"badger"});
         SearchSettings.LIME_SEARCH_TERMS.setValue(new String[]{"badger"});

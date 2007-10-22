@@ -37,8 +37,8 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }      
     
-    @SuppressWarnings("unused")
-    private static void doSettings() {
+    @Override
+    public void setSettings() {
         TIMEOUT = 1250;
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3;wmv;png;bin");
         // get the resource file for com/limegroup/gnutella
@@ -70,8 +70,8 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
     
     //////////////////////////////////////////////////////////////////
 
-    public static Integer numUPs() {
-        return new Integer(3);
+    public int getNumberOfPeers() {
+        return 3;
     }
 
     public static ActivityCallback getActivityCallback() {

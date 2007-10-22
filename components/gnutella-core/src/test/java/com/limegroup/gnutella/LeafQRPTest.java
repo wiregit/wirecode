@@ -12,7 +12,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -32,12 +31,9 @@ public class LeafQRPTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public static Integer numUPs() {
-        return new Integer(1);
-    }
-
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
 
     ///////////////////////// Actual Tests ////////////////////////////

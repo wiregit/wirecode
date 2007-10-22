@@ -25,7 +25,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Checks whether a leaf node handles GUESS queries correctly.  Tests the
@@ -272,12 +271,9 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         UDP_ACCESS.send(dg);
 	}
 
-    public static Integer numUPs() {
-        return new Integer(3);
-    }
-
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
+    @Override
+    public int getNumberOfPeers() {
+        return 3;
     }
 
 }

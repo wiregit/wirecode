@@ -28,8 +28,9 @@ public class UDPStatusTest extends ClientSideTestCase {
         return new ActivityCallbackStub();
     }
     
-    protected static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
     
     public void testSolicited() throws Exception {

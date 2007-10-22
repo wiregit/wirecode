@@ -24,13 +24,14 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         return buildTestSuite(ClientSideOOBProxyControlTest.class);
     }
 
-    @SuppressWarnings("unused")
-    private static void doSettings() {
+    @Override
+    public void doSettings() {
         SearchSettings.DISABLE_OOB_V2.setBoolean(false);
     }
     
-    public static Integer numUPs() {
-        return new Integer(2);
+    @Override
+    public int getNumberOfPeers() {
+        return 2;
     }
 
     public static ActivityCallback getActivityCallback() {

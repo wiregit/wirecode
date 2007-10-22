@@ -28,19 +28,25 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.util.Base32;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -48,9 +54,32 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  */
 public class ClientSidePushProxyTest extends ClientSideTestCase {
     
-    protected static final int PORT = 6669;
+    protected final int PORT = 6669;
 
+    /**
+     * static so the activity callback can access it.
+     */
     protected static int TIMEOUT = 1000; // should override super
+
+    private FileManager fileManager;
+
+    private ConnectionManager connectionManager;
+
+    private QueryRequestFactory queryRequestFactory;
+
+    private ApplicationServices applicationServices;
+
+    private SearchServices searchServices;
+
+    private ResponseFactory responseFactory;
+
+    private QueryReplyFactory queryReplyFactory;
+
+    private MyActivityCallback callback;
+
+    private DownloadServices downloadServices;
+
+    private NetworkManagerStub networkManagerStub;
 
     public ClientSidePushProxyTest(String name) {
         super(name);
@@ -66,9 +95,28 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
     @Override
     public void setUp() throws Exception {
-        super.setUp();
+        networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setPort(PORT);
+        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        super.setUp(injector);
 
-        ProviderHacks.getDownloadManager().clearAllDownloads();        
+        DownloadManager downloadManager = injector.getInstance(DownloadManager.class);
+        fileManager = injector.getInstance(FileManager.class);
+        connectionManager = injector.getInstance(ConnectionManager.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        applicationServices = injector.getInstance(ApplicationServices.class);
+        searchServices = injector.getInstance(SearchServices.class);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        callback = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
+        downloadServices = injector.getInstance(DownloadServices.class);
+        
+        downloadManager.clearAllDownloads();
         
         //      Turn off by default, explicitly test elsewhere.
         SSLSettings.TLS_INCOMING.setValue(false);
@@ -76,9 +124,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // duplicate queries are sent out each time, so avoid the DuplicateFilter
         Thread.sleep(2000);        
 
-        ((MyActivityCallback) getCallback()).cleanup();
         // send a MessagesSupportedMessage
-        testUP[0].send(ProviderHacks.getMessagesSupportedVendorMessage());
+        testUP[0].send(injector.getInstance(MessagesSupportedVendorMessage.class));
         testUP[0].flush();
         
         // we expect to get a PushProxy request
@@ -122,11 +169,11 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         drain(testUP[0]);
 
         // make sure leaf is sharing
-        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
-        assertEquals(1, ProviderHacks.getConnectionManager().getNumConnections());
+        assertEquals(2, fileManager.getNumFiles());
+        assertEquals(1, connectionManager.getNumConnections());
 
         // send a query that should be answered
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
+        QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
                 "berkeley", null, null, null, false, Network.UNKNOWN, false, 0);
         testUP[0].send(query);
         testUP[0].flush();
@@ -168,7 +215,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             ss.bind(new InetSocketAddress(9000));
             // test that the client responds to a PushRequest
             PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
-                                             ProviderHacks.getApplicationServices().getMyGUID(),
+                                             applicationServices.getMyGUID(),
                                              0, 
                                              InetAddress.getLocalHost().getAddress(),
                                              9000,
@@ -192,7 +239,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                 // confirm a GIV
                 currLine = reader.readLine();
                 GUID guid = new GUID(
-                        ProviderHacks.getApplicationServices().getMyGUID());
+                        applicationServices.getMyGUID());
                 String givLine = "GIV 0:" + guid.toHexString();
                 assertTrue(currLine.startsWith(givLine));
             } finally {
@@ -222,7 +269,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query
         byte[] guid = GUID.makeGuid();
-        ProviderHacks.getSearchServices().query(guid, "boalt.org");
+        searchServices.query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;
@@ -240,21 +287,21 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             Set<IpPort> proxies = new TreeSet<IpPort>(IpPort.COMPARATOR);
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             Response[] res = new Response[1];
-            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
-            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6355,
+            res[0] = responseFactory.createResponse(10, 10, "boalt.org");
+            m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 6355,
                     myIP(), 0, res, clientGUID, new byte[0], true, false,
                     true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 
             // wait a while for Leaf to process result
-            assertNotNull(((MyActivityCallback) getCallback()).getRFD());
+            assertNotNull(callback.getRFD());
 
 
             // tell the leaf to download the file, should result in push proxy
             // request
-            Downloader download = ProviderHacks.getDownloadServices().download((new RemoteFileDesc[] 
-                { ((MyActivityCallback)getCallback()).getRFD() }), true, 
+            Downloader download = downloadServices.download((new RemoteFileDesc[] 
+                { callback.getRFD() }), true, 
                     new GUID(m.getGUID()));
     
             // wait for the incoming HTTP request
@@ -292,8 +339,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                 StringTokenizer st = new StringTokenizer(currLine, ":");
                 assertEquals(st.nextToken(), "X-Node");
                 InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-                Arrays.equals(addr.getAddress(), ProviderHacks.getNetworkManager().getAddress());
-                assertEquals(Integer.parseInt(st.nextToken()), PORT);
+                Arrays.equals(addr.getAddress(), networkManagerStub.getAddress());
+                assertEquals(PORT, Integer.parseInt(st.nextToken()));
         
                 // send back a 202 and make sure no PushRequest is sent via the normal
                 // way
@@ -358,6 +405,9 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     }
     
     private void doNormalTest(boolean settingOn, boolean expectTLS) throws Exception {
+        
+        setAccepted(true);
+        
         if(settingOn)
             SSLSettings.TLS_INCOMING.setValue(true);
         
@@ -367,7 +417,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // construct and send a query
         byte[] guid = GUID.makeGuid();
-        ProviderHacks.getSearchServices().query(guid, "golf is awesome");
+        searchServices.query(guid, "golf is awesome");
 
         // the testUP[0] should get it
         Message m = null;
@@ -377,21 +427,20 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // send a reply with NO PushProxy info
         Response[] res = new Response[1];
-        res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "golf is awesome");
-        m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6355,
+        res[0] = responseFactory.createResponse(10, 10, "golf is awesome");
+        m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 6355,
                 myIP(), 0, res, clientGUID, new byte[0], false, false, true,
                 true, false, false, null);
         testUP[0].send(m);
         testUP[0].flush();
 
         // wait a while for Leaf to process result
-        assertNotNull(((MyActivityCallback) getCallback()).getRFD());
+        assertNotNull(callback.getRFD());
 
         // tell the leaf to download the file, should result in normal TCP
         // PushRequest
-        Downloader downloader = ProviderHacks.getDownloadServices().download(
-                (new RemoteFileDesc[] { ((MyActivityCallback) getCallback())
-                        .getRFD() }), true, new GUID(m.getGUID()));
+        Downloader downloader = downloadServices.download(
+                (new RemoteFileDesc[] { callback.getRFD() }), true, new GUID(m.getGUID()));
 
         // await a PushRequest
         do {
@@ -402,8 +451,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         assertNotNull(pr);
         assertEquals(expectTLS, pr.isTLSCapable());
         assertEquals(clientGUID, pr.getClientGUID());
-        assertEquals(ProviderHacks.getNetworkManager().getAddress(), pr.getIP());
-        assertEquals(ProviderHacks.getNetworkManager().getPort(), pr.getPort());
+        assertEquals(networkManagerStub.getAddress(), pr.getIP());
+        assertEquals(networkManagerStub.getPort(), pr.getPort());
         assertEquals(10, pr.getIndex());
         assertFalse(pr.isFirewallTransferPush());
         
@@ -411,13 +460,16 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     }
 
     public void testCanReactToBadPushProxy() throws Exception {
+        // assume client accepted connections from the outside successfully
+        setAccepted(true);
+        
         drain(testUP[0]);
         // some setup
         byte[] clientGUID = GUID.makeGuid();
 
         // construct and send a query
         byte[] guid = GUID.makeGuid();
-        ProviderHacks.getSearchServices().query(guid, "berkeley.edu");
+        searchServices.query(guid, "berkeley.edu");
 
         // the testUP[0] should get it
         Message m = null;
@@ -438,27 +490,27 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             proxies.add(new IpPortImpl("127.0.0.1", 8000));
             Response[] res = new Response[1];
-            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "berkeley.edu");
-            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6355,
+            res[0] = responseFactory.createResponse(10, 10, "berkeley.edu");
+            m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 6355,
                     myIP(), 0, res, clientGUID, new byte[0], true, false,
                     true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 
             // wait a while for Leaf to process result
-            assertNotNull(((MyActivityCallback) getCallback()).getRFD());
+            assertNotNull(callback.getRFD());
 
             // tell the leaf to download the file, should result in push proxy
             // request
-            ProviderHacks.getDownloadServices()
+            downloadServices
                     .download(
-                            (new RemoteFileDesc[] { ((MyActivityCallback) getCallback())
-                                    .getRFD() }), true, new GUID((m.getGUID())));
+                            (new RemoteFileDesc[] { callback.getRFD() }), true, new GUID((m.getGUID())));
 
             // wait for the incoming HTTP request
             Socket httpSock = ss.accept();
             try {
-                // send back a error and make sure the PushRequest is sent via
+                System.out.println("sending error");
+                // send back an error and make sure the PushRequest is sent via
                 // the normal way
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(httpSock.getOutputStream()));
@@ -478,18 +530,15 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         }
     }
 
-    public static Integer numUPs() {
-        return new Integer(1);
-    }
-
-    public static ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
+    public int getNumberOfPeers() {
+        return 1;
     }
 
     private static byte[] myIP() {
         return new byte[] { (byte) 192, (byte) 168, 0, 1 };
     }
 
+    @Singleton
     public static class MyActivityCallback extends ActivityCallbackStub {
 
         private Lock rfdLock = new ReentrantLock();
@@ -502,7 +551,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             rfdLock.lock();
             try {
                 if (rfd == null) {
-                    rfdCondition.await(TIMEOUT, TimeUnit.MILLISECONDS);
+                    rfdCondition.await(120, TimeUnit.SECONDS);
                 }
             } finally {
                 rfdLock.unlock();
@@ -512,6 +561,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         public void handleQueryResult(RemoteFileDesc rfd, HostData data,
                 Set locs) {
+            System.out.println("rfd received");
             rfdLock.lock();
             try {
                 this.rfd = rfd;
@@ -526,8 +576,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         }
     }
 
-    private static void setAccepted(boolean accepted) throws Exception {
-        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(), "_acceptedIncoming", accepted);
+    private void setAccepted(boolean accepted) throws Exception {
+        networkManagerStub.setAcceptedIncomingConnection(accepted);
     }
 
 }

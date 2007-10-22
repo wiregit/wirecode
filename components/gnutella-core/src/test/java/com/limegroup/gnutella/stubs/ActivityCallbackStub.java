@@ -3,6 +3,7 @@ package com.limegroup.gnutella.stubs;
 import java.io.File;
 import java.util.Set;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -20,6 +21,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
 /**
  * A stub for ActivityCallback.  Does nothing.
  */
+@Singleton
 public class ActivityCallbackStub implements ActivityCallback {
     
     //don't delete corrupt file on detection

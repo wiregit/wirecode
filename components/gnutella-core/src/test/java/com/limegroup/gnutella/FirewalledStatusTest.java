@@ -37,8 +37,8 @@ public class FirewalledStatusTest extends ClientSideTestCase {
         
     }
     
-    @SuppressWarnings("unused")
-    private static void doSettings() {
+    @Override
+    public void setSettings() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
     }        
 
@@ -58,8 +58,9 @@ public class FirewalledStatusTest extends ClientSideTestCase {
 
     //////////////////////////////////////////////////////////////////
 
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
 
     public static ActivityCallback getActivityCallback() {

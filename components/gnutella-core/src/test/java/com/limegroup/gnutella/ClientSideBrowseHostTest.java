@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -20,13 +22,17 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.Base32;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -36,6 +42,10 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
     private MyActivityCallback callback;
+    private NetworkManagerStub networkManagerStub;
+    private SearchServices searchServices;
+    private ResponseFactory responseFactory;
+    private QueryReplyFactory queryReplyFactory;
 
     public ClientSideBrowseHostTest(String name) {
         super(name);
@@ -57,20 +67,33 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     // 2. that the client makes a correct push proxy connection if necessary
     // 3. if all else fails the client sends a PushRequest
 
-    public static void globalSetUp() throws Exception {
-        PrivilegedAccessor.setValue(ProviderHacks.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
+    @Override
+    protected void setUp() throws Exception {
+        networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setAcceptedIncomingConnection(true);
+        networkManagerStub.setPort(SERVER_PORT);
+        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        super.setUp(injector);
+        callback = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
+        searchServices = injector.getInstance(SearchServices.class);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
     }
 
     public void testHTTPRequest() throws Exception {
-        callback = (MyActivityCallback) getCallback();
-
+        
         drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        ProviderHacks.getSearchServices().query(guid, "boalt.org");
+        searchServices.query(guid, "boalt.org");
 
         // the testUP[0] should get it
         Message m = null;
@@ -88,20 +111,19 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             IpPort[] proxies = new IpPortImpl[1];
             proxies[0] = new IpPortImpl("127.0.0.1", 7000);
             Response[] res = new Response[1];
-            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "boalt.org");
-            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 7000,
+            res[0] = responseFactory.createResponse(10, 10, "boalt.org");
+            m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 7000,
                     InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false,
                     true, true, false, false, null);
             testUP[0].send(m);
             testUP[0].flush();
 
             // wait a while for Leaf to process result
-            Thread.sleep(200);
             assertNotNull(callback.getRFD());
 
             // tell the leaf to browse host the file, should result in direct HTTP
             // request
-            ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
+            searchServices.doAsynchronousBrowseHost(callback.getRFD(),
                     new GUID(GUID.makeGuid()), new GUID(clientGUID),
                     null, false);
 
@@ -130,14 +152,13 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         // wait for connections to process any messages
         Thread.sleep(6000);
         
-        callback = (MyActivityCallback) getCallback();
         drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        ProviderHacks.getSearchServices().query(guid, "nyu.edu");
+        searchServices.query(guid, "nyu.edu");
 
         // the testUP[0] should get it
         Message m = null;
@@ -157,20 +178,19 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             final IpPortSet proxies = new IpPortSet();
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             Response[] res = new Response[1];
-            res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "nyu.edu");
-            m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 6999,
+            res[0] = responseFactory.createResponse(10, 10, "nyu.edu");
+            m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 6999,
                     InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false,
                     true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 
             // wait a while for Leaf to process result
-            Thread.sleep(200);
-            assertTrue(callback.getRFD() != null);
+            assertNotNull(callback.getRFD());
 
             // tell the leaf to browse host the file, should result in PushProxy
             // request
-            ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
+            searchServices.doAsynchronousBrowseHost(callback.getRFD(),
                     new GUID(GUID.makeGuid()), new GUID(clientGUID),
                     proxies, false);
 
@@ -209,8 +229,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                 StringTokenizer st = new StringTokenizer(currLine, ":");
                 assertEquals(st.nextToken(), "X-Node");
                 InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-                Arrays.equals(addr.getAddress(), ProviderHacks.getNetworkManager().getAddress());
-                assertEquals(Integer.parseInt(st.nextToken()), SERVER_PORT);
+                Arrays.equals(addr.getAddress(), networkManagerStub.getAddress());
+                assertEquals(SERVER_PORT, Integer.parseInt(st.nextToken()));
 
                 // now we need to GIV
                 Socket push = new Socket(InetAddress.getLocalHost(), SERVER_PORT);
@@ -244,14 +264,13 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
 
     public void testSendsPushRequest() throws Exception {
-        callback = (MyActivityCallback) getCallback();
         drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        ProviderHacks.getSearchServices().query(guid, "anita");
+        searchServices.query(guid, "anita");
 
         // the testUP[0] should get it
         Message m = null;
@@ -265,19 +284,18 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         final IpPortSet proxies = new IpPortSet();
         proxies.add(new IpPortImpl("127.0.0.1", 7001));
         Response[] res = new Response[1];
-        res[0] = ProviderHacks.getResponseFactory().createResponse(10, 10, "anita");
-        m = ProviderHacks.getQueryReplyFactory().createQueryReply(m.getGUID(), (byte) 1, 7000,
+        res[0] = responseFactory.createResponse(10, 10, "anita");
+        m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 7000,
                 InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false, true,
                 true, false, false, proxies);
         testUP[0].send(m);
         testUP[0].flush();
 
         // wait a while for Leaf to process result
-        Thread.sleep(200);
-        assertTrue(callback.getRFD() != null);
+        assertNotNull(callback.getRFD());
 
         // tell the leaf to browse host the file,
-        ProviderHacks.getSearchServices().doAsynchronousBrowseHost(callback.getRFD(),
+        searchServices.doAsynchronousBrowseHost(callback.getRFD(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies, false);
 
@@ -324,28 +342,32 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         // TODO: should i send some Query Hits? Might be a good test.
     }
 
-    // ////////////////////////////////////////////////////////////////
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfPeers() {
+        return 1;
     }
 
-    public static ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
-    }
-
+    @Singleton
     private static class MyActivityCallback extends ActivityCallbackStub {
-        private RemoteFileDesc _rfd = null;
-        public RemoteFileDesc getRFD() {
-            return _rfd;
+        
+        private volatile RemoteFileDesc remoteFileDesc;
+
+        private final CountDownLatch latch = new CountDownLatch(1);
+        
+        public RemoteFileDesc getRFD() throws InterruptedException {
+            latch.await(5, TimeUnit.SECONDS);
+            return remoteFileDesc;
         }
         
         public void handleQueryResult(RemoteFileDesc rfd,
                                       HostData data,
                                       Set locs) {
-            _rfd = rfd;
             // make sure the browse is not attempted as a TLS connection
-            _rfd.setTLSCapable(false);
+            rfd.setTLSCapable(false);
+            remoteFileDesc = rfd;
+            latch.countDown();
         }
     }
+
 }
 

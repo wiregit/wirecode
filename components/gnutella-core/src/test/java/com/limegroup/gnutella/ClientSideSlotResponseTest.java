@@ -17,7 +17,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 
 /**
@@ -42,8 +41,8 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     private static final String APP_TXT = SOME_FILE+"2.txt";
     private static final String OTHER_TORRENT = "other.torrent";
     
-    @SuppressWarnings("unused")
-    private static void doSettings() throws Exception {
+    @Override
+    public void setSettings() throws Exception {
     	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
     	File textFile = new File(_sharedDir,TEXT_FILE);
     	File torrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
@@ -69,14 +68,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	assertEquals(5, ProviderHacks.getFileManager().getNumFiles());
     }
     
-    public static Integer numUPs() {
-        return new Integer(3);
+    @Override
+    public int getNumberOfPeers() {
+        return 3;
     }
 
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-    
     private static class UploadManagerStub extends HTTPUploadManager {
     	boolean isServiceable, mayBeServiceable;
     	UploadManagerStub() {
