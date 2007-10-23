@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -130,7 +131,26 @@ public class MagnetOptions implements Serializable {
 		}
 		return magnet;
 	}
-	
+
+    /**
+     * Allows multiline parsing of magnet links.
+     * @param magnets
+     * @return array may be empty, but is never <code>null</code>
+     */
+    public static MagnetOptions[] parseMagnets(String magnets) {
+        List<MagnetOptions> list = new ArrayList<MagnetOptions>();
+        StringTokenizer tokens = new StringTokenizer
+            (magnets, System.getProperty("line.separator"));
+        while (tokens.hasMoreTokens()) {
+            String next = tokens.nextToken();
+            MagnetOptions[] options = MagnetOptions.parseMagnet(next);
+            if (options.length > 0) {
+                list.addAll(Arrays.asList(options));                
+            }
+        }
+        return list.toArray(new MagnetOptions[0]);
+    }
+
 	/**
 	 * Returns an empty array if the string could not be parsed.
 	 * @param arg a string like "magnet:?xt.1=urn:sha1:49584DFD03&xt.2=urn:sha1:495345k"

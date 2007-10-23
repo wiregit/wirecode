@@ -9,10 +9,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -305,24 +301,5 @@ public class ExternalControl {
         }
         
 	    return false;
-	}
-    
-	/**
-	 * Allows multiline parsing of magnet links.
-	 * @param magnets
-	 * @return array may be empty, but is never <code>null</code>
-	 */
-	public MagnetOptions[] parseMagnets(String magnets) {
-		List<MagnetOptions> list = new ArrayList<MagnetOptions>();
-		StringTokenizer tokens = new StringTokenizer
-			(magnets, System.getProperty("line.separator"));
-		while (tokens.hasMoreTokens()) {
-			String next = tokens.nextToken();
-			MagnetOptions[] options = MagnetOptions.parseMagnet(next);
-			if (options.length > 0) {
-				list.addAll(Arrays.asList(options));			    
-			}
-		}
-		return list.toArray(new MagnetOptions[0]);
 	}
 }
