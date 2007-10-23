@@ -176,13 +176,14 @@ public abstract class BaseTestCase extends AssertComparisons {
             runTest();
         } catch (Throwable t) {
             thrown = t;
+            throw thrown;
         } finally {
             try {
                 tearDown();
             } catch (Throwable tearDown){
                 // don't let throwables during tearDown
                 // overwrite throwables from the test
-                if (thrown != null)
+                if (thrown == null)
                     throw tearDown;
             } finally {
                 postTearDown();
