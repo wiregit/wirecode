@@ -3,7 +3,10 @@ package com.limegroup.gnutella;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
 
@@ -14,6 +17,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
@@ -79,6 +84,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
     private LifecycleManager lifecycleManager;
     private QueryRequestFactory queryRequestFactory;
     private ConnectionServices connectionServices;
+    private ConnectionManager connectionManager;
 
     public UltrapeerQueryRouteTableTest(String name) {
         super(name);
@@ -126,12 +132,23 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         connectionServices = injector.getInstance(ConnectionServices.class);
 
         lifecycleManager.start();
-        connectionServices.connectToHostAsynchronously("localhost", 
-            Backend.BACKEND_PORT, ConnectType.PLAIN);    
         
+        final AtomicReference<ManagedConnection> mc = new AtomicReference<ManagedConnection>(null);
+        connectionManager = injector.getInstance(ConnectionManager.class);
+        connectionManager.addEventListener(new ConnectionLifecycleListener() {
+            public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+                if (evt.isConnectionInitializedEvent() && evt.getConnection().getPort() == Backend.BACKEND_PORT) {
+                    mc.set(evt.getConnection());
+                }
+            }
+        });
+        connectionServices.connectToHostAsynchronously("localhost", 
+                Backend.BACKEND_PORT, ConnectType.PLAIN);    
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.
-         Thread.sleep(5 * 1000);
+        while(mc.get() == null || mc.get().getQueryRouteTablePercentFull() == 0) {
+            Thread.sleep(500);
+        }
         assertTrue("should be connected", connectionServices.isConnected());
         
         SENT.clear();
@@ -139,8 +156,17 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 	}
 
 	public void tearDown() throws Exception {
+        final CountDownLatch disconnectLatch = new CountDownLatch(1);
+        connectionManager.addEventListener(new ConnectionLifecycleListener() {
+            public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+                if (evt.isConnectionClosedEvent() && evt.getConnection().getPort() == Backend.BACKEND_PORT)
+                    disconnectLatch.countDown();
+            }
+        });
 	    connectionServices.disconnect();
 	    lifecycleManager.shutdown();
+	    if (!disconnectLatch.await(3, TimeUnit.SECONDS))
+            fail("teardown failed");
 	}
     
     /**
@@ -183,7 +209,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         // The TTL on the sent query should be 1 because the other Ultrapeer
         // should have a "hit" in its QRP table.  When there's a hit, we 
         // send with TTL 1 simply because it's likely that it's popular.
-        assertEquals("wrong ttl", 1, qSent.getTTL());
+        assertEquals("wrong ttl "+qSent, 1, qSent.getTTL());
         assertEquals("wrong hops", 0, qSent.getHops());
         assertEquals("wrong query", qr.getQuery(), qSent.getQuery());
         assertEquals("wrong guid", qr.getGUID(), qSent.getGUID());        
