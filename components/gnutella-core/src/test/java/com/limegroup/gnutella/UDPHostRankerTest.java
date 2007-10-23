@@ -17,11 +17,15 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.io.IpPort;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
@@ -30,8 +34,17 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  */
 @SuppressWarnings("unchecked")
 public class UDPHostRankerTest extends ClientSideTestCase {
-    protected static final int PORT=6669;
-    protected static int TIMEOUT=1000; // should override super
+    
+    final int PORT = 6669;
+    private PingRequestFactory pingRequestFactory;
+    private UniqueHostPinger uniqueHostPinger;
+    private MessageFactory messageFactory;
+    private PingReplyFactory pingReplyFactory;
+    private MessageRouterImpl messageRouter;
+    
+    {
+        TIMEOUT = 1000; // override super
+    }
 
     public UDPHostRankerTest(String name) {
         super(name);
@@ -45,8 +58,17 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    ///////////////////////// Actual Tests ////////////////////////////
-
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class);
+        super.setUp(injector);
+        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        uniqueHostPinger = injector.getInstance(UniqueHostPinger.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
+    }
+    
     public void testRanker() throws Exception {
         DatagramSocket[] udps = new DatagramSocket[20];
         for (int i = 0; i < udps.length; i++)   
@@ -58,8 +80,8 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         final MLImpl ml = new MLImpl();
 
-        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest(GUID.makeGuid(), (byte)1);
-        UDPPinger pinger = ProviderHacks.getUniqueHostPinger();
+        PingRequest pr = pingRequestFactory.createPingRequest(GUID.makeGuid(), (byte)1);
+        UDPPinger pinger = uniqueHostPinger;
         pinger.rank(list, ml, null, pr);
         
         Thread.sleep(500);
@@ -75,9 +97,9 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) ProviderHacks.getMessageFactory().read(in);
+            PingRequest ping = (PingRequest) messageFactory.read(in);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PingReply pong = ProviderHacks.getPingReplyFactory().create(ping.getGUID(), (byte)1);
+            PingReply pong = pingReplyFactory.create(ping.getGUID(), (byte)1);
             pong.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
@@ -90,9 +112,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         // wait 20 seconds, make sure MessageRouter's map is clear
         Thread.sleep(20000);
-        Map map = 
-        (Map) PrivilegedAccessor.getValue(ProviderHacks.getMessageRouter(),
-                                          "_messageListeners");
+        Map map = messageRouter.getMessageListenerMap();
         assertEquals(0, map.size());
         assertTrue(ml.unregistered);
     }
@@ -144,11 +164,8 @@ public class UDPHostRankerTest extends ClientSideTestCase {
     public int getNumberOfPeers() {
         return 1;
     }
-
-    public static ActivityCallback getActivityCallback() {
-        return new MyActivityCallback();
-    }
-
+    
+    @Singleton
     public static class MyActivityCallback extends ActivityCallbackStub {
         private RemoteFileDesc rfd = null;
         public RemoteFileDesc getRFD() {
