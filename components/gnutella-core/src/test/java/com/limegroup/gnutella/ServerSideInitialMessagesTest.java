@@ -14,7 +14,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  *  Tests that an Ultrapeer and Leaf correctly send and parse some initial messages
@@ -34,20 +33,20 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         return buildTestSuite(ServerSideInitialMessagesTest.class);
     }    
    
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfUltrapeers() {
+        return 1;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
-    }
-	
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
+    @Override
+    public int getNumberOfLeafpeers() {
+        return 1;
     }
     
-    public void setUp() {
+    @Override
+    public void setUp() throws Exception {
         _queue=new ArrayList(10);
+        super.setUp(LimeTestUtils.createInjector());
     }
 
     // BEGIN TESTS

@@ -5,11 +5,13 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  *  Tests that an Ultrapeer correctly handle Probe queries.  Essentially tests
@@ -24,7 +26,10 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  */
 public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     
-    protected static int TIMEOUT = 2000;
+    private final int TIMEOUT = 2000;
+    private QueryRequestFactory queryRequestFactory;
+    private ResponseFactory responseFactory;
+    private QueryReplyFactory queryReplyFactory;
 
     public ServerSideDynamicQueryTest(String name) {
         super(name);
@@ -38,18 +43,16 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-    public static Integer numUPs() {
-        return new Integer(2);
+	@Override
+	public int getNumberOfUltrapeers() {
+	    return 2;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
+	@Override
+	public int getNumberOfLeafpeers() {
+	    return 1;
     }
 	
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-
     @Override
     public void setUpQRPTables() throws Exception {
         //3. routed leaf, with route table for "test"
@@ -71,13 +74,19 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         }
     }
 
-    // BEGIN TESTS
-    // ------------------------------------------------------
-
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+    }
+    
     public void testBasicProbeMechanicsFromUltrapeer() throws Exception {
         drainAll();
 
-        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest request = queryRequestFactory.createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -91,9 +100,9 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
-		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
+		Response response1=responseFactory.createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
-		QueryReply reply1=ProviderHacks.getQueryReplyFactory().createQueryReply(request.getGUID(), (byte)2, 6346,
+		QueryReply reply1=queryReplyFactory.createQueryReply(request.getGUID(), (byte)2, 6346,
                 IP, 56, new Response[] {response1}, guid1, false);
         drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
@@ -125,7 +134,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testBasicProbeMechanicsFromLeaf() throws Exception {
         drainAll();
 
-        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest request = queryRequestFactory.createQuery("berkeley");
         request.hop();
         request.setTTL((byte)1);
         assertEquals(1, request.getHops());
@@ -141,9 +150,9 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
-		Response response1=ProviderHacks.getResponseFactory().createResponse(0L, 0L, "berkeley rocks");
+		Response response1=responseFactory.createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
-		QueryReply reply1=ProviderHacks.getQueryReplyFactory().createQueryReply(request.getGUID(), (byte)2, 6346,
+		QueryReply reply1=queryReplyFactory.createQueryReply(request.getGUID(), (byte)2, 6346,
                 IP, 56, new Response[] {response1}, guid1, false);
         drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
@@ -175,7 +184,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testDuplicateProbes() throws Exception {
         drainAll();
 
-        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest request = queryRequestFactory.createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -208,7 +217,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
     public void testProbeIsLimited() throws Exception {
         drainAll();
 
-        QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest request = queryRequestFactory.createQuery("berkeley");
         request.setTTL((byte)1);
 
         ULTRAPEER[1].send(request);
@@ -259,7 +268,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         for (int i = 2; i < 5; i++) {
             drainAll();
 
-            QueryRequest request = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+            QueryRequest request = queryRequestFactory.createQuery("berkeley");
             request.setTTL((byte)i);
 
             ULTRAPEER[1].send(request);
