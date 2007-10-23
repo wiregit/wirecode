@@ -60,9 +60,9 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 
     private ConnectionServices connectionServices;
 
-    private HeadersFactory headersFactory;
+    protected HeadersFactory headersFactory;
 
-    private BlockingConnectionFactory blockingConnectionFactory;
+    protected BlockingConnectionFactory blockingConnectionFactory;
 
 	/**
 	 * The central Ultrapeer used in the test.

@@ -13,7 +13,9 @@ import junit.framework.Test;
 
 import org.limewire.io.IOUtils;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
@@ -35,22 +37,22 @@ import com.limegroup.gnutella.util.EmptyResponder;
 @SuppressWarnings( { "unchecked", "cast" } )
 public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase {
 
-    protected static int TIMEOUT = 2000;
-
     /**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS;
+    private DatagramSocket UDP_ACCESS;
 
     /**
      * Just a TCP connection to use for testing.
      */
-    private static ServerSocket TCP_ACCESS;
+    private ServerSocket TCP_ACCESS;
 
     /**
      * The port for TCP_ACCESS
      */ 
-    private static final int TCP_ACCESS_PORT = 10776;
+    private final int TCP_ACCESS_PORT = 10776;
+
+    private MessageFactory messageFactory;
 
     public ServerSideConnectBackRedirectTest(String name) {
         super(name);
@@ -64,24 +66,40 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
 		junit.textui.TestRunner.run(suite());
 	}
 
-    public static Integer numUPs() {
-        return new Integer(2);
+	@Override
+	public int getNumberOfUltrapeers() {
+	    return 2;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
+	@Override
+	public int getNumberOfLeafpeers() {
+	    return 1;
     }
 
-    // BEGIN TESTS
-    // ------------------------------------------------------
-
-    // RUN THIS TEST FIRST
-    public void testConfirmSupport() throws Exception {
-        UDP_ACCESS = new DatagramSocket();
+	@Override
+	protected void setUp() throws Exception {
+	    Injector injector = LimeTestUtils.createInjector();
+	    super.setUp(injector);
+	    messageFactory = injector.getInstance(MessageFactory.class);
+	    
+	    UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
 
-	    LEAF[0] = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
-        LEAF[0].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF[0] = blockingConnectionFactory.createConnection("localhost", PORT);
+        LEAF[0].initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+        
+	    exchangeCapabilities();
+	}
+	
+	@Override
+	public void tearDown() throws Exception {
+	    super.tearDown();
+	    if (TCP_ACCESS != null) {
+	        TCP_ACCESS.close();
+	    }
+	}
+	
+    public void exchangeCapabilities() throws Exception {
 		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 
         //  Give the connection a chance to send its initial messages
@@ -127,7 +145,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = ProviderHacks.getMessageFactory().read(in);
+                Message m = messageFactory.read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
@@ -275,7 +293,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = ProviderHacks.getMessageFactory().read(in);
+                Message m = messageFactory.read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
