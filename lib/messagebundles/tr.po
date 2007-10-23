@@ -8,18 +8,17 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-10-01 15:41+0000\n"
+"PO-Revision-Date: 2007-10-17 23:01+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
-#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
@@ -28,7 +27,6 @@ msgstr ""
 "LimeWire'ı kullanmaya devam etmek için hard diskinizde yer açmalısınız."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
-#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
@@ -38,7 +36,6 @@ msgstr ""
 "edemeyebilir."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
-#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because you do not have the "
 "necessary permissions. Your preferences may not be maintained the next time "
@@ -56,10 +53,9 @@ msgid ""
 "behave in unexpected ways."
 msgstr ""
 "LimeWire gerekli bir dosyayı işletim sisteminin desteklemediği karakterler "
-"içerdiğinden dolayı açamadı. LimeWire beklenmedik bir şekilde davranabilir."
+"içerdiğinden dolayı açamaz. LimeWire beklenmedik bir şekilde davranabilir."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:39
-#, fuzzy
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
@@ -68,7 +64,6 @@ msgstr ""
 "fazla dosya indirmek için hard diskinizde boş yer açmalısınız."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:40
-#, fuzzy
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
@@ -77,7 +72,6 @@ msgstr ""
 "indiremiyor. Lütfen diğer programı kapatın ve tekrar deneyin."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:41
-#, fuzzy
 msgid ""
 "LimeWire was unable to create or continue writing an incomplete file for the "
 "selected download because you do not have permission to write files to the "
@@ -109,7 +103,6 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
 #: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
-#, fuzzy
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
@@ -120,10 +113,10 @@ msgstr ""
 #: core/com/limegroup/gnutella/DownloadManager.java:216
 #, fuzzy
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr "Üzgünüz ama LimeWire eski indirme ögelerini tekrardan başlatamıyor."
+msgstr ""
+"Üzgünüz ama LimeWire eski indirme ögelerinizi tekrardan başlatamıyor."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
-#, fuzzy
 msgid "Loading TLS Encryption..."
 msgstr "TLS Şifreleme yükleniyor..."
 
@@ -180,7 +173,6 @@ msgid "Loading magnet Management..."
 msgstr "Birleştirici (Magnet) Yönetimi yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
-#, fuzzy
 msgid "Loading Old Downloads..."
 msgstr "Eski İndirme Ögeleri yükleniyor..."
 
@@ -209,7 +201,6 @@ msgid "Loading Stale Connection Management..."
 msgstr "Stale (Eskimiş) Bağlantı Yönetimi yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
-#, fuzzy
 msgid "Loading Saved Files..."
 msgstr "Kaydedilmiş Dosyalar yükleniyor..."
 
@@ -219,7 +210,6 @@ msgstr "Spam Yönetimi yükleniyor..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:41
-#, fuzzy
 msgid "All Types"
 msgstr "Tüm Dosya Türleri"
 
@@ -234,7 +224,6 @@ msgstr "Programlar"
 #: core/com/limegroup/gnutella/MediaType.java:44
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:86
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
-#, fuzzy
 msgid "Audio"
 msgstr "Ses"
 
@@ -242,12 +231,10 @@ msgstr "Ses"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:102
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
-#, fuzzy
 msgid "Video"
 msgstr "Video"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
-#, fuzzy
 msgid "Images"
 msgstr "Resimler"
 
@@ -607,7 +594,6 @@ msgstr ""
 "butonuna tıklayınız."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:379
-#, fuzzy
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, click "
@@ -633,13 +619,11 @@ msgstr "Gözardı Et"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:428
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:95
-#, fuzzy
 msgid "Always Send Immediately"
 msgstr "Daima Hemen Gönder"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:429
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
-#, fuzzy
 msgid "Always Ask For Review"
 msgstr "Gözden Geçirmek İçin Sor"
 
@@ -660,7 +644,6 @@ msgstr ""
 "Teşekkür Ederiz.."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:533
-#, fuzzy
 msgid "Copy Report"
 msgstr "Raporu Kopyala"
 
@@ -676,12 +659,10 @@ msgstr "Raporu Kopyala"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:146
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
-#, fuzzy
 msgid "OK"
-msgstr "TAMAM"
+msgstr "Tamam"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
-#, fuzzy
 msgid "Automatically Scroll"
 msgstr "Otomatik Kaydır"
 
@@ -692,7 +673,6 @@ msgstr "LimeWire Hakkında"
 #. set up limewire version label
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:34
-#, fuzzy
 msgid "LimeWire"
 msgstr "LimeWire"
 
@@ -725,7 +705,6 @@ msgstr ""
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
-#, fuzzy
 msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
@@ -837,7 +816,6 @@ msgid "Deselect All"
 msgstr "Hiçbirisini Seçme"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:336
-#, fuzzy
 msgid "Deselects all Items in the List"
 msgstr "Listedeki Tüm Nesneleri Seçilmemiş Hale Getir"
 
@@ -2754,7 +2732,6 @@ msgid "A newer version is available, update?"
 msgstr "Yeni bir sürüm kullanılabilir durumda, güncellensin mi?"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:63
-#, fuzzy
 msgid "Upgrade to PRO"
 msgstr "PRO Sürüme Yükselt"
 
@@ -2766,7 +2743,6 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:66
-#, fuzzy
 msgid "Upgrade to LimeWire PRO?"
 msgstr "LimeWire PRO Sürümüne Yükseltilsin mi?"
 
@@ -2783,12 +2759,10 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:76
-#, fuzzy
 msgid "Would you like to get your free Java upgrade?"
 msgstr "Ücretsiz Java Yükseltmenizi İstiyor musunuz?"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:166
-#, fuzzy
 msgid "Get LimeWire PRO Now"
 msgstr "LimeWire PRO Sürümünü Şimdi Al"
 
@@ -2799,7 +2773,7 @@ msgstr "Niçin"
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:170
 #, fuzzy
 msgid "What does PRO give me?"
-msgstr "PRO ile nelere sahip olabilirim?"
+msgstr "PRO bana neler sağlar?"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:172
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:200
@@ -2807,7 +2781,6 @@ msgid "Later"
 msgstr "Sonra"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:174
-#, fuzzy
 msgid "Get LimeWire PRO Later"
 msgstr "LimeWire PRO'yu Sonra Al"
 
@@ -2823,7 +2796,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:538
-#, fuzzy
+#, java-format
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
@@ -2840,8 +2813,8 @@ msgid ""
 "the newest official version of LimeWire.</html>"
 msgstr ""
 "<html><b>LimeWire bir virüs ya da truva atı tarafıdan zarar görmüş "
-"olabilir!</b><br><br>Resmi LimeWire sürümünü indirmek için lütfen  <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> adresini "
+"olabilir!</b><br><br>Son çıkan resmi LimeWire sürümünü indirmek için lütfen  "
+"<a href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> adresini "
 "ziyaret edin.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:33
@@ -2880,12 +2853,10 @@ msgid "Disconnect from the Network"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:96
-#, fuzzy
 msgid "Open .&torrent"
 msgstr ".&torrent Aç"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:97
-#, fuzzy
 msgid "Opens a .torrent file from your hard drive"
 msgstr "Hard diskinizden bir .torrent dosyası açar"
 

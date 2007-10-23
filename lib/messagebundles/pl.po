@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -255,6 +255,7 @@ msgstr ""
 #~ msgstr "Problemy z Push"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
+#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
@@ -351,6 +352,7 @@ msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr "Niestety, LimeWire nie mógł ponowić ściągania starych plików."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
+#, fuzzy
 msgid "Loading TLS Encryption..."
 msgstr "Ładowanie TLS Encryption..."
 

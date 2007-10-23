@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-10-18 18:46+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -370,7 +370,7 @@ msgstr "Инициализация загрузок..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "Поиск обновления"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Directed Querier..."
@@ -415,7 +415,7 @@ msgstr "Программы"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 #, fuzzy
 msgid "Audio"
-msgstr "Студия"
+msgstr "Аудио"
 
 #: core/com/limegroup/gnutella/MediaType.java:45
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:102
@@ -423,11 +423,11 @@ msgstr "Студия"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 #, fuzzy
 msgid "Video"
-msgstr "Вид"
+msgstr "Видео"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Images"
-msgstr "Картинки"
+msgstr "Изображения"
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:194
@@ -449,7 +449,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:211
 #, fuzzy
 msgid "You have already downloaded {0}"
-msgstr "Вы уже загружаете этот файл в \"{0}\"."
+msgstr "Этот файл уже загружен в \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:216
 #, fuzzy
@@ -482,7 +482,7 @@ msgstr "Для ТУРБО-загрузки купите LimeWire Pro."
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
 msgid "Support open networks. Get LimeWire PRO."
-msgstr "Поддержите открытые сети."
+msgstr "Поддержите открытые сети. Купите LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
@@ -585,7 +585,7 @@ msgstr "Действие:"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 #, fuzzy
 msgid "Copyright"
-msgstr "Копировать"
+msgstr "Авторское право"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
@@ -594,7 +594,7 @@ msgstr "Копировать"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 #, fuzzy
 msgid "License Type"
-msgstr "Лицензия:"
+msgstr "Типа лицензии:"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
 msgid "Director"
@@ -636,7 +636,7 @@ msgstr "Картинки"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
 msgid "Description"
-msgstr ""
+msgstr "Описание"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
@@ -656,7 +656,7 @@ msgstr "Документы"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 msgid "Topic"
-msgstr ""
+msgstr "Тема"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Author"
@@ -666,7 +666,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 #, fuzzy
 msgid "Application"
-msgstr "Действие:"
+msgstr "Приложение"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:364
@@ -676,7 +676,7 @@ msgstr "Действие:"
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:218
 #, fuzzy
 msgid "Name"
-msgstr "Переименовать"
+msgstr "Именовать"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 msgid "Publisher"
@@ -684,15 +684,15 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Platform"
-msgstr ""
+msgstr "сборка"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "Возможно выбранный файл содержит угроза безопасности."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:101
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWire не может загрузить файл .торрент от добавленной URL."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:34
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:550
@@ -711,15 +711,14 @@ msgstr ""
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:15
 #, fuzzy
 msgid "Automatically start torrents"
-msgstr "Прокручивать текст"
+msgstr "Автоматически запускать торренты"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:17
 #, fuzzy
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
-msgstr ""
-"Вы можете указать, будет ли открыт доступ к частично загруженным файлам."
+msgstr "У вас выбор автоматически запускать торренты, загружены Gnutellа."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:25
 #, fuzzy
@@ -728,7 +727,7 @@ msgstr "Запускать автоматически"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:35
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Настройки БитТоррента"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:37
 msgid ""
@@ -866,13 +865,12 @@ msgstr "LimeWire Client"
 #. set up close button
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:78
-#, fuzzy
 msgid "Close"
 msgstr "Закрыть (&C)"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
-msgstr "Закрыть"
+msgstr "Закрыть окно"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -913,6 +911,8 @@ msgstr ""
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
+"Техническая поддержка Limewire'а быстро отвечает на все вопросы о Limewire "
+"PRO."
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:223
@@ -982,7 +982,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
-msgstr "Очистить историю"
+msgstr "Очистить журнал"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:133
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
@@ -1168,12 +1168,13 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:486
+#, fuzzy
 msgid ""
 "LimeWire is unable to find a license for this file. Download anyway?\n"
 "\n"
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
-msgstr ""
+msgstr "Limewire не может найти лицензию этого файла. Все равно загрузить?"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1673
 #, java-format
@@ -1267,7 +1268,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:449
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
+msgstr "Alpha-версия еще не годен. Нажмить ОК чтобы выйти из системы. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:455
 msgid ""
@@ -1362,15 +1363,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Позже напомните меня"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 msgid "Do not Show Again"
-msgstr ""
+msgstr "Больше не показывать."
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
 msgid "Change Language"
-msgstr ""
+msgstr "Изменить язык"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
 msgid "Show Language in status bar"
@@ -1384,7 +1385,7 @@ msgstr "Помощь по использованию LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:119
 msgid "LimeWire must be restarted for the new language to take effect."
-msgstr ""
+msgstr "Чтобы видеть Limewire в новом языке, надо перезагрузить програму."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:383
 msgid "Verify"
@@ -1410,7 +1411,7 @@ msgstr "Просмотреть лицензию"
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:500
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:568
 msgid "View Verification Page"
-msgstr ""
+msgstr "Видеть страница верификации."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:447
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
@@ -1682,11 +1683,11 @@ msgstr "Инициализация окна статуса..."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:448
 msgid "LimeWire has not detected a firewall"
-msgstr ""
+msgstr "LimeWire не обнаружил брандмауер"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:451
 msgid "LimeWire has detected a firewall"
-msgstr ""
+msgstr "LimeWire  обнаружил брандмауер."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:536
 msgid "Connection"
@@ -2020,19 +2021,26 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:47
+#, fuzzy
 msgid ""
 "LimeWire is translated into many different languages including Chinese, "
 "French, German, Japanese, Italian, Spanish and many more. Visit LimeWire's "
 "<a href=\"{0}\">internationalization page</a> for information on how you can "
 "help translation efforts! "
 msgstr ""
+"LimeWire переведен разных языках, в том числе- китайский, французский, "
+"немецкий, японский, итальянский, испанский и др. Посетите <a "
+"href=\"{0}\">международную страницу</a> Limewire'а и узнавайте о участии в "
+"этом проекте. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:48
-#, java-format
+#, fuzzy
 msgid ""
 "Sport the LimeWire look! Visit our <a href=\"{0}\">LimeWire gear</a> page "
 "and purchase a t-shirt or hat!"
 msgstr ""
+"Оденься в стиле \"LimeWire\"! Посетите наша страница <a "
+"href=\"{0}\">LimeWire gear</a> и купите футболку или шляпку."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:49
 msgid ""
@@ -2265,7 +2273,7 @@ msgstr ""
 msgid ""
 "Want to share a large file? LimeWire supports file sizes up to 1 TB "
 "(terabyte)."
-msgstr ""
+msgstr "Хотите сделать доступным большые файлы? Limewire"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
 msgid ""
@@ -2739,6 +2747,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:196
 msgid "Thank you for supporting LimeWire! We hope you enjoy LimeWire PRO. "
 msgstr ""
+"Спасибо за поддержку LimeWire'а. Надеемся вам нравится LimeWire PRO. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:197
 msgid ""
@@ -2889,6 +2898,9 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
+"Может быть ваша программа \"LimeWire\" была искажена вирусом или трояном! "
+"Посетите, пожалуйста <a href=\"http://www.limewire.com/corrupted\">сюда</a> "
+"и загрузить самая новейшая версия LimeWire'а."
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:33
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
@@ -2946,7 +2958,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:130
 msgid "Download .torrent file from the web"
-msgstr ""
+msgstr "Загрузить файл .torrent через интернета."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:145
 msgid "URL"
@@ -3065,7 +3077,7 @@ msgstr "Вы"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:228
 msgid "A connection error has occurred"
-msgstr ""
+msgstr "Произошла ошибка соединения."
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:249
 #, fuzzy
@@ -3266,7 +3278,7 @@ msgstr "Общедоступные файлы"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:114
 msgid "Yes, Try Again"
-msgstr ""
+msgstr "Правильно, пытайся еще раз."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:115
 #, fuzzy
@@ -3297,7 +3309,7 @@ msgstr "Очередь"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:66
 #, java-format
 msgid "Connecting ({0} hosts tried)..."
-msgstr ""
+msgstr "Соединяется({0} хостов разысканы)..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:72
 msgid "Waiting On Busy Hosts"
@@ -3306,7 +3318,7 @@ msgstr "Ожидание занятых хостов"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:78
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:71
 msgid "Complete"
-msgstr ""
+msgstr "Завершено"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:84
 msgid "Aborted"
@@ -3367,7 +3379,7 @@ msgstr "Приостановлен"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:167
 msgid "Content Removed"
-msgstr ""
+msgstr "содержимое удалено"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:171
 #, fuzzy
@@ -3451,7 +3463,7 @@ msgstr "Ищу источники...."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:266
 msgid "LimeWire cannot download this torrent.  The tracker responded"
-msgstr ""
+msgstr "не может загрузить этот торрент. Отслеживатель отвечает"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:356
 msgid "Priority"
@@ -3499,7 +3511,7 @@ msgstr "Скорость:"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:950
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:328
 msgid "BitTorrent"
-msgstr ""
+msgstr "БитТоррент"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1011
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:793
@@ -3830,7 +3842,7 @@ msgstr "Действие:"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:33
 msgid "File & Protocol Associations"
-msgstr ""
+msgstr "файл и идентификации протоколов"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:33
 msgid "What type of resources should LimeWire open?"
@@ -3850,7 +3862,7 @@ msgstr "Удалить выбранные соединения"
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:68
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:73
 msgid "Ignore all missing associations."
-msgstr ""
+msgstr "Игнорировать все недоступные идентификацией"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:70
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:75
@@ -3859,7 +3871,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:25
 msgid "Content Filtering"
-msgstr ""
+msgstr "фильтрование содержимое"
 
 #: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:26
 msgid ""
@@ -3905,7 +3917,7 @@ msgstr "Просмотрщик изображений"
 
 #: gui/com/limegroup/gnutella/gui/init/LanguageWindow.java:51
 msgid "Please choose the language you would like LimeWire to use."
-msgstr ""
+msgstr "В каком языке Вы хотите использовать LimeWire ?"
 
 #: gui/com/limegroup/gnutella/gui/init/LanguageWindow.java:81
 #, fuzzy
@@ -3962,7 +3974,7 @@ msgstr "Браузер"
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:139
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:88
 msgid "Choose Another Folder"
-msgstr ""
+msgstr "Выбирать другой папки"
 
 #: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:45
 msgid "Confirm Scan"
@@ -4240,11 +4252,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:781
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Переместить в корзину"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:782
 msgid "Move to Trash"
-msgstr ""
+msgstr "Переместить в корзину"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:830
 msgid "Are you sure you want to delete the selected file(s)?"
@@ -4372,7 +4384,7 @@ msgstr "В плейлист"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:808
 msgid "Hide .torrent Files"
-msgstr ""
+msgstr "Скрыть файлы .торрент"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:811
 #, fuzzy
@@ -4397,7 +4409,7 @@ msgstr "Настройка параметров общего доступа"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:68
 msgid "Folders to share"
-msgstr ""
+msgstr "Распределенные папки"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:76
 msgid ""
@@ -4420,15 +4432,15 @@ msgstr "Отправить"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:301
 msgid "Folder is fully shared including all subfolders."
-msgstr ""
+msgstr "Папка  полностью распределена, включая все подпапки"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:315
 msgid "Folder is not shared and no subfolders are shared."
-msgstr ""
+msgstr "Папка не распределена и никаких подпапки расределены"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:323
 msgid "Folder's files and some subfolders are shared."
-msgstr ""
+msgstr "Файлы в папке и некоторые подпапки распределены."
 
 #: gui/com/limegroup/gnutella/gui/library/SpeciallySharedFilesDirectoryHolder.java:14
 msgid "Individually Shared Files"
@@ -4590,7 +4602,7 @@ msgstr "Показать/скрыть (&W)"
 #: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:44
 #, java-format
 msgid "Show {0} Window"
-msgstr ""
+msgstr "Показывать {0} окно"
 
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:64
 msgid "&Get More Skins"
@@ -4642,19 +4654,19 @@ msgstr "Показывать подписи к значкам"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:44
 msgid "&Increase Font Size"
-msgstr ""
+msgstr "Увеличить размер шрифта"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:45
 msgid "Increases the Font Size"
-msgstr ""
+msgstr "Увеличит размер шрифта"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:48
 msgid "&Decrease Font Size"
-msgstr ""
+msgstr "Уменьшить размер шрифта"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:49
 msgid "Decreases the Font Size"
-msgstr ""
+msgstr "уменьшит размер шрифта"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:59
 #, fuzzy
@@ -4663,19 +4675,19 @@ msgstr "Язык:"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:60
 msgid "Select your Language Prefereces"
-msgstr ""
+msgstr "Выбор языка"
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
 msgid "The file type is not recognized."
-msgstr ""
+msgstr "Типа файла не распознана."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
 msgid "The file cannot be found."
-msgstr ""
+msgstr "файл не может быть найден."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
 msgid "The file is corrupt."
-msgstr ""
+msgstr "файл искажен."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
 msgid "There is an unknown error with the audio file."
@@ -4884,7 +4896,7 @@ msgstr "Хост"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
-msgstr ""
+msgstr "Интерфейс сети"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:56
@@ -4923,7 +4935,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:29
 msgid "Links and File Types"
-msgstr ""
+msgstr "Ссылки и типы файлов"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:31
 msgid ""
@@ -5039,7 +5051,7 @@ msgstr "Показать пример"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Send Errors Automatically if LimeWire is Frozen"
-msgstr ""
+msgstr "Автоматически отправлять ошибкы если LimeWire не отвечает."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:19
 msgid "Host Communication"
@@ -5117,7 +5129,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:14
 msgid "Buffer Size"
-msgstr ""
+msgstr "размер буфера"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:16
 msgid ""
@@ -5246,8 +5258,9 @@ msgstr "Скорость загрузки:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:45
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:45
+#, fuzzy
 msgid "Unlimited"
-msgstr ""
+msgstr "неограниченно"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:20
 #, fuzzy
@@ -5264,8 +5277,9 @@ msgstr ""
 "списка."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:29
+#, fuzzy
 msgid "Show License Warning:"
-msgstr ""
+msgstr "Показывать предупреждение о лицензию."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:22
 msgid ""
@@ -5278,8 +5292,9 @@ msgid "Display junk in place"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:37
+#, fuzzy
 msgid "Display junk at the bottom of search results"
-msgstr ""
+msgstr "Отображать брак у конца результатов поиска"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:38
 #, fuzzy
@@ -5334,7 +5349,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:52
 msgid "Do Nothing (Not Recommended)"
-msgstr ""
+msgstr "Ничего не делать (не рекомендуется)"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:155
 msgid ""
@@ -5883,11 +5898,11 @@ msgstr "Максимальное количество выгрузок:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensivity"
-msgstr ""
+msgstr "Реактивность"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
 msgid "Adjust the sensitivity of LimeWire's junk filter"
-msgstr ""
+msgstr "Отрегулировать реактивность фильтра бракаП"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:41
 msgid "Forget Training Data"
@@ -5956,7 +5971,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:28
 msgid "Show Connection Quality Indicator:"
-msgstr ""
+msgstr "Показывать индикатор качества соединения"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:19
 #, fuzzy
@@ -6190,14 +6205,15 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:439
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 msgid "Not Junk"
-msgstr ""
+msgstr "Не брак"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:255
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:367
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:421
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:443
+#, fuzzy
 msgid "Mark selected search results as Junk"
-msgstr ""
+msgstr "Сделать браком избранные результатов поиска."
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:353
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:440
@@ -6210,7 +6226,7 @@ msgstr "Блокировать результаты поиска от хоста
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:856
 msgid "More Info..."
-msgstr ""
+msgstr "Дополнительная информация"
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:44
 msgid "Select Search Type:"
@@ -6329,7 +6345,7 @@ msgstr "Поиск в сети по заданным словам"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:650
 msgid "The address format is incorrect, please use host:port."
-msgstr ""
+msgstr "формат адреса неправильно, используетесь, пожалуйста, host:port."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:83
 msgid "Close Search"
@@ -6353,7 +6369,7 @@ msgstr "Блокировать хост"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Mark As"
-msgstr ""
+msgstr "Отметить как"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 #, fuzzy
@@ -6382,6 +6398,8 @@ msgstr ""
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
+"Подождите, пожалуйста, LimeWire нужен выполнить полную загрузку перед начале "
+"поиска."
 
 #. if not connected or connecting, show one message.
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:409
@@ -6452,7 +6470,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
-msgstr ""
+msgstr "файлы \".торрент\""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:87
 msgid "\"magnet:\" links"
@@ -6876,7 +6894,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:335
 msgid "How does it work?"
-msgstr ""
+msgstr "Как это функционирует?"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:421
 #, fuzzy
@@ -6898,11 +6916,11 @@ msgstr "Сохранить текущий плейлист"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:512
 msgid "Copyright Holder:"
-msgstr ""
+msgstr "Владелец автррских правах."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:518
 msgid "Copyright Year:"
-msgstr ""
+msgstr "год авторского права"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:525
 #, fuzzy
@@ -7006,7 +7024,7 @@ msgstr "Пожалуйста подождите, пока LimeWire проска�
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:117
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:140
 msgid "Successfully uploaded files"
-msgstr ""
+msgstr "Загрузка успешно завершена."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:121
 msgid "There was an error while connecting to the internet archive."
@@ -7190,7 +7208,7 @@ msgstr "Исполнители:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "Тема:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"

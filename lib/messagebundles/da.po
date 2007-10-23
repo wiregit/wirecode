@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-10-14 06:44+0000\n"
+"PO-Revision-Date: 2007-10-21 18:23+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1292,9 +1292,8 @@ msgstr "Kommentarer"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
-#, fuzzy
 msgid "Action"
-msgstr "Aktion:"
+msgstr "Handling"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
@@ -1915,6 +1914,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire kunne ikke finde din web browser og kan derfor ikke vise følgende "
+"web side: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1692
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1715
@@ -1929,10 +1930,12 @@ msgid ""
 "\n"
 "Executed command: {0}."
 msgstr ""
+"LimeWire vil ikke åbne den angivne fil.\n"
+"\n"
+"Udførende handling: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1697
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1720
-#, fuzzy
 msgid "LimeWire could not launch the specified file."
 msgstr "LimeWire kan ikke åbne den angivne fil."
 
@@ -2077,19 +2080,17 @@ msgstr ""
 "den færdige version af 1.6.0.\n"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
-#, fuzzy
 msgid "Upgrade Java"
 msgstr "Opgrader din Java"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:168
-#, fuzzy
 msgid "More Information"
-msgstr "Flere muligheder"
+msgstr "Mere information"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
 msgid "Visit {0}"
-msgstr ""
+msgstr "Besøg {0}."
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
@@ -2121,9 +2122,8 @@ msgid "Verify"
 msgstr "Bekræft"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:427
-#, fuzzy
 msgid "LimeWire was unable to locate the details of this license."
-msgstr "LimeWire kan ikke lokalisere licensen."
+msgstr "LimeWire kan ikke lokalisere oplysninger om denne licens."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:432
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:558
@@ -2151,7 +2151,6 @@ msgstr "Licens detaljer"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:452
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:578
-#, fuzzy
 msgid "View License Deed"
 msgstr "Se licens"
 
@@ -2187,7 +2186,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:510
 msgid "View Usage Rights"
-msgstr ""
+msgstr "Vis brugerrettigheder"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:515
 msgid ""
@@ -2201,13 +2200,12 @@ msgid ""
 msgstr "LimeWire har endnu ikke bekræftet denne licens."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:525
-#, fuzzy
 msgid "Weedshare Details"
 msgstr "Weedshare detaljer om fil"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:553
 msgid "This file may require a license in order to open and view."
-msgstr ""
+msgstr "Denne fil kan kræve en licens for at kunne åbnes og vises."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:593
 msgid "License Details"
@@ -2645,6 +2643,8 @@ msgid ""
 "It helps the network if you keep your LimeWire running. Others will connect "
 "to the network easier and searches will perform better. "
 msgstr ""
+"Det hjælper netværket, hvis du lader din LimeWire køre. Andre vil få lettere "
+"forbindelse til netværket og søgninger vil give bedre resultater. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
 msgid ""
@@ -2667,6 +2667,9 @@ msgid ""
 "download. In order to successfully complete your download, wait while your "
 "request advances in line and is eventually serviced."
 msgstr ""
+"Når LimeWire angiver at dit download \"Venter i kø\" betyder det at den "
+"kilde du ønsker at downloade fra er optaget og har sat din anmodning i kø. "
+"Hvis du venter vil det også blive din tur til at downloade den ønskede fil."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:36
 #, java-format
@@ -2691,6 +2694,8 @@ msgid ""
 "Do you have a tip for effectively using LimeWire? Add it to <a "
 "href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
+"Har du et tip til hvordan andre kan bruge LimeWire effektivt? Tilføj det til "
+"<a href=\"{0}\">the wiki</a> og tippet vil måske finde vej til Dagens Tip!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
 msgid ""
@@ -2819,6 +2824,10 @@ msgid ""
 "LimeWire learns what to block and what not to block. After a short training "
 "period, LimeWire automatically blocks most junk results. Try it!"
 msgstr ""
+"Bliver du tæppebombet med meningsløse søgeresultater? Markér søgeresultatet "
+"og klik på junk knappen. Når du markerer søgeresultater som junk eller ikke "
+"junk så lærer LimeWire hvad der skal blokeres og hvad ikke. Efter en kort "
+"træningsperiode, så vil LimeWire automatisk blokere det meste junk. Prøv det!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
 msgid ""
@@ -2882,6 +2891,8 @@ msgid ""
 "If you try to download a file that you already have, LimeWire lets you know, "
 "even if the file has a different name."
 msgstr ""
+"Hvis du prøver at downloade en fil, som du allerede har så vil LimeWire give "
+"dig besked, også når filen har et andet navn."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:63
 msgid ""
@@ -3346,6 +3357,8 @@ msgid ""
 "Control-click a search result, then choose Search More, then Get More "
 "Results. "
 msgstr ""
+"Er du utilfreds med antallet af søgeresultater? Højre klik på søgeresultatet "
+"og vælg \"Søg mere\" og \"Få flere resultater\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:144
 msgid ""
@@ -3386,6 +3399,8 @@ msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "control-click it and choose Stop Sharing File. "
 msgstr ""
+"Har du netop downloaded en fil du ikke ønsker at dele? I biblioteket kan du "
+"højre klikke på den og vælge Del ikke fil. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:149
 msgid ""
@@ -3703,7 +3718,7 @@ msgstr "Åbner en .torrent fil på din harddisk"
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:117
 #, fuzzy
 msgid "&Download .torrent"
-msgstr "Download side"
+msgstr "&Download .torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:118
 msgid "Downloads a .torrent file from the WWW"
@@ -3845,9 +3860,8 @@ msgstr "Kunne ikke sende chat meddelelse"
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:43
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
-#, fuzzy
 msgid "Browse Host"
-msgstr "Browserindstillinger"
+msgstr "Gennemsøg vært"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:47
 msgid "Create a New Outgoing Connection"
@@ -3892,9 +3906,8 @@ msgstr "Protokol"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:74
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:420
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:282
-#, fuzzy
 msgid "Vendor/Version"
-msgstr "Ikke brugbar version"
+msgstr "Forhandler/version"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:82
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:412
@@ -3943,7 +3956,6 @@ msgstr "Ultrapeers"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:62
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:20
-#, fuzzy
 msgid "Leaf"
 msgstr "Periferien"
 
@@ -3990,13 +4002,12 @@ msgstr "Vært:"
 #. 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:377
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:54
-#, fuzzy
 msgid "Port:"
-msgstr "Ringe"
+msgstr "Port:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:389
 msgid "Use TLS:"
-msgstr ""
+msgstr "Brug TLS:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:26
 msgid "Peer"
@@ -4048,9 +4059,8 @@ msgstr "Kø"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:57
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:58
-#, fuzzy
 msgid "Queued"
-msgstr "Kø"
+msgstr "I kø"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:66
 #, java-format
@@ -4128,9 +4138,8 @@ msgid "Content Removed"
 msgstr "Indhold fjernet"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:171
-#, fuzzy
 msgid "Resuming..."
-msgstr "Standser..."
+msgstr "Genoptager..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:175
 msgid "Downloading .torrent file..."
@@ -4468,16 +4477,15 @@ msgstr "Rediger det endelige filnavn"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:127
 msgid "Always Save As..."
-msgstr ""
+msgstr "Gem altid som..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:129
 msgid "Always Append (#)"
-msgstr ""
+msgstr "Tilføj altid (#)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:131
-#, fuzzy
 msgid "Always Ask"
-msgstr "Altid"
+msgstr "Spørg altid"
 
 #. default action settings panel
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:142
@@ -4522,9 +4530,8 @@ msgid "Choose a different location for the Download"
 msgstr "Vælg anden destination for download"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:362
-#, fuzzy
 msgid "Append (#)"
-msgstr "Tabte (I/U)"
+msgstr "Tilføj (#)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:364
 msgid "Appends (#) to filename"
@@ -4758,13 +4765,12 @@ msgstr ""
 "gennemsøgningen er fuldført."
 
 #: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:51
-#, fuzzy
 msgid "Scan Hard Drive?"
-msgstr "Gennemsøger harddisk"
+msgstr "Skan harddisk?"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:227
 msgid "Limewire Setup Dialog"
-msgstr ""
+msgstr "LimeWire opsætningsdialog"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:478
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
@@ -4789,9 +4795,8 @@ msgstr "Lær mere om denne mulighed..."
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:39
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:22
-#, fuzzy
 msgid "Connection Speed"
-msgstr "Forbindelse afbrudt"
+msgstr "Forbindelses hastighed"
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:40
 msgid ""
@@ -4806,9 +4811,8 @@ msgstr ""
 "ikke er på listen, kan du vælge den der ligner mest hastighedsmæssigt."
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:48
-#, fuzzy
 msgid "Select Speed"
-msgstr "Vælg type:"
+msgstr "Vælg hastighed"
 
 #: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:31
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
@@ -4839,7 +4843,7 @@ msgstr "Vent venligt mens LimeWire gennemsøger harddisken..."
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:87
 msgid "Scan cancelled"
-msgstr ""
+msgstr "Skanning afbrudt"
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:107
 msgid "Scanning Hard Drive..."
@@ -5328,7 +5332,7 @@ msgstr "&Vis/skjul"
 #: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:44
 #, java-format
 msgid "Show {0} Window"
-msgstr ""
+msgstr "Vis {0} vindue"
 
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:64
 msgid "&Get More Skins"
@@ -5408,7 +5412,7 @@ msgstr "Filtypen kan ikke genkendes."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
 msgid "The file cannot be found."
-msgstr ""
+msgstr "Filen kan ikke findes."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
 msgid "The file is corrupt."
@@ -5511,18 +5515,16 @@ msgstr "Pladser"
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
-#, fuzzy
 msgid "Connections"
-msgstr "Kvalitet:"
+msgstr "Forbindelser"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:338
 msgid "System Tray"
 msgstr "Afslutning"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
-#, fuzzy
 msgid "Updates"
-msgstr "Opdater nu"
+msgstr "Opdateringer"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:344
 msgid "Player"
@@ -5547,9 +5549,8 @@ msgstr "Hjælpeprogram"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:359
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:35
-#, fuzzy
 msgid "Bug Reports"
-msgstr "Kopier rapport"
+msgstr "Fejl rapport"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:361
 msgid "View"
@@ -5590,9 +5591,8 @@ msgstr "Indhold"
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:420
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:442
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
-#, fuzzy
 msgid "Junk"
-msgstr "Ikke junk"
+msgstr "junk"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:375
 msgid "Keywords"
@@ -5658,9 +5658,8 @@ msgstr ""
 "forhold til forbudslisten."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:29
-#, fuzzy
 msgid "Links and File Types"
-msgstr "Licens type:"
+msgstr "Links og filtyper:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:31
 msgid ""
@@ -5670,9 +5669,8 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:59
-#, fuzzy
 msgid "Use LimeWire for..."
-msgstr "&Brug af LimeWire"
+msgstr "Brug LimeWire til..."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:21
 msgid "Audio Options"
@@ -5853,7 +5851,7 @@ msgstr "Aktiver indholdsfiltrering"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:14
 msgid "Buffer Size"
-msgstr ""
+msgstr "Buffer størrelse"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:16
 msgid ""
@@ -6237,7 +6235,6 @@ msgstr ""
 "tidligere valgte mappe."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:202
-#, fuzzy
 msgid "Open Dialog to Select a Folder"
 msgstr "Åben dialog for at vælge mappe"
 
@@ -6246,9 +6243,8 @@ msgid "Reset"
 msgstr "Nulstil"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:235
-#, fuzzy
 msgid "Reset to Default Download Folder"
-msgstr "Brug standardvalg"
+msgstr "Nulstil til standard download mappe"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:35
 msgid ""
@@ -6844,9 +6840,8 @@ msgid "Back To Search"
 msgstr "Tilbage til søgning"
 
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:255
-#, fuzzy
 msgid "Would you like to start downloads from the following magnets?"
-msgstr "Ønsker du at spærre for søgeresultater fra værten på"
+msgstr ""
 
 #. *
 #. * The resource to use for the vendor property.
@@ -6978,9 +6973,8 @@ msgstr "Nøgleord"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:171
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:345
-#, fuzzy
 msgid "Direct Connect"
-msgstr "Mislykkede direkte forbindelser"
+msgstr "Direkte forbindelse"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:319
 msgid "Got Friends?"
@@ -7320,9 +7314,8 @@ msgid "Range Unavailable"
 msgstr "Range utilgængelig"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:95
-#, fuzzy
 msgid "Malformed Request"
-msgstr "Grådig forespørgsel"
+msgstr "Forkert forespørgsel"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:101
 msgid "Banned Greedy Servent"
@@ -7337,9 +7330,8 @@ msgid "Suspended"
 msgstr "Suspenderet"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:119
-#, fuzzy
 msgid "Awaiting Requests"
-msgstr "Chat anmodninger"
+msgstr "Afventer anmodninger"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:312
 #, fuzzy
@@ -7605,9 +7597,8 @@ msgid "Allow modification of your work?"
 msgstr "Tillad ændring af dit værk?"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:496
-#, fuzzy
 msgid "Save details to file"
-msgstr "Gem den nuværende spilleliste som en fil"
+msgstr "Gem detaljer til filen"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:512
 msgid "Copyright Holder:"
@@ -7656,7 +7647,7 @@ msgstr "Verifikationsfilen skal gemmes på følgende URL:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:705
 msgid "Please enter your Internet Archive username and password."
-msgstr ""
+msgstr "Indtast venligst dit Internet arkiv brugernavn og adgangskode."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:711
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:717
@@ -7703,6 +7694,8 @@ msgid ""
 "There was an error communicating with the Internet Archive. Do you want to "
 "try again?"
 msgstr ""
+"Der var en fejl under kommunikationen med Internet arkivet. Vil du forsøge "
+"igen?"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:97
 msgid "Requesting Identifier..."
@@ -7719,15 +7712,17 @@ msgid "Successfully uploaded files"
 msgstr "Vellykkede oploadede filer"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:121
-#, fuzzy
 msgid "There was an error while connecting to the internet archive."
-msgstr "Opretter forbindelse til Internet Archive..."
+msgstr ""
+"Der var en fejl mens der blev oprettet forbindelse til Internetarkivet..."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:124
 msgid ""
 "There was an error while logging in to the Internet Archive. Please check "
 "your username and password and try again."
 msgstr ""
+"Der opstod en fejl da du prøvede at logge på Internet Arkivet. Tjek venligst "
+"dit brugernavn og din adgangskode og prøv igen."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:127
 msgid "There was an error while trying to access the upload directory."
@@ -7738,6 +7733,7 @@ msgid ""
 "There was an error communicating with the Internet Archive. Please try again "
 "later."
 msgstr ""
+"Der var en kommunikationsfejl med Internet Arkivet. Forsøg igen senere."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:168
 msgid "Upload"

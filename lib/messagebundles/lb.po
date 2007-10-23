@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-09-14 04:26+0000\n"
+"PO-Revision-Date: 2007-10-18 21:06+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Luxembourgish <lb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:34
@@ -88,6 +88,8 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"LimeWire konnt dei onkomplett Datei fun deem ausgewielten Download opmaachen "
+"well den Dateinumm zeechen enthällt dei net fun eisem System accepteiert gin"
 
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
@@ -184,7 +186,7 @@ msgstr "Lueden Stale Connection Management..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
 msgid "Loading Saved Files..."
-msgstr "Luesen gespäichert Fichieren..."
+msgstr "Lueden gespäichert Fichieren..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
 msgid "Loading Spam Management..."
@@ -547,7 +549,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:71
 msgid "Internal Error"
-msgstr ""
+msgstr "Internen Fehler"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:377
 msgid ""
@@ -567,30 +569,30 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:390
 msgid "Send"
-msgstr ""
+msgstr "Fortschecken"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:398
 msgid "Review"
-msgstr ""
+msgstr "Revisioun"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:411
 msgid "Discard"
-msgstr ""
+msgstr "Raushuelen"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:428
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:95
 msgid "Always Send Immediately"
-msgstr ""
+msgstr "Emmer direkt fortschecken"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:429
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Ask For Review"
-msgstr ""
+msgstr "Emmer no enger Revisioun froen"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:430
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Discard All Errors"
-msgstr ""
+msgstr "D'Fehler emmer raushuelen"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:504
 msgid ""
@@ -598,6 +600,9 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
+"LimeWire konnt den Fehler-Server net erreschen fir dei Fehlermeldung hei "
+"drenner ze schecken. Fir mei Hellef an Hellef zum Fehler kennt dir op "
+"www.limewire.com goen an \"Support\" clicken. Merci"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:533
 msgid "Copy Report"
@@ -661,6 +666,8 @@ msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
 msgstr ""
+"LimeWire ass natielesch och d'Ergebnis fun deenen villen Schaffstonnen fun "
+"den LimeWire-entweckler:"
 
 #. business developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:197
@@ -675,12 +682,16 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
+"D'LimeWire <a href=\"http://www.limewire.com/\">web site</a> an de "
+"grafeschen obbau fun LimeWire  sin di haart Aarbescht fum LimeWire-web team:"
 
 #. support staff
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:215
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
+"D'LimeWire PRO Froen gin gewessenhaft fum LimeWire sengem techneschen "
+"Support beäntwert:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:223
@@ -705,6 +716,8 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
 msgstr ""
+"LimeWire geif och gären den Matwiekenden fum Internationalisatiouns Projet, "
+"fir d'Uwendung selwer an fir d'LimeWire Sait merci soen:"
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:289
@@ -712,6 +725,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
+"Verschidden Mataarbeschter fun der Gnutella Gemeinschaft verdengen en "
+"extraen Merci. Dobai sin:"
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:310
@@ -720,6 +735,9 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
+"Schlussendlech geif LimeWire nach gären all den Entweckler, Benotzer an all "
+"di Aaner dei hier Ideen zum Projet baigesteiert hun villmools merci soen. "
+"Ouni d'LimeWire Benotzer giff d'LimeWire Netzwierk net existeieren."
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:315
 msgid ""
@@ -6611,4 +6629,4 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
-msgstr ""
+msgstr "Informatioun"

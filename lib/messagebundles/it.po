@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-10-11 12:32+0000\n"
+"PO-Revision-Date: 2007-10-21 18:21+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -2097,7 +2097,7 @@ msgstr "Copia rapporto"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
 msgid "OK"
-msgstr ""
+msgstr "Fatto"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -2437,7 +2437,7 @@ msgstr "Registazione Log"
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "Visualizza le Schermate {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -2722,7 +2722,7 @@ msgstr "Visualizza il contratto di licenza"
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:500
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:568
 msgid "View Verification Page"
-msgstr ""
+msgstr "Visualizza Pagina di Verifica"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:447
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
@@ -3118,16 +3118,16 @@ msgstr "Visualizza Meduia Player"
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Stai condividendo {0} file"
+msgstr[1] "Stai condividendo {0} file"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:835
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Stai condividendo {0} file (Caricamento...)"
+msgstr[1] "Stai condividendo {0} file (Caricamento...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:901
 msgid "Downloads:"

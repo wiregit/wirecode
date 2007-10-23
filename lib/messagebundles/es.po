@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-09-28 15:41+0000\n"
+"PO-Revision-Date: 2007-10-20 21:46+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1884,10 +1884,12 @@ msgstr "Plataforma:"
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:99
 msgid "The selected .torrent file may contain a security hazard."
 msgstr ""
+"El archivo '.torrent' contiene códigos que podrían poner en riesgo a su "
+"sistema y/o privacidad."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:101
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWire no puede bajar el archivo '.torrent' del URL provisto."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:34
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:550
@@ -1895,6 +1897,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Si usted detiene esta carga, la descarga del '.torrent' se detendrá. ¿Estas "
+"seguro que deseas hacer esto?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:37
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:555
@@ -1902,6 +1906,9 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Esta carga es una carga tipo torrent y no ha encontrado suficientes fuentes "
+"completas. Usted deberia permitir que la carga continue un poco mas. Esta "
+"seguro que desea detenerlo?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:15
 #, fuzzy
@@ -1924,7 +1931,7 @@ msgstr "Iniciar automáticamente"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:35
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Configuracion de BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:37
 msgid ""
@@ -1933,6 +1940,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Usted puede elegir si LimeWire puede manejar la configuración del protocolo "
+"'Bittorrent'. Esto es altamente recomendable que LimeWire maneje estas "
+"configuraciones. Valores erróneos o impropios pueden causar mal desempeño "
+"y/o que su memoria RAM se vea altamente cargada."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:62
 msgid ""
@@ -1940,26 +1951,30 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Valores personalizados que estén erróneos o inapropiados pueden causar mal "
+"desempeño de su equipo. A menos que usted este seguro de lo que haces, es "
+"recomendable que LimeWire maneje estas configuraciones."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:76
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
 msgstr ""
+"Dejar que LimeWire maneje mis configuraciones de 'BitTorrent'. (Recomendado)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:84
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Máximas cargas por archivo 'torrent'."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:90
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Mínimas cargas por archivo ‘torrent’."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:96
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Verificacion seguro de paquete"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:102
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Acceso experimental a disco"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:71
 msgid "Internal Error"
@@ -2045,7 +2060,7 @@ msgstr "Copiar informe"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
 msgid "OK"
-msgstr ""
+msgstr "ACEPTAR"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -2189,6 +2204,8 @@ msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
 msgstr ""
+"BitTorrent, el logo BitTorrent y Torrent son marcas registradas de "
+"bitTorrent, Inc."
 
 #. *
 #. * The select all action.
@@ -2378,12 +2395,12 @@ msgstr "Consola"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
 msgid "Lo&gging"
-msgstr ""
+msgstr "Ingresando"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "Mostrar la {0} pantalla"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -2428,6 +2445,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire no pudo encontrar su programa de acceso a internet para mostrar la "
+"siguiente pagina: {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1692
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1715
@@ -2489,6 +2508,9 @@ msgid ""
 "LimeWire was unable to create your settings directory and is using a "
 "temporary directory.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"LimeWire no puede crear un directorio para sus configuraciones y por lo "
+"tanto esta utilizando un directorio temporal. Sus configuraciones serán "
+"borradas cuando cierres el LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:367
 msgid "Loading Icons..."
@@ -2514,7 +2536,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:449
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
+msgstr "Esta versión Alpha se ha expirado. Presione OK/ACEPTAR para salir. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:455
 msgid ""
@@ -2539,6 +2561,13 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"LimeWire no puede crear el directorio temporero.\n"
+"\n"
+"Esto es causado por falta de accesos. Asegúrese que LimeWire y/o usted tenga "
+"acceso para crear archivos y/o directorios en su ordenador. Si el problema "
+"persiste, visite www.limewire.com y presione sobre el vinculo 'Support'.\n"
+"\n"
+"LimeWire terminara su proceso. Gracias."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:471
 #: gui/com/limegroup/gnutella/gui/MessageService.java:97
@@ -2592,6 +2621,9 @@ msgid ""
 "version is known to have caused problems with LimeWire. Please upgrade to "
 "the final 1.6.0 release.\n"
 msgstr ""
+"Actualmente estas utilizando una version beta de Java 1.6.0. Se conoce que "
+"esta version puede causar problemas con LimeWire. Por favor actualize a la "
+"version final 1.6.0.\n"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
 #, fuzzy
@@ -2610,7 +2642,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Recordar Luego"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 #, fuzzy
@@ -2619,11 +2651,11 @@ msgstr "Compartir Descargas"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
 msgid "Change Language"
-msgstr ""
+msgstr "Cambiar Lenguage"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Mostrar Lenguage en la barra de estado."
 
 #. 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
@@ -2657,7 +2689,7 @@ msgstr "Ver el documento de licencia postulado"
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:500
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:568
 msgid "View Verification Page"
-msgstr ""
+msgstr "Ver página de verificación."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:447
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
@@ -2770,7 +2802,7 @@ msgstr "Pegar"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1266
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:119
 msgid "Delete"
-msgstr ""
+msgstr "Borrar"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 msgid "Add"

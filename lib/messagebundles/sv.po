@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-27 16:43-0400\n"
-"PO-Revision-Date: 2007-09-14 18:29+0000\n"
+"PO-Revision-Date: 2007-10-17 13:46+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-10-16 18:04+0000\n"
+"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -280,12 +280,13 @@ msgstr ""
 "För att fortsätta använda LimeWire måste du frigöra utrymme på din hårddisk."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
+#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"LimeWire kan inte skriva in en nödvändig fil för att din hårddisk är full. "
-"För att fortsätta använda LimeWire måste du befria utrymme på din hårddisk."
+"LimeWire kan inte öppna en nödvändig fil därför att ett annat program har "
+"låst denna fil. LimeWire kan uppföra sig oväntat tills denna fil frigörs."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
@@ -325,12 +326,17 @@ msgstr ""
 "program. Vänligen stäng programmet och försök ladda ned på nytt."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:41
+#, fuzzy
 msgid ""
 "LimeWire was unable to create or continue writing an incomplete file for the "
 "selected download because you do not have permission to write files to the "
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"LimeWire kunde inte skapa eller fortsätta skriva en ofärdig fil för den "
+"markerade nedladdning, därför att du har inte har dom rättigheterna att "
+"skapa filer i mappen ofärdiga filer. För att fortsätta använda LimeWire, var "
+"vänlig och välj en annan spara som mapp."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:42
 msgid ""
@@ -357,8 +363,10 @@ msgid ""
 msgstr ""
 
 #: core/com/limegroup/gnutella/DownloadManager.java:216
+#, fuzzy
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr "Tyvärr kunde LimeWire inte omladda dina gamla nedladdningar."
+msgstr ""
+"Tyvärr kunde LimeWire inte fortsätta att ladda ner dina gamla nedladdningar."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
 #, fuzzy
