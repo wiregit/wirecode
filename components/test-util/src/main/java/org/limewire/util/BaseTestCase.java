@@ -169,13 +169,21 @@ public abstract class BaseTestCase extends AssertComparisons {
             //LogFactory.getLog(this.getClass()).info("Running test: " + _currentTestName);
         }
         assertNotNull(_currentTestName);
+        Throwable thrown = null;
         try {
             preSetUp();
             setUp();
             runTest();
+        } catch (Throwable t) {
+            thrown = t;
         } finally {
             try {
                 tearDown();
+            } catch (Throwable tearDown){
+                // don't let throwables during tearDown
+                // overwrite throwables from the test
+                if (thrown != null)
+                    throw tearDown;
             } finally {
                 postTearDown();
             }
