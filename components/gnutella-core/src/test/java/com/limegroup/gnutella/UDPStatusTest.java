@@ -8,13 +8,18 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
-import org.limewire.util.PrivilegedAccessor;
-
+import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 
 public class UDPStatusTest extends ClientSideTestCase {
+
+    private NetworkManager networkManager;
+    private UDPService udpService;
+    private PingReplyFactory pingReplyFactory;
+    private PingRequestFactory pingRequestFactory;
 
     public UDPStatusTest(String name) {
         super(name);
@@ -24,92 +29,94 @@ public class UDPStatusTest extends ClientSideTestCase {
         return buildTestSuite(UDPStatusTest.class);
     }    
     
-    protected static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-    
     @Override
     public int getNumberOfPeers() {
         return 1;
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        networkManager = injector.getInstance(NetworkManager.class);
+        udpService = injector.getInstance(UDPService.class);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+    }
+    
     public void testSolicited() throws Exception {
         drainAll();
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveSolicited());
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveUnsolicited());
-        assertTrue(ProviderHacks.getUdpService().isListening());
+        assertFalse(networkManager.canReceiveSolicited());
+        assertFalse(networkManager.canReceiveUnsolicited());
+        assertTrue(udpService.isListening());
         
         DatagramSocket s = new DatagramSocket(6346);
         s.setSoTimeout(1000);
         
         try {
-            PingReply pong = ProviderHacks.getPingReplyFactory().create(ProviderHacks.getUdpService().getSolicitedGUID().bytes().clone(),
+            PingReply pong = pingReplyFactory.create(udpService.getSolicitedGUID().bytes().clone(),
                     (byte)1,6346,InetAddress.getLocalHost().getAddress());
             UDPService.mutateGUID(pong.getGUID(), InetAddress.getLocalHost(), 6346);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             pong.write(baos);
             byte []buf = baos.toByteArray();
             s.send(new DatagramPacket(buf,buf.length,InetAddress.getLocalHost(),
-                    ProviderHacks.getUdpService().getStableUDPPort()));
+                    udpService.getStableUDPPort()));
             Thread.sleep(100);
-            assertTrue(ProviderHacks.getNetworkManager().canReceiveSolicited());
-            assertFalse(ProviderHacks.getNetworkManager().canReceiveUnsolicited());
+            assertTrue(networkManager.canReceiveSolicited());
+            assertFalse(networkManager.canReceiveUnsolicited());
         } catch (IOException bad) {
             fail(bad);
         } finally {
             s.close();
         }
-        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedSolicitedIncoming",Boolean.FALSE);
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveSolicited());
     }
     
     public void testUnsolicited() throws Exception {
         drainAll();
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveSolicited());
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveUnsolicited());
-        assertTrue(ProviderHacks.getUdpService().isListening());
+        assertFalse(networkManager.canReceiveSolicited());
+        assertFalse(networkManager.canReceiveUnsolicited());
+        assertTrue(udpService.isListening());
         
         DatagramSocket s = new DatagramSocket(6346);
         s.setSoTimeout(1000);
         
         try {
-            PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(ProviderHacks.getUdpService().getConnectBackGUID().bytes(), (byte)1);
+            PingRequest ping = pingRequestFactory.createPingRequest(udpService.getConnectBackGUID().bytes(), (byte)1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ping.write(baos);
             byte []buf = baos.toByteArray();
             s.send(new DatagramPacket(buf,buf.length,InetAddress.getLocalHost(),
-                    ProviderHacks.getUdpService().getStableUDPPort()));
+                    udpService.getStableUDPPort()));
             Thread.sleep(100);
-            assertFalse(ProviderHacks.getNetworkManager().canReceiveSolicited());
-            assertTrue(ProviderHacks.getNetworkManager().canReceiveUnsolicited());
+            assertFalse(networkManager.canReceiveSolicited());
+            assertTrue(networkManager.canReceiveUnsolicited());
         } catch (IOException bad) {
             fail(bad);
         } finally {
             s.close();
         }
-        PrivilegedAccessor.setValue(ProviderHacks.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.FALSE);
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveUnsolicited());
     }
     
     public void testUnsolicitedConnected() throws Exception {
         drainAll();
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveSolicited());
-        assertFalse(ProviderHacks.getNetworkManager().canReceiveUnsolicited());
-        assertTrue(ProviderHacks.getUdpService().isListening());
+        assertFalse(networkManager.canReceiveSolicited());
+        assertFalse(networkManager.canReceiveUnsolicited());
+        assertTrue(udpService.isListening());
         
         DatagramSocket s = new DatagramSocket(testUP[0].getPort(),testUP[0].getInetAddress());
         s.setSoTimeout(1000);
         
         try {
-            PingRequest ping = ProviderHacks.getPingRequestFactory().createPingRequest(ProviderHacks.getUdpService().getConnectBackGUID().bytes(), (byte)1);
+            PingRequest ping = pingRequestFactory.createPingRequest(udpService.getConnectBackGUID().bytes(), (byte)1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ping.write(baos);
             byte []buf = baos.toByteArray();
             s.send(new DatagramPacket(buf,buf.length,InetAddress.getLocalHost(),
-                    ProviderHacks.getUdpService().getStableUDPPort()));
+                    udpService.getStableUDPPort()));
             Thread.sleep(100);
-            assertFalse(ProviderHacks.getNetworkManager().canReceiveSolicited());
-            assertFalse(ProviderHacks.getNetworkManager().canReceiveUnsolicited());
+            assertFalse(networkManager.canReceiveSolicited());
+            assertFalse(networkManager.canReceiveUnsolicited());
         } catch (IOException bad) {
             fail(bad);
         } finally {
