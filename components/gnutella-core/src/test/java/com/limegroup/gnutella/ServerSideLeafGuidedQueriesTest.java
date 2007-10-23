@@ -6,16 +6,18 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  *  Tests that an Ultrapeer correctly handle Probe queries.  Essentially tests
@@ -31,7 +33,10 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 @SuppressWarnings("null")
 public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
 
-    private static int TIMEOUT = 300;
+    private final int TIMEOUT = 300;
+    private QueryRequestFactory queryRequestFactory;
+    private ResponseFactory responseFactory;
+    private QueryReplyFactory queryReplyFactory;
     
     public ServerSideLeafGuidedQueriesTest(String name) {
         super(name);
@@ -45,18 +50,16 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-    public static Integer numUPs() {
-        return new Integer(29);
+	@Override
+	public int getNumberOfUltrapeers() {
+	    return 29;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
+	@Override
+	public int getNumberOfLeafpeers() {
+	    return 1;
     }
 	
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-
     @Override
     public void setSettings() throws Exception {
         setSharedDirectories(new File[0]);
@@ -89,9 +92,16 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
             }
         }
     }
+    
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+    }
 
-    // BEGIN TESTS
-    // ------------------------------------------------------
 
     public void testConfirmSupport() throws Exception {
         Message m = getFirstMessageOfType(LEAF[0],
@@ -111,7 +121,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // stop.
 
         // send a query from the leaf
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest query = queryRequestFactory.createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -149,7 +159,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed
 
         // send a query from the leaf
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest query = queryRequestFactory.createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -200,7 +210,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed AND the leaf still wants more
 
         // send a query from the leaf
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest query = queryRequestFactory.createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -256,7 +266,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         // have been routed AND the leaf still wants more
 
         // send a query from the leaf
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("berkeley");
+        QueryRequest query = queryRequestFactory.createQuery("berkeley");
         LEAF[0].send(query);
         LEAF[0].flush();
 
@@ -333,8 +343,8 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         throws Exception {
         byte[] ip = new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
         byte[] clientGUID = GUID.makeGuid();
-        Response[] resp = new Response[] {ProviderHacks.getResponseFactory().createResponse(0, 10, "berkeley")};
-        QueryReply reply = ProviderHacks.getQueryReplyFactory().createQueryReply(guid, (byte)3, 6346,
+        Response[] resp = new Response[] {responseFactory.createResponse(0, 10, "berkeley")};
+        QueryReply reply = queryReplyFactory.createQueryReply(guid, (byte)3, 6346,
                 ip, 0, resp, clientGUID, false);
         source.send(reply);
         source.flush();
