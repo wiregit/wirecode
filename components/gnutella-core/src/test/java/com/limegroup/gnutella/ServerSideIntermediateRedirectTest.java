@@ -8,8 +8,11 @@ import java.net.ServerSocket;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
@@ -32,22 +35,26 @@ import com.limegroup.gnutella.util.EmptyResponder;
 public final class ServerSideIntermediateRedirectTest 
     extends ServerSideTestCase {
 
-    protected static int TIMEOUT = 2000;
+    private final int TIMEOUT = 2000;
 
     /**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS;
+    private DatagramSocket UDP_ACCESS;
 
     /**
      * Just a TCP connection to use for testing.
      */
-    private static ServerSocket TCP_ACCESS;
+    private ServerSocket TCP_ACCESS;
 
     /**
      * The port for TCP_ACCESS
      */ 
-    private static final int TCP_ACCESS_PORT = 10776;
+    private final int TCP_ACCESS_PORT = 10776;
+
+    private MessageFactory messageFactory;
+
+    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
 
     public ServerSideIntermediateRedirectTest(String name) {
         super(name);
@@ -61,21 +68,37 @@ public final class ServerSideIntermediateRedirectTest
 		junit.textui.TestRunner.run(suite());
 	}
 
-    public static Integer numUPs() {
-        return new Integer(2);
+	@Override
+	public int getNumberOfUltrapeers() {
+	    return 2;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
+	@Override
+	public int getNumberOfLeafpeers() {
+	    return 1;
     }
 	
-    // BEGIN TESTS
-    // ------------------------------------------------------
-
-    public void testNoRedirectCandidates() throws Exception {
-        UDP_ACCESS = new DatagramSocket();
+	@Override
+	protected void setUp() throws Exception {
+	    Injector injector = LimeTestUtils.createInjector();
+	    super.setUp(injector);
+	    messageFactory = injector.getInstance(MessageFactory.class);
+	    messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
+	    
+	    UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
-
+	}
+	
+	@Override
+	public void tearDown() throws Exception {
+	    super.tearDown();
+	    if (TCP_ACCESS != null) {
+	        TCP_ACCESS.close();
+	    }
+	}
+	
+    public void testNoRedirectCandidates() throws Exception {
+    
         // ok, currently there are no redirect ultrapeers, so we've changed
         // the behavior - the Ultrapeer should just drop them on the floor
         TCPConnectBackVendorMessage tcp = 
@@ -100,7 +123,7 @@ public final class ServerSideIntermediateRedirectTest
             UDP_ACCESS.setSoTimeout(TIMEOUT);
             UDP_ACCESS.receive(pack);
             ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-            ProviderHacks.getMessageFactory().read(bais);
+            messageFactory.read(bais);
             fail("Got a message");
         } catch (InterruptedIOException expected) {}
     }
@@ -108,13 +131,13 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirect() throws Exception {
 
-        BlockingConnection redirUP = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+        BlockingConnection redirUP = blockingConnectionFactory.createConnection("localhost", PORT);
         
-        redirUP.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        redirUP.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP.isOpen());
         drain(redirUP);
 
-        Message msvm = ProviderHacks.getMessagesSupportedVendorMessage();
+        Message msvm = messagesSupportedVendorMessage;
         redirUP.send(msvm);
         redirUP.flush();
 
@@ -160,21 +183,21 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirectMultiple() throws Exception {
 
-        BlockingConnection redirUP1 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
-        redirUP1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        BlockingConnection redirUP1 = blockingConnectionFactory.createConnection("localhost", PORT);
+        redirUP1.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP1.isOpen());
         drain(redirUP1);
 
-        Message msvm = ProviderHacks.getMessagesSupportedVendorMessage();
+        Message msvm = messagesSupportedVendorMessage;
         redirUP1.send(msvm);
         redirUP1.flush();
 
-        BlockingConnection redirUP2 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
-        redirUP2.initialize( ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        BlockingConnection redirUP2 = blockingConnectionFactory.createConnection("localhost", PORT);
+        redirUP2.initialize( headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP2.isOpen());
         drain(redirUP2);
 
-        msvm = ProviderHacks.getMessagesSupportedVendorMessage();
+        msvm = messagesSupportedVendorMessage;
         redirUP2.send(msvm);
         redirUP2.flush();
 
