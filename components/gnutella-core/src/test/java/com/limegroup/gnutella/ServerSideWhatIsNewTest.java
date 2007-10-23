@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -13,6 +15,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.downloader.TestFile;
@@ -21,12 +24,14 @@ import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Tests that What is new support is fully functional.  We use a leaf here - we
@@ -43,15 +48,19 @@ public class ServerSideWhatIsNewTest
     private static File susheel = null;
     private static File tempFile1 = null;
     private static File tempFile2 = null;
-
+    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
+    private CapabilitiesVMFactory capabilitiesVMFactory;
+    private FileManager fileManager;
+    private CreationTimeCache creationTimeCache;
+    private QueryRequestFactory queryRequestFactory;
+    private Injector injector;
+    private DownloadServices downloadServices;
+    
     public ServerSideWhatIsNewTest(String name) {
         super(name);
     }
     
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-    
+    @Override
     public int getNumberOfPeers() {
         return 1;
     }
@@ -64,16 +73,7 @@ public class ServerSideWhatIsNewTest
         junit.textui.TestRunner.run(suite());
     }
     
-    public void tearDown() { 
-        //  Now that this class is ClientSideTestCase derived, it reuses connections.
-        //      Therefore, since we are re-sending the same query string repeatedly, 
-        //      we need to pause a bit longer between each test, or else DuplicateFilter.allow()
-        //      will reject the subsequent queries as duplicates.
-        try {
-            Thread.sleep(3500);
-        } catch (InterruptedException unused) {}
-    }
-    
+    @Override
     public void setSettings() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
@@ -104,7 +104,19 @@ public class ServerSideWhatIsNewTest
     }        
     
     public void setUp() throws Exception  {
-        doSettings();
+        injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        
+        messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
+        capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
+        fileManager = injector.getInstance(FileManager.class);
+        creationTimeCache = injector.getInstance(CreationTimeCache.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        downloadServices = injector.getInstance(DownloadServices.class);
+
+        fileManager.loadSettingsAndWait(500);
+        
+        exchangeCapabilitiesMessage();
     }
     
     @Override
@@ -112,18 +124,13 @@ public class ServerSideWhatIsNewTest
         return false;
     }
 
-
-    ///////////////////////// Actual Tests ////////////////////////////
-    
-    // THIS TEST SHOULD BE RUN FIRST!!
-    // just test that What Is New support is advertised
-    public void testSendsCapabilitiesMessage() throws Exception {
+    public void exchangeCapabilitiesMessage() throws Exception {
         //testUP = connect(rs, 6355, true);
         BlockingConnection connection = testUP[0];
 
         // send a MessagesSupportedMessage and capabilities VM
-        connection.send(ProviderHacks.getMessagesSupportedVendorMessage());
-        connection.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
+        connection.send(messagesSupportedVendorMessage);
+        connection.send(capabilitiesVMFactory.getCapabilitiesVM());
         connection.flush();
 
         Thread.sleep(100);
@@ -142,61 +149,53 @@ public class ServerSideWhatIsNewTest
     public void testCreationTimeCacheInitialState() throws Exception {
         // wait for fm to finish
         int i = 0;
-        for (; (i < 15) && (ProviderHacks.getFileManager().getNumFiles() < 2); i++)
+        for (; (i < 15) && (fileManager.getNumFiles() < 2); i++)
             Thread.sleep(1000);
         if (i == 15) assertTrue(false);
 
         // we should be sharing two files - two text files.
-        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals(2, fileManager.getNumFiles());
 
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
-        FileManager fm = ProviderHacks.getFileManager();
+        FileManager fm = fileManager;
         URN berkeleyURN = fm.getURNForFile(berkeley);
         URN susheelURN = fm.getURNForFile(susheel);
 
-        {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
-            assertEquals(2, urnToLong.size());
-            assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
-            assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
-        }
+        Map urnToLong =  creationTimeCache.getUrnToTime();
+        assertEquals(2, urnToLong.size());
+        assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
+        assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
 
-        {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
-            if (longToUrns.size() == 1) {
-                Iterator iter = longToUrns.entrySet().iterator();
-                Set urnSet = (Set)((Map.Entry)iter.next()).getValue();
-                assertTrue(urnSet.contains(berkeleyURN));
-                assertTrue(urnSet.contains(susheelURN));
-                assertEquals(2, urnSet.size());
-            }
-            else if (longToUrns.size() == 2) {
-                Iterator iter = longToUrns.entrySet().iterator();
-                Set urnSet = (Set)((Map.Entry)iter.next()).getValue();
-                assertTrue(
-                           ( urnSet.contains(berkeleyURN) && 
-                             !urnSet.contains(susheelURN) )
-                           ||
-                           ( !urnSet.contains(berkeleyURN) && 
-                             urnSet.contains(susheelURN) )
-                           );
-                assertEquals(1, urnSet.size());
-                urnSet = (Set)((Map.Entry)iter.next()).getValue();
-                assertTrue(
-                           ( urnSet.contains(berkeleyURN) && 
-                             !urnSet.contains(susheelURN) )
-                           ||
-                           ( !urnSet.contains(berkeleyURN) && 
-                             urnSet.contains(susheelURN) )
-                           );
-                assertEquals(1, urnSet.size());
-            }
-            else assertTrue("Bad Cache!", false);
+        Map longToUrns = creationTimeCache.getTimeToUrn();
+        if (longToUrns.size() == 1) {
+            Iterator iter = longToUrns.entrySet().iterator();
+            Set urnSet = (Set)((Map.Entry)iter.next()).getValue();
+            assertTrue(urnSet.contains(berkeleyURN));
+            assertTrue(urnSet.contains(susheelURN));
+            assertEquals(2, urnSet.size());
         }
+        else if (longToUrns.size() == 2) {
+            Iterator iter = longToUrns.entrySet().iterator();
+            Set urnSet = (Set)((Map.Entry)iter.next()).getValue();
+            assertTrue(
+                    ( urnSet.contains(berkeleyURN) && 
+                            !urnSet.contains(susheelURN) )
+                            ||
+                            ( !urnSet.contains(berkeleyURN) && 
+                                    urnSet.contains(susheelURN) )
+            );
+            assertEquals(1, urnSet.size());
+            urnSet = (Set)((Map.Entry)iter.next()).getValue();
+            assertTrue(
+                    ( urnSet.contains(berkeleyURN) && 
+                            !urnSet.contains(susheelURN) )
+                            ||
+                            ( !urnSet.contains(berkeleyURN) && 
+                                    urnSet.contains(susheelURN) )
+            );
+            assertEquals(1, urnSet.size());
+        }
+        else assertTrue("Bad Cache!", false);
     }
-
 
     // make sure that a what is new query is answered correctly
     public void testWhatIsNewQueryBasic() throws Exception {
@@ -204,7 +203,7 @@ public class ServerSideWhatIsNewTest
         drain(connection);
 
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         whatIsNewQuery.hop();
@@ -237,7 +236,7 @@ public class ServerSideWhatIsNewTest
 
         {
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.AUDIO_MASK);
         whatIsNewQuery.hop();
@@ -255,7 +254,7 @@ public class ServerSideWhatIsNewTest
 
         {
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW, false, 0 | QueryRequest.DOC_MASK);
         whatIsNewQuery.hop();
@@ -285,8 +284,7 @@ public class ServerSideWhatIsNewTest
     // test that the creation time cache handles the additional sharing of files
     // fine
     public void testAddSharedFiles() throws Exception {
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
-        FileManager fm = ProviderHacks.getFileManager();
+        FileManager fm = fileManager;
         URN berkeleyURN = fm.getURNForFile(berkeley);
         URN susheelURN = fm.getURNForFile(susheel);
 
@@ -316,41 +314,34 @@ public class ServerSideWhatIsNewTest
         assertTrue(tempFile1.exists());
         assertTrue(tempFile2.exists());
 
-        ProviderHacks.getFileManager().loadSettings();
-        int i = 0;
-        for (; (i < 15) && (ProviderHacks.getFileManager().getNumFiles() < 4); i++)
-            Thread.sleep(1000);
-        if (i == 15)
-            fail("num shared files? " + ProviderHacks.getFileManager().getNumFiles());
+        fileManager.loadSettingsAndWait(1000);
+        assertEquals("Files were not loaded by filemanager", 4, fileManager.getNumFiles());
 
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         URN tempFile2URN = fm.getURNForFile(tempFile2);
-        {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
-            assertEquals(4, urnToLong.size());
-            assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
-            assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
-            assertNotNull(""+urnToLong, urnToLong.get(tempFile1URN));
-            assertNotNull(""+urnToLong, urnToLong.get(tempFile2URN));
-        }
-        {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
-            assertTrue(""+longToUrns, 
-                       (longToUrns.size() == 2) || (longToUrns.size() == 3) ||
-                       (longToUrns.size() == 4));
-        }
+
+        Map urnToLong = creationTimeCache.getUrnToTime();
+        assertEquals(4, urnToLong.size());
+        assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
+        assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
+        assertNotNull(""+urnToLong, urnToLong.get(tempFile1URN));
+        assertNotNull(""+urnToLong, urnToLong.get(tempFile2URN));
+        
+        Map longToUrns = creationTimeCache.getTimeToUrn();
+        assertTrue(""+longToUrns, 
+                (longToUrns.size() == 2) || (longToUrns.size() == 3) ||
+                (longToUrns.size() == 4));
     }
 
     // test that after the sharing of additional files, the what is new query
     // results in something else
     public void testWhatIsNewQueryNewFiles() throws Exception {
+        testAddSharedFiles();
         BlockingConnection connection = testUP[0];
         drain(connection);
 
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         connection.send(whatIsNewQuery);
@@ -383,8 +374,9 @@ public class ServerSideWhatIsNewTest
     // a total black box test, but hacking up the changing of ID3 data isn't
     // worth the cost.  this test should be good enough....
     public void testFileChanged() throws Exception {
-        FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
+        testAddSharedFiles();
+        FileManager fm = fileManager;
+        CreationTimeCache ctCache = creationTimeCache;
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         Long cTime = ctCache.getCreationTime(tempFile1URN);
 
@@ -415,7 +407,7 @@ public class ServerSideWhatIsNewTest
         drain(connection);
 
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         connection.send(whatIsNewQuery);
@@ -447,8 +439,9 @@ public class ServerSideWhatIsNewTest
     // test that the fileChanged method of FM does the right thing when you 
     // change the file to a existing URN.
     public void testFileChangedToExistingURN() throws Exception {
-        FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
+        testAddSharedFiles();
+        FileManager fm = fileManager;
+        CreationTimeCache ctCache = creationTimeCache;
         URN tempFile1URN = fm.getURNForFile(tempFile1);
 //        URN tempFile2URN = fm.getURNForFile(tempFile2);
         // we are changing tempFile1 to become tempFile2 - but since we
@@ -466,8 +459,16 @@ public class ServerSideWhatIsNewTest
 
         FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
         assertNotNull(beforeChanged);
+        
+        final CountDownLatch latch = new CountDownLatch(1);
+        fm.addFileEventListener(new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                assertEquals(FileManagerEvent.Type.CHANGE_FILE, evt.getType());
+                latch.countDown();
+            }
+        });
         fm.fileChanged(tempFile1);
-        Thread.sleep(3000);
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
         FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
@@ -483,7 +484,7 @@ public class ServerSideWhatIsNewTest
         drain(connection);
 
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         connection.send(whatIsNewQuery);
@@ -513,33 +514,29 @@ public class ServerSideWhatIsNewTest
 
     // test that the FileManager.removeFileIfShared method works    
     public void testRemoveSharedFile() throws Exception {
-        FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();        
+        FileManager fm = fileManager;
+                
         
         int size = 0;
         {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            Map urnToLong = creationTimeCache.getUrnToTime();
             assertEquals(3, urnToLong.size());
         }
+        
         {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            Map longToUrns = creationTimeCache.getTimeToUrn();
             size = longToUrns.size();
             assertTrue((longToUrns.size() == 2) || (longToUrns.size() == 3));
         }
         
         // tempFile1 is the same URN as tempFile2
         fm.removeFileIfShared(tempFile1);
-
         {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            Map urnToLong = creationTimeCache.getUrnToTime();  
             assertEquals(3, urnToLong.size());
         }
         {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            Map longToUrns = creationTimeCache.getTimeToUrn();
             assertEquals(longToUrns.size(), size);
         }
         
@@ -547,13 +544,11 @@ public class ServerSideWhatIsNewTest
         fm.removeFileIfShared(tempFile2);
 
         {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            Map urnToLong = creationTimeCache.getUrnToTime();
             assertEquals(2, urnToLong.size());
         }
         {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            Map longToUrns =creationTimeCache.getTimeToUrn();
             assertEquals(longToUrns.size(), (size-1));
         }
     }
@@ -562,8 +557,7 @@ public class ServerSideWhatIsNewTest
     // manually delete a file, make sure it isn't shared and that the CTC has
     // the correct sizes, etc...
     public void testManualFileDeleteLoadSettings() throws Exception {
-        FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
+        FileManager fm = fileManager;
 
         tempFile1.delete(); tempFile1 = null;
         tempFile2.delete(); tempFile2 = null;
@@ -571,18 +565,16 @@ public class ServerSideWhatIsNewTest
 
         fm.loadSettings();
         Thread.sleep(2000);
-        assertEquals("num shared files", 1, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals("num shared files", 1, fileManager.getNumFiles());
 
         URN susheelURN = fm.getURNForFile(susheel);
         {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            Map urnToLong = creationTimeCache.getUrnToTime(); 
             assertEquals(""+urnToLong, 1, urnToLong.size());
             assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
         }
         {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            Map longToUrns = creationTimeCache.getTimeToUrn();
             assertEquals(""+longToUrns, 1, longToUrns.size());
         }
     }
@@ -590,13 +582,12 @@ public class ServerSideWhatIsNewTest
 
     // download a file and make sure the creation time given back is stored...
     public void testDownloadCapturesCreationTime() throws Exception {
-        FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
+        FileManager fm = fileManager;
+        CreationTimeCache ctCache = creationTimeCache;
         
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
-        TestUploader uploader = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
-                ProviderHacks.getIpFilter());
+        TestUploader uploader = injector.getInstance(TestUploader.class);
         uploader.start("whatever.txt", UPLOADER_PORT, false);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
@@ -609,7 +600,7 @@ public class ServerSideWhatIsNewTest
                                                 false, null, urns, false,
                                                 false, "LIME", new HashSet(), -1, false);
         Downloader downloader = 
-            ProviderHacks.getDownloadServices().download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+            downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
         int sleeps = 0;
         while (downloader.getState() != DownloadStatus.COMPLETE) {
@@ -618,7 +609,7 @@ public class ServerSideWhatIsNewTest
             if (sleeps > 320) assertTrue("download never completed", false);
         }
         
-        assertEquals( 2, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals( 2, fileManager.getNumFiles());
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.exists());
@@ -643,14 +634,14 @@ public class ServerSideWhatIsNewTest
     // download a file and make sure the creation time given back is stored...
     public void testSwarmDownloadCapturesOlderCreationTime() throws Exception {
         
-        FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
+        FileManager fm = fileManager;
+        CreationTimeCache ctCache = creationTimeCache;
 
         // get rid of the old shared file
         File newFile = new File(_savedDir, "whatever.txt");
         fm.removeFileIfShared(newFile);
         newFile.delete();
-        assertEquals(1, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals(1, fileManager.getNumFiles());
         
         final int UPLOADER_PORT = 20000;
         byte[] guid = GUID.makeGuid();
@@ -658,8 +649,7 @@ public class ServerSideWhatIsNewTest
         Long cTime[] = new Long[uploader.length];
         RemoteFileDesc rfds[] = new RemoteFileDesc[uploader.length];
         for (int i = 0; i < uploader.length; i++) {
-            uploader[i] = new TestUploader(ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getFeaturesWriter(),
-                    ProviderHacks.getIpFilter());
+            uploader[i] = injector.getInstance(TestUploader.class);
             uploader[i].start("anita.txt", UPLOADER_PORT+i, false);
             uploader[i].setRate(50);
             cTime[i] = new Long(5+i);
@@ -673,7 +663,7 @@ public class ServerSideWhatIsNewTest
                                          false, "LIME", new HashSet(), -1, false);
         }
 
-        Downloader downloader = ProviderHacks.getDownloadServices().download(rfds, false, new GUID(guid));
+        Downloader downloader = downloadServices.download(rfds, false, new GUID(guid));
         
         Thread.sleep(2000);
         assertTrue(downloader.getState() != DownloadStatus.COMPLETE);
@@ -688,7 +678,7 @@ public class ServerSideWhatIsNewTest
             if (sleeps > 120) assertTrue("download never completed", false);
         }
         
-        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals(2, fileManager.getNumFiles());
 
         {
             Map urnToLong = 
@@ -712,8 +702,8 @@ public class ServerSideWhatIsNewTest
         susheel.setLastModified(123456);
         berkeley.setLastModified(123457);
         
-        FileManager fm = ProviderHacks.getFileManager();
-        CreationTimeCache ctCache = ProviderHacks.getCreationTimeCache();
+        FileManager fm = fileManager;
+        CreationTimeCache ctCache = creationTimeCache;
 
         File winInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
         File linInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
@@ -742,12 +732,12 @@ public class ServerSideWhatIsNewTest
         osxDst.deleteOnExit();
         
         try {
-            ProviderHacks.getFileManager().loadSettings();
+            fileManager.loadSettings();
             int i = 0;
-            for (; (i < 15) && (ProviderHacks.getFileManager().getNumFiles()+ProviderHacks.getFileManager().getNumForcedFiles() < 5); i++)
+            for (; (i < 15) && (fileManager.getNumFiles()+fileManager.getNumForcedFiles() < 5); i++)
                 Thread.sleep(1000);
             if (i == 15)
-                fail("num shared files? " + ProviderHacks.getFileManager().getNumFiles());
+                fail("num shared files? " + fileManager.getNumFiles());
     
             // we should be sharing two files - two text files and three installers
             // but the creation time cache should only have the two text files
@@ -755,17 +745,15 @@ public class ServerSideWhatIsNewTest
             //
             //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
             //      files don't count), and 3 forced shared files
-            assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
-            assertEquals(3, ProviderHacks.getFileManager().getNumForcedFiles());
+            assertEquals(2, fileManager.getNumFiles());
+            assertEquals(3, fileManager.getNumForcedFiles());
     
             {
-                Map urnToLong = 
-                    (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+                Map urnToLong = creationTimeCache.getUrnToTime();
                 assertEquals(2, urnToLong.size());
             }
             {
-                Map longToUrns =
-                    (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+                Map longToUrns = creationTimeCache.getTimeToUrn();
                 assertEquals(2, longToUrns.size());
             }
     
