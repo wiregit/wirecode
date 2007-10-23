@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.filters;
 
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Test;
@@ -18,7 +17,6 @@ import com.google.inject.Module;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -211,43 +209,4 @@ public class IPFilterTest extends LimeTestCase {
                 new byte[16], 0l, blackListedAddress, 6346);
         assertFalse(filter.allow(push2));
     }
-    
-    private static class StubFilter implements IPFilter {
-
-        public boolean allow(byte[] addr) {
-            return true;
-        }
-
-        public boolean allow(IP ip) {
-            return true;
-        }
-
-        public boolean allow(SocketAddress addr) {
-            return true;
-        }
-
-        public boolean allow(String addr) {
-            return true;
-        }
-
-        public boolean hasBlacklistedHosts() {
-            return true;
-        }
-
-        public int logMinDistanceTo(IP ip) {
-            return 0;
-        }
-
-        public void refreshHosts() {
-        }
-
-        public void refreshHosts(IPFilterCallback callback) {
-        }
-
-        public boolean allow(Message m) {
-            return true;
-        }
-        
-    }
-        
 }

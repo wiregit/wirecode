@@ -106,6 +106,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
     private QueryReplyFactory queryReplyFactory;
 
     private ResponseFactory responseFactory;
+    
+    private LifecycleManager lifecycleManager;
 
     public UltrapeerRoutingTest(String name) {
         super(name);
@@ -163,8 +165,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
         responseFactory = injector.getInstance(ResponseFactory.class);
-
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
         
         lifecycleManager.start();
         connectionServices.connect();
@@ -181,7 +183,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		ULTRAPEER_1.close();
 		ULTRAPEER_2.close();
         connectionServices.disconnect();
-		sleep();
+        lifecycleManager.shutdown();
 	}
 
 	private void sleep() {
