@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
@@ -37,11 +36,13 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -67,7 +68,7 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
- * The list of all ManagedConnection's.  Provides a factory method for creating
+ * The list of all RoutedConnection's.  Provides a factory method for creating
  * user-requested outgoing connections, accepts incoming connections, and
  * fetches "automatic" outgoing connections as needed.  Creates threads for
  * handling these connections when appropriate.
@@ -176,8 +177,8 @@ public class ConnectionManager implements ConnectionAcceptor,
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
-    private final List<ManagedConnection> _initializingFetchedConnections =
-        new ArrayList<ManagedConnection>();
+    private final List<RoutedConnection> _initializingFetchedConnections =
+        new ArrayList<RoutedConnection>();
 
     /**
      * dedicated ConnectionFetcher used by leafs to fetch a
@@ -231,9 +232,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      *   much slower.
      */
     //TODO:: why not use sets here??
-    private volatile List<ManagedConnection> _connections = Collections.emptyList();
-    private volatile List<ManagedConnection> _initializedConnections = Collections.emptyList();
-    private volatile List<ManagedConnection> _initializedClientConnections = Collections.emptyList();
+    private volatile List<RoutedConnection> _connections = Collections.emptyList();
+    private volatile List<RoutedConnection> _initializedConnections = Collections.emptyList();
+    private volatile List<RoutedConnection> _initializedClientConnections = Collections.emptyList();
 
     private volatile int _shieldedConnections = 0;
     private volatile int _nonLimeWireLeaves = 0;
@@ -271,7 +272,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<SimppManager> simppManager;
     private final CapabilitiesVMFactory capabilitiesVMFactory;
-    private final ManagedConnectionFactory managedConnectionFactory;
+    private final RoutedConnectionFactory managedConnectionFactory;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<QueryUnicaster> queryUnicaster;
     private final SocketsManager socketsManager;
@@ -289,7 +290,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<SimppManager> simppManager,
             CapabilitiesVMFactory capabilitiesVMFactory,
-            ManagedConnectionFactory managedConnectionFactory,
+            RoutedConnectionFactory managedConnectionFactory,
             Provider<MessageRouter> messageRouter,
             Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager,
@@ -364,27 +365,11 @@ public class ConnectionManager implements ConnectionAcceptor,
         });
     }
 
-
-    /**
-     * Create a new connection, blocking until it's initialized, but launching
-     * a new thread to do the message loop.
-     */
-    public ManagedConnection createConnectionBlocking(String hostname, int portnum, ConnectType type) throws IOException {
-        ManagedConnection c = managedConnectionFactory.createManagedConnection(hostname, portnum,
-                type);
-
-        // Initialize synchronously
-        initializeExternallyGeneratedConnection(c, null);
-        // Kick off a thread for the message loop.
-        ThreadExecutor.startThread(new OutgoingConnector(c, false), "OutgoingConnector");
-        return c;
-    }
-
     /**
      * Create a new connection, allowing it to initialize and loop for messages on a new thread.
      */
     public void createConnectionAsynchronously(String hostname, int portnum, ConnectType type) {
-        ManagedConnection mc = managedConnectionFactory.createManagedConnection(hostname, portnum,
+        RoutedConnection mc = managedConnectionFactory.createRoutedConnection(hostname, portnum,
                 type);
         try {
             initializeExternallyGeneratedConnection(mc, new IncomingGNetObserver(mc));
@@ -414,29 +399,14 @@ public class ConnectionManager implements ConnectionAcceptor,
      * and then loops for messages (it will return when the connection dies).
      */
      void acceptConnection(Socket socket) {
-         ManagedConnection connection = managedConnectionFactory.createManagedConnection(socket);
-         
-         GnetConnectObserver listener = null;
-         
-         if(connection.isAsynchronous())
-             listener = new IncomingGNetObserver(connection);
-         else
-             Thread.currentThread().setName("IncomingConnectionThread");
+         RoutedConnection connection = managedConnectionFactory.createRoutedConnection(socket);         
+         GnetConnectObserver listener = new IncomingGNetObserver(connection);
          
          try {
              initializeExternallyGeneratedConnection(connection, listener);
          } catch (IOException e) {
 			 connection.close();
              return;
-         }
-         
-         // Otherwise, the listener will be notified when to start.
-         if(listener == null) {
-             try {
-    			 startConnection(connection);
-             } catch(IOException e) {
-                 // the blocking connection died.
-             }
          }
      }
 
@@ -446,9 +416,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      * removing this connection from routing tables and modifying active
      * connection fetchers accordingly.
      *
-     * @param mc the <tt>ManagedConnection</tt> instance to remove
+     * @param mc the <tt>RoutedConnection</tt> instance to remove
      */
-    public synchronized void remove(ManagedConnection mc) {
+    public synchronized void remove(RoutedConnection mc) {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;
         removeInternal(mc);
@@ -577,7 +547,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     boolean isConnectedTo(String hostName) {
         //A list of all connections, both initialized and
         //uninitialized, leaves and unrouted. 
-        for(ManagedConnection mc : getConnections()) {
+        for(RoutedConnection mc : getConnections()) {
             if (mc.getAddress().equals(hostName))
                 return true;
         }
@@ -595,7 +565,7 @@ public class ConnectionManager implements ConnectionAcceptor,
                 if(them != null && host.getAddress().equals(them.getAddress()) && host.getPort() == them.getPort())
                     return true;
             }
-            for(ManagedConnection next : _initializingFetchedConnections) {
+            for(RoutedConnection next : _initializingFetchedConnections) {
                 if(host.getAddress().equals(next.getAddress()) && host.getPort() == next.getPort())
                     return true;
             }
@@ -768,7 +738,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     public void measureBandwidth() {
         float upstream=0.f;
         float downstream=0.f;
-        for(ManagedConnection mc : getInitializedConnections()) {
+        for(RoutedConnection mc : getInitializedConnections()) {
             mc.measureBandwidth();
             upstream+=mc.getMeasuredUpstreamBandwidth();
             downstream+=mc.getMeasuredDownstreamBandwidth();
@@ -804,11 +774,11 @@ public class ConnectionManager implements ConnectionAcceptor,
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-    private HandshakeStatus allowConnection(ManagedConnection c) {
-        if(!c.receivedHeaders())
+    private HandshakeStatus allowConnection(RoutedConnection c) {
+        if(!c.getConnectionCapabilities().receivedHeaders())
             return HandshakeStatus.NO_HEADERS;
         
-		return allowConnection(c.headers(), false);
+		return allowConnection(c.getConnectionCapabilities().getHeadersRead(), false);
     }
 
     /**
@@ -1124,8 +1094,8 @@ public class ConnectionManager implements ConnectionAcceptor,
     private int ultrapeerToUltrapeerConnections() {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
-        for(ManagedConnection mc : _initializedConnections) {
-            if (mc.isSupernodeSupernodeConnection())
+        for(RoutedConnection mc : _initializedConnections) {
+            if (mc.getConnectionCapabilities().isSupernodeSupernodeConnection())
                 ret++;
         }
         return ret;
@@ -1136,8 +1106,8 @@ public class ConnectionManager implements ConnectionAcceptor,
     private int oldConnections() {
 		// technically, we can allow old connections.
 		int ret = 0;
-        for(ManagedConnection mc : _initializedConnections) {
-            if (!mc.isSupernodeConnection())
+        for(RoutedConnection mc : _initializedConnections) {
+            if (!mc.getConnectionCapabilities().isSupernodeConnection())
                 ret++;
         }
         return ret;
@@ -1164,7 +1134,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     /**
      * Returns a list of this' initialized connections.
      */
-    public List<ManagedConnection> getInitializedConnections() {
+    public List<RoutedConnection> getInitializedConnections() {
         return _initializedConnections;
     }
 
@@ -1173,9 +1143,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      * String loc.
      * create a new linkedlist to return.
      */
-    public List<ManagedConnection> getInitializedConnectionsMatchLocale(String loc) {
-        List<ManagedConnection> matches = new LinkedList<ManagedConnection>();
-        for(ManagedConnection conn : _initializedConnections) {
+    public List<RoutedConnection> getInitializedConnectionsMatchLocale(String loc) {
+        List<RoutedConnection> matches = new LinkedList<RoutedConnection>();
+        for(RoutedConnection conn : _initializedConnections) {
             if(loc.equals(conn.getLocalePref()))
                 matches.add(conn);
         }
@@ -1185,7 +1155,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     /**
      * Returns a list of this' initialized connections.
      */
-    public List<ManagedConnection> getInitializedClientConnections() {
+    public List<RoutedConnection> getInitializedClientConnections() {
         return _initializedClientConnections;
     }
 
@@ -1194,9 +1164,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      * String loc.
      * create a new linkedlist to return.
      */
-    public List<ManagedConnection> getInitializedClientConnectionsMatchLocale(String loc) {
-    	List<ManagedConnection>  matches = new LinkedList<ManagedConnection>();
-        for(ManagedConnection conn : _initializedClientConnections) {
+    public List<RoutedConnection> getInitializedClientConnectionsMatchLocale(String loc) {
+    	List<RoutedConnection>  matches = new LinkedList<RoutedConnection>();
+        for(RoutedConnection conn : _initializedClientConnections) {
             if(loc.equals(conn.getLocalePref()))
                 matches.add(conn);
         }
@@ -1206,7 +1176,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     /**
      * @return all of this' connections.
      */
-    public List<ManagedConnection> getConnections() {
+    public List<RoutedConnection> getConnections() {
         return _connections;
     }
 
@@ -1226,7 +1196,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             // connections and the test for proxy support is cached boolean
             // value
             Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
-            for(ManagedConnection currMC : getInitializedConnections()) {
+            for(RoutedConnection currMC : getInitializedConnections()) {
                 if(proxies.size() >= 4)
                     break;
                 if (currMC.isMyPushProxy())
@@ -1245,16 +1215,16 @@ public class ConnectionManager implements ConnectionAcceptor,
     public boolean sendTCPConnectBackRequests() {
         int sent = 0;
         
-        List<ManagedConnection> peers = new ArrayList<ManagedConnection>(getInitializedConnections());
+        List<RoutedConnection> peers = new ArrayList<RoutedConnection>(getInitializedConnections());
         Collections.shuffle(peers);
-        for (Iterator<ManagedConnection> iter = peers.iterator(); iter.hasNext();) {
-            ManagedConnection currMC = iter.next();
-            if (currMC.remoteHostSupportsTCPRedirect() < 0)
+        for (Iterator<RoutedConnection> iter = peers.iterator(); iter.hasNext();) {
+            RoutedConnection currMC = iter.next();
+            if (currMC.getConnectionCapabilities().remoteHostSupportsTCPRedirect() < 0)
                 iter.remove();
         }
         
         if (peers.size() == 1) {
-            ManagedConnection myConn = peers.get(0);
+            RoutedConnection myConn = peers.get(0);
             for (int i = 0; i < CONNECT_BACK_REDUNDANT_REQUESTS; i++) {
                 // This is inside to generate a different GUID for each request.
                 Message cb = new TCPConnectBackVendorMessage(networkManager.getPort());
@@ -1263,7 +1233,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             }
         } else {
             final Message cb = new TCPConnectBackVendorMessage(networkManager.getPort());
-            for(ManagedConnection currMC : peers) {
+            for(RoutedConnection currMC : peers) {
                 if(sent >= 5)
                     break;
                 currMC.send(cb);
@@ -1281,12 +1251,12 @@ public class ConnectionManager implements ConnectionAcceptor,
     public boolean sendUDPConnectBackRequests(GUID cbGuid) {
         int sent =  0;
         final Message cb = new UDPConnectBackVendorMessage(networkManager.getPort(), cbGuid);
-        List<ManagedConnection> peers = new ArrayList<ManagedConnection>(getInitializedConnections());
+        List<RoutedConnection> peers = new ArrayList<RoutedConnection>(getInitializedConnections());
         Collections.shuffle(peers);
-        for(ManagedConnection currMC : peers) {
+        for(RoutedConnection currMC : peers) {
             if(sent >= 5)
                 break;
-            if (currMC.remoteHostSupportsUDPConnectBack() >= 0) {
+            if (currMC.getConnectionCapabilities().remoteHostSupportsUDPConnectBack() >= 0) {
                 currMC.send(cb);
                 sent++;
             }
@@ -1304,8 +1274,8 @@ public class ConnectionManager implements ConnectionAcceptor,
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for query status response is a cached
             // value
-            for(ManagedConnection currMC : getInitializedConnections()) {
-                if (currMC.remoteHostSupportsLeafGuidance() >= 0)
+            for(RoutedConnection currMC : getInitializedConnections()) {
+                if (currMC.getConnectionCapabilities().remoteHostSupportsLeafGuidance() >= 0)
                     currMC.send(stat);
             }
         }
@@ -1319,9 +1289,9 @@ public class ConnectionManager implements ConnectionAcceptor,
 	 *  there is one, otherwise returns <tt>null</tt>
 	 */
 	public Endpoint getConnectedGUESSUltrapeer() {
-        for(ManagedConnection connection : _initializedConnections) {
-			if(connection.isSupernodeConnection() &&
-			   connection.isGUESSUltrapeer()) {
+        for(RoutedConnection connection : _initializedConnections) {
+			if(connection.getConnectionCapabilities().isSupernodeConnection() &&
+			   connection.getConnectionCapabilities().isGUESSUltrapeer()) {
 				return new Endpoint(connection.getInetAddress().getAddress(),
 									connection.getPort());
 			}
@@ -1336,11 +1306,11 @@ public class ConnectionManager implements ConnectionAcceptor,
      * @return A non-null List of GUESS enabled, TCP connected Ultrapeers.  The
      * are represented as ManagedConnections.
      */
-	public List<ManagedConnection> getConnectedGUESSUltrapeers() {
-        List<ManagedConnection> retList = new ArrayList<ManagedConnection>();
-        for(ManagedConnection connection : _initializedConnections) {
-			if(connection.isSupernodeConnection() &&
-               connection.isGUESSUltrapeer())
+	public List<RoutedConnection> getConnectedGUESSUltrapeers() {
+        List<RoutedConnection> retList = new ArrayList<RoutedConnection>();
+        for(RoutedConnection connection : _initializedConnections) {
+			if(connection.getConnectionCapabilities().isSupernodeConnection() &&
+               connection.getConnectionCapabilities().isGUESSUltrapeer())
 				retList.add(connection);
 		}
 		return retList;
@@ -1354,9 +1324,9 @@ public class ConnectionManager implements ConnectionAcceptor,
      * and initializeFetchedConnection, both times from within a
      * synchronized(this) block.
      */
-    private void connectionInitializing(ManagedConnection c) {
+    private void connectionInitializing(RoutedConnection c) {
         //REPLACE _connections with the list _connections+[c]
-        List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
+        List<RoutedConnection> newConnections=new ArrayList<RoutedConnection>(_connections);
         newConnections.add(c);
         _connections = Collections.unmodifiableList(newConnections);
         try {
@@ -1379,7 +1349,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * 
      * Default access for testing.
      */
-    void connectionInitializingIncoming(ManagedConnection c) {
+    void connectionInitializingIncoming(RoutedConnection c) {
         connectionInitializing(c);
     }
 
@@ -1390,7 +1360,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * 
      * Default access for testing.
      */
-    boolean connectionInitialized(ManagedConnection c) {
+    boolean connectionInitialized(RoutedConnection c) {
         if(_connections.contains(c)) {
             // Double-check that we haven't improperly allowed
             // this connection.  It is possible that, because of race-conditions,
@@ -1403,35 +1373,35 @@ public class ConnectionManager implements ConnectionAcceptor,
             
 
             //update the appropriate list of connections
-            if(!c.isSupernodeClientConnection()){
+            if(!c.getConnectionCapabilities().isSupernodeClientConnection()){
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections+[c]
-                List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_initializedConnections);
+                List<RoutedConnection> newConnections=new ArrayList<RoutedConnection>(_initializedConnections);
                 newConnections.add(c);
                 _initializedConnections =
                     Collections.unmodifiableList(newConnections);
                 
-                if(c.isClientSupernodeConnection()) {
+                if(c.getConnectionCapabilities().isClientSupernodeConnection()) {
                 	killPeerConnections(); // clean up any extraneus peer conns.
                     _shieldedConnections++;
                 }
-                if(!c.isLimeWire())
+                if(!c.getConnectionCapabilities().isLimeWire())
                     _nonLimeWirePeers++;
                 if(checkLocale(c.getLocalePref()))
                     _localeMatchingPeers++;
             } else {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
-                List<ManagedConnection> newConnections
-                    =new ArrayList<ManagedConnection>(_initializedClientConnections);
+                List<RoutedConnection> newConnections
+                    =new ArrayList<RoutedConnection>(_initializedClientConnections);
                 newConnections.add(c);
                 _initializedClientConnections =
                     Collections.unmodifiableList(newConnections);
-                if(!c.isLimeWire())
+                if(!c.getConnectionCapabilities().isLimeWire())
                     _nonLimeWireLeaves++;
             }
 	        // do any post-connection initialization that may involve sending.
-	        c.postInit();
+	        c.sendPostInitializeMessages();
 	        // sending the ping request.
     		sendInitialPingRequest(c);
             return true;
@@ -1450,16 +1420,16 @@ public class ConnectionManager implements ConnectionAcceptor,
      * 
      * @return whether the connection should be allowed 
      */
-    private boolean allowInitializedConnection(ManagedConnection c) {
-    	if ((isShieldedLeaf() || !isSupernode()) && !c.isClientSupernodeConnection())
+    private boolean allowInitializedConnection(RoutedConnection c) {
+    	if ((isShieldedLeaf() || !isSupernode()) && !c.getConnectionCapabilities().isClientSupernodeConnection())
     		return false;
         
-        List<ManagedConnection> connections = getConnections();
+        List<RoutedConnection> connections = getConnections();
         int listenPort = c.getListeningPort();
         String addr = c.getAddress();
         
         for(int i = 0; i < connections.size(); i++ ) {
-            ManagedConnection mc = connections.get(i);
+            RoutedConnection mc = connections.get(i);
             if(mc == c)
                 continue;
             if(!ConnectionSettings.ALLOW_DUPLICATE.getValue() && addr.equals(mc.getAddress())) {
@@ -1474,16 +1444,16 @@ public class ConnectionManager implements ConnectionAcceptor,
             }
         }
         
-    	return allowConnection(c.headers()).isAcceptable();
+    	return allowConnection(c.getConnectionCapabilities().getHeadersRead()).isAcceptable();
     }
     
     /**
      * removes any supernode->supernode connections
      */
     private void killPeerConnections() {
-    	List<ManagedConnection> conns = _initializedConnections;
-        for(ManagedConnection con : conns) {
-			if (con.isSupernodeSupernodeConnection()) 
+    	List<RoutedConnection> conns = _initializedConnections;
+        for(RoutedConnection con : conns) {
+			if (con.getConnectionCapabilities().isSupernodeSupernodeConnection()) 
 				removeInternal(con);
 		}
     }
@@ -1521,10 +1491,10 @@ public class ConnectionManager implements ConnectionAcceptor,
         adjustConnectionFetchers(); // kill them all
         
         //2. Remove all connections.
-        for(ManagedConnection c : getConnections()) {
+        for(RoutedConnection c : getConnections()) {
             remove(c);
             //add the endpoint to hostcatcher
-            if (c.isSupernodeConnection()) {
+            if (c.getConnectionCapabilities().isSupernodeConnection()) {
                 //add to catcher with the locale info.
                 ExtendedEndpoint ee = new ExtendedEndpoint(c.getInetAddress().getHostAddress(),
                                                            c.getPort(), c.getLocalePref());
@@ -1596,8 +1566,8 @@ public class ConnectionManager implements ConnectionAcceptor,
      * ttl of the PingRequest will be 1 if we don't need any connections.
      * Otherwise, the ttl = max ttl.
      */
-    private void sendInitialPingRequest(ManagedConnection connection) {
-        if(connection.supportsPongCaching()) return;
+    private void sendInitialPingRequest(RoutedConnection connection) {
+        if(connection.getConnectionCapabilities().supportsPongCaching()) return;
 
         //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping,
@@ -1613,10 +1583,6 @@ public class ConnectionManager implements ConnectionAcceptor,
             pr = pingRequestFactory.createPingRequest((byte)4);
 
         connection.send(pr);
-        //Ensure that the initial ping request is written in a timely fashion.
-        try {
-            connection.flush();
-        } catch (IOException e) { /* close it later */ }
     }
 
     /**
@@ -1624,25 +1590,25 @@ public class ConnectionManager implements ConnectionAcceptor,
      * is already held.  This version does not kick off ConnectionFetchers;
      * only the externally exposed version of remove does that.
      */
-    private void removeInternal(ManagedConnection c) {
+    private void removeInternal(RoutedConnection c) {
         // 1a) Remove from the initialized connections list and clean up the
         // stuff associated with initialized connections.  For efficiency
         // reasons, this must be done before (2) so packets are not forwarded
         // to dead connections (which results in lots of thrown exceptions).
-        if(!c.isSupernodeClientConnection()){
+        if(!c.getConnectionCapabilities().isSupernodeClientConnection()){
             int i=_initializedConnections.indexOf(c);
             if (i != -1) {
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections-[c]
-                List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>();
+                List<RoutedConnection> newConnections=new ArrayList<RoutedConnection>();
                 newConnections.addAll(_initializedConnections);
                 newConnections.remove(c);
                 _initializedConnections =
                     Collections.unmodifiableList(newConnections);
                 //maintain invariant
-                if(c.isClientSupernodeConnection())
+                if(c.getConnectionCapabilities().isClientSupernodeConnection())
                     _shieldedConnections--;
-                if(!c.isLimeWire())
+                if(!c.getConnectionCapabilities().isLimeWire())
                     _nonLimeWirePeers--;
                 if(checkLocale(c.getLocalePref()))
                     _localeMatchingPeers--;
@@ -1653,12 +1619,12 @@ public class ConnectionManager implements ConnectionAcceptor,
             if (i != -1) {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections-[c]
-                List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>();
+                List<RoutedConnection> newConnections=new ArrayList<RoutedConnection>();
                 newConnections.addAll(_initializedClientConnections);
                 newConnections.remove(c);
                 _initializedClientConnections =
                     Collections.unmodifiableList(newConnections);
-                if(!c.isLimeWire())
+                if(!c.getConnectionCapabilities().isLimeWire())
                     _nonLimeWireLeaves--;
             }
         }
@@ -1668,7 +1634,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         int i=_connections.indexOf(c);
         if (i != -1) {
             //REPLACE _connections with the list _connections-[c]
-            List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
+            List<RoutedConnection> newConnections=new ArrayList<RoutedConnection>(_connections);
             newConnections.remove(c);
             _connections = Collections.unmodifiableList(newConnections);
         }
@@ -1707,12 +1673,12 @@ public class ConnectionManager implements ConnectionAcceptor,
      */
     private synchronized void stabilizeConnections() {
         while(getNumInitializedConnections() > _preferredConnections) {
-            ManagedConnection newest = null;
-            for(ManagedConnection c : _initializedConnections) {
+            RoutedConnection newest = null;
+            for(RoutedConnection c : _initializedConnections) {
                 // first see if this is a non-limewire connection and cut it off
                 // unless it is our only connection left
                 
-                if (!c.isLimeWire()) {
+                if (!c.getConnectionCapabilities().isLimeWire()) {
                     newest = c;
                     break;
                 }
@@ -1837,7 +1803,7 @@ public class ConnectionManager implements ConnectionAcceptor,
         }
         int lastInitializingConnectionIndex = _initializingFetchedConnections.size();
         while((need < 0) && (lastInitializingConnectionIndex > 0)) {
-            ManagedConnection connection = 
+            RoutedConnection connection = 
                 _initializingFetchedConnections.remove(--lastInitializingConnectionIndex);
             need++;
             extras.add(connection);
@@ -1855,7 +1821,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             if(next instanceof ConnectionFetcher) {
                ((ConnectionFetcher)next).stopConnecting(); 
             } else {
-                removeInternal((ManagedConnection)next);
+                removeInternal((RoutedConnection)next);
             }
         }
     }
@@ -1894,7 +1860,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * This will maintain all class invariants and then wait to hear
      * back from the ConnectionFetcher after connecting succeeds or fails.
      */
-    private void initializeFetchedConnection(ManagedConnection mc,
+    private void initializeFetchedConnection(RoutedConnection mc,
                                              ConnectionFetcher fetcher) {
         
         synchronized(this) {
@@ -1934,7 +1900,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * hostcache.
      * @param mc
      */
-    private void cleanupBrokenFetchedConnection(ManagedConnection mc) {
+    private void cleanupBrokenFetchedConnection(RoutedConnection mc) {
         synchronized (this) {
             _initializingFetchedConnections.remove(mc);
             removeInternal(mc);
@@ -1953,18 +1919,18 @@ public class ConnectionManager implements ConnectionAcceptor,
      * @param connection The connection on which we received the headers
      */
     private void processConnectionHeaders(Connection connection){
-        if(!connection.receivedHeaders()) {
+        if(!connection.getConnectionCapabilities().receivedHeaders()) {
             return;
         }
 
         //get the connection headers
-        Properties headers = connection.headers().props();
+        Properties headers = connection.getConnectionCapabilities().getHeadersRead().props();
         //return if no headers to process
         if(headers == null)
             return;
         //update the addresses in the host cache (in case we received some
         //in the headers)
-        updateHostCache(connection.headers());
+        updateHostCache(connection.getConnectionCapabilities().getHeadersRead());
 
         //get remote address.  If the more modern "Listen-IP" header is
         //not included, try the old-fashioned "X-My-Address".
@@ -2070,7 +2036,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      *
      * @throws IOException on failure.  No cleanup is necessary if this happens.
      */
-    private void initializeExternallyGeneratedConnection(ManagedConnection c, GnetConnectObserver observer)
+    private void initializeExternallyGeneratedConnection(RoutedConnection c, GnetConnectObserver observer)
       throws IOException {
         //For outgoing connections add it to the GUI and the fetcher lists now.
         //For incoming, we'll do this below after checking incoming connection
@@ -2094,18 +2060,13 @@ public class ConnectionManager implements ConnectionAcceptor,
             cleanupBrokenExternallyGeneratedConnection(c);
             throw e;
         }
-
-        // If observer is null, we blocked while initializing.
-        // Otherwise, the observer will be notified on completion and do their own thing.
-        if(observer == null)
-            completeInitializeExternallyGeneratedConnection(c);
     }
     
     /**
      * Cleans up a connection that couldn't be initialized.
      * @param c
      */
-    private void cleanupBrokenExternallyGeneratedConnection(ManagedConnection c) {
+    private void cleanupBrokenExternallyGeneratedConnection(RoutedConnection c) {
         remove(c);
         processConnectionHeaders(c);
     }
@@ -2118,7 +2079,7 @@ public class ConnectionManager implements ConnectionAcceptor,
      * 
      * @return true if the connection should continue, false if it was closed
      */
-    private boolean completeInitializeExternallyGeneratedConnection(ManagedConnection c) throws IOException {
+    private boolean completeInitializeExternallyGeneratedConnection(RoutedConnection c) throws IOException {
         processConnectionHeaders(c);
         
         // If there's not space for the connection, destroy it.
@@ -2148,14 +2109,14 @@ public class ConnectionManager implements ConnectionAcceptor,
     /**
      * Performs the steps necessary to complete connection initialization.
      * 
-     * @param mc the <tt>ManagedConnection</tt> to finish initializing
+     * @param mc the <tt>RoutedConnection</tt> to finish initializing
      * @param fetched Specifies whether or not this connection is was fetched by a connection fetcher. If so, this
      *            removes that connection from the list of fetched connections being initialized, keeping the connection
      *            fetcher data in sync
      *            
      * @return true if the connection should continue, false if it was closed
      */
-    private boolean completeConnectionInitialization(ManagedConnection mc,
+    private boolean completeConnectionInitialization(RoutedConnection mc,
                                                   boolean fetched) {
         synchronized(this) {
             if(fetched) {
@@ -2225,52 +2186,22 @@ public class ConnectionManager implements ConnectionAcceptor,
         return SystemUtils.getIdleTime() >= MINIMUM_IDLE_TIME;
     }
 
-
-    /**
-     * This thread does the initialization and the message loop for
-     * ManagedConnections created by createConnectionBlocking
-     */
-    private class OutgoingConnector implements Runnable {
-        private final ManagedConnection _connection;
-        private final boolean _doInitialization;
-
-        /**
-		 * Creates a new <tt>OutgoingConnector</tt> instance that will
-		 * attempt to create a connection to the specified host.
-		 *
-		 * @param connection the host to connect to
-         */
-        public OutgoingConnector(ManagedConnection connection,
-								 boolean initialize) {
-            _connection = connection;
-            _doInitialization = initialize;
-        }
-
-        public void run() {
-            try {
-				if(_doInitialization)
-					initializeExternallyGeneratedConnection(_connection, null);
-				startConnection(_connection);
-            } catch(IOException ignored) {}
-        }
-    }
-
 	/**
 	 * Runs standard calls that should be made whenever a connection is fully
 	 * established and should wait for messages.
 	 *
-	 * @param conn the <tt>ManagedConnection</tt> instance to start
+	 * @param conn the <tt>RoutedConnection</tt> instance to start
 	 * @throws <tt>IOException</tt> if there is an excpetion while looping
 	 *  for messages
 	 */
-	private void startConnection(ManagedConnection conn) throws IOException {
-		if(conn.isGUESSUltrapeer())
+	private void startConnection(RoutedConnection conn) throws IOException {
+		if(conn.getConnectionCapabilities().isGUESSUltrapeer())
 			queryUnicaster.get().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
         if(LOG.isDebugEnabled())
             LOG.debug("Looping for messages with conn: " + conn);
 		// this can throw IOException
-		conn.loopForMessages();
+		conn.startMessaging();
 	}
     
     /**
@@ -2278,8 +2209,8 @@ public class ConnectionManager implements ConnectionAcceptor,
      * Not as robust as ConnectionFetcher because less accounting is needed.
      */
     private class IncomingGNetObserver implements GnetConnectObserver {
-        private final ManagedConnection connection;
-        IncomingGNetObserver(ManagedConnection connection) {
+        private final RoutedConnection connection;
+        IncomingGNetObserver(RoutedConnection connection) {
             this.connection = connection;
         }
 
@@ -2322,7 +2253,7 @@ public class ConnectionManager implements ConnectionAcceptor,
     private class ConnectionFetcher implements GnetConnectObserver, HostCatcher.EndpointObserver {
         // set if this connectionfetcher is a preferencing fetcher
         private final boolean _pref;
-        private volatile ManagedConnection connection;
+        private volatile RoutedConnection connection;
         private volatile Endpoint endpoint;
         private volatile boolean stoppedEarly = false;
 
@@ -2395,7 +2326,7 @@ public class ConnectionManager implements ConnectionAcceptor,
             this.endpoint = incoming;
             ConnectType type = endpoint.isTLSCapable() && SSLSettings.isOutgoingTLSEnabled() ? 
                                         ConnectType.TLS : ConnectType.PLAIN;
-            connection = managedConnectionFactory.createManagedConnection(endpoint.getAddress(),
+            connection = managedConnectionFactory.createRoutedConnection(endpoint.getAddress(),
                     endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);
             doConnectionCheck();
@@ -2576,9 +2507,9 @@ public class ConnectionManager implements ConnectionAcceptor,
         int msgs; 
 
         // Count the messages on initialized connections
-        for(ManagedConnection c : getInitializedConnections()) {
-            msgs = c.getNumMessagesSent();
-            msgs += c.getNumMessagesReceived();
+        for(RoutedConnection c : getInitializedConnections()) {
+            msgs = c.getConnectionMessageStatistics().getNumMessagesSent();
+            msgs += c.getConnectionMessageStatistics().getNumMessagesReceived();
             if ( msgs > messageThreshold )
                 count++;
         }
@@ -2592,9 +2523,9 @@ public class ConnectionManager implements ConnectionAcceptor,
         int count = 0;
 
         // Count the messages on initialized connections
-        for(ManagedConnection c : getInitializedConnections()) {
-            count += c.getNumMessagesSent();
-            count += c.getNumMessagesReceived();
+        for(RoutedConnection c : getInitializedConnections()) {
+            count += c.getConnectionMessageStatistics().getNumMessagesSent();
+            count += c.getConnectionMessageStatistics().getNumMessagesReceived();
         }
         return count;
     }
@@ -2611,17 +2542,17 @@ public class ConnectionManager implements ConnectionAcceptor,
         }
         
         public Object inspect() {
-            List<ManagedConnection> conns = getConnections();
+            List<RoutedConnection> conns = getConnections();
             
             Map<String,Object> ret = new HashMap<String,Object>(conns.size()*2);
-            for(ManagedConnection mc : conns) {
+            for(RoutedConnection mc : conns) {
                 if (isSupernode()) {
-                    if (leaf && mc.isSupernodeConnection())
+                    if (leaf && mc.getConnectionCapabilities().isSupernodeConnection())
                         continue;
-                    if (!leaf && mc.isSupernodeClientConnection())
+                    if (!leaf && mc.getConnectionCapabilities().isSupernodeClientConnection())
                         continue;
                 }
-                ret.put(mc.getAddress()+":"+mc.getPort(), mc.inspect());
+                ret.put(mc.getAddress()+":"+mc.getPort(), ((Inspectable)mc).inspect());
             }
             return ret;
         }

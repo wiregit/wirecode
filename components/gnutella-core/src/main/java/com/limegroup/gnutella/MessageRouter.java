@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.limewire.io.IpPort;
 
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
@@ -22,7 +23,7 @@ public interface MessageRouter {
     /**
      * Installs a MessageHandler for "regular" Messages.
      * 
-     * @link #handleMessage(Message, ManagedConnection)
+     * @link #handleMessage(Message, RoutedConnection)
      * @param clazz The Class of the Message
      * @param handler The Handler of the Message
      */
@@ -32,7 +33,7 @@ public interface MessageRouter {
     /**
      * Adds the new handler as a handler in addition to other handlers.
      * 
-     * @link #handleMessage(Message, ManagedConnection)
+     * @link #handleMessage(Message, RoutedConnection)
      * @param clazz The Class of the Message
      * @param handler The Handler of the Message
      */
@@ -147,10 +148,10 @@ public interface MessageRouter {
      * message type.
      *
      * @param m the <tt>Message</tt> instance to route appropriately
-     * @param receivingConnection the <tt>ManagedConnection</tt> over which
+     * @param receivingConnection the <tt>ReplyHandler</tt> over which
      *  the message was received
      */
-    public void handleMessage(Message msg, ManagedConnection receivingConnection);
+    public void handleMessage(Message msg, ReplyHandler receivingConnection);
 
     /**
      * The handler for all message types.  Processes a message based on the 
@@ -210,14 +211,14 @@ public interface MessageRouter {
      * setting up the proper reply routing.
      */
     public void sendPingRequest(PingRequest request,
-            ManagedConnection connection);
+            RoutedConnection connection);
 
     /**
      * Sends the query request to the designated connection,
      * setting up the proper reply routing.
      */
     public void sendQueryRequest(QueryRequest request,
-            ManagedConnection connection);
+            RoutedConnection connection);
 
     /**
      * Broadcasts the ping request to all initialized connections,
@@ -250,17 +251,17 @@ public interface MessageRouter {
             ReplyHandler handler);
 
     /**
-     * Originates a new query request to the ManagedConnection.
+     * Originates a new query request to the RoutedConnection.
      *
      * @param request The query to send.
-     * @param mc The ManagedConnection to send the query along
+     * @param mc The RoutedConnection to send the query along
      * @return false if the query was not sent, true if so
      */
-    public boolean originateQuery(QueryRequest query, ManagedConnection mc);
+    public boolean originateQuery(QueryRequest query, RoutedConnection mc);
 
     /**
      * The default handler for QueryReplies received in
-     * ManagedConnection.loopForMessages().  This implementation
+     * RoutedConnection.loopForMessages().  This implementation
      * uses the query route table to route a query reply.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
      * the QueryReply count is incremented.<p>

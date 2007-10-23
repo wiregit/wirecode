@@ -14,8 +14,9 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -96,7 +97,7 @@ public class ProviderHacks {
         if(initializing)
             throw new IllegalStateException("already initializing!");
         initializing = true;
-        aReallyLongNameThatYouDontWantToTypeALot = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class)).getInstance(LimeWireCore.class);
+        aReallyLongNameThatYouDontWantToTypeALot = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class), new LimeTestUtils.BlockingConnectionFactoryModule()).getInstance(LimeWireCore.class);
         initialized = true;
         initializedSource = new Exception();
         initializing = false;
@@ -111,7 +112,7 @@ public class ProviderHacks {
     public static HostCatcher getHostCatcher() { return use().getHostCatcher(); }
     public static ConnectionDispatcher getConnectionDispatcher() { return use().getConnectionDispatcher(); }
     public static QueryUnicaster getQueryUnicaster() { return use().getQueryUnicaster(); }
-    public static ManagedConnectionFactory getManagedConnectionFactory() { return use().getManagedConnectionFactory(); }
+    public static RoutedConnectionFactory getManagedConnectionFactory() { return use().getManagedConnectionFactory(); }
     public static UploadManager getUploadManager() { return use().getUploadManager(); }
     public static SearchServices getSearchServices() { return use().getSearchServices(); }
     public static DownloadServices getDownloadServices() { return use().getDownloadServices(); }
@@ -140,7 +141,6 @@ public class ProviderHacks {
     public static RUDPContext getRUDPContext() { return use().getRUDPContext(); }
     public static UDPSelectorProvider getUDPSelectorProvider() { return use().getUDPSelectorProvider(); }
     public static CapabilitiesVMFactory getCapabilitiesVMFactory() { return use().getCapabilitiesVMFactory(); }
-    public static ConnectionFactory getConnectionFactory() { return use().getConnectionFactory(); };
     public static LifecycleManager getLifecycleManager() { return use().getLifecycleManager(); }
     public static SimppManager getSimppManager() { return use().getSimppManager(); }
     public static QueryDispatcher getQueryDispatcher() { return use().getQueryDispatcher(); }
@@ -197,6 +197,8 @@ public class ProviderHacks {
     public static ApplicationServices getApplicationServices() { return use().getApplicationServices(); }
     public static NetworkManager getNetworkManager() { return use().getNetworkManager(); }
     public static ConnectionServices getConnectionServices() { return use().getConnectionServices(); }
+    
+    public static BlockingConnectionFactory getBlockingConnectionFactory() { return use().getInjector().getInstance(BlockingConnectionFactory.class); }
     
     
 }

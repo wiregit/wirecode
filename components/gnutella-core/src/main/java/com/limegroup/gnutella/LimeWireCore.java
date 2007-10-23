@@ -35,8 +35,8 @@ import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -160,8 +160,8 @@ public class LimeWireCore {
         return injector.getInstance(HostDataFactory.class);
     }
 
-    public ManagedConnectionFactory getManagedConnectionFactory() {
-        return injector.getInstance(ManagedConnectionFactory.class);
+    public RoutedConnectionFactory getManagedConnectionFactory() {
+        return injector.getInstance(RoutedConnectionFactory.class);
     }
 
     public QueryRequestFactory getQueryRequestFactory() {
@@ -578,12 +578,7 @@ public class LimeWireCore {
 
     public DHTNodeFetcherFactory getDHTNodeFetcherFactory() {
         return injector.getInstance(DHTNodeFetcherFactory.class);
-    }
-
-    public ConnectionFactory getConnectionFactory() {
-        return injector.getInstance(ConnectionFactory.class);
-    }
-    
+    }    
     
     public DownloadCallback getDownloadCallback() {
         return injector.getInstance(DownloadCallback.class);

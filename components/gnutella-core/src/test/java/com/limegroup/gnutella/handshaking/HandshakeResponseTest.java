@@ -23,8 +23,8 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -49,7 +49,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
 
     private PingReplyFactory pingReplyFactory;
 
-    private ManagedConnectionFactory managedConnectionFactory;
+    private RoutedConnectionFactory managedConnectionFactory;
 
     private ConnectionServices connectionServices;
 
@@ -84,7 +84,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
          testConnectionManager = (TestConnectionManager) injector.getInstance(ConnectionManager.class);
          hostCatcher = injector.getInstance(HostCatcher.class);
          pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-         managedConnectionFactory = injector.getInstance(ManagedConnectionFactory.class);
+         managedConnectionFactory = injector.getInstance(RoutedConnectionFactory.class);
          connectionServices = injector.getInstance(ConnectionServices.class);
          headersFactory = injector.getInstance(HeadersFactory.class);
          
@@ -114,8 +114,8 @@ public final class HandshakeResponseTest extends LimeTestCase {
     public void testAddXTryHeader() throws Exception {
         hostCatcher.clear();
         assertEquals(0, hostCatcher.getNumHosts());
-        List<ManagedConnection> ipPorts = new LinkedList<ManagedConnection>();
-        ipPorts.add(managedConnectionFactory.createManagedConnection("24.67.85.4", 6346));
+        List<RoutedConnection> ipPorts = new LinkedList<RoutedConnection>();
+        ipPorts.add(managedConnectionFactory.createRoutedConnection("24.67.85.4", 6346));
         testConnectionManager.setInitializedConnections(ipPorts);
         
         Properties props = HandshakeResponse.addXTryHeader(ULTRAPEER_HEADERS, new Properties(), connectionServices);

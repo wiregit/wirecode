@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -94,7 +95,7 @@ public abstract class PeerTestCase extends LimeTestCase {
                                                   null);
     }
 
-    protected static Connection connect(boolean ultrapeer) throws Exception {
+    protected static BlockingConnection connect(boolean ultrapeer) throws Exception {
          ServerSocket ss=new ServerSocket();
          ss.setReuseAddress(true);
          ss.bind(new InetSocketAddress(0));
@@ -114,7 +115,7 @@ public abstract class PeerTestCase extends LimeTestCase {
          } else {
              responder = new OldResponder();
          }
-         Connection con = ProviderHacks.getConnectionFactory().createConnection(socket);
+         BlockingConnection con = ProviderHacks.getBlockingConnectionFactory().createConnection(socket);
          con.initialize(null, responder, 1000);
          replyToPing(con, ultrapeer);
          return con;
@@ -146,7 +147,7 @@ public abstract class PeerTestCase extends LimeTestCase {
      /**
       * Note that this function will _EAT_ messages until it finds a ping to respond to.
       */  
-    private static void replyToPing(Connection c, boolean ultrapeer) 
+    private static void replyToPing(BlockingConnection c, boolean ultrapeer) 
         throws Exception {
         // respond to a ping iff one is given.
         Message m = null;

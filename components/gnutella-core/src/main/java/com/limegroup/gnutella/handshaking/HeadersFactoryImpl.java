@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.handshaking;
 
+import java.util.Properties;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
@@ -17,14 +19,14 @@ public class HeadersFactoryImpl implements HeadersFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.handshaking.HeadersFactory#createLeafHeaders(java.lang.String)
      */
-    public LeafHeaders createLeafHeaders(String remoteIP) {
+    public Properties createLeafHeaders(String remoteIP) {
         return new LeafHeaders(remoteIP, networkManager);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.handshaking.HeadersFactory#createUltrapeerHeaders(java.lang.String)
      */
-    public UltrapeerHeaders createUltrapeerHeaders(String remoteIP) {
+    public Properties createUltrapeerHeaders(String remoteIP) {
         return new UltrapeerHeaders(remoteIP, networkManager);
     }
 

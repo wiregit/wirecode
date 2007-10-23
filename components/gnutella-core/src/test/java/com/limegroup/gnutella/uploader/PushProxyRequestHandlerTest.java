@@ -21,11 +21,11 @@ import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
@@ -229,7 +229,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             return null;
         }
 
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+        public void handleMessage(Message msg, ReplyHandler receivingConnection) {
             // TODO Auto-generated method stub
             
         }
@@ -264,7 +264,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             return false;
         }
 
-        public boolean originateQuery(QueryRequest query, ManagedConnection mc) {
+        public boolean originateQuery(QueryRequest query, RoutedConnection mc) {
             // TODO Auto-generated method stub
             return false;
         }
@@ -305,12 +305,12 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             
         }
 
-        public void sendPingRequest(PingRequest request, ManagedConnection connection) {
+        public void sendPingRequest(PingRequest request, RoutedConnection connection) {
             // TODO Auto-generated method stub
             
         }
 
-        public void sendQueryRequest(QueryRequest request, ManagedConnection connection) {
+        public void sendQueryRequest(QueryRequest request, RoutedConnection connection) {
             // TODO Auto-generated method stub
             
         }

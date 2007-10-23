@@ -37,7 +37,9 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.connection.GnutellaConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -165,10 +167,10 @@ public final class MessageRouterImplTest extends LimeTestCase {
         tcm.resetAndInitialize();
         
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        ManagedConnectionFactory connectionFactory = injector.getInstance(ManagedConnectionFactory.class);
+        RoutedConnectionFactory connectionFactory = injector.getInstance(RoutedConnectionFactory.class);
         
         QueryRequest qr = queryRequestFactory.createQuery(LeafConnection.ALT_LEAF_KEYWORD);
-        ReplyHandler rh = connectionFactory.createManagedConnection("localhost", 6346);
+        ReplyHandler rh = connectionFactory.createRoutedConnection("localhost", 6346);
         
         messageRouterImpl.forwardQueryRequestToLeaves(qr, rh);
         
@@ -1157,7 +1159,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         
     }
     
-    private static class ManagedConnectionStub extends ManagedConnection {
+    private static class ManagedConnectionStub extends GnutellaConnection {
         
         final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
 
@@ -1185,7 +1187,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         }
         
         @Override
-        public void initialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
+        public void initialize(GnetConnectObserver observer) throws IOException, NoGnutellaOkException, BadHandshakeException {
         }
         
         @Override

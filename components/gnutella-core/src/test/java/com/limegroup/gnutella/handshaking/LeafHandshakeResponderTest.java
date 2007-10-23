@@ -69,7 +69,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         // test the 3 Ultrapeer cases -- 
 
         // create the Ultrapeer responder to test off of
-        LeafHandshakeResponder responder = 
+        HandshakeResponder responder = 
             handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
         // 1) Ultrapeer-Leaf::No X-Ultrapeer-Needed -- we should ignore 
@@ -125,7 +125,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         setPreferredConnections();
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
-        LeafHandshakeResponder responder = 
+        HandshakeResponder responder = 
             handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
         // Leaf-Leaf  --> never allowed, regardless of slots
@@ -160,7 +160,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
-        LeafHandshakeResponder responder = 
+        HandshakeResponder responder = 
             handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
         // 1) check the Ultrapeer case.  Here, the "leaf" does
@@ -184,7 +184,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);        
         // the ultrapeer we'll be testing against
-        LeafHandshakeResponder responder = 
+        HandshakeResponder responder = 
             handshakeResponderFactory.createLeafHandshakeResponder("23.3.4.5");
 
 

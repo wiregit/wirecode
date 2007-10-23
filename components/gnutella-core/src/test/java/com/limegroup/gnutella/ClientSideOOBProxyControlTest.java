@@ -4,6 +4,7 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -150,7 +151,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         assertQueryNoOOB(testUP[1], query, false);
     }
     
-    private QueryRequest assertQuery(Connection c, QueryRequest query, boolean doNotProxy,
+    private QueryRequest assertQuery(BlockingConnection c, QueryRequest query, boolean doNotProxy,
             boolean desiresOOB) throws BadPacketException {
         QueryRequest qr = getFirstInstanceOfMessageType(c, QueryRequest.class);
         assertNotNull(qr);
@@ -160,7 +161,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         return qr;
     }
     
-    private QueryRequest assertQueryNoOOB(Connection c, QueryRequest query, boolean doNotProxy) throws BadPacketException {
+    private QueryRequest assertQueryNoOOB(BlockingConnection c, QueryRequest query, boolean doNotProxy) throws BadPacketException {
         return assertQuery(c, query, doNotProxy, false);
     }
 

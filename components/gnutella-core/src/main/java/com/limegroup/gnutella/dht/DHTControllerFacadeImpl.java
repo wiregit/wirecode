@@ -16,9 +16,9 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.SpamServices;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.db.AltLocModel;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesModel;
@@ -88,7 +88,7 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
         return altLocValueFactory.get();
     }
     
-    public List<ManagedConnection> getInitializedClientConnections() {
+    public List<RoutedConnection> getInitializedClientConnections() {
         return connectionManager.get().getInitializedClientConnections();
     }
     

@@ -12,11 +12,11 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -72,7 +72,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         ReplyHandler rh = testConnectionFactory.createUltrapeerConnection();        
         QueryRequest query = queryRequestFactory.createQuery("test", (byte)1);
         QueryHandler qh = queryHandlerFactory.createHandler(query, rh, new TestResultCounter());
-        ManagedConnection mc = testConnectionFactory.createUltrapeerConnection();
+        GnutellaConnection mc = testConnectionFactory.createUltrapeerConnection();
 
         qh.sendQueryToHost(query, mc);
 
@@ -213,11 +213,11 @@ public final class QueryHandlerTest extends LimeTestCase {
 		Method m = 
             PrivilegedAccessor.getMethod(QueryHandler.class, 
                                          "calculateNewHosts",
-                                         new Class[]{Connection.class, 
+                                         new Class[]{BlockingConnection.class, 
                                                      Byte.TYPE});
         
         // test for a degree 19, ttl 4 network
-        ManagedConnection mc = testConnectionFactory.createNewConnection(19);
+        GnutellaConnection mc = testConnectionFactory.createNewConnection(19);
         int horizon = 0;
         for(int i=0; i<19; i++) {
             horizon += 

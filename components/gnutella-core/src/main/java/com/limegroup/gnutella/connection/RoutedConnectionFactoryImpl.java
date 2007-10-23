@@ -12,7 +12,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GuidMapManager;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
@@ -31,7 +30,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 @Singleton
-public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
+public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
 
     private final Provider<ConnectionManager> connectionManager;
 
@@ -78,7 +77,7 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private final Provider<SecureMessageVerifier> secureMessageVerifier;
 
     @Inject
-    public ManagedConnectionFactoryImpl(Provider<ConnectionManager> connectionManager,
+    public RoutedConnectionFactoryImpl(Provider<ConnectionManager> connectionManager,
             NetworkManager networkManager, QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, Provider<MessageDispatcher> messageDispatcher,
@@ -115,12 +114,12 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
         this.secureMessageVerifier = secureMessageVerifier;
     }
 
-    public ManagedConnection createManagedConnection(String host, int port) {
-        return createManagedConnection(host, port, ConnectType.PLAIN);
+    public RoutedConnection createRoutedConnection(String host, int port) {
+        return createRoutedConnection(host, port, ConnectType.PLAIN);
     }
 
-    public ManagedConnection createManagedConnection(String host, int port, ConnectType type) {
-        return new ManagedConnection(host, port, type, connectionManager.get(), networkManager,
+    public RoutedConnection createRoutedConnection(String host, int port, ConnectType type) {
+        return new GnutellaConnection(host, port, type, connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
                 messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
                         .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
@@ -129,8 +128,8 @@ public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
                 applicationServices, secureMessageVerifier.get());
     }
 
-    public ManagedConnection createManagedConnection(Socket socket) {
-        return new ManagedConnection(socket, connectionManager.get(), networkManager,
+    public RoutedConnection createRoutedConnection(Socket socket) {
+        return new GnutellaConnection(socket, connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
                 messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler
                         .get(), capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,

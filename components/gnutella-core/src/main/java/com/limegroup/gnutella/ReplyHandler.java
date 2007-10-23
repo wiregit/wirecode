@@ -15,6 +15,7 @@ import com.limegroup.gnutella.messages.vendor.SimppVM;
  * An interface for those things that handle replies and thus are placed
  * as values in RouteTables.
  */
+// TODO: move methods out of here that are only for Connections
 public interface ReplyHandler extends IpPort {
 
     /**
@@ -32,6 +33,7 @@ public interface ReplyHandler extends IpPort {
      */
     void handlePushRequest(PushRequest pushRequest, ReplyHandler handler);
 
+    // TODO: remove this
 	int getNumMessagesReceived();
 
 	void countDroppedMessage();

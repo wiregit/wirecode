@@ -12,12 +12,11 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -128,12 +127,12 @@ public final class QueryHandler implements Inspectable {
 	/**
 	 * Constant list of connections that have already been queried.
 	 */
-	private final List<ManagedConnection> QUERIED_CONNECTIONS = new ArrayList<ManagedConnection>();
+	private final List<RoutedConnection> QUERIED_CONNECTIONS = new ArrayList<RoutedConnection>();
 
     /**
      * <tt>List</tt> of TTL=1 probe connections that we've already used.
      */
-    private final List<ManagedConnection> QUERIED_PROBE_CONNECTIONS = new ArrayList<ManagedConnection>();
+    private final List<RoutedConnection> QUERIED_PROBE_CONNECTIONS = new ArrayList<RoutedConnection>();
 
 	/**
 	 * The time the query started.
@@ -333,7 +332,7 @@ public final class QueryHandler implements Inspectable {
             // connections because we'll be modifying it.
             int newHosts = 
                 sendQuery(
-                    new ArrayList<ManagedConnection>(
+                    new ArrayList<RoutedConnection>(
                             connectionManager.getInitializedConnections()));
             if(newHosts == 0) {
                 // if we didn't query any new hosts, wait awhile for new
@@ -390,10 +389,10 @@ public final class QueryHandler implements Inspectable {
      *  
      *  Default access for testing
      */
-    int sendQuery(List<? extends ManagedConnection> ultrapeersAll) {
+    int sendQuery(List<? extends RoutedConnection> ultrapeersAll) {
 
         //we want to try to use all connections in ultrapeersLocale first.
-        List<? extends ManagedConnection> ultrapeers = // method returns a copy
+        List<? extends RoutedConnection> ultrapeers = // method returns a copy
             connectionManager.getInitializedConnectionsMatchLocale
             (_prefLocale);
             
@@ -420,14 +419,14 @@ public final class QueryHandler implements Inspectable {
         if (LOG.isTraceEnabled())
             LOG.trace("potential querier size: " + length);
         byte ttl = 0;
-        ManagedConnection mc = null;
+        RoutedConnection mc = null;
 
         // add randomization to who we send our queries to
         Collections.shuffle(ultrapeers);
 
         // weed out all connections that aren't yet stable
         for(int i=0; i<length; i++) {
-			ManagedConnection curConnection = ultrapeers.get(i);			
+			RoutedConnection curConnection = ultrapeers.get(i);			
 
 			// if the connection hasn't been up for long, don't use it,
             // as the replies will never make it back to us if the
@@ -481,8 +480,8 @@ public final class QueryHandler implements Inspectable {
             hostsToQuery/remainingConnections;;
         
         ttl = calculateNewTTL(hostsToQueryPerConnection, 
-                              mc.getNumIntraUltrapeerConnections(),
-                              mc.headers().getMaxTTL());
+                              mc.getConnectionCapabilities().getNumIntraUltrapeerConnections(),
+                              mc.getConnectionCapabilities().getHeadersRead().getMaxTTL());
                
 
         // If we're sending the query down a probe connection and we've
@@ -508,10 +507,10 @@ public final class QueryHandler implements Inspectable {
      * Sends a query to the specified host.
      *
      * @param query the <tt>QueryRequest</tt> to send
-     * @param mc the <tt>ManagedConnection</tt> to send the query to
+     * @param mc the <tt>RoutedConnection</tt> to send the query to
      * @return the number of new hosts theoretically hit by this query
      */
-    int sendQueryToHost(QueryRequest query, ManagedConnection mc) {
+    int sendQueryToHost(QueryRequest query, RoutedConnection mc) {
         
         // send the query directly along the connection, but if the query didn't
         // go through send back 0....
@@ -525,7 +524,7 @@ public final class QueryHandler implements Inspectable {
         // adds the connection to the list of probe connections if it's
         // a TTL=1 query to a connection that supports probe extensions,
         // otherwise add it to the list of connections we've queried
-        if(ttl == 1 && mc.supportsProbeQueries()) {
+        if(ttl == 1 && mc.getConnectionCapabilities().supportsProbeQueries()) {
             this.QUERIED_PROBE_CONNECTIONS.add(mc);
         } else {
             this.QUERIED_CONNECTIONS.add(mc);
@@ -583,8 +582,8 @@ public final class QueryHandler implements Inspectable {
      * @param conn the <tt>Connection</tt> that will received the query
 	 * @param ttl the TTL of the query to add
 	 */
-	private static int calculateNewHosts(Connection conn, byte ttl) {
-        return calculateNewHosts(conn.getNumIntraUltrapeerConnections(), ttl);
+	private static int calculateNewHosts(RoutedConnection conn, byte ttl) {
+        return calculateNewHosts(conn.getConnectionCapabilities().getNumIntraUltrapeerConnections(), ttl);
 	}
 
 	/**

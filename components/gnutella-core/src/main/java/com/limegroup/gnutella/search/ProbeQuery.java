@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -17,12 +17,12 @@ final class ProbeQuery {
     /**
      * Constant list of hosts to probe query at ttl=1.
      */
-    private final List<ManagedConnection> TTL_1_PROBES;
+    private final List<RoutedConnection> TTL_1_PROBES;
     
     /**
      * Constant list of hosts to probe query at ttl=2.
      */
-    private final List<ManagedConnection> TTL_2_PROBES;
+    private final List<RoutedConnection> TTL_2_PROBES;
 
     /**
      * Constant reference to the query handler instance.
@@ -39,9 +39,9 @@ final class ProbeQuery {
      * @param qh the <tt>QueryHandler</tt> instance containing data
      *  for the probe
      */
-    ProbeQuery(List<? extends ManagedConnection> connections, QueryHandler qh) {
+    ProbeQuery(List<? extends RoutedConnection> connections, QueryHandler qh) {
         QUERY_HANDLER = qh;
-        List<List<ManagedConnection>> lists = createProbeLists(connections, qh.QUERY);
+        List<List<RoutedConnection>> lists = createProbeLists(connections, qh.QUERY);
 
         TTL_1_PROBES = lists.get(0);
         TTL_2_PROBES = lists.get(1);        
@@ -77,11 +77,11 @@ final class ProbeQuery {
     int sendProbe() {
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
-        for(ManagedConnection mc : TTL_1_PROBES)
+        for(RoutedConnection mc : TTL_1_PROBES)
             hosts += QUERY_HANDLER.sendQueryToHost(query, mc);
         
         query = QUERY_HANDLER.createQuery((byte)2);
-        for(ManagedConnection mc : TTL_2_PROBES)
+        for(RoutedConnection mc : TTL_2_PROBES)
             hosts += QUERY_HANDLER.sendQueryToHost(query, mc);
         
         TTL_1_PROBES.clear();
@@ -95,17 +95,17 @@ final class ProbeQuery {
      * This list will vary in size depending on how popular the content appears
      * to be.
      */
-    private static List<List<ManagedConnection>> createProbeLists(
-            List<? extends ManagedConnection> connections, QueryRequest query) {
+    private static List<List<RoutedConnection>> createProbeLists(
+            List<? extends RoutedConnection> connections, QueryRequest query) {
         
-        LinkedList<ManagedConnection> missConnections = new LinkedList<ManagedConnection>();
-        LinkedList<ManagedConnection> oldConnections  = new LinkedList<ManagedConnection>();
-        LinkedList<ManagedConnection> hitConnections  = new LinkedList<ManagedConnection>();
+        LinkedList<RoutedConnection> missConnections = new LinkedList<RoutedConnection>();
+        LinkedList<RoutedConnection> oldConnections  = new LinkedList<RoutedConnection>();
+        LinkedList<RoutedConnection> hitConnections  = new LinkedList<RoutedConnection>();
 
         // iterate through our connections, adding them to the hit, miss, or
         // old connections list
-        for(ManagedConnection mc : connections) {
-            if(mc.isUltrapeerQueryRoutingConnection()) {
+        for(RoutedConnection mc : connections) {
+            if(mc.getConnectionCapabilities().isUltrapeerQueryRoutingConnection()) {
                 if(mc.shouldForwardQuery(query)) { 
                     hitConnections.add(mc);
                 } else {
@@ -117,9 +117,9 @@ final class ProbeQuery {
         }
 
         // final list of connections to query
-        List<List<ManagedConnection>> returnLists = new ArrayList<List<ManagedConnection>>(2);
-        LinkedList<ManagedConnection> ttl1List = new LinkedList<ManagedConnection>();
-        LinkedList<ManagedConnection> ttl2List = new LinkedList<ManagedConnection>();
+        List<List<RoutedConnection>> returnLists = new ArrayList<List<RoutedConnection>>(2);
+        LinkedList<RoutedConnection> ttl1List = new LinkedList<RoutedConnection>();
+        LinkedList<RoutedConnection> ttl2List = new LinkedList<RoutedConnection>();
         returnLists.add(ttl1List);
         returnLists.add(ttl2List);        
 

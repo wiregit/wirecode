@@ -7,6 +7,7 @@ import java.util.ListIterator;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -48,7 +49,7 @@ public class ClientSideInitialMessagesTest extends ClientSideTestCase {
     // BEGIN TESTS
     // ======================================================
     public void testInitialUpMessages() throws Exception {
-        Connection up=testUP[0];
+        BlockingConnection up=testUP[0];
         
         Thread.sleep( 10*1000 );
         parseWaitingMessages( up );
@@ -74,7 +75,7 @@ public class ClientSideInitialMessagesTest extends ClientSideTestCase {
     }
     // ======================================================
     
-    private void parseWaitingMessages( Connection con ) throws Exception {
+    private void parseWaitingMessages( BlockingConnection con ) throws Exception {
         try {
             Message m=con.receive( 100 );
             

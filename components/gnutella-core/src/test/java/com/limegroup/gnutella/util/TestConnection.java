@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Provider;
@@ -8,10 +10,12 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GuidMapManager;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.connection.ConnectionCapabilities;
+import com.limegroup.gnutella.connection.ConnectionCapabilitiesDelegator;
+import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
@@ -37,7 +41,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * testing the horizon calculation and testing the new search
  * architecture.
  */
-public abstract class TestConnection extends ManagedConnection {
+public abstract class TestConnection extends GnutellaConnection {
     
     private final boolean queriesMustBeInRoutingTables;
 
@@ -78,17 +82,11 @@ public abstract class TestConnection extends ManagedConnection {
         this.connections = connections;
     }
 
-    public int getNumIntraUltrapeerConnections() {
-        return this.connections;
-    }
-    
-    public boolean isUltrapeerQueryRoutingConnection() {
-        return false;
-    }
     
     /**
      * Override the stability check method -- assume we're always stable.
      */
+    @Override
     public boolean isStable(long time) {
         return true;
     }
@@ -100,6 +98,7 @@ public abstract class TestConnection extends ManagedConnection {
         return QRT;
     }
 
+    @Override
     public void originateQuery(QueryRequest query) {
         send(query);
     }
@@ -107,6 +106,7 @@ public abstract class TestConnection extends ManagedConnection {
     /**
      * Overridden to keep track of messages sent.
      */
+    @Override
     public void send(Message msg) {         
         if(msg instanceof ResetTableMessage) {
             QRT.reset((ResetTableMessage)msg);
@@ -140,6 +140,34 @@ public abstract class TestConnection extends ManagedConnection {
     
     public boolean receivedQuery() {
         return receivedQuery;
+    }
+    
+
+    private final AtomicReference<ConnectionCapabilities> connectionCapabilitiesRef = new AtomicReference<ConnectionCapabilities>();
+    @Override
+    public ConnectionCapabilities getConnectionCapabilities() {
+        if (connectionCapabilitiesRef.get() == null)
+            connectionCapabilitiesRef.compareAndSet(null, new StubCapabilities(super
+                    .getConnectionCapabilities()));
+        return connectionCapabilitiesRef.get();
+    }
+    
+    
+    private class StubCapabilities extends ConnectionCapabilitiesDelegator {
+        public StubCapabilities(ConnectionCapabilities delegate) {
+            super(delegate);
+        }
+
+
+        @Override
+        public int getNumIntraUltrapeerConnections() {
+            return TestConnection.this.connections;
+        }
+        
+        @Override
+        public boolean isUltrapeerQueryRoutingConnection() {
+            return false;
+        }
     }
 }
 

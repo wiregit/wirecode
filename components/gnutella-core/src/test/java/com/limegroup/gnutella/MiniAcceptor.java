@@ -6,6 +6,7 @@ import java.net.Socket;
 
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 
 /**
@@ -26,7 +27,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponder;
  */
 public class MiniAcceptor implements Runnable {
     private Object lock=new Object();
-    private Connection c=null;
+    private BlockingConnection c=null;
     private boolean done=false;
     private int port;
     private IOException error=null;
@@ -57,7 +58,7 @@ public class MiniAcceptor implements Runnable {
      *  Returns null if something went awry.  In this case, you 
      *  can get the exception via getError.  Bad design, but 
      *  exists for backwards compatibility. */
-    public Connection accept() {
+    public BlockingConnection accept() {
         synchronized (lock) {
             while (! done) {
                 try {
@@ -83,7 +84,7 @@ public class MiniAcceptor implements Runnable {
             Socket s=ss.accept();
             //Technically "GNUTELLA " should be read from s.  Turns out that
             //out implementation doesn't care;
-            Connection c=ProviderHacks.getConnectionFactory().createConnection(s);
+            BlockingConnection c=ProviderHacks.getBlockingConnectionFactory().createConnection(s);
             c.initialize(null, properties, 1000);
             ss.close();
             synchronized (lock) {

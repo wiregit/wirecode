@@ -26,6 +26,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
@@ -266,9 +267,9 @@ public class StandardMessageRouter extends MessageRouterImpl {
         //words, why no ultrapong marking, proper address calculation, etc?
         
         //send the pongs for leaves
-        List<ManagedConnection> leafConnections = connectionManager.getInitializedClientConnections();
+        List<RoutedConnection> leafConnections = connectionManager.getInitializedClientConnections();
         
-        for(ManagedConnection connection : leafConnections) {
+        for(RoutedConnection connection : leafConnections) {
             //create the pong for this connection
             PingReply pr = 
                 pingReplyFactory.createExternal(m.getGUID(), (byte)2, 

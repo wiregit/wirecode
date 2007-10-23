@@ -73,7 +73,8 @@ public abstract class ReadHeadersIOState extends ReadState {
             if(!doneConnect) {
                 if(BufferUtils.readLine(buffer, currentHeader)) {
                     connectLine = currentHeader.toString();
-                    LOG.debug("Read connect line: " + connectLine);
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Read connect line: " + connectLine);
                     currentHeader.delete(0, currentHeader.length());
                     processConnectLine();
                     doneConnect = true;
@@ -85,7 +86,8 @@ public abstract class ReadHeadersIOState extends ReadState {
                     if(!BufferUtils.readLine(buffer, currentHeader))
                         break;
                     
-                    LOG.debug("Read header: " + currentHeader);
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Read header: " + currentHeader);
                     if(!support.processReadHeader(currentHeader.toString())) {
                         allDone = true;
                         break; // we finished reading this set of headers!

@@ -4,13 +4,13 @@ import com.limegroup.gnutella.connection.GnetConnectObserver;
 
 
 public class StubGnetConnectObserver implements GnetConnectObserver {
-    private boolean noGOK;
-    private int code;
-    private String msg;
-    private boolean badHandshake;
-    private boolean connect;
-    private boolean shutdown;
-    private Thread finishedThread;
+    private volatile boolean noGOK;
+    private volatile int code;
+    private volatile String msg;
+    private volatile boolean badHandshake;
+    private volatile boolean connect;
+    private volatile boolean shutdown;
+    private volatile Thread finishedThread;
     
     public synchronized void handleNoGnutellaOk(int code, String msg) {
         this.noGOK = true;
@@ -68,6 +68,10 @@ public class StubGnetConnectObserver implements GnetConnectObserver {
 
     public Thread getFinishedThread() {
         return finishedThread;
+    }
+    
+    public String toString() {
+        return "ngok: " + noGOK + ", code: " + code + ", msg: " + msg + ", badHandshake: " + badHandshake + ", connect: " + connect + "shutdown: " + shutdown + ", finishedThread: " + finishedThread;
     }
 
 }

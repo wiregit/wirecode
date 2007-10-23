@@ -22,13 +22,13 @@ import org.limewire.io.IPPortCombo;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.CountingConnection;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.CountingConnection;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -438,16 +438,16 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		List upCons = ProviderHacks.getConnectionManager().getInitializedConnections();
  		
- 		Connection notSupporting = (Connection) upCons.get(0);
- 		Connection supporting = (Connection) upCons.get(1);
+ 		BlockingConnection notSupporting = (BlockingConnection) upCons.get(0);
+ 		BlockingConnection supporting = (BlockingConnection) upCons.get(1);
  		
- 		assertLessThanOrEquals(1,notSupporting.remoteHostSupportsUDPCrawling());
- 		assertLessThanOrEquals(1,supporting.remoteHostSupportsUDPCrawling());
+ 		assertLessThanOrEquals(1,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
+ 		assertLessThanOrEquals(1,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		
  		PrivilegedAccessor.setValue(supporting,"_messagesSupported",msvm);
  		
- 		assertLessThanOrEquals(1,notSupporting.remoteHostSupportsUDPCrawling());
- 		assertGreaterThanOrEquals(1,supporting.remoteHostSupportsUDPCrawling());
+ 		assertLessThanOrEquals(1,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
+ 		assertGreaterThanOrEquals(1,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		
  		
  		
@@ -463,8 +463,8 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		PrivilegedAccessor.setValue(notSupporting,"_messagesSupported",msvm);
  		
- 		assertGreaterThan(0,notSupporting.remoteHostSupportsUDPCrawling());
- 		assertGreaterThan(0,supporting.remoteHostSupportsUDPCrawling());
+ 		assertGreaterThan(0,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
+ 		assertGreaterThan(0,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		
  		pong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgNewOnly);
  		

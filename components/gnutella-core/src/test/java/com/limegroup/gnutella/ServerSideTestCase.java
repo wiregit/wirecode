@@ -8,6 +8,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -46,12 +47,12 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     /**
      * Leaf connections to the Ultrapeer.
      */
-    protected static Connection LEAF[];
+    protected static BlockingConnection LEAF[];
 
     /**
      * Ultrapeer connections to the Ultrapeer.
      */
-    protected static Connection ULTRAPEER[];
+    protected static BlockingConnection ULTRAPEER[];
 
     private static ActivityCallback callback;
     protected static ActivityCallback getCallback() {
@@ -69,12 +70,12 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
 	private static void buildConnections() throws Exception {
         for (int i = 0; i < LEAF.length; i++) {
-            LEAF[i] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+            LEAF[i] = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
             assertTrue(LEAF[i].isOpen());
         }
         
         for (int i = 0; i < ULTRAPEER.length; i++) {
-            ULTRAPEER[i] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+            ULTRAPEER[i] = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
             assertTrue(ULTRAPEER[i].isOpen());
         }
     }
@@ -129,13 +130,13 @@ public abstract class ServerSideTestCase extends LimeTestCase {
                                                                  "numUPs");
         if ((numUPs.intValue() < 0) || (numUPs.intValue() > 30))
             throw new IllegalArgumentException("Bad value for numUPs!!!");
-        ULTRAPEER = new Connection[numUPs.intValue()];
+        ULTRAPEER = new BlockingConnection[numUPs.intValue()];
 
         Integer numLs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
                                                                  "numLeaves");
         if ((numLs.intValue() < 0) || (numLs.intValue() > 30))
             throw new IllegalArgumentException("Bad value for numLs!!!");
-        LEAF = new Connection[numLs.intValue()];
+        LEAF = new BlockingConnection[numLs.intValue()];
 
 		connect(callingClass);
 	}
@@ -148,12 +149,12 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         for (int i = 0; i < ULTRAPEER.length; i++) {
             assertTrue("should be open, index = " + i, ULTRAPEER[i].isOpen());
             assertTrue("should be up -> up, index = " + i,
-                       ULTRAPEER[i].isSupernodeSupernodeConnection());
+                       ULTRAPEER[i].getConnectionCapabilities().isSupernodeSupernodeConnection());
         }
         for (int i = 0; i < LEAF.length; i++) {
             assertTrue("should be open, index = " + i, LEAF[i].isOpen());
             assertTrue("should be up -> up, index = " + i,
-                       LEAF[i].isClientSupernodeConnection());
+                       LEAF[i].getConnectionCapabilities().isClientSupernodeConnection());
         }
     }
 
@@ -206,18 +207,18 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     }
     
     /** Builds a conenction with default headers */
-    protected Connection createLeafConnection() throws Exception {
+    protected BlockingConnection createLeafConnection() throws Exception {
         return createConnection(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"));
     }
     
     /** Builds an ultrapeer connection with default headers */
-    protected Connection createUltrapeerConnection() throws Exception {
+    protected BlockingConnection createUltrapeerConnection() throws Exception {
         return createConnection(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"));
     }
     
     /** Builds a single connection with the given headers. */
-    protected Connection createConnection(Properties headers) throws Exception {
-        Connection c = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+    protected BlockingConnection createConnection(Properties headers) throws Exception {
+        BlockingConnection c = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         assertTrue(c.isOpen());
         return c;

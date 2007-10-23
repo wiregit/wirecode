@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -115,9 +116,9 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 			&& (pingReply.getFiles() < SharingSettings.FREELOADER_FILES.getValue())
 			&& ((int)(Math.random()*100.f) >
 				SharingSettings.FREELOADER_ALLOWED.getValue())
-			&& (handler instanceof ManagedConnection)
+			&& (handler instanceof RoutedConnection)
             && (handler.isStable())) {
-            connectionManager.get().remove((ManagedConnection)handler);
+            connectionManager.get().remove((RoutedConnection)handler);
         }
 	}
 	

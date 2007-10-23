@@ -20,6 +20,8 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -58,13 +60,13 @@ public class LeafRoutingTest extends LimeTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    private Connection ultrapeer1;
-    private Connection ultrapeer2;
-    private Connection old1;
+    private BlockingConnection ultrapeer1;
+    private BlockingConnection ultrapeer2;
+    private BlockingConnection old1;
 
     private LifecycleManager lifecycleManager;
     private ConnectionServices connectionServices;
-    private ConnectionFactory connectionFactory;
+    private BlockingConnectionFactory connectionFactory;
     private PingReplyFactory pingReplyFactory;
     private SearchServices searchServices;
     private FileManager fileManager;
@@ -127,7 +129,7 @@ public class LeafRoutingTest extends LimeTestCase {
         });
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
-        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         searchServices = injector.getInstance(SearchServices.class);
         fileManager = injector.getInstance(FileManager.class);
@@ -158,7 +160,7 @@ public class LeafRoutingTest extends LimeTestCase {
          old1 = connect(6352, true);
      }
      
-    private Connection connect(int port, boolean ultrapeer) 
+    private BlockingConnection connect(int port, boolean ultrapeer) 
         throws Exception {
          ServerSocket ss=new ServerSocket(port);
          connectionServices.connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
@@ -178,7 +180,7 @@ public class LeafRoutingTest extends LimeTestCase {
              responder = new EmptyResponder();
          }
          
-         Connection con = connectionFactory.createConnection(socket);
+         BlockingConnection con = connectionFactory.createConnection(socket);
          con.initialize(null, responder, 1000);
          replyToPing(con, ultrapeer);
          return con;
@@ -207,7 +209,7 @@ public class LeafRoutingTest extends LimeTestCase {
          throw new IOException();
      }
 
-	private void replyToPing(Connection c, boolean ultrapeer) 
+	private void replyToPing(BlockingConnection c, boolean ultrapeer) 
         throws Exception {
         // respond to a ping iff one is given.
         Message m = null;
@@ -284,7 +286,7 @@ public class LeafRoutingTest extends LimeTestCase {
         
         props.put(HeaderNames.X_ULTRAPEER, "True");
         //props.put(HeaderNames.X_PROBE_QUERIES, PROBE_VERSION);
-        Connection c = connectionFactory.createConnection("127.0.0.1", SERVER_PORT);
+        BlockingConnection c = connectionFactory.createConnection("127.0.0.1", SERVER_PORT);
 
         try {
             c.initialize(props, new EmptyResponder(), 1000);
@@ -293,7 +295,7 @@ public class LeafRoutingTest extends LimeTestCase {
             // THESE VALUES WERE POPULATED DURING THE PING/PONG EXCHANGE
             // WHEN THE CONNECTIONS WERE CREATED.
             
-            String hosts = c.headers().getProperty(HeaderNames.X_TRY_ULTRAPEERS);
+            String hosts = c.getConnectionCapabilities().getHeadersRead().getProperty(HeaderNames.X_TRY_ULTRAPEERS);
             //System.out.println("X-Try-Ultrapeers: "+hosts);
             assertNotNull("unexpected null value", hosts);
             Set s = list2set(hosts);
@@ -366,7 +368,7 @@ public class LeafRoutingTest extends LimeTestCase {
      * Tests to make sure that connections to old hosts are not allowed
      */
     public void testConnectionToOldDisallowed() {
-        Connection c= connectionFactory.createConnection("127.0.0.1", SERVER_PORT);
+        BlockingConnection c= connectionFactory.createConnection("127.0.0.1", SERVER_PORT);
         try {
             c.initialize(new Properties(), new EmptyResponder(), 1000);
             fail("handshake should not have succeeded");

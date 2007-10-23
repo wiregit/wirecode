@@ -56,7 +56,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
@@ -336,8 +336,8 @@ public class RequeryDownloadTest extends LimeTestCase {
         QueryReply reply = queryReplyFactory.createQueryReply(guidToUse, (byte)6, 6666,
                 ip, 0l, new Response[] { response }, new byte[16], false, false, true, false,
                 false, false);//supports chat, is multicast response....
-        ManagedConnectionFactory managedConnectionFactory = injector.getInstance(ManagedConnectionFactory.class);
-        messageRouter.handleQueryReply(reply, managedConnectionFactory.createManagedConnection("1.2.3.4", PORT));
+        RoutedConnectionFactory managedConnectionFactory = injector.getInstance(RoutedConnectionFactory.class);
+        messageRouter.handleQueryReply(reply, managedConnectionFactory.createRoutedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
         Thread.sleep(2000);

@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -77,10 +78,7 @@ public class Main {
                         if (commands.length>=3)
                             port=Integer.parseInt(commands[2]);
                         System.out.println("Connecting...");
-                        core.getConnectionServices().connectToHostBlocking(commands[1], port, ConnectType.PLAIN);
-                        System.out.println("Connected");
-                    } catch (IOException e) {
-                        System.out.println("Couldn't establish connection.");
+                        core.getConnectionServices().connectToHostAsynchronously(commands[1], port, ConnectType.PLAIN);
                     } catch (NumberFormatException e) {
                         System.out.println("Please specify a valid port.");
                     }
@@ -147,16 +145,16 @@ public class Main {
 
         /////////////////////////// ActivityCallback methods //////////////////////
     
-        public void connectionInitializing(ManagedConnection c) {
+        public void connectionInitializing(RoutedConnection c) {
         }
     
-        public void connectionInitialized(ManagedConnection c) {
+        public void connectionInitialized(RoutedConnection c) {
     //      String host = c.getOrigHost();
     //      int    port = c.getOrigPort();
             ;//System.out.println("Connected to "+host+":"+port+".");
         }
     
-        public void connectionClosed(ManagedConnection c) {
+        public void connectionClosed(RoutedConnection c) {
     //      String host = c.getOrigHost();
     //      int    port = c.getOrigPort();
             //System.out.println("Connection to "+host+":"+port+" closed.");

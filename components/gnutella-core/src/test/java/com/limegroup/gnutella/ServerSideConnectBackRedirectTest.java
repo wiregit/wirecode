@@ -88,7 +88,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
 
-	    LEAF[0] = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+	    LEAF[0] = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
         LEAF[0].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
 		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 

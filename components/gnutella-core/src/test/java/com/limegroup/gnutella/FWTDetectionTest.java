@@ -31,7 +31,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -540,7 +541,7 @@ public class FWTDetectionTest extends LimeTestCase {
                 Provider<ConnectionDispatcher> connectionDispatcher, @Named("backgroundExecutor")
                 ScheduledExecutorService backgroundExecutor, Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
-                ManagedConnectionFactory managedConnectionFactory,
+                RoutedConnectionFactory managedConnectionFactory,
                 Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager, ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner, 
@@ -568,7 +569,7 @@ public class FWTDetectionTest extends LimeTestCase {
             return 1;
         }
         
-        public List<ManagedConnection> getInitializedConnections() {
+        public List<RoutedConnection> getInitializedConnections() {
             return Collections.emptyList();
         }
     }

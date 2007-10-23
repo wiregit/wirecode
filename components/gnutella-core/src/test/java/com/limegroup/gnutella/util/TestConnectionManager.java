@@ -15,13 +15,13 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -40,12 +40,12 @@ public class TestConnectionManager extends ConnectionManager {
     /**
      * The list of ultrapeer <tt>Connection</tt> instances
      */
-    private final List<ManagedConnection> CONNECTIONS = new LinkedList<ManagedConnection>();
+    private final List<RoutedConnection> CONNECTIONS = new LinkedList<RoutedConnection>();
     
     /**
      * The list of leaf <tt>Connection</tt> instances
      */
-    private final List<ManagedConnection> LEAF_CONNECTIONS = new LinkedList<ManagedConnection>();
+    private final List<RoutedConnection> LEAF_CONNECTIONS = new LinkedList<RoutedConnection>();
     
     /**
      * Constant for whether or not this should be considered an
@@ -129,7 +129,7 @@ public class TestConnectionManager extends ConnectionManager {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<SimppManager> simppManager,
             CapabilitiesVMFactory capabilitiesVMFactory,
-            ManagedConnectionFactory managedConnectionFactory,
+            RoutedConnectionFactory managedConnectionFactory,
             Provider<MessageRouter> messageRouter,
             Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager,
@@ -195,7 +195,7 @@ public class TestConnectionManager extends ConnectionManager {
         LEAF_CONNECTIONS.clear();
         
         for(int i=0; i<NUM_CONNECTIONS; i++) {
-            ManagedConnection curConn = null;
+            RoutedConnection curConn = null;
             if(i < numNewConnections) {
                 curConn = testConnectionFactory.createUltrapeerConnection(new String[]{ULTRAPEER_KEYWORDS[i]});
             } else {
@@ -206,7 +206,7 @@ public class TestConnectionManager extends ConnectionManager {
 
         // now, give ourselves the desired number of leaves
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
-            ManagedConnection conn;
+            RoutedConnection conn;
             if(useVaried && i >= (NUM_LEAF_CONNECTIONS/2)) {
                 conn = testConnectionFactory.createAltLeafConnection();
             } else {
@@ -244,16 +244,16 @@ public class TestConnectionManager extends ConnectionManager {
     /**
      * Accessor for the custom list of connections.
      */
-    public List<ManagedConnection> getInitializedConnections() {
+    public List<RoutedConnection> getInitializedConnections() {
         return CONNECTIONS;
     }
     
-    public void setInitializedConnections(List<ManagedConnection> connections) {
+    public void setInitializedConnections(List<RoutedConnection> connections) {
         CONNECTIONS.clear();
         CONNECTIONS.addAll(connections);
     }
     
-    public List<ManagedConnection> getInitializedClientConnections() {
+    public List<RoutedConnection> getInitializedClientConnections() {
         return LEAF_CONNECTIONS;
     }
 
@@ -278,9 +278,9 @@ public class TestConnectionManager extends ConnectionManager {
     /**
      * Returns the total number of queries received over all leaf connections.
      */
-    private static int getNumQueries(Collection<ManagedConnection> connections) {
+    private static int getNumQueries(Collection<RoutedConnection> connections) {
         int numQueries = 0;
-        Iterator<ManagedConnection> iter = connections.iterator();
+        Iterator<RoutedConnection> iter = connections.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             numQueries += tc.getNumQueries();
@@ -293,7 +293,7 @@ public class TestConnectionManager extends ConnectionManager {
      */
     public int getNumOldConnectionQueries() {
         int numQueries = 0;
-        Iterator<ManagedConnection> iter = CONNECTIONS.iterator();
+        Iterator<RoutedConnection> iter = CONNECTIONS.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             if(tc instanceof OldConnection) {
@@ -308,7 +308,7 @@ public class TestConnectionManager extends ConnectionManager {
      */
     public int getNumNewConnectionQueries() {
         int numQueries = 0;
-        Iterator<ManagedConnection> iter = CONNECTIONS.iterator();
+        Iterator<RoutedConnection> iter = CONNECTIONS.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             if(tc instanceof NewConnection) {

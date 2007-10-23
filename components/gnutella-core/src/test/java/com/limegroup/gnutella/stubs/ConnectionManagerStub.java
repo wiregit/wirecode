@@ -15,14 +15,14 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
@@ -43,7 +43,7 @@ public class ConnectionManagerStub extends ConnectionManager {
 
     private Boolean fullyConnected;
 
-    private List<ManagedConnection> initializedConnections;
+    private List<RoutedConnection> initializedConnections;
 
     private Integer preferredConnectionCount;
 
@@ -53,7 +53,7 @@ public class ConnectionManagerStub extends ConnectionManager {
             Provider<ConnectionDispatcher> connectionDispatcher, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<SimppManager> simppManager,
             CapabilitiesVMFactory capabilitiesVMFactory,
-            ManagedConnectionFactory managedConnectionFactory,
+            RoutedConnectionFactory managedConnectionFactory,
             Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager, ConnectionServices connectionServices,
             Provider<NodeAssigner> nodeAssigner, 
@@ -82,7 +82,7 @@ public class ConnectionManagerStub extends ConnectionManager {
 
     /** Calls c.close iff enableRemove */
     @Override
-    public void remove(ManagedConnection c) {
+    public void remove(RoutedConnection c) {
         if (enableRemove)
             c.close();
     }
@@ -135,7 +135,7 @@ public class ConnectionManagerStub extends ConnectionManager {
     }
     
 
-    public void setInitializedConnections(List<ManagedConnection> initializedConnections) {
+    public void setInitializedConnections(List<RoutedConnection> initializedConnections) {
         this.initializedConnections = initializedConnections;
     }
 
@@ -145,7 +145,7 @@ public class ConnectionManagerStub extends ConnectionManager {
 
 
     @Override
-    public List<ManagedConnection> getInitializedConnections() {
+    public List<RoutedConnection> getInitializedConnections() {
         if(initializedConnections != null)
             return initializedConnections;
         else

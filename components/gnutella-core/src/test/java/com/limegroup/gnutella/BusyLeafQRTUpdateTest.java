@@ -5,11 +5,11 @@ import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
 
 import org.limewire.net.ConnectionDispatcher;
-import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -19,9 +19,13 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.connection.ConnectionCapabilities;
+import com.limegroup.gnutella.connection.ConnectionCapabilitiesDelegator;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
@@ -61,15 +65,15 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerCountQRT.class);
                 bind(FileManager.class).to(FileManagerStub.class);
-                bind(ManagedConnection.class).to(ManagedConnectionCountQRT.class);
+                bind(GnutellaConnection.class).to(ManagedConnectionCountQRT.class);
             }
             
         };
         
         Injector injector = LimeTestUtils.createInjector(module);
         
-        peer = (ManagedConnectionCountQRT)injector.getInstance(ManagedConnection.class);
-        leaf = (ManagedConnectionCountQRT)injector.getInstance(ManagedConnection.class);
+        peer = (ManagedConnectionCountQRT)injector.getInstance(GnutellaConnection.class);
+        leaf = (ManagedConnectionCountQRT)injector.getInstance(GnutellaConnection.class);
         cm = (ConnectionManagerCountQRT)injector.getInstance(ConnectionManager.class);
         
         peer.setLeafConnection(false);
@@ -186,7 +190,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         while( !busyLeaf && it.hasNext() )
             //  NOTE: don't remove the leaf's BUSY flag, since some peers may not have
             //  been updated yet due to timing quirks.
-            if( ((ManagedConnection)it.next()).isBusyEnoughToTriggerQRTRemoval() )
+            if( ((GnutellaConnection)it.next()).isBusyEnoughToTriggerQRTRemoval() )
                 busyLeaf=true;
         
         return busyLeaf;
@@ -213,7 +217,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
-                ManagedConnectionFactory managedConnectionFactory,
+                RoutedConnectionFactory managedConnectionFactory,
                 Provider<MessageRouter> messageRouter,
                 Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager,
@@ -232,11 +236,11 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         public void addStubOvrConnection( ManagedConnectionCountQRT mcso ) throws Exception {
             PrivilegedAccessor.invokeMethod( 
                     this, "connectionInitializing",  
-                    new Object[] { mcso }, new Class[] { ManagedConnection.class } );
+                    new Object[] { mcso }, new Class[] { GnutellaConnection.class } );
 
             PrivilegedAccessor.invokeMethod( 
                     this, "connectionInitialized",  
-                    new Object[] { mcso }, new Class[] { ManagedConnection.class } );
+                    new Object[] { mcso }, new Class[] { GnutellaConnection.class } );
         }
         
         /**
@@ -256,7 +260,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
     /**
      * The local stub for testing busy leaf connections
      */
-    static class ManagedConnectionCountQRT extends ManagedConnectionStub {      
+    private static class ManagedConnectionCountQRT extends ManagedConnectionStub {
         
         @Inject
         public ManagedConnectionCountQRT(ConnectionManager connectionManager,
@@ -287,47 +291,30 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                     connectionServices, guidMapManager, spamFilterFactory,
                     messageReaderFactory, messageFactory, applicationServices);
             try {
-              PrivilegedAccessor.setValue(ManagedConnection.class, "MIN_BUSY_LEAF_TIME", new Long(TEST_MIN_BUSY_LEAF_TIME));                
-              PrivilegedAccessor.setValue(this, "hopsFlowMax", new Integer(-1));
-          } catch (Exception e) {
-              ErrorService.error( e );
-          }  
+                PrivilegedAccessor.setValue(GnutellaConnection.class, "MIN_BUSY_LEAF_TIME",
+                        new Long(TEST_MIN_BUSY_LEAF_TIME));
+                PrivilegedAccessor.setValue(this, "hopsFlowMax", new Integer(-1));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+        
+        
 
         private static final long TEST_MIN_BUSY_LEAF_TIME=1000*5;
         
         private boolean isLeaf = false;
         
+        @Override
         public long getNextQRPForwardTime() {
             return 0l;
         }        
         
+        @Override
         public void incrementNextQRPForwardTime(long curTime) {
         }
 
-        public boolean isUltrapeerQueryRoutingConnection() {
-            return !isLeaf;
-        }
-        
-        /** 
-         * If I'm not a leaf then I'm an Ultrapeer! See also 
-         * isClientSupernodeConnection()
-         */
-        public boolean isSupernodeClientConnection() {
-            return isLeaf;
-        }
-        
-        /** 
-         * If I'm not a leaf then I'm an Ultrapeer! See also 
-         * isSupernodeClientConnection()
-         */
-        public boolean isClientSupernodeConnection() {
-            return isLeaf;
-        }
-        
-        public boolean isQueryRoutingEnabled() {
-            return !isLeaf;
-        }
+     
         
         public void send(Message m) {}
 
@@ -342,9 +329,52 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         }
 
         public boolean _qrtIncluded=false;
+        @Override
         public QueryRouteTable getQueryRouteTableReceived() {
             _qrtIncluded = true;
             return super.getQueryRouteTableReceived();
+        }
+        
+        private final AtomicReference<ConnectionCapabilities> connectionCapabilitiesRef = new AtomicReference<ConnectionCapabilities>();
+        // return a stubbed capabilities that is backed by the basic ones. 
+        @Override public ConnectionCapabilities getConnectionCapabilities() {
+            if(connectionCapabilitiesRef.get() == null)
+                connectionCapabilitiesRef.compareAndSet(null, new StubCapabilities(super.getConnectionCapabilities()));
+            return connectionCapabilitiesRef.get();
+        }
+        
+        private class StubCapabilities extends ConnectionCapabilitiesDelegator {
+            public StubCapabilities(ConnectionCapabilities delegate) {
+                super(delegate);
+            }
+
+            @Override
+            public boolean isUltrapeerQueryRoutingConnection() {
+                return !isLeaf;
+            }
+            
+            /** 
+             * If I'm not a leaf then I'm an Ultrapeer! See also 
+             * isClientSupernodeConnection()
+             */
+            @Override
+            public boolean isSupernodeClientConnection() {
+                return isLeaf;
+            }
+            
+            /** 
+             * If I'm not a leaf then I'm an Ultrapeer! See also 
+             * isSupernodeClientConnection()
+             */
+            @Override
+            public boolean isClientSupernodeConnection() {
+                return isLeaf;
+            }
+            
+            @Override
+            public boolean isQueryRoutingEnabled() {
+                return !isLeaf;
+            }
         }
     }
     
@@ -368,7 +398,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
-                ManagedConnectionFactory managedConnectionFactory,
+                RoutedConnectionFactory managedConnectionFactory,
                 Provider<MessageRouter> messageRouter,
                 Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager,
@@ -391,7 +421,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         }
 
         /** Calls c.close iff enableRemove */
-        public void remove(ManagedConnection c) {
+        public void remove(GnutellaConnection c) {
             if (enableRemove) 
                 c.close();
         }
@@ -409,7 +439,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         }
     }
 
-    public static class ManagedConnectionStub extends ManagedConnection {
+    public static class ManagedConnectionStub extends GnutellaConnection {
 
         @Inject
         public ManagedConnectionStub(
@@ -475,7 +505,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         }
 
         @Override
-        public void initialize() throws IOException, NoGnutellaOkException,
+        public void initialize(GnetConnectObserver observer) throws IOException, NoGnutellaOkException,
                 BadHandshakeException {
         }
     }

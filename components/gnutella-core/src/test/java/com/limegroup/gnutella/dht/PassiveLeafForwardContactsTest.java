@@ -18,15 +18,15 @@ import org.limewire.mojito.settings.NetworkSettings;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
@@ -187,7 +187,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         assertEquals(0, connectionManager.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
-        Connection out = createLeafConnection();
+        BlockingConnection out = createLeafConnection();
         
         try {
             assertTrue(out.isOpen());
@@ -199,10 +199,10 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue(connectionServices.isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = connectionManager.getConnections().get(0);
+            RoutedConnection in = connectionManager.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
-            assertEquals(-1, in.remoteHostIsPassiveLeafNode());
+            assertEquals(-1, in.getConnectionCapabilities().remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
             // Pretend the leaf is running in PASSIVE_LEAF mode.
@@ -222,7 +222,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             Thread.sleep(250);
             
             // And did it work?
-            assertNotEquals(-1, in.remoteHostIsPassiveLeafNode());
+            assertNotEquals(-1, in.getConnectionCapabilities().remoteHostIsPassiveLeafNode());
             assertTrue(in.isPushProxyFor());
             
             dhtManager.start(DHTMode.PASSIVE);
@@ -275,7 +275,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         assertEquals(0, connectionManager.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
-        Connection out = createLeafConnection();
+        BlockingConnection out = createLeafConnection();
         try {
             assertTrue(out.isOpen());
             assertTrue(out.isOutgoing());
@@ -286,10 +286,10 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue(connectionServices.isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = connectionManager.getConnections().get(0);
+            RoutedConnection in = connectionManager.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
-            assertEquals(-1, in.remoteHostIsPassiveLeafNode());
+            assertEquals(-1, in.getConnectionCapabilities().remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
             // --- WE DO NOT PRETEND TO BE IN PASSIVE_LEAF MODE !!! ---
@@ -302,7 +302,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             Thread.sleep(2000);
             
             // And did it work?
-            assertEquals(-1, in.remoteHostIsPassiveLeafNode());
+            assertEquals(-1, in.getConnectionCapabilities().remoteHostIsPassiveLeafNode());
             assertTrue(in.isPushProxyFor());
             
             dhtManager.start(DHTMode.PASSIVE);
@@ -334,7 +334,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         assertEquals(0, connectionManager.getNumConnections());
 
         // Connect a leaf Node to the Ultrapeer
-        Connection out = createLeafConnection();
+        BlockingConnection out = createLeafConnection();
         try {
             assertTrue(out.isOpen());
             assertTrue(out.isOutgoing());
@@ -345,10 +345,10 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue(connectionServices.isActiveSuperNode());
             
             // Check a few more things
-            ManagedConnection in = connectionManager.getConnections().get(0);
+            RoutedConnection in = connectionManager.getConnections().get(0);
             assertFalse(in.isOutgoing());
             assertTrue(in.isSupernodeClientConnection());
-            assertEquals(-1, in.remoteHostIsPassiveLeafNode());
+            assertEquals(-1, in.getConnectionCapabilities().remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
             // pretend the leaf is running in PASSIVE_LEAF mode.
@@ -365,7 +365,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             Thread.sleep(2000);
             
             // And did it work?
-            assertNotEquals(-1, in.remoteHostIsPassiveLeafNode());
+            assertNotEquals(-1, in.getConnectionCapabilities().remoteHostIsPassiveLeafNode());
             assertFalse(in.isPushProxyFor());
             
             dhtManager.start(DHTMode.PASSIVE);
@@ -398,13 +398,13 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         factory.addMessageBlock(messageBlock);
     }
 
-    protected Connection createLeafConnection() throws Exception {
+    protected BlockingConnection createLeafConnection() throws Exception {
         return createConnection(injector.getInstance(HeadersFactory.class).createLeafHeaders("localhost"));
     }
     
     /** Builds a single connection with the given headers. */
-    protected Connection createConnection(Properties headers) throws Exception {
-        Connection c = injector.getInstance(ManagedConnectionFactory.class).createManagedConnection("localhost", PORT);
+    protected BlockingConnection createConnection(Properties headers) throws Exception {
+        BlockingConnection c = (BlockingConnection)injector.getInstance(RoutedConnectionFactory.class).createRoutedConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         return c;
     }

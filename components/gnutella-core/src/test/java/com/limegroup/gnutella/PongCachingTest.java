@@ -8,6 +8,8 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
@@ -54,29 +56,29 @@ public final class PongCachingTest extends LimeTestCase {
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private Connection LEAF;
+    private BlockingConnection LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private Connection ULTRAPEER_1;
+    private BlockingConnection ULTRAPEER_1;
 
     /**
 	 * Second Ultrapeer connection
      */
-    private Connection ULTRAPEER_2;
+    private BlockingConnection ULTRAPEER_2;
 
     /**
      * Third Ultrapeer connection
      */
-    private Connection ULTRAPEER_3;
+    private BlockingConnection ULTRAPEER_3;
     
     /**
      * Fourth Ultrapeer connection
      */
-    private Connection ULTRAPEER_4;
+    private BlockingConnection ULTRAPEER_4;
 
-    private ConnectionFactory connectionFactory;
+    private BlockingConnectionFactory connectionFactory;
 
     private ConnectionServices connectionServices;
 
@@ -140,7 +142,7 @@ public final class PongCachingTest extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
 
         Injector injector = LimeTestUtils.createInjector();
-        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         headersFactory = injector.getInstance(HeadersFactory.class);
         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
@@ -202,23 +204,23 @@ public final class PongCachingTest extends LimeTestCase {
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_2.isOpen());
-        assertTrue("should be up", ULTRAPEER_2.isSupernodeSupernodeConnection());
+        assertTrue("should be up", ULTRAPEER_2.getConnectionCapabilities().isSupernodeSupernodeConnection());
         ULTRAPEER_3.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_3.isOpen());
-        assertTrue("should be up", ULTRAPEER_3.isSupernodeSupernodeConnection());
+        assertTrue("should be up", ULTRAPEER_3.getConnectionCapabilities().isSupernodeSupernodeConnection());
 
         ULTRAPEER_4.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_4.isOpen());
-        assertTrue("should be up", ULTRAPEER_4.isSupernodeSupernodeConnection());
+        assertTrue("should be up", ULTRAPEER_4.getConnectionCapabilities().isSupernodeSupernodeConnection());
 
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_1.isOpen());
-        assertTrue("should be up", ULTRAPEER_1.isSupernodeSupernodeConnection());        
+        assertTrue("should be up", ULTRAPEER_1.getConnectionCapabilities().isSupernodeSupernodeConnection());        
         //3. routed leaf, with route table for "test"
         LEAF.initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", LEAF.isOpen());
-        assertTrue("should be up", LEAF.isClientSupernodeConnection());        
+        assertTrue("should be up", LEAF.getConnectionCapabilities().isClientSupernodeConnection());        
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("test");
         qrt.add("susheel");

@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -68,10 +69,10 @@ public final class ConnectionWatchdog {
         final long received;
 
         /** Takes a snapshot of the given connection. */
-        ConnectionState(ManagedConnection c) {
-            this.sentDropped=c.getNumSentMessagesDropped();
-            this.sent=c.getNumMessagesSent();
-            this.received=c.getNumMessagesReceived();            
+        ConnectionState(RoutedConnection c) {
+            this.sentDropped=c.getConnectionMessageStatistics().getNumSentMessagesDropped();
+            this.sent=c.getConnectionMessageStatistics().getNumMessagesSent();
+            this.received=c.getConnectionMessageStatistics().getNumMessagesReceived();            
         }
 
         /**
@@ -103,8 +104,8 @@ public final class ConnectionWatchdog {
      */
     private void findDuds() {
         //Take a snapshot of all connections, including leaves.
-        Map<ManagedConnection, ConnectionState> snapshot = new HashMap<ManagedConnection, ConnectionState>();
-        for(ManagedConnection c : allConnections()) {
+        Map<RoutedConnection, ConnectionState> snapshot = new HashMap<RoutedConnection, ConnectionState>();
+        for(RoutedConnection c : allConnections()) {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
@@ -121,18 +122,18 @@ public final class ConnectionWatchdog {
      * This is done by scheduling an event and checking the progress against
      * a snapshot.
      
-     * @requires connections is a list of ManagedConnection
+     * @requires connections is a list of RoutedConnection
      * @modifies manager, router
-     * @effects removes from manager any ManagedConnection's in "connections"
+     * @effects removes from manager any RoutedConnection's in "connections"
      *  that still aren't progressing after being pinged.
      */
-    private void killIfStillDud(List<? extends ManagedConnection> connections) {
+    private void killIfStillDud(List<? extends RoutedConnection> connections) {
         //Take a snapshot of each connection, then send a ping.
         //The horizon statistics for the connection are temporarily disabled
         //during this process.  In the rare chance that legitimate pongs 
         //(other than in response to my ping), they will be ignored.
-        Map<ManagedConnection, ConnectionState> snapshot = new HashMap<ManagedConnection, ConnectionState>();
-        for(ManagedConnection c : connections) {
+        Map<RoutedConnection, ConnectionState> snapshot = new HashMap<RoutedConnection, ConnectionState>();
+        for(RoutedConnection c : connections) {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
@@ -144,11 +145,11 @@ public final class ConnectionWatchdog {
 
     /** Returns an iterable of all initialized connections in this, including
      *  leaf connecions. */
-    private Iterable<ManagedConnection> allConnections() {
-        List<ManagedConnection> normal = connectionManager.get().getInitializedConnections();
-        List<ManagedConnection> leaves = connectionManager.get().getInitializedClientConnections();
+    private Iterable<RoutedConnection> allConnections() {
+        List<RoutedConnection> normal = connectionManager.get().getInitializedConnections();
+        List<RoutedConnection> leaves = connectionManager.get().getInitializedClientConnections();
 
-        List<ManagedConnection> buf = new ArrayList<ManagedConnection>(normal.size() + leaves.size());
+        List<RoutedConnection> buf = new ArrayList<RoutedConnection>(normal.size() + leaves.size());
         buf.addAll(normal);
         buf.addAll(leaves);
         return buf;
@@ -163,7 +164,7 @@ public final class ConnectionWatchdog {
      * If no duds exist (or they were killed), findDuds() is started again.
      */
     private class DudChecker implements Runnable {
-        private Map<ManagedConnection, ConnectionState> snapshots;
+        private Map<RoutedConnection, ConnectionState> snapshots;
         private boolean kill;
         
         /**
@@ -171,7 +172,7 @@ public final class ConnectionWatchdog {
          * The checker may be used to kill the connections (if they haven't progressed)
          * or to re-evaluate them later.
          */
-        DudChecker(Map<ManagedConnection, ConnectionState> snapshots, boolean kill) {
+        DudChecker(Map<RoutedConnection, ConnectionState> snapshots, boolean kill) {
             this.snapshots = snapshots;
             this.kill = kill;
         }
@@ -179,12 +180,12 @@ public final class ConnectionWatchdog {
         public void run() {
             //Loop through all connections, trying to find ones that
             //have not made sufficient progress. 
-            List<ManagedConnection> potentials;
+            List<RoutedConnection> potentials;
             if(kill)
                 potentials = Collections.emptyList();
             else
-                potentials = new ArrayList<ManagedConnection>();
-            for(ManagedConnection c : allConnections()) {
+                potentials = new ArrayList<RoutedConnection>();
+            for(RoutedConnection c : allConnections()) {
                 if (!c.isKillable())
     				continue;
                 ConnectionState oldState = snapshots.get(c);

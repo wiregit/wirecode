@@ -9,6 +9,7 @@ import org.limewire.rudp.UDPConnection;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
@@ -153,13 +154,13 @@ public class NetworkManagerImpl implements NetworkManager {
     	props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
     	HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
     	
-        for(ManagedConnection c : connectionManager.get().getInitializedConnections()) {
-    		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
+        for(RoutedConnection c : connectionManager.get().getInitializedConnections()) {
+    		if (c.getConnectionCapabilities().remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
     			c.send(huvm);
     	}
     	
-        for(ManagedConnection c : connectionManager.get().getInitializedClientConnections()) {
-    		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
+        for(RoutedConnection c : connectionManager.get().getInitializedClientConnections()) {
+    		if (c.getConnectionCapabilities().remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
     			c.send(huvm);
     	}
         

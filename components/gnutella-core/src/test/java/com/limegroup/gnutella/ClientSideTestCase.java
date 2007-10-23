@@ -13,6 +13,8 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -60,13 +62,14 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     private final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    protected Connection testUP[];
+
+    protected BlockingConnection testUP[];
 
     private ActivityCallback callback;
     private LifecycleManager lifecycleManager;
     private ConnectionServices connectionServices;
     private PingReplyFactory pingReplyFactory;
-    private ConnectionFactory connectionFactory;
+    private BlockingConnectionFactory connectionFactory;
     private SpamManager spamManager;
     private HeadersFactory headersFactory;
     private LimeXMLDocumentFactory instance;
@@ -148,7 +151,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         connectionServices = injector.getInstance(ConnectionServices.class);
         ConnectionManager connectionManager = injector.getInstance(ConnectionManager.class);
         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         spamManager = injector.getInstance(SpamManager.class);
         headersFactory = injector.getInstance(HeadersFactory.class);
         instance = injector.getInstance(LimeXMLDocumentFactory.class);
@@ -161,7 +164,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         
         if (numUPs < 1 || numUPs > 4)
             throw new IllegalArgumentException("Bad value for numUPs!!!");
-        testUP = new Connection[numUPs];
+        testUP = new BlockingConnection[numUPs];
         for (int i = 0; i < testUP.length; i++) {
             try {
                 testUP[i] = connect(6355+i, true);
@@ -186,7 +189,8 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     
      ////////////////////////// Initialization ////////////////////////
 
-     private Connection connect(int port, boolean ultrapeer) 
+
+     private BlockingConnection connect(int port, boolean ultrapeer)
          throws IOException, BadPacketException, Exception {
          ServerSocket ss=new ServerSocket(port);
          connectionServices.connectToHostAsynchronously("127.0.0.1", port, ConnectType.PLAIN);
@@ -205,7 +209,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
          } else {
              responder = new OldResponder();
          }
-         Connection con = connectionFactory.createConnection(socket);
+    BlockingConnection con = connectionFactory.createConnection(socket);
          con.initialize(null, responder, 1000);
          if (shouldRespondToPing()) {
              replyToPing(con, ultrapeer);
@@ -239,7 +243,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
      /**
       * Note that this function will _EAT_ messages until it finds a ping to respond to.
       */  
-    private void replyToPing(Connection c, boolean ultrapeer) 
+    private void replyToPing(BlockingConnection c, boolean ultrapeer)
         throws Exception {
         // respond to a ping iff one is given.
         Message m = null;

@@ -8,6 +8,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -73,7 +75,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
     /** @return The first QueyrRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
-    private QueryStatusResponse getFirstQueryStatus(Connection c) 
+    private QueryStatusResponse getFirstQueryStatus(BlockingConnection c)
                                         throws BadPacketException, IOException {
         return getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }

@@ -33,7 +33,7 @@ public class HandshakeResponderFactoryImpl implements HandshakeResponderFactory 
      * 
      * @see com.limegroup.gnutella.handshaking.HandshakeResponderFactory#createUltrapeerHandshakeResponder(java.lang.String)
      */
-    public UltrapeerHandshakeResponder createUltrapeerHandshakeResponder(
+    public HandshakeResponder createUltrapeerHandshakeResponder(
             String host) {
         return new UltrapeerHandshakeResponder(host, networkManager,
                 headersFactory, connectionManager.get(), connectionServices);
@@ -44,7 +44,7 @@ public class HandshakeResponderFactoryImpl implements HandshakeResponderFactory 
      * 
      * @see com.limegroup.gnutella.handshaking.HandshakeResponderFactory#createLeafHandshakeResponder(java.lang.String)
      */
-    public LeafHandshakeResponder createLeafHandshakeResponder(String host) {
+    public HandshakeResponder createLeafHandshakeResponder(String host) {
         return new LeafHandshakeResponder(host, headersFactory, connectionManager.get(), connectionServices);
     }
 

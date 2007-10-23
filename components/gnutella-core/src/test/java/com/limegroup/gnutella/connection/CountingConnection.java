@@ -1,12 +1,14 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 
+import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
-public class CountingConnection extends Connection {
+public class CountingConnection extends BlockingConnection {
     
     public int incomingCount;
     public int incomingFailed;

@@ -36,8 +36,8 @@ import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AbstractAltLocValue;
@@ -220,10 +220,10 @@ public abstract class AbstractDHTController implements DHTController {
         }
         
         DHTContactsMessage msg = new DHTContactsMessage(node);
-        List<ManagedConnection> list = dhtControllerFacade.getInitializedClientConnections();
-        for (ManagedConnection mc : list) {
+        List<RoutedConnection> list = dhtControllerFacade.getInitializedClientConnections();
+        for (RoutedConnection mc : list) {
             if (mc.isPushProxyFor()
-                    && mc.remoteHostIsPassiveLeafNode() > -1) {
+                    && mc.getConnectionCapabilities().remoteHostIsPassiveLeafNode() > -1) {
                 mc.send(msg);
             }
         }

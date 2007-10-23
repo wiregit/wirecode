@@ -27,7 +27,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -216,12 +216,12 @@ public class PassiveDHTNodeController extends AbstractDHTController {
             
         } else if(evt.isConnectionCapabilitiesEvent()){
             
-            if(c.remostHostIsActiveDHTNode() > -1) {
+            if(c.getConnectionCapabilities().remostHostIsActiveDHTNode() > -1) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Connection is active dht node: "+ c);
                 }
                 addLeafDHTNode( host , port );
-            } else if(c.remostHostIsPassiveDHTNode() > -1) {
+            } else if(c.getConnectionCapabilities().remostHostIsPassiveDHTNode() > -1) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Connection is passive dht node: "+ c);
                 }

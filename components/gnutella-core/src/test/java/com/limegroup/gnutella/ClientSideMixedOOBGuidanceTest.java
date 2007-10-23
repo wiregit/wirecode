@@ -13,6 +13,7 @@ import junit.framework.Test;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -81,7 +82,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
     /** @return The first QueryRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
-    private QueryStatusResponse getFirstQueryStatus(Connection c) 
+    private QueryStatusResponse getFirstQueryStatus(BlockingConnection c) 
                                        throws IOException, BadPacketException {
         return (QueryStatusResponse)
             getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
@@ -93,7 +94,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("not open", testUP[i].isOpen());
-            assertTrue("not up->leaf", testUP[i].isSupernodeClientConnection());
+            assertTrue("not up->leaf", testUP[i].getConnectionCapabilities().isSupernodeClientConnection());
             drain(testUP[i], 500);
             if ((i==2)) { // i'll send 0 later....
                 testUP[i].send(messagesSupportedVendorMessage);

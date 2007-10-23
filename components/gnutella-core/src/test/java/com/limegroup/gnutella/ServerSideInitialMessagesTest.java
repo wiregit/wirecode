@@ -7,6 +7,7 @@ import java.util.ListIterator;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -54,7 +55,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     // BEGIN TESTS
     // ======================================================
     public void testInitialPeerMessages() throws Exception{
-        Connection up=ULTRAPEER[0];
+        BlockingConnection up=ULTRAPEER[0];
         Thread.sleep( 10*1000 );
         parseWaitingMessages( up );
 
@@ -79,7 +80,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     }
     // ------------------------------------------------------
     public void testInitialLeafMessages() throws Exception {
-        Connection leaf=LEAF[0];
+        BlockingConnection leaf=LEAF[0];
         
         Thread.sleep( 5*1000 );
         parseWaitingMessages( leaf );
@@ -100,7 +101,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     }
     // ======================================================
     
-    private void parseWaitingMessages( Connection con ) throws Exception {
+    private void parseWaitingMessages( BlockingConnection con ) throws Exception {
         try {
             Message m = null;
             while((m = con.receive( 300 )) !=null ) {

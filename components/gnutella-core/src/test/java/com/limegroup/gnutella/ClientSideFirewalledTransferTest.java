@@ -29,6 +29,7 @@ import org.limewire.rudp.UDPConnection;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.Base32;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -209,7 +210,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         assertEquals(ppi.getPort(), 6355);
         
         assertEquals(ppi.getInetAddress(), 
-                ((Connection)connectionManager.getConnections().get(0)).getInetAddress() 
+                ((BlockingConnection)connectionManager.getConnections().get(0)).getInetAddress()
                 );
 
         // set up a ServerSocket to get give on

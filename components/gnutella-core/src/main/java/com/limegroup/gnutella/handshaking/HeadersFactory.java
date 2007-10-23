@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.handshaking;
 
+import java.util.Properties;
+
 public interface HeadersFactory {
 
-    public LeafHeaders createLeafHeaders(String remoteIP);
+    public Properties createLeafHeaders(String remoteIP);
 
-    public UltrapeerHeaders createUltrapeerHeaders(String remoteIP);
+    public Properties createUltrapeerHeaders(String remoteIP);
 
 }

@@ -9,7 +9,7 @@ import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.StorableModel;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 
-import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.connection.RoutedConnection;
 
 /* This really isn't the best name for the object, but I don't know what'd be right. */
 public interface DHTControllerFacade {
@@ -26,7 +26,7 @@ public interface DHTControllerFacade {
 
     boolean isActiveSupernode();
 
-    List<ManagedConnection> getInitializedClientConnections();
+    List<RoutedConnection> getInitializedClientConnections();
 
     boolean isConnected();
 

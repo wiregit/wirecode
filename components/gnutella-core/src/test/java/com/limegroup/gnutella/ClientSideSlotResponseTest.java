@@ -106,7 +106,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         
         assertTrue("should be open", testUP[0].isOpen());
         assertTrue("should be up -> leaf",
-                testUP[0].isSupernodeClientConnection());
+                testUP[0].getConnectionCapabilities().isSupernodeClientConnection());
         drain(testUP[0], 500);
     }
 

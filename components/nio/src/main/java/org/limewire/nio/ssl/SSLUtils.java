@@ -12,6 +12,7 @@ import javax.net.ssl.SSLContext;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.ProtocolBandwidthTracker;
 import org.limewire.nio.channel.BufferReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.util.BufferUtils;
@@ -100,7 +101,7 @@ public class SSLUtils {
      * If no SSL exchanges are performed on the socket, the returned
      * tracker will always report 0 bytes produced and consumed.
      */
-    public static SSLBandwidthTracker getSSLBandwidthTracker(Socket socket) {
+    public static ProtocolBandwidthTracker getSSLBandwidthTracker(Socket socket) {
         if(socket instanceof TLSNIOSocket) {
            return new SSLChannelTracker(((TLSNIOSocket)socket).getSSLChannel());
         } else {
@@ -108,13 +109,13 @@ public class SSLUtils {
         }
     }
     /**
-     * Provides an implementation for the {@link SSLBandwidthTracker}
+     * Provides an implementation for the {@link ProtocolBandwidthTracker}
      * interface where each "get" method returns 
      * zero. Using an empty tracker as the default value of a 
      * <code>SSLBandwidthTracker</code> avoids 
      * <code>NullPointerExceptions</code>.
      */
-    public static class EmptyTracker implements SSLBandwidthTracker {
+    public static class EmptyTracker implements ProtocolBandwidthTracker {
         private static final EmptyTracker instance = new EmptyTracker();
         public static final EmptyTracker instance() { return instance; }
         private EmptyTracker() {}
@@ -124,7 +125,7 @@ public class SSLUtils {
         public long getWrittenBytesProduced() { return 0; }
     }
     
-    private static class SSLChannelTracker implements SSLBandwidthTracker {
+    private static class SSLChannelTracker implements ProtocolBandwidthTracker {
         private final SSLReadWriteChannel channel;
         
         SSLChannelTracker(SSLReadWriteChannel channel) {

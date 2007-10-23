@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import org.limewire.inject.Providers;
 
+import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
@@ -11,7 +12,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
  * in this package instead of com.limegroup.gnutella.stubs because it requires
  * package-access to ManagedConnection.
  */
-public class ManagedConnectionStub extends ManagedConnection {
+public class ManagedConnectionStub extends GnutellaConnection {
     
     @Deprecated
     public ManagedConnectionStub() {

@@ -19,6 +19,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
+import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
@@ -138,6 +140,7 @@ public class LimeTestUtils {
     public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
         List<Module> list = new ArrayList<Module>();
         list.addAll(Arrays.asList(modules));
+        list.add(new BlockingConnectionFactoryModule());
         list.add(new LimeWireCoreModule(callbackClass));
         Injector injector = Guice.createInjector(list);
         
@@ -188,6 +191,13 @@ public class LimeTestUtils {
         @Override
         protected void configure() {
             bind(NetworkManager.class).toInstance(networkManagerStub);
+        }
+    }
+    
+    public static class BlockingConnectionFactoryModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            bind(BlockingConnectionFactory.class).to(BlockingConnectionFactoryImpl.class);
         }
     }
 }

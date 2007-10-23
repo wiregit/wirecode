@@ -70,12 +70,16 @@ import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactoryImpl;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.chat.InstantMessengerFactoryImpl;
+import com.limegroup.gnutella.connection.ConnectionBandwidthStatistics;
+import com.limegroup.gnutella.connection.ConnectionBandwidthStatisticsImpl;
+import com.limegroup.gnutella.connection.ConnectionCapabilities;
+import com.limegroup.gnutella.connection.ConnectionCapabilitiesImpl;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManagerImpl;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
-import com.limegroup.gnutella.connection.ManagedConnectionFactoryImpl;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactoryImpl;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactoryImpl;
 import com.limegroup.gnutella.connection.UDPConnectionChecker;
 import com.limegroup.gnutella.connection.UDPConnectionCheckerImpl;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
@@ -225,7 +229,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HTTPUploadSessionManager.class).to(HTTPUploadManager.class);
         bind(QueryHandlerFactory.class).to(QueryHandlerFactoryImpl.class);
         bind(QueryRequestFactory.class).to(QueryRequestFactoryImpl.class);
-        bind(ManagedConnectionFactory.class).to(ManagedConnectionFactoryImpl.class);
+        bind(RoutedConnectionFactory.class).to(RoutedConnectionFactoryImpl.class);
         bind(HostDataFactory.class).to(HostDataFactoryImpl.class);
         bind(AltLocValueFactory.class).to(AltLocValueFactoryImpl.class);
         bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
@@ -297,6 +301,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPPinger.class).to(UDPPingerImpl.class);
         bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
         bind(Inspector.class).to(InspectorImpl.class);
+        bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
+        bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);
         bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
         bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
@@ -344,9 +350,6 @@ public class LimeWireCoreModule extends AbstractModule {
         // TODO: Need to add interface to these classes
         //----------------------------------------------
         bind(FileManager.class).to(MetaFileManager.class);
-       
-        //TODO: only needed in tests, so move there eventually
-        bind(ConnectionFactory.class).to(ConnectionFactoryImpl.class);
     }
     
     @Singleton

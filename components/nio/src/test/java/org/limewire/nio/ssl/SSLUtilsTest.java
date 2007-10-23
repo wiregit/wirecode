@@ -11,6 +11,7 @@ import junit.framework.Test;
 
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.NIOSocket;
+import org.limewire.nio.ProtocolBandwidthTracker;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.BufferUtils;
 
@@ -80,7 +81,7 @@ public class SSLUtilsTest extends BaseTestCase {
     }
     
     public void testGetSSLBandwidthTracker() throws Exception {
-        SSLBandwidthTracker t = SSLUtils.getSSLBandwidthTracker(new Socket());
+        ProtocolBandwidthTracker t = SSLUtils.getSSLBandwidthTracker(new Socket());
         assertSame(t, SSLUtils.EmptyTracker.instance());// a little stricter check than necessary
         
         t = SSLUtils.getSSLBandwidthTracker(new NIOSocket());
@@ -93,8 +94,8 @@ public class SSLUtilsTest extends BaseTestCase {
         Socket outgoing = new TLSSocketFactory().createSocket("localhost", listening.getLocalPort());
         Socket incoming = listening.accept();
         
-        SSLBandwidthTracker outTracker = SSLUtils.getSSLBandwidthTracker(outgoing);
-        SSLBandwidthTracker inTracker = SSLUtils.getSSLBandwidthTracker(incoming);
+        ProtocolBandwidthTracker outTracker = SSLUtils.getSSLBandwidthTracker(outgoing);
+        ProtocolBandwidthTracker inTracker = SSLUtils.getSSLBandwidthTracker(incoming);
         assertNotSame(outTracker, inTracker);
         assertNotSame(outTracker, SSLUtils.EmptyTracker.instance());
         assertNotSame(inTracker, SSLUtils.EmptyTracker.instance());

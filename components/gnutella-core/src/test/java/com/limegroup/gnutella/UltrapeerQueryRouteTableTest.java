@@ -19,6 +19,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
@@ -133,7 +134,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
         lifecycleManager.start();
         
-        final AtomicReference<ManagedConnection> mc = new AtomicReference<ManagedConnection>(null);
+        final AtomicReference<RoutedConnection> mc = new AtomicReference<RoutedConnection>(null);
         connectionManager = injector.getInstance(ConnectionManager.class);
         connectionManager.addEventListener(new ConnectionLifecycleListener() {
             public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
@@ -146,7 +147,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
                 Backend.BACKEND_PORT, ConnectType.PLAIN);    
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.
-        while(mc.get() == null || mc.get().getQueryRouteTablePercentFull() == 0) {
+        while(mc.get() == null || mc.get().getRoutedConnectionStatistics().getQueryRouteTablePercentFull() == 0) {
             Thread.sleep(500);
         }
         assertTrue("should be connected", connectionServices.isConnected());
@@ -278,7 +279,8 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
                     replyNumberVendorMessageFactory, pingRequestFactory);
         }
         
-        public boolean originateQuery(QueryRequest r, ManagedConnection c) {
+        @Override
+        public boolean originateQuery(QueryRequest r, RoutedConnection c) {
             SENT.add(r);
             super.originateQuery(r, c);
             return true;

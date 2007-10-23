@@ -1,11 +1,11 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collection;
 
 import org.limewire.io.IpPort;
 
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public interface ConnectionServices {
@@ -83,7 +83,7 @@ public interface ConnectionServices {
     /**
      * Closes and removes the given connection.
      */
-    public void removeConnection(ManagedConnection c);
+    public void removeConnection(RoutedConnection c);
 
     /**
      * Disconnects from the network.  Closes all connections and sets
@@ -109,16 +109,6 @@ public interface ConnectionServices {
      */
     public void connectToHostAsynchronously(String hostname, int portnum,
             ConnectType type);
-
-    /**
-     * Creates a new outgoing messaging connection to the given host and port.
-     * Blocks until the connection established.  Throws IOException if
-     * the connection failed.
-     * @return a connection to the request host
-     * @exception IOException the connection failed
-     */
-    public ManagedConnection connectToHostBlocking(String hostname,
-            int portnum, ConnectType type) throws IOException;
 
     /**
      *  Returns the number of initialized messaging connections.

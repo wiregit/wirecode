@@ -16,10 +16,10 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.connection.Connection;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -46,16 +46,16 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
         byte format = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
         
         //get a list of all ultrapeers and leafs we have connections to
-        List<ManagedConnection> endpointsUP = new LinkedList<ManagedConnection>();
-        List<ManagedConnection> endpointsLeaf = new LinkedList<ManagedConnection>();
+        List<RoutedConnection> endpointsUP = new LinkedList<RoutedConnection>();
+        List<RoutedConnection> endpointsLeaf = new LinkedList<RoutedConnection>();
         
         //add only good ultrapeers or just those who support UDP pinging
         //(they support UDP ponging, obviously)
         boolean newOnly = request.hasNewOnly();
         
-        for(ManagedConnection c : connectionManager.get().getInitializedConnections()) {
+        for(RoutedConnection c : connectionManager.get().getInitializedConnections()) {
             if (newOnly) {  
-                if (c.remoteHostSupportsUDPCrawling() >= 1)
+                if (c.getConnectionCapabilities().remoteHostSupportsUDPCrawling() >= 1)
                     endpointsUP.add(c);
             } else if (c.isGoodUltrapeer())  {
                 endpointsUP.add(c);
@@ -63,7 +63,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
         }
         
         //add all leaves.. or not?
-        for(ManagedConnection c : connectionManager.get().getInitializedClientConnections()) {
+        for(RoutedConnection c : connectionManager.get().getInitializedClientConnections()) {
             //if (c.isGoodLeaf()) //uncomment if you decide you want only good leafs 
                 endpointsLeaf.add(c);
         }
@@ -93,16 +93,16 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             
             //move the connections with the locale pref to the head of the lists
             //we prioritize these disregarding the other criteria (such as isGoodUltrapeer, etc.)
-            List<ManagedConnection> prefedcons =
+            List<RoutedConnection> prefedcons =
                 connectionManager.get().getInitializedConnectionsMatchLocale(myLocale);
-            for(ManagedConnection c : prefedcons) {
+            for(RoutedConnection c : prefedcons) {
                 endpointsUP.remove(c);
                 endpointsUP.add(0, c);
             }
             
             prefedcons =
                 connectionManager.get().getInitializedClientConnectionsMatchLocale(myLocale);
-            for(ManagedConnection c : prefedcons) {
+            for(RoutedConnection c : prefedcons) {
                 endpointsLeaf.remove(c);
                 endpointsLeaf.add(0, c);
             }
@@ -178,7 +178,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
         //cache the call to currentTimeMillis() cause its not always cheap
         long now = System.currentTimeMillis();
         
-        for(ManagedConnection c : endpointsUP) {
+        for(RoutedConnection c : endpointsUP) {
             //pack each entry into a 6 byte array and add it to the result.
             System.arraycopy(
                     packIPAddress(c.getInetAddress(),c.getPort()),
@@ -204,7 +204,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             
             if (request.hasReplies()) {
                 // pack the # of replies as reported up to Integer.MAX_VALUE
-                ByteOrder.int2leb(ByteOrder.long2int(c.getNumQueryReplies()),
+                ByteOrder.int2leb(ByteOrder.long2int(c.getConnectionMessageStatistics().getNumQueryReplies()),
                         result,index);
                 index += 4;
             }           
@@ -214,8 +214,8 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
         //in the same order as the results.
         if (request.hasUserAgent()) {
             StringBuilder agents = new StringBuilder();
-            for(Connection c: endpointsUP) {
-                String agent = c.getUserAgent();
+            for(Connection c : endpointsUP) {
+                String agent = c.getConnectionCapabilities().getUserAgent();
                 agent = StringUtils.replace(agent,UDPCrawlerPong.AGENT_SEP,"\\"+UDPCrawlerPong.AGENT_SEP);
                 agents.append(agent).append(UDPCrawlerPong.AGENT_SEP);
             }

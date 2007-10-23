@@ -16,6 +16,8 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -262,7 +264,7 @@ public class NodeAssignerTest extends LimeTestCase {
     
     private class TestAcceptor implements Runnable {
         private volatile boolean acceptsUltrapeers = true;        
-        private volatile Connection incomingConnection;
+        private volatile BlockingConnection incomingConnection;
         private volatile boolean keepRunning = true;
         private volatile ServerSocket serverSocket;
         
@@ -275,11 +277,11 @@ public class NodeAssignerTest extends LimeTestCase {
                     serverSocket.close();
                     serverSocket = null;
                     socket.setSoTimeout(1000);
-                    incomingConnection = injector.getInstance(ConnectionFactory.class).createConnection(socket);
+                    incomingConnection = injector.getInstance(BlockingConnectionFactory.class).createConnection(socket);
                     if(acceptsUltrapeers) {
-                        incomingConnection.initialize(null, new UltrapeerResponder());
+                        incomingConnection.initialize(null, new UltrapeerResponder(), 0);
                     } else {
-                        incomingConnection.initialize(null, new NoUltrapeerResponder());
+                        incomingConnection.initialize(null, new NoUltrapeerResponder(), 0);
                     }
                 } catch (IOException e) {
                     if(keepRunning)

@@ -10,6 +10,7 @@ import junit.framework.Test;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -47,12 +48,12 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection LEAF;
+    private static BlockingConnection LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private static Connection ULTRAPEER_1;
+    private static BlockingConnection ULTRAPEER_1;
 
     /**
      * Ultrapeer 1 UDP connection.
@@ -72,7 +73,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     /**
 	 * Second Ultrapeer connection
      */
-    private static Connection ULTRAPEER_2;
+    private static BlockingConnection ULTRAPEER_2;
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -93,10 +94,10 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 	}
 	
 	private static void buildConnections() throws Exception {
-        ULTRAPEER_1 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        ULTRAPEER_1 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
         UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
-        ULTRAPEER_2 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        ULTRAPEER_2 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
     }
 
     public static void setSettings() {
@@ -197,7 +198,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 
-	    LEAF = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+	    LEAF = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
         //3. routed leaf, with route table for "test"
         LEAF.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         qrt = new QueryRouteTable();

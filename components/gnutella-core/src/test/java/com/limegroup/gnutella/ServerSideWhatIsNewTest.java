@@ -14,6 +14,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.messages.FeatureSearchData;
@@ -118,7 +119,7 @@ public class ServerSideWhatIsNewTest
     // just test that What Is New support is advertised
     public void testSendsCapabilitiesMessage() throws Exception {
         //testUP = connect(rs, 6355, true);
-        Connection connection = testUP[0];
+        BlockingConnection connection = testUP[0];
 
         // send a MessagesSupportedMessage and capabilities VM
         connection.send(ProviderHacks.getMessagesSupportedVendorMessage());
@@ -199,7 +200,7 @@ public class ServerSideWhatIsNewTest
 
     // make sure that a what is new query is answered correctly
     public void testWhatIsNewQueryBasic() throws Exception {
-        Connection connection = testUP[0];
+        BlockingConnection connection = testUP[0];
         drain(connection);
 
         QueryRequest whatIsNewQuery = 
@@ -230,7 +231,8 @@ public class ServerSideWhatIsNewTest
 
     // make sure that a what is new query meta query is answered correctly
     public void testWhatIsNewQueryMeta() throws Exception {
-        Connection connection = testUP[0];
+
+        BlockingConnection connection = testUP[0];
         drain(connection);
 
         {
@@ -344,7 +346,7 @@ public class ServerSideWhatIsNewTest
     // test that after the sharing of additional files, the what is new query
     // results in something else
     public void testWhatIsNewQueryNewFiles() throws Exception {
-        Connection connection = testUP[0];
+        BlockingConnection connection = testUP[0];
         drain(connection);
 
         QueryRequest whatIsNewQuery = 
@@ -409,7 +411,7 @@ public class ServerSideWhatIsNewTest
 
         // now just send another What Is New query and make sure everything
         // is kosher - probably overkill but whatever....
-        Connection connection = testUP[0];
+        BlockingConnection connection = testUP[0];
         drain(connection);
 
         QueryRequest whatIsNewQuery = 
@@ -477,7 +479,7 @@ public class ServerSideWhatIsNewTest
 
         // now just send another What Is New query and make sure everything
         // is kosher - probbably overkill but whatever....
-        Connection connection = testUP[0];
+        BlockingConnection connection = testUP[0];
         drain(connection);
 
         QueryRequest whatIsNewQuery = 

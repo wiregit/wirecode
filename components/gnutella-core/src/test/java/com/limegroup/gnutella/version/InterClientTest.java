@@ -10,9 +10,9 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.PeerTestCase;
 import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -30,7 +30,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 public class InterClientTest extends PeerTestCase {
     
-    private Connection PEER;
+    private BlockingConnection PEER;
     
     public InterClientTest(String name) {
         super(name);

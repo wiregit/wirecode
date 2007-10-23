@@ -37,8 +37,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionFactory;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.FileManager;
@@ -52,8 +50,10 @@ import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -329,7 +329,7 @@ public class PushUploadTest extends LimeTestCase {
      * than once.
      */
     public void testDuplicatePushes() throws Exception {
-        Connection connection = injector.getInstance(ConnectionFactory.class).createConnection("localhost", PORT);
+        BlockingConnection connection = injector.getInstance(BlockingConnectionFactory.class).createConnection("localhost", PORT);
         try {
             connection.initialize(injector.getInstance(HeadersFactory.class).createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
@@ -389,7 +389,7 @@ public class PushUploadTest extends LimeTestCase {
      */
     private Socket getSocketFromPush() throws IOException,
             BadPacketException {
-        Connection connection = injector.getInstance(ConnectionFactory.class).createConnection("localhost", PORT);
+        BlockingConnection connection = injector.getInstance(BlockingConnectionFactory.class).createConnection("localhost", PORT);
         try {
             connection.initialize(injector.getInstance(HeadersFactory.class).createUltrapeerHeaders(null),
                     new EmptyResponder(), 1000);
@@ -573,7 +573,7 @@ public class PushUploadTest extends LimeTestCase {
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
-                ManagedConnectionFactory managedConnectionFactory,
+                RoutedConnectionFactory managedConnectionFactory,
                 Provider<MessageRouter> messageRouter,
                 Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager,

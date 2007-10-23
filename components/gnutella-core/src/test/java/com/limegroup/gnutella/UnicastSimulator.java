@@ -16,6 +16,7 @@ import java.util.Random;
 import org.limewire.io.IOUtils;
 import org.limewire.security.AddressSecurityToken;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -128,7 +129,7 @@ public class UnicastSimulator {
                 sock.setSoTimeout(0);
 
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
-                    Connection conn = ProviderHacks.getConnectionFactory().createConnection(sock);
+                    BlockingConnection conn = ProviderHacks.getBlockingConnectionFactory().createConnection(sock);
                     conn.initialize(null, null, 1000);
                     for (int i = 0; i < _pongs.length; i++) {
                         conn.send(_pongs[i]);

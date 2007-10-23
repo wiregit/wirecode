@@ -7,6 +7,8 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
@@ -79,19 +81,19 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private Connection LEAF;
+    private BlockingConnection LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private Connection ULTRAPEER_1;
+    private BlockingConnection ULTRAPEER_1;
 
     /**
 	 * Second Ultrapeer connection
      */
-    private Connection ULTRAPEER_2;
+    private BlockingConnection ULTRAPEER_2;
 
-    private ConnectionFactory connectionFactory;
+    private BlockingConnectionFactory connectionFactory;
 
     private ConnectionServices connectionServices;
 
@@ -154,7 +156,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
         
         Injector injector = LimeTestUtils.createInjector();
-        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         headersFactory = injector.getInstance(HeadersFactory.class);
         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
@@ -488,8 +490,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
      *
      * @param sender the <tt>Connection</tt>
      */
-    private static void testLastHop(Connection sender, 
-                                    Connection receiver, 
+    private static void testLastHop(BlockingConnection sender, 
+                                    BlockingConnection receiver, 
                                     QueryRequest qr) throws Exception {
 		sender.send(qr);
 		sender.flush();

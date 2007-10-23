@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import junit.framework.Test;
 
@@ -14,9 +15,10 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -36,7 +38,7 @@ import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 @SuppressWarnings( {"unchecked", "null"})
 public class I18NSendReceiveTest extends LimeTestCase {
 
-    private static Connection CONN_1;
+    private static BlockingConnection CONN_1;
     private static int TEST_PORT = 6667;
 
   
@@ -65,7 +67,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
         FILE_0, FILE_1, FILE_2, FILE_3, FILE_4, META_FILE_0, META_FILE_1, 
         META_FILE_2};
     private HeadersFactory headersFactory;
-    private ConnectionFactory connectionFactory;
+    private BlockingConnectionFactory connectionFactory;
     private QueryRequestFactory queryRequestFactory;
     private LifecycleManager lifecycleManager;
     private ConnectionServices connectionServices;
@@ -127,7 +129,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
         
         Injector injector = LimeTestUtils.createInjector();
         headersFactory = injector.getInstance(HeadersFactory.class);
-        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
@@ -148,7 +150,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
     }
     
     private void connect() throws Exception {
-        UltrapeerHeaders headers = headersFactory.createUltrapeerHeaders("localhost");
+        Properties headers = headersFactory.createUltrapeerHeaders("localhost");
         headers.put(HeaderNames.X_DEGREE,"42");
         CONN_1 = connectionFactory.createConnection("localhost", TEST_PORT, ConnectType.PLAIN);
         CONN_1.initialize(headers, new EmptyResponder(), 1000);

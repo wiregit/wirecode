@@ -37,7 +37,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -1134,7 +1134,7 @@ public class PingReplyTest extends LimeTestCase {
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
-                ManagedConnectionFactory managedConnectionFactory,
+                RoutedConnectionFactory managedConnectionFactory,
                 Provider<MessageRouter> messageRouter,
                 Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager,

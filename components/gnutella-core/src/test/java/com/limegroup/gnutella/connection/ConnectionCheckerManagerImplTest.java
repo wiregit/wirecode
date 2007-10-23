@@ -74,7 +74,7 @@ public class ConnectionCheckerManagerImplTest extends BaseTestCase {
                 @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
-                ManagedConnectionFactory managedConnectionFactory,
+                RoutedConnectionFactory managedConnectionFactory,
                 Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager, ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner, 

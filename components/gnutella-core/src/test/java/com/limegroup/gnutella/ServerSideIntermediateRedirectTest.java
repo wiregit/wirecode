@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
@@ -115,7 +116,7 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirect() throws Exception {
 
-        Connection redirUP = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        BlockingConnection redirUP = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
         
         redirUP.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP.isOpen());
@@ -167,7 +168,7 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirectMultiple() throws Exception {
 
-        Connection redirUP1 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        BlockingConnection redirUP1 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
         redirUP1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP1.isOpen());
         drain(redirUP1);
@@ -176,7 +177,7 @@ public final class ServerSideIntermediateRedirectTest
         redirUP1.send(msvm);
         redirUP1.flush();
 
-        Connection redirUP2 = ProviderHacks.getConnectionFactory().createConnection("localhost", PORT);
+        BlockingConnection redirUP2 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
         redirUP2.initialize( ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP2.isOpen());
         drain(redirUP2);

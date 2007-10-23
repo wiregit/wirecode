@@ -11,6 +11,8 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -46,13 +48,13 @@ public class VendorMessageSupportTest extends LimeTestCase {
     
     private ServerSocket _tcpSock = null;
     private DatagramSocket _udpSock = null;
-    private Connection _leaf1 = null;
-    private Connection _leaf2 = null;
+    private BlockingConnection _leaf1 = null;
+    private BlockingConnection _leaf2 = null;
 
     private static boolean _testHopsFlow = true;
     private static boolean _testTCPCB = true;
     private static boolean _testUDPCB = true;
-    private ConnectionFactory connectionFactory;
+    private BlockingConnectionFactory connectionFactory;
     private HeadersFactory headersFactory;
     private QueryRequestFactory queryRequestFactory;
     private MessageFactory messageFactory;
@@ -78,7 +80,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         
         Injector injector = LimeTestUtils.createInjector();
         
-        connectionFactory = injector.getInstance(ConnectionFactory.class);
+        connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         headersFactory = injector.getInstance(HeadersFactory.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
@@ -117,7 +119,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         testConnection(_leaf1);
     }
 
-    private void testConnection(Connection c) throws Exception {
+    private void testConnection(BlockingConnection c) throws Exception {
         boolean receivedDesiredMessage = false;
         while (true) {
             try {
@@ -141,13 +143,13 @@ public class VendorMessageSupportTest extends LimeTestCase {
         }
         if (!receivedDesiredMessage)
             fail("No MessagesSupportedMessage recieved");
-        if (c.supportsVendorMessage("BEAR".getBytes(), 4) < 1) {
+        if (c.getConnectionCapabilities().supportsVendorMessage("BEAR".getBytes(), 4) < 1) {
             _testHopsFlow = false;
         }
-        if (c.supportsVendorMessage("GTKG".getBytes(), 7) < 1) {
+        if (c.getConnectionCapabilities().supportsVendorMessage("GTKG".getBytes(), 7) < 1) {
             _testUDPCB = false;
         }
-        if (c.supportsVendorMessage("BEAR".getBytes(), 7) < 1) {
+        if (c.getConnectionCapabilities().supportsVendorMessage("BEAR".getBytes(), 7) < 1) {
             _testTCPCB = false;
         }
     }
@@ -256,7 +258,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         _tcpSock.setSoTimeout(5*1000); // wait for up to 5 seconds...
         final TCPConnectBackVendorMessage tcp = 
            new TCPConnectBackVendorMessage(_tcpSock.getLocalPort());
-        final Connection c = _leaf1;
+        final BlockingConnection c = _leaf1;
         Thread sendThread = new Thread() {
             public void run() {
                 try {
@@ -298,7 +300,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         final UDPConnectBackVendorMessage udp = 
            new UDPConnectBackVendorMessage(_udpSock.getLocalPort(),
                                            guid);
-        final Connection c = _leaf1;
+        final BlockingConnection c = _leaf1;
         Thread sendThread = new Thread() {
             public void run() {
                 try {

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -326,7 +327,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         }
     }
 
-    private void routeResultsToUltrapeer(byte[] guid, Connection source) 
+    private void routeResultsToUltrapeer(byte[] guid, BlockingConnection source) 
         throws Exception {
         byte[] ip = new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
         byte[] clientGUID = GUID.makeGuid();

@@ -5,16 +5,15 @@ import java.util.List;
 
 import com.limegroup.gnutella.messages.Message;
 
-@SuppressWarnings("unchecked")
 class StubSentHandler implements SentMessageHandler {
     
-    private List SENT = new LinkedList();
+    private List<Message> SENT = new LinkedList<Message>();
     
     public void processSentMessage(Message m) { SENT.add(m); }
     
-    public List list() { return SENT; }
+    public List<Message> list() { return SENT; }
     
-    public Message next() { return (Message)SENT.remove(0); }
+    public Message next() { return SENT.remove(0); }
     
     public int size() { return SENT.size(); }
     

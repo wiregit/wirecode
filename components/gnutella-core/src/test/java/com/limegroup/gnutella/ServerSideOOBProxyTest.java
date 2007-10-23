@@ -17,6 +17,7 @@ import junit.framework.Test;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -787,7 +788,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     
     
    
-    private final void sendF(Connection c, Message m) throws Exception {
+    private final void sendF(BlockingConnection c, Message m) throws Exception {
         c.send(m);
         c.flush();
     }

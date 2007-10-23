@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -14,13 +13,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -32,11 +31,15 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
+import com.limegroup.gnutella.connection.ConnectionCapabilities;
+import com.limegroup.gnutella.connection.ConnectionCapabilitiesDelegator;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
-import com.limegroup.gnutella.connection.ManagedConnectionFactory;
+import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.OutputRunner;
+import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
@@ -282,10 +285,10 @@ public class ConnectionManagerTest extends LimeTestCase {
      * Tests the various connection-counting methods
      */
     public void testGetNumberOfConnections() throws Exception {
-        ManagedConnection[] limeLeaves = new ManagedConnection[30];
-        ManagedConnection[] nonLimeLeaves = new ManagedConnection[30];
-        ManagedConnection[] limePeers = new ManagedConnection[32];
-        ManagedConnection[] nonLimePeers = new ManagedConnection[32];
+        GnutellaConnection[] limeLeaves = new GnutellaConnection[30];
+        GnutellaConnection[] nonLimeLeaves = new GnutellaConnection[30];
+        GnutellaConnection[] limePeers = new GnutellaConnection[32];
+        GnutellaConnection[] nonLimePeers = new GnutellaConnection[32];
         
         for(int i = 0; i < limeLeaves.length; i++) {
             limeLeaves[i] = testConnectionFactory.createSupernodeClientConnection(true);
@@ -457,7 +460,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         Thread.sleep(1000); // let capVM send
         
         assertEquals(1, connectionManager.getInitializedConnections().size());
-        ManagedConnection mc = connectionManager.getInitializedConnections().get(0);
+        RoutedConnection mc = connectionManager.getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
@@ -473,7 +476,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         Thread.sleep(1000); // let capVM send
         
         assertEquals(1, connectionManager.getInitializedConnections().size());
-        ManagedConnection mc = connectionManager.getInitializedConnections().get(0);
+        RoutedConnection mc = connectionManager.getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertTrue(mc.isTLSEncoded());
     }
@@ -489,7 +492,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         Thread.sleep(1000); // let capVM send
         
         assertEquals(1, connectionManager.getInitializedConnections().size());
-        ManagedConnection mc = connectionManager.getInitializedConnections().get(0);
+        RoutedConnection mc = connectionManager.getInitializedConnections().get(0);
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
@@ -687,21 +690,21 @@ public class ConnectionManagerTest extends LimeTestCase {
                 "_connectTime", new Integer(0));
     }
     
-    private void initializeStart(ManagedConnection c) throws Exception {
+    private void initializeStart(RoutedConnection c) throws Exception {
         //  Need to setup the _outputRunner member of c as well...
         PrivilegedAccessor.setValue(c, "_outputRunner", new NullOutputRunner() );
         
         PrivilegedAccessor.invokeMethod( connectionManager,
             "connectionInitializingIncoming",
             new Object[] { c },
-            new Class[] { ManagedConnection.class} );
+            new Class[] { RoutedConnection.class} );
     }
     
-    private void initializeDone(ManagedConnection c) throws Exception {
+    private void initializeDone(GnutellaConnection c) throws Exception {
         PrivilegedAccessor.invokeMethod( connectionManager,
             "connectionInitialized",
             new Object[] { c },
-            new Class[] { ManagedConnection.class} );            
+            new Class[] { RoutedConnection.class} );            
     }
 
     /**
@@ -836,7 +839,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     @Singleton
-    private static class TestManagedConnectionFactory implements ManagedConnectionFactory {
+    private static class TestManagedConnectionFactory implements RoutedConnectionFactory {
 
         private final Provider<ConnectionManager> connectionManager;
         private final NetworkManager networkManager;
@@ -901,11 +904,11 @@ public class ConnectionManagerTest extends LimeTestCase {
             this.applicationServices = applicationServices;
         }
         
-        public ManagedConnection createManagedConnection(String host, int port) {
-            return createManagedConnection(host, port, ConnectType.PLAIN);
+        public RoutedConnection createRoutedConnection(String host, int port) {
+            return createRoutedConnection(host, port, ConnectType.PLAIN);
         }
 
-        public ManagedConnection createManagedConnection(String host, int port, ConnectType type) {
+        public GnutellaConnection createRoutedConnection(String host, int port, ConnectType type) {
             return new TestManagedConnection(connectionManager.get(), networkManager,
                     queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
                     messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler.get()
@@ -946,13 +949,13 @@ public class ConnectionManagerTest extends LimeTestCase {
             return connection;
         }
 
-        public ManagedConnection createManagedConnection(Socket socket) {
+        public GnutellaConnection createRoutedConnection(Socket socket) {
            return null;
         }
         
     }
 
-    private static class TestManagedConnection extends ManagedConnection {
+    private static class TestManagedConnection extends GnutellaConnection {
         private boolean isOutgoing;
         private int sent;
         private int received;
@@ -1039,40 +1042,61 @@ public class ConnectionManagerTest extends LimeTestCase {
             setIsSupernodeClientConnection(false);
         }
         
-        @Override
-        public boolean isSupernodeSupernodeConnection() {
-            return isSupernodeSupernodeConnection;
-        }
+      
         
         public void setIsSupernodeSupernodeConnection(boolean isSupernodeSupernodeConnection) {
             this.isSupernodeSupernodeConnection = isSupernodeSupernodeConnection;
         }
-            
-        @Override
-        public boolean isClientSupernodeConnection() {
-            return isClientSupernodeConnection;
-        }
+       
         
         public void setIsClientSupernodeConnection(boolean isClientSupernodeConnection) {
             this.isClientSupernodeConnection = isClientSupernodeConnection;
         }
         
-        @Override
-        public boolean isSupernodeClientConnection() {
-            return isSupernodeClientConnection;
-        }
         
         public void setIsSupernodeClientConnection(boolean isSupernodeClientConnection) {
             this.isSupernodeClientConnection = isSupernodeClientConnection;
         }
-        
-        @Override
-        public boolean isLimeWire() {
-            return isLime;
-        }
+       
         
         public void setIsLimeWire(boolean isLime) {
             this.isLime = isLime;
+        }
+        
+        private final AtomicReference<ConnectionCapabilities> connectionCapabilitiesRef = new AtomicReference<ConnectionCapabilities>();
+        // return a stubbed capabilities that is backed by the basic ones.
+        @Override
+        public ConnectionCapabilities getConnectionCapabilities() {
+            if (connectionCapabilitiesRef.get() == null)
+                connectionCapabilitiesRef.compareAndSet(null, new StubCapabilities(super
+                        .getConnectionCapabilities()));
+            return connectionCapabilitiesRef.get();
+        }
+        
+        private class StubCapabilities extends ConnectionCapabilitiesDelegator {
+            public StubCapabilities(ConnectionCapabilities delegate) {
+                super(delegate);
+            }
+
+            @Override
+            public boolean isSupernodeSupernodeConnection() {
+                return isSupernodeSupernodeConnection;
+            }
+
+            @Override
+            public boolean isClientSupernodeConnection() {
+                return isClientSupernodeConnection;
+            }
+
+            @Override
+            public boolean isSupernodeClientConnection() {
+                return isSupernodeClientConnection;
+            }
+
+            @Override
+            public boolean isLimeWire() {
+                return isLime;
+            }            
         }
     }
     

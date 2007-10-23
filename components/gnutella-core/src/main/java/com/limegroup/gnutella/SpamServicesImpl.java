@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -37,7 +38,7 @@ public class SpamServicesImpl implements SpamServices {
         
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
-        for(ManagedConnection c : connectionManager.get().getConnections()) {
+        for(RoutedConnection c : connectionManager.get().getConnections()) {
             if(ipFilter.get().allow(c.getAddress())) {
                 c.setPersonalFilter(spamFilterFactory.createPersonalFilter());
                 c.setRouteFilter(spamFilterFactory.createRouteFilter());

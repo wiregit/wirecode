@@ -2,9 +2,9 @@ package com.limegroup.gnutella.handshaking;
 
 public interface HandshakeResponderFactory {
 
-    public UltrapeerHandshakeResponder createUltrapeerHandshakeResponder(
+    public HandshakeResponder createUltrapeerHandshakeResponder(
             String host);
 
-    public LeafHandshakeResponder createLeafHandshakeResponder(String host);
+    public HandshakeResponder createLeafHandshakeResponder(String host);
 
 }

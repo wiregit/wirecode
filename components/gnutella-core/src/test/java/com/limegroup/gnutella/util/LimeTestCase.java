@@ -22,10 +22,10 @@ import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.Backend;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -348,7 +348,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Sends a pong through the connection to keep it alive.
      */
-    public static void keepAlive(Connection c) throws IOException {
+    public static void keepAlive(BlockingConnection c) throws IOException {
         PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1);
         c.send(pr);
         c.flush();
@@ -358,7 +358,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Sends a pong through all connections to keep them alive.
      * @param pingReplyFactory 
      */
-    public static void keepAllAlive(Connection[] cs, PingReplyFactory pingReplyFactory) throws IOException {
+    public static void keepAllAlive(BlockingConnection[] cs, PingReplyFactory pingReplyFactory) throws IOException {
         for(int i = 0; i < cs.length; i++) {
             PingReply pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1);
             cs[i].send(pr);
@@ -371,11 +371,11 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
 	 *
      * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
 	 */
-    public static boolean drain(Connection c) throws IOException {
+    public static boolean drain(BlockingConnection c) throws IOException {
         return drain(c, TIMEOUT);
     }
     
-    public static boolean drain(Connection c, int timeout) throws IOException {
+    public static boolean drain(BlockingConnection c, int timeout) throws IOException {
         if(!c.isOpen())
             return false;
 
@@ -400,14 +400,14 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Tries to drain all messages from the array of connections.
      */
- 	public static void drainAll(Connection[] conns) throws Exception {
+ 	public static void drainAll(BlockingConnection[] conns) throws Exception {
  	    drainAll(conns, TIMEOUT);
  	}
     
     /**
      * drains all messages from the given connections simultaneously.
      */
-    public static void drainAllParallel(final Connection [] conns) {
+    public static void drainAllParallel(final BlockingConnection [] conns) {
         Thread []r = new Thread[conns.length];
         for (int i = 0; i < conns.length; i++) {
             final int index = i;
@@ -430,7 +430,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         }
     }
  	
- 	public static void drainAll(Connection[] cs, int tout) throws IOException {
+ 	public static void drainAll(BlockingConnection[] cs, int tout) throws IOException {
         for (int i = 0; i < cs.length; i++) {
             if (cs[i].isOpen())
                 drain(cs[i], tout);
@@ -441,11 +441,11 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
  	 * Returns true if no messages beside expected ones (such as QRP, Pings)
  	 * were received.
  	 */
- 	public static boolean noUnexpectedMessages(Connection c) {
+ 	public static boolean noUnexpectedMessages(BlockingConnection c) {
  	    return noUnexpectedMessages(c, TIMEOUT);
  	}
  	
- 	public static boolean noUnexpectedMessages(Connection c, int timeout) {
+ 	public static boolean noUnexpectedMessages(BlockingConnection c, int timeout) {
         for(int i = 0; i < 100; i++) {
             if(!c.isOpen())
                 return true;
@@ -473,11 +473,11 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Returns the first message of the expected type, ignoring
      * RouteTableMessages and PingRequests.
      */
-    public static <T extends Message> T getFirstMessageOfType(Connection c, Class<T> type) {
+    public static <T extends Message> T getFirstMessageOfType(BlockingConnection c, Class<T> type) {
         return getFirstMessageOfType(c, type, TIMEOUT);
     }
 
-    public static <T extends Message> T getFirstMessageOfType(Connection c,
+    public static <T extends Message> T getFirstMessageOfType(BlockingConnection c,
                                                 Class<T> type,
                                                 int timeout) {
         for(int i = 0; i < 100; i++) {
@@ -512,12 +512,12 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         throw new RuntimeException("No IIOE or Message after 100 iterations");
     }
     
-    public static <T extends Message> T getFirstInstanceOfMessageType(Connection c,
+    public static <T extends Message> T getFirstInstanceOfMessageType(BlockingConnection c,
                           Class<T> type) throws BadPacketException {
         return getFirstInstanceOfMessageType(c, type, TIMEOUT);
     }
 
-    public static <T extends Message> T getFirstInstanceOfMessageType(Connection c,
+    public static <T extends Message> T getFirstInstanceOfMessageType(BlockingConnection c,
                Class<T> type, int timeout) throws BadPacketException {
         for(int i = 0; i < 200; i++) {
             if(!c.isOpen()){
@@ -571,23 +571,23 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         return null;
     }
 
-    public static QueryRequest getFirstQueryRequest(Connection c) {
+    public static QueryRequest getFirstQueryRequest(BlockingConnection c) {
         return getFirstQueryRequest(c, TIMEOUT);
     }
     
-    public static QueryRequest getFirstQueryRequest(Connection c, int tout) {
+    public static QueryRequest getFirstQueryRequest(BlockingConnection c, int tout) {
         return getFirstMessageOfType(c, QueryRequest.class, tout);
     }
     
-    public static QueryReply getFirstQueryReply(Connection c) {
+    public static QueryReply getFirstQueryReply(BlockingConnection c) {
         return getFirstQueryReply(c, TIMEOUT);
     }
     
-    public static QueryReply getFirstQueryReply(Connection c, int tout) {
+    public static QueryReply getFirstQueryReply(BlockingConnection c, int tout) {
         return getFirstMessageOfType(c, QueryReply.class, tout);
     }
     
-    public static void failIfAnyArrive(final Connection []connections, final Class type) 
+    public static void failIfAnyArrive(final BlockingConnection []connections, final Class type) 
     throws Exception {
         Thread [] drainers = new ManagedThread[connections.length];
         for (int i = 0; i < connections.length; i++) {

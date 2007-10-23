@@ -6,6 +6,7 @@ import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
@@ -82,8 +83,8 @@ public class LimeResponsesTest extends ClientSideTestCase {
     }
     
     public void testQRP() throws Exception {
-        ManagedConnection c = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
-        c.incrementNextQRPForwardTime(0);
+        RoutedConnection c = ProviderHacks.getConnectionManager().getInitializedConnections().get(0);
+        c.getRoutedConnectionStatistics().incrementNextQRPForwardTime(0);
         PatchTableMessage ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 22000);
         assertNotNull(ptm);
         QueryRouteTable qrt = new QueryRouteTable();
@@ -94,7 +95,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
         
         // change some words, an updated qrp should be sent shortly
         SearchSettings.LIME_QRP_ENTRIES.setValue(new String[]{"mushroom"});
-        c.incrementNextQRPForwardTime(0);
+        c.getRoutedConnectionStatistics().incrementNextQRPForwardTime(0);
         triggerSimppUpdate();
         ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);
         assertNotNull(ptm);

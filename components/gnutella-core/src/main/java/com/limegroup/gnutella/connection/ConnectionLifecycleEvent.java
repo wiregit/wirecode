@@ -2,8 +2,6 @@ package com.limegroup.gnutella.connection;
 
 import java.util.EventObject;
 
-import com.limegroup.gnutella.ManagedConnection;
-
 public class ConnectionLifecycleEvent extends EventObject {
     
     public static enum EventType {
@@ -17,10 +15,10 @@ public class ConnectionLifecycleEvent extends EventObject {
         CONNECTION_CAPABILITIES;
     }
     
-    private final ManagedConnection connection;
+    private final RoutedConnection connection;
     private final EventType type;
     
-    public ConnectionLifecycleEvent(Object source, EventType type, ManagedConnection c) {
+    public ConnectionLifecycleEvent(Object source, EventType type, RoutedConnection c) {
         super(source);
         this.connection = c;
         this.type = type;
@@ -41,7 +39,7 @@ public class ConnectionLifecycleEvent extends EventObject {
         return type;
     }
 
-    public ManagedConnection getConnection() {
+    public RoutedConnection getConnection() {
         return connection;
     }
 

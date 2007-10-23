@@ -19,12 +19,12 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -703,7 +703,7 @@ public class OOBHandlerTest extends BaseTestCase {
         }
 
         public void handleMessage(Message msg,
-                ManagedConnection receivingConnection) {
+                ReplyHandler receivingConnection) {
         }
 
         public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
@@ -719,7 +719,7 @@ public class OOBHandlerTest extends BaseTestCase {
             return false;
         }
 
-        public boolean originateQuery(QueryRequest query, ManagedConnection mc) {
+        public boolean originateQuery(QueryRequest query, RoutedConnection mc) {
             return false;
         }
 
@@ -747,14 +747,14 @@ public class OOBHandlerTest extends BaseTestCase {
         }
 
         public void sendPingRequest(PingRequest request,
-                ManagedConnection connection) {
+                RoutedConnection connection) {
         }
 
         public void sendPushRequest(PushRequest push) throws IOException {
         }
 
         public void sendQueryRequest(QueryRequest request,
-                ManagedConnection connection) {
+                RoutedConnection connection) {
         }
 
         public void setMessageHandler(Class<? extends Message> clazz,

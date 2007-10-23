@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.Message;
 
 /**
@@ -46,7 +47,7 @@ public class MessageDispatcher {
     /**
      * Dispatches a TCP message.
      */
-    public void dispatchTCP(Message m, ManagedConnection conn) {
+    public void dispatchTCP(Message m, RoutedConnection conn) {
         DISPATCH.execute(new TCPDispatch(messageRouter, m, conn));
     }
     
@@ -83,9 +84,9 @@ public class MessageDispatcher {
     private static class TCPDispatch implements Runnable {
         private final MessageRouter messageRouter;
         private final Message m;
-        private final ManagedConnection conn;
+        private final RoutedConnection conn;
 
-        TCPDispatch(MessageRouter messageRouter, Message m, ManagedConnection conn) {
+        TCPDispatch(MessageRouter messageRouter, Message m, RoutedConnection conn) {
             this.messageRouter = messageRouter;
             this.m = m; this.conn = conn;
         }

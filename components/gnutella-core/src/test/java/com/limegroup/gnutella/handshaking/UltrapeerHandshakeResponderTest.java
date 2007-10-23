@@ -8,9 +8,9 @@ import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -62,7 +62,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
      */
     private void fillSlots() throws Exception {
         int maxLeaves = UltrapeerSettings.MAX_LEAVES.getValue();
-        ManagedConnection[] mc = new ManagedConnection[maxLeaves];
+        GnutellaConnection[] mc = new GnutellaConnection[maxLeaves];
         for(int i = 0; i < mc.length; i++) {
             mc[i] = new ManagedConnectionStub();
         }
@@ -92,7 +92,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
         // test the 3 Ultrapeer cases -- 
 
         // create the Ultrapeer responder to test off of
-        UltrapeerHandshakeResponder responder = 
+        HandshakeResponder responder = 
             ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("23.3.4.5");
 
         // 1) Ultrapeer-Ultrapeer::No X-Ultrapeer-Needed
@@ -152,7 +152,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
 
         assertTrue(ProviderHacks.getConnectionServices().isSupernode());
 
-        UltrapeerHandshakeResponder responder = 
+        HandshakeResponder responder = 
             ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("23.3.4.5");
 
         // Leaf-Ultrapeer  --> leaf slots available
@@ -188,7 +188,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         setPreferredConnections();
 
-        UltrapeerHandshakeResponder responder = 
+        HandshakeResponder responder = 
             ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("23.3.4.5");
 
         // 1) check the Ultrapeer case -- leaf guidance should be used
@@ -235,7 +235,7 @@ public final class UltrapeerHandshakeResponderTest extends LimeTestCase {
         
           
         // the ultrapeer we'll be testing against
-        UltrapeerHandshakeResponder responder = 
+        HandshakeResponder responder = 
             ProviderHacks.getHandshakeResponderFactory().createUltrapeerHandshakeResponder("23.3.4.5");
 
 

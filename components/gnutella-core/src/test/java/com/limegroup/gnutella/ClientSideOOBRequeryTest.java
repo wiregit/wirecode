@@ -161,7 +161,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());
             assertTrue("should be up -> leaf",
-                testUP[i].isSupernodeClientConnection());
+                testUP[i].getConnectionCapabilities().isSupernodeClientConnection());
             drain(testUP[i], 100);
             // OOB client side needs server side leaf guidance
             testUP[i].send(messagesSupportedVendorMessage);

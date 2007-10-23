@@ -41,7 +41,6 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.CollectionUtils;

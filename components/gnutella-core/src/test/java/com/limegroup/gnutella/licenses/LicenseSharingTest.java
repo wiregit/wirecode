@@ -109,7 +109,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());
-            assertTrue("should be up -> leaf", testUP[i].isSupernodeClientConnection());
+            assertTrue("should be up -> leaf", testUP[i].getConnectionCapabilities().isSupernodeClientConnection());
             if (i != testUP.length - 1)
                 drain(testUP[i], 500);
         }

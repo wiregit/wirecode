@@ -6,6 +6,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.filters.XMLDocFilterTest;
@@ -115,7 +116,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         }
     }
 
-    private QueryRequest assertQuery(Connection c, GUID guid) throws BadPacketException {
+    private QueryRequest assertQuery(BlockingConnection c, GUID guid) throws BadPacketException {
         QueryRequest qr = getFirstInstanceOfMessageType(c, QueryRequest.class);
         assertNotNull(qr);
         assertEquals(guid.bytes(), qr.getGUID());

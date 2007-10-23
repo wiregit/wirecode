@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -14,6 +13,7 @@ import org.limewire.rudp.UDPMultiplexor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
@@ -138,7 +138,7 @@ public class ConnectionServicesImpl implements ConnectionServices {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.ConnectionServices#removeConnection(com.limegroup.gnutella.ManagedConnection)
      */
-    public void removeConnection(ManagedConnection c) {
+    public void removeConnection(RoutedConnection c) {
         connectionManager.get().remove(c);
     }
 
@@ -205,14 +205,6 @@ public class ConnectionServicesImpl implements ConnectionServices {
         if (spamServices.get().isAllowed(addr)) {
             connectionManager.get().createConnectionAsynchronously(hostname, portnum, type);
     	}
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.ConnectionServices#connectToHostBlocking(java.lang.String, int, com.limegroup.gnutella.util.SocketsManager.ConnectType)
-     */
-    public ManagedConnection connectToHostBlocking(String hostname, int portnum, ConnectType type)
-    	throws IOException {
-        return connectionManager.get().createConnectionBlocking(hostname, portnum, type);
     }
 
     /* (non-Javadoc)

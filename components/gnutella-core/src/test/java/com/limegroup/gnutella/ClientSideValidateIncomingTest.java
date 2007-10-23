@@ -12,6 +12,7 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -189,7 +190,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         
     }
     
-    private void readNumConnectBacks(int num,Connection conn, int timeout) throws Exception {
+    private void readNumConnectBacks(int num,BlockingConnection conn, int timeout) throws Exception {
         Message m;
         for (int i = 0; i < num; i++) {
             do {
