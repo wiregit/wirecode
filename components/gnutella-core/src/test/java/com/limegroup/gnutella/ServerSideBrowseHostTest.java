@@ -7,13 +7,15 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For
@@ -34,6 +36,9 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 public final class ServerSideBrowseHostTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;
+    private FileManager fileManager;
+    private QueryRequestFactory queryRequestFactory;
+    private MessageFactory messageFactory;
 
     public ServerSideBrowseHostTest(String name) {
         super(name);
@@ -46,19 +51,17 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
-
-    public static Integer numUPs() {
-        return new Integer(1);
+	
+    @Override
+    public int getNumberOfUltrapeers() {
+        return 1;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfLeafpeers() {
+        return 1;
     }
 	
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-
     @Override
     public void setUpQRPTables() throws Exception {
         // for Ultrapeer 1
@@ -72,6 +75,15 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         }
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        fileManager = injector.getInstance(FileManager.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+    }
+    
     // BEGIN TESTS
     // ------------------------------------------------------
 
@@ -79,10 +91,10 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, ProviderHacks.getFileManager().getNumFiles());
+        assertEquals(2, fileManager.getNumFiles());
 
         // send a query that should be answered
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte) 1,
+        QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
                 "berkeley", null, null, null, false, Network.UNKNOWN, false, 0);
         ULTRAPEER[0].send(query);
         ULTRAPEER[0].flush();
@@ -122,7 +134,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
             currLine = in.readLine();
         } while ((currLine != null) && !currLine.equals(""));
 
-        QueryReply qr = (QueryReply) ProviderHacks.getMessageFactory().read(s.getInputStream());
+        QueryReply qr = (QueryReply) messageFactory.read(s.getInputStream());
         assertEquals(2, qr.getResultCount());
 
         assertNull(in.readLine());
