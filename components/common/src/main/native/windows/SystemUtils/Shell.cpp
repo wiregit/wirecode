@@ -56,10 +56,18 @@ JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openURLNative(JNIEnv *
 JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openFileNative(JNIEnv *e, jclass c, jstring path) {
 	Run(GetJavaString(e, path));
 }
+JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openFileParamsNative(JNIEnv *e, jclass c, jstring path, jstring params) {
+	Run(GetJavaString(e, path), GetJavaString(e, params));
+}
 void Run(LPCTSTR path) {
 
 	// Call ShellExecute() with all the defaults, this acts exactly like Run on the Start menu, and returns immediately
 	ShellExecute(NULL, NULL, path, _T(""), _T(""), SW_SHOWNORMAL);
+}
+
+void Run(LPCTSTR path, LPCTSTR params) {
+
+	ShellExecute(NULL, NULL, path, params, _T(""), SW_SHOWNORMAL);
 }
 
 // Takes a path to a file on the disk, like "C:\Folder\file.ext", or a whole folder like "C:\Folder" without a trailing slash

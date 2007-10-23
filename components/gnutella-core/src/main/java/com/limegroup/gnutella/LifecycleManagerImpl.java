@@ -537,6 +537,26 @@ public class LifecycleManagerImpl implements LifecycleManager {
         shutdownDone.set(true);
     }
 
+    
+    private static String parseCommand(String toCall) {
+        if (toCall.startsWith("\"")) {
+            int end;
+            if ((end = toCall.indexOf("\"", 1)) > -1) {
+                return toCall.substring(0,end+1);
+            }
+            else {
+                return toCall+"\"";
+            }
+        }
+        int space;
+        if ((space = toCall.indexOf(" ")) > -1) {
+            return toCall.substring(0, space);
+        }
+        
+        return toCall;
+    }
+    
+    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.LifecycleManager#shutdown(java.lang.String)
      */
@@ -545,7 +565,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
         if (toExecute != null) {
             try {
                 if (OSUtils.isWindowsVista()) {
-                    SystemUtils.openFile(toExecute);
+                    String cmd = parseCommand(toExecute).trim();
+                    String params = toExecute.substring(cmd.length()).trim();
+                    SystemUtils.openFile(cmd, params);
                 }
                 else {
                     Runtime.getRuntime().exec(toExecute);

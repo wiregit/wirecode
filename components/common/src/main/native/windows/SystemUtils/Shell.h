@@ -23,6 +23,7 @@ extern "C" {
 	JNIEXPORT jstring JNICALL Java_org_limewire_util_SystemUtils_getSpecialPathNative(JNIEnv *e, jclass c, jstring name);
 	JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openURLNative(JNIEnv *e, jclass c, jstring url);
 	JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openFileNative(JNIEnv *e, jclass c, jstring path);
+	JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openFileParamsNative(JNIEnv *e, jclass c, jstring path, jstring params);
 	JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_recycleNative(JNIEnv *e, jclass c, jstring path);
 	JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_setFileWriteable(JNIEnv *e, jclass c, jstring path);
 	JNIEXPORT jlong JNICALL Java_org_limewire_util_SystemUtils_idleTime(JNIEnv *e, jclass c);
@@ -39,6 +40,7 @@ extern "C" {
 CString GetRunningPath();
 CString GetSpecialPath(LPCTSTR name);
 void Run(LPCTSTR path);
+void Run(LPCTSTR path, LPCTSTR params);
 bool Recycle(LPCTSTR path);
 int SetFileWritable(LPCTSTR path);
 DWORD GetIdleTime();
