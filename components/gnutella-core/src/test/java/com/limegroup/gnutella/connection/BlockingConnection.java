@@ -310,7 +310,8 @@ public class BlockingConnection extends AbstractConnection {
      */
     private Message readAndUpdateStatistics() throws IOException, BadPacketException {
         Message msg = messageFactory.read(_in, HEADER_BUF, Network.TCP, getSoftMax(), null);
-        processReadMessage(msg);
+        if (msg != null)
+            processReadMessage(msg);
         return msg;
     }
 
