@@ -91,7 +91,10 @@ public final class CreationTimeCache {
         });
 	}
     
-    private Map<URN, Long> getUrnToTime() {
+    /**
+     * Package private for testing.
+     */
+    Map<URN, Long> getUrnToTime() {
         try {
             return deserializer.get().getUrnToTime();
         } catch (InterruptedException e) {
@@ -101,7 +104,10 @@ public final class CreationTimeCache {
         }
     }
     
-    private SortedMap<Long, Set<URN>> getTimeToUrn() {
+    /**
+     * Package private for testing.
+     */
+    SortedMap<Long, Set<URN>> getTimeToUrn() {
         try {
             return deserializer.get().getTimeToUrn();
         } catch (InterruptedException e) {
