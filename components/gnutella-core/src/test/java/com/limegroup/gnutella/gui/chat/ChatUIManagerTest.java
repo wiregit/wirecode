@@ -17,8 +17,8 @@ import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.chat.InstantMessengerImpl;
-import com.limegroup.gnutella.gui.GUIMediator;
 import com.limegroup.gnutella.gui.GUITestUtils;
+import com.limegroup.gnutella.gui.I18n;
 import com.limegroup.gnutella.gui.LimeWireGUIModule;
 import com.limegroup.gnutella.gui.ResourceManager;
 import com.limegroup.gnutella.gui.VisualConnectionCallback;
@@ -145,7 +145,7 @@ public class ChatUIManagerTest extends BaseTestCase {
         assertTrue(!incoming.getChat().isConnected());
         GUITestUtils.waitForSwing();
         assertTrue(incoming.getText().indexOf(
-                GUIMediator.getStringResource("Host is unavailable")) != -1);
+                I18n.tr("Host is unavailable")) != -1);
     }
 
     private ChatFrame getIncomingChat() {
