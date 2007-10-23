@@ -1424,7 +1424,6 @@ public abstract class FileManager {
                                             final int revision, final FileEventListener callback, final AddType addFileType) {
         return new UrnCallback() {
 		    public void urnsCalculated(File f, Set<? extends URN> urns) {
-		        
 		        FileDesc fd = null;
 		        synchronized(FileManager.this) {
     		        if(revision != _revision) {
@@ -1670,7 +1669,7 @@ public abstract class FileManager {
         // We also return false, because the file was never really
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
-            removeUrnIndex(fd);
+            removeUrnIndex(fd, false);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
             assert removed : "File "+i+" not found in " + _incompletesShared;
@@ -1713,7 +1712,7 @@ public abstract class FileManager {
         }
 
         //Remove hash information.
-        removeUrnIndex(fd);
+        removeUrnIndex(fd, true);
   
         // Notify the GUI...
         if (notify) {
@@ -1865,8 +1864,11 @@ public abstract class FileManager {
             DELIMITERS);
     }
 
-    /** Removes any URN index information for desc */
-    private synchronized void removeUrnIndex(FileDesc fileDesc) {
+    /** 
+     * Removes any URN index information for desc
+     * @param purgeState true if any state should also be removed (creation time, altlocs) 
+     */
+    private synchronized void removeUrnIndex(FileDesc fileDesc, boolean purgeState) {
         for(URN urn : fileDesc.getUrns()) {
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
@@ -1875,7 +1877,7 @@ public abstract class FileManager {
 
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
-            if (indices.size()==0) {
+            if (indices.size()==0 && purgeState) {
                 fileManagerController.lastUrnRemoved(urn);
                 _urnMap.remove(urn);
             }

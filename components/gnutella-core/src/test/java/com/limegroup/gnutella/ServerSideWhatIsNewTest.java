@@ -7,16 +7,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
@@ -382,16 +381,34 @@ public class ServerSideWhatIsNewTest
 
         FileWriter writer = null;
         {
+            long modified = tempFile1.lastModified();
+            while (modified == System.currentTimeMillis())
+                Thread.sleep(10);
             writer = new FileWriter(tempFile1);
             writer.write(berkeley.getName(), 0, berkeley.getName().length());
             writer.flush();
             writer.close();
+            // the filesystem is not too responsive
+            while(tempFile1.lastModified() == modified)
+                Thread.sleep(10);
         }
 
-        FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
+        final FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
         assertNotNull(beforeChanged);
+        
+        final CountDownLatch fileChangedLatch = new CountDownLatch(1);
+        fm.addFileEventListener(new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.getType() != FileManagerEvent.Type.CHANGE_FILE)
+                    return;
+                if (evt.getFileDescs() == null || evt.getFileDescs().length != 2)
+                    return;
+                if (evt.getFileDescs()[0] == beforeChanged)
+                    fileChangedLatch.countDown();
+            }
+        });
         fm.fileChanged(tempFile1);
-        Thread.sleep(3000);
+        assertTrue(fileChangedLatch.await(3, TimeUnit.SECONDS));
         FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
@@ -451,10 +468,16 @@ public class ServerSideWhatIsNewTest
 
         FileWriter writer = null;
         {
+            long modified = tempFile1.lastModified();
+            while (modified == System.currentTimeMillis())
+                Thread.sleep(10);
             writer = new FileWriter(tempFile1);
             writer.write(tempFile2.getName(), 0, tempFile2.getName().length());
             writer.flush();
             writer.close();
+            // the filesystem is not too responsive
+            while(tempFile1.lastModified() == modified)
+                Thread.sleep(10);
         }
 
         FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
@@ -520,7 +543,7 @@ public class ServerSideWhatIsNewTest
         int size = 0;
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
-            assertEquals(3, urnToLong.size());
+            assertEquals(urnToLong.toString(), 3, urnToLong.size());
         }
         
         {
@@ -584,6 +607,10 @@ public class ServerSideWhatIsNewTest
     public void testDownloadCapturesCreationTime() throws Exception {
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
+        for (FileDesc fd : fileManager.getAllSharedFileDescriptors()) {
+            fileManager.removeFileIfShared(fd.getFile());
+            fd.getFile().delete();
+        }
         
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
@@ -599,34 +626,30 @@ public class ServerSideWhatIsNewTest
                                                 guid, 1, false, 3,
                                                 false, null, urns, false,
                                                 false, "LIME", new HashSet(), -1, false);
-        Downloader downloader = 
-            downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
-        int sleeps = 0;
-        while (downloader.getState() != DownloadStatus.COMPLETE) {
-            Thread.sleep(1000);
-            sleeps++;
-            if (sleeps > 320) assertTrue("download never completed", false);
-        }
+        int sharedBefore = fileManager.getNumFiles();
+        final CountDownLatch downloadedLatch = new CountDownLatch(2); //1 incomplete, 2 complete
+        fileManager.addFileEventListener(new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.isAddEvent())
+                    downloadedLatch.countDown();
+            }
+        });
+        downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        assertTrue("download never completed",downloadedLatch.await(320,TimeUnit.SECONDS));
         
-        assertEquals( 2, fileManager.getNumFiles());
+        assertEquals( sharedBefore + 1, fileManager.getNumFiles());
 
         File newFile = new File(_savedDir, "whatever.txt");
-        assertTrue(newFile.exists());
+        assertTrue(newFile.getAbsolutePath()+" didn't exist", newFile.exists());
         URN newFileURN = fm.getURNForFile(newFile);
         assertEquals(TestFile.hash(), newFileURN);
-        assertEquals(cTime, ctCache.getCreationTime(newFileURN));
+        assertEquals(newFileURN.toString(), cTime, ctCache.getCreationTime(newFileURN));
 
-        {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
-            assertEquals(""+urnToLong, 2, urnToLong.size());
-        }
-        {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
-            assertEquals(""+longToUrns, 2, longToUrns.size());
-        }
+        Map urnToLong = ctCache.getUrnToTime();
+        assertEquals(""+urnToLong, sharedBefore + 1, urnToLong.size());
+        Map longToUrns = ctCache.getTimeToUrn();
+        assertEquals(""+longToUrns+"  vs "+urnToLong, sharedBefore + 1, longToUrns.size());
 
     }
 
@@ -636,13 +659,12 @@ public class ServerSideWhatIsNewTest
         
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
-
-        // get rid of the old shared file
-        File newFile = new File(_savedDir, "whatever.txt");
-        fm.removeFileIfShared(newFile);
-        newFile.delete();
-        assertEquals(1, fileManager.getNumFiles());
         
+        for (FileDesc fd : fileManager.getAllSharedFileDescriptors()) {
+            fileManager.removeFileIfShared(fd.getFile());
+            fd.getFile().delete();
+        }
+
         final int UPLOADER_PORT = 20000;
         byte[] guid = GUID.makeGuid();
         TestUploader uploader[] = new TestUploader[4];
@@ -663,35 +685,36 @@ public class ServerSideWhatIsNewTest
                                          false, "LIME", new HashSet(), -1, false);
         }
 
-        Downloader downloader = downloadServices.download(rfds, false, new GUID(guid));
-        
-        Thread.sleep(2000);
-        assertTrue(downloader.getState() != DownloadStatus.COMPLETE);
+        // first we get a notification for sharing the incomplete file desc
+        final Semaphore downloadState = new Semaphore(0); 
+        fileManager.addFileEventListener(new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.isAddEvent())
+                    downloadState.release();
+            }
+        });
+        downloadServices.download(rfds, false, new GUID(guid));
+        assertTrue("download never started",downloadState.tryAcquire(120,TimeUnit.SECONDS));
+        Thread.sleep(1000);
         // make sure that the partial file has a creation time - by now one of
         // the downloaders must have got X-Create-Time
         assertNotNull(ctCache.getCreationTime(TestFile.hash()));
 
-        int sleeps = 0;
-        while (downloader.getState() != DownloadStatus.COMPLETE) {
-            Thread.sleep(1000);
-            sleeps++;
-            if (sleeps > 120) assertTrue("download never completed", false);
-        }
+        // second notification is for sharing the entire file
+        assertTrue("download never finished",downloadState.tryAcquire(120,TimeUnit.SECONDS));
         
-        assertEquals(2, fileManager.getNumFiles());
+        assertEquals(1, fileManager.getNumFiles());
 
         {
-            Map urnToLong = 
-                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
-            assertEquals(""+urnToLong, 2, urnToLong.size());
+            Map urnToLong = ctCache.getUrnToTime(); 
+            assertEquals(""+urnToLong, 1, urnToLong.size());
         }
         {
-            Map longToUrns =
-                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
-            assertEquals(""+longToUrns, 2, longToUrns.size());
+            Map longToUrns = ctCache.getTimeToUrn();
+            assertEquals(""+longToUrns, 1, longToUrns.size());
         }
 
-        newFile = new File(_savedDir, "anita.txt");
+        File newFile = new File(_savedDir, "anita.txt");
         assertTrue(newFile.exists());
         URN newFileURN = fm.getURNForFile(newFile);
         assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
