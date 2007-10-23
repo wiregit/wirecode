@@ -199,7 +199,7 @@ public class ManagedConnection extends Connection
         
     
     /** The OutputRunner */
-    private OutputRunner _outputRunner;
+    private volatile OutputRunner _outputRunner;
     
     /** Keeps track of sent/received [dropped] & bandwidth. */
     private final ConnectionStats _connectionStats = new ConnectionStats();
