@@ -154,10 +154,7 @@ public class ConnectionServicesImpl implements ConnectionServices {
      * @see com.limegroup.gnutella.ConnectionServices#connect()
      */
     public void connect() {
-        // this call is asynchronous but that's ok - after the
-        // filters get loaded and adjusted any established 
-        // connections will be checked.
-        spamServices.get().reloadIPFilter();
+        spamServices.get().adjustSpamFilters();
         
         //delegate to connection manager
         connectionManager.get().connect();
