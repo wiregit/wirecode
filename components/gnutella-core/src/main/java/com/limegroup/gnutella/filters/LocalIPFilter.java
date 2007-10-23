@@ -33,8 +33,8 @@ public final class LocalIPFilter extends AbstractIPFilter {
     
     private final IPFilter delegate;
     private final ScheduledExecutorService ipLoader;
-    /** Marker for whether or not hostiles have been loaded. */
-    private volatile boolean loadedHostiles = false;
+    /** Marker for whether or not hostiles need to be loaded. */
+    private volatile boolean shouldLoadHostiles;
     
     /** Constructs an IPFilter that automatically loads the content. */
     @Inject
@@ -49,6 +49,10 @@ public final class LocalIPFilter extends AbstractIPFilter {
             @Named("backgroundExecutor") ScheduledExecutorService ipLoader) {
         this.delegate = delegate;
         this.ipLoader = ipLoader;
+        
+        File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
+        shouldLoadHostiles = hostiles.exists();
+        
         if(load) {
             delegate.refreshHosts();
             refreshHosts();
@@ -63,14 +67,18 @@ public final class LocalIPFilter extends AbstractIPFilter {
     }
     
     public void refreshHosts(final IPFilterCallback callback) {
-        ipLoader.execute(new Runnable() {
+        Runnable load = new Runnable() {
             public void run() {
                 delegate.refreshHosts();
                 refreshHostsImpl();
                 if (callback != null)
                     callback.ipFiltersLoaded();
             }
-        });
+        };
+        if (!shouldLoadHostiles) 
+            load.run();
+        else 
+            ipLoader.execute(load);
     }
     
     /** Does the work of setting new good  & bad hosts. */
@@ -92,8 +100,8 @@ public final class LocalIPFilter extends AbstractIPFilter {
         }
 
         // Load data from hostiles.txt (if it wasn't already loaded!)...
-        if(!loadedHostiles) {
-            loadedHostiles = true;
+        if(shouldLoadHostiles) {
+            shouldLoadHostiles = false;
             
             LOG.debug("loading hostiles");
             File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
