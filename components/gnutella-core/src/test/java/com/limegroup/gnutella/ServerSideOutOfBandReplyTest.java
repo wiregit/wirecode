@@ -97,7 +97,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
 
-    public static void setUpQRPTables() throws Exception {
+    @Override
+    public void setUpQRPTables() throws Exception {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
@@ -362,7 +363,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         SearchSettings.DISABLE_OOB_V2.setValue(0);
         v2disabled = false;
     }
-    private static void drain() throws Exception {
+    
+    private void drain() throws Exception {
         drainAll();
         try {
             UDP_ACCESS.setSoTimeout(10);

@@ -54,7 +54,8 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
 
-    public static void setSettings() {
+    @Override
+    public void setSettings() {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
@@ -64,7 +65,8 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
     }
 
-    public static void setUpQRPTables() throws Exception {
+    @Override
+    public void setUpQRPTables() throws Exception {
         //3. routed leaf, with route table for "test"
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");

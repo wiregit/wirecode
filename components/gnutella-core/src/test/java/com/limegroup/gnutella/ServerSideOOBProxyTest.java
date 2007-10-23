@@ -83,7 +83,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
 
-    public static void setSettings() throws Exception {
+    @Override
+    public void setSettings() throws Exception {
         // we want to test the expirer so make the expire period small
         PrivilegedAccessor.setValue(GuidMapManagerImpl.class, "EXPIRE_POLL_TIME", new Long(EXPIRE_TIME));
         Class clazz = PrivilegedAccessor.getClass(GuidMapManagerImpl.class, "GuidMapImpl");
@@ -93,7 +94,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         UDP_ACCESS.setSoTimeout(500);
     }
 
-    public static void setUpQRPTables() throws Exception {
+    @Override
+    public void setUpQRPTables() throws Exception {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("stanford");
         qrt.add("susheel");

@@ -57,16 +57,18 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
 
-    public static void setSettings() throws Exception {
+    @Override
+    public void setSettings() throws Exception {
         setSharedDirectories(new File[0]);
     }
 
-    public static void quickDrainAll() throws Exception {
+    public void quickDrainAll() throws Exception {
         drainAll(ULTRAPEER, TIMEOUT);
         drainAll(LEAF, TIMEOUT);
     }
 
-    public static void setUpQRPTables() throws Exception {
+    @Override
+    public void setUpQRPTables() throws Exception {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");

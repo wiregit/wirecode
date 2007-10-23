@@ -50,7 +50,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
 
-    public static void setUpQRPTables() throws Exception {
+    @Override
+    public void setUpQRPTables() throws Exception {
         //3. routed leaf, with route table for "test"
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");

@@ -9,6 +9,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * Message requesting inspection for specified values.
@@ -121,5 +122,10 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
      */
     public int getVersion() {
         return super.getVersion();
+    }
+    
+    @Override
+    public Class<? extends Message> getHandlerClass() {
+        return InspectionRequest.class;
     }
 }

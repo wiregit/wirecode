@@ -6,9 +6,11 @@ import java.util.Properties;
 
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -36,28 +38,31 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     /**
      * Simple IP so a blank one isn't used.
      */
-    protected static final byte[] IP = new byte[] { 1, 1, 1, 1};
+    protected final byte[] IP = new byte[] { 1, 1, 1, 1};
 
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    protected static final int PORT = 6667;
+    protected final int PORT = 6667;
 
     /**
      * Leaf connections to the Ultrapeer.
      */
-    protected static BlockingConnection LEAF[];
+    protected BlockingConnection LEAF[];
 
     /**
      * Ultrapeer connections to the Ultrapeer.
      */
-    protected static BlockingConnection ULTRAPEER[];
+    protected BlockingConnection ULTRAPEER[];
 
-    private static ActivityCallback callback;
-    protected static ActivityCallback getCallback() {
-        return callback;
-    }
+    private LifecycleManager lifecycleManager;
+
+    private ConnectionServices connectionServices;
+
+    private HeadersFactory headersFactory;
+
+    private BlockingConnectionFactory blockingConnectionFactory;
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -68,19 +73,19 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         super(name);
     }
     
-	private static void buildConnections() throws Exception {
+	private void buildConnections() throws Exception {
         for (int i = 0; i < LEAF.length; i++) {
-            LEAF[i] = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+            LEAF[i] = blockingConnectionFactory.createConnection("localhost", PORT);
             assertTrue(LEAF[i].isOpen());
         }
         
         for (int i = 0; i < ULTRAPEER.length; i++) {
-            ULTRAPEER[i] = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+            ULTRAPEER[i] = blockingConnectionFactory.createConnection("localhost", PORT);
             assertTrue(ULTRAPEER[i].isOpen());
         }
     }
 
-    public static void setSettings() throws Exception {
+    public final void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
@@ -106,46 +111,68 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
+        
+        setSettings();
     }
 
-	public static void globalSetUp(Class callingClass) throws Exception {
-        // calls all doSettings() for me and my children
-        PrivilegedAccessor.invokeAllStaticMethods(callingClass, "setSettings",
-                                                  null);
-        callback=
-        (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
-                                                          "getActivityCallback");
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-
-		//ROUTER_SERVICE = new RouterService(callback);
-		ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getHostCatcher().clear();
-        ProviderHacks.getConnectionServices().connect();
-        
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-        // set up ultrapeer stuff
-        Integer numUPs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
-                                                                 "numUPs");
-        if ((numUPs.intValue() < 0) || (numUPs.intValue() > 30))
-            throw new IllegalArgumentException("Bad value for numUPs!!!");
-        ULTRAPEER = new BlockingConnection[numUPs.intValue()];
-
-        Integer numLs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
-                                                                 "numLeaves");
-        if ((numLs.intValue() < 0) || (numLs.intValue() > 30))
-            throw new IllegalArgumentException("Bad value for numLs!!!");
-        LEAF = new BlockingConnection[numLs.intValue()];
-
-		connect(callingClass);
+	/**
+	 * Can be overridden in subclasses.
+	 */
+	public void setSettings() throws Exception {
 	}
-
+	
+	/**
+	 * Can be overriden in subclasses. Returns 2 by default.
+	 */
+	public int getNumberOfUltrapeers() {
+	    return 2;
+	}
+	
+	/**
+     * Can be overriden in subclasses. Returns 2 by default.
+     */
+	public int getNumberOfLeafpeers() {
+	    return 2;
+	}
+	
+	/**
+	 * Can be overridden in subclasses.
+	 * @throws Exception 
+	 */
+	public void setUpQRPTables() throws Exception {
+	    
+	}
     
-    public void setUp() throws Exception {
-        // calls all doSettings() for me and my children
-        PrivilegedAccessor.invokeAllStaticMethods(this.getClass(), "setSettings",
-                                                  null);
+    public void setUp(Injector injector) throws Exception {
+        doSettings();
+    
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
+
+        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+
+        lifecycleManager.start();
+
+        connectionServices.connect();
+        
+        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+
+        // set up ultrapeer stuff
+        int numUPs = getNumberOfUltrapeers();
+        if (numUPs < 0 || numUPs > 30)
+            throw new IllegalArgumentException("Bad value for numUPs!!!");
+        
+        ULTRAPEER = new BlockingConnection[numUPs];
+
+        int numLs =  getNumberOfLeafpeers();
+        if (numLs < 0 || numLs > 30)
+            throw new IllegalArgumentException("Bad value for numLs!!!");
+        LEAF = new BlockingConnection[numLs];
+
+        connect();
+        
         for (int i = 0; i < ULTRAPEER.length; i++) {
             assertTrue("should be open, index = " + i, ULTRAPEER[i].isOpen());
             assertTrue("should be up -> up, index = " + i,
@@ -159,24 +186,28 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     }
 
 
-	public static void globalTearDown() throws Exception {
-        ProviderHacks.getConnectionServices().disconnect();
+	public void tearDown() throws Exception {
+	    // there was an error in setup, return so we can see the actual exception
+	    if (connectionServices == null)
+	        return;
+	    
+	    connectionServices.disconnect();
 		sleep();
         for (int i = 0; i < LEAF.length; i++)
             LEAF[i].close();
         for (int i = 0; i < ULTRAPEER.length; i++)
             ULTRAPEER[i].close();
-		sleep();
+		lifecycleManager.shutdown();
 	}
 
-	protected static void sleep() {
+	protected void sleep() {
 		try {Thread.sleep(300);}catch(InterruptedException e) {}
 	}
 
 	/**
 	 * Drains all messages 
 	 */
- 	protected static void drainAll() throws Exception {
+ 	protected void drainAll() throws Exception {
         for (int i = 0; i < ULTRAPEER.length; i++)
             if(ULTRAPEER[i].isOpen()) 
                 drain(ULTRAPEER[i]);
@@ -188,13 +219,13 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	/**
 	 * Connects all of the nodes to the central test Ultrapeer.
 	 */
-    private static void connect(Class callingClass) throws Exception {
+    private void connect() throws Exception {
 		buildConnections();
         // init connections
         for (int i = ULTRAPEER.length-1; i > -1; i--)
-            ULTRAPEER[i].initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+            ULTRAPEER[i].initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         for (int i = 0; i < LEAF.length; i++)
-            LEAF[i].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+            LEAF[i].initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
 
         for (int i = 0; i < ULTRAPEER.length; i++)
             assertTrue(ULTRAPEER[i].isOpen());
@@ -202,23 +233,22 @@ public abstract class ServerSideTestCase extends LimeTestCase {
             assertTrue(LEAF[i].isOpen());
 
         // set up QRP tables for the child
-        PrivilegedAccessor.invokeAllStaticMethods(callingClass, "setUpQRPTables",
-                                                  null);
+        setUpQRPTables();
     }
     
     /** Builds a conenction with default headers */
     protected BlockingConnection createLeafConnection() throws Exception {
-        return createConnection(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"));
+        return createConnection(headersFactory.createLeafHeaders("localhost"));
     }
     
     /** Builds an ultrapeer connection with default headers */
     protected BlockingConnection createUltrapeerConnection() throws Exception {
-        return createConnection(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"));
+        return createConnection(headersFactory.createUltrapeerHeaders("localhost"));
     }
     
     /** Builds a single connection with the given headers. */
     protected BlockingConnection createConnection(Properties headers) throws Exception {
-        BlockingConnection c = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+        BlockingConnection c = blockingConnectionFactory.createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         assertTrue(c.isOpen());
         return c;

@@ -64,8 +64,6 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
     
-    public static void setUpQRPTables() {}
-
     /**
      * Tests the method for checking whether or not a connection is stable.
      */

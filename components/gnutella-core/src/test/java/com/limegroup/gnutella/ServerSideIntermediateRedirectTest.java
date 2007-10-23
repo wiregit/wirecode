@@ -14,7 +14,6 @@ import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 
 /**
@@ -70,13 +69,6 @@ public final class ServerSideIntermediateRedirectTest
         return new Integer(1);
     }
 	
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-
-    public static void setUpQRPTables() throws Exception {
-    }
-
     // BEGIN TESTS
     // ------------------------------------------------------
 

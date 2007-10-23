@@ -46,8 +46,6 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
     
-    public static void setUpQRPTables() {}
-    
     public void setUp() {
         _queue=new ArrayList(10);
     }

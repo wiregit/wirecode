@@ -86,7 +86,8 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
         return new ActivityCallbackStub();
     }
 
-    public static void setUpQRPTables() throws Exception {
+    @Override
+    public void setUpQRPTables() throws Exception {
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("leehsus");

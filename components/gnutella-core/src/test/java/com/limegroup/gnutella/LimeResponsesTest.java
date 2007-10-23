@@ -26,10 +26,6 @@ public class LimeResponsesTest extends ClientSideTestCase {
         return buildTestSuite(LimeResponsesTest.class);
     }
     
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-    
     @Override
     public int getNumberOfPeers() {
         return 1;
@@ -42,6 +38,8 @@ public class LimeResponsesTest extends ClientSideTestCase {
         SearchSettings.LIME_SEARCH_TERMS.setValue(new String[]{"badger"});
         SearchSettings.SEND_LIME_RESPONSES.setValue(1f);
     }
+    
+    
     
     public void testResponse() throws Exception {
         QueryRequest qr = ProviderHacks.getQueryRequestFactory().createNonFirewalledQuery("badger", (byte)1);
