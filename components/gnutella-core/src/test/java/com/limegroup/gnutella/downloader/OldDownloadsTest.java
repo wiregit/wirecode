@@ -9,9 +9,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -24,9 +26,11 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         
     private static final Log LOG = LogFactory.getLog(OldDownloadsTest.class);
     
-    private static final String filePath = "com/limegroup/gnutella/downloader/";
+    private final String filePath = "com/limegroup/gnutella/downloader/";
     
-    private static TestActivityCallback callback;
+    private TestActivityCallback callback;
+
+    private DownloadManager downloadManager;
 
     public OldDownloadsTest(String name) {
         super(name);
@@ -40,10 +44,11 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         return buildTestSuite(OldDownloadsTest.class);
     }
     
-    public static void globalSetUp() throws Exception {
-        callback = new TestActivityCallback();
-        if(true)throw new RuntimeException("fix me");
-        //new RouterService( callback );
+    @Override
+    public void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector(TestActivityCallback.class);
+		downloadManager = injector.getInstance(DownloadManager.class);
+		callback = (TestActivityCallback) injector.getInstance(ActivityCallback.class);
     }
     
     public void testLegacy() throws Exception {
@@ -60,7 +65,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         //Build part of backend 
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         DownloadSettings.MAX_SIM_DOWNLOAD.setValue(0);
-        DownloadManager dm = ProviderHacks.getDownloadManager();
+        DownloadManager dm = downloadManager;
         dm.initialize();
         assertTrue("unable to read snapshot!",
             dm.readSnapshot(CommonUtils.getResourceFile(filePath + file)));
