@@ -8,8 +8,12 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
@@ -54,6 +58,14 @@ public class SimppManagerTest extends LimeTestCase {
     static final int PORT = 6346;
 
     private static File _simppFile;
+
+    private CapabilitiesVMFactory capabilitiesVMFactory;
+
+    private ConnectionServices connectionServices;
+
+    private SimppManager simppManager;
+
+    private LifecycleManager lifecycleManager;
     
     public SimppManagerTest(String name) {
         super(name);
@@ -67,25 +79,27 @@ public class SimppManagerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public static void globalSetUp() throws Exception {
-        setSettings();
-      //  RouterService rs = new RouterService(new ActivityCallbackStub());
-        ProviderHacks.getLifecycleManager().start();
-    }
-
-    public static void globalShutdown() throws Exception {
-        ProviderHacks.getLifecycleManager().shutdown();
-        Thread.sleep(5000);
-    }
-    
+    @Override
     public void setUp() throws Exception {
-        setSettings();
         
-        //Make sure we have no remaining connections from previous tests
-        assertFalse(ProviderHacks.getConnectionServices().isConnected());
+        Injector injector = LimeTestUtils.createInjector();
+		capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
+		connectionServices = injector.getInstance(ConnectionServices.class);
+		simppManager = injector.getInstance(SimppManager.class);
+		lifecycleManager = injector.getInstance(LifecycleManager.class);
+        
+		setSettings();
+		
+        lifecycleManager.start();
     }
     
-    private static void setSettings() throws Exception {
+    @Override
+    protected void tearDown() throws Exception {
+        connectionServices.disconnect();
+        lifecycleManager.shutdown();
+    }
+    
+    private void setSettings() throws Exception {
         String simppDir = "com/limegroup/gnutella/simpp/";
 
         OLD_SIMPP_FILE = CommonUtils.getResourceFile(simppDir+"oldFile.xml");
@@ -158,46 +172,46 @@ public class SimppManagerTest extends LimeTestCase {
 
     public void testOldVersion() throws Exception{
         //Note: we have already set the version to be old in setSettings
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("problem reading/verifying old version file", 1,
                                                               man.getVersion());
     }
     
     public void testMiddleVersion() throws Exception {
         changeSimppFile(MIDDLE_SIMPP_FILE);
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("problem reading/verifying middle version file", 2,
                                                              man.getVersion());
     }
     
     public void testNewVersion() throws Exception {
         changeSimppFile(NEW_SIMPP_FILE);
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("problem reading/verifying new version file", 3,
                                                             man.getVersion());
     }
     
     public void testBadSignatureFails() throws Exception {
         changeSimppFile(DEF_SIG_FILE);
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("bad signature accepted", 0, man.getVersion());
     }
     
     public void testBadMessageFails() throws Exception {
         changeSimppFile(DEF_MESSAGE_FILE);
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("tampered message accepted", 0, man.getVersion());
     }
     
     public void testBadXMLFails() throws Exception {
         changeSimppFile(BAD_XML_FILE);
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("malformed xml accepted", 0, man.getVersion());
     }
     
     public void testRandomBytesFails() throws Exception {
         changeSimppFile(RANDOM_BYTES_FILE);
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("garbage bytes accepted", 0, man.getVersion());
     }
 
@@ -216,7 +230,7 @@ public class SimppManagerTest extends LimeTestCase {
         //3. let the test run and make sure state is OK, for this test this part
         //is just a formality, the real testing is on the TestConnection in step
         //2 above.
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("SimppManager should not have updated", MIDDLE, 
                                                               man.getVersion());
         conn.killConnection();
@@ -234,7 +248,7 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let messages be exchanged, 
         
         //3. let the test run and make sure state is OK, 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("SimppManager should not have updated", NEW, 
                                                               man.getVersion());
         conn.killConnection();
@@ -252,7 +266,7 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let messages be exchanged, 
 
         //3. let the test run and make sure state is OK, 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("SimppManager should not have updated", MIDDLE, 
                                                               man.getVersion());
         conn.killConnection();
@@ -271,7 +285,7 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let messages be exchanged, 
 
         //3. let the test run and make sure state is OK, 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("SimppManager should not have updated", MIDDLE, 
                                                               man.getVersion());
         conn.killConnection();
@@ -290,7 +304,7 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let the message exchange take place
 
         //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                          NEW, man.getVersion());
         conn.killConnection();
@@ -309,12 +323,12 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let the message exchange take place
 
         //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         
         //we should have been disconnected
-        assertFalse(ProviderHacks.getConnectionServices().isConnected());
+        assertFalse(connectionServices.isConnected());
     }
 
     public void testTamperedSimppDataRejected() throws Exception  {
@@ -329,12 +343,12 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let the message exchange take place
 
         //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         
         //we should have been disconnected
-        assertFalse(ProviderHacks.getConnectionServices().isConnected());
+        assertFalse(connectionServices.isConnected());
     }
 
     public void testBadSimppXMLRejected() throws Exception  {
@@ -348,7 +362,7 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let the message exchange take place
 
         //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
 
@@ -366,11 +380,11 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let the message exchange take place
 
         //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         //we should have been disconnected
-        assertFalse(ProviderHacks.getConnectionServices().isConnected());
+        assertFalse(connectionServices.isConnected());
     }
 
     public void testSimppTakesEffect() throws Exception {
@@ -446,7 +460,7 @@ public class SimppManagerTest extends LimeTestCase {
         Thread.sleep(6000);//let the message exchange take place
 
         //3. OK. LimeWire should have upgraded now. 
-        SimppManager man = ProviderHacks.getSimppManager();
+        SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         conn.killConnection();
@@ -454,7 +468,7 @@ public class SimppManagerTest extends LimeTestCase {
 
     ////////////////////////////////private methods///////////////////////////
     
-    private static void changeSimppFile(File inputFile) throws Exception {        
+    private void changeSimppFile(File inputFile) throws Exception {        
         FileUtils.copy(inputFile, _simppFile);
         
         PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
@@ -462,13 +476,12 @@ public class SimppManagerTest extends LimeTestCase {
         PrivilegedAccessor.setValue(SimppManager.class, "MIN_VERSION", 
                                     new Integer(0));//so we can use 1,2,3
         //reload the SimppManager and Capabilities VM
-        ProviderHacks.getSimppManager();
-        ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM();
+        capabilitiesVMFactory.getCapabilitiesVM();
     }
     
-    private static void updateSimppSettings() throws Exception {
-        for(SimppSettingsManager ssm : ProviderHacks.getSimppManager().getSimppSettingsManagers())
-            ssm.updateSimppSettings(ProviderHacks.getSimppManager().getPropsString());
+    private void updateSimppSettings() throws Exception {
+        for (SimppSettingsManager ssm : simppManager.getSimppSettingsManagers())
+            ssm.updateSimppSettings(simppManager.getPropsString());
     }
     
 }
