@@ -5,7 +5,7 @@ package org.limewire.lws.server;
  * represent something that will be on the client, it represents the Lime Wire
  * Store, for example.
  */
-interface RemoteServer {
+public interface RemoteServer {
     
     /**
      * Returns the {@link Thread} that started this server, after starting it.

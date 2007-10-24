@@ -2,19 +2,20 @@ package com.limegroup.gnutella.lws.server;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
-import org.limewire.lws.server.ConnectionListener;
+import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
-import org.limewire.lws.server.SenderOfMessagesToServer;
+import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
+import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
@@ -28,13 +29,13 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
- * Encapsulates a {@link LWSDispatcher} and {@link ReceivesCommandsFromDispatcher}.
+ * Encapsulates a {@link LWSDispatcher} and {@link LWSReceivesCommandsFromDispatcher}.
  */
 @Singleton
-public final class LWSManagerImpl implements LWSManager, SenderOfMessagesToServer {
+public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToServer {
     
     /** The page for making commands to The Lime Wire Store server. */
-    private final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
+    final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
         = "/store/app/pages/client/ClientCom/command/";
         
     private LWSDispatcher dispatcher;
@@ -45,59 +46,91 @@ public final class LWSManagerImpl implements LWSManager, SenderOfMessagesToServe
     private final String hostNameAndPort;
     
     private final HttpExecutor exe;
+    private boolean isConnected;
     
     @Inject
     public LWSManagerImpl(HttpExecutor exe) {
+        this(exe, LWSSettings.AUTHENTICATION_HOSTNAME.getValue(), LWSSettings.AUTHENTICATION_PORT.getValue());
+    }
+    
+    public LWSManagerImpl(HttpExecutor exe, String host, int port) {
+        
         this.exe = exe;
         this.dispatcher = LWSDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
-
             public String receiveCommand(String cmd, Map<String, String> args) {
                 return LWSManagerImpl.this.dispatch(cmd, args);
-            }
-
-            @Override
-            protected void connectionChanged(boolean isConnected) {
-                // nothing
-            }
-            
+            }            
         });
         
         // Construct the hostname and port to which we connect for authentication
         // from remote settings
-        StringBuffer hostNameAndPortBuffer = new StringBuffer(LWSSettings.AUTHENTICATION_HOSTNAME.getValue());
-        int port = LWSSettings.AUTHENTICATION_PORT.getValue();
+        StringBuffer hostNameAndPortBuffer = new StringBuffer(host);
         if (port > 0) hostNameAndPortBuffer.append(":").append(port);
         this.hostNameAndPort = hostNameAndPortBuffer.toString();
+        //
+        // remember when we're connected
+        //
+        dispatcher.addConnectionListener(new LWSConnectionListener() {
+
+            public void connectionChanged(boolean isConnected) {
+                LWSManagerImpl.this.isConnected = isConnected;
+            }
+            
+        });
     }
  
-    public final boolean addConnectionListener(ConnectionListener lis) {
+    public final boolean addConnectionListener(LWSConnectionListener lis) {
         return dispatcher.addConnectionListener(lis);
     }
 
-    public final boolean removeConnectionListener(ConnectionListener lis) {
+    public final boolean removeConnectionListener(LWSConnectionListener lis) {
         return dispatcher.removeConnectionListener(lis);
     }
     
     
     // -----------------------------------------------------------------
-    // Implementation of StoreManager
+    // Implementation of LWSManager
     // -----------------------------------------------------------------
 
     public final HttpRequestHandler getHandler() {
         return dispatcher;
     }
+    
+    public boolean isConnected() {
+        return isConnected;
+    }
   
     public final boolean registerHandler(String cmd, Handler lis) {
+        if (lis == null) throw new NullPointerException("Handlers can't be null");
         String hash = hash(cmd);
-        return commands2handlers.get(hash) != null ? false : commands2handlers.put(hash, lis) != null;
+        commands2handlers.put(hash, lis);
+        return true;
+    }
+    
+    public final boolean unregisterHandler(String cmd) {
+        String hash = hash(cmd);
+        return commands2handlers.remove(hash) != null;
     }
  
     public final boolean registerListener(String cmd, Listener lis) {
         String hash = hash(cmd);
         List<Listener> lst = commands2listenerLists.get(hash);
-        if (lst == null) commands2listenerLists.put(hash, lst = new ArrayList<Listener>());
-        return lst.contains(lis) ? false : lst.add(lis);
-    }    
+        if (lst == null) commands2listenerLists.put(hash, lst = new Vector<Listener>());
+        boolean result = lst.contains(lis) ? false : lst.add(lis);
+        return result;
+    } 
+    
+    public final boolean unregisterListener(String cmd) {
+        String hash = hash(cmd);
+        boolean result = commands2listenerLists.remove(hash) != null;
+        
+        return result;
+    }
+    
+    public final void clearHandlersAndListeners() {
+        commands2handlers.clear();
+        commands2listenerLists.clear();
+    }
     
     public final void sendMessageToServer(final String msg, 
                                           final Map<String, String> args, 
@@ -108,7 +141,7 @@ public final class LWSManagerImpl implements LWSManager, SenderOfMessagesToServe
         //
         // we don't care what this response is, because we are
         // always talking to the remote web server, so process it
-        // right away
+        // right away so we don't block
         //
         //
         cb.process(Responses.OK);
@@ -167,5 +200,5 @@ public final class LWSManagerImpl implements LWSManager, SenderOfMessagesToServe
                 return res;
             }
         }
-    }   
+    }  
 }

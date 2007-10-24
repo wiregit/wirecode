@@ -1,11 +1,16 @@
 package org.limewire.lws.server;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.LWSServerUtil;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.settings.LWSSettings;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
@@ -15,10 +20,25 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
     
     public final static int LOCAL_PORT  = LocalServerImpl.PORT;
     public final static int REMOTE_PORT = RemoteServerImpl.PORT;
+    
+    /**
+     * The number of times we'll try for a private key. Because we can't respond
+     * in the client on the same thread we received a request, we hand back the
+     * web page code the public key before giving it to the server. So it may
+     * have not arrived yet.
+     */
+    private final static int TIMES_TO_TRY_FOR_PRIVATE_KEY = 3;
+    
+    /**
+     * Time to sleep between tries for the private key if we haven't gotten it
+     * yet.
+     */
+    private final static int SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES = 1000;
 
     private LocalServerImpl localServer;
     private RemoteServerImpl remoteServer;
     private FakeJavascriptCodeInTheWebpage code;
+    private String privateKey;
     
     private Thread localThread;
     private Thread remoteThread;    
@@ -80,6 +100,13 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         return errorHandler(new String[]{want});
     }
     
+    /**
+     * Returns a {@link FakeJavascriptCodeInTheWebpage#Handler} for ensuring
+     * there was some error, but the type doesn't matter.
+     * 
+     * @return a {@link FakeJavascriptCodeInTheWebpage#Handler} for ensuring
+     *         there was some error, but the type doesn't matter.
+     */
     protected final FakeJavascriptCodeInTheWebpage.Handler errorHandlerAny() {
         return new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {
@@ -89,6 +116,13 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         };
     }
     
+    /**
+     * Returns a {@link FakeJavascriptCodeInTheWebpage#Handler} for ensuring
+     * there was an error from <code>wants</code>.
+     * 
+     * @return Returns a {@link FakeJavascriptCodeInTheWebpage#Handler} for
+     *         ensuring there was an error from <code>wants</code>.
+     */    
     protected final FakeJavascriptCodeInTheWebpage.Handler errorHandler(final String[] wants) {
         return new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {
@@ -109,7 +143,7 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
                     }
                 }
                 if (!haveIt) {
-                    fail("didn't received one message of: " + unwrap(wants));
+                    fail("didn't received one message of: " + unwrap(wants) + " but did receive '" + have  + "'");
                 }
             }
         };
@@ -127,12 +161,22 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
     protected final void setUp() throws Exception {
 
         beforeSetup();
+        
+        LWSSettings.AUTHENTICATION_HOSTNAME.setValue("localhost");
+        LWSSettings.AUTHENTICATION_PORT.setValue(8080);
+        
+        Injector inj = LimeTestUtils.createInjector(new AbstractModule() {
+            protected void configure() {
+                requestStaticInjection(SocketsManager.class);
+            }
+        });
 
-        localServer     = new LocalServerImpl("localhost", REMOTE_PORT);
-        remoteServer    = new RemoteServerImpl(LOCAL_PORT);
+        SocketsManager socketsManager = inj.getInstance(SocketsManager.class);
+        localServer     = new LocalServerImpl(socketsManager, "localhost", REMOTE_PORT);
+        remoteServer    = new RemoteServerImpl(socketsManager, LOCAL_PORT);
         localThread     = localServer.start();
         remoteThread    = remoteServer.start();
-        code            = new FakeJavascriptCodeInTheWebpage(localServer, remoteServer);
+        code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer, remoteServer);
 
         afterSetup();
     }
@@ -166,18 +210,33 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
     }
 
     protected final String getPrivateKey() {
-        String publicKey = getPublicKey(); 
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {
+        if (privateKey == null) {
+            String publicKey = getPublicKey();
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                //
+                // Not crucial, but would like to see the error
+                //
+                e.printStackTrace();
+            }
+            Map<String, String> args = new HashMap<String, String>();
+            args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
             //
-            // Not crucial, but would like to see the error
+            // We'll try this TIMES_TO_TRY_FOR_PRIVATE_KEY times
+            // See the comment at TIMES_TO_TRY_FOR_PRIVATE_KEY for why.
             //
-            e.printStackTrace();
+            for (int i=0; i<TIMES_TO_TRY_FOR_PRIVATE_KEY; i++) {
+                privateKey = sendMessageFromClientToRemoteServer(LWSDispatcherSupport.Commands.GIVE_KEY, args);
+                if (LWSServerUtil.isValidPrivateKey(privateKey)) break;
+                try {
+                    Thread.sleep(SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
         }
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
-        return sendMessageFromClientToRemoteServer(LWSDispatcherSupport.Commands.GIVE_KEY, args);
+        return privateKey;
     }
 
     protected final String getPublicKey() {

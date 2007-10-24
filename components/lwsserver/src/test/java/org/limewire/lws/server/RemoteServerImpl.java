@@ -1,11 +1,15 @@
 package org.limewire.lws.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
+
 import org.limewire.lws.server.AbstractServer;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LocalServerDelegate;
+import org.limewire.net.SocketsManager;
 
 /**
  * A simple remote {@link RemoteServer}.
@@ -13,21 +17,104 @@ import org.limewire.lws.server.LocalServerDelegate;
 public class RemoteServerImpl extends AbstractServer implements RemoteServer {
 
     /** The port on which we'll connect this server. */
-    public final static int PORT = 8091;
+    public final static int PORT = 8080;
     
     private final LocalServerDelegate del;
 
-    public RemoteServerImpl(int otherPort) {
-        super(PORT, null);
+    public RemoteServerImpl(SocketsManager socketsManager, int otherPort) {
+        super(PORT, "Remote Server");
         setDispatcher(new DispatcherImpl());
-        this.del = new LocalServerDelegate("localhost", otherPort, new URLSocketOpenner());
-    }
-
-    public String toString() {
-        return "Remote Server";
+        this.del = new LocalServerDelegate(socketsManager, "localhost", otherPort);
     }
     
-    public final class DispatcherImpl extends LWSDispatcherSupport {
+    /**
+     * We DO want the IP of the incoming request to go to our handlers.
+     */
+    @Override
+    protected final boolean sendIPToHandlers() {
+        return true;
+    }
+    
+    /**
+     * Returns the equivalent of
+     * 
+     * <pre>
+     * {&quot;public&quot; -&gt; &quot;PCURJKKTXE&quot;, &quot;private&quot; -&gt; &quot;BMBTVRVCSX&quot; }
+     * </pre>
+     * 
+     * for request
+     * 
+     * <pre>
+     * store\app\pages\client\ClientCom\command\StoreKey\public\PCURJKKTXE\private\BMBTVRVCSX/
+     * </pre>
+     * 
+     * @param request request of the form
+     * 
+     * <pre>
+     * store\app\pages\client\ClientCom\command\StoreKey\public\PCURJKKTXE\private\BMBTVRVCSX/
+     * </pre>
+     * 
+     * @return the equivalent of
+     * 
+     * <pre>
+     * {&quot;public&quot; -&gt; &quot;PCURJKKTXE&quot;, &quot;private&quot; -&gt; &quot;BMBTVRVCSX&quot; }
+     * </pre>
+     * 
+     * for request
+     * 
+     * <pre>
+     * store\app\pages\client\ClientCom\command\StoreKey\public\PCURJKKTXE\private\BMBTVRVCSX/
+     * </pre>
+     */
+    static Map<String, String> getArgs(String request) {
+        Map<String,String> args = new HashMap<String,String>();
+        String target = "ClientCom";
+        int itarget = request.indexOf(target);
+        if (itarget == -1) return args;
+        String rest = request.substring(itarget + target.length());
+        if (rest.equals("")) return args;
+        if (!Character.isLetterOrDigit(rest.charAt(0))) rest = rest.substring(1);
+        if (rest.equals("")) return args;
+        for (StringTokenizer st = new StringTokenizer(rest,"/\\" + File.separatorChar, false);
+             st.hasMoreTokens();) {
+            String name = st.nextToken();
+            if (!st.hasMoreTokens()) {
+                args.put(name, null);
+                break;
+            }
+            String value = st.nextToken();
+            args.put(name,value);
+        }
+        return args;
+    }
+
+    /**
+     * Returns <code>StoreKey</code> for the following String:
+     * <pre>
+     * store\app\pages\client\ClientCom\command\StoreKey\public\PCURJKKTXE\private\BMBTVRVCSX/
+     * </pre>
+     * 
+     * @param request
+     * @return
+     */
+    static String getCommand(String request) {
+        String target = "command";
+        int itarget = request.indexOf(target);
+        if (itarget == -1) return null;
+        String rest = request.substring(itarget + target.length());
+        if (rest.equals("")) return null;
+        if (!Character.isLetterOrDigit(rest.charAt(0))) rest = rest.substring(1);
+        if (rest.equals("")) return null;
+        StringBuffer res = new StringBuffer();
+        for (int i=0; i<rest.length(); i++) {
+            char c = rest.charAt(i);
+            if (!Character.isLetterOrDigit(c)) break;
+            res.append(c);
+        }
+        return res.toString();
+    }
+    
+    private final class DispatcherImpl extends LWSDispatcherSupport {
 
         @Override
         protected final Handler[] createHandlers() {
@@ -66,7 +153,6 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
                     cb.process(LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY);
                     return;
                 }
-                note("StoreKey: " + publicKey + " -> " + ip + "," + privateKey);
                 storeKeys(publicKey, privateKey, ip);
                 cb.process(LWSDispatcherSupport.Responses.OK);
             }
@@ -91,13 +177,22 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
                     return;
                 }                
                 String privateKey = lookupPrivateKey(publicKey, ip);
-                note("GiveKey: " + publicKey + " -> " + ip + "," + privateKey);
                 cb.process(privateKey);
             }
         }
 
         public void sendMessageToServer(String msg, Map<String,String> args, StringCallback cb) throws IOException {
-            del.sendMessageToServer(msg, args, cb);
+            del.sendMessageToServer(msg, args, cb, LocalServerDelegate.NormalStyleURLConstructor.INSTANCE);
+        }
+
+        @Override
+        Map<String, String> getArgs(String request) {
+            return RemoteServerImpl.getArgs(request);
+        }
+
+        @Override
+        String getCommand(String request) {
+            return RemoteServerImpl.getCommand(request);
         }
     }    
 
@@ -117,9 +212,8 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
         }
 
         public boolean equals(final Object o) {
-            if (!(o instanceof Pair))
-                return false;
-            final Pair that = (Pair) o;
+            if (!(o instanceof Pair)) return false;
+            Pair that = (Pair) o;
             return this.key.equals(that.key) && this.ip.equals(that.ip);
         }
 
@@ -135,8 +229,8 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
     private final Map<Pair, String> pairs2privateKeys = new HashMap<Pair, String>();
 
     public boolean storeKeys(String publicKey, String privateKey, String ip) {
-        Pair p = new Pair(publicKey, ip);
-        return pairs2privateKeys.put(new Pair(publicKey, ip), privateKey) != null;
+        boolean result = pairs2privateKeys.put(new Pair(publicKey, ip), privateKey) != null;
+        return result;
     }
 
     public String lookupPrivateKey(String publicKey, String ip) {

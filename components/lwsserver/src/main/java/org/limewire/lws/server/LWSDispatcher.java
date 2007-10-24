@@ -23,7 +23,7 @@ public interface LWSDispatcher extends AsyncHttpRequestHandler {
      * @return <code>true</code> if <code>lis</code> was added as a listener,
      *         <code>false</code> otherwise.
      */
-    boolean addConnectionListener(ConnectionListener lis);
+    boolean addConnectionListener(LWSConnectionListener lis);
 
     /**
      * Returns <code>true</code> if <code>lis</code> was removed as a listener,
@@ -33,6 +33,6 @@ public interface LWSDispatcher extends AsyncHttpRequestHandler {
      * @return <code>true</code> if <code>lis</code> was removed as a listener,
      *         <code>false</code> otherwise.
      */
-    boolean removeConnectionListener(ConnectionListener lis);
+    boolean removeConnectionListener(LWSConnectionListener lis);
   
 }

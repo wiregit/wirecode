@@ -9,7 +9,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.text.MessageFormat;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,33 +30,114 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     
     private final static Log LOG = LogFactory.getLog(LWSDispatcherSupport.class);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
-    private ReceivesCommandsFromDispatcher dispatchee;
+    private LWSReceivesCommandsFromDispatcher commandReceiver;
     
     public LWSDispatcherSupport() {
         Handler[] hs = createHandlers();
-        LOG.debug("creating " + hs.length + " handler(s)...");
+        if (LOG.isDebugEnabled()) LOG.debug("creating " + hs.length + " handler(s)...");
         for (Handler h : hs) {
             this.names2handlers.put(h.name().toLowerCase(), h);
-            LOG.debug(" - " + h.name());
+            if (LOG.isDebugEnabled()) LOG.debug(" - " + h.name());
         }
     }
+    
+    // ------------------------------------------------------
+    // Abstract
+    // ------------------------------------------------------
+    
+    /*
+     * The abstraction is this.  There are two subclasses of this class:
+     * 
+     *   - LWSMainDispatcher (for deployment)
+     *   - RemoteServerImpl.DispatcherImpl (for testing)
+     * 
+     * Both follow basically the pattern except the remote version is supposed
+     * be a mock Wicket server, so we have to send urls in a different way.
+     * In both cases below Here, StoreKey is the command, and the args are 
+     * {"public" -> "JNGMLANSKC", "private" -> "LNUCOQSVOR"}
+     * 
+     * LWSMainDispatcher takes CGI parameters in the normal way:
+     * 
+     *   - http://some.url/StoreKey?public=JNGMLANSKC&private=LNUCOQSVOR
+     *   
+     * But RemoteServerImpl.DispatcherImpl takes them slightly differently:
+     * 
+     *   - http://some.url/StoreKey/public/JNGMLANSKC/private/LNUCOQSVOR
+     *   
+     * In particular the correct call that we will see would look like this
+     * 
+     *   - store\app\pages\client\ClientCom\command\StoreKey\public\JNGMLANSKC\private\LNUCOQSVOR
+     *   
+     * So we need to abstract out removing the command, and retrieving the arguments.
+     */
+    
+    /**
+     * Returns the command portion of a request or null if the parameter
+     * <code>command</code> is missing or the parameter <code>command</code>
+     * doesn't have an argument.
+     * <p>
+     * For example, in the case of {@link LWSDispatcherImpl} we would have the
+     * following:
+     * 
+     * <pre>
+     * http://some.url/StoreKey?public=JNGMLANSKC&amp;private=LNUCOQSVOR -&gt; StoreKey
+     * http://some.url/?public=JNGMLANSKC&amp;private=LNUCOQSVOR         -&gt; null
+     * </pre>
+     * 
+     * In the case of {@link RemoteServerImpl.DispatcherImpl} we would have
+     * 
+     * <pre>
+     * store\app\pages\client\ClientCom\command\StoreKey\public\JNGMLANSKC\private\LNUCOQSVOR -&gt; StoreKey
+     * store\app\pages\client\ClientCom\command                                               -&gt; null
+     * store\app\pages\client\ClientCom\command\                                              -&gt; null
+     * store\app\pages\client\ClientCom\ccccommand                                            -&gt; null
+     * 
+     * @param
+     */
+    abstract String getCommand(String request);
+    
+    /**
+     * Returns the arguments portion of a request.
+     * <p>
+     * For example, in the case of {@link LWSDispatcherImpl} we would have the
+     * following:
+     * 
+     * <pre>
+     * http://some.url/StoreKey?public=JNGMLANSKC&amp;private=LNUCOQSVOR -&gt; {"public" -> "JNGMLANSKC", "private" -> "LNUCOQSVOR"}
+     * http://some.url/?public=JNGMLANSKC&amp;private=LNUCOQSVOR         -&gt; {"public" -> "JNGMLANSKC", "private" -> "LNUCOQSVOR"}
+     * </pre>
+     * 
+     * In the case of {@link RemoteServerImpl.DispatcherImpl} we would have
+     * 
+     * <pre>
+     * store\app\pages\client\ClientCom\command\StoreKey\public\JNGMLANSKC\private\LNUCOQSVOR -&gt; {"command" -> "StoreKey", "public" -> "JNGMLANSKC", "private" -> "LNUCOQSVOR"}
+     * store\app\pages\client\ClientCom\command                                               -&gt; {"command" -> null}
+     * store\app\pages\client\ClientCom\command\                                              -&gt; {"command" -> null}
+     * store\app\pages\client\ClientCom\ccccommand                                            -&gt; {"command" -> null}
+     * </pre>
+     * 
+     * @param request
+     * @return
+     */
+    abstract Map<String,String> getArgs(String request);
+    
     
     // ------------------------------------------------------
     // Interface
     // ------------------------------------------------------
     
-    public void handle(HttpRequest httpReq, final HttpResponse res, HttpContext c) throws HttpException, IOException {
+    public final void handle(HttpRequest httpReq, final HttpResponse res, HttpContext c) throws HttpException, IOException {
         String request = httpReq.getRequestLine().getUri();
-        final String req = getOnlytheFileRequestPortionOfURL(request);
-        final Handler h = names2handlers.get(req.toLowerCase());
+        final String command = getCommand(request); //getOnlytheFileRequestPortionOfURL(request);
+        final Handler h = names2handlers.get(command.toLowerCase());
         if (h == null) {
-            LOG.error("Couldn't create a handler for " + req);
+            if (LOG.isErrorEnabled()) LOG.error("Couldn't create a handler for " + command);
             String str = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
             res.setEntity(new StringEntity(str));
             return;
         }
-        LOG.debug("have handler: " + h.name());
-        final Map<String, String> args = LWSDispatcherSupport.getArgs(request);
+        if (LOG.isDebugEnabled()) LOG.debug("have handler: " + h.name());
+        final Map<String, String> args = getArgs(request);
         h.handle(args, new StringCallback() {
 
             public void process(String response) {
@@ -71,12 +151,12 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         });
     }
     
-    public final boolean addConnectionListener(ConnectionListener lis) {
-        return getDispatchee().addConnectionListener(lis);
+    public final boolean addConnectionListener(LWSConnectionListener lis) {
+        return getCommandReceiver().addConnectionListener(lis);
     }
 
-    public final boolean removeConnectionListener(ConnectionListener lis) {
-        return getDispatchee().removeConnectionListener(lis);
+    public final boolean removeConnectionListener(LWSConnectionListener lis) {
+        return getCommandReceiver().removeConnectionListener(lis);
     }
     
     /**
@@ -89,37 +169,39 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     /* (non-Javadoc)
      * @see org.limewire.store.server.Dispatcher#setDispatchee(org.limewire.store.server.Dispatchee)
      */
-    public final void setDispatchee(ReceivesCommandsFromDispatcher dispatchee) {
-        this.dispatchee = dispatchee;
+    public final void setCommandReceiver(LWSReceivesCommandsFromDispatcher commandReceiver) {
+        this.commandReceiver = commandReceiver;
     }
 
     /**
-     * Returns the {@link ReceivesCommandsFromDispatcher} instance.
+     * Returns the {@link LWSReceivesCommandsFromDispatcher} instance.
      * 
-     * @return the {@link ReceivesCommandsFromDispatcher} instance
+     * @return the {@link LWSReceivesCommandsFromDispatcher} instance
      */
-    final ReceivesCommandsFromDispatcher getDispatchee() {
-        return dispatchee;
+    final LWSReceivesCommandsFromDispatcher getCommandReceiver() {
+        return commandReceiver;
     }
     
     /**
      * Create an instance of Handler from the top level name as well as trying a
      * static inner class and calls its {@link Handler#handle()} method.
      */
-    final void handle(String request,  PrintStream out, StringCallback callback) {
-        final String req = getOnlytheFileRequestPortionOfURL(request);
+    final void handle(String request, PrintStream out, StringCallback callback) {
+        final String req = getCommand(request);
         final Handler h = names2handlers.get(req.toLowerCase());
         if (h == null) {
-            LOG.error("Couldn't create a handler for " + req);
+            if (LOG.isErrorEnabled()) LOG.error("Couldn't create a handler for " + req);
             callback.process(report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND));
+            return;
         }
-        LOG.debug("have handler: " + h.name());
-        final Map<String, String> args = LWSDispatcherSupport.getArgs(request);
+        if (LOG.isDebugEnabled()) LOG.debug("have handler: " + h.name());
+        final Map<String, String> args = getArgs(request);
         h.handle(args, callback);
     }    
 
     final void note(String pattern, Object... os) {
         if (LOG.isDebugEnabled()) LOG.info(MessageFormat.format(pattern, os));
+//        System.out.println("[" + getClass().getName() + "] " + MessageFormat.format(pattern, os));
     }    
    
     /**
@@ -132,26 +214,8 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * @return the message <tt>error</tt> in the call back
      */
     public static final String report(String error) {
-        return wrapCallback(LWSDispatcherSupport.Constants.ERROR_CALLBACK, LWSServerUtil.wrapError(error));
-    }
-    
-    /**
-     * Returns the arguments to the right of the <code>?</code>. <br>
-     * <code>static</code> for testing
-     * 
-     * @param request may be <code>null</code>
-     * @return the arguments to the right of the <code>?</code>
-     */
-    static Map<String, String> getArgs(String request) {
-        if (request == null || request.length() == 0) {
-            return Collections.emptyMap();
-        }
-        int ihuh = request.indexOf('?');
-        if (ihuh == -1) {
-            return Collections.emptyMap();
-        }
-        final String rest = request.substring(ihuh + 1);
-        return LWSServerUtil.parseArgs(rest);
+        return wrapCallback(LWSDispatcherSupport.Constants.ERROR_CALLBACK, 
+                            LWSServerUtil.wrapError(error));
     }
 
     /**
@@ -166,30 +230,14 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * @return the message <tt>msg</tt> using callback function
      *         <tt>callback</tt>
      */
-    protected static final String wrapCallback(final String callback,
-            final String msg) {
+    protected static final String wrapCallback(final String callback, final String msg) {
         if (LWSServerUtil.isEmpty(callback)) {
             return msg;
         } else {
             char q = LWSDispatcherSupport.Constants.CALLBACK_QUOTE;
             String s = LWSDispatcherSupport.Constants.CALLBACK_QUOTE_STRING;
-            return callback + "(" + q + msg.replace(s, "\\" + s) + q + ")";
+            return callback + "(" + q + (msg == null ? "" : msg.replace(s, "\\" + s)) + q + ")";
         }
-    }
-
-    /**
-     * Removes hash and other stuff.
-     */
-    private String getOnlytheFileRequestPortionOfURL(final String s) {
-        int iprefix = s.indexOf(PREFIX);
-        String res = iprefix == -1 ? s : s.substring(iprefix + PREFIX.length());
-        final char[] cs = { '#', '?' };
-        for (char c : cs) {
-            final int id = res.indexOf(c);
-            if (id != -1)
-                res = res.substring(0, id);
-        }
-        return res;
     }
 
     /**
@@ -414,6 +462,15 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * </ul>
          */
         String AUTHENTICATE = "Authenticate";
+        
+        /**
+         * Sent from Code to Local with parameters.
+         * <ul>
+         * <li>{@link LocalServer.Parameters#COMMAND}</li>
+         * </ul>
+         * for executing an actual command.
+         */
+        String MSG = "Msg";
     }
 
     /**
@@ -437,7 +494,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         String PUBLIC = "public";
     
         /**
-         * Name of the command to send to the {@link ReceivesCommandsFromDispatcher}.
+         * Name of the command to send to the {@link LWSReceivesCommandsFromDispatcher}.
          */
         String COMMAND = "command";
     
@@ -529,12 +586,12 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     
         /**
          * When there was a command sent to the local host, but no
-         * {@link ReceivesCommandsFromDispatcher} was set up to handle it.
+         * {@link LWSReceivesCommandsFromDispatcher} was set up to handle it.
          */
         String NO_DISPATCHEE = "no.dispatcher";
     
         /**
-         * When there was a {@link ReceivesCommandsFromDispatcher} to handle this command, but it
+         * When there was a {@link LWSReceivesCommandsFromDispatcher} to handle this command, but it
          * didn't understand it.
          */
         String UNKNOWN_COMMAND = "unknown.command";

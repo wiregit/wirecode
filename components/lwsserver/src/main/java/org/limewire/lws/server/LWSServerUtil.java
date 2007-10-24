@@ -100,7 +100,7 @@ public final class LWSServerUtil {
      * @return error code fonud in {@link ErrorCodes} or <tt>null</tt> if it's
      *         not an error
      */
-    static String unwrapError(final String line) {
+    public static String unwrapError(final String line) {
         if (line.startsWith(ERROR_START)) {
             return line.substring(ERROR_START.length()).trim();
         } else {
@@ -124,7 +124,7 @@ public final class LWSServerUtil {
      * @param res
      * @return
      */
-    static String removeCallback(final String res) {
+    public static String removeCallback(final String res) {
         if (res == null) return null;
         String start = "(" + LWSDispatcherSupport.Constants.CALLBACK_QUOTE_STRING;
         String end = LWSDispatcherSupport.Constants.CALLBACK_QUOTE_STRING + ")";
@@ -159,7 +159,7 @@ public final class LWSServerUtil {
      * @return <tt>true</tt> if <tt>key</tt> is a valid public key,
      *         <tt>false</tt> otherwise
      */
-    static boolean isValidPublicKey(final String key) {
+    public static boolean isValidPublicKey(final String key) {
         return isValidKey(key);
     }
 
@@ -171,7 +171,7 @@ public final class LWSServerUtil {
      * @return <tt>true</tt> if <tt>key</tt> is a valid private key,
      *         <tt>false</tt> otherwise
      */
-    static boolean isValidPrivateKey(final String key) {
+    public static boolean isValidPrivateKey(final String key) {
         return isValidKey(key);
     }
 
@@ -273,7 +273,7 @@ public final class LWSServerUtil {
      * @return <code>true</code> is <code>res</code> isn't <code>null</code>
      *         and starts with {@link #ERROR_START}
      */
-    static boolean isError(String res) {
+    public static boolean isError(String res) {
         return res != null && res.startsWith(ERROR_START);
     }
 }

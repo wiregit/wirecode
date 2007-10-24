@@ -4,7 +4,8 @@ import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherSupport;
 
 /**
- * This represents an instance of a local server.
+ * This represents an instance of a local server. It is a mock version of the
+ * local server running in the client.
  */
 public interface LocalServer {
     

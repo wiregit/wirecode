@@ -8,9 +8,9 @@ import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Date;
-import java.util.List;
-import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,34 +23,29 @@ import org.limewire.service.ErrorService;
 public abstract class AbstractServer implements Runnable  {
 
     private static final Log LOG = LogFactory.getLog(AbstractServer.class);
-    
-    private final static int NUM_WORKERS = 5;
     private static final byte[] NEWLINE = { (byte) '\r', (byte) '\n' };
-    private final int port;
-    private final String name;
-
-    private boolean done = false;
-
-    private final List<Thread> threads = new Vector<Thread>(NUM_WORKERS);
-    private final List<Worker> workers = new Vector<Worker>(NUM_WORKERS);
     
+    private final int port;
+    private final String name;  
+    private final AtomicBoolean hasShutDown = new AtomicBoolean(false);
+    
+    private boolean done = false;
     private LWSDispatcher dispatcher;
-
-    private boolean hasShutDown;
     private Thread runner;
+    private ServerSocket serverSocket;
 
     // --------------------------------------------------------
     // Interface
     // --------------------------------------------------------
 
-    public AbstractServer(final int port, final String name, final LWSDispatcherSupport dispatcher) {
+    public AbstractServer(int port, String name, LWSDispatcherSupport dispatcher) {
         this.port = port;
         this.name = name;
         this.dispatcher = dispatcher;
         LOG.debug(name + " on port " + port);
     }
     
-    public AbstractServer(final int port, final String name) {
+    public AbstractServer(int port, String name) {
         this(port, name, null);        
     }
     
@@ -65,9 +60,7 @@ public abstract class AbstractServer implements Runnable  {
      * Main entry point.
      */
     public final void run() {
-        this.hasShutDown = false;
         noteRun();
-        createWorkers();
         go();
     }
     
@@ -102,19 +95,28 @@ public abstract class AbstractServer implements Runnable  {
      */
     public final void shutDown(final long millis) {
         getDispatcher().note("shutting down");
-        if (hasShutDown) return;
-        hasShutDown = true;
+        if (hasShutDown.getAndSet(true)) return;
         setDone(true);
-        for (int i=0, N=threads.size(); i<N; i++) {
-            stop(threads.get(i), millis);
-        }
         stop(runner, millis);
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                handle(e, getClass() + " on port " + port);
+            }
+        }   
         runner = null;
     }    
+    
+    public final String toString() {
+        return name;
+    }
 
     // --------------------------------------------------------
     // Interface to subclasses
     // --------------------------------------------------------
+    
+    protected abstract boolean sendIPToHandlers();
 
     protected final void handle(final Throwable t) {
         ErrorService.error(t);
@@ -147,67 +149,47 @@ public abstract class AbstractServer implements Runnable  {
      */
     protected void noteRun() {
     }
-    
-    /**
-     * Only set when someone has called {@link #shutDown(long)} to differentiate
-     * between forced and accidental shutdowns.
-     */
-    protected final boolean hasShutDown() {
-        return this.hasShutDown;
-    }
 
     // --------------------------------------------------------
     // Private
     // --------------------------------------------------------
 
-    private void createWorkers() {
-        for (int i = 0; i < NUM_WORKERS; ++i) {
-            addNewThread(new Worker(), "store server worker #" + i);
-        }
-    }
-
     private void go() {
+        int threadCounter = 0;
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                shutDown();
+            }
+        }));       
         try {
-            ServerSocket tmpSocket = null;
             int tmpPort = port;
             for (; tmpPort < port+10; tmpPort++) {
                 try {
-                    tmpSocket = new ServerSocket(tmpPort);
+                    serverSocket = new ServerSocket(tmpPort);
                 } catch (IOException ignored) { }
-                if (tmpSocket != null) break;
+                if (serverSocket != null) break;
             }
-            final ServerSocket ss = tmpSocket;
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                public void run() {
-                    shutDown();
-                }
-            }));
             while (!isDone()) {
-                Socket s = ss.accept();
-                synchronized (workers) {
-                    if (workers.isEmpty()) {
-                        Worker ws = new Worker();
-                        ws.setSocket(s);
-                        addNewThread(ws, "store server additional worker");
-                    } else {
-                        Worker w = workers.get(0);
-                        workers.remove(0);
-                        w.setSocket(s);
-                    }
-                }
+                Socket s = serverSocket.accept();
+                Worker ws = new Worker("lws worked #" + (threadCounter++));
+                ws.setSocket(s, tmpPort);
+                addNewThread(ws);
             }
         } catch (IOException e) {
-            handle(e, getClass() + " on port " + port);
-            if (e instanceof java.net.BindException)
-                setDone(true);
+            //
+            // We are going to interupt this socket when we're
+            // done, so don't complain about SocketExceptions
+            //
+            if (!(e instanceof SocketException)) handle(e, getClass() + " on port " + port);
+            if (e instanceof java.net.BindException) setDone(true);
+        } finally {
+            shutDown();
         }
         shutDown();
     }
 
-    private void addNewThread(Worker w, String name) {
-        Thread t = new ManagedThread(w, name);
-        threads.add(t);
-        workers.add(w);
+    private void addNewThread(Worker w) {
+        Thread t = new ManagedThread(w, w.getName());
         t.start();
     }
 
@@ -224,42 +206,34 @@ public abstract class AbstractServer implements Runnable  {
          * Socket to client we're handling
          */
         private Socket s;
+        
+        private final String name;
+        Worker(String name) {
+            this.name = name;
+        }
 
-        synchronized void setSocket(Socket s) {
+        public String getName() {
+            return name;
+        }
+
+        synchronized void setSocket(Socket s, int port) {
             this.s = s;
             notify();
         }
-
-        public synchronized void run() {
-            while (true) {
-                if (s == null) {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                        /* should not happen */
-                        continue;
-                    }
-                }
-                try {
-                    handleClient();
-                } catch (IOException e) {
-                    LOG.debug("handleClient", e);
-                }
-                /*
-                 * go back in wait queue if there's fewer than numHandler
-                 * connections.
-                 */
-                s = null;
-                synchronized (AbstractServer.this.workers) {
-                    if (AbstractServer.this.workers.size() >= AbstractServer.NUM_WORKERS) {
-                        return;
-                    } else {
-                        AbstractServer.this.workers.add(this);
-                    }
-                }
-            }
+        
+        public String toString() {
+            return name;
         }
 
+        public void run() {
+            try {
+                handleClient();
+            } catch (IOException e) {
+                LOG.debug("handleClient", e);
+            }
+        }
+        
+        @SuppressWarnings("deprecation")
         private void handleClient() throws IOException {
             InputStream is = new BufferedInputStream(s.getInputStream());
             final PrintStream ps = new PrintStream(s.getOutputStream(), true);
@@ -312,7 +286,6 @@ public abstract class AbstractServer implements Runnable  {
                     ps.write(buf, 0, 5);
                     ps.write(NEWLINE);
                     ps.flush();
-                    s.close();
                     return;
                 }
 
@@ -330,16 +303,16 @@ public abstract class AbstractServer implements Runnable  {
                 if (request.startsWith(File.separator)) {
                     request = request.substring(1);
                 }
-                final String ip = LWSServerUtil.getIPAddress(s.getInetAddress());
                 //
-                // add the ip address
+                // Only add the IP address if we're a remote server
                 //
-                if (request.indexOf("?") == -1) {
-                    request += "?";
-                } else {
-                    request += "&";
+                if (sendIPToHandlers()) {
+                    //
+                    // We use Wicket-style arguments, because only remote servers want this
+                    //
+                    String ip = LWSServerUtil.getIPAddress(s.getInetAddress());
+                    request += "/ip/" + ip;
                 }
-                request += "ip=" + ip;
                 getDispatcher().handle(request, ps, new StringCallback() {
 
                     public void process(String res) {
@@ -349,7 +322,7 @@ public abstract class AbstractServer implements Runnable  {
                         try {
                             ps.write(NEWLINE);
                             ps.print("Last-modified: ");
-                            println(ps, LWSServerUtil.createCookieDate()); // todo wrong
+                            println(ps, LWSServerUtil.createCookieDate());
                             ps.print("Server: ");
                             ps.print(getName());
                             ps.write(NEWLINE);
@@ -359,6 +332,7 @@ public abstract class AbstractServer implements Runnable  {
                             println(ps, String.valueOf(res.length()));
                             ps.write(NEWLINE);
                             ps.print(res);
+                            ps.flush();
                         } catch (IOException e) {
                             ErrorService.error(e);
                         }
@@ -368,6 +342,7 @@ public abstract class AbstractServer implements Runnable  {
 
             } finally {
                 s.close();
+                is.close();
             }
         }
 
@@ -380,17 +355,19 @@ public abstract class AbstractServer implements Runnable  {
     }
     
     private void stop(final Thread t, final long millis) {
-        synchronized (t) {
-            try {
-                t.join(millis);
-            } catch (InterruptedException e) {
-                LOG.debug("trying to stop: " + t, e);
+        if (t != null) {
+            synchronized (t) {
+                try {
+                    t.join(millis);
+                } catch (InterruptedException e) {
+                    LOG.debug("trying to stop: " + t, e);
+                }
             }
-        }
+        }    
     }
 
     /**
-     * Calls {@link #shutDown(long)} with <code>1000</code>.
+     * Calls {@link #shutDown(long)} with <code>100</code>.
      */
     public final void shutDown() {
         shutDown(100);

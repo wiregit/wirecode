@@ -6,18 +6,19 @@ import javax.swing.JOptionPane;
 
 import org.limewire.lws.server.LocalServerDelegate;
 import org.limewire.lws.server.LocalServerImpl;
+import org.limewire.net.SocketsManager;
 
 
 /**
  * This class represents fake javascript code that can
  * communicate to the remote server and local server on the client.
  */
-final class FakeJavascriptCodeInTheWebpage {
+public final class FakeJavascriptCodeInTheWebpage {
 
 	private final LocalServerDelegate toLocalServer;
 	private final LocalServerDelegate toRemoteServer;
 	
-	interface Handler {
+	public interface Handler {
 
 		public final static Handler ALERT = new Handler() {
 			public void handle(String res) {
@@ -28,9 +29,9 @@ final class FakeJavascriptCodeInTheWebpage {
 		void handle(String res);
 	}
 	
-	FakeJavascriptCodeInTheWebpage(LocalServerImpl local, RemoteServerImpl remote) {
-		this.toLocalServer = new LocalServerDelegate("localhost", local.getPort());
-		this.toRemoteServer = new LocalServerDelegate("localhost", remote.getPort());
+	FakeJavascriptCodeInTheWebpage(SocketsManager socketsManager, LocalServerImpl local, RemoteServerImpl remote) {
+		this.toLocalServer = new LocalServerDelegate(socketsManager, "localhost", local.getPort());
+        this.toRemoteServer = new LocalServerDelegate(socketsManager, "localhost", remote.getPort());
 	}
 	
 	protected final void sendLocalMsg(String msg, Map<String, String> args, final Handler h) {
@@ -38,7 +39,7 @@ final class FakeJavascriptCodeInTheWebpage {
             public void process(String response) {
                 h.handle(removeHeaders(response));
             }
-        });
+        }, LocalServerDelegate.NormalStyleURLConstructor.INSTANCE);
 	}
 
 	protected final void sendRemoteMsg(String msg, Map<String, String> args, final Handler h) {
@@ -46,7 +47,7 @@ final class FakeJavascriptCodeInTheWebpage {
             public void process(String response) {
                 h.handle(removeHeaders(response));
             }
-        });
+        }, LocalServerDelegate.WicketStyleURLConstructor.INSTANCE);
 	}
 	
 	private String removeHeaders(String response) {

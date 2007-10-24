@@ -1,9 +1,10 @@
-package org.limewire.lws.server;
+package com.limegroup.gnutella.lws.server;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.lws.server.LWSDispatcherSupport;
+import org.limewire.lws.server.LWSServerUtil;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;
@@ -11,7 +12,7 @@ import junit.textui.TestRunner;
 /**
  * Tests that we handle a bad message correctly.
  */
-public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationSupport {
+public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationSupportWithNoLocalServer {
 
     public BadMessageBeforeAuthenticationTest(String s) {
         super(s);
@@ -29,10 +30,9 @@ public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationSup
         final Map<String, String> args = new HashMap<String, String>();
         args.put(LWSDispatcherSupport.Parameters.MSG, "badMsg");
         args.put(LWSDispatcherSupport.Parameters.CALLBACK, "callback");
-        args.put(LWSDispatcherSupport.Parameters.PRIVATE, "asdfasdfasdfasdf");
-        getCode().sendLocalMsg("Msg", args,errorHandler(new String[] {
-                LWSDispatcherSupport.ErrorCodes.INVALID_PRIVATE_KEY,
-                LWSDispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY
-        }));
+        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.AUTHENTICATE, 
+                args);
+        assertTrue("invalid message '" + res + "'", LWSServerUtil.isError(res));
+
     }
 }

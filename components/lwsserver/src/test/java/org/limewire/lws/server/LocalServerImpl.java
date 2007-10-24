@@ -2,7 +2,8 @@ package org.limewire.lws.server;
 
 import java.util.Map;
 
-import org.limewire.lws.server.LWSMainDispatcher;
+import org.limewire.lws.server.LWSDispatcherImpl;
+import org.limewire.net.SocketsManager;
 
 /**
  * Base class for local servers.
@@ -14,27 +15,30 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
     
     private final LocalServerDelegate del;
 
-    public LocalServerImpl(String host, int otherPort) {
+    public LocalServerImpl(SocketsManager socketsManager, String host, int otherPort) {
         super(PORT, "Local Server");
-        LWSMainDispatcher ssd = new LWSMainDispatcher(new SenderOfMessagesToServer() {
+        LWSDispatcherImpl ssd = new LWSDispatcherImpl(new LWSSenderOfMessagesToServer() {
             public void sendMessageToServer(String msg, Map<String, String> args, StringCallback cb) {
-                del.sendMessageToServer(msg, args, cb);
+                del.sendMessageToServer(msg, args, cb, LocalServerDelegate.WicketStyleURLConstructor.INSTANCE);
             }
 
         });
         setDispatcher(ssd);
         
-        ssd.setDispatchee(new AbstractReceivesCommandsFromDispatcher() {
-
-            @Override
-            protected void connectionChanged(boolean isConnected) {
-            }
-
+        ssd.setCommandReceiver(new AbstractReceivesCommandsFromDispatcher() {
             public String receiveCommand(String cmd, Map<String, String> args) {
                 return null;
             }
             
         });
-        this.del = new LocalServerDelegate(host, otherPort, new URLSocketOpenner());
+        this.del = new LocalServerDelegate(socketsManager, host, otherPort);
+    }
+    
+    /**
+     * We do NOT want the IP of the incoming request to go to our handlers.
+     */
+    @Override
+    protected final boolean sendIPToHandlers() {
+        return false;
     }
 }

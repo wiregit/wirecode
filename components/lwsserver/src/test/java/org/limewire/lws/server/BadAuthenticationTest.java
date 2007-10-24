@@ -4,27 +4,26 @@ import junit.framework.Test;
 import junit.textui.TestRunner;
 
 /**
- * Tests the proper way to handle a bad message.
+ * Tests bad forms of authenticating.
  */
-public class GoodMessageBeforeAuthenticationTest extends AbstractCommunicationSupport {
+public class BadAuthenticationTest extends AbstractCommunicationSupport {
 
-    public GoodMessageBeforeAuthenticationTest(String s) {
+    public BadAuthenticationTest(String s) {
         super(s);
     }
 
     public static Test suite() {
-        return buildTestSuite(GoodMessageBeforeAuthenticationTest.class);
+        return buildTestSuite(BadAuthenticationTest.class);
     }
 
     public static void main(String[] args) {
         TestRunner.run(suite());
     }
 
-    public void testGoodMessageBeforeAuthentication() {
+    public void testSendAuthenticationWithoutPrivateKey() {
         getCode().sendLocalMsg(LWSDispatcherSupport.Commands.AUTHENTICATE,
                                DUMMY_CALLBACK_ARGS,
                                errorHandlerAny());
     }
-
 
 }

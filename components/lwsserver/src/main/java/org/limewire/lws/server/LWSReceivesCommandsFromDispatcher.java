@@ -13,10 +13,10 @@ import java.util.Map;
  * following URL
  * 
  * <pre>
- * http://12.34.45.56:8091/store:DownloadSong?hash=123&amp;code=456&amp;privateKey=abc
+ * http://localhost:8091/store:Msg?command=DownloadSong&hash=123&amp;code=456&amp;privateKey=abc
  * </pre>
  * 
- * For a given {@link ReceivesCommandsFromDispatcher}, <code>d</code>, the {@link LWSDispatcher}
+ * For a given {@link LWSReceivesCommandsFromDispatcher}, <code>d</code>, the {@link LWSDispatcher}
  * will then construct a {@link Map} of arguments, <code>args</code>
  * 
  * <pre>
@@ -35,7 +35,7 @@ import java.util.Map;
  * used for authentication.
  * 
  */
-public interface ReceivesCommandsFromDispatcher {
+public interface LWSReceivesCommandsFromDispatcher {
 
     /**
      * Responds to <code>cmd</code> with arguments <code>args</code>.
@@ -48,8 +48,8 @@ public interface ReceivesCommandsFromDispatcher {
     
     /**
      * Called when we're connected from the server, and <code>this</code>
-     * should notify all the {@link ConnectionListener}s added by
-     * {@link #addConnectionListener(ConnectionListener)}.
+     * should notify all the {@link LWSConnectionListener}s added by
+     * {@link #addConnectionListener(LWSConnectionListener)}.
      * 
      * @param isConnected whether we're connected when a connection changes
      */
@@ -63,7 +63,7 @@ public interface ReceivesCommandsFromDispatcher {
      * @return <code>true</code> if <code>lis</code> was added as a listener,
      *         <code>false</code> otherwise.
      */
-    boolean addConnectionListener(ConnectionListener lis);
+    boolean addConnectionListener(LWSConnectionListener lis);
 
     /**
      * Returns <code>true</code> if <code>lis</code> was removed as a listener,
@@ -73,6 +73,6 @@ public interface ReceivesCommandsFromDispatcher {
      * @return <code>true</code> if <code>lis</code> was removed as a listener,
      *         <code>false</code> otherwise.
      */
-    boolean removeConnectionListener(ConnectionListener lis);    
+    boolean removeConnectionListener(LWSConnectionListener lis);    
 
 }

@@ -10,7 +10,7 @@ package org.limewire.lws.server;
  * these.
  * <p>
  * Implementations of this interface are used to make
- * {@link SenderOfMessagesToServer#sendMessageToServer(String, java.util.Map, StringCallback)}
+ * {@link LWSSenderOfMessagesToServer#sendMessageToServer(String, java.util.Map, StringCallback)}
  * nonblocking by passing the result to the last argument.
  */
 public interface StringCallback {

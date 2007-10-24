@@ -1,7 +1,7 @@
 package org.limewire.lws.server;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 
 /**
@@ -9,39 +9,30 @@ import java.util.List;
  * This class abstract out the
  * {@link #addConnectionListener(ConnectionListener adding},
  * {@link #removeConnectionListener(ConnectionListener removing}, and
- * {@link #setConnected(boolean notifying} of {@link ConnectionListener}s and
+ * {@link #setConnected(boolean notifying} of {@link LWSConnectionListener}s and
  * leaves subclasses responsible for implementing the
  * {@link ReceivesCommandsFromDispatcher#receiveCommand(String, java.util.Map command handling).
  */
-public abstract class AbstractReceivesCommandsFromDispatcher implements ReceivesCommandsFromDispatcher {
+public abstract class AbstractReceivesCommandsFromDispatcher implements LWSReceivesCommandsFromDispatcher {
 
-    private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
-    private boolean isConnected;
+    private final List<LWSConnectionListener> connectionListeners 
+        = new Vector<LWSConnectionListener>();
 
     public final void setConnected(boolean isConnected) {
-        this.isConnected = isConnected;
-        connectionChanged(this.isConnected);
         if (!connectionListeners.isEmpty()) {
-            for (ConnectionListener lis : connectionListeners) {
-                lis.connectionChanged(isConnected);
+            synchronized (connectionListeners) {
+                for (LWSConnectionListener lis : connectionListeners) {
+                    lis.connectionChanged(isConnected);
+                }
             }
         }
     }
 
-    public final boolean addConnectionListener(ConnectionListener lis) {
+    public final boolean addConnectionListener(LWSConnectionListener lis) {
         return connectionListeners.contains(lis) ? false : connectionListeners.add(lis);
     }
 
-    public final boolean removeConnectionListener(ConnectionListener lis) {
+    public final boolean removeConnectionListener(LWSConnectionListener lis) {
         return !connectionListeners.contains(lis) ? false : connectionListeners.remove(lis);
     }
-
-    /**
-     * Override this to receive notification when the connection has changed.
-     * 
-     * @param isConnected <tt>true</tt> if we're connected, <tt>false</tt>
-     *        otherwise
-     */
-    protected abstract void connectionChanged(boolean isConnected);
-
 }

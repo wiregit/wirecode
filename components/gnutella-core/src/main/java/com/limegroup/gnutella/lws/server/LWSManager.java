@@ -4,7 +4,7 @@ package com.limegroup.gnutella.lws.server;
 import java.util.Map;
 
 import org.apache.http.protocol.HttpRequestHandler;
-import org.limewire.lws.server.ConnectionListener;
+import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 
 /**
@@ -67,26 +67,33 @@ public interface LWSManager {
      *         passing along messages
      */
     HttpRequestHandler getHandler();
+        
+    /**
+     * Returns <code>true</code> if <code>this</code> is connected.
+     * 
+     * @return <code>true</code> if <code>this</code> is connected
+     */
+    boolean isConnected();
     
     /**
-     * Returns <tt>true</tt> if <tt>lis</tt> was added as a listener,
-     * <tt>false</tt> otherwise.
+     * Returns <code>true</code> if <code>lis</code> was added as a listener,
+     * <code>false</code> otherwise.
      * 
      * @param lis new listener
-     * @return <tt>true</tt> if <tt>lis</tt> was added as a listener,
-     *         <tt>false</tt> otherwise.
+     * @return <code>true</code> if <code>lis</code> was added as a listener,
+     *         <code>false</code> otherwise.
      */
-    boolean addConnectionListener(ConnectionListener lis);
+    boolean addConnectionListener(LWSConnectionListener lis);
 
     /**
-     * Returns <tt>true</tt> if <tt>lis</tt> was removed as a listener,
-     * <tt>false</tt> otherwise.
+     * Returns <code>true</code> if <code>lis</code> was removed as a listener,
+     * <code>false</code> otherwise.
      * 
      * @param lis old listener
-     * @return <tt>true</tt> if <tt>lis</tt> was removed as a listener,
-     *         <tt>false</tt> otherwise.
+     * @return <code>true</code> if <code>lis</code> was removed as a listener,
+     *         <code>false</code> otherwise.
      */
-    boolean removeConnectionListener(ConnectionListener lis);    
+    boolean removeConnectionListener(LWSConnectionListener lis);    
     
     /**
      * Defines the interface to handle commands sent to a {@link LWSManager}.
@@ -111,17 +118,26 @@ public interface LWSManager {
     }
     
     /**
-     * Register a handler for the command <tt>cmd</tt>, and returns
-     * <tt>true</tt> on success and <tt>false</tt> on failure. There
+     * Register a handler for the command <code>cmd</code>There
      * can be only <b>one</b> {@link LWSManager.Handler} for every
-     * command.
+     * command.  If one already exists, it will be overwritten.
      * 
      * @param cmd String that invokes this listener
      * @param lis handler
-     * @return <tt>true</tt> if we added, <tt>false</tt> for a
-     *         problem or if this command is already registered
+     * @return <code>true</code> if we added <code>lis</code>
      */
     boolean registerHandler(String cmd, Handler lis);
+    
+    /**
+     * Unregisters a handler for the command <code>cmd</code>, and returns
+     * <code>true</code> on success and <code>false</code> on failure. There can be
+     * only <b>one</b> {@link LWSManager.Handler} for every command.
+     * 
+     * @param cmd String that invokes this listener
+     * @return <code>true</code> if we removed the {@link Handler} for
+     *         <code>cmd</code>
+     */
+    boolean unregisterHandler(String cmd);
 
     /**
      * Defines the interface to handle commands, but does <b>NOT</b> return a
@@ -146,15 +162,24 @@ public interface LWSManager {
     }
     
     /**
-     * Registers a {@link LWSManager.Listener} for the command <tt>cmd</tt>.
+     * Registers a {@link LWSManager.Listener} for the command <code>cmd</code>.
      * There can be multiple {@link LWSManager.Listener}s.
      * 
      * @param cmd String that invokes this listener
      * @param lis listener to register
-     * @return <tt>true</tt> if we added, <tt>false</tt> for a problem or if
-     *         this command is already registered
+     * @return <code>true</code> if we added <code>lis</code>
      */
-    boolean registerListener(String cmd, Listener lis);  
+    boolean registerListener(String cmd, Listener lis);
+    
+    /**
+     * Unregisters a {@link LWSManager.Listener} for the command <code>cmd</code>.There
+     * can be multiple {@link LWSManager.Listener}s.
+     * 
+     * @param cmd String that invokes this listener
+     * @return <code>true</code> if we removed the {@link Listener} for
+     *         <code>cmd</code>
+     */
+    boolean unregisterListener(String cmd);
     
     /**
      * An abstract implementation of {@link Handler} that abstracts away
@@ -170,6 +195,10 @@ public interface LWSManager {
 
         public final String name() {
             return name;
+        }
+        
+        public String toString() {
+            return "Handler(" + name() + ")";
         }
     }
     
@@ -213,5 +242,10 @@ public interface LWSManager {
             return name;
         }   
     }    
+    
+    /**
+     * Clears all the listeners and handlers.  This is used mainly for testing.
+     */
+    void clearHandlersAndListeners();
 
 }

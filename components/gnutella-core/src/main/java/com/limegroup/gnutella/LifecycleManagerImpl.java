@@ -48,6 +48,7 @@ import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
@@ -434,10 +435,14 @@ public class LifecycleManagerImpl implements LifecycleManager {
         initializeConnectionDispatcher();
         LOG.trace("STOP register connection dispatchers");
 
-        LOG.trace("START StoreServer");
-        //localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  GuiCoreMediator.getStoreManager().getHandler());
-        localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  lwsManager.get().getHandler());
-        LOG.trace("END StoreServer");         
+        // Allow us to disable this remotely is needed
+        if (LWSSettings.IS_ENABLED.getValue()) {
+            LOG.trace("START StoreServer");
+            localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  lwsManager.get().getHandler());
+            LOG.trace("END StoreServer");
+        } else {
+            LOG.trace("Disabling the StoreServer");
+        }      
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();

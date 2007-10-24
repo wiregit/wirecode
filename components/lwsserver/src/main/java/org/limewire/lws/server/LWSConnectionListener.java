@@ -3,7 +3,7 @@ package org.limewire.lws.server;
 /**
  * Listens for notification to when we are connected and disconnected.
  */
-public interface ConnectionListener {
+public interface LWSConnectionListener {
 
     /**
      * Called when a connected event changes.
