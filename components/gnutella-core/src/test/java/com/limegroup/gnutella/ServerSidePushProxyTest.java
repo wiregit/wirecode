@@ -74,12 +74,14 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-    public static Integer numUPs() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfUltrapeers() {
+        return 1;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
+    @Override
+    public int getNumberOfLeafpeers() {
+        return 1;
     }
 	
     public static ActivityCallback getActivityCallback() {

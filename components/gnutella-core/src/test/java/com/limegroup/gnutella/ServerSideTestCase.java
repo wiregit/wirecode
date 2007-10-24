@@ -63,6 +63,8 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     protected HeadersFactory headersFactory;
 
     protected BlockingConnectionFactory blockingConnectionFactory;
+    
+    protected Injector injector;
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -143,9 +145,14 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	    
 	}
     
+    public void setUp() throws Exception {
+        setUp(LimeTestUtils.createInjector());
+    }
+    
     public void setUp(Injector injector) throws Exception {
         doSettings();
-    
+        
+        this.injector = injector;
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         headersFactory = injector.getInstance(HeadersFactory.class);
