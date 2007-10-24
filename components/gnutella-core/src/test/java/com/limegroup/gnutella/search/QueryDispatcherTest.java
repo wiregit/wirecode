@@ -7,9 +7,11 @@ import junit.framework.Test;
 
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.TestResultCounter;
@@ -20,7 +22,11 @@ import com.limegroup.gnutella.util.TestResultCounter;
  */
 public class QueryDispatcherTest extends LimeTestCase {
 
-	public QueryDispatcherTest(String name) {
+	private QueryDispatcher queryDispatcher;
+    private QueryHandlerFactory queryHandlerFactory;
+    private QueryRequestFactory queryRequestFactory;
+
+    public QueryDispatcherTest(String name) {
 		super(name);
 	}
 
@@ -32,8 +38,12 @@ public class QueryDispatcherTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }    
     
-    public static void globalSetUp()  {
-        //new RouterService(new ActivityCallbackStub());
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+		queryDispatcher = injector.getInstance(QueryDispatcher.class);
+		queryHandlerFactory = injector.getInstance(QueryHandlerFactory.class);
+		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
     }
 
     /**
@@ -41,16 +51,16 @@ public class QueryDispatcherTest extends LimeTestCase {
      * from the query dispatcher.
      */
     public void testRemoveReplyHandler() throws Exception {
-        QueryDispatcher qd = ProviderHacks.getQueryDispatcher();
+        QueryDispatcher qd = queryDispatcher;
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
 
         assertEquals("should not be any queries", 0, queries.size());
 
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        QueryRequest qr = queryRequestFactory.createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
         QueryHandler handler = 
-            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qr, rh, 
+            queryHandlerFactory.createHandlerForNewLeaf(qr, rh, 
                                                  new TestResultCounter(0));
 
 
@@ -62,9 +72,9 @@ public class QueryDispatcherTest extends LimeTestCase {
         assertEquals("should not be any queries", 0, queries.size());
         
         // now add two different queries and make sure everything is koser
-        QueryRequest qrAlt = ProviderHacks.getQueryRequestFactory().createQuery("test 2");
+        QueryRequest qrAlt = queryRequestFactory.createQuery("test 2");
         QueryHandler handlerAlt = 
-            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qrAlt, rh, 
+            queryHandlerFactory.createHandlerForNewLeaf(qrAlt, rh, 
                                              new TestResultCounter(0));
         
         qd.addQuery(handler);
@@ -76,10 +86,10 @@ public class QueryDispatcherTest extends LimeTestCase {
         assertEquals("should not be any queries", 0, queries.size());
 
         // one more test - make sure different RHs don't effect each other
-        QueryRequest qrOther = ProviderHacks.getQueryRequestFactory().createQuery("test other");
+        QueryRequest qrOther = queryRequestFactory.createQuery("test other");
         ReplyHandler rhOther = new TestReplyHandler();
         QueryHandler handlerOther = 
-            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qrOther, rhOther, 
+            queryHandlerFactory.createHandlerForNewLeaf(qrOther, rhOther, 
                                              new TestResultCounter(0));
         
         qd.addQuery(handler);
@@ -99,19 +109,19 @@ public class QueryDispatcherTest extends LimeTestCase {
      * removed correctly
      */
     public void testRemoveStoppedQuery() throws Exception {
-        QueryDispatcher qd = ProviderHacks.getQueryDispatcher();
+        QueryDispatcher qd = queryDispatcher;
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
         
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("test");
+        QueryRequest qr = queryRequestFactory.createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
         QueryHandler qhand = 
-            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qr, rh,
+            queryHandlerFactory.createHandlerForNewLeaf(qr, rh,
                                                  new TestResultCounter(0));
 
-        QueryRequest qr2 = ProviderHacks.getQueryRequestFactory().createQuery("test2");
+        QueryRequest qr2 = queryRequestFactory.createQuery("test2");
         QueryHandler qhand2 = 
-            ProviderHacks.getQueryHandlerFactory().createHandlerForNewLeaf(qr2, rh,
+            queryHandlerFactory.createHandlerForNewLeaf(qr2, rh,
                                                  new TestResultCounter(0));
         
         qd.addQuery(qhand);

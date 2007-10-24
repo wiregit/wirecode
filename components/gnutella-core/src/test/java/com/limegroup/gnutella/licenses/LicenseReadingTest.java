@@ -11,15 +11,19 @@ import junit.framework.Test;
 import org.limewire.collection.NameValue;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 public final class LicenseReadingTest extends LimeTestCase {
 
-	public LicenseReadingTest(String name) {
+	private LimeXMLDocumentFactory limeXMLDocumentFactory;
+
+    public LicenseReadingTest(String name) {
 		super(name);
 	}
 
@@ -34,6 +38,11 @@ public final class LicenseReadingTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
+	@Override
+	protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+	}
 	
 	public void testReadID3AndXML() throws Exception {
 	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
@@ -56,7 +65,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	                 amd.getLicense());
         
 	    
-	    LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(nvList, amd.getSchemaURI());
+	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(nvList, amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicense(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +
@@ -140,7 +149,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    
 	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
 	    assertNotNull(amd);
-	    LimeXMLDocument doc = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
+	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicenseType(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +
