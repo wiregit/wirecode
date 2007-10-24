@@ -8,13 +8,14 @@ import junit.framework.Test;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  *  Tests that a Ultrapeer correctly sends XML Replies.  
@@ -30,6 +31,8 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  */
 public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 
+    private QueryRequestFactory queryRequestFactory;
+
     public ServerSideXMLReplyTest(String name) {
         super(name);
     }
@@ -42,18 +45,16 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-    public static Integer numUPs() {
-        return new Integer(1);
+	@Override
+	public int getNumberOfUltrapeers() {
+	    return 1;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(1);
+	@Override
+	public int getNumberOfLeafpeers() {
+	    return 1;
     }
 	
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
-    }
-
     @Override
     public void setSettings() {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
@@ -87,14 +88,18 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         }
     }
 
-    // BEGIN TESTS
-    // ------------------------------------------------------
-
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        super.setUp(injector);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+    }
+    
     public void testXMLReturned1() throws Exception {
         drainAll();
 
         // send a query
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("metadata");
+        QueryRequest query = queryRequestFactory.createQuery("metadata");
         ULTRAPEER[0].send(query);
         ULTRAPEER[0].flush();
 
@@ -115,7 +120,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Ambient\"></audio></audios>";
 
         // send a query
-        QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("Ambient", richQuery);
+        QueryRequest query = queryRequestFactory.createQuery("Ambient", richQuery);
         ULTRAPEER[0].send(query);
         ULTRAPEER[0].flush();
 
@@ -139,7 +144,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"junk\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("junk 16", richQuery);
+            QueryRequest query = queryRequestFactory.createQuery("junk 16", richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
 
@@ -158,7 +163,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("Test 16", richQuery);
+            QueryRequest query = queryRequestFactory.createQuery("Test 16", richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
 
@@ -180,7 +185,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" price=\"$19.99\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("$19.99 16", 
+            QueryRequest query = queryRequestFactory.createQuery("$19.99 16", 
                                                           richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
@@ -200,7 +205,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\" title=\"junk\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("Test junk 16", 
+            QueryRequest query = queryRequestFactory.createQuery("Test junk 16", 
                                                           richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
@@ -220,7 +225,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\" title=\"Test mpg\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("Test mpg 16", 
+            QueryRequest query = queryRequestFactory.createQuery("Test mpg 16", 
                                                           richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
@@ -243,7 +248,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\" type=\"Audiobook\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("Test Audiobook 16", 
+            QueryRequest query = queryRequestFactory.createQuery("Test Audiobook 16", 
                                                           richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
@@ -266,7 +271,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" price=\"$19.99\" type=\"Audiobook\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("$19.99 Audiobook 16", 
+            QueryRequest query = queryRequestFactory.createQuery("$19.99 Audiobook 16", 
                                                           richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
@@ -286,7 +291,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" price=\"$19.99\" artist=\"Tester\"></audio></audios>";
 
             // send a query
-            QueryRequest query = ProviderHacks.getQueryRequestFactory().createQuery("$19.99 Tester 16", 
+            QueryRequest query = queryRequestFactory.createQuery("$19.99 Tester 16", 
                                                           richQuery);
             ULTRAPEER[0].send(query);
             ULTRAPEER[0].flush();
