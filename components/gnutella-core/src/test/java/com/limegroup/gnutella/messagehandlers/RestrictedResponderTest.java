@@ -6,12 +6,9 @@ import java.net.InetSocketAddress;
 import java.security.PublicKey;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessage;
@@ -24,17 +21,29 @@ import org.limewire.setting.StringArraySetting;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.UDPReplyHandlerCache;
+import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 
 @SuppressWarnings("all")
 public class RestrictedResponderTest extends BaseTestCase {
+
+    private PingRequestFactory pingRequestFactory;
+    private NetworkManager networkManager;
+    private SimppManager simppManager;
+    private UDPReplyHandlerFactory udpReplyHandlerFactory;
+    private UDPReplyHandlerCache udpReplyHandlerCache;
 
     public RestrictedResponderTest(String name) {
         super(name);
@@ -48,6 +57,7 @@ public class RestrictedResponderTest extends BaseTestCase {
     static ReplyHandler h;
     static StringArraySetting ipSetting;
     static LongSetting versionSetting;
+    
     public void setUp() throws Exception {
         SettingsFactory f = new SettingsFactory(new File("set"));
         ipSetting = f.createStringArraySetting("ips", new String[]{"1.2.3.4"});
@@ -58,13 +68,20 @@ public class RestrictedResponderTest extends BaseTestCase {
                 return "1.2.3.4";
             }
         };
+		Injector injector = LimeTestUtils.createInjector();
+
+		pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+		networkManager = injector.getInstance(NetworkManager.class);
+		simppManager = injector.getInstance(SimppManager.class);
+		udpReplyHandlerFactory = injector.getInstance(UDPReplyHandlerFactory.class);
+		udpReplyHandlerCache = injector.getInstance(UDPReplyHandlerCache.class);
     }
     
     public void testRestrictions() throws Exception {
         // ban everyone
         ipSetting.setValue(new String[0]);
         TestResponder responder = new TestResponder(null);
-        Message m = ProviderHacks.getPingRequestFactory().createMulticastPing();
+        Message m = pingRequestFactory.createMulticastPing();
         responder.handleMessage(m, addr, h);
         assertNull(responder.msg);
         assertNull(responder.addr);
@@ -203,7 +220,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         // a message w/o a version will go through if it has the proper
         // destination address
         m.version = -1;
-        m.destAddr = new IpPortImpl(InetAddress.getByAddress(ProviderHacks.getNetworkManager().getExternalAddress()),1234);
+        m.destAddr = new IpPortImpl(InetAddress.getByAddress(networkManager.getExternalAddress()),1234);
         responder.handleMessage(m, addr, h);
         assertSame(m, responder.msg);
         
@@ -217,18 +234,18 @@ public class RestrictedResponderTest extends BaseTestCase {
     private static int simppVersion;
     private void triggerSimppUpdate() throws Exception {
         List<SimppListener> l = (List<SimppListener>) 
-            PrivilegedAccessor.getValue(ProviderHacks.getSimppManager(), "listeners");
+            PrivilegedAccessor.getValue(simppManager, "listeners");
         for (SimppListener s : l)
             s.simppUpdated(simppVersion++);
     }
     
-    private static class TestResponder extends RestrictedResponder {
+    private class TestResponder extends RestrictedResponder {
 
         Message msg;
         InetSocketAddress addr;
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
-            super(ipSetting, verifier, versionSetting, ProviderHacks.getNetworkManager(), ProviderHacks.getSimppManager(), ProviderHacks.getUDPReplyHandlerFactory(), ProviderHacks.getUDPReplyHandlerCache(), 
+            super(ipSetting, verifier, versionSetting, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, 
                     new ImmediateExecutor());
         }
 
