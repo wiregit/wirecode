@@ -111,9 +111,9 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
         clientGUID = GUID.makeGuid();
         leafGUID = new GUID(clientGUID);
 
-        LEAF[0] = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+        LEAF[0] = blockingConnectionFactory.createConnection("localhost", PORT);
         // routed leaf, with route table for "test"
-        LEAF[0].initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF[0].initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");

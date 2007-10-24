@@ -94,7 +94,7 @@ public class InspectionTest extends ServerSideTestCase {
     }
     
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
         super.setUp(injector);
         messageFactory = injector.getInstance(MessageFactory.class);
