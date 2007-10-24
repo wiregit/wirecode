@@ -5,12 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.BaseTestCase;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.settings.LWSSettings;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
@@ -162,16 +158,7 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
 
         beforeSetup();
         
-        LWSSettings.AUTHENTICATION_HOSTNAME.setValue("localhost");
-        LWSSettings.AUTHENTICATION_PORT.setValue(8080);
-        
-        Injector inj = LimeTestUtils.createInjector(new AbstractModule() {
-            protected void configure() {
-                requestStaticInjection(SocketsManager.class);
-            }
-        });
-
-        SocketsManager socketsManager = inj.getInstance(SocketsManager.class);
+        SocketsManager socketsManager = new SocketsManagerImpl();
         localServer     = new LocalServerImpl(socketsManager, "localhost", REMOTE_PORT);
         remoteServer    = new RemoteServerImpl(socketsManager, LOCAL_PORT);
         localThread     = localServer.start();
