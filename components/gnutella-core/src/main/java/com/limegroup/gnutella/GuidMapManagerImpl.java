@@ -61,7 +61,7 @@ class GuidMapManagerImpl implements GuidMapManager {
     /** Runnable that iterates through potential expirations and expires them. */
     private class GuidExpirer implements Runnable {
         public void run() {
-            synchronized (GuidMapManagerImpl.class) {
+            synchronized (GuidMapManagerImpl.this) {
                 // iterator through all the maps....
                 for(Iterator<GuidMapImpl> i = toExpire.iterator(); i.hasNext(); ) {
                     GuidMapImpl next = i.next();
