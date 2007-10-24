@@ -7,14 +7,17 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPortSet;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 public class SpamManagerTest extends LimeTestCase {
 
@@ -49,6 +52,8 @@ public class SpamManagerTest extends LimeTestCase {
     private LimeXMLDocument doc1;
     //private LimeXMLDocument doc2;
     private SpamManager manager;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private QueryRequestFactory queryRequestFactory;
     
     public SpamManagerTest(String name) {
         super(name);
@@ -58,26 +63,23 @@ public class SpamManagerTest extends LimeTestCase {
         return buildTestSuite(SpamManagerTest.class);
     }
 
-    public static void globalSetUp() {
-        try {
-            urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
-            urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-            urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-        } catch (Exception e) {
-            fail(e);
-        }
-    }
-    
     @Override
     protected void setUp() throws Exception {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         SearchSettings.FILTER_SPAM_RESULTS.revertToDefault();
         
+        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+        urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
+        urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
+
+		Injector injector = LimeTestUtils.createInjector();
+		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
         manager = new SpamManager(new RatingTable());
         manager.clearFilterData();
         
-        doc1 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml1);
-        //doc2 = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(xml2);        
+        doc1 = limeXMLDocumentFactory.createLimeXMLDocument(xml1);
     }
     
     /** 
@@ -197,7 +199,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, snakeRating);
         
         // make the user send a query with a badger and a mushroom
-        QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery(mushroom);
+        QueryRequest qr = queryRequestFactory.createQuery(mushroom);
         manager.startedQuery(qr);
         
         // if we receive results containing badgers and snakes their rating
