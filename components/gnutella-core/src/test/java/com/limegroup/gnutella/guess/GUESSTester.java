@@ -12,13 +12,17 @@ import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 
 /** Provides primitives for contacting GUESS nodes on the network.
  *  THIS TEST SHOULD NOT BE INCLUDED IN ALL TESTS!  It is very specifically 
@@ -41,6 +45,12 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
 
     private PingReply _pong = null;
     private final Object _pongLock = new Object();
+
+    private QueryRequestFactory queryRequestFactory;
+
+    private PingRequestFactory pingRequestFactory;
+
+    private MessageFactory messageFactory;
 
 	/**
 	 * Constructs a new <tt>GUESSTester</tt> instance.
@@ -67,6 +77,13 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         }
     }
 
+	@Override
+	public void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+		pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+		messageFactory = injector.getInstance(MessageFactory.class);
+	}
 
     private void listenLoop() {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
@@ -80,7 +97,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = ProviderHacks.getMessageFactory().read(in);		
+                    Message message = messageFactory.read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryReply) {
                         synchronized (_qrLock) {
@@ -120,7 +137,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         try {
             assertTrue(testAck("10.254.0.19", 6346) > 0);
             assertNotNull(testQuery("10.254.0.19", 6346,
-									ProviderHacks.getQueryRequestFactory().createQuery("morrissey", (byte)1)));
+									queryRequestFactory.createQuery("morrissey", (byte)1)));
         }
         catch (Exception whatever) {
             assertTrue(false);
@@ -135,7 +152,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-		QueryRequest qr = ProviderHacks.getQueryRequestFactory().createQuery("susheel", (byte)1);
+		QueryRequest qr = queryRequestFactory.createQuery("susheel", (byte)1);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         qr.write(baos);
@@ -166,7 +183,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-        PingRequest pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        PingRequest pr = pingRequestFactory.createPingRequest((byte)1);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);
