@@ -145,7 +145,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	    
 	}
     
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         setUp(LimeTestUtils.createInjector());
     }
     
