@@ -17,18 +17,22 @@ import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.StubHandshakeResponder;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 
 /**
@@ -39,6 +43,12 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 public class ManagedConnectionTest extends ServerSideTestCase {
     
     private static final int LISTEN_PORT = 12350;
+    private ConnectionManager connectionManager;
+    private PingRequestFactory pingRequestFactory;
+    private PingReplyFactory pingReplyFactory;
+    private QueryRequestFactory queryRequestFactory;
+    private RoutedConnectionFactory routedConnectionFactory;
+    private BlockingConnectionFactory blockingConnectionFactory;
 
     public ManagedConnectionTest(String name) {
         super(name);
@@ -52,16 +62,26 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public static Integer numUPs() {
-        return new Integer(0);
+    @Override
+    public int getNumberOfUltrapeers() {
+        return 0;
     }
 
-    public static Integer numLeaves() {
-        return new Integer(0);
+    @Override
+    public int getNumberOfLeafpeers() {
+        return 0;
     }
-	
-    public static ActivityCallback getActivityCallback() {
-        return new ActivityCallbackStub();
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        
+        connectionManager = injector.getInstance(ConnectionManager.class);
+        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        routedConnectionFactory = injector.getInstance(RoutedConnectionFactory.class);
+        blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
     }
     
     /**
@@ -84,7 +104,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testConnectionStatsRecorded() throws Exception {
-        ConnectionManager cm = ProviderHacks.getConnectionManager();
+        ConnectionManager cm = connectionManager;
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection in = createLeafConnection();
@@ -103,7 +123,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         //long initialBytesSent = out.getUncompressedBytesSent();
         long initialBytesRecv = in.getConnectionBandwidthStatistics().getUncompressedBytesReceived();
         
-        pr=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
+        pr=pingRequestFactory.createPingRequest((byte)3);
         out.send(pr);
         
         start=System.currentTimeMillis();        
@@ -122,7 +142,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testForwardsGGEP() throws Exception {
-        ConnectionManager cm = ProviderHacks.getConnectionManager();
+        ConnectionManager cm = connectionManager;
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection conn = createLeafConnection();
@@ -132,7 +152,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         
         BlockingConnection out = (BlockingConnection)cm.getConnections().get(0);
 
-        out.send(ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1));
+        out.send(pingReplyFactory.create(GUID.makeGuid(), (byte)1));
 		Message m = getFirstInstanceOfMessageType(conn, PingReply.class);
 		assertNotNull(m);
 		assertInstanceof("should be a pong", PingReply.class, m);
@@ -163,7 +183,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 	// Tests to make sure that connections are closed correctly from the
     //	  client side.
     public void testClientSideClose() throws Exception {
-        ConnectionManager cm = ProviderHacks.getConnectionManager();
+        ConnectionManager cm = connectionManager;
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection out = createLeafConnection();
@@ -183,7 +203,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 	 // Tests to make sure that connections are closed correctly from the
 	 // server side.
     public void testServerSideClose() throws Exception {
-        ConnectionManager cm = ProviderHacks.getConnectionManager();
+        ConnectionManager cm = connectionManager;
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection out = createLeafConnection();
@@ -193,13 +213,13 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         assertTrue("connection should be open", out.isOpen());
         
         out.close();
-        Message m = ProviderHacks.getPingRequestFactory().createPingRequest((byte)4);
+        Message m = pingRequestFactory.createPingRequest((byte)4);
         m.hop();
         in.send(m);   
         Thread.sleep(500);
-        in.send(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4));
+        in.send(pingRequestFactory.createPingRequest((byte)4));
         Thread.sleep(500);
-        in.send(ProviderHacks.getPingRequestFactory().createPingRequest((byte)4));
+        in.send(pingRequestFactory.createPingRequest((byte)4));
         Thread.sleep(500);
 
         assertTrue("connection should not be open", !in.isOpen());
@@ -208,15 +228,15 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     
     public void testHashFiltering() throws Exception {
         URN sha1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
-        QueryRequest urnFile = ProviderHacks.getQueryRequestFactory().createQuery(sha1,"java");
+        QueryRequest urnFile = queryRequestFactory.createQuery(sha1,"java");
         
-        GnutellaConnection mc = (GnutellaConnection)ProviderHacks.getManagedConnectionFactory().createRoutedConnection("", 1);
+        GnutellaConnection mc = (GnutellaConnection)routedConnectionFactory.createRoutedConnection("", 1);
         // default should be no filtering
         assertFalse(mc.isSpam(urnFile));
         
         // now turn filtering on and rebuild filters
         FilterSettings.FILTER_HASH_QUERIES.setValue(true);
-        mc = (GnutellaConnection)ProviderHacks.getManagedConnectionFactory().createRoutedConnection("", 1);
+        mc = (GnutellaConnection)routedConnectionFactory.createRoutedConnection("", 1);
         
         assertTrue(mc.isSpam(urnFile));
 
@@ -224,7 +244,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingHandshakeSucceeds() throws Exception {
-        RoutedConnection mc = ProviderHacks.getManagedConnectionFactory().createRoutedConnection("127.0.0.1", LISTEN_PORT);
+        RoutedConnection mc = routedConnectionFactory.createRoutedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -244,7 +264,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingBadHandshake() throws Exception {
-        RoutedConnection mc = ProviderHacks.getManagedConnectionFactory().createRoutedConnection("127.0.0.1", LISTEN_PORT);
+        RoutedConnection mc = routedConnectionFactory.createRoutedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -265,7 +285,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingNGOK() throws Exception {
-        RoutedConnection mc = ProviderHacks.getManagedConnectionFactory().createRoutedConnection("127.0.0.1", LISTEN_PORT);
+        RoutedConnection mc = routedConnectionFactory.createRoutedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -287,7 +307,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
     }
     
     public void testNonBlockingHandshakeTimeout() throws Exception {
-        RoutedConnection mc = ProviderHacks.getManagedConnectionFactory().createRoutedConnection("127.0.0.1", LISTEN_PORT);
+        RoutedConnection mc = routedConnectionFactory.createRoutedConnection("127.0.0.1", LISTEN_PORT);
         ConnectionAcceptor acceptor = new ConnectionAcceptor();
         StubGnetConnectObserver observer = new StubGnetConnectObserver();
         acceptor.start();
@@ -317,7 +337,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         public void setLocalePreferencing(boolean b) {}
     }
     
-    private static class ConnectionAcceptor {
+    private class ConnectionAcceptor {
         private ServerSocket socket;
         private SimpleAcceptObserver observer;
         
@@ -338,7 +358,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         }
     }    
     
-    private static class SimpleAcceptObserver implements AcceptObserver {
+    private class SimpleAcceptObserver implements AcceptObserver {
         private boolean noGOK = false;
         private boolean timeout = false;
         private boolean badHandshake = false;
@@ -373,7 +393,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
                             return;
                         }
 
-                        final BlockingConnection con = ProviderHacks.getBlockingConnectionFactory().createConnection(socket);
+                        final BlockingConnection con = blockingConnectionFactory.createConnection(socket);
                         con.initialize(null, new StubHandshakeResponder(), 1000);
                     } catch (Exception e) {
                         ErrorService.error(e);
