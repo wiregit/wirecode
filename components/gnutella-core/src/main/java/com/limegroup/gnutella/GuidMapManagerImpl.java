@@ -21,6 +21,8 @@ class GuidMapManagerImpl implements GuidMapManager {
     
     /* The time which expired GUIDs will be purged. */
     private static long EXPIRE_POLL_TIME = 2 * 60 * 1000;
+    /** The default lifetime of the GUID (10 minutes). */
+    private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
     
     /** A listing of all GuidMaps that have atleast one GUID that needs expiry. */
     private List<GuidMapImpl> toExpire = new LinkedList<GuidMapImpl>();
@@ -83,8 +85,6 @@ class GuidMapManagerImpl implements GuidMapManager {
      * Implementation of GuidMap that delegates to the factory to expire things.
      */
     private class GuidMapImpl implements GuidMap {
-        /** The default lifetime of the GUID (10 minutes). */
-        private long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
         
         /** Mapping between new & old GUID.  Lazily constructed. */
         private Map<GUID.TimedGUID, GUID> map;

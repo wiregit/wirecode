@@ -95,8 +95,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     public void setSettings() throws Exception {
         // we want to test the expirer so make the expire period small
         PrivilegedAccessor.setValue(GuidMapManagerImpl.class, "EXPIRE_POLL_TIME", new Long(EXPIRE_TIME));
-        Class clazz = PrivilegedAccessor.getClass(GuidMapManagerImpl.class, "GuidMapImpl");
-        PrivilegedAccessor.setValue(clazz, "TIMED_GUID_LIFETIME", new Long(EXPIRE_TIME));
+        PrivilegedAccessor.setValue(GuidMapManagerImpl.class, "TIMED_GUID_LIFETIME", new Long(EXPIRE_TIME));
         ConnectionSettings.MULTICAST_PORT.setValue(10100);
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(500);
@@ -150,16 +149,25 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         replyNumberVendorMessageFactory = injector.getInstance(ReplyNumberVendorMessageFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
     }
+
+    private void establishOOBAbility() throws Exception {
+        networkManagerStub.setCanReceiveSolicited(true);
+        networkManagerStub.setCanReceiveUnsolicited(true);
+        networkManagerStub.setOOBCapable(true);
+        networkManagerStub.setGuessCapable(true);
+        sendF(LEAF[0], messagesSupportedVendorMessage);
+        sendF(LEAF[1], messagesSupportedVendorMessage);
+        Thread.sleep(100);
+    }
     
-    // PLEASE RUN THIS TEST FIRST!!!
     public void testProxiesOnlyWhenSupposedTo() throws Exception {
 
         // before we set up GUESS we should see that the UP does not proxy
         //------------------------------
         {
-        drainAll();    
-        sendF(LEAF[1], messagesSupportedVendorMessage);
-        Thread.sleep(100); // wait for processing of msvm
+            drainAll();    
+            sendF(LEAF[1], messagesSupportedVendorMessage);
+            Thread.sleep(100); // wait for processing of msvm
 
         QueryRequest query = queryRequestFactory.createQuery("stanford");
         sendF(LEAF[1], query);
@@ -323,6 +331,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     /** tests that v2 queries are upgraded to v3. */
     public void testProtocolUpgrade() throws Exception {
+        establishOOBAbility();
         SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         drainAll();
         QueryRequest nonOOB = queryRequestFactory.createQuery("badger");
@@ -346,6 +355,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     
     /** tests that v2 queries are upgraded to v3 and v2 is disabled */
     public void testProtocolUpgradeDisableV2() throws Exception {
+        establishOOBAbility();
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         drainAll();
         QueryRequest nonOOB = queryRequestFactory.createQuery("badger");
@@ -368,7 +378,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     }
     
     public void testOOBProxyControlMessage() throws Exception {
-        
+        establishOOBAbility();
         // default case proxying works
         {
             drainAll();    
@@ -521,6 +531,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     // 1) routed TCP results are mapped
     // 2) OOB results are acked and mapped
     public void testBasicProxy() throws Exception {
+        establishOOBAbility();
         drainAll();    
 
         QueryRequest query = queryRequestFactory.createQuery("stanford");
@@ -668,6 +679,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
      * are dropped
      */
     public void testDropUnsolicited() throws Exception {
+        establishOOBAbility();
     	drainAll();
     	QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 3,
                 "not proxied", null, null, null, false, Network.UNKNOWN, false, 0, true,
@@ -751,12 +763,15 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     // tests that the expirer works
     public void testExpirer() throws Exception {
+        fail("this test relies on the others being run before it so it needs to be rewritten entirely");
         // see if anything is going to be expired
-        List expireList = (List) PrivilegedAccessor.getValue(GuidMapManagerImpl.class, 
+        GuidMapManager gmm = injector.getInstance(GuidMapManager.class);
+        List expireList = (List) PrivilegedAccessor.getValue(gmm, 
                                                              "toExpire");
+        System.out.println(expireList);
         assertNotNull(expireList);
         Thread.sleep(EXPIRE_TIME*2);  // old guids should be expired...
-        synchronized (GuidMapManagerImpl.class) {
+        synchronized (gmm) {
             assertEquals(1, expireList.size());
             // iterator through all the maps and confirm they are empty
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
@@ -789,7 +804,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
         Thread.sleep(EXPIRE_TIME*2);
         
-        synchronized (GuidMapManagerImpl.class) {
+        synchronized (gmm) {
             // iterator through all the maps and confirm they are empty
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
                 Object guidMapImpl = i.next();
