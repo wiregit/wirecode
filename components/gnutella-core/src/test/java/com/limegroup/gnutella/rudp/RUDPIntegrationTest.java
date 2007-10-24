@@ -12,11 +12,17 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.IOErrorObserver;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPConnectionProcessor;
+import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
@@ -30,11 +36,15 @@ public class RUDPIntegrationTest extends LimeTestCase {
     
     private static final int PORT = 9313;
     
-    private MessageHandler ackHandler;
-    private MessageHandler dataHandler;
-    private MessageHandler finHandler;
-    private MessageHandler keepAliveHandler;
-    private MessageHandler synHandler;
+    private LifecycleManager lifecycleManager;
+
+    private UDPSelectorProvider selectorProvider;
+
+    private NetworkManager networkManager;
+
+    private UDPService udpService;
+
+    private MessageRouter messageRouter;
 
     public RUDPIntegrationTest(String name) {
         super(name);
@@ -58,50 +68,52 @@ public class RUDPIntegrationTest extends LimeTestCase {
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
     }
     
-    public static void globalSetUp() throws Exception {
-        setSettings();
-       // RouterService rs = new RouterService(new ActivityCallbackStub(), ProviderHacks.getMessageRouter());
-        ProviderHacks.getLifecycleManager().start();
-        Thread.sleep(1000);
-    }
-    
     public void setUp() throws Exception {
         setSettings();
+        Injector injector = LimeTestUtils.createInjector();
+        
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        selectorProvider = injector.getInstance(UDPSelectorProvider.class);
+        networkManager = injector.getInstance(NetworkManager.class);
+        udpService = injector.getInstance(UDPService.class);
+        messageRouter = injector.getInstance(MessageRouter.class);
+        
+        
+        lifecycleManager.start();
     }
     
+    @Override
+    protected void tearDown() throws Exception {
+        lifecycleManager.shutdown();
+    }
+    
+    @SuppressWarnings("unchecked")
     public void testLimeRUDPMessageHandlerIsInstalled() throws Exception {
-        storeHandlers();
-        assertEquals(LimeRUDPMessageHandler.class, ackHandler.getClass());
-        assertEquals(LimeRUDPMessageHandler.class, dataHandler.getClass());
-        assertEquals(LimeRUDPMessageHandler.class, finHandler.getClass());
-        assertEquals(LimeRUDPMessageHandler.class, keepAliveHandler.getClass());
-        assertEquals(LimeRUDPMessageHandler.class, synHandler.getClass());
-    }
-    
-    public void testIncomingUDPPacketsSentToHandler() throws Exception {
-        storeHandlers();
-        try {
-            StubRUDPMessageHandler handler = new StubRUDPMessageHandler();
-            RUDPMessageHandlerHelper.addHandler(handler);
-            checkMessage(handler, LimeRUDPMessageHelper.getAck(1));
-            checkMessage(handler, LimeRUDPMessageHelper.getData(1));
-            checkMessage(handler, LimeRUDPMessageHelper.getFin(1));
-            checkMessage(handler, LimeRUDPMessageHelper.getKeepAlive(1));
-            checkMessage(handler, LimeRUDPMessageHelper.getSyn(1));
-        } finally {
-            revertToStoredHandlers();
+        Class[] handledMessageClasses = RUDPMessageHandlerHelper.getMessageClasses();
+        for (Class clazz : handledMessageClasses) {
+            assertEquals(LimeRUDPMessageHandler.class, messageRouter.getUDPMessageHandler(clazz).getClass());
         }
     }
     
+    public void testIncomingUDPPacketsSentToHandler() throws Exception {
+        StubRUDPMessageHandler handler = new StubRUDPMessageHandler();
+        RUDPMessageHandlerHelper.addHandler(messageRouter, handler);
+        checkMessage(handler, LimeRUDPMessageHelper.getAck(1));
+        checkMessage(handler, LimeRUDPMessageHelper.getData(1));
+        checkMessage(handler, LimeRUDPMessageHelper.getFin(1));
+        checkMessage(handler, LimeRUDPMessageHelper.getKeepAlive(1));
+        checkMessage(handler, LimeRUDPMessageHelper.getSyn(1));
+    }
+    
     public void testPacketsSentToMultiplexorAndGoesToProcessor() throws Exception {
-        StubUDPConnectionProcessor stub = new StubUDPConnectionProcessor(ProviderHacks.getUDPSelectorProvider().getContext());
+        StubUDPConnectionProcessor stub = new StubUDPConnectionProcessor(selectorProvider.getContext());
         SelectableChannel channel = createUDPSocketChannel(stub);
         assertEquals(0, stub.id);
         // This is done only to allow the multiplexor to learn about the processor.
         NIODispatcher.instance().register(channel,  new StubIOErrorObserver());
         Thread.sleep(100);
         assertNotEquals(0, stub.id);
-        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", ProviderHacks.getNetworkManager().getNonForcedPort());
+        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", networkManager.getNonForcedPort());
         stub.addr = addr;
         stub.isConnecting = false;
         checkMessage(stub, LimeRUDPMessageHelper.getAck(stub.id));
@@ -135,15 +147,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     private void sendToUDP(Message m) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         m.write(out);
-        ProviderHacks.getUdpService().send(m, new InetSocketAddress("127.0.0.1", PORT));
-    }
-    
-    private void storeHandlers() throws Exception {
-        RUDPMessageHandlerHelper.setHandlerFields(this, "ackHandler", "dataHandler", "finHandler", "keepAliveHandler", "synHandler");
-    }
-    
-    private void revertToStoredHandlers() throws Exception {
-        RUDPMessageHandlerHelper.setHandlers(ackHandler, dataHandler, finHandler, keepAliveHandler, synHandler);
+        udpService.send(m, new InetSocketAddress("127.0.0.1", PORT));
     }
     
     private interface MessageObserver {
