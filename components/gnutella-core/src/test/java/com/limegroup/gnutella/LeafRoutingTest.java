@@ -54,7 +54,7 @@ import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 @SuppressWarnings("all")
 public class LeafRoutingTest extends LimeTestCase {
     private static final int SERVER_PORT = 6669;
-    private static final int TIMEOUT=500000;
+    private static final int TIMEOUT=5000;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
     private static final byte[] oldIP=
@@ -224,7 +224,7 @@ public class LeafRoutingTest extends LimeTestCase {
             guid = new GUID().bytes();
         }
         
-        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
+        Socket socket = c.getSocket();
         PingReply reply = 
             pingReplyFactory.createExternal(guid, (byte)7,
                                      socket.getLocalPort(), 
@@ -426,8 +426,12 @@ public class LeafRoutingTest extends LimeTestCase {
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
         URN berkeleyURN = (URN) iter.next();
+        while (!berkeleyURN.isSHA1())
+            berkeleyURN = (URN) iter.next();
         iter = UrnHelper.calculateAndCacheURN(susheel, urnCache).iterator();
         URN susheelURN = (URN) iter.next();
+        while (!susheelURN.isSHA1())
+            susheelURN = (URN) iter.next();
 
         // send a query that should hit
         QueryRequest query = queryRequestFactory.createQuery(berkeleyURN);
@@ -443,7 +447,7 @@ public class LeafRoutingTest extends LimeTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(berkeley, urnCache));
+                assertTrue(UrnHelper.calculateAndCacheURN(berkeley, urnCache).containsAll(first.getUrns()));
             }
         } while (!(m instanceof QueryReply)) ;
         
@@ -461,7 +465,7 @@ public class LeafRoutingTest extends LimeTestCase {
                 QueryReply qr = (QueryReply) m;
                 iter = qr.getResults();
                 Response first = (Response) iter.next();
-                assertEquals(first.getUrns(), UrnHelper.calculateAndCacheURN(susheel, urnCache));
+                assertTrue(UrnHelper.calculateAndCacheURN(susheel, urnCache).containsAll(first.getUrns()));
             }
         } while (!(m instanceof QueryReply)) ;
     }
