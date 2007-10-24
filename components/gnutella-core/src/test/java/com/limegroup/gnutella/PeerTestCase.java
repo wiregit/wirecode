@@ -11,12 +11,16 @@ import java.util.Properties;
 
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -41,12 +45,12 @@ public abstract class PeerTestCase extends LimeTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
- //   protected static RouterService rs;
-
-    private static ActivityCallback callback;
-    protected static ActivityCallback getCallback() {
-        return callback;
-    }
+    protected Injector injector;
+    protected LifecycleManager lifecycleManager;
+    protected ConnectionServices connectionServices;
+    protected BlockingConnectionFactory blockingConnectionFactory;
+    protected PingReplyFactory pingReplyFactory;
+    protected HeadersFactory headersFactory;
 
     public PeerTestCase(String name) {
         super(name);
@@ -71,35 +75,51 @@ public abstract class PeerTestCase extends LimeTestCase {
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
     
-    public static void globalSetUp(Class callingClass) throws Exception {
-        // calls all doSettings() for me and my children
-        PrivilegedAccessor.invokeAllStaticMethods(callingClass, "doSettings",
-                                                  null);
-        callback=
-        (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
-                                                         "getActivityCallback");
-      //  rs=new RouterService(callback);
-        assertEquals("unexpected port",
-            SERVER_PORT, ConnectionSettings.PORT.getValue());
-        ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getHostCatcher().clear();
-        ProviderHacks.getConnectionServices().connect();
-        Thread.sleep(2000);
-        assertEquals("unexpected port",
-            SERVER_PORT, ConnectionSettings.PORT.getValue());
-    }        
+
+    protected ActivityCallback getActivityCallback() {
+        return injector.getInstance(ActivityCallback.class);
+    }
     
-    public void setUp() throws Exception  {
+    protected void setUp() throws Exception {
+        setUp(LimeTestUtils.createInjector());
+    }
+    
+    protected void tearDown() throws Exception {
+        if (connectionServices != null)
+            connectionServices.disconnect();
+        if (lifecycleManager != null)
+            lifecycleManager.shutdown();
+    }
+    
+    protected void setUp(Injector injector) throws Exception  {
         // calls all doSettings() for me and my parents
         PrivilegedAccessor.invokeAllStaticMethods(this.getClass(), "doSettings",
                                                   null);
+        
+        this.injector = injector;
+        // calls all doSettings() for me and my children
+        
+        //  rs=new RouterService(callback);
+        assertEquals("unexpected port",
+                SERVER_PORT, ConnectionSettings.PORT.getValue());
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+        blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        
+        lifecycleManager.start();
+        connectionServices.connect();
+        Thread.sleep(2000);
+        assertEquals("unexpected port",
+                SERVER_PORT, ConnectionSettings.PORT.getValue());
     }
 
-    protected static BlockingConnection connect(boolean ultrapeer) throws Exception {
+    protected BlockingConnection connect(boolean ultrapeer) throws Exception {
          ServerSocket ss=new ServerSocket();
          ss.setReuseAddress(true);
          ss.bind(new InetSocketAddress(0));
-         ProviderHacks.getConnectionServices().connectToHostAsynchronously("127.0.0.1", ss.getLocalPort(), ConnectType.PLAIN);
+         connectionServices.connectToHostAsynchronously("127.0.0.1", ss.getLocalPort(), ConnectType.PLAIN);
          Socket socket = ss.accept();
          ss.close();
          
@@ -115,7 +135,7 @@ public abstract class PeerTestCase extends LimeTestCase {
          } else {
              responder = new OldResponder();
          }
-         BlockingConnection con = ProviderHacks.getBlockingConnectionFactory().createConnection(socket);
+         BlockingConnection con = blockingConnectionFactory.createConnection(socket);
          con.initialize(null, responder, 1000);
          replyToPing(con, ultrapeer);
          return con;
@@ -147,7 +167,7 @@ public abstract class PeerTestCase extends LimeTestCase {
      /**
       * Note that this function will _EAT_ messages until it finds a ping to respond to.
       */  
-    private static void replyToPing(BlockingConnection c, boolean ultrapeer) 
+    private void replyToPing(BlockingConnection c, boolean ultrapeer) 
         throws Exception {
         // respond to a ping iff one is given.
         Message m = null;
@@ -162,9 +182,9 @@ public abstract class PeerTestCase extends LimeTestCase {
             guid = new GUID().bytes();
         }
         
-        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
+        Socket socket = c.getSocket();
         PingReply reply = 
-        ProviderHacks.getPingReplyFactory().createExternal(guid, (byte)7,
+        pingReplyFactory.createExternal(guid, (byte)7,
                                  socket.getLocalPort(), 
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
@@ -173,10 +193,10 @@ public abstract class PeerTestCase extends LimeTestCase {
         c.flush();
     }
 
-    private static class UltrapeerResponder implements HandshakeResponder {
+    private class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing)  {
-            Properties props = ProviderHacks.getHeadersFactory().createUltrapeerHeaders("127.0.0.1"); 
+            Properties props = headersFactory.createUltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
