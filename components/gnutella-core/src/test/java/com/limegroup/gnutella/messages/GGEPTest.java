@@ -7,12 +7,14 @@ import java.util.Set;
 
 import org.limewire.collection.NameValue;
 import org.limewire.io.IOUtils;
+import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
 
 
 @SuppressWarnings( { "unchecked", "cast" } )
-public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class GGEPTest extends BaseTestCase {
+    
     public GGEPTest(String name) {
         super(name);
     }
