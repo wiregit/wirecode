@@ -22,15 +22,26 @@ import org.limewire.io.IPPortCombo;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.ResponseFactory;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.connection.CountingConnection;
+import com.limegroup.gnutella.connection.CountingConnectionFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -48,34 +59,54 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private static final int PORT = 6669;
+    private final int PORT = 6669;
     
-    private static InetAddress _udpAddress;
+    private InetAddress _udpAddress;
 
     /**
 	 * The different connections to the ultrapeer.
 	 */
-    private static CountingConnection LEAF_1,LEAF_2, LEAF_3, UP1, UP2, UP3;
+    private CountingConnection LEAF_1,LEAF_2, LEAF_3, UP1, UP2, UP3;
     
     /**
      * the different kinds of queries
      */
-    private static final UDPCrawlerPing msgAll = new UDPCrawlerPing(new GUID(GUID.makeGuid()));
+    private final UDPCrawlerPing msgAll = new UDPCrawlerPing(new GUID(GUID.makeGuid()));
     
     /**
-	 * The central Ultrapeer used in the test.
-	 */
-	//private static final RouterService ROUTER_SERVICE = 
-	//	new RouterService(new ActivityCallbackStub());
-	/**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS;
+    private DatagramSocket UDP_ACCESS;
+
+    private NetworkManager networkManager;
+
+    private LifecycleManager lifecycleManager;
+
+    private ConnectionServices connectionServices;
+
+    private MessageRouter messageRouter;
+
+    private VendorMessageFactory vendorMessageFactory;
+
+    private HeadersFactory headersFactory;
+
+    private UDPCrawlerPongFactory crawlerPongFactory;
+
+    private ConnectionManager connectionManager;
+
+    private ResponseFactory responseFactory;
+
+    private QueryReplyFactory queryReplyFactory;
+
+    private UDPService udpService;
+
+    private CountingConnectionFactory countingConnectionFactory;
 	
 	
 	public UDPCrawlerMessagesTest(String name) {
 		super(name);
 	}
+	
 	public static Test suite() {
         return buildTestSuite(UDPCrawlerMessagesTest.class);
     }    
@@ -88,20 +119,18 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 	 * builds the connections between the entities in the test
 	 * @throws Exception something bad happened (?)
 	 */
-	private static void buildConnections() throws Exception {
-		LEAF_1 = new CountingConnection("localhost", PORT);
-	    LEAF_2 = new CountingConnection("localhost", PORT);
-	    LEAF_3 = new CountingConnection("localhost", PORT);
-	    UP1 =  new CountingConnection("localhost", PORT);
-	    UP2 = new CountingConnection("localhost", PORT);
-	    UP3 =  new CountingConnection("localhost", PORT);
+	private void buildConnections() throws Exception {
+		LEAF_1 = countingConnectionFactory.createConnection("localhost", PORT);
+	    LEAF_2 = countingConnectionFactory.createConnection("localhost", PORT);
+	    LEAF_3 = countingConnectionFactory.createConnection("localhost", PORT);
+	    UP1 =  countingConnectionFactory.createConnection("localhost", PORT);
+	    UP2 = countingConnectionFactory.createConnection("localhost", PORT);
+	    UP3 =  countingConnectionFactory.createConnection("localhost", PORT);
 	    
 	    UDP_ACCESS = new DatagramSocket();
-	    
-	    
 	}
 	
-	public static void setSettings() {
+	public void setSettings() {
 		
 		String localIP = null;
         try {
@@ -122,44 +151,53 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 	}
-	
-	public static void globalSetUp() throws Exception {
-        setSettings();
 
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
+	@Override
+	public void setUp() throws Exception {
+        setSettings();
+        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
         
-        ProviderHacks.getNetworkManager().setListeningPort(PORT);
-		ProviderHacks.getLifecycleManager().start();
-        ProviderHacks.getHostCatcher().clear();
-        ProviderHacks.getConnectionServices().connect();	
+        Injector injector = LimeTestUtils.createInjector();
+        networkManager = injector.getInstance(NetworkManager.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+        messageRouter = injector.getInstance(MessageRouter.class);
+        vendorMessageFactory = injector.getInstance(VendorMessageFactory.class);
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        crawlerPongFactory = injector.getInstance(UDPCrawlerPongFactory.class);
+        connectionManager = injector.getInstance(ConnectionManager.class);
+        responseFactory = injector.getInstance(ResponseFactory.class);
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        udpService = injector.getInstance(UDPService.class);
+        countingConnectionFactory = injector.getInstance(CountingConnectionFactory.class);
+        
+        networkManager.setListeningPort(PORT);
+		lifecycleManager.start();
+        connectionServices.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
         
-        Object handler = ProviderHacks.getMessageRouter().getUDPMessageHandler(UDPCrawlerPing.class);
+        Object handler = messageRouter.getUDPMessageHandler(UDPCrawlerPing.class);
         PrivilegedAccessor.setValue(handler,
 				"_UDPListRequestors",
 				new FixedSizeExpiringSet(200,200));
         UDP_ACCESS.connect(InetAddress.getLocalHost(),PORT);
-        ProviderHacks.getVendorMessageFactory().setParser(VendorMessage.F_CRAWLER_PONG, VendorMessage.F_LIME_VENDOR_ID, 
+        vendorMessageFactory.setParser(VendorMessage.F_CRAWLER_PONG, VendorMessage.F_LIME_VENDOR_ID, 
                 new UDPCrawlerPongParserStub());
 	}
 	
-	public void setUp() {
-        setSettings();
-    }
-	
-	public static void globalTearDown() throws Exception {
-        ProviderHacks.getConnectionServices().disconnect();
-		sleep();
+	@Override
+	public void tearDown() throws Exception {
+        connectionServices.disconnect();
+        lifecycleManager.shutdown();
 		LEAF_1.close();
 		LEAF_2.close();
 		LEAF_3.close();
 		UP1.close();
 		UP2.close();
 		UP3.close();
-		sleep();
+		UDP_ACCESS.close();
 	}
 	
 	private static void sleep() {
@@ -169,17 +207,17 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 	/**
 	 * Connects all of the nodes to the central test Ultrapeer.
 	 */
-    private static void connect() throws Exception {
+    private void connect() throws Exception {
 		buildConnections();
         //ultrapeers 
-        UP1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
-        UP2.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
-        UP3.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP1.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP2.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP3.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         
         //leafs
-        LEAF_1.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"),new EmptyResponder(), 1000);
-        LEAF_2.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
-        LEAF_3.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_1.initialize(headersFactory.createLeafHeaders("localhost"),new EmptyResponder(), 1000);
+        LEAF_2.initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_3.initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
                 
 
 		assertTrue("ULTRAPEER_2 should be connected", UP2.isOpen());
@@ -199,7 +237,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     /**
 	 * Drains all messages 
 	 */
- 	private static void drainAll() throws Exception {
+ 	private void drainAll() throws Exception {
  		if(UP1.isOpen()) {
  			drain(UP1);
  		}
@@ -227,7 +265,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	 * @throws Exception
  	 */
  	public void testMsgAll() throws Exception {
- 		UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgAll);
+ 		UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgAll);
  		//test whether we got proper # of results
         byte[] payload = reply.getPayload();
         assertEquals(3,payload[0]);
@@ -286,7 +324,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	 */
  	public void testMsgNone() throws Exception {
  	    UDPCrawlerPing msgNone = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 0, 0,(byte)0);
- 		UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgNone);
+ 		UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgNone);
         byte[] payload = reply.getPayload();
  		assertEquals(0,payload[0]);
  		assertEquals(0,payload[1]);
@@ -297,7 +335,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	 */
  	public void testMsgLeafs() throws Exception {
        UDPCrawlerPing msgLeafsOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 0, 2,(byte)0);
- 		UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgLeafsOnly);
+ 		UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgLeafsOnly);
         byte[] payload = reply.getPayload();
  		assertEquals(2,payload[1]);
  		assertEquals(0,payload[0]);
@@ -308,7 +346,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	 */
  	public void testMsgSome() throws Exception {
  	    UDPCrawlerPing msgSome = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 2, 1,(byte)0);
- 		UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgSome);
+ 		UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgSome);
         byte[] payload = reply.getPayload();
  		
  		assertEquals(1,payload[1]);
@@ -321,7 +359,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	 */
  	public void testMsgMore() throws Exception {
  	    UDPCrawlerPing msgMore = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 20, 30,(byte)0);
- 		UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgMore);
+ 		UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgMore);
         byte[] payload = reply.getPayload();
  		
  		//we should get the number we have connected.
@@ -367,7 +405,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	public void testConnectionTime() throws Exception{
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
         UDPCrawlerPing msgTimes = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)1);
- 		UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgTimes);
+ 		UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgTimes);
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
  		assertTrue((format & UDPCrawlerPing.CONNECTION_TIME)
@@ -386,7 +424,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	public void testBadMask() throws Exception {
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
         UDPCrawlerPing msgBadMask = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0xFF);
- 		UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgBadMask);
+ 		UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgBadMask);
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertTrue((format & UDPCrawlerPing.CONNECTION_TIME)
@@ -407,7 +445,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	public void testLocale() throws Exception {
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
         UDPCrawlerPing msgLocale = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)2);
-        UDPCrawlerPong reply = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgLocale);
+        UDPCrawlerPong reply = crawlerPongFactory.createUDPCrawlerPong(msgLocale);
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
@@ -436,15 +474,15 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		assertGreaterThan(0,msvm.supportsUDPCrawling());
  		
- 		List upCons = ProviderHacks.getConnectionManager().getInitializedConnections();
+ 		List<RoutedConnection> upCons = connectionManager.getInitializedConnections();
  		
- 		BlockingConnection notSupporting = (BlockingConnection) upCons.get(0);
- 		BlockingConnection supporting = (BlockingConnection) upCons.get(1);
+ 		RoutedConnection notSupporting = upCons.get(0);
+ 		RoutedConnection supporting =  upCons.get(1);
  		
  		assertLessThanOrEquals(1,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		assertLessThanOrEquals(1,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		
- 		PrivilegedAccessor.setValue(supporting,"_messagesSupported",msvm);
+ 		PrivilegedAccessor.setValue(supporting,"supportedVendorMessage",msvm);
  		
  		assertLessThanOrEquals(1,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		assertGreaterThanOrEquals(1,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
@@ -453,7 +491,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		//so now, only one UP should be in the result.
         UDPCrawlerPing msgNewOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x4);
- 		UDPCrawlerPong pong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgNewOnly);
+ 		UDPCrawlerPong pong = crawlerPongFactory.createUDPCrawlerPong(msgNewOnly);
  		
  		assertEquals(1, pong.getPayload()[0]);
  		
@@ -461,12 +499,12 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		//now, make one other UP support that message as well
  		
- 		PrivilegedAccessor.setValue(notSupporting,"_messagesSupported",msvm);
+ 		PrivilegedAccessor.setValue(notSupporting,"supportedVendorMessage",msvm);
  		
  		assertGreaterThan(0,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		assertGreaterThan(0,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		
- 		pong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgNewOnly);
+ 		pong = crawlerPongFactory.createUDPCrawlerPong(msgNewOnly);
  		
  		assertEquals(2,pong.getPayload()[0]);
  	}
@@ -474,7 +512,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	public void testMsgAgents() throws Exception {
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
         UDPCrawlerPing msgAgents = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x8);
- 		UDPCrawlerPong pong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgAgents);
+ 		UDPCrawlerPong pong = crawlerPongFactory.createUDPCrawlerPong(msgAgents);
         byte[] payload = pong.getPayload();
         int agentsOffset=(payload[0]+payload[1])*6+3;
         int agentsSize = ByteOrder.leb2short(payload,agentsOffset);
@@ -508,7 +546,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(5);
         PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
         UDPCrawlerPing msgNodeUptime = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x10);
-        UDPCrawlerPong pong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgNodeUptime);
+        UDPCrawlerPong pong = crawlerPongFactory.createUDPCrawlerPong(msgNodeUptime);
         byte[] payload = pong.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
@@ -534,7 +572,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     			UDPCrawlerPing.ALL,
     			UDPCrawlerPing.ALL,
     			UDPCrawlerPing.REPLIES);
-    	UDPCrawlerPong repliesPong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(repliesPing);
+    	UDPCrawlerPong repliesPong = crawlerPongFactory.createUDPCrawlerPong(repliesPing);
     	byte [] payload = repliesPong.getPayload();
     	byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
     	assertTrue((format & UDPCrawlerPing.REPLIES) == UDPCrawlerPing.REPLIES);
@@ -547,9 +585,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     	// send a few query replies on each conn
     	Response[] res = new Response[1];
         for (int j = 0; j < res.length; j++)
-            res[j] = ProviderHacks.getResponseFactory().createResponse(10, 10, "not proxied");
+            res[j] = responseFactory.createResponse(10, 10, "not proxied");
         Message reply = 
-            ProviderHacks.getQueryReplyFactory().createQueryReply(GUID.makeGuid(), (byte) 3, 6356,
+            queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 3, 6356,
                 InetAddress.getLocalHost().getAddress(), 0, res, GUID.makeGuid(), new byte[0], false, false,
                 true, true, false, false, null);
         
@@ -568,7 +606,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         UP3.send(reply);UP3.flush();
         Thread.sleep(100);
         
-        repliesPong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(repliesPing);
+        repliesPong = crawlerPongFactory.createUDPCrawlerPong(repliesPing);
         payload = repliesPong.getPayload();
         
         int current = 0;
@@ -584,7 +622,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
      //   PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
         
         UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte) (0x1 << 6));
-        UDPCrawlerPong pong = ProviderHacks.getUDPCrawlerPongFactory().createUDPCrawlerPong(msgDHTStatus);
+        UDPCrawlerPong pong = crawlerPongFactory.createUDPCrawlerPong(msgDHTStatus);
         byte[] payload = pong.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
@@ -600,7 +638,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     }
     
  	private void tryMessage() throws Exception {
- 		assertTrue(ProviderHacks.getUdpService().isListening());
+ 		assertTrue(udpService.isListening());
  		UDP_ACCESS.setSoTimeout(5000);
  		
  		

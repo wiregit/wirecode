@@ -1,0 +1,56 @@
+package com.limegroup.gnutella.connection;
+
+import java.net.Socket;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.util.SocketsManager;
+import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+
+@Singleton
+public class CountingConnectionFactory implements BlockingConnectionFactory {
+
+    private final CapabilitiesVMFactory capabilitiesVMFactory;
+    private final Provider<SocketsManager> socketsManager;
+    private final Provider<Acceptor> acceptor;
+    private final MessagesSupportedVendorMessage supportedVendorMessage;
+    private final MessageFactory messageFactory;
+    private final NetworkManager networkManager;
+    
+
+    @Inject
+    public CountingConnectionFactory(CapabilitiesVMFactory capabilitiesVMFactory,
+            Provider<SocketsManager> socketsManager,
+            Provider<Acceptor> acceptor,
+            MessagesSupportedVendorMessage supportedVendorMessage,
+            MessageFactory messageFactory, NetworkManager networkManager) {
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
+        this.socketsManager = socketsManager;
+        this.acceptor = acceptor;
+        this.supportedVendorMessage = supportedVendorMessage;
+        this.messageFactory = messageFactory;
+        this.networkManager = networkManager;
+    }
+    
+    public CountingConnection createConnection(Socket socket) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+    
+    public CountingConnection createConnection(String host, int port) {
+        return createConnection(host, port, ConnectType.PLAIN);
+    }
+
+    public CountingConnection createConnection(String host, int port,
+            ConnectType connectType) {
+        return new CountingConnection(host, port, connectType, capabilitiesVMFactory,
+                socketsManager.get(), acceptor.get(), supportedVendorMessage,
+                messageFactory, networkManager);
+    }
+    
+}

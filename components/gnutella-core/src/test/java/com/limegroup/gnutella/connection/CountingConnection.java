@@ -2,10 +2,14 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public class CountingConnection extends BlockingConnection {
@@ -18,8 +22,11 @@ public class CountingConnection extends BlockingConnection {
     public boolean countEnabled;
 
 
-    public CountingConnection(String host, int port) {
-        super(host, port, ConnectType.PLAIN, ProviderHacks.getCapabilitiesVMFactory(), ProviderHacks.getSocketsManager(), ProviderHacks.getAcceptor(), ProviderHacks.getMessagesSupportedVendorMessage(), ProviderHacks.getMessageFactory(), ProviderHacks.getNetworkManager());
+    public CountingConnection(String host, int port, ConnectType connectType,
+            CapabilitiesVMFactory capabilitiesVMFactory, SocketsManager socketsManager,
+            Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
+            MessageFactory messageFactory, NetworkManager networkManager) {
+        super(host, port, ConnectType.PLAIN, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, messageFactory, networkManager);
         countEnabled = true;
     }
 
