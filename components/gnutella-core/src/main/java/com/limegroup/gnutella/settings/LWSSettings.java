@@ -17,7 +17,7 @@ public final class LWSSettings extends LimeProps {
      * The hostname to which we connect for authentication.
      */    
     public static final StringSetting AUTHENTICATION_HOSTNAME =
-        FACTORY.createRemoteStringSetting("AUTHENTICATION_HOSTNAME", "localhost", "authenticationHostname");
+        FACTORY.createRemoteStringSetting("AUTHENTICATION_HOSTNAME", "", "authenticationHostname");
     
     /**
      * The on which we connect for authentication.  This can be <code><= 0</code> for no port.

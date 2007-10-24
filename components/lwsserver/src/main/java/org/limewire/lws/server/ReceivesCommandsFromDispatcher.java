@@ -13,7 +13,7 @@ import java.util.Map;
  * following URL
  * 
  * <pre>
- * http://localhost:8091/store:DownloadSong?hash=123&amp;code=456&amp;privateKey=abc
+ * http://12.34.45.56:8091/store:DownloadSong?hash=123&amp;code=456&amp;privateKey=abc
  * </pre>
  * 
  * For a given {@link ReceivesCommandsFromDispatcher}, <code>d</code>, the {@link LWSDispatcher}
