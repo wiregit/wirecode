@@ -26,6 +26,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * Only messages coming from the inspector ips can turn
  * stats on. 
  */
+// PURPOSELY NOT A SINGLETON!
 public class AdvancedToggleHandler extends RestrictedResponder {
 
     /** Max time to keep stats on */

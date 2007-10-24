@@ -36,6 +36,7 @@ public class IncompleteFileDescTest extends LimeTestCase {
     
     @Override
     public void setUp() throws Exception {
+       
         urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         urns = new HashSet(1);
         urns.add(urn);

@@ -91,7 +91,7 @@ public class FileManagerStub extends FileManager {
     public void setDescs(List descs) {
         this._descs = descs;
     }
-
+    
     public void setFiles(Map m) {
     	_files = m;
     }

@@ -38,7 +38,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     private final NetworkManager networkManager;
     private final UDPReplyHandlerFactory udpReplyHandlerFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
-    private final Executor service; 
+    private final Executor messageExecutorService; 
     
     public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager,
             SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
@@ -60,21 +60,14 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
             NetworkManager networkManager,
             SimppManager simppManager,
             UDPReplyHandlerFactory udpReplyHandlerFactory,
-            UDPReplyHandlerCache udpReplyHandlerCache, Executor service) {
+            UDPReplyHandlerCache udpReplyHandlerCache, Executor messageExecutorService) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
         this.networkManager = networkManager;
         this.udpReplyHandlerFactory = udpReplyHandlerFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
-        if (service == null) {
-            service = new Executor() {
-                public void execute(Runnable r) {
-                    r.run();
-                }
-            };
-        }
-        this.service = service;
+        this.messageExecutorService = messageExecutorService;
         allowed = new IPList();
         allowed.add("*.*.*.*");
         simppManager.addListener(this);
@@ -165,7 +158,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         public void handleSecureMessage(final SecureMessage sm, boolean passed) {
             if (!passed)
                 return;
-            service.execute(new Runnable() {
+            messageExecutorService.execute(new Runnable() {
                 public void run() {
                     processRoutableMessage((RoutableGGEPMessage)sm, addr, handler);
                 }
