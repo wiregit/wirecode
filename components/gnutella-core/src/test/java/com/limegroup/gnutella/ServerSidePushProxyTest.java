@@ -103,14 +103,14 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    // THIS TEST MUST BE FIRST - MAKES SURE THE UP SUPPORTS THE PUSHPROXY VM
-    // EXCHANGE AND SETS UP OTHER TESTS
-    public void testEstablishPushProxy() throws Exception {
+    
+    protected void setUp() throws Exception {
+        super.setUp();
         drainAll();
         Message m = null;
         clientGUID = GUID.makeGuid();
         leafGUID = new GUID(clientGUID);
-
+        
         LEAF[0] = blockingConnectionFactory.createConnection("localhost", PORT);
         // routed leaf, with route table for "test"
         LEAF[0].initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
@@ -120,27 +120,27 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
         qrt.addIndivisible(UrnHelper.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[0].send((RouteTableMessage)iter.next());
-			LEAF[0].flush();
+            LEAF[0].flush();
         }
-
+        
         // make sure UP is advertised proxy support
         do {
             m = LEAF[0].receive(TIMEOUT);
         } while (!(m instanceof MessagesSupportedVendorMessage)) ;
         assertTrue(((MessagesSupportedVendorMessage)m).supportsPushProxy() > 0);
-
+        
         // send proxy request
         PushProxyRequest req = new PushProxyRequest(new GUID(clientGUID));
         LEAF[0].send(req);
         LEAF[0].flush();
-
+        
         // wait for ack
         do {
             m = LEAF[0].receive(TIMEOUT);
         } while (!(m instanceof PushProxyAcknowledgement)) ;
         assertTrue(Arrays.equals(m.getGUID(), clientGUID));
         assertEquals(PORT, ((PushProxyAcknowledgement)m).getListeningPort());
-
+        
         // ultrapeer supports push proxy setup A-OK
     }
     
