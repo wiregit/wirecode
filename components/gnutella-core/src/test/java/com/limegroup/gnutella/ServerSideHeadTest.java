@@ -10,6 +10,9 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -30,13 +33,18 @@ public class ServerSideHeadTest extends LimeTestCase {
         return buildTestSuite(ServerSideHeadTest.class);
     }
     
-    private static DatagramSocket socket1, socket2;
-    private static int port1, port2;
-    private static InetSocketAddress addr1, addr2;
-    private static HeadPing ping1, ping2;
+    private DatagramSocket socket1, socket2;
+    private int port1, port2;
+    private InetSocketAddress addr1, addr2;
+    private HeadPing ping1, ping2;
+    private LifecycleManager lifecycleManager;
+    private MessageRouter messageRouter;
+    private MessageFactory messageFactory;
 
     
-    public static void globalSetUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
+
     	ConnectionSettings.SOLICITED_GRACE_PERIOD.setValue(1000l);
     	ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     	
@@ -53,8 +61,6 @@ public class ServerSideHeadTest extends LimeTestCase {
     	ping1 = new HeadPing(FileManagerStub.NOT_HAVE);
     	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
 
-
-    	
     	ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
     	ping1.write(baos1);
     	ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
@@ -63,30 +69,30 @@ public class ServerSideHeadTest extends LimeTestCase {
     	addr1 = new InetSocketAddress(InetAddress.getLocalHost(), port1);
     	addr2 = new InetSocketAddress(InetAddress.getLocalHost(), port2);
 
-
-
     	
-        @SuppressWarnings("all") // DPINJ: textfix
-    	FileManagerStub fmanager = new FileManagerStub();
+    	Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+    	    @Override
+    	    protected void configure() {
+    	        bind(FileManager.class).to(FileManagerStub.class);
+    	    } 
+    	});
     	
-    //	RouterService service = new RouterService(new ActivityCallbackStub());
-    	ProviderHacks.getLifecycleManager().start();
-    	
-    //	PrivilegedAccessor.setValue(RouterService.class,"fileManager",fmanager);
+    	lifecycleManager = injector.getInstance(LifecycleManager.class);
+        messageRouter = injector.getInstance(MessageRouter.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+        
+    	lifecycleManager.start();
     }
     
     public void tearDown() throws Exception {
-    //	Thread.sleep(ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue());
-    }
-    
-    public static void globalTearDown() throws Exception {
-    	socket1.close();
-    	socket2.close();
+        socket1.close();
+        socket2.close();
+        lifecycleManager.shutdown();
     }
   
     public void testGeneralBehavior() throws Exception{
     	
-    	MessageRouter router = ProviderHacks.getMessageRouter();
+    	MessageRouter router = messageRouter;
     	router.handleUDPMessage(ping1,addr1);
     	Thread.sleep(100);
     	
@@ -94,7 +100,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	socket1.receive(received);
     	
     	HeadPong pong = (HeadPong) 
-			ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(received.getData()));
+			messageFactory.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     	
@@ -104,7 +110,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	received = new DatagramPacket(new byte[1024],1024);
     	socket2.receive(received);
     	pong = (HeadPong) 
-			ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(received.getData()));
+			messageFactory.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping2.getGUID(),pong.getGUID()));
     	
@@ -116,7 +122,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	received = new DatagramPacket(new byte[1024],1024);
     	socket1.receive(received);
     	pong = (HeadPong) 
-			ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(received.getData()));
+			messageFactory.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     }

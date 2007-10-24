@@ -6,14 +6,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerController;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -94,20 +92,6 @@ public class FileManagerStub extends FileManager {
         this._descs = descs;
     }
 
-    @Deprecated
-    public FileManagerStub(Map urns,List descs) {
-    	super(ProviderHacks.getFileManagerController());
-        _urns = urns;
-        _descs = descs;
-    }
-    
-    @Deprecated
-    public FileManagerStub(){
-    	super(ProviderHacks.getFileManagerController());
-        _urns = new HashMap();
-    	_descs = new Vector();
-    }
-    
     public void setFiles(Map m) {
     	_files = m;
     }
