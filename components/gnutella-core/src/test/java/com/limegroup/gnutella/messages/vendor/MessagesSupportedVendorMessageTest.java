@@ -7,13 +7,19 @@ import junit.framework.Test;
 
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.MessageFactory;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
 public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase {
+    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
+    private MessageFactory messageFactory;
+
+
     public MessagesSupportedVendorMessageTest(String name) {
         super(name);
     }
@@ -27,10 +33,16 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
+    protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
+		messageFactory = injector.getInstance(MessageFactory.class);
+    }
     
     public void testStaticConstructor() throws Exception {
         MessagesSupportedVendorMessage vmp = 
-            ProviderHacks.getMessagesSupportedVendorMessage();
+            messagesSupportedVendorMessage;
         assertGreaterThan(0, vmp.supportsTCPConnectBack());
         assertGreaterThan(0, vmp.supportsUDPConnectBack());
         assertGreaterThan(0, vmp.supportsTCPConnectBackRedirect());
@@ -53,7 +65,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         MessagesSupportedVendorMessage vmpRead = 
-            (MessagesSupportedVendorMessage) ProviderHacks.getMessageFactory().read(bais);
+            (MessagesSupportedVendorMessage) messageFactory.read(bais);
         assertEquals(vmp, vmpRead);
         assertGreaterThan(0, vmpRead.supportsTCPConnectBack());
         assertGreaterThan(0, vmpRead.supportsUDPConnectBack());
@@ -99,7 +111,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         MessagesSupportedVendorMessage vmp = 
-           (MessagesSupportedVendorMessage) ProviderHacks.getMessageFactory().read(bais);
+           (MessagesSupportedVendorMessage) messageFactory.read(bais);
         // make sure it supports everything we expect....
         assertEquals(10, vmp.supportsMessage("SUSH".getBytes(), 10));
         assertEquals(5, vmp.supportsMessage("NEIL".getBytes(), 5));

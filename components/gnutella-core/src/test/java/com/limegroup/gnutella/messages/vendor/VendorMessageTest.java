@@ -10,21 +10,29 @@ import junit.framework.Test;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
+import org.limewire.util.BaseTestCase;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.FileDescStub;
 
 
 @SuppressWarnings( { "unchecked", "cast" } )
-public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class VendorMessageTest extends BaseTestCase {
     
     private SecurityToken token;
+    private ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
+    private MessageFactory messageFactory;
+    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
+    private NetworkManager networkManager;
     
     public VendorMessageTest(String name) {
         super(name);
@@ -36,6 +44,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
 
     @Override
     protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		replyNumberVendorMessageFactory = injector.getInstance(ReplyNumberVendorMessageFactory.class);
+		messageFactory = injector.getInstance(MessageFactory.class);
+		messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
+		networkManager = injector.getInstance(NetworkManager.class);
+
         token = new AddressSecurityToken(InetAddress.getLocalHost(), 7090);
     }
 
@@ -100,26 +114,26 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         
         // test old versions are no longer accepted 
         try {
-            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 1, new byte[1]);
             fail("should have thrown bad packed exception, protocol version 1 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         try {
-            vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+            vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                     (byte) 1, (byte) 0, 2, new byte[1]);
             fail("should have thrown bad packed exception, protocol version 2 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         
-        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createFromNetwork(GUID.makeGuid(),
+        vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
                 (byte) 1, (byte) 0, 3, new byte[2]);
         
         testWrite(vm);
         // test other constructor....
-        vm = ProviderHacks.getReplyNumberVendorMessageFactory().createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
+        vm = replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
         testRead(vm);
 
         // Push Proxy Request
@@ -248,7 +262,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    	HeadPing ping2 = (HeadPing) ProviderHacks.getMessageFactory().read(bais);
+    	HeadPing ping2 = (HeadPing) messageFactory.read(bais);
     	
     	assertEquals(ping.getUrn(), ping2.getUrn());
     	assertEquals(ping.getFeatures(),ping2.getFeatures());
@@ -262,7 +276,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
     	baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	bais = new ByteArrayInputStream(baos.toByteArray());
-    	ping2 = (HeadPing) ProviderHacks.getMessageFactory().read(bais);
+    	ping2 = (HeadPing) messageFactory.read(bais);
     	
     	assertEquals(g,ping2.getClientGuid());
     	
@@ -272,7 +286,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
     	ping.write(baos);
     	bais = new ByteArrayInputStream(baos.toByteArray());
     	try {
-    	ping2 = (HeadPing) ProviderHacks.getMessageFactory().read(bais);
+    	ping2 = (HeadPing) messageFactory.read(bais);
     		fail("parsed a ping which claimed to have a clientguid but didn't");
     	}catch(BadPacketException expected) {}
     }
@@ -298,7 +312,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        VendorMessage vmRead = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm, vmRead);
     }
 
@@ -306,7 +320,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        VendorMessage vmRead = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm,vmRead);
     }
 
@@ -486,7 +500,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
                                           InetAddress.getLocalHost(), 6346);
         hops = new HopsFlowVendorMessage((byte)4);
 
-        ms = ProviderHacks.getMessagesSupportedVendorMessage();
+        ms = messagesSupportedVendorMessage;
         
         tcp.write(baos);
         udp.write(baos);
@@ -498,22 +512,22 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        VendorMessage vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        VendorMessage vm = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm,(tcp));
 
-        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        vm = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm,(udp));
 
-        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        vm = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm,(tcpR));
 
-        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        vm = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm,(udpR));
 
-        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        vm = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm,(ms));
         
-        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        vm = (VendorMessage) messageFactory.read(bais);
         assertEquals(vm,(hops));
     }
 
@@ -530,15 +544,15 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        vm = (VendorMessage) ProviderHacks.getMessageFactory().read(bais);
+        vm = (VendorMessage) messageFactory.read(bais);
         
     }
 
     public void testReadHeaderUpdateVendorMessage() throws Exception {
         
         // make a header update message as we do when our ip changes
-        byte addr[] = ProviderHacks.getNetworkManager().getAddress();
-        int port = ProviderHacks.getNetworkManager().getPort();
+        byte addr[] = networkManager.getAddress();
+        int port = networkManager.getPort();
         Properties props = new Properties();
         props.put(HeaderNames.LISTEN_IP, NetworkUtils.ip2string(addr) + ":" + port);
         HeaderUpdateVendorMessage m = new HeaderUpdateVendorMessage(props);
@@ -559,7 +573,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         System.arraycopy(data.toByteArray(), headerLength, payload, 0, payloadLength);
 
         // see if Message.createMessage() can understand it
-        Message m2 = ProviderHacks.getMessageFactory().createMessage(header, payload, (byte)4, Network.TCP, null);
+        Message m2 = messageFactory.createMessage(header, payload, (byte)4, Network.TCP, null);
         assertNotNull(m2);
     }
     

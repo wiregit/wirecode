@@ -5,14 +5,24 @@ import java.io.ByteArrayOutputStream;
 
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage.Control;
 
 public class OOBProxyControlVendorMessageTest extends BaseTestCase {
 
+    private MessageFactory messageFactory;
+
     public OOBProxyControlVendorMessageTest(String name) {
         super(name);
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		messageFactory = injector.getInstance(MessageFactory.class);
     }
     
     public void testDoNotProxyAtAllMessage() throws Exception {
@@ -47,7 +57,7 @@ public class OOBProxyControlVendorMessageTest extends BaseTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         msg.write(out);
         
-        Message m = ProviderHacks.getMessageFactory().read(new ByteArrayInputStream(out.toByteArray()));
+        Message m = messageFactory.read(new ByteArrayInputStream(out.toByteArray()));
         assertTrue(m instanceof OOBProxyControlVendorMessage);
         OOBProxyControlVendorMessage read = (OOBProxyControlVendorMessage)m;
         assertEquals(msg.getMaximumDisabledVersion(), read.getMaximumDisabledVersion());
