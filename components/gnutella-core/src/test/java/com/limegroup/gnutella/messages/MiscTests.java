@@ -5,15 +5,16 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Random;
 
+import junit.framework.Test;
+
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.util.CommonUtils;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class MiscTests extends LimeTestCase {
@@ -28,9 +29,11 @@ public class MiscTests extends LimeTestCase {
     
     /** Makes sure all stuff we need to work works. */
     public void testSecureUpdateMessage() throws Exception {
-        ProviderHacks.getStaticMessages().initialize();
-        QueryReply reply = ProviderHacks.getStaticMessages().getUpdateReply();
-        QueryReply lime = ProviderHacks.getStaticMessages().getLimeReply();
+        Injector injector = LimeTestUtils.createInjector();
+        StaticMessages staticMessages = injector.getInstance(StaticMessages.class);
+        staticMessages.initialize();
+        QueryReply reply = staticMessages.getUpdateReply();
+        QueryReply lime = staticMessages.getLimeReply();
         assertTrue(reply.hasSecureData());
         assertTrue(lime.hasSecureData());
 
