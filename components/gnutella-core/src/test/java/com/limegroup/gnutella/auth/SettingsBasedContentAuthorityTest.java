@@ -7,13 +7,18 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
  
 public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     
+    private IpPortContentAuthorityFactory ipPortContentAuthorityFactory;
+    private PingRequestFactory pingRequestFactory;
+
     public SettingsBasedContentAuthorityTest(String name) {
         super(name);
     }
@@ -21,10 +26,17 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     public static Test suite() {
         return buildTestSuite(SettingsBasedContentAuthorityTest.class);
     }
+
+    @Override
+    protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		ipPortContentAuthorityFactory = injector.getInstance(IpPortContentAuthorityFactory.class);
+		pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+    }
     
     public void testInitialize() {
         ContentSettings.AUTHORITIES.setValue(new String[] { "yahoo.com", "google.com:82", "askjeeves.com:6346" });
-        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory());
+        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ipPortContentAuthorityFactory);
         auth.initialize();
         ContentAuthority[] all = auth.getAuthorities();
         assertEquals(3, all.length);
@@ -44,7 +56,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     
     public void testInitializeDNSFails() {
         ContentSettings.AUTHORITIES.setValue(new String[] { "notarealdnsnamesodonteventryit.com", "google.com" });
-        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory());
+        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ipPortContentAuthorityFactory);
         auth.initialize();
         ContentAuthority[] all = auth.getAuthorities();
         assertEquals(1, all.length);
@@ -57,7 +69,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     public void testRandomSending() throws Exception {
         final int[] randoms = new int[] { 0, 2, 1, 0, 1, 0, 0, 1, 2, 2 };
         
-        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ProviderHacks.getIpPortContentAuthorityFactory()) {
+        SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ipPortContentAuthorityFactory) {
             public Random newRandom() {
                 return new StubRandom(randoms);
             }
@@ -69,7 +81,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
 
         Message[] ms = new Message[randoms.length];
         for(int i = 0; i < randoms.length; i++) {
-            ms[i] = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+            ms[i] = pingRequestFactory.createPingRequest((byte)1);
             auth.send(ms[i]);
         }
         
