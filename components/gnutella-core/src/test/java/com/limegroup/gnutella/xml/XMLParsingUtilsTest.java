@@ -9,18 +9,20 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
+import org.limewire.util.BaseTestCase;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.util.LimeTestCase;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 
 /**
  * Tests for the XMLParsingUtils class
  */
 @SuppressWarnings("unchecked")
-public class XMLParsingUtilsTest extends LimeTestCase {
+public class XMLParsingUtilsTest extends BaseTestCase {
     
     private static final String AUDIO_SCHEMA = "http://www.limewire.com/schemas/audio.xsd";
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
     
     public XMLParsingUtilsTest(String name) {
         super(name);
@@ -28,6 +30,12 @@ public class XMLParsingUtilsTest extends LimeTestCase {
     
     public static Test suite() {
         return buildTestSuite(XMLParsingUtilsTest.class);
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
     }
     
     public void testSplit() throws Exception {
@@ -123,7 +131,7 @@ public class XMLParsingUtilsTest extends LimeTestCase {
         list.add(new NameValue<String>("audios__audio__language__", "s\tpace"));
         list.add(new NameValue<String>("audios__audio__seconds__", "even[ m�r�] c�a��cters"));
         list.add(new NameValue<String>("audios__audio__bitrate__", "a\u0002\u0003\u0004b"));
-        String xml = ProviderHacks.getLimeXMLDocumentFactory().createLimeXMLDocument(list, AUDIO_SCHEMA).getXMLString();
+        String xml = limeXMLDocumentFactory.createLimeXMLDocument(list, AUDIO_SCHEMA).getXMLString();
         XMLParsingUtils.ParseResult r = XMLParsingUtils.parse(xml,1);
         assertEquals("http://www.limewire.com/schemas/audio.xsd", r.schemaURI);
         assertEquals("audio", r.type);
