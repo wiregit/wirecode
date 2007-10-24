@@ -223,7 +223,7 @@ public abstract class VendorMessage extends AbstractMessage {
         return _payload;
     }
 
-    protected int getVersion() {
+    public int getVersion() {
         return _version;
     }
 

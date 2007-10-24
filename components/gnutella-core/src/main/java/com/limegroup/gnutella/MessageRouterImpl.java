@@ -186,7 +186,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
     /** The maximum number of UDP replies to buffer up.  Non-final for 
      *  testing.
      */
-    static int MAX_BUFFERED_REPLIES = 250;
+    public static final int MAX_BUFFERED_REPLIES = 250;
+    
+    private int maxBufferedReplies = MAX_BUFFERED_REPLIES;
 
     /**
      * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
@@ -1240,7 +1242,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
                                                       Response[] resps) {
         // store responses by guid for later retrieval
         synchronized (_outOfBandReplies) {
-            if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
+            if (_outOfBandReplies.size() < maxBufferedReplies) {
                 GUID.TimedGUID tGUID = 
                     new GUID.TimedGUID(new GUID(query.getGUID()),
                                        TIMED_GUID_LIFETIME);
@@ -2852,6 +2854,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     Map<GUID.TimedGUID, QueryResponseBundle> getOutOfBandReplies() {
         return _outOfBandReplies;
+    }
+    
+    /**
+     * Default access use for testing only. 
+     */
+    void setMaxBufferedReplies(int maxBufferedReplies) {
+        this.maxBufferedReplies = maxBufferedReplies;
     }
     
     private static class QueryResponseBundle {
