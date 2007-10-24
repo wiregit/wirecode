@@ -43,7 +43,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.ManagedConnectionStub;
+import com.limegroup.gnutella.RoutedConnectionStub;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
@@ -1354,7 +1354,7 @@ public class AltLocUploadTest extends LimeTestCase {
         }
     }
 
-    private static class MyReplyHandler extends ManagedConnectionStub {
+    private static class MyReplyHandler extends RoutedConnectionStub {
         public QueryReply received;
 
         public void handleQueryReply(QueryReply queryReply,

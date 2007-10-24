@@ -39,8 +39,8 @@ public class IpPortImpl implements IpPort {
     }
     
     /** Constructs a new IpPort using the given byte[] & port. */
-    public IpPortImpl(byte[] addr, int port) throws UnknownHostException {
-        this(new InetSocketAddress(InetAddress.getByAddress(addr), port), asString(addr));
+    public IpPortImpl(byte[] addr, int port) {
+        this(new InetSocketAddress(getAddressFromBytes(addr), port), asString(addr));
     }
     
     /** Constructs an IpPort using the given host:port */
@@ -92,5 +92,13 @@ public class IpPortImpl implements IpPort {
                 sb.append(".");
         }
         return sb.toString();
+    }
+    
+    private static InetAddress getAddressFromBytes(byte[] address) {
+        try {
+            return InetAddress.getByAddress(address);
+        } catch(UnknownHostException uhe) {
+            throw new IllegalArgumentException("invalid address: " + asString(address));
+        }
     }
 }

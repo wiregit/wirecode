@@ -10,8 +10,6 @@ import java.util.StringTokenizer;
 
 import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -366,8 +364,8 @@ public class HandshakeResponse {
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're accepting
      */
-    static HandshakeResponse createAcceptIncomingResponse(HandshakeResponse response, Properties headers, ConnectionServices connectionServices) {
-        return new HandshakeResponse(addXTryHeader(response, headers, connectionServices));
+    static HandshakeResponse createAcceptIncomingResponse(HandshakeResponse response, Properties headers, HandshakeServices handshakeServices) {
+        return new HandshakeResponse(addXTryHeader(response, headers, handshakeServices));
     }
 
 
@@ -390,19 +388,19 @@ public class HandshakeResponse {
 	 * @param headers the <tt>Properties</tt> instance containing the headers
 	 *  to send to the node we're rejecting
 	 */
-	static HandshakeResponse createCrawlerResponse(ConnectionManager connectionManager) {
+	static HandshakeResponse createCrawlerResponse(HandshakeServices handshakeServices) {
 		Properties headers = new Properties();
 		
         // add our user agent
         headers.put(HeaderNames.USER_AGENT, LimeWireUtils.getHttpServer());
-        headers.put(HeaderNames.X_ULTRAPEER, Boolean.toString(connectionManager.isSupernode()));
+        headers.put(HeaderNames.X_ULTRAPEER, Boolean.toString(handshakeServices.isUltrapeer()));
         
 		// add any leaves
-        List<? extends IpPort> leaves = connectionManager.getInitializedClientConnections();
+        List<? extends IpPort> leaves = handshakeServices.getLeafNodes();
 		headers.put(HeaderNames.LEAVES, createEndpointString(leaves, leaves.size()));
 
 		// add any Ultrapeers
-        List<? extends IpPort> ultrapeers = connectionManager.getInitializedConnections();
+        List<? extends IpPort> ultrapeers = handshakeServices.getUltrapeerNodes();
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(ultrapeers, ultrapeers.size()));
 			
@@ -422,9 +420,9 @@ public class HandshakeResponse {
      * @return a <tt>HandshakeResponse</tt> with the appropriate response 
      *  headers
      */
-    static HandshakeResponse createUltrapeerRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status, ConnectionServices connectionServices) {
+    static HandshakeResponse createUltrapeerRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status, HandshakeServices handshakeServices) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL, status.getMessage(),
-                                     addXTryHeader(hr, new Properties(), connectionServices));        
+                                     addXTryHeader(hr, new Properties(), handshakeServices));        
     }
 
 
@@ -457,9 +455,9 @@ public class HandshakeResponse {
      *  connection and with the specified connection headers
      */
     static HandshakeResponse 
-        createLeafRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status, ConnectionServices connectionServices) {
+        createLeafRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status, HandshakeServices handshakeServices) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL, status.getMessage(),
-                                     addXTryHeader(hr, new Properties(), connectionServices));  
+                                     addXTryHeader(hr, new Properties(), handshakeServices));  
     }
 
     /**
@@ -571,8 +569,8 @@ public class HandshakeResponse {
      *  
      *  Default access for testing.
      */
-    static Properties addXTryHeader(HandshakeResponse hr, Properties headers, ConnectionServices connectionServices) {
-        Collection<IpPort> hosts = connectionServices.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
+    static Properties addXTryHeader(HandshakeResponse hr, Properties headers, HandshakeServices handshakeServices) {
+        Collection<IpPort> hosts = handshakeServices.getAvailableHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;
     }

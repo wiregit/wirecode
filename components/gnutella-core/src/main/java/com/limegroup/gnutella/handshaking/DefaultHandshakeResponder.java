@@ -1,18 +1,11 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.ConnectionManager;
 
 /**
  * This is an abstract class that provides a default implementation of
  * HandshakeResponder. 
  */
 public abstract class DefaultHandshakeResponder implements HandshakeResponder {
-
-    /**
-     * An instance of connection manager (to reference other stuff
-     * held by connection manager)
-     */
-    protected final ConnectionManager _manager;
     
     /**
      * The host to which are opening connection
@@ -30,8 +23,7 @@ public abstract class DefaultHandshakeResponder implements HandshakeResponder {
      * connection
      * @param host The host with whom we are handshaking
      */
-    public DefaultHandshakeResponder(String host, ConnectionManager connectionManager) {
-        this._manager = connectionManager;
+    public DefaultHandshakeResponder(String host) {
         this._host = host;
     }
     

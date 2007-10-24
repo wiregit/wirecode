@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.net.ConnectionDispatcher;
 
@@ -18,11 +17,10 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
-import com.limegroup.gnutella.ProviderHacks;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
@@ -63,21 +61,6 @@ public class ConnectionManagerStub extends ConnectionManager {
                 capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
                 socketsManager, connectionServices, nodeAssigner, ipFilter,
                 connectionCheckerManager, pingRequestFactory);
-    }
-
-    @Deprecated
-    public ConnectionManagerStub() {
-        super(ProviderHacks.getNetworkManager(), Providers.of(ProviderHacks.getHostCatcher()),
-                Providers.of(ProviderHacks.getConnectionDispatcher()), ProviderHacks
-                        .getBackgroundExecutor(), Providers.of(ProviderHacks.getSimppManager()),
-                ProviderHacks.getCapabilitiesVMFactory(), ProviderHacks
-                        .getManagedConnectionFactory(), Providers.of(ProviderHacks
-                        .getMessageRouter()), Providers.of(ProviderHacks.getQueryUnicaster()),
-                ProviderHacks.getSocketsManager(), ProviderHacks.getConnectionServices(), Providers
-                        .of(ProviderHacks.getNodeAssigner()), Providers.of(ProviderHacks
-                        .getIpFilter()), ProviderHacks.getConnectionCheckerManager(), ProviderHacks
-                        .getPingRequestFactory());
-
     }
 
     /** Calls c.close iff enableRemove */

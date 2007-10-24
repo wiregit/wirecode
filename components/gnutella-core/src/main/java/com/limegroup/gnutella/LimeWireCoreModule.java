@@ -120,6 +120,8 @@ import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
+import com.limegroup.gnutella.handshaking.HandshakeServices;
+import com.limegroup.gnutella.handshaking.HandshakeServicesImpl;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
@@ -321,6 +323,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(NIODispatcher.class).toProvider(NIODispatcherProvider.class);
         bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
         bind(ResponseVerifier.class).to(ResponseVerifierImpl.class);
+        bind(HandshakeServices.class).to(HandshakeServicesImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

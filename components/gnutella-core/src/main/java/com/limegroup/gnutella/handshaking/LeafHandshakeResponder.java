@@ -2,8 +2,6 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
@@ -14,8 +12,7 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
 public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
     
     private final HeadersFactory headersFactory;
-    private final ConnectionManager connectionManager;
-    private final ConnectionServices connectionServices;
+    private final HandshakeServices handshakeServices;
     
     /**
      * Creates a new instance of LeafHandshakeResponder
@@ -25,13 +22,11 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    LeafHandshakeResponder(String host, HeadersFactory headersFactory, ConnectionManager connectionManager,
-            ConnectionServices connectionServices) {
-        super(host, connectionManager);
+    LeafHandshakeResponder(String host, HeadersFactory headersFactory, HandshakeServices handshakeServices) {
+        super(host);
         
         this.headersFactory = headersFactory;
-        this.connectionManager = connectionManager;
-        this.connectionServices = connectionServices;
+        this.handshakeServices = handshakeServices;
     }
     
     /**
@@ -58,7 +53,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
             }
         }
         
-        HandshakeStatus status = _manager.allowConnection(response);
+        HandshakeStatus status = handshakeServices.getHandshakeStatusForResponse(response);
         if(!status.isAcceptable()) {
             HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse(status);
@@ -86,7 +81,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
     protected HandshakeResponse respondToIncoming(HandshakeResponse hr) {
 		if (hr.isCrawler()) {
 		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
-			return HandshakeResponse.createCrawlerResponse(connectionManager);
+			return HandshakeResponse.createCrawlerResponse(handshakeServices);
 		}
 		
         //if not an ultrapeer, reject.
@@ -98,10 +93,10 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         Properties ret = headersFactory.createLeafHeaders(getRemoteIP());
         
         //If we already have enough ultrapeers, reject.
-        HandshakeStatus status = _manager.allowConnection(hr);
+        HandshakeStatus status = handshakeServices.getHandshakeStatusForResponse(hr);
         if (!status.isAcceptable()) {
             HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HandshakeResponse.createLeafRejectIncomingResponse(hr, status, connectionServices);
+            return HandshakeResponse.createLeafRejectIncomingResponse(hr, status, handshakeServices);
         } 
 
 		//deflate if we can ...
@@ -112,6 +107,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
 
         //b) We're not a leaf yet, so accept the incoming connection
-        return HandshakeResponse.createAcceptIncomingResponse(hr, ret, connectionServices);
+        return HandshakeResponse.createAcceptIncomingResponse(hr, ret, handshakeServices);
     }
 }

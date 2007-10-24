@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.NetworkManager;
+import org.limewire.io.IpPort;
 
 /**
  * Headers that should be sent only by Ultrapeers.
@@ -19,8 +19,8 @@ public class UltrapeerHeaders extends DefaultHeaders {
      *  on Gnutella -- useful in discovering the real address at the NAT
      *  or firewall
      */
-    UltrapeerHeaders(String remoteIP, NetworkManager networkManager) {
-        super(remoteIP, networkManager);
+    UltrapeerHeaders(String remoteIP, IpPort localIp) {
+        super(remoteIP, localIp);
         //set Ultrapeer property
         put(HeaderNames.X_ULTRAPEER, "True");
         put(HeaderNames.X_PROBE_QUERIES, PROBE_VERSION);
