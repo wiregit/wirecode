@@ -346,15 +346,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     private static final int TIMEOUT = 2000;
     
     /**
-     * Sends a pong through the connection to keep it alive.
-     */
-    public static void keepAlive(BlockingConnection c) throws IOException {
-        PingReply pr = ProviderHacks.getPingReplyFactory().create(GUID.makeGuid(), (byte)1);
-        c.send(pr);
-        c.flush();
-    }
-    
-    /**
      * Sends a pong through all connections to keep them alive.
      * @param pingReplyFactory 
      */
