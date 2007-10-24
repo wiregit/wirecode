@@ -1,12 +1,8 @@
 package com.limegroup.gnutella.gui.search;
 
 import java.io.IOException;
-import java.util.List;
 
 import junit.framework.Test;
-
-import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * This class tests that the database is lenient in creating results and doesn't

@@ -13,6 +13,7 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
     private static final int MSECS_PER_HOUR=60*60*1000;
     private static final int MSECS_PER_DAY=24*MSECS_PER_HOUR;
 
+    private ClockStub clock;
 
     public StatisticsTest(String name) {
         super(name);
@@ -25,17 +26,18 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void setUp() {
         ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(0);
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.0f);
-        TestStatistics.now=0;
+        
+        clock = new ClockStub();
     }
     
     /** Tests the test!  You may laugh, but it took me a while to get that class
      *  working, because the initializer for Statistics depends on template
      *  methods in the subclass, which was previously using uninitialized state
      *  of the subclass. */
-    public void testTestStatistics() {
-        TestStatistics.now=1000;
-        TestStatistics t=new TestStatistics();
-        TestStatistics.now+=12;
+    public void testStatistics() {
+        clock.setNow(1000);
+        Statistics t=new Statistics(clock);
+        clock.addNow(12);
         assertEquals(12, t.getUptime());
     }
 
@@ -43,9 +45,9 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
      * Start up for first time.  Run for 1 day.  Shutdown.
      */
     public void testFirstDay() {
-        TestStatistics.now=MSECS_PER_DAY*8;
-        TestStatistics stats=new TestStatistics();
-        TestStatistics.now+=MSECS_PER_DAY;
+        clock.setNow(MSECS_PER_DAY*8);
+        Statistics stats=new Statistics(clock);
+        clock.addNow(MSECS_PER_DAY);
         assertEquals(1.0f/7.0f, stats.calculateFractionalUptime(), DELTA);
     }
 
@@ -56,9 +58,9 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
         //                 ------up------
         // days 0          1             2
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
-        TestStatistics.now=MSECS_PER_DAY;
-        TestStatistics stats=new TestStatistics();
-        TestStatistics.now+=MSECS_PER_DAY;
+        clock.setNow(MSECS_PER_DAY);
+        Statistics stats=new Statistics(clock);
+        clock.addNow(MSECS_PER_DAY);
         assertEquals(0.5f, stats.calculateFractionalUptime(), DELTA);
         assertEquals(12*60*60., (float)stats.calculateDailyUptime(), DELTA);
     }
@@ -70,9 +72,9 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testFractionalUpdate() {
         //Test calculate without property update
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
-        TestStatistics.now=2*MSECS_PER_DAY;
-        TestStatistics stats=new TestStatistics();
-        TestStatistics.now+=MSECS_PER_DAY;
+        clock.setNow(2*MSECS_PER_DAY);
+        Statistics stats=new Statistics(clock);
+        clock.addNow(MSECS_PER_DAY);
         assertEquals(3.0f/7.0f, stats.calculateFractionalUptime(), DELTA);
         assertEquals(0,
             ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
@@ -81,7 +83,7 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         //Test shutdown method too.
         stats.shutdown();
-        assertEquals(TestStatistics.now, 
+        assertEquals(clock.now(), 
             ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
         assertEquals(3.0f/7.0f, 
             ApplicationSettings.FRACTIONAL_UPTIME.getValue(), DELTA);
@@ -91,9 +93,9 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
      *  converge on this value. */
     public void testConvergence() {
         for (int i=0; i<200; i++) {            
-            TestStatistics.now+=MSECS_PER_HOUR;
-            TestStatistics stats=new TestStatistics();    //start
-            TestStatistics.now+=2*MSECS_PER_HOUR;
+            clock.addNow(MSECS_PER_HOUR);
+            Statistics stats=new Statistics(clock);    //start
+            clock.addNow(2*MSECS_PER_HOUR);
             stats.shutdown();                             //stop
         }
 
@@ -106,9 +108,9 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
      * Run for a huge period of time.
      */
     public void testUpFullTime() {
-        TestStatistics.now=MSECS_PER_DAY;   //optional
-        TestStatistics stats=new TestStatistics();
-        TestStatistics.now+=MSECS_PER_DAY*8;
+        clock.setNow(MSECS_PER_DAY);   //optional
+        Statistics stats=new Statistics(clock);
+        clock.addNow(MSECS_PER_DAY*8);
         assertEquals(1.0f, stats.calculateFractionalUptime(), DELTA);
         assertEquals(24*60*60., (float)stats.calculateDailyUptime(), DELTA);
     }
@@ -121,15 +123,15 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
 
         //Test calculate without property update
-        TestStatistics.now=MSECS_PER_DAY;
-        TestStatistics stats=new TestStatistics();
-        TestStatistics.now-=MSECS_PER_HOUR;   //backwards!
+        clock.setNow(MSECS_PER_DAY);
+        Statistics stats=new Statistics(clock);
+        clock.substractNow(MSECS_PER_HOUR);   //backwards!
         assertEquals(0.5f,
             ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);
 
         //Test shutdown method too.
         stats.shutdown();
-        assertEquals(TestStatistics.now,
+        assertEquals(clock.now(),
             ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
         assertEquals(0.5f,
             ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);        
@@ -144,30 +146,18 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.5f);
 
         //Test calculate without property update
-        TestStatistics.now=
-             ApplicationSettings.LAST_SHUTDOWN_TIME.getValue()-MSECS_PER_HOUR;
-        TestStatistics stats=new TestStatistics();
-        TestStatistics.now+=MSECS_PER_DAY;
+        clock.setNow(
+             ApplicationSettings.LAST_SHUTDOWN_TIME.getValue()-MSECS_PER_HOUR);
+        Statistics stats=new Statistics(clock);
+        clock.addNow(MSECS_PER_DAY);
         assertEquals(0.5f,
             ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);
 
         //Test shutdown method too.
         stats.shutdown();
-        assertEquals(TestStatistics.now,
+        assertEquals(clock.now(),
             ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
         assertEquals(0.5f,
             ApplicationSettings.FRACTIONAL_UPTIME.getValue(), 0.0f);
-    }
-}
-
-
-/** Lets you fake the system time used in fractional uptime calculations. */
-class TestStatistics extends Statistics {
-    static long now;   
-
-    protected long now() {
-        //Need static variable because Statistics.startTime() is
-        //initialized before local fields of TestStatistics.
-        return now;
     }
 }

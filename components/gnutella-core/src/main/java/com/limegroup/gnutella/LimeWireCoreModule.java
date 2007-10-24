@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
@@ -208,6 +209,7 @@ public class LimeWireCoreModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        binder().install(new LimeWireCommonModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         
         bind(LimeWireCore.class);

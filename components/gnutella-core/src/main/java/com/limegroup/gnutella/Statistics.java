@@ -1,15 +1,20 @@
 package com.limegroup.gnutella;
 
+import org.limewire.util.Clock;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
- * Maintains various session statistics, like uptime.  Implements the Singleton
- * pattern.  Statistics are initialized the when the class is loaded; call
+ * Maintains various session statistics, like uptime.  
+ * Statistics are initialized the when the class is loaded; call
  * Statistics.instance() to guarantee initialization.  
  */
+@Singleton
 public class Statistics {
-    /** "PROTECTED" FOR TESTING PURPOSES ONLY! */
-    protected Statistics() {}
+    
+    private final Clock clock;
     
     /** The number of seconds in a day. */
     private static final int SECONDS_PER_DAY=24*60*60;
@@ -19,8 +24,13 @@ public class Statistics {
     private static final int WINDOW_MILLISECONDS=7*SECONDS_PER_DAY*1000;
     
     /** The time this was initialized. */
-    private long startTime=now();
-    
+    private long startTime;
+        
+    @Inject
+    Statistics(Clock clock) {
+        this.clock = clock;
+        startTime = clock.now();
+    }
 
     /** 
      * Returns the amount of time this has been running.
@@ -29,7 +39,7 @@ public class Statistics {
     public long getUptime() {
         //TODO: clocks can go backwards from daylight savings, resulting in
         //negative values.
-        return now() - startTime;
+        return clock.now() - startTime;
     }
 
     /**
@@ -72,7 +82,7 @@ public class Statistics {
         //account for 75% of the calculation.
         
         final float W=WINDOW_MILLISECONDS;
-        float T=Math.min(W, now() - ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
+        float T=Math.min(W, clock.now() - ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
         float t=Math.min(W, getUptime());
         float P=ApplicationSettings.FRACTIONAL_UPTIME.getValue();
         
@@ -93,15 +103,9 @@ public class Statistics {
         //Order matters, as calculateFractionalUptime() depends on the
         //LAST_SHUTDOWN_TIME property.
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(calculateFractionalUptime());
-        ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(now());
+        ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(clock.now());
         int sessions = ApplicationSettings.SESSIONS.getValue();
         ApplicationSettings.SESSIONS.setValue( sessions + 1 );
-    }
-
-    /** The current system time, in milliseconds.  Exists as a hook for testing
-     *  purposes only. */
-    protected long now() {
-        return System.currentTimeMillis();
     }
 
 
