@@ -4,11 +4,15 @@ import java.io.ByteArrayInputStream;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 
 public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     
+    private PingRequestFactory pingRequestFactory;
+    private MessageFactory messageFactory;
+
     public MessageTest(String name) {
         super(name);
     }
@@ -16,13 +20,20 @@ public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     public static Test suite() {
         return buildTestSuite(MessageTest.class);
     }
+    
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+    }
 
     public void testLegacy() throws Exception {
         //Note: some of Message's code is covered by subclass tests, e.g.,
         //PushRequestTest.
 
-        Message m1=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
-        Message m2=ProviderHacks.getPingRequestFactory().createPingRequest((byte)3);
+        Message m1=pingRequestFactory.createPingRequest((byte)3);
+        Message m2=pingRequestFactory.createPingRequest((byte)3);
         m2.setPriority(5);
         assertGreaterThan(0, m1.compareTo(m2));
         assertLessThan(0, m2.compareTo(m1));
@@ -43,7 +54,7 @@ public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         byte[] b = new byte[40];
         try {
-            ProviderHacks.getMessageFactory().read(bais,b,(byte)4);
+            messageFactory.read(bais,b,(byte)4);
             fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
         }
