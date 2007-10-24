@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import org.limewire.inject.Providers;
 
+@Deprecated
 public class HackConnectionManager extends ConnectionManager {
 
     public HackConnectionManager() {

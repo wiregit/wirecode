@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
@@ -14,16 +15,35 @@ import org.apache.http.message.BasicHttpResponse;
 import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.HackConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.connection.ConnectionCheckerManager;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.FeaturesWriter;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
@@ -32,6 +52,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
     private StubConnectionManager connectionManager;
     private AltLocManager altLocManager;
     private HTTPHeaderUtils httpHeaderUtils;
+    private AlternateLocationFactory alternateLocationFactory;
 
     public HTTPHeaderUtilsTest(String name) {
         super(name);
@@ -43,10 +64,19 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
 
     @Override
     public void setUp() throws Exception {
-        connectionManager = new StubConnectionManager();
+        final NetworkManager networkManager = new NetworkManagerStub();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManager);
+                bind(ConnectionManager.class).to(StubConnectionManager.class);
+            }
+        });
+        alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        connectionManager = (StubConnectionManager) injector.getInstance(ConnectionManager.class);
         connectionManager.proxies = new StrictIpPortSet<Connectable>();
         altLocManager = new AltLocManager();
-        NetworkManager networkManager = new NetworkManagerStub();
+        
         httpHeaderUtils = new HTTPHeaderUtils(new FeaturesWriter(networkManager), networkManager, Providers.of((ConnectionManager) connectionManager));
     }
 
@@ -164,13 +194,35 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
                 tls = true;
                 loc = loc.substring(1);
             }
-            alts.add((DirectAltLoc)ProviderHacks.getAlternateLocationFactory().create(loc, UrnHelper.SHA1, tls));
+            alts.add((DirectAltLoc)alternateLocationFactory.create(loc, UrnHelper.SHA1, tls));
         }
         return alts;
     }
         
     /** A fake ConnectionManager with custom proxies. */
-    private static class StubConnectionManager extends HackConnectionManager {
+    @Singleton
+    private static class StubConnectionManager extends ConnectionManager {
+
+        @Inject
+        public StubConnectionManager(NetworkManager networkManager,
+                Provider<HostCatcher> hostCatcher,
+                @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
+                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                Provider<SimppManager> simppManager,
+                CapabilitiesVMFactory capabilitiesVMFactory,
+                RoutedConnectionFactory managedConnectionFactory,
+                Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
+                SocketsManager socketsManager, ConnectionServices connectionServices,
+                Provider<NodeAssigner> nodeAssigner,  
+                @Named("ipFilter") Provider<IPFilter> ipFilter,
+                ConnectionCheckerManager connectionCheckerManager,
+                PingRequestFactory pingRequestFactory) {
+            super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
+                    capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
+                    socketsManager, connectionServices, nodeAssigner, ipFilter, connectionCheckerManager,
+                    pingRequestFactory);
+            
+        }
 
         private Set<Connectable> proxies;
         
