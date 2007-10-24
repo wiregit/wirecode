@@ -692,7 +692,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @see com.limegroup.gnutella.MessageRouter#handleUDPMessage(com.limegroup.gnutella.messages.Message, java.net.InetSocketAddress)
      */	
 	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
-	    System.out.println(msg.getClass());
 	    // Increment hops and decrement TTL.
 	    msg.hop();
         messageCounter.countMessage(msg);
@@ -2846,6 +2845,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     RouteTable getHeadPongRouteTable() {
         return _headPongRouteTable;
+    }
+    
+    /**
+     * Default access for testing only. 
+     */
+    Map<GUID.TimedGUID, QueryResponseBundle> getOutOfBandReplies() {
+        return _outOfBandReplies;
     }
     
     private static class QueryResponseBundle {
