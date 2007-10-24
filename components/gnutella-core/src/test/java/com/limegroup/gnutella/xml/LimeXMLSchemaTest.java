@@ -3,13 +3,14 @@ package com.limegroup.gnutella.xml;
 import java.io.File;
 import java.util.Iterator;
 
-import org.limewire.util.CommonUtils;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.CommonUtils;
+
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.Expand;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
 /**
@@ -17,7 +18,9 @@ import com.limegroup.gnutella.util.Expand;
  */
 public class LimeXMLSchemaTest extends LimeTestCase {
             
-	public LimeXMLSchemaTest(String name) {
+	private static LimeXMLProperties limeXMLProperties;
+
+    public LimeXMLSchemaTest(String name) {
 		super(name);
 	}
 
@@ -34,6 +37,8 @@ public class LimeXMLSchemaTest extends LimeTestCase {
             CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
             CommonUtils.getUserSettingsDir()
         );
+		Injector injector = LimeTestUtils.createInjector();
+		limeXMLProperties = injector.getInstance(LimeXMLProperties.class);
     }
 	
 	/**
@@ -46,7 +51,7 @@ public class LimeXMLSchemaTest extends LimeTestCase {
 	 */
     public static void testGetFieldNames() throws Exception {
         LimeXMLSchema schema = new LimeXMLSchema(new File(
-            ProviderHacks.getLimeXMLProperties().getXMLSchemaDir() 
+            limeXMLProperties.getXMLSchemaDir() 
             + File.separator
             + "audio.xsd"));
         

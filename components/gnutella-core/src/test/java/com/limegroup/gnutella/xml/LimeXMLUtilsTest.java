@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -10,7 +11,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class LimeXMLUtilsTest extends LimeTestCase {
 
-    LimeXMLDocumentFactory factory;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
     
     public LimeXMLUtilsTest(String name) {
         super(name);
@@ -18,7 +19,8 @@ public class LimeXMLUtilsTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        factory = ProviderHacks.getLimeXMLDocumentFactory();
+		Injector injector = LimeTestUtils.createInjector();
+		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
     }
     
     public void testUnencodeXML() throws Exception {
@@ -52,7 +54,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
             "comments=\"test\" action=\"test\"" +
             "></audio></audios>";
-        LimeXMLDocument doc = factory.createLimeXMLDocument(queryString);
+        LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue(doc.getAction().equals("test"));
         assertFalse(doc.actionDetailRequested());
         
@@ -65,7 +67,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "comments=\"test\" action=\"test\" actionDetailRequested=\"false\"" +
             "></audio></audios>";
         
-        doc = factory.createLimeXMLDocument(queryString);
+        doc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue(doc.getAction().equals("test"));
         assertFalse(doc.actionDetailRequested());
         
@@ -78,7 +80,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "comments=\"test\" action=\"test\" addActionDetail=\"True\"" +
             "></audio></audios>";
         
-        doc = factory.createLimeXMLDocument(queryString);
+        doc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue(doc.getAction().equals("test"));
         assertTrue(doc.actionDetailRequested());
     }
@@ -92,7 +94,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
     public void testDocsThatShouldMatch() throws Exception {
         
         LimeXMLDocument doc = 
-            factory.createLimeXMLDocument(buildXMLString("director=\"francis loopola\""));
+            limeXMLDocumentFactory.createLimeXMLDocument(buildXMLString("director=\"francis loopola\""));
         // Make sure that null pointers are thrown properly.
         try {
             LimeXMLUtils.match(doc, null, false);
@@ -113,13 +115,13 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
             "comments=\"test\" action=\"test\"" +
             "></audio></audios>";
-        LimeXMLDocument queryDoc = factory.createLimeXMLDocument(queryString);
+        LimeXMLDocument queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         String onDiskString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio " +
             "title=\"test\"" +
             "></audio></audios>";
-        LimeXMLDocument onDiskDoc = factory.createLimeXMLDocument(onDiskString);
+        LimeXMLDocument onDiskDoc = limeXMLDocumentFactory.createLimeXMLDocument(onDiskString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         
@@ -129,7 +131,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"test\"></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         onDiskString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
@@ -137,21 +139,21 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
             "comments=\"test\" action=\"test\"></audio></audios>";
-        onDiskDoc = factory.createLimeXMLDocument(onDiskString);
+        onDiskDoc = limeXMLDocumentFactory.createLimeXMLDocument(onDiskString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"test\" artist=\"test\"></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"test\" artist=\"test\" album=\"test\"></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
@@ -159,7 +161,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"test\" artist=\"test\" album=\"test\" track=\"test\"" +
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
@@ -168,7 +170,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"test\" artist=\"test\" album=\"test\" track=\"test\"" +
             " type=\"song\""+
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
@@ -177,7 +179,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"test\" artist=\"test\" album=\"test\" track=\"test\"" +
             " type=\"song\" year=\"test\""+
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         
@@ -187,7 +189,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"test\" artist=\"test\" album=\"test\" track=\"test\" type=" +
             "\"song\" year=\"test\" seconds=\"test\""+
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         
@@ -197,7 +199,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"test\" artist=\"test\" album=\"test\" track=\"test\" type=" +
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\"" +
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
@@ -207,7 +209,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\"" +
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
@@ -217,7 +219,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\" bitrate=\"test\"" +
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         queryString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
@@ -226,7 +228,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\" bitrate=\"test\" price=\"test\""+
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
@@ -236,7 +238,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\"" +
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
         queryString = 
@@ -255,7 +257,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
             "comments=\"test\" action=\"test\"" +
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);
         assertTrue("docs should match", LimeXMLUtils.match(onDiskDoc,queryDoc, false));
     }
     
@@ -272,14 +274,14 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
             "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
             "comments=\"test\" action=\"test\"></audio></audios>";
-        LimeXMLDocument onDiskDoc = factory.createLimeXMLDocument(onDiskString);    
+        LimeXMLDocument onDiskDoc = limeXMLDocumentFactory.createLimeXMLDocument(onDiskString);    
         
         String queryString = 
             "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"nottest\"" +
             "></audio></audios>";
-        LimeXMLDocument queryDoc = factory.createLimeXMLDocument(queryString);  
+        LimeXMLDocument queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);  
         assertFalse("docs should not match", 
             LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
@@ -288,7 +290,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
             "\"test\" artist=\"nottest\"" +
             "></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);  
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);  
         assertFalse("docs should not match", 
             LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
@@ -298,7 +300,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"test\" artist=\"nottest\" album=\"test\" track=\"test\" type=" +
             "\"song\" year=\"test\" seconds=\"test\" language=\"test\"" +
             " ></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);  
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);  
         assertFalse("docs should not match", 
             LimeXMLUtils.match(onDiskDoc,queryDoc, false));
         
@@ -308,7 +310,7 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             "\"test\" artist=\"nottest\" album=\"test\" track=\"test\" type=" +
             "\"song\" year=\"test\" seconds=\"nottest\" language=\"test\"" +
             " ></audio></audios>";
-        queryDoc = factory.createLimeXMLDocument(queryString);  
+        queryDoc = limeXMLDocumentFactory.createLimeXMLDocument(queryString);  
         assertFalse("docs should not match", 
             LimeXMLUtils.match(onDiskDoc,queryDoc, false));
     }

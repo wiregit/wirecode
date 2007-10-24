@@ -3,13 +3,14 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -17,6 +18,7 @@ public class OGGWritingTest extends LimeTestCase {
 
     private static String TEST_NAME = "testfile12341234.ogg";
     private static File TEST_FILE;
+    private MetaDataReader metaDataReader;
 
 	public OGGWritingTest(String name) {
 		super(name);
@@ -41,6 +43,9 @@ public class OGGWritingTest extends LimeTestCase {
         FileUtils.copy(f, TEST_FILE);
         assertTrue(TEST_FILE.exists());
         TEST_FILE.deleteOnExit();
+		
+		Injector injector = LimeTestUtils.createInjector();
+		metaDataReader = injector.getInstance(MetaDataReader.class);
     }
 
     public static void globalTearDown() {
@@ -62,7 +67,7 @@ public class OGGWritingTest extends LimeTestCase {
         assertEquals("Incorrect comment", "allComment",data.getComment());        
         
         // Read existing stuff in file.
-        LimeXMLDocument doc = ProviderHacks.getMetaDataReader().readDocument(TEST_FILE);
+        LimeXMLDocument doc = metaDataReader.readDocument(TEST_FILE);
         //2. Write data into the file 
         MetaDataEditor editor = MetaDataEditor.getEditorForFile(TEST_FILE.getPath());
         editor.populate(doc);

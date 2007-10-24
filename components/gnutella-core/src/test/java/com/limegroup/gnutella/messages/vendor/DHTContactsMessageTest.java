@@ -12,12 +12,15 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class DHTContactsMessageTest extends LimeTestCase {
     
+    private VendorMessageFactory vendorMessageFactory;
+
     public DHTContactsMessageTest(String name) {
         super(name);
     }
@@ -29,6 +32,12 @@ public class DHTContactsMessageTest extends LimeTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		vendorMessageFactory = injector.getInstance(VendorMessageFactory.class);
     }
     
     public void testSerialization() throws Exception {
@@ -58,7 +67,7 @@ public class DHTContactsMessageTest extends LimeTestCase {
         byte[] payload = new byte[raw.length - 23];
         System.arraycopy(raw, 23, payload, 0, payload.length);
         
-        DHTContactsMessage msg2 = (DHTContactsMessage)ProviderHacks.getVendorMessageFactory().deriveVendorMessage(
+        DHTContactsMessage msg2 = (DHTContactsMessage)vendorMessageFactory.deriveVendorMessage(
                 guid, ttl, hops, payload, Message.Network.UDP);
         
         assertEquals(2, msg2.getContacts().size());

@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.xml;
 
-import org.limewire.util.CommonUtils;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.CommonUtils;
+
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.Expand;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
 /**
@@ -14,7 +15,9 @@ import com.limegroup.gnutella.util.Expand;
  */
 public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
             
-	public LimeXMLSchemaRepositoryTest(String name) {
+	private LimeXMLSchemaRepository limeXMLSchemaRepository;
+
+    public LimeXMLSchemaRepositoryTest(String name) {
 		super(name);
 	}
 
@@ -31,6 +34,9 @@ public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
             CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
             CommonUtils.getUserSettingsDir()
         );
+
+		Injector injector = LimeTestUtils.createInjector();
+		limeXMLSchemaRepository = injector.getInstance(LimeXMLSchemaRepository.class);
     }
     
     /**
@@ -42,8 +48,7 @@ public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
      * ones change) then change the order of the checks.
      */
     public void testAvailableSchemaURIs() {
-        String[] availableSchemas 
-            = ProviderHacks.getLimeXMLSchemaRepository().getAvailableSchemaURIs();
+        String[] availableSchemas = limeXMLSchemaRepository.getAvailableSchemaURIs();
             
         check( availableSchemas[0], "application");
         check( availableSchemas[1], "audio");

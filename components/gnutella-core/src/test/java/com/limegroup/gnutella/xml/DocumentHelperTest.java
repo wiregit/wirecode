@@ -5,7 +5,8 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -13,7 +14,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class DocumentHelperTest extends LimeTestCase {
     
-    LimeXMLDocumentHelper helper;
+    private LimeXMLDocumentHelper limeXMLDocumentHelper;
     
     public DocumentHelperTest(String name){
         super(name);
@@ -25,7 +26,8 @@ public class DocumentHelperTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        helper = ProviderHacks.getLimeXMLDocumentHelper();
+		Injector injector = LimeTestUtils.createInjector();
+		limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
     }
     
     /**
@@ -34,9 +36,9 @@ public class DocumentHelperTest extends LimeTestCase {
     public void testGetDocuments() throws Exception {
         
         // test short-circuiting
-        assertEquals(0,helper.getDocuments(null,1).size());
-        assertEquals(0,helper.getDocuments("",1).size());
-        assertEquals(0,helper.getDocuments("asfd",0).size());
+        assertEquals(0,limeXMLDocumentHelper.getDocuments(null,1).size());
+        assertEquals(0,limeXMLDocumentHelper.getDocuments("",1).size());
+        assertEquals(0,limeXMLDocumentHelper.getDocuments("asfd",0).size());
         
         // test a valid document
         String threeResp = "<?xml version=\"1.0\"?>"+
@@ -45,7 +47,7 @@ public class DocumentHelperTest extends LimeTestCase {
         "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\" index=\"1\"/>"+
         "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\" index=\"2\"/></audios>";
         
-        List l = helper.getDocuments(threeResp,3);
+        List l = limeXMLDocumentHelper.getDocuments(threeResp,3);
         assertEquals(1,l.size());
         
         LimeXMLDocument []docs = (LimeXMLDocument [])l.get(0);
@@ -54,14 +56,14 @@ public class DocumentHelperTest extends LimeTestCase {
             assertNotNull(docs[i]);
         
         // test not enough xml
-        l = helper.getDocuments(threeResp,4);
+        l = limeXMLDocumentHelper.getDocuments(threeResp,4);
         assertEquals(1,l.size());
         docs = (LimeXMLDocument [])l.get(0);
         assertEquals(4,docs.length);
         assertNull(docs[3]);
         
         // test too much xml
-        l = helper.getDocuments(threeResp,2);
+        l = limeXMLDocumentHelper.getDocuments(threeResp,2);
         assertEquals(0,l.size());
         
         //test identical indices
@@ -70,7 +72,7 @@ public class DocumentHelperTest extends LimeTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\" index=\"1\"/>"+
         "<audio genre=\"Classical\" identifier=\"def2.txt\" bitrate=\"2192\" index=\"1\"/>"+
         "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\" index=\"0\"/></audios>";
-        l = helper.getDocuments(identical,3);
+        l = limeXMLDocumentHelper.getDocuments(identical,3);
         assertEquals(1,l.size());
         docs = (LimeXMLDocument [])l.get(0);
         assertEquals(3,docs.length);
@@ -83,21 +85,21 @@ public class DocumentHelperTest extends LimeTestCase {
             "<?xml version=\"1.0\"?>"+
             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
             "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\" index=\"asdf\"/></audios>";
-        l = helper.getDocuments(invalidIndex,1);
+        l = limeXMLDocumentHelper.getDocuments(invalidIndex,1);
         assertEquals(0,l.size());
 
         invalidIndex = 
             "<?xml version=\"1.0\"?>"+
             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
             "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\" index=\"-2\"/></audios>";
-        l = helper.getDocuments(invalidIndex,1);
+        l = limeXMLDocumentHelper.getDocuments(invalidIndex,1);
         assertEquals(0,l.size());
         
         invalidIndex =
             "<?xml version=\"1.0\"?>"+
             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
             "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/></audios>";
-        l = helper.getDocuments(invalidIndex,1);
+        l = limeXMLDocumentHelper.getDocuments(invalidIndex,1);
         assertEquals(0,l.size());
         
         
@@ -106,14 +108,14 @@ public class DocumentHelperTest extends LimeTestCase {
             "<?xml version=\"1.0\"?>"+
             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
             "<audio genre=\"Blues\" identifier=\"def.txt\" bitrate=\"192\"/>";
-        l = helper.getDocuments(invalidIndex,1);
+        l = limeXMLDocumentHelper.getDocuments(invalidIndex,1);
         assertEquals(0,l.size());
         
         
         // test valid documented catenated to an invalid one
         String oneValidOneNot = 
             threeResp+invalidXML;
-        l = helper.getDocuments(oneValidOneNot,3);
+        l = limeXMLDocumentHelper.getDocuments(oneValidOneNot,3);
         assertEquals(1,l.size());
         docs = (LimeXMLDocument [])l.get(0);
         assertEquals(3,docs.length);
@@ -123,7 +125,7 @@ public class DocumentHelperTest extends LimeTestCase {
         // test two valid documents
         
         String twoValid = threeResp+identical;
-        l = helper.getDocuments(twoValid,3);
+        l = limeXMLDocumentHelper.getDocuments(twoValid,3);
         assertEquals(2,l.size());
         docs = (LimeXMLDocument [])l.get(0);
         assertEquals(3,docs.length);
@@ -140,21 +142,21 @@ public class DocumentHelperTest extends LimeTestCase {
         String action = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\" action=\"test.com\" index=\"0\"/></audios>";
-        assertEquals("test.com", helper.getDocuments(action, 1).get(0)[0].getAction());
-        assertFalse(helper.getDocuments(action, 1).get(0)[0].actionDetailRequested());
+        assertEquals("test.com", limeXMLDocumentHelper.getDocuments(action, 1).get(0)[0].getAction());
+        assertFalse(limeXMLDocumentHelper.getDocuments(action, 1).get(0)[0].actionDetailRequested());
         
         // test action detail
         action = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\" action=\"test.com\" addActionDetail=\"False\" index=\"0\"/></audios>";
-        assertEquals("test.com", helper.getDocuments(action, 1).get(0)[0].getAction());
-        assertFalse(helper.getDocuments(action, 1).get(0)[0].actionDetailRequested());
+        assertEquals("test.com", limeXMLDocumentHelper.getDocuments(action, 1).get(0)[0].getAction());
+        assertFalse(limeXMLDocumentHelper.getDocuments(action, 1).get(0)[0].actionDetailRequested());
         
         action = "<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\" action=\"test.com\" addActionDetail=\"True\" index=\"0\"/></audios>";
-        assertEquals("test.com", helper.getDocuments(action, 1).get(0)[0].getAction());
-        assertTrue(helper.getDocuments(action, 1).get(0)[0].actionDetailRequested());
+        assertEquals("test.com", limeXMLDocumentHelper.getDocuments(action, 1).get(0)[0].getAction());
+        assertTrue(limeXMLDocumentHelper.getDocuments(action, 1).get(0)[0].actionDetailRequested());
     }
     
 }

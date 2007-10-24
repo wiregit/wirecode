@@ -11,7 +11,8 @@ import junit.framework.Test;
 import org.limewire.collection.FixedSizeSortedSet;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.helpers.AlternateLocationHelper;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -28,6 +29,8 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
 	private AlternateLocationCollection _alCollection;
 	private AlternateLocationHelper alternateLocationHelper;
 
+    private AlternateLocationFactory alternateLocationFactory;
+
 	public AlternateLocationCollectionTest(String name) {
 		super(name);
 	}
@@ -41,12 +44,15 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
 	}
 
 	protected void setUp() {
-	    alternateLocationHelper = new AlternateLocationHelper(ProviderHacks.getAlternateLocationFactory());
+		Injector injector = LimeTestUtils.createInjector();
+		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+
+	    alternateLocationHelper = new AlternateLocationHelper(alternateLocationFactory);
 		_alternateLocations = new HashSet();
         
 		for(int i=0; i<alternateLocationHelper.EQUAL_SHA1_LOCATIONS.length; i++) {
             try {
-                _alternateLocations.add(ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[i], UrnHelper.URNS[0]));
+                _alternateLocations.add(alternateLocationFactory.create(alternateLocationHelper.SOME_IPS[i], UrnHelper.URNS[0]));
             } catch (IOException e) {
                 fail("could not set up test");
             }
@@ -147,7 +153,7 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
 			String str = st.nextToken();
 			str = str.trim();
 			AlternateLocation al=
-			    ProviderHacks.getAlternateLocationFactory().create(str, _alCollection.getSHA1Urn());
+			    alternateLocationFactory.create(str, _alCollection.getSHA1Urn());
 
 			assertTrue(_alCollection.contains(al));
 		}
@@ -218,13 +224,13 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
         AlternateLocation[] alts = new AlternateLocation[5];
         
         for(int i=0; i<5; i++) {
-            AlternateLocation al = ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[i], UrnHelper.URNS[0]);
+            AlternateLocation al = alternateLocationFactory.create(alternateLocationHelper.SOME_IPS[i], UrnHelper.URNS[0]);
             alts[i] = al;
             c1.add(al);
         }
         
         try {
-            c1.add(ProviderHacks.getAlternateLocationFactory().create(alternateLocationHelper.SOME_IPS[6], UrnHelper.URNS[1]));
+            c1.add(alternateLocationFactory.create(alternateLocationHelper.SOME_IPS[6], UrnHelper.URNS[1]));
             fail("exception should have been thrown by now");
         } catch(IllegalArgumentException e) {
             //expected behaviour

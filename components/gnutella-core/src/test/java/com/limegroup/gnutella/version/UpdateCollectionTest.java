@@ -6,7 +6,8 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.Version;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public final class UpdateCollectionTest extends LimeTestCase {
@@ -23,7 +24,8 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-	    updateCollectionFactory = ProviderHacks.getUpdateCollectionFactory();
+		Injector injector = LimeTestUtils.createInjector();
+		updateCollectionFactory = injector.getInstance(UpdateCollectionFactory.class);
 	}
 
 	/**

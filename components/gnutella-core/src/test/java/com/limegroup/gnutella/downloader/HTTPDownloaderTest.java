@@ -32,21 +32,35 @@ import org.limewire.io.IpPortSet;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.BandwidthManager;
+import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
-import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     private HTTPDownloaderFactory httpDownloaderFactory;
+    private NetworkManager networkManager;
+    private AlternateLocationFactory alternateLocationFactory;
+    private DownloadManager downloadManager;
+    private CreationTimeCache creationTimeCache;
+    private BandwidthManager bandwidthManager;
+    private PushEndpointCache pushEndpointCache;
+    private VerifyingFileFactory verifyingFileFactory;
 
     public HTTPDownloaderTest(String name) {
         super(name);
@@ -57,7 +71,17 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void setUp() {
-        httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(ProviderHacks.getNetworkManager(), ProviderHacks.getAlternateLocationFactory(), ProviderHacks.getDownloadManager(), ProviderHacks.getCreationTimeCache(), ProviderHacks.getBandwidthManager(), Providers.of(ProviderHacks.getPushEndpointCache()));
+		Injector injector = LimeTestUtils.createInjector();
+		networkManager = injector.getInstance(NetworkManager.class);
+		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+		downloadManager = injector.getInstance(DownloadManager.class);
+		creationTimeCache = injector.getInstance(CreationTimeCache.class);
+		bandwidthManager = injector.getInstance(BandwidthManager.class);
+		pushEndpointCache = injector.getInstance(PushEndpointCache.class);
+		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+		verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
+        
+		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager, alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager, Providers.of(pushEndpointCache));
     }
     
     public void testWrittenAltHeadersWithTLS() throws Exception {
@@ -75,10 +99,10 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                         boolean failed = false;
                         AlternateLocation loc;            
                         if(i == 25 || i == 30 || Math.random() < 0.5) {
-                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, UrnHelper.URNS[0], true);
+                            loc = alternateLocationFactory.create("1.2.3." + i, UrnHelper.URNS[0], true);
                             tls = true;
                         } else {
-                            loc = ProviderHacks.getAlternateLocationFactory().create("1.2.3." + i, UrnHelper.URNS[0], false);
+                            loc = alternateLocationFactory.create("1.2.3." + i, UrnHelper.URNS[0], false);
                         }
                         
                         if(i != 30 && (i == 25 || Math.random() < 0.5)) {
@@ -193,7 +217,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                             null, false, false, "LIME",
                                             null, -1, false);
         File f = new File("sam");
-        VerifyingFile vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(length);
+        VerifyingFile vf = verifyingFileFactory.createVerifyingFile(length);
         vf.open(f);
         HTTPDownloader dl = httpDownloaderFactory.create(null, rfd, vf, false);
         
@@ -371,7 +395,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
                                                 0,
                                                 false);
                                                 
-        VerifyingFile vf = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(1000);
+        VerifyingFile vf = verifyingFileFactory.createVerifyingFile(1000);
         
         Socket socket = new NIOSocket("127.0.0.1", server.getLocalPort());
         Socket accept = server.accept();

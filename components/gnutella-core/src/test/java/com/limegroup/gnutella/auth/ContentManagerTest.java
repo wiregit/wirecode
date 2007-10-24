@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.auth;
 
-import org.limewire.concurrent.ThreadExecutor;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import org.limewire.concurrent.ThreadExecutor;
+
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -26,6 +27,7 @@ public class ContentManagerTest extends LimeTestCase {
     private Observer one;
     private Observer two;
     private Observer three;
+    private IpPortContentAuthorityFactory ipPortContentAuthorityFactory;
     
     
     public ContentManagerTest(String name) {
@@ -37,20 +39,28 @@ public class ContentManagerTest extends LimeTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-       URN_1 = URN.createSHA1Urn(S_URN_1);
-       URN_2 = URN.createSHA1Urn(S_URN_2);
-       URN_3 = URN.createSHA1Urn(S_URN_3);
+
     }
     
     public void setUp() throws Exception {
+		URN_1 = URN.createSHA1Urn(S_URN_1);
+		URN_2 = URN.createSHA1Urn(S_URN_2);
+		URN_3 = URN.createSHA1Urn(S_URN_3);
+
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
-        mgr = new ContentManager(ProviderHacks.getIpPortContentAuthorityFactory());
+
         crOne = new ContentResponse(URN_1, true);
         crTwo = new ContentResponse(URN_2, false);
         one = new Observer();
         two = new Observer();
         three = new Observer();
+		
+		Injector injector = LimeTestUtils.createInjector();
+		ipPortContentAuthorityFactory = injector.getInstance(IpPortContentAuthorityFactory.class);
+
+		mgr = new ContentManager(ipPortContentAuthorityFactory);
+        
         assertNull(mgr.getResponse(URN_1));
         assertNull(mgr.getResponse(URN_2));        
         assertNull(mgr.getResponse(URN_3));

@@ -8,13 +8,16 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.MessageFactory;
 
 public class LimeACKVendorMessageTest extends BaseTestCase {
 
     private SecurityToken token;
+    private MessageFactory messageFactory;
     
     public LimeACKVendorMessageTest(String name) {
         super(name);
@@ -22,6 +25,8 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		messageFactory = injector.getInstance(MessageFactory.class);
         token = new AddressSecurityToken(InetAddress.getLocalHost(), 5904);
     }
     
@@ -84,7 +89,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             LimeACKVendorMessage vmRead = 
-                (LimeACKVendorMessage) ProviderHacks.getMessageFactory().read(bais);
+                (LimeACKVendorMessage) messageFactory.read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 

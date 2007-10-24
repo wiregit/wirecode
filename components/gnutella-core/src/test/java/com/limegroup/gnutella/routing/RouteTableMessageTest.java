@@ -5,9 +5,11 @@ import java.io.InputStream;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -15,7 +17,9 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class RouteTableMessageTest extends LimeTestCase {
         
-	public RouteTableMessageTest(String name) {
+	private MessageFactory messageFactory;
+
+    public RouteTableMessageTest(String name) {
 		super(name);
 	}
 
@@ -27,6 +31,12 @@ public class RouteTableMessageTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
+	@Override
+	protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		messageFactory = injector.getInstance(MessageFactory.class);
+	}
+	
 	public void testLegacy() throws Exception {
         //Read bytes with bad variant
         byte[] message=new byte[23+2];
@@ -36,7 +46,7 @@ public class RouteTableMessageTest extends LimeTestCase {
         message[23+0]=(byte)0xFF;                            //bogus variant
         InputStream in=new ByteArrayInputStream(message);
         try {
-            ProviderHacks.getMessageFactory().read(in);
+            messageFactory.read(in);
             fail("exception should have been thrown");
         } catch (BadPacketException e) {
         }

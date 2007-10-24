@@ -12,6 +12,7 @@ import junit.framework.Test;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
@@ -25,6 +26,8 @@ import com.limegroup.gnutella.xml.MetaFileManager;
 public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     private static final long MAX_FILE_SIZE = 3L * 1024L * 1024;
+    private UrnCache urnCache;
+    private FileManagerController fileManagerController;
     
 	public FileDescTest(String name) {
 		super(name);
@@ -38,12 +41,19 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
 		junit.textui.TestRunner.run(suite());
 	}
 
+	@Override
+	protected void setUp() throws Exception {
+	    Injector injector = LimeTestUtils.createInjector();
+		urnCache = injector.getInstance(UrnCache.class);
+		fileManagerController = injector.getInstance(FileManagerController.class);
+	}
+	
 	/**
 	 * Tests the FileDesc construcotor for invalid arguments
 	 */
 	public void testInvalidConstructorArguments() throws Exception {
         File file = CommonUtils.getResourceFile("build.xml");
-        Set urns = UrnHelper.calculateAndCacheURN(file, ProviderHacks.getUrnCache());
+        Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
 		try {
 			new FileDesc(null, urns, 0);
@@ -85,15 +95,15 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         Iterator it = fileList.iterator();
         for(int i = 0; it.hasNext(); i++) {
             File file = (File)it.next();
-            Set urns = UrnHelper.calculateAndCacheURN(file, ProviderHacks.getUrnCache()); 
+            Set urns = UrnHelper.calculateAndCacheURN(file, urnCache); 
             new FileDesc(file, urns, i);
         }
     }
     
     public void testIsRareFile() throws Exception {
-        FileManager fm = new MetaFileManager(ProviderHacks.getFileManagerController());
+        FileManager fm = new MetaFileManager(fileManagerController);
         File file = CommonUtils.getResourceFile("build.xml");
-        Set urns = UrnHelper.calculateAndCacheURN(file, ProviderHacks.getUrnCache());
+        Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
         FileDesc fd = new FileDesc(file, urns, 0);
         

@@ -11,12 +11,14 @@ import org.apache.commons.httpclient.URI;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 
 public class WeedLicenseTest extends BaseTestCase {
     
     private LicenseCache licenseCache;
+    private LicenseFactory licenseFactory;
 
     public WeedLicenseTest(String name) {
 		super(name);
@@ -32,6 +34,8 @@ public class WeedLicenseTest extends BaseTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		licenseFactory = injector.getInstance(LicenseFactory.class);
 	    licenseCache = new LicenseCache();
 	}
 	
@@ -177,7 +181,7 @@ public class WeedLicenseTest extends BaseTestCase {
         try {
             server.setResponseData(xml(true, "A", "B", "Free"));
             setLookupPage("http://127.0.0.1:20181/");
-            License l = ProviderHacks.getLicenseFactory().create("http://www.shmedlic.com/license/3play.aspx cid: 34 vid: 78");
+            License l = licenseFactory.create("http://www.shmedlic.com/license/3play.aspx cid: 34 vid: 78");
             l.verify(licenseCache);
             assertTrue(l.isVerified());
     	    assertTrue(l.isValid(null));
