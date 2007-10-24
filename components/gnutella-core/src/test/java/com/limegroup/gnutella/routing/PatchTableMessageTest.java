@@ -7,8 +7,10 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -17,7 +19,9 @@ import com.limegroup.gnutella.util.LimeTestCase;
 @SuppressWarnings( { "unchecked", "cast" } )
 public class PatchTableMessageTest extends LimeTestCase {
         
-	public PatchTableMessageTest(String name) {
+	private MessageFactory messageFactory;
+
+    public PatchTableMessageTest(String name) {
 		super(name);
 	}
 
@@ -27,6 +31,12 @@ public class PatchTableMessageTest extends LimeTestCase {
 
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
+	}
+	
+	@Override
+	protected void setUp() throws Exception {
+	    Injector injector = LimeTestUtils.createInjector();
+		messageFactory = injector.getInstance(MessageFactory.class);
 	}
 	
     /** Unit test */
@@ -81,8 +91,8 @@ public class PatchTableMessageTest extends LimeTestCase {
         assertEquals((byte)0xCD, m.getData()[1]);
     }
 
-    static PatchTableMessage read(byte[] bytes) throws Exception {
+    private PatchTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (PatchTableMessage)ProviderHacks.getMessageFactory().read(in);
+        return (PatchTableMessage)messageFactory.read(in);
     }
 }

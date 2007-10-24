@@ -7,11 +7,15 @@ import java.nio.ByteBuffer;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.stubs.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -29,6 +33,12 @@ public final class MessageWriterTest extends LimeTestCase {
     private WriteBufferChannel SINK = new WriteBufferChannel(1024 * 1024);
     private MessageWriter WRITER = new MessageWriter(STATS, QUEUE, SENT, SINK);
 
+    private MessageFactory messageFactory;
+
+    private QueryRequestFactory queryRequestFactory;
+
+    private PingReplyFactory pingReplyFactory;
+
 	public MessageWriterTest(String name) {
 		super(name);
 	}
@@ -39,6 +49,14 @@ public final class MessageWriterTest extends LimeTestCase {
 
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
+	}
+	
+	@Override
+	protected void setUp() throws Exception {
+	    Injector injector = LimeTestUtils.createInjector();
+		messageFactory = injector.getInstance(MessageFactory.class);
+		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+		pingReplyFactory = injector.getInstance(PingReplyFactory.class);
 	}
 	
 	public void testSimpleWrite() throws Exception {
@@ -206,7 +224,7 @@ public final class MessageWriterTest extends LimeTestCase {
     }
 	
 	private Message read(InputStream in) throws Exception {
-	    return ProviderHacks.getMessageFactory().read(in, (byte)100);
+	    return messageFactory.read(in, (byte)100);
     }
     
     private Message read(ByteBuffer buffer) throws Exception {
@@ -236,11 +254,11 @@ public final class MessageWriterTest extends LimeTestCase {
     }
     
     private QueryRequest q(String query) {
-        return ProviderHacks.getQueryRequestFactory().createQuery(query, (byte)5);
+        return queryRequestFactory.createQuery(query, (byte)5);
     }
     
     private PingReply g(int port) {
-        return ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, port, IP);
+        return pingReplyFactory.create(new byte[16], (byte)5, port, IP);
     }
     
     private PushRequest s(int port) {

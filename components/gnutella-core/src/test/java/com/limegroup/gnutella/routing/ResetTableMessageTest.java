@@ -6,8 +6,10 @@ import java.io.InputStream;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -16,7 +18,9 @@ import com.limegroup.gnutella.util.LimeTestCase;
 @SuppressWarnings( { "unchecked", "cast" } )
 public class ResetTableMessageTest extends LimeTestCase {
         
-	public ResetTableMessageTest(String name) {
+	private MessageFactory messageFactory;
+
+    public ResetTableMessageTest(String name) {
 		super(name);
 	}
 
@@ -26,6 +30,12 @@ public class ResetTableMessageTest extends LimeTestCase {
 
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
+	}
+	
+	@Override
+	protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		messageFactory = injector.getInstance(MessageFactory.class);
 	}
 
     public void testLegacy() throws Exception {
@@ -59,8 +69,8 @@ public class ResetTableMessageTest extends LimeTestCase {
         assertEquals(256, m.getTableSize());
     }
 
-    static ResetTableMessage read(byte[] bytes) throws Exception {
+    ResetTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (ResetTableMessage)ProviderHacks.getMessageFactory().read(in);
+        return (ResetTableMessage)messageFactory.read(in);
     }
 }

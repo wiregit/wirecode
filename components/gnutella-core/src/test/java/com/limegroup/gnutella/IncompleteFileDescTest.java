@@ -5,13 +5,15 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
+import com.google.inject.Injector;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 @SuppressWarnings("unchecked")
@@ -21,7 +23,8 @@ public class IncompleteFileDescTest extends LimeTestCase {
     private String fileName = "ifd.txt";
     private URN urn;
     private Set urns;
-    private VerifyingFile vf  = ProviderHacks.getVerifyingFileFactory().createVerifyingFile(0);
+    private VerifyingFile vf;
+    private VerifyingFileFactory verifyingFileFactory;
 
     public IncompleteFileDescTest(String name) {
         super(name);
@@ -31,10 +34,15 @@ public class IncompleteFileDescTest extends LimeTestCase {
         return buildTestSuite(IncompleteFileDescTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         urns = new HashSet(1);
         urns.add(urn);
+        
+        Injector injector = LimeTestUtils.createInjector();
+        verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
+        vf = verifyingFileFactory.createVerifyingFile();
         
         ifd = new IncompleteFileDesc(
             new File(fileName),
@@ -43,6 +51,7 @@ public class IncompleteFileDescTest extends LimeTestCase {
             fileName,
             1981,
             vf);
+		
     }
     
     public void testGetAvailableRanges() throws Exception {

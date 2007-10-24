@@ -17,12 +17,15 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.Pools;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 
 public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCase {
     private final Random RND = new Random();
+    private QueryRequestFactory queryRequestFactory;
     
     public QueryRouteTableTest(String name) {
         super(name);
@@ -32,6 +35,12 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         return buildTestSuite(QueryRouteTableTest.class);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+		Injector injector = LimeTestUtils.createInjector();
+		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+    }
+    
     /** May return null!
      */ 
     private BitSet getBitTable(QueryRouteTable source) throws Exception {
@@ -160,20 +169,20 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         //1. Simple keyword tests (add, contains)
         //we have moved to 1-bit entry per hash, so either absent or present....
         assertTrue(! qrt.contains(
-                ProviderHacks.getQueryRequestFactory().createQuery("garbage",(byte)4)));
-        assertTrue(qrt.contains(ProviderHacks.getQueryRequestFactory().createQuery("bad", (byte)2)));
-        assertTrue(qrt.contains(ProviderHacks.getQueryRequestFactory().createQuery("bad", (byte)3)));
-        assertTrue(qrt.contains(ProviderHacks.getQueryRequestFactory().createQuery("bad", (byte)4)));
+                queryRequestFactory.createQuery("garbage",(byte)4)));
+        assertTrue(qrt.contains(queryRequestFactory.createQuery("bad", (byte)2)));
+        assertTrue(qrt.contains(queryRequestFactory.createQuery("bad", (byte)3)));
+        assertTrue(qrt.contains(queryRequestFactory.createQuery("bad", (byte)4)));
         assertTrue(qrt.contains(
-                ProviderHacks.getQueryRequestFactory().createQuery("good bad", (byte)2)));
+                queryRequestFactory.createQuery("good bad", (byte)2)));
         assertTrue(! qrt.contains(
-                ProviderHacks.getQueryRequestFactory().createQuery("good bd", (byte)3)));
-        assertTrue(qrt.contains(ProviderHacks.getQueryRequestFactory().createQuery(
+                queryRequestFactory.createQuery("good bd", (byte)3)));
+        assertTrue(qrt.contains(queryRequestFactory.createQuery(
                                                   "good bad book", (byte)3)));
-        assertTrue(! qrt.contains(ProviderHacks.getQueryRequestFactory().createQuery(
+        assertTrue(! qrt.contains(queryRequestFactory.createQuery(
                                                     "good bad bok", (byte)3)));
         assertTrue(qrt.contains(
-                ProviderHacks.getQueryRequestFactory().createQuery(UrnHelper.UNIQUE_SHA1)));
+                queryRequestFactory.createQuery(UrnHelper.UNIQUE_SHA1)));
     }
     
     public void testAddAll() throws Exception {
@@ -475,12 +484,12 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         qrt.add("bad");   //{good/1, book/1, bad/3}
         QueryRouteTable qrt2=new QueryRouteTable(512);
         qrt2.addAll(qrt);
-        assertTrue(qrt2.contains(ProviderHacks.getQueryRequestFactory().createQuery("bad", (byte)4)));
-        assertTrue(qrt2.contains(ProviderHacks.getQueryRequestFactory().createQuery("good", (byte)4)));
+        assertTrue(qrt2.contains(queryRequestFactory.createQuery("bad", (byte)4)));
+        assertTrue(qrt2.contains(queryRequestFactory.createQuery("good", (byte)4)));
         qrt2=new QueryRouteTable(32);
         qrt2.addAll(qrt);
-        assertTrue(qrt2.contains(ProviderHacks.getQueryRequestFactory().createQuery("bad", (byte)4)));
-        assertTrue(qrt2.contains(ProviderHacks.getQueryRequestFactory().createQuery("good", (byte)4)));
+        assertTrue(qrt2.contains(queryRequestFactory.createQuery("bad", (byte)4)));
+        assertTrue(qrt2.contains(queryRequestFactory.createQuery("good", (byte)4)));
     }
     
     public void testBadPackets() throws Exception {
