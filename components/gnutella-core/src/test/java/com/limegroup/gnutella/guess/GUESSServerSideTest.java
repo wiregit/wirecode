@@ -14,12 +14,16 @@ import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.Backend;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Tests the Server Side of GUESS....
@@ -35,6 +39,12 @@ public class GUESSServerSideTest extends LimeTestCase {
 	private final int SOCKET_TIMEOUT = 5*1000; // 5 second wait for a message
 
     private DatagramSocket _socket = null;
+
+    private PingRequestFactory pingRequestFactory;
+
+    private QueryRequestFactory queryRequestFactory;
+
+    private MessageFactory messageFactory;
 
     
     public GUESSServerSideTest(String name) {
@@ -55,6 +65,10 @@ public class GUESSServerSideTest extends LimeTestCase {
     
     public void setUp() throws Exception {
         launchBackend();
+		Injector injector = LimeTestUtils.createInjector();
+		pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+		messageFactory = injector.getInstance(MessageFactory.class);
     }
 
     public static void main(String[] args) {
@@ -86,7 +100,7 @@ public class GUESSServerSideTest extends LimeTestCase {
             //}
 
         // first try to get a AddressSecurityToken....
-        PingRequest pr = ProviderHacks.getPingRequestFactory().createQueryKeyRequest();
+        PingRequest pr = pingRequestFactory.createQueryKeyRequest();
         AddressSecurityToken qkToUse = null;
         send(pr, address, Backend.BACKEND_PORT);
         //try {
@@ -101,7 +115,7 @@ public class GUESSServerSideTest extends LimeTestCase {
             //}
 
         // send a normal ping, should get a pong....
-        pr = ProviderHacks.getPingRequestFactory().createPingRequest((byte)1);
+        pr = pingRequestFactory.createPingRequest((byte)1);
         send(pr, address, Backend.BACKEND_PORT);
         //try {
             pRep = (PingReply) receive();
@@ -118,7 +132,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         (new Random()).nextBytes(fakeQueryKey);
 
 		QueryRequest crapQuery = 
-			ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", 
+			queryRequestFactory.createQueryKeyQuery("susheel", 
 											 new AddressSecurityToken(fakeQueryKey));
         //QueryRequest crapQuery = 
 		//  new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
@@ -141,7 +155,7 @@ public class GUESSServerSideTest extends LimeTestCase {
 
         // now try a legit one....
 		QueryRequest goodQuery =
-			ProviderHacks.getQueryRequestFactory().createQueryKeyQuery("susheel", qkToUse);
+			queryRequestFactory.createQueryKeyQuery("susheel", qkToUse);
 
 		byte[] guid = goodQuery.getGUID();
         send(goodQuery, address, Backend.BACKEND_PORT);
@@ -182,7 +196,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         byte[] data = datagram.getData();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = ProviderHacks.getMessageFactory().read(in);		
+        Message message = messageFactory.read(in);		
         return message;
     }
 
