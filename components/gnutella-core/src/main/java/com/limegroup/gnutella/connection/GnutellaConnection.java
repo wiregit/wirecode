@@ -200,12 +200,6 @@ public class GnutellaConnection extends AbstractConnection
     /** Keeps track of sent/received [dropped] & bandwidth. */
     private final ConnectionStats _connectionStats = new ConnectionStats();
     
-    /**
-     * The minimum time a leaf needs to be in "busy mode" before we will consider him "truly
-     * busy" for the purposes of QRT updates.
-     */
-    private static long MIN_BUSY_LEAF_TIME = 1000 * 20;   //  20 seconds
-
     /** The next time I should send a query route table to this connection.
 	 */
     private long _nextQRPForwardTime;
@@ -590,19 +584,6 @@ public class GnutellaConnection extends AbstractConnection
             return false;
         int hfm = getHopsFlowMax();
         return hfm >=0 && hfm < 3;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RoutedConnection#isBusyEnoughToTriggerQRTRemoval()
-     */
-    public boolean isBusyEnoughToTriggerQRTRemoval(){
-        if( _busyTime == -1 )
-            return false;
-        
-        if( System.currentTimeMillis() > (_busyTime+MIN_BUSY_LEAF_TIME) )
-            return true;
-        
-        return false;
     }
     
     /* (non-Javadoc)
@@ -1291,7 +1272,6 @@ public class GnutellaConnection extends AbstractConnection
         data.put("qrteu", getQueryRouteTableEmptyUnits());
         data.put("qrtpf", getQueryRouteTablePercentFull());
         data.put("qrts", getQueryRouteTableSize());
-        data.put("betqr", isBusyEnoughToTriggerQRTRemoval());
         data.put("bl", isBusyLeaf());
         data.put("k", isKillable());
         data.put("pp", isPushProxyFor());
