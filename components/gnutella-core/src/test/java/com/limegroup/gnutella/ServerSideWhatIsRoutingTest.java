@@ -10,11 +10,16 @@ import junit.framework.Test;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
+import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -43,45 +48,51 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private static final int PORT = 6667;
+    private final int PORT = 6667;
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static BlockingConnection LEAF;
+    private BlockingConnection LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private static BlockingConnection ULTRAPEER_1;
+    private BlockingConnection ULTRAPEER_1;
 
     /**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS;
+    private DatagramSocket UDP_ACCESS;
 
     /**
      * Just a TCP connection to use for testing.
      */
-    private static ServerSocket TCP_ACCESS;
+    private ServerSocket TCP_ACCESS;
 
     /**
      * The port for TCP_ACCESS
      */ 
-    private static final int TCP_ACCESS_PORT = 10776;
+    private final int TCP_ACCESS_PORT = 10776;
 
     /**
 	 * Second Ultrapeer connection
      */
-    private static BlockingConnection ULTRAPEER_2;
+    private BlockingConnection ULTRAPEER_2;
 
-	/**
-	 * The central Ultrapeer used in the test.
-	 */
-//	private static final RouterService ROUTER_SERVICE = 
-//		new RouterService(new ActivityCallbackStub());
+    private LifecycleManager lifecycleManager;
 
-    public ServerSideWhatIsRoutingTest(String name) {
+    private ConnectionServices connectionServices;
+
+    private BlockingConnectionFactory blockingConnectionFactory;
+
+    private HeadersFactory headersFactory;
+
+    private QueryRequestFactory queryRequestFactory;
+
+    private CapabilitiesVMFactory capabilitiesVMFactory;
+
+	public ServerSideWhatIsRoutingTest(String name) {
         super(name);
     }
     
@@ -93,14 +104,14 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	private static void buildConnections() throws Exception {
-        ULTRAPEER_1 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+	private void buildConnections() throws Exception {
+        ULTRAPEER_1 = blockingConnectionFactory.createConnection("localhost", PORT);
         UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
-        ULTRAPEER_2 = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+        ULTRAPEER_2 = blockingConnectionFactory.createConnection("localhost", PORT);
     }
 
-    public static void setSettings() {
+    public void setSettings() {
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
@@ -125,38 +136,37 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
     }
 
-	public static void globalSetUp() throws Exception {
+    @Override
+	public void setUp() throws Exception {
         setSettings();
+        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
 
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-
-		ProviderHacks.getLifecycleManager().start();
-		ProviderHacks.getHostCatcher().clear();
-        ProviderHacks.getConnectionServices().connect();	
+        Injector injector = LimeTestUtils.createInjector();
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        connectionServices = injector.getInstance(ConnectionServices.class);
+        blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
+        headersFactory = injector.getInstance(HeadersFactory.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
+        
+        lifecycleManager.start();
+        connectionServices.connect();	
 		connect();
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
 	}
 
-    
-    public void setUp() {
-        setSettings();
-    }
-
-
-	public static void globalTearDown() throws Exception {
-        ProviderHacks.getConnectionServices().disconnect();
-		sleep();
+    @Override
+    protected void tearDown() throws Exception {
+        connectionServices.disconnect();
+        lifecycleManager.shutdown();
         if ((LEAF != null) && LEAF.isOpen())
             LEAF.close();
-		ULTRAPEER_1.close();
-		ULTRAPEER_2.close();
-		sleep();
+        ULTRAPEER_1.close();
+        ULTRAPEER_2.close();
         UDP_ACCESS.close();
         TCP_ACCESS.close();
-	}
-
+    }
+    
 	private static void sleep() {
 		try {Thread.sleep(300);}catch(InterruptedException e) {}
 	}
@@ -164,7 +174,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 	/**
 	 * Drains all messages 
 	 */
- 	private static void drainAll() throws Exception {
+ 	private void drainAll() throws Exception {
  		if(ULTRAPEER_1.isOpen()) {
  			drain(ULTRAPEER_1);
  		}
@@ -179,12 +189,12 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 	/**
 	 * Connects all of the nodes to the central test Ultrapeer.
 	 */
-    private static void connect() throws Exception {
+    private void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_2.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize(ProviderHacks.getHeadersFactory().createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        ULTRAPEER_1.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
@@ -198,9 +208,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 
-	    LEAF = ProviderHacks.getBlockingConnectionFactory().createConnection("localhost", PORT);
+	    LEAF = blockingConnectionFactory.createConnection("localhost", PORT);
         //3. routed leaf, with route table for "test"
-        LEAF.initialize(ProviderHacks.getHeadersFactory().createLeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF.initialize(headersFactory.createLeafHeaders("localhost"), new EmptyResponder(), 1000);
         qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
@@ -219,15 +229,12 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 		sleep();
     }
 
-    // BEGIN TESTS
-    // ------------------------------------------------------
-
     public void testDoesNotRouteToLeafWhatIsNewQuery() throws Exception {
         drainAll();
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
@@ -246,12 +253,12 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         drainAll();
 
         // send the CapabilitiesVM
-        LEAF.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
+        LEAF.send(capabilitiesVMFactory.getCapabilitiesVM());
         LEAF.flush();
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_1.send(whatIsNewQuery);
@@ -269,7 +276,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the LAST HOP query
         whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(),
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(),
                     (byte)1, QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false,
                     Network.UNKNOWN, false, FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
@@ -294,7 +301,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
@@ -314,12 +321,12 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         drainAll();
 
         // send the CapabilitiesVM
-        ULTRAPEER_1.send(ProviderHacks.getCapabilitiesVMFactory().getCapabilitiesVM());
+        ULTRAPEER_1.send(capabilitiesVMFactory.getCapabilitiesVM());
         ULTRAPEER_1.flush();
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         ULTRAPEER_2.send(whatIsNewQuery);
@@ -344,7 +351,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest whatIsNewQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.WHAT_IS_NEW);
         LEAF.send(whatIsNewQuery);
@@ -372,7 +379,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest unknownFeatureQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)3,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
@@ -402,7 +409,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // send the query
         QueryRequest unknownFeatureQuery = 
-            ProviderHacks.getQueryRequestFactory().createQueryRequest(GUID.makeGuid(), (byte)2,
+            queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
                 QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, null, false, Network.UNKNOWN, false,
                 FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR+1);
         ULTRAPEER_2.send(unknownFeatureQuery);
