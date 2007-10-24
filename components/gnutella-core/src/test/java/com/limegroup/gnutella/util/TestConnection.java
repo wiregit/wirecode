@@ -2,6 +2,8 @@ package com.limegroup.gnutella.util;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Provider;
@@ -33,7 +35,6 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**

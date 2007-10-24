@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -34,7 +35,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 /**

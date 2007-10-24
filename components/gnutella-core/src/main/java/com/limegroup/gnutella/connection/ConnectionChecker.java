@@ -13,13 +13,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
+import org.limewire.net.SocketsManager;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.UploadServices;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known

@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.SocketsManager;
 import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
@@ -54,7 +55,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;

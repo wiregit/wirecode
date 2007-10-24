@@ -18,6 +18,7 @@ import org.limewire.io.Pools;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
+import org.limewire.net.LimeWireNetModule;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
@@ -165,6 +166,8 @@ import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
+import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
+import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
 import com.limegroup.gnutella.spam.AddressToken;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
@@ -205,6 +208,8 @@ public class LimeWireCoreModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
+        
         bind(LimeWireCore.class);
         
         if(activityCallbackClass != null) {

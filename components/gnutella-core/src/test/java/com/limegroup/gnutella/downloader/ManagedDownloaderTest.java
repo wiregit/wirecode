@@ -27,6 +27,7 @@ import org.limewire.collection.Range;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -74,7 +75,6 @@ import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager;
 
 public class ManagedDownloaderTest extends LimeTestCase {
     

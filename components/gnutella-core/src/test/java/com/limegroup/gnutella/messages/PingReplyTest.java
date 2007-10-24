@@ -17,6 +17,7 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.security.AddressSecurityToken;
 
 import com.google.inject.AbstractModule;
@@ -44,7 +45,6 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class PingReplyTest extends LimeTestCase {

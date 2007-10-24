@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.setting.StringSetting;
 
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public abstract class AbstractConnection implements Connection {
 

@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.UploadServices;
-import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
 public class ConnectionCheckerManagerImpl implements ConnectionCheckerManager {

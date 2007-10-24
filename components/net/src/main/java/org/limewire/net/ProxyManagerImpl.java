@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.statemachine.BlockingStateMachine;
@@ -30,40 +32,46 @@ import org.limewire.nio.statemachine.SimpleReadState;
 import org.limewire.nio.statemachine.SimpleWriteState;
 import org.limewire.util.BufferUtils;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 
 /**
- * A collection of utilities for proxy connection establishment.
- * Used with Sockets.
+ * Manages whether or not a connection is proxied, and how it is proxied.
  */
-class ProxyUtils {
+@Singleton
+class ProxyManagerImpl implements ProxyManager {
     
-    private static final Log LOG = LogFactory.getLog(ProxyUtils.class);
+    private static final Log LOG = LogFactory.getLog(ProxyManagerImpl.class);
     
-    private ProxyUtils() {}
+    private final ProxySettings proxySettings;
     
-    /**
-     * Determines the kind of proxy to use for connecting to the given address.
+    @Inject
+    public ProxyManagerImpl(ProxySettings proxySettings) {
+        this.proxySettings = proxySettings;
+    }
+        
+    /* (non-Javadoc)
+     * @see org.limewire.net.ProxyManager#getProxyType(java.net.InetAddress)
      */
-    static int getProxyType(InetAddress address) {
+    public ProxyType getProxyType(InetAddress address) {
 		// if the user specified that he wanted to use a proxy to connect
 		// to the network, we will use that proxy unless the host we
 		// want to connect to is a private address
-		int connectionType = ConnectionSettings.CONNECTION_METHOD.getValue();
-		boolean valid =  connectionType != ConnectionSettings.C_NO_PROXY &&
+        ProxyType connectionType = proxySettings.getCurrentProxyType();
+		boolean valid =  connectionType != ProxyType.NONE &&
                         (!NetworkUtils.isPrivateAddress(address) ||
-                         ConnectionSettings.USE_PROXY_FOR_PRIVATE.getValue());
+                         proxySettings.isProxyForPrivateEnabled());
         if(valid)
             return connectionType;
         else
-            return ConnectionSettings.C_NO_PROXY;
+            return ProxyType.NONE;
     }
     
-    /**
-     * Establishes a proxy connection on the given socket.
+    /* (non-Javadoc)
+     * @see org.limewire.net.ProxyManager#establishProxy(int, java.net.Socket, java.net.InetSocketAddress, int)
      */
-    static Socket establishProxy(int type, Socket proxySocket, InetSocketAddress addr, int timeout) throws IOException {
+    public Socket establishProxy(ProxyType type, Socket proxySocket, InetSocketAddress addr, int timeout) throws IOException {
         proxySocket.setSoTimeout(timeout);
         List<IOState> states = getProxyStates(type, addr);
         InputStream in = proxySocket.getInputStream();
@@ -77,21 +85,29 @@ class ProxyUtils {
         
         proxySocket.setSoTimeout(0);
         return proxySocket;
+    }    
+
+    public ProxyConnector getConnectorFor(ProxyType type, ConnectObserver observer, InetSocketAddress host, int timeout) {
+        return new ProxyConnectorImpl(type, observer, host, timeout);
+    }
+    
+    public InetSocketAddress getProxyHost() throws UnknownHostException {
+        return new InetSocketAddress(proxySettings.getProxyHost(), proxySettings.getProxyPort());
     }
     
     /** Returns the correct states for the given proxy. */
-    private static List<IOState> getProxyStates(int type, InetSocketAddress addr) throws IOException {
+    private List<IOState> getProxyStates(ProxyType type, InetSocketAddress addr) throws IOException {
         switch(type) {
-        case ConnectionSettings.C_HTTP_PROXY: return getHttpStates(addr);
-        case ConnectionSettings.C_SOCKS4_PROXY: return getSocksV4States(addr);
-        case ConnectionSettings.C_SOCKS5_PROXY: return getSocksV5States(addr);
+        case HTTP: return getHttpStates(addr);
+        case SOCKS4: return getSocksV4States(addr);
+        case SOCKS5: return getSocksV5States(addr);
         default:
             throw new IOException("Unknown proxy type.");
         }
     }
     
     /** Returns a list of states for processing a SOCKSv4 proxy. */
-    private static List<IOState> getSocksV4States(final InetSocketAddress addr) {
+    private List<IOState> getSocksV4States(final InetSocketAddress addr) {
         List<IOState> states = new LinkedList<IOState>();
 
         byte[] hostBytes = addr.getAddress().getAddress();
@@ -100,9 +116,9 @@ class ProxyUtils {
         portBytes[0] = ((byte) (port >> 8));
         portBytes[1] = ((byte) port);
         
-        boolean auth = ConnectionSettings.PROXY_AUTHENTICATE.getValue();
-        String authName = ConnectionSettings.PROXY_USERNAME.getValue();
-        byte[] authData = auth ? authName.getBytes() : DataUtils.EMPTY_BYTE_ARRAY;
+        boolean auth = proxySettings.isProxyAuthenticationRequired();
+        String authName = proxySettings.getProxyUsername();
+        byte[] authData = auth ? authName.getBytes() : new byte[0];
         ByteBuffer outgoing = ByteBuffer.allocate(2 + portBytes.length + hostBytes.length + authData.length + 1);
         outgoing.put((byte)0x04);
         outgoing.put((byte)0x01);
@@ -132,11 +148,11 @@ class ProxyUtils {
     }
     
     /** Returns all states necessary for a SOCKSv5 proxy connection. */
-    private static List<IOState> getSocksV5States(InetSocketAddress addr) {
+    private List<IOState> getSocksV5States(InetSocketAddress addr) {
         List<IOState> states = new LinkedList<IOState>();
         // If authenticating, write: # of auth methods, support no auth, support usr/password auth
         // If not authenticating, write: # of auth methods, support no auth.
-        byte[] auths = ConnectionSettings.PROXY_AUTHENTICATE.getValue() ?
+        byte[] auths = proxySettings.isProxyAuthenticationRequired() ?
                 new byte[] { 0x02, 0x00, 0x02 } : new byte[] { 0x01, 0x00 };
         ByteBuffer outgoing = ByteBuffer.allocate(1 + auths.length);
         outgoing.put((byte)0x05);
@@ -160,8 +176,8 @@ class ProxyUtils {
         });
         
 		// username/password 
-		String username = ConnectionSettings.PROXY_USERNAME.getValue();
-		String password = ConnectionSettings.PROXY_PASS.getValue();
+		String username = proxySettings.getProxyUsername();
+		String password = proxySettings.getProxyPassword();
         outgoing = ByteBuffer.allocate(1 + 1 + username.length() + 1 + password.length());
         outgoing.put((byte)0x01);
         outgoing.put((byte)username.length());
@@ -236,7 +252,7 @@ class ProxyUtils {
     }    
 
     /** Returns the states associated with an HTTP proxy. */
-    private static List<IOState> getHttpStates(InetSocketAddress addr) {
+    private List<IOState> getHttpStates(InetSocketAddress addr) {
         List<IOState> states = new LinkedList<IOState>();
         
 		String connectString = "CONNECT " + addr.getAddress().getHostAddress() + ":" + addr.getPort() + " HTTP/1.0\r\n\r\n";
@@ -299,14 +315,14 @@ class ProxyUtils {
      * ConnectObserver that will establish a proxy prior to delegating the connect back
      * to the delegate.
      */
-    static class ProxyConnector implements ConnectObserver, IOStateObserver {
-        private final int proxyType;
+    private class ProxyConnectorImpl implements ProxyManager.ProxyConnector, IOStateObserver {
+        private final ProxyType proxyType;
         private final ConnectObserver delegate;
         private final InetSocketAddress addr;
         private final int timeout;
         private volatile Socket socket;
         
-        ProxyConnector(int type, ConnectObserver observer, InetSocketAddress host, int tout) {
+        ProxyConnectorImpl(ProxyType type, ConnectObserver observer, InetSocketAddress host, int tout) {
             proxyType = type;
             delegate = observer;
             addr = host;

@@ -10,6 +10,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -25,7 +26,6 @@ import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -8,13 +8,27 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.net.ProxyManager.ProxyConnector;
 import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+
+/**
+ * A SocketController that does everything SimpleSocketController does,
+ * except limits the number of outgoing attempts at any given moment.
+ * 
+ * Connection attempts beyond the limit will be queued until space
+ * is available for connecting.
+ */
+@Singleton
 class LimitedSocketController extends SimpleSocketController {
+    
+    private static final int DEFAULT_MAX_CONNECTING_SOCKETS = 4;
 
     /**
      * The maximum number of concurrent connection attempts.
@@ -36,8 +50,14 @@ class LimitedSocketController extends SimpleSocketController {
      * number of connections concurrently.
      * @param max
      */
-    LimitedSocketController(int max) {
-        this.MAX_CONNECTING_SOCKETS = max;
+    @Inject
+    LimitedSocketController(ProxyManager proxyManager, SocketBindingSettings socketBindingSettings) {
+        this(proxyManager, socketBindingSettings, DEFAULT_MAX_CONNECTING_SOCKETS);
+    }
+    
+    LimitedSocketController(ProxyManager proxyManager, SocketBindingSettings socketBindingSettings, int maxConnectingSockets) {
+        super(proxyManager, socketBindingSettings);
+        this.MAX_CONNECTING_SOCKETS = maxConnectingSockets;
     }
     
 
@@ -86,8 +106,8 @@ class LimitedSocketController extends SimpleSocketController {
                 i.remove();
                 return true;
             // must handle proxy'd kinds also.
-            } else if(next.observer instanceof ProxyUtils.ProxyConnector) {
-                if(((ProxyUtils.ProxyConnector)next.observer).getDelegateObserver() == observer) {
+            } else if(next.observer instanceof ProxyConnector) {
+                if(((ProxyConnector)next.observer).getDelegateObserver() == observer) {
                     i.remove();
                     return true;
                 }

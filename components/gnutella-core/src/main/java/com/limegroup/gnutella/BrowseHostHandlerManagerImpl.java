@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
@@ -21,7 +22,6 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.BrowseHostHandler.PushRequestDetails;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
 public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {

@@ -9,6 +9,7 @@ import junit.framework.Test;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
 
@@ -22,7 +23,6 @@ import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public class ConnectionTest extends LimeTestCase {
     

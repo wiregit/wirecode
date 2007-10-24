@@ -1,23 +1,17 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net;
 
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.NIOSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.ssl.TLSSocketFactory;
-import org.limewire.util.OSUtils;
-
-import com.google.inject.Singleton;
-
 
 /** Factory for creating Sockets. */
-@Singleton
-public class SocketsManager {
+public interface SocketsManager {
     
     /** The different ways a connection can be attempted. */
     public static enum ConnectType {    
@@ -29,15 +23,10 @@ public class SocketsManager {
             this.factory = factory;
         }
         
-        private NBSocketFactory getFactory() {
+        NBSocketFactory getFactory() {
             return factory;
         }
-    }    
-    
-    private final SocketController CONTROLLER =
-        OSUtils.isSocketChallengedWindows() ?
-                new LimitedSocketController(4) :
-                new SimpleSocketController();
+    }
     
     /**
      * Connects and returns a socket to the given host, with a timeout.
@@ -53,9 +42,7 @@ public class SocketsManager {
      *  requested time
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Socket connect(InetSocketAddress addr, int timeout) throws IOException {
-        return connect(addr, timeout, ConnectType.PLAIN);
-    }
+    public Socket connect(InetSocketAddress addr, int timeout) throws IOException;
     
     /**
      * Connects and returns a socket to the given host, with a timeout.
@@ -76,9 +63,7 @@ public class SocketsManager {
      *  requested time
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Socket connect(InetSocketAddress addr, int timeout, ConnectType type) throws IOException {
-        return connect(addr, timeout, null, type);
-    }
+    public Socket connect(InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
     
     /**
      * Sets up a socket for connecting.
@@ -104,9 +89,7 @@ public class SocketsManager {
      * @throws IOException see above
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
-        return connect(addr, timeout, observer, ConnectType.PLAIN);
-    }
+    public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException;
     
     /**
      * Sets up a socket for connecting.
@@ -137,14 +120,7 @@ public class SocketsManager {
      * @throws IOException see above
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
-        if(!NetworkUtils.isValidPort(addr.getPort()))  
-            throw new IllegalArgumentException("port out of range: "+addr.getPort());
-        if(addr.isUnresolved())
-            throw new IOException("address must be resolved!");
-        
-        return CONTROLLER.connect(type.getFactory(), addr, timeout, observer);
-	}
+    public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException;
     
     /**
      * Removes the given ConnectObserver from wanting to make a request.
@@ -153,17 +129,11 @@ public class SocketsManager {
      * Otherwise it returns false, and the ConnectObserver should expect some sort of callback
      * indicating whether or not the connect succeeded.
      */
-    public boolean removeConnectObserver(ConnectObserver observer) {
-        return CONTROLLER.removeConnectObserver(observer);
-    }	
+    public boolean removeConnectObserver(ConnectObserver observer);
 
     /** Returns the number of Sockets allowed to be created concurrently. */
-	public int getNumAllowedSockets() {
-        return CONTROLLER.getNumAllowedSockets();
-	}
+	public int getNumAllowedSockets();
     
     /** Returns the number of Sockets that are waiting for the controller to process them. */
-    public int getNumWaitingSockets() {
-        return CONTROLLER.getNumWaitingSockets();
-    }
+    public int getNumWaitingSockets();
 }

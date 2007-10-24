@@ -21,11 +21,11 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.limegroup.gnutella.util.SocketsManager;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 
 /**

@@ -3,11 +3,11 @@ package com.limegroup.gnutella.chat;
 
 import junit.framework.Test;
 
+import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SocketStub;
-import com.limegroup.gnutella.util.SocketsManager;
 
 public class InstantMessengerTest extends BaseTestCase {
 
@@ -24,7 +24,7 @@ public class InstantMessengerTest extends BaseTestCase {
     }
 
     public void testIsOutgoing() {
-        InstantMessenger im = new InstantMessengerImpl("host", 1234, new ActivityCallbackStub(), new SocketsManager());
+        InstantMessenger im = new InstantMessengerImpl("host", 1234, new ActivityCallbackStub(), new SocketsManagerImpl());
         assertTrue(im.isOutgoing());
         assertEquals("host", im.getHost());
         assertEquals(1234, im.getPort());

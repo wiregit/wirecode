@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
@@ -20,8 +22,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.SocketsManager;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Manages state for push upload requests.

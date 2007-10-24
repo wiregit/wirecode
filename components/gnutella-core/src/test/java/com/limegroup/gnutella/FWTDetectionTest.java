@@ -21,6 +21,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -45,7 +46,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * this class tests that the node properly detects if it is

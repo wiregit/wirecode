@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

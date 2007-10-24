@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +13,7 @@ import org.limewire.nio.observer.ConnectObserver;
  * whereas another might queue sockets so that only a certain amount
  * can connect at a given time.
  */
-interface SocketController {
+public interface SocketController {
 
     /** 
      * Enqueue's this socket for wanting a connection.

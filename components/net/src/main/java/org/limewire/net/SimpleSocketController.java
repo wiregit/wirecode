@@ -1,19 +1,35 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+/**
+ * A SocketController that blindly connects to the given address
+ * (deferring the connection through proxies, if necessary).
+ */
+@Singleton
 class SimpleSocketController implements SocketController {    
 
     /** The possibly null address to bind to. */
     private InetSocketAddress lastBindAddr;
+    
+    private final ProxyManager proxyManager;
+    private final SocketBindingSettings socketBindingSettings;
+    
+    @Inject
+    SimpleSocketController(ProxyManager proxyManager, SocketBindingSettings socketBindingSettings) {
+        this.proxyManager = proxyManager;
+        this.socketBindingSettings = socketBindingSettings;
+    }
     
     /**
      * Makes a connection to the given InetSocketAddress.
@@ -22,9 +38,9 @@ class SimpleSocketController implements SocketController {
      */
     public Socket connect(NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) 
       throws IOException {  
-        int proxyType = ProxyUtils.getProxyType(addr.getAddress());  
+        ProxyType proxyType = proxyManager.getProxyType(addr.getAddress());  
                        
-        if (proxyType != ConnectionSettings.C_NO_PROXY)  
+        if (proxyType != ProxyType.NONE)  
             return connectProxy(factory, proxyType, addr, timeout, observer);  
         else
             return connectPlain(factory, addr, timeout, observer);  
@@ -67,14 +83,14 @@ class SimpleSocketController implements SocketController {
     
     /** Attempts to bind the Socket using the values from ConnectionSettings. */
     protected void bindSocket(Socket socket) {
-        if(ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue()) {
-            String bindAddrString = ConnectionSettings.CUSTOM_INETADRESS.getValue();
+        if(socketBindingSettings.isSocketBindingRequired()) {
+            String bindAddrString = socketBindingSettings.getAddressToBindTo();
             try {
                 if(lastBindAddr == null || !lastBindAddr.getAddress().getHostAddress().equals(bindAddrString))
                     lastBindAddr = new InetSocketAddress(bindAddrString, 0);
                 socket.bind(lastBindAddr);
             } catch(IOException iox) {
-                ConnectionSettings.CUSTOM_NETWORK_INTERFACE.setValue(false);
+                socketBindingSettings.bindingFailed();
             }
         }
     }
@@ -82,18 +98,16 @@ class SimpleSocketController implements SocketController {
     /**
      * Connects to a host using a proxy.
      */
-    protected Socket connectProxy(NBSocketFactory factory, int type, InetSocketAddress addr, int timeout, ConnectObserver observer)
+    protected Socket connectProxy(NBSocketFactory factory, ProxyType type, InetSocketAddress addr, int timeout, ConnectObserver observer)
       throws IOException {
-        String proxyHost = ConnectionSettings.PROXY_HOST.getValue();
-        int proxyPort = ConnectionSettings.PROXY_PORT.getValue();
-        InetSocketAddress proxyAddr = new InetSocketAddress(proxyHost, proxyPort);
+        InetSocketAddress proxyAddr = proxyManager.getProxyHost();
         
         if(observer != null) {
-            return connectPlain(factory, proxyAddr, timeout, new ProxyUtils.ProxyConnector(type, observer, addr, timeout));
+            return connectPlain(factory, proxyAddr, timeout, proxyManager.getConnectorFor(type, observer, addr, timeout));
         } else {
             Socket proxySocket = connectPlain(factory, proxyAddr, timeout, null);
             try {
-                return ProxyUtils.establishProxy(type, proxySocket, addr, timeout);
+                return proxyManager.establishProxy(type, proxySocket, addr, timeout);
             } catch(IOException iox) {
                 // Ensure the proxySocket is closed.  Not all proxies cleanup correctly.
                 try { proxySocket.close(); } catch(IOException ignored) {}

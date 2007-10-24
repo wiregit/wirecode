@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
@@ -96,7 +97,6 @@ import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;

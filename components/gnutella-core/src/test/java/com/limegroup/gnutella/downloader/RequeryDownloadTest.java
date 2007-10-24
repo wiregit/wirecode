@@ -17,6 +17,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.Range;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -83,7 +84,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.QueryUtils;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**

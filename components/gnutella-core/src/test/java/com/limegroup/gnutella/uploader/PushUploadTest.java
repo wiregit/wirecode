@@ -27,6 +27,7 @@ import org.apache.http.message.BasicLineParser;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.AbstractModule;
@@ -74,7 +75,6 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager;
 
 //ITEST
 public class PushUploadTest extends LimeTestCase {

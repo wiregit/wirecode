@@ -18,6 +18,8 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.rudp.UDPConnection;
 
 import com.google.inject.Provider;
@@ -28,8 +30,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.SocketsManager;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 

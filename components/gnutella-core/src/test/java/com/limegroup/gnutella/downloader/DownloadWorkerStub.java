@@ -3,9 +3,10 @@ package com.limegroup.gnutella.downloader;
 import java.net.Socket;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.net.SocketsManager;
+
 import com.google.inject.Provider;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.util.SocketsManager;
 
 class DownloadWorkerStub extends DownloadWorker {
 

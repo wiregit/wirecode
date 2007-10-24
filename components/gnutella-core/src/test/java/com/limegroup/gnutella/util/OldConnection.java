@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Provider;

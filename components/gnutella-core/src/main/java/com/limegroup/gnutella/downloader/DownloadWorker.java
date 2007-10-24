@@ -15,6 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.statemachine.IOStateObserver;
 
@@ -31,8 +33,6 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
-import com.limegroup.gnutella.util.SocketsManager;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Class that performs the logic of downloading a file from a single host.

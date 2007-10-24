@@ -10,6 +10,8 @@ import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
@@ -17,7 +19,6 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.StubSpamServices;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.util.SocketsManager;
 
 //ITEST
 public class ChatTest extends BaseTestCase {
@@ -60,7 +61,7 @@ public class ChatTest extends BaseTestCase {
         connectionDispatcher = new ConnectionDispatcherImpl();
 
         factory = new InstantMessengerFactoryImpl(Providers.of((ActivityCallback) receiverCallback),
-                Providers.of(new SocketsManager()));
+                Providers.of((SocketsManager)new SocketsManagerImpl()));
         
         chatManager = new ChatManager(new StubSpamServices(), factory);
         connectionDispatcher.addConnectionAcceptor(chatManager, false, "CHAT");
@@ -85,7 +86,7 @@ public class ChatTest extends BaseTestCase {
 
     public void testChatThroughAcceptor() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManager());
+        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManagerImpl());
         messenger.start();
         callback.waitForConnect(1000);
         assertTrue(messenger.isConnected());
@@ -97,7 +98,7 @@ public class ChatTest extends BaseTestCase {
 
     public void testSendHugeMessage() throws Exception {
         callback = new MyActivityCallback();
-        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManager());
+        messenger = new InstantMessengerImpl("localhost", CHAT_PORT, callback, new SocketsManagerImpl());
         messenger.start();
         callback.waitForConnect(1000);
         assertFalse(messenger.send(new String(new char[10000])));

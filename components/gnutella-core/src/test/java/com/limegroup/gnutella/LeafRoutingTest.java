@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -44,7 +45,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

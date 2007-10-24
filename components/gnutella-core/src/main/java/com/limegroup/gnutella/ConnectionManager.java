@@ -30,6 +30,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.SystemUtils;
 
 import com.google.inject.Inject;
@@ -63,9 +65,7 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * The list of all RoutedConnection's.  Provides a factory method for creating

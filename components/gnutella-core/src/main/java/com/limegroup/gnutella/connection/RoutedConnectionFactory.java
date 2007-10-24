@@ -2,7 +2,8 @@ package com.limegroup.gnutella.connection;
 
 import java.net.Socket;
 
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
+import org.limewire.net.SocketsManager.ConnectType;
+
 
 public interface RoutedConnectionFactory {
 

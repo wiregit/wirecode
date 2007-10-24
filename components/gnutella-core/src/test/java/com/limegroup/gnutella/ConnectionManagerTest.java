@@ -20,6 +20,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -60,8 +62,6 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**

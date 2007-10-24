@@ -2,11 +2,12 @@ package com.limegroup.gnutella.chat;
 
 import java.net.Socket;
 
+import org.limewire.net.SocketsManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
 public class InstantMessengerFactoryImpl implements InstantMessengerFactory {

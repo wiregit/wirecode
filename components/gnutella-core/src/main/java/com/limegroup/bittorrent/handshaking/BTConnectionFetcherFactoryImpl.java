@@ -2,13 +2,14 @@ package com.limegroup.bittorrent.handshaking;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.net.SocketsManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
 public class BTConnectionFetcherFactoryImpl implements BTConnectionFetcherFactory {

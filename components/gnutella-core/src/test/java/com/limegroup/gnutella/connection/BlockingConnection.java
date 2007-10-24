@@ -18,6 +18,8 @@ import org.limewire.io.CompressingOutputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.io.Pools;
 import org.limewire.io.UncompressingInputStream;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.NetworkManager;
@@ -33,8 +35,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.util.SocketsManager;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 /**
  * A Gnutella messaging connection. Provides handshaking functionality and

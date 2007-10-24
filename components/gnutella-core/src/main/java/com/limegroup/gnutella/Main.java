@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.limewire.io.IpPort;
+import org.limewire.net.SocketsManager.ConnectType;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**

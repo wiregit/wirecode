@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.io.Connectable;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /** A (incomplete!) stub for ConnectionManager. */
 @Singleton

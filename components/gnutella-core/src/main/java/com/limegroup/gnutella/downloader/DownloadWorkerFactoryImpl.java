@@ -2,12 +2,13 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.net.SocketsManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
 public class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {

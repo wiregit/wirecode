@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Inject;

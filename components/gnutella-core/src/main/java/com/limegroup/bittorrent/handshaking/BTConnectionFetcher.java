@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.net.SocketsManager;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
@@ -27,7 +28,6 @@ import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutdownable  {

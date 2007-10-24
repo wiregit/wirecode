@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.rudp.UDPMultiplexor;
 
 import com.google.inject.Inject;
@@ -15,7 +16,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 @Singleton
 public class ConnectionServicesImpl implements ConnectionServices {

@@ -4,9 +4,9 @@ import java.net.InetAddress;
 import java.util.Collection;
 
 import org.limewire.io.IpPort;
+import org.limewire.net.SocketsManager.ConnectType;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public interface ConnectionServices {
 

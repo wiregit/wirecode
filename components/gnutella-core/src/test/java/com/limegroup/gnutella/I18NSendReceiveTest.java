@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 
@@ -29,7 +30,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;

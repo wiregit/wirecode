@@ -11,14 +11,16 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.ConnectObserverStub;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class ProxyTest extends BaseTestCase {
 
@@ -59,7 +61,8 @@ public class ProxyTest extends BaseTestCase {
         fps = new FakeProxyServer(9990, 9999);
         fps.setMakeError(false);
         
-        socketsManager = new SocketsManager();
+        Injector injector = LimeTestUtils.createInjector();        
+        socketsManager = injector.getInstance(SocketsManager.class);
         
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
     }

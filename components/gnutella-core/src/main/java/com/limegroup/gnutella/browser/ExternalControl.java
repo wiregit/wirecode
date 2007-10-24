@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
 import org.limewire.util.CommonUtils;
@@ -30,7 +31,6 @@ import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.SocketsManager;
 
 @Singleton
 public class ExternalControl {

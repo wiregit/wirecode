@@ -32,6 +32,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.SocketsManager;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
@@ -90,7 +91,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in

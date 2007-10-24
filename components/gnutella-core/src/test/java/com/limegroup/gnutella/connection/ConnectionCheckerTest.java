@@ -6,12 +6,13 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.UploadServices;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * Tests the class that checks whether or not the user has a live internet
@@ -48,7 +49,7 @@ public class ConnectionCheckerTest extends BaseTestCase {
         connectionServices = context.mock(ConnectionServices.class);
         uploadServices = context.mock(UploadServices.class);
         downloadServices = context.mock(DownloadServices.class);
-        socketsManager = new SocketsManager();
+        socketsManager = new SocketsManagerImpl();
         udpConnectionChecker = context.mock(UDPConnectionChecker.class);
         connectionCheckerListener = context.mock(ConnectionCheckerListener.class);
     }

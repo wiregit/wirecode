@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 import org.limewire.service.ErrorService;
@@ -31,7 +32,6 @@ import com.google.inject.name.Names;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager;
 
 public class AcceptorTest extends LimeTestCase {
     

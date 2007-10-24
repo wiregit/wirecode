@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
+import org.limewire.net.SocketsManager;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.AbstractChannelWriter;
 import org.limewire.nio.channel.NIOMultiplexor;
@@ -31,7 +32,6 @@ import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.SocketsManager;
 
 /**
  * This class implements a simple chat protocol that allows to exchange text

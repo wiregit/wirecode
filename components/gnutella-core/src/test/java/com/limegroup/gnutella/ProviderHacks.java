@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
@@ -53,7 +54,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
-import com.limegroup.gnutella.util.SocketsManager;
 import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;

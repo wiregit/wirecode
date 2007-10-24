@@ -3,6 +3,8 @@ package com.limegroup.gnutella.connection;
 import java.net.InetAddress;
 import java.util.List;
 
+import org.limewire.net.SocketsManager.ConnectType;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;
@@ -17,7 +19,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.SocketsManager.ConnectType;
 
 public class TLSConnectionTest extends LimeTestCase {
     

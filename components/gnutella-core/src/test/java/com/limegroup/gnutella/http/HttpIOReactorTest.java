@@ -29,12 +29,12 @@ import org.limewire.http.HttpIOReactor;
 import org.limewire.http.SessionRequestCallbackAdapter;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.util.SocketsManager;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
