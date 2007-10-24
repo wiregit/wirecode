@@ -21,18 +21,20 @@ public class LimeRUDPContext implements RUDPContext {
     private final RUDPMessageFactory rudpMessageFactory;
     private final RUDPSettings rudpSettings;
     private final UDPService udpService;
+    private final NIODispatcher nioDispatcher;
     
-
     /**
      * Constructs a new LimeRUDPContext and installs it as the parser
      * for incoming messages.
      */
     @Inject
     public LimeRUDPContext(UDPService udpService,
-            RUDPMessageFactory rudpMessageFactory, RUDPSettings rudpSettings, MessageFactory messageFactory) {
+            RUDPMessageFactory rudpMessageFactory, RUDPSettings rudpSettings, MessageFactory messageFactory,
+            NIODispatcher nioDispatcher) {
         this.udpService = udpService;
         this.rudpMessageFactory = rudpMessageFactory;
         this.rudpSettings = rudpSettings;
+        this.nioDispatcher = nioDispatcher;
         
         MessageParser parser = new LimeRUDPMessageParser(rudpMessageFactory);
         messageFactory.setParser(RUDPMessage.F_RUDP_MESSAGE, parser);
@@ -43,7 +45,7 @@ public class LimeRUDPContext implements RUDPContext {
     }
 
     public TransportListener getTransportListener() {
-        return NIODispatcher.instance().getTransportListener();
+        return nioDispatcher.getTransportListener();
     }
 
     public RUDPSettings getRUDPSettings() {

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.rudp.messages;
 
 import junit.framework.Test;
 
+import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.messages.AckMessage;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.FinMessage;
@@ -11,12 +12,12 @@ import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.RUDPMessage.OpCode;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
+import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.LimeTestCase;
 
-public class LimeRUDPMessageFactoryTest extends LimeTestCase {
+public class LimeRUDPMessageFactoryTest extends BaseTestCase {
 
     public LimeRUDPMessageFactoryTest(String name) {
         super(name);
@@ -30,8 +31,9 @@ public class LimeRUDPMessageFactoryTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    // TODO move this somewhere else, integration test
     public void testContextUsesCorrectFactoryAndDelegate() {
-        RUDPMessageFactory f = ProviderHacks.getRUDPContext().getMessageFactory();
+        RUDPMessageFactory f = LimeTestUtils.createInjector().getInstance(RUDPContext.class).getMessageFactory();
         assertEquals(LimeRUDPMessageFactory.class, f.getClass());
         assertEquals(DefaultMessageFactory.class, ((LimeRUDPMessageFactory)f).getDelegate().getClass());
     }
