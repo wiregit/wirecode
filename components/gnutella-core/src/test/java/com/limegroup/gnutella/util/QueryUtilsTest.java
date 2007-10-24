@@ -8,15 +8,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.BaseTestCase;
+
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ProviderHacks;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 
 @SuppressWarnings("unchecked")
-public class QueryUtilsTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class QueryUtilsTest extends BaseTestCase {
     
+    private QueryRequestFactory queryRequestFactory;
+
     public QueryUtilsTest(String name) {
         super(name);
     }
@@ -25,6 +31,12 @@ public class QueryUtilsTest extends com.limegroup.gnutella.util.LimeTestCase {
         return buildTestSuite(QueryUtilsTest.class);
     }  
 
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+    }
+    
     public void testCreateQueryString() {
         QueryRequest qr;
         
@@ -34,24 +46,24 @@ public class QueryUtilsTest extends com.limegroup.gnutella.util.LimeTestCase {
         query = QueryUtils.createQueryString("reallylongfilenamethatisgoingtotruncate");
         assertEquals("reallylongfilenamethatisgoingt", query);
         // verify that we can create local & network queries out of the query string
-        qr = ProviderHacks.getQueryRequestFactory().createQuery(query);
-        ProviderHacks.getQueryRequestFactory().createMulticastQuery(GUID.makeGuid(), qr);
+        qr = queryRequestFactory.createQuery(query);
+        queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
         
         //such query will fit any 2 out of 3 words in it.
         query = QueryUtils.createQueryString("short one, reallylongotherfilename");
         assertEquals(2,query.split(" ").length);
-        qr = ProviderHacks.getQueryRequestFactory().createQuery(query);
-        ProviderHacks.getQueryRequestFactory().createMulticastQuery(GUID.makeGuid(), qr);
+        qr = queryRequestFactory.createQuery(query);
+        queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
         
         query = QueryUtils.createQueryString("longfirstthingthatwontfitatall, but short others");
         containsAll("but short others", query);
-        qr = ProviderHacks.getQueryRequestFactory().createQuery(query);
-        ProviderHacks.getQueryRequestFactory().createMulticastQuery(GUID.makeGuid(), qr);
+        qr = queryRequestFactory.createQuery(query);
+        queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
         
         query = QueryUtils.createQueryString("(5).jpg");
         assertEquals("5 jpg", query);
-        qr = ProviderHacks.getQueryRequestFactory().createQuery(query);
-        ProviderHacks.getQueryRequestFactory().createMulticastQuery(GUID.makeGuid(), qr);
+        qr = queryRequestFactory.createQuery(query);
+        queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
         
         // test with allow numbers switched on
         assertEquals("500 jpg", QueryUtils.createQueryString("500 jpg", true));
