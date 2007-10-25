@@ -13,6 +13,7 @@ import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.http.HttpClientManager;
@@ -67,7 +68,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    licenseFactory = new LicenseFactoryImpl(Providers.of(licenseCache));
 	    
 	    // XXX HttpClient should be usable without static injection
-        Guice.createInjector(new AbstractModule() {
+        LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 requestStaticInjection(HttpClientManager.class);
