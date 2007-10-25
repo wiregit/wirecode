@@ -28,7 +28,6 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-@SuppressWarnings("unchecked")
 public class MulticastTest extends LimeTestCase {
 
     private  final int DELAY = 1000;
@@ -162,7 +161,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals( "unexpected number of multicast messages", 1, 
                 M_HANDLER.multicasted.size() );
 
-        Message m = (Message)M_HANDLER.multicasted.get(0);
+        Message m = M_HANDLER.multicasted.get(0);
         assertInstanceof( QueryRequest.class, m );
         QueryRequest qr = (QueryRequest)m;
         assertEquals("unexpected query", "sam", qr.getQuery() );
@@ -191,7 +190,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals( "unexpected number of replies", 1,
                 U_HANDLER.unicasted.size() );
 
-        Message m = (Message)U_HANDLER.unicasted.get(0);
+        Message m = U_HANDLER.unicasted.get(0);
         assertInstanceof( QueryReply.class, m);
         QueryReply qr = (QueryReply)m;
         assertTrue("should have MCAST header", qr.isReplyToMulticastQuery());
@@ -233,7 +232,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("should have gotten reply", 1,
                 U_HANDLER.unicasted.size());
 
-        Message m = (Message)U_HANDLER.unicasted.get(0);
+        Message m = U_HANDLER.unicasted.get(0);
         assertInstanceof( QueryReply.class, m);
         QueryReply qr = (QueryReply)m;
         // Because we're acting as both the sender & receiver, our
@@ -265,7 +264,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("should have sent & received push", 1,
                 M_HANDLER.multicasted.size());
         // should be a push.
-        m = (Message)M_HANDLER.multicasted.get(0);
+        m = M_HANDLER.multicasted.get(0);
         assertInstanceof(PushRequest.class, m);
         PushRequest pr = (PushRequest)m;
         // note it was hopped.
@@ -299,7 +298,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("should have gotten reply", 1,
                 U_HANDLER.unicasted.size());
 
-        Message m = (Message)U_HANDLER.unicasted.get(0);
+        Message m = U_HANDLER.unicasted.get(0);
         assertInstanceof( QueryReply.class, m);
         QueryReply qr = (QueryReply)m;
         // Because we're acting as both the sender & receiver, our
@@ -331,7 +330,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("should have sent & received push", 1,
                 M_HANDLER.multicasted.size());
         // should be a push.
-        m = (Message)M_HANDLER.multicasted.get(0);
+        m = M_HANDLER.multicasted.get(0);
         assertInstanceof(PushRequest.class, m);
         PushRequest pr = (PushRequest)m;
         // note it was hopped.
@@ -364,7 +363,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("should have gotten reply", 1,
                 U_HANDLER.unicasted.size());
 
-        Message m = (Message)U_HANDLER.unicasted.get(0);
+        Message m = U_HANDLER.unicasted.get(0);
         assertInstanceof( QueryReply.class, m);
         QueryReply qr = (QueryReply)m;
         // Because we're acting as both the sender & receiver, our
@@ -397,7 +396,7 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("should have sent & received push", 1,
                 M_HANDLER.multicasted.size());
         // should be a push.
-        m = (Message)M_HANDLER.multicasted.get(0);
+        m = M_HANDLER.multicasted.get(0);
         assertInstanceof(PushRequest.class, m);
         
         assertEquals("should not have unicasted anything", 0,
@@ -431,7 +430,7 @@ public class MulticastTest extends LimeTestCase {
     }
     
     private static class MulticastHandler implements MessageHandler {
-        List multicasted = new LinkedList();
+        List<Message> multicasted = new LinkedList<Message>();
 
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             multicasted.add(msg);
@@ -439,7 +438,7 @@ public class MulticastTest extends LimeTestCase {
     }
     
     private static class UnicastedHandler implements MessageHandler {
-        List unicasted = new LinkedList();
+        List<Message>  unicasted = new LinkedList<Message>();
         
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             unicasted.add(msg);
