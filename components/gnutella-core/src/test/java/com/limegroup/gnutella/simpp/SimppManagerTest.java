@@ -82,9 +82,13 @@ public class SimppManagerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    @Override
     public void setUp() throws Exception {
         
+        setSettings();
+        
+    }
+    
+    public void createSimppManager() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
 		capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
 		connectionServices = injector.getInstance(ConnectionServices.class);
@@ -92,7 +96,6 @@ public class SimppManagerTest extends LimeTestCase {
 		lifecycleManager = injector.getInstance(LifecycleManager.class);
         messageFactory = injector.getInstance(MessageFactory.class);
         
-		setSettings();
 		
         lifecycleManager.start();
     }
@@ -176,6 +179,7 @@ public class SimppManagerTest extends LimeTestCase {
 
     public void testOldVersion() throws Exception{
         //Note: we have already set the version to be old in setSettings
+        createSimppManager();
         SimppManager man = simppManager;
         assertEquals("problem reading/verifying old version file", 1,
                                                               man.getVersion());
@@ -183,6 +187,7 @@ public class SimppManagerTest extends LimeTestCase {
     
     public void testMiddleVersion() throws Exception {
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
         SimppManager man = simppManager;
         assertEquals("problem reading/verifying middle version file", 2,
                                                              man.getVersion());
@@ -190,6 +195,7 @@ public class SimppManagerTest extends LimeTestCase {
     
     public void testNewVersion() throws Exception {
         changeSimppFile(NEW_SIMPP_FILE);
+        createSimppManager();
         SimppManager man = simppManager;
         assertEquals("problem reading/verifying new version file", 3,
                                                             man.getVersion());
@@ -197,24 +203,28 @@ public class SimppManagerTest extends LimeTestCase {
     
     public void testBadSignatureFails() throws Exception {
         changeSimppFile(DEF_SIG_FILE);
+        createSimppManager();
         SimppManager man = simppManager;
         assertEquals("bad signature accepted", 0, man.getVersion());
     }
     
     public void testBadMessageFails() throws Exception {
         changeSimppFile(DEF_MESSAGE_FILE);
+        createSimppManager();
         SimppManager man = simppManager;
         assertEquals("tampered message accepted", 0, man.getVersion());
     }
     
     public void testBadXMLFails() throws Exception {
         changeSimppFile(BAD_XML_FILE);
+        createSimppManager();
         SimppManager man = simppManager;
         assertEquals("malformed xml accepted", 0, man.getVersion());
     }
     
     public void testRandomBytesFails() throws Exception {
         changeSimppFile(RANDOM_BYTES_FILE);
+        createSimppManager();
         SimppManager man = simppManager;
         assertEquals("garbage bytes accepted", 0, man.getVersion());
     }
@@ -222,7 +232,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testOlderSimppNotRequested() throws Exception {
         //1. Set up LimeWire
         changeSimppFile(MIDDLE_SIMPP_FILE);
-
+        createSimppManager();
         //2. Set up the TestConnection to have the old version, and expect to
         //not receive a simpprequest
         TestConnection conn = new TestConnection(OLD, false, false, messageFactory);//!expect, !respond
@@ -243,7 +253,8 @@ public class SimppManagerTest extends LimeTestCase {
     public void testOlderSimppNotRequestedUnsolicitedAccepted() throws Exception {
         //1. Set up LimeWire 
         changeSimppFile(MIDDLE_SIMPP_FILE);
-
+        createSimppManager();
+        
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited newer SimppResponse
         TestConnection conn = new TestConnection(NEW ,false, true, OLD, messageFactory);
@@ -261,6 +272,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testSameSimppNotRequested() throws Exception {
         //1. Set up LimeWire 
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited same SimppResponse
@@ -279,6 +291,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testNewSimppAdvOldActualRejected() throws Exception {
         //1. Set up LimeWire 
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited older SimppResponse
@@ -299,6 +312,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testNewerSimppRequested() throws Exception {
         //1. Set up limewire correctly
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire
@@ -317,6 +331,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testTamperedSimppSigRejected() throws Exception {
         //1. Set up limewire correctly
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective signature
@@ -338,6 +353,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testTamperedSimppDataRejected() throws Exception  {
        //1. Set up limewire correctly
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective message msg
@@ -358,6 +374,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testBadSimppXMLRejected() throws Exception  {
         //1. Set up limewire correctly
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a bad_xml msg
@@ -376,6 +393,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testGargabeDataRejected() throws Exception {
         //1. Set up limewire correctly
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a garbage msg
@@ -394,6 +412,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testSimppTakesEffect() throws Exception {
         //1. Test that Simpp files read off disk take effect. 
         changeSimppFile(OLD_SIMPP_FILE);
+        createSimppManager();
         updateSimppSettings();
 
         assertEquals("base case did not revert to defaults",12, 
@@ -413,6 +432,7 @@ public class SimppManagerTest extends LimeTestCase {
 
     public void testSimppSettingObeysMax() throws Exception {
         changeSimppFile(OLD_SIMPP_FILE);
+        createSimppManager();
         updateSimppSettings();
         
         assertEquals("base case did not revert to defaults",12, 
@@ -432,6 +452,7 @@ public class SimppManagerTest extends LimeTestCase {
 
     public void testSimppSettingObeysMin() throws Exception {
         changeSimppFile(OLD_SIMPP_FILE);
+        createSimppManager();
         updateSimppSettings();
         
         assertEquals("base case did not revert to defaults",12, 
@@ -453,6 +474,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testIOXLeavesSimppUnchanged() throws Exception {
         //1. Set up limewire correctly
         changeSimppFile(MIDDLE_SIMPP_FILE);
+        createSimppManager();
 
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire, but then close the connection while
@@ -475,12 +497,14 @@ public class SimppManagerTest extends LimeTestCase {
     private void changeSimppFile(File inputFile) throws Exception {        
         FileUtils.copy(inputFile, _simppFile);
         
-        PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
-        PrivilegedAccessor.setValue(CapabilitiesVM.class,"_instance", null);
+//        PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
         PrivilegedAccessor.setValue(SimppManager.class, "MIN_VERSION", 
                                     new Integer(0));//so we can use 1,2,3
         //reload the SimppManager and Capabilities VM
-        capabilitiesVMFactory.getCapabilitiesVM();
+        if (capabilitiesVMFactory != null) {
+            capabilitiesVMFactory.updateCapabilities();
+            capabilitiesVMFactory.getCapabilitiesVM();
+        }
     }
     
     private void updateSimppSettings() throws Exception {
