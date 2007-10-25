@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.chat;
 
 
+import java.net.InetAddress;
+
 import junit.framework.Test;
 
 import org.limewire.net.SocketsManagerImpl;
@@ -23,13 +25,13 @@ public class InstantMessengerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public void testIsOutgoing() {
+    public void testIsOutgoing() throws Exception {
         InstantMessenger im = new InstantMessengerImpl("host", 1234, new ActivityCallbackStub(), new SocketsManagerImpl());
         assertTrue(im.isOutgoing());
         assertEquals("host", im.getHost());
         assertEquals(1234, im.getPort());
         
-        im = new InstantMessengerImpl(new SocketStub(), new ActivityCallbackStub());
+        im = new InstantMessengerImpl(new SocketStub(InetAddress.getByAddress(new byte[] { 1, 2, 3, 4 }), 1234), new ActivityCallbackStub());
         assertFalse(im.isOutgoing());
         assertEquals("1.2.3.4", im.getHost());
         assertEquals(1234, im.getPort());
