@@ -1,4 +1,4 @@
-package org.limewire.lws.server;
+package com.limegroup.gnutella.lws.server;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +10,8 @@ import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.lws.server.StringCallback;
 import org.limewire.net.SocketsManager;
+
+import com.limegroup.gnutella.lws.server.AbstractServer;
 
 /**
  * A simple remote {@link RemoteServer}.

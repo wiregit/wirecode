@@ -3,6 +3,7 @@ package org.limewire.lws.server;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSDispatcherSupport.Parameters;
 
 import junit.framework.Test;
@@ -11,27 +12,26 @@ import junit.textui.TestRunner;
 /**
  * Tests bad forms of authenticating.
  */
-public class BadAuthenticationTestAlreadyAuthenticated extends AbstractCommunicationSupport {
+public class BadAuthenticationTestWithBadPrivateKeyTest extends AbstractCommunicationSupport {
 
-    public BadAuthenticationTestAlreadyAuthenticated(String s) {
+    public BadAuthenticationTestWithBadPrivateKeyTest(String s) {
         super(s);
     }
 
     public static Test suite() {
-        return buildTestSuite(BadAuthenticationTestAlreadyAuthenticated.class);
+        return buildTestSuite(BadAuthenticationTestWithBadPrivateKeyTest.class);
     }
 
     public static void main(String[] args) {
         TestRunner.run(suite());
     }
 
-    public void testAlreadyAuthenticated() {
-        String privateKey = doAuthenticate();
+    public void testSendAuthenticationWithBadPrivateKey() {
         Map<String, String> args = new HashMap<String, String>();
-        args.put(Parameters.PRIVATE, privateKey);
+        args.put(Parameters.PRIVATE, "asdfasdf"); // This is too short to be valid
         getCode().sendLocalMsg(LWSDispatcherSupport.Commands.AUTHENTICATE,
-                args,
-                errorHandlerAny());
-    } 
+                               args,
+                               errorHandlerAny());
+    }    
 
 }

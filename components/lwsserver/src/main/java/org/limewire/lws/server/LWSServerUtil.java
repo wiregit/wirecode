@@ -35,7 +35,7 @@ public final class LWSServerUtil {
      * @return <code>true</code> if <code>s</code> is <code>null</code> or
      *         <code>""</code>, otherwise <code>false</code>.
      */
-    static boolean isEmpty(final String s) {
+    public static boolean isEmpty(final String s) {
         return s == null || s.equals("");
     }
 
@@ -45,7 +45,7 @@ public final class LWSServerUtil {
      * @param rest the string to parse
      * @return CGI arguments from <tt>rest</tt>
      */
-    static Map<String, String> parseArgs(final String rest) {
+    public static Map<String, String> parseArgs(final String rest) {
         if (isEmpty(rest))
             return Collections.emptyMap();
         final Map<String, String> res = new HashMap<String, String>(3);
@@ -71,7 +71,7 @@ public final class LWSServerUtil {
      * 
      * @return a string suitable for the date for a cookie
      */
-    static String createCookieDate() {
+    public static String createCookieDate() {
         // Wdy, DD-Mon-YYYY HH:MM:SS GMT
         Format f = new SimpleDateFormat("E, dd-MM-yyyy kk:mm:ss");
         Date date = Calendar.getInstance(TimeZone.getTimeZone("GMT")).getTime();
@@ -181,7 +181,7 @@ public final class LWSServerUtil {
      * @param addr address in question
      * @return the string IP address for the given address
      */
-    static String getIPAddress(final InetAddress addr) {
+    public static String getIPAddress(final InetAddress addr) {
         if (addr == null)
             return null;
         byte[] bs = addr.getAddress();
@@ -196,7 +196,7 @@ public final class LWSServerUtil {
      * 
      * @return a public or private key
      */
-    static String generateKey() {
+    public static String generateKey() {
         final StringBuffer sb = new StringBuffer();
         for (int i = 0; i < LWSDispatcherSupport.Constants.KEY_LENGTH;) {
             final int r = 'A' + (int) (Math.random() * ('Z' - 'A'));
@@ -228,7 +228,7 @@ public final class LWSServerUtil {
      * @return a string with the urlencoded arguments removed with these
      *         arguments separated by {@link Constants#ARGUMENT_SEPARATOR}
      */
-    static String addURLEncodedArguments(final String cmd,
+    public static String addURLEncodedArguments(final String cmd,
             final Map<String, String> args) {
         if (cmd == null) return null;
 

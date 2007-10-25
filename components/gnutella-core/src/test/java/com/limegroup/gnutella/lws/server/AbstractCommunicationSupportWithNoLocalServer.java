@@ -5,11 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
-import org.limewire.lws.server.AbstractServer;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
-import org.limewire.lws.server.LocalServerImpl;
-import org.limewire.lws.server.RemoteServerImpl;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.AbstractModule;
@@ -18,6 +15,7 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+
 
 /**
  * This is a simpler class than {@link AbstractCommunicationSupport} in the
@@ -186,8 +184,10 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
     protected final String doAuthenticate(final String privateKey) {
         Map<String, String> args = new HashMap<String, String>();
-        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
-        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.AUTHENTICATE, args);
+//        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
+//        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.AUTHENTICATE, args);
+        args.put("private", privateKey);
+        return sendMessageFromWebpageToClient("authenticate", args);        
     }
 
     protected final String getPrivateKey() {
@@ -223,6 +223,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         note("Got the private key: " + privateKey);
         return privateKey;
     }
+   
 
     protected final String getPublicKey() {
         String publicKey = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);

@@ -1,4 +1,4 @@
-package org.limewire.lws.server;
+package com.limegroup.gnutella.lws.server;
 
 import java.util.Map;
 

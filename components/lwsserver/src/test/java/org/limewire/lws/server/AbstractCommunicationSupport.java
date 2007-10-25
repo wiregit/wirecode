@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.lws.server.LWSDispatcherSupport;
+import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.BaseTestCase;

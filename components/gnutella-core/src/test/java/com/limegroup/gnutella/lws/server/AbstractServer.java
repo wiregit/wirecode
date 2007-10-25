@@ -1,4 +1,4 @@
-package org.limewire.lws.server;
+package com.limegroup.gnutella.lws.server;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -236,7 +236,7 @@ public abstract class AbstractServer implements Runnable  {
             }
         }
         
-        @SuppressWarnings("deprecation")
+//        @SuppressWarnings("deprecation")
         private void handleClient() throws IOException {
             InputStream is = new BufferedInputStream(s.getInputStream());
             final PrintStream ps = new PrintStream(s.getOutputStream(), true);

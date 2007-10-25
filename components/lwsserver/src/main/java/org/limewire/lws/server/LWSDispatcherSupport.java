@@ -94,7 +94,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * 
      * @param
      */
-    abstract String getCommand(String request);
+    protected abstract String getCommand(String request);
     
     /**
      * Returns the arguments portion of a request.
@@ -119,7 +119,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * @param request
      * @return
      */
-    abstract Map<String,String> getArgs(String request);
+    protected abstract Map<String,String> getArgs(String request);
     
     
     // ------------------------------------------------------
@@ -186,7 +186,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * Create an instance of Handler from the top level name as well as trying a
      * static inner class and calls its {@link Handler#handle()} method.
      */
-    final void handle(String request, PrintStream out, StringCallback callback) {
+    public final void handle(String request, PrintStream out, StringCallback callback) {
         final String req = getCommand(request);
         final Handler h = names2handlers.get(req.toLowerCase());
         if (h == null) {
@@ -276,7 +276,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     /**
      * Handles commands.
      */
-    interface Handler {
+    protected interface Handler {
 
         /**
          * Perform some operation on the incoming message and return the result.
@@ -318,7 +318,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     /**
      * Generic base class for {@link Handler}s.
      */
-    abstract static class AbstractHandler extends HasName implements Handler {
+    protected abstract static class AbstractHandler extends HasName implements Handler {
         protected AbstractHandler(String name) {
             super(name);
         }
@@ -333,7 +333,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     /**
      * Generic base class for {@link Listener}s.
      */
-    abstract static class AbstractListener extends HasName implements Listener {
+    protected abstract static class AbstractListener extends HasName implements Listener {
         protected AbstractListener(String name) {
             super(name);
         }

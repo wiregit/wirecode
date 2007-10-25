@@ -37,7 +37,7 @@ import org.limewire.service.ErrorService;
  * &lt;pre&gt;
  * 
  */
-final class LWSDispatcherImpl extends LWSDispatcherSupport {
+public final class LWSDispatcherImpl extends LWSDispatcherSupport {
        
     private final LWSSenderOfMessagesToServer sender;
     private String publicKey;
@@ -64,7 +64,7 @@ final class LWSDispatcherImpl extends LWSDispatcherSupport {
       * @param request may be <code>null</code>
       * @return the arguments to the right of the <code>?</code>
       */
-     Map<String, String> getArgs(String request) {
+    protected Map<String, String> getArgs(String request) {
          if (request == null || request.length() == 0) {
              return Collections.emptyMap();
          }
@@ -77,7 +77,7 @@ final class LWSDispatcherImpl extends LWSDispatcherSupport {
      }   
      
      @Override
-     String getCommand(String request) {
+     protected String getCommand(String request) {
          int iprefix = request.indexOf(PREFIX);
          String res = iprefix == -1 ? request : request.substring(iprefix + PREFIX.length());
          final char[] cs = { '#', '?' };

@@ -1,5 +1,7 @@
 package org.limewire.lws.server;
 
+import org.limewire.lws.server.LWSDispatcherSupport;
+
 import junit.framework.Test;
 import junit.textui.TestRunner;
 

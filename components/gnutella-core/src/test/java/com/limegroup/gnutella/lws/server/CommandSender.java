@@ -9,8 +9,6 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.LocalServerDelegate;
-import org.limewire.lws.server.LocalServerImpl;
 
 import com.limegroup.gnutella.http.HttpClientManager;
 
