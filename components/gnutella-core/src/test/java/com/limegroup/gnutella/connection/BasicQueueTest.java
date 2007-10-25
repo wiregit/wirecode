@@ -2,19 +2,15 @@ package com.limegroup.gnutella.connection;
 
 import junit.framework.Test;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.Response;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -24,15 +20,11 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class BasicQueueTest extends LimeTestCase {
     
-    private BasicQueue QUEUE = new BasicQueue();
+    private BasicQueue QUEUE;
+    private Mockery context;
 	
     private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
     
-    private QueryReplyFactory queryReplyFactory;
-    private QueryRequestFactory queryRequestFactory;
-    private PingReplyFactory pingReplyFactory;
-    private PingRequestFactory pingRequestFactory;
-
 	public BasicQueueTest(String name) {
 		super(name);
 	}
@@ -47,11 +39,8 @@ public class BasicQueueTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
-        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
+        QUEUE = new BasicQueue();
+        context = new Mockery();
     }
         
     // test buffer doesn't get re-ordered.
@@ -131,25 +120,55 @@ public class BasicQueueTest extends LimeTestCase {
         assertNull(QUEUE.removeNext());
     }
     
-    private QueryRequest q(String query) {
-        return queryRequestFactory.createQuery(query, (byte)5);
+    private QueryRequest q(final String query) {
+        final QueryRequest qr = context.mock(QueryRequest.class);
+       
+        context.checking(new Expectations() {{
+            allowing(qr).getTTL(); will(returnValue((byte)5));
+            allowing(qr).getQuery(); will(returnValue(query));
+        }});
+        
+        return qr;
     }
     
-    private PingReply g(int port) {
-        return pingReplyFactory.create(new byte[16], (byte)5, port, IP);
+    private PingReply g(final int port) {
+        final PingReply pr = context.mock(PingReply.class);
+        
+        context.checking(new Expectations() {{
+            allowing(pr).getTTL(); will(returnValue((byte)5));
+            allowing(pr).getPort(); will(returnValue(port));
+            allowing(pr).getIPBytes(); will(returnValue(IP));
+        }});
+        
+        return pr;
     }
     
-    private PingRequest p(int ttl) {
-        return pingRequestFactory.createPingRequest((byte)ttl);
+    private PingRequest p(final int ttl) {
+        final PingRequest pr = context.mock(PingRequest.class);
+        
+        context.checking(new Expectations() {{
+            allowing(pr).getTTL(); will(returnValue((byte)ttl));
+        }});
+        
+        return pr;
     }
     
     private PushRequest s(int port) {
         return new PushRequest(new byte[16], (byte)5, new byte[16], 0, IP, port);
     }
     
-    private QueryReply r(int port) {
-        return queryReplyFactory.createQueryReply(new byte[16], (byte)5,
-                port, IP, 0, new Response[0], new byte[16], false);
+    private QueryReply r(final int port) {
+        final QueryReply qr = context.mock(QueryReply.class);
+        
+        context.checking(new Expectations() {{
+            allowing(qr).getTTL(); will(returnValue((byte)5));
+            allowing(qr).getPort(); will(returnValue(port));
+            allowing(qr).getIPBytes(); will(returnValue(IP));
+            allowing(qr).getSpeed(); will(returnValue((long)0));
+        }});
+        
+        return qr;
+
     }
     
     private ResetTableMessage t() {
