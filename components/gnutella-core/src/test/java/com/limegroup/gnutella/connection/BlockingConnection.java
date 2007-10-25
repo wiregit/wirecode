@@ -37,55 +37,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 
 /**
- * A Gnutella messaging connection. Provides handshaking functionality and
- * routines for reading and writing of Gnutella messages. A connection is either
- * incoming (created from a Socket) or outgoing (created from an address). This
- * class does not provide sophisticated buffering or routing logic; use
- * ManagedConnection for that.
- * <p>
- * 
- * You will note that the constructors don't actually involve the network and
- * hence never throw exceptions or block. <b>To actual initialize a connection,
- * you must call initialize().</b> While this is somewhat awkward, it is
- * intentional. It makes it easier, for example, for the GUI to show
- * uninitialized connections.
- * <p>
- * 
- * <tt>Connection</tt> supports only 0.6 handshakes. Gnutella 0.6 connections
- * have a list of properties read and written during the handshake sequence.
- * Typical property/value pairs might be "Query-Routing: 0.3" or "User-Agent:
- * LimeWire".
- * <p>
- * 
- * This class augments the basic 0.6 handshaking mechanism to allow
- * authentication via "401" messages. Authentication interactions can take
- * multiple rounds.
- * <p>
- * 
- * This class supports reading and writing streams using 'deflate' compression.
- * The HandshakeResponser is what actually determines whether or not deflate
- * will be used. This class merely looks at what the responses are in order to
- * set up the appropriate streams. Compression is implemented by chaining the
- * input and output streams, meaning that even if an extending class implements
- * getInputStream() and getOutputStream(), the actual input and output stream
- * used may not be an instance of the expected class. However, the information
- * is still chained through the appropriate stream.
- * <p>
- * 
- * The amount of bytes written and received are maintained by this class. This
- * is necessary because of compression and decompression are considered
- * implementation details in this class.
- * <p>
- * 
- * Finally, <tt>Connection</tt> also handles setting the SOFT_MAX_TTL on a
- * per-connection basis. The SOFT_MAX TTL is the limit for hops+TTL on all
- * incoming traffic, with the exception of query hits. If an incoming message
- * has hops+TTL greater than SOFT_MAX, we set the TTL to SOFT_MAX-hops. We do
- * this on a per-connection basis because on newer connections that understand
- * X-Max-TTL, we can regulate the TTLs they send us. This helps prevent
- * malicious hosts from using headers like X-Max-TTL to simply get connections.
- * This way, they also have to abide by the contract of the X-Max-TTL header,
- * illustrated by sending lower TTL traffic generally.
+ * A connection for use with tests that blocks for reading/writing.
  */
 public class BlockingConnection extends AbstractConnection {
 

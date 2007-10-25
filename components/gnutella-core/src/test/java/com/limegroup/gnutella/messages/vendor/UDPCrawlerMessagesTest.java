@@ -56,14 +56,13 @@ import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
-@SuppressWarnings( { "unchecked", "cast" } )
 public class UDPCrawlerMessagesTest extends LimeTestCase {
 
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private final int PORT = 6669;
+    private static int PORT = 6669;
     
     private InetAddress _udpAddress;
 
@@ -158,6 +157,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 
 	@Override
 	public void setUp() throws Exception {
+        PORT++;
         setSettings();
         assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
         
@@ -291,41 +291,34 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte [] current = new byte[6];
         
         System.arraycopy(payload,index,current,0,6);
-        IPPortCombo combo = 
-            IPPortCombo.getCombo(current);
-        Endpoint e = new Endpoint(combo.getInetAddress(),combo.getPort());
+        IPPortCombo e = IPPortCombo.getCombo(current);
         assertEquals(UP1.getInetAddress(),e.getInetAddress());
-        assertTrue(e.getPort() == UP1.getPort());
+        assertEquals(UP1.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        combo = IPPortCombo.getCombo(current);
-        e = new Endpoint(combo.getInetAddress(),combo.getPort());
+        e = IPPortCombo.getCombo(current);
         assertEquals(UP2.getInetAddress(),e.getInetAddress());
-        assertTrue(e.getPort() == UP2.getPort());
+        assertEquals(UP2.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        combo = IPPortCombo.getCombo(current);
-        e = new Endpoint(combo.getInetAddress(),combo.getPort());
+        e = IPPortCombo.getCombo(current);
         assertEquals(UP3.getInetAddress(),e.getInetAddress());
-        assertTrue(e.getPort() == UP3.getPort());
+        assertEquals(UP3.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        combo = IPPortCombo.getCombo(current);
-        e = new Endpoint(combo.getInetAddress(),combo.getPort());
+        e = IPPortCombo.getCombo(current);
         assertEquals(LEAF_1.getInetAddress(),e.getInetAddress());
-        assertTrue(e.getPort() == LEAF_1.getPort());
+        assertEquals(LEAF_1.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        combo = IPPortCombo.getCombo(current);
-        e = new Endpoint(combo.getInetAddress(),combo.getPort());
+        e = IPPortCombo.getCombo(current);
         assertEquals(LEAF_2.getInetAddress(),e.getInetAddress());
-        assertTrue(e.getPort() == LEAF_2.getPort());
+        assertEquals(LEAF_2.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        combo = IPPortCombo.getCombo(current);
-        e = new Endpoint(combo.getInetAddress(),combo.getPort());
+        e = IPPortCombo.getCombo(current);
         assertEquals(LEAF_3.getInetAddress(),e.getInetAddress());
-        assertTrue(e.getPort() == LEAF_3.getPort());
+        assertEquals(LEAF_3.getPort(), e.getPort());
  	}
  	
  	/**
@@ -418,9 +411,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
  		assertTrue((format & UDPCrawlerPing.CONNECTION_TIME)
-                == (int)UDPCrawlerPing.CONNECTION_TIME);
+                == UDPCrawlerPing.CONNECTION_TIME);
  		assertFalse((format & UDPCrawlerPing.LOCALE_INFO)
-                == (int)UDPCrawlerPing.LOCALE_INFO);
+                == UDPCrawlerPing.LOCALE_INFO);
  		
  		//see if the result we got had any uptime (it should!)
  		short uptime = ByteOrder.leb2short(payload,9);
@@ -437,11 +430,11 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertTrue((format & UDPCrawlerPing.CONNECTION_TIME)
-                == (int)UDPCrawlerPing.CONNECTION_TIME);
+                == UDPCrawlerPing.CONNECTION_TIME);
         assertTrue((format & UDPCrawlerPing.LOCALE_INFO)
-                == (int)UDPCrawlerPing.LOCALE_INFO);
+                == UDPCrawlerPing.LOCALE_INFO);
         assertTrue((format & UDPCrawlerPing.DHT_STATUS)
-                == (int)UDPCrawlerPing.DHT_STATUS);
+                == UDPCrawlerPing.DHT_STATUS);
         
         //see if the result we got had any uptime (it should!)
         short uptime = ByteOrder.leb2short(payload,14);
@@ -458,9 +451,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
-                == (int)UDPCrawlerPing.CONNECTION_TIME);
+                == UDPCrawlerPing.CONNECTION_TIME);
         assertTrue((format & UDPCrawlerPing.LOCALE_INFO)
-                == (int)UDPCrawlerPing.LOCALE_INFO);
+                == UDPCrawlerPing.LOCALE_INFO);
  		
  		//see if any of the connections have the locale in them - they should
         String lang = new String(payload, 9, 2);
@@ -562,9 +555,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte[] payload = pong.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
-                == (int)UDPCrawlerPing.CONNECTION_TIME);
+                == UDPCrawlerPing.CONNECTION_TIME);
         assertTrue((format & UDPCrawlerPing.NODE_UPTIME)
-                == (int)UDPCrawlerPing.NODE_UPTIME);
+                == UDPCrawlerPing.NODE_UPTIME);
         
         //we should have an uptime > 5
         assertGreaterThan(5,ByteOrder.leb2int(payload,3));
@@ -634,9 +627,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte[] payload = pong.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
-                == (int)UDPCrawlerPing.CONNECTION_TIME);
+                == UDPCrawlerPing.CONNECTION_TIME);
         assertTrue((format & UDPCrawlerPing.DHT_STATUS)
-                == (int)UDPCrawlerPing.DHT_STATUS);
+                == UDPCrawlerPing.DHT_STATUS);
         
         byte status = payload[3];
         assertFalse( (status & UDPCrawlerPong.DHT_WAITING_MASK) == UDPCrawlerPong.DHT_WAITING_MASK);

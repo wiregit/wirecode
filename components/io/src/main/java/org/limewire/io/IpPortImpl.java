@@ -85,9 +85,10 @@ public class IpPortImpl implements IpPort {
     }
     
     private static String asString(byte[] addr) {
+     // xxx.xxx.xxx.xxx => 15 chars
         StringBuilder sb = new StringBuilder(19);
         for(int i = 0; i < addr.length; i++) {
-            sb.append(addr[i]);
+            sb.append(addr[i] & 0xFF);
             if(i != addr.length - 1)
                 sb.append(".");
         }

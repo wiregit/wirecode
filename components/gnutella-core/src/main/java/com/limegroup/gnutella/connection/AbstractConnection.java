@@ -48,7 +48,7 @@ public abstract class AbstractConnection implements Connection {
     private final String host;
 
     /** The port the remote host is listening on. */
-    private int port;
+    private volatile int port;
 
     /** The socket connecting us to the remote host. */
     protected volatile Socket socket;
@@ -96,7 +96,7 @@ public abstract class AbstractConnection implements Connection {
 
     private final Acceptor acceptor;
     
-    private SimpleProtocolBandwidthTracker simpleProtocolBandwidthTracker;
+    private final SimpleProtocolBandwidthTracker simpleProtocolBandwidthTracker;
 
     /**
      * Cache the 'connection closed' exception, so we have to allocate one for
