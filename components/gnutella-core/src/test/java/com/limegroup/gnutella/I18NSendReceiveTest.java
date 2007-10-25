@@ -144,7 +144,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
 
     @Override
     public void tearDown() throws Exception {
-        drain(CONN_1);
+        BlockingConnectionUtils.drain(CONN_1);
         CONN_1.close();
         connectionServices.disconnect();
     }
@@ -154,7 +154,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
         headers.put(HeaderNames.X_DEGREE,"42");
         CONN_1 = connectionFactory.createConnection("localhost", TEST_PORT, ConnectType.PLAIN);
         CONN_1.initialize(headers, new EmptyResponder(), 1000);
-        drain(CONN_1);
+        BlockingConnectionUtils.drain(CONN_1);
     }
 
 
@@ -168,9 +168,9 @@ public class I18NSendReceiveTest extends LimeTestCase {
         CONN_1.send(qr);
         CONN_1.flush();
         
-        Message m = getFirstQueryReply(CONN_1);
+        Message m = BlockingConnectionUtils.getFirstQueryReply(CONN_1);
         assertNull("should not have received a QueryReply", m);
-        drain(CONN_1);
+        BlockingConnectionUtils.drain(CONN_1);
 
         List expectedReply = new ArrayList();
         //should find FILE_0
@@ -229,7 +229,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
         CONN_1.send(qr);
         CONN_1.flush();
 
-        QueryReply rp = getFirstQueryReply(CONN_1);
+        QueryReply rp = BlockingConnectionUtils.getFirstQueryReply(CONN_1);
         
         assertTrue("we should of received a QueryReply", rp != null);
         assertEquals("should have " + size + " result(s)", 
@@ -254,7 +254,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
      * test that XML queries are sent and replies using the correct name
      */
     public void testSendReceiveXML() throws Exception {
-        drain(CONN_1);
+        BlockingConnectionUtils.drain(CONN_1);
         setUpMetaData();
         I18NConvert normer = I18NConvert.instance();
 

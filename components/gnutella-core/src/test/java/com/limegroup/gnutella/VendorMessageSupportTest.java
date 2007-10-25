@@ -158,8 +158,8 @@ public class VendorMessageSupportTest extends LimeTestCase {
         if ( !_testHopsFlow )
             fail("hops flow not supported - ignoring test.");
         
-        drain(_leaf1);
-        drain(_leaf2);
+        BlockingConnectionUtils.drain(_leaf1);
+        BlockingConnectionUtils.drain(_leaf2);
 
         QueryRequest qr = queryRequestFactory.createQuery("susheel", (byte)3);
         
@@ -252,8 +252,8 @@ public class VendorMessageSupportTest extends LimeTestCase {
         if (!_testTCPCB) 
             fail("TCP ConnectBack not supported - ignoring test.");
         
-        drain(_leaf1);
-        drain(_leaf2);
+        BlockingConnectionUtils.drain(_leaf1);
+        BlockingConnectionUtils.drain(_leaf2);
         
         _tcpSock.setSoTimeout(5*1000); // wait for up to 5 seconds...
         final TCPConnectBackVendorMessage tcp = 
@@ -290,8 +290,8 @@ public class VendorMessageSupportTest extends LimeTestCase {
         if(!_testUDPCB)
             fail("UDP Connectback not supported - ignoring test");
         
-        drain(_leaf1);
-        drain(_leaf2);
+        BlockingConnectionUtils.drain(_leaf1);
+        BlockingConnectionUtils.drain(_leaf2);
 
         _udpSock.setSoTimeout(5*1000); // wait for up to 5 seconds...
         GUID guid = new GUID(GUID.makeGuid());

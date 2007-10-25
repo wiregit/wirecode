@@ -176,13 +176,13 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 	 */
  	private void drainAll() throws Exception {
  		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
+ 			BlockingConnectionUtils.drain(ULTRAPEER_1);
  		}
  		if(ULTRAPEER_2.isOpen()) {
- 			drain(ULTRAPEER_2);
+ 			BlockingConnectionUtils.drain(ULTRAPEER_2);
  		}
  		if((LEAF != null) && LEAF.isOpen()) {
- 			drain(LEAF);
+ 			BlockingConnectionUtils.drain(LEAF);
  		}
  	}
 
@@ -244,7 +244,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         Thread.sleep(1000);
 
         // the Leaf should NOT get this query
-        QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+        QueryRequest rQuery = (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF,
                                                             QueryRequest.class);
         assertNull(rQuery);
     }
@@ -268,7 +268,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         Thread.sleep(1000);
 
         // the Leaf should get this query
-        QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+        QueryRequest rQuery = (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF,
                                                             QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
@@ -286,7 +286,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         Thread.sleep(1000);
 
         // the Leaf should get this query
-        rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+        rQuery = (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF,
                                                             QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
@@ -312,7 +312,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // the UP should NOT get this query
         QueryRequest rQuery = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER_1,
                                                          QueryRequest.class);
         assertNull(rQuery);
     }
@@ -337,7 +337,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // the UP should get this query
         QueryRequest rQuery = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER_1,
                                                          QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
@@ -362,13 +362,13 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
         // UP 1 should get this query
         QueryRequest rQuery = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER_1,
                                                          QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
                      new GUID(whatIsNewQuery.getGUID()));
         // UP 2 should NOT get this query
-        rQuery = (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_2,
+        rQuery = (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER_2,
                                                               QueryRequest.class);
         assertNull(rQuery);
     }
@@ -389,13 +389,13 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         Thread.sleep(4000);
 
         // the Leaf should NOT get this query
-        QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+        QueryRequest rQuery = (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF,
                                                             QueryRequest.class);
         assertNull(rQuery);
 
         // Ultrapeer 1 should get it though
         rQuery = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER_1,
                                                          QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 
@@ -419,13 +419,13 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         Thread.sleep(4000);
 
         // the Leaf should NOT get this query
-        QueryRequest rQuery = (QueryRequest) getFirstInstanceOfMessageType(LEAF,
+        QueryRequest rQuery = (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF,
                                                             QueryRequest.class);
         assertNull(rQuery);
 
         // Ultrapeer 1 should get it though
         rQuery = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER_1,
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER_1,
                                                          QueryRequest.class);
         assertNotNull(rQuery);
         assertEquals(new GUID(rQuery.getGUID()), 

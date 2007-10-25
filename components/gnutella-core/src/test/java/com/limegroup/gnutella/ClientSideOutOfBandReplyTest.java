@@ -117,7 +117,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             assertTrue("should be open", testUP[i].isOpen());
             assertTrue("should be up -> leaf",
                 testUP[i].getConnectionCapabilities().isSupernodeClientConnection());
-            drain(testUP[i], 500);
+            BlockingConnectionUtils.drain(testUP[i], 500);
             // OOB client side needs server side leaf guidance
             testUP[i].send(messagesSupportedVendorMessage);
             testUP[i].flush();
@@ -126,7 +126,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         Thread.sleep(250);
         
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
     }
@@ -143,7 +143,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // all connected UPs should get a OOB query
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
             assertTrue(qr.desiresOutOfBandReplies());
@@ -204,13 +204,13 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         testUP[0].send(messagesSupportedVendorMessage);
         testUP[0].flush();
         Thread.sleep(200);
-        assertNull(getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class));
+        assertNull(BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class));
         
         SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         testUP[0].send(messagesSupportedVendorMessage);
         testUP[0].flush();
         Thread.sleep(2000);
-        OOBProxyControlVendorMessage m = getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class);
+        OOBProxyControlVendorMessage m = BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class);
         assertNotNull(m);
         assertEquals(2,m.getMaximumDisabledVersion());
     }
@@ -229,7 +229,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // all connected UPs should get a OOB query
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
             assertTrue(qr.desiresOutOfBandReplies());
@@ -266,7 +266,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // now stop the query
         searchServices.stopQuery(queryGuid);
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         drainAll();
 
         // send another ReplyNumber
@@ -306,7 +306,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // results are recieved) we don't request OOB replies for it
         
         // clear up messages before we test.
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
 
         // first of all, we should confirm that we are sending out a OOB query.
         GUID queryGuid = new GUID(searchServices.newQueryGUID());
@@ -318,7 +318,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // all connected UPs should get a OOB query
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
             assertTrue(qr.desiresOutOfBandReplies());
@@ -410,7 +410,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         testUP[2].send(ppAck); testUP[2].flush();
 
         { // this should not go through because of firewall/firewall
-            drain(testUP[0]);
+            BlockingConnectionUtils.drain(testUP[0]);
 
             QueryRequest query = 
                 queryRequestFactory.createQueryRequest(GUID.makeGuid(),
@@ -419,12 +419,12 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                     false, Network.UNKNOWN, false, 0, false, 0);
 
             testUP[0].send(query);testUP[0].flush();
-            QueryReply reply = getFirstQueryReply(testUP[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
             assertNull(reply);
         }
 
         { // this should go through because of firewall transfer/solicited
-            drain(testUP[0]);
+            BlockingConnectionUtils.drain(testUP[0]);
 
             QueryRequest query = 
                 queryRequestFactory.createQueryRequest(GUID.makeGuid(),
@@ -435,13 +435,13 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             assertTrue(query.canDoFirewalledTransfer());
 
             testUP[0].send(query);testUP[0].flush();
-            QueryReply reply = getFirstQueryReply(testUP[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
             assertNotNull(reply);
             assertTrue(reply.getSupportsFWTransfer());
         }
 
         { // this should go through because the source isn't firewalled
-            drain(testUP[1]);
+            BlockingConnectionUtils.drain(testUP[1]);
 
             QueryRequest query = 
                 queryRequestFactory.createQueryRequest(GUID.makeGuid(),
@@ -450,7 +450,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                     false, Network.UNKNOWN, false, 0, false, 0);
 
             testUP[1].send(query);testUP[1].flush();
-            QueryReply reply = getFirstQueryReply(testUP[1]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[1]);
             assertNotNull(reply);
             assertFalse(reply.getSupportsFWTransfer());
         }
@@ -458,7 +458,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // set test client to non-firewalled
         networkManagerStub.setAcceptedIncomingConnection(true);
         { // this should go through because test node is not firewalled
-            drain(testUP[2]);
+            BlockingConnectionUtils.drain(testUP[2]);
 
             QueryRequest query = 
                 queryRequestFactory.createQueryRequest(GUID.makeGuid(),
@@ -468,7 +468,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                     false, Network.UNKNOWN, false, 0, false, 0);
 
             testUP[2].send(query);testUP[2].flush();
-            QueryReply reply = getFirstQueryReply(testUP[2]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[2]);
             assertNotNull(reply);
             assertFalse(reply.getSupportsFWTransfer());
         }
@@ -488,7 +488,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
         // all connected UPs should get a OOB query
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
             assertTrue(qr.desiresOutOfBandReplies());

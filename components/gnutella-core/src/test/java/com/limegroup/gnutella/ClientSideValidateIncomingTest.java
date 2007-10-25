@@ -167,7 +167,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
      * send a few redundant requests
      */
     public void testTCPRedundantRequestsSent() throws Exception {
-        drainAllParallel(testUP);
+        BlockingConnectionUtils.drainAllParallel(testUP);
         // wait some time - both UPs should get a single connect back
         
         //sleep

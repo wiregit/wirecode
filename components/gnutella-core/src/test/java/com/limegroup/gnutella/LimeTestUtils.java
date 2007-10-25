@@ -8,7 +8,9 @@ import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -21,6 +23,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
@@ -128,6 +131,11 @@ public class LimeTestUtils {
 	    for(int i = 0; i < files.length; i++)
 	        files[i].delete();
 	}
+    
+    public static void setSharedDirectories(File[] dirs) {
+        Set<File> set = new HashSet<File>(Arrays.asList(dirs));
+        SharingSettings.DIRECTORIES_TO_SHARE.setValue(set);
+    }
 
     /**
      * Creates the Guice injector with the limewire default modules and the 
@@ -142,10 +150,7 @@ public class LimeTestUtils {
         list.addAll(Arrays.asList(modules));
         list.add(new BlockingConnectionFactoryModule());
         list.add(new LimeWireCoreModule(callbackClass));
-        Injector injector = Guice.createInjector(list);
-        
-        ProviderHacks.markUnusable();        
-        
+        Injector injector = Guice.createInjector(list);        
         return injector;
     }
 

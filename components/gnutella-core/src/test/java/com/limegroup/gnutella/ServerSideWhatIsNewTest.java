@@ -86,7 +86,7 @@ public class ServerSideWhatIsNewTest
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
-        setSharedDirectories( new File[] { _sharedDir, _savedDir } );
+        LimeTestUtils.setSharedDirectories( new File[] { _sharedDir, _savedDir } );
         // get the resource file for com/limegroup/gnutella
         berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
@@ -199,7 +199,7 @@ public class ServerSideWhatIsNewTest
     // make sure that a what is new query is answered correctly
     public void testWhatIsNewQueryBasic() throws Exception {
         BlockingConnection connection = testUP[0];
-        drain(connection);
+        BlockingConnectionUtils.drain(connection);
 
         QueryRequest whatIsNewQuery = 
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
@@ -213,7 +213,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(connection,
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(2, reply.getResultCount());
@@ -231,7 +231,7 @@ public class ServerSideWhatIsNewTest
     public void testWhatIsNewQueryMeta() throws Exception {
 
         BlockingConnection connection = testUP[0];
-        drain(connection);
+        BlockingConnectionUtils.drain(connection);
 
         {
         QueryRequest whatIsNewQuery = 
@@ -246,7 +246,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(2000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(connection,
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNull(reply);
         }
@@ -264,7 +264,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(connection,
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(2, reply.getResultCount());
@@ -337,7 +337,7 @@ public class ServerSideWhatIsNewTest
     public void testWhatIsNewQueryNewFiles() throws Exception {
         testAddSharedFiles();
         BlockingConnection connection = testUP[0];
-        drain(connection);
+        BlockingConnectionUtils.drain(connection);
 
         QueryRequest whatIsNewQuery = 
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
@@ -350,7 +350,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(connection,
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());
@@ -421,7 +421,7 @@ public class ServerSideWhatIsNewTest
         // now just send another What Is New query and make sure everything
         // is kosher - probably overkill but whatever....
         BlockingConnection connection = testUP[0];
-        drain(connection);
+        BlockingConnectionUtils.drain(connection);
 
         QueryRequest whatIsNewQuery = 
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
@@ -434,7 +434,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(connection,
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());
@@ -504,7 +504,7 @@ public class ServerSideWhatIsNewTest
         // now just send another What Is New query and make sure everything
         // is kosher - probbably overkill but whatever....
         BlockingConnection connection = testUP[0];
-        drain(connection);
+        BlockingConnectionUtils.drain(connection);
 
         QueryRequest whatIsNewQuery = 
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
@@ -517,7 +517,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) getFirstInstanceOfMessageType(connection,
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());

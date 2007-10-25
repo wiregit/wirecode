@@ -23,6 +23,7 @@ import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.Constants;
@@ -239,22 +240,22 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 	 */
  	private void drainAll() throws Exception {
  		if(UP1.isOpen()) {
- 			drain(UP1);
+ 			BlockingConnectionUtils.drain(UP1);
  		}
  		if(UP2.isOpen()) {
- 			drain(UP2);
+ 			BlockingConnectionUtils.drain(UP2);
  		}
  		if(UP3.isOpen()){
- 			drain(UP3);
+ 			BlockingConnectionUtils.drain(UP3);
  		}
  		if(LEAF_1.isOpen()) {
- 			drain(LEAF_1);
+ 			BlockingConnectionUtils.drain(LEAF_1);
  		}
  		if(LEAF_2.isOpen()) {
- 			drain(LEAF_2);
+ 			BlockingConnectionUtils.drain(LEAF_2);
  		}
  		if(LEAF_3.isOpen()) {
- 			drain(LEAF_3);
+ 			BlockingConnectionUtils.drain(LEAF_3);
  		}
  		
  		

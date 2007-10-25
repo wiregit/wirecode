@@ -12,14 +12,15 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.CommonUtils;
 
+import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 
 public class TestConnection extends AssertComparisons {
@@ -37,6 +38,8 @@ public class TestConnection extends AssertComparisons {
     private int _capabilitySimppNo;
 
     private boolean _causeError;
+    
+    private final MessageFactory messageFactory;
 
     /**
      * When creating a TestConnection you want to specify 4 things
@@ -50,18 +53,19 @@ public class TestConnection extends AssertComparisons {
      * simpp-data when it receives a SimppRequestVM
      */
     public TestConnection(int simppNumber, boolean expectSimppReq,
-                                     boolean sendSimppData) throws IOException {
-        this(simppNumber, expectSimppReq, sendSimppData, simppNumber);
+                                     boolean sendSimppData, MessageFactory messageFactory) throws IOException {
+        this(simppNumber, expectSimppReq, sendSimppData, simppNumber, messageFactory);
     }
     
     public TestConnection(int simppNumber, boolean expectSimppReq, 
-               boolean sendSimppData, int capabilitySimpp) throws IOException {
+               boolean sendSimppData, int capabilitySimpp, MessageFactory messageFactory) throws IOException {
         super("FakeTest");
         _simppData = readCorrectFile(simppNumber);
         _expectSimppRequest = expectSimppReq;
         _sendSimppData = sendSimppData;
         _capabilitySimppNo = capabilitySimpp;
         _causeError = false;
+        this.messageFactory = messageFactory;
     }
 
     public void start() {
@@ -132,8 +136,8 @@ public class TestConnection extends AssertComparisons {
         //Read the first message of type SimppRequest
         Message message = null;
         try {
-            message = LimeTestCase.getFirstInstanceOfMessage(
-                                           _socket, SimppRequestVM.class, 2000);
+            message = BlockingConnectionUtils.getFirstInstanceOfMessage(
+                                           _socket, SimppRequestVM.class, 2000, messageFactory);
         } catch (BadPacketException bpx) {
             fail("limewire sent message with BPX");
         }
@@ -153,8 +157,8 @@ public class TestConnection extends AssertComparisons {
         //Read the first message of type SimppRequest
         Message message = null;
         try {
-            message = LimeTestCase.getFirstInstanceOfMessage(
-                                           _socket, SimppRequestVM.class, 2000);
+            message = BlockingConnectionUtils.getFirstInstanceOfMessage(
+                                           _socket, SimppRequestVM.class, 2000, messageFactory);
         } catch (BadPacketException bpx) {
             fail("limewire sent message with BPX");
         }

@@ -142,7 +142,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         // TODO hack: incrementing port value so each test has its own port
         // PORT++;
         ConnectionSettings.PORT.setValue(PORT);
-        setSharedDirectories(new File[0]);
+        LimeTestUtils.setSharedDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -195,13 +195,13 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 	 */
  	private void drainAll() throws Exception {
  		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
+ 			BlockingConnectionUtils.drain(ULTRAPEER_1);
  		}
  		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_2);
+ 			BlockingConnectionUtils.drain(ULTRAPEER_2);
  		}
  		if(LEAF.isOpen()) {
- 			drain(LEAF);
+ 			BlockingConnectionUtils.drain(LEAF);
  		}
  	}
 
@@ -268,7 +268,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
 		assertTrue("should not have drained leaf successfully", 
-				   !drain(LEAF));
+				   !BlockingConnectionUtils.drain(LEAF));
     }
 
 	/**
@@ -303,7 +303,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
 		
 		//2. Check that replies are routed back.
-		drain(LEAF);
+		BlockingConnectionUtils.drain(LEAF);
 		Response response1=responseFactory.createResponse(0L, 0L, "response1.txt");
 		byte[] clientGUID = GUID.makeGuid();
 		QueryReply reply1=queryReplyFactory.createQueryReply(qr.getGUID(), (byte)2, 6346,
@@ -315,7 +315,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		assertTrue("guids should be equal", 
 				   Arrays.equals(clientGUID, replyRead.getClientGUID()));
 		
-		drain(LEAF);
+		BlockingConnectionUtils.drain(LEAF);
 		Response response2 = responseFactory.createResponse(0l, 0l, "response2.txt");
 		byte[] guid2 = GUID.makeGuid();
 		QueryReply reply2 = 
@@ -332,8 +332,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 				   Arrays.equals(guid2, replyRead.getClientGUID()));
 
 		//3. Check that pushes are routed (not broadcast)
-		drain(ULTRAPEER_2);
-		drain(ULTRAPEER_1);
+		BlockingConnectionUtils.drain(ULTRAPEER_2);
+		BlockingConnectionUtils.drain(ULTRAPEER_1);
 
 		PushRequest push1 = 
             new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 0, 
@@ -346,7 +346,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		PushRequest pushRead = (PushRequest)m;
 		assertEquals("unexpected push index", 0, pushRead.getIndex());
 		assertTrue("should not have drained ULTRAPEER_1 successfully", 
-				   !drain(ULTRAPEER_1));
+				   !BlockingConnectionUtils.drain(ULTRAPEER_1));
 		
         // check that pushes with unmatching client guids are not forwarded
 		PushRequest push2 = 
@@ -359,11 +359,11 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		pushRead=(PushRequest)m;
 		assertEquals("unexpected push index", 1,pushRead.getIndex());
 		assertTrue("should not have drained ultrapeer successfully", 
-				   !drain(ULTRAPEER_2));   
+				   !BlockingConnectionUtils.drain(ULTRAPEER_2));   
 		
 		// Check that queries can re-route push routes
-		drain(LEAF);
-		drain(ULTRAPEER_2);
+		BlockingConnectionUtils.drain(LEAF);
+		BlockingConnectionUtils.drain(ULTRAPEER_2);
 		ULTRAPEER_1.send(reply1);
 		ULTRAPEER_1.flush();
 
@@ -382,7 +382,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		pushRead = (PushRequest)m;
 		assertEquals("unexpected push index", 3, pushRead.getIndex());
 		assertTrue("should not have drained ultrapeer successfully", 
-				   !drain(ULTRAPEER_2));   
+				   !BlockingConnectionUtils.drain(ULTRAPEER_2));   
 
     }
 
@@ -440,7 +440,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		ULTRAPEER_2.send(qr);
 		ULTRAPEER_2.flush();
 
-        assertTrue(!drain(ULTRAPEER_1));
+        assertTrue(!BlockingConnectionUtils.drain(ULTRAPEER_1));
 
         // ok, now make sure a query DOES get through on the last hop
         qr = queryRequestFactory.createQuery("leehsu", (byte)2);        
@@ -529,7 +529,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		assertTrue("guids should be equal", 
 				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
 		
-		assertTrue("leaf should not have received the query", !drain(LEAF));
+		assertTrue("leaf should not have received the query", !BlockingConnectionUtils.drain(LEAF));
 		
 
 		// now test to make sure that query routing on the last hop
@@ -540,7 +540,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		ULTRAPEER_1.flush();
 
 		assertTrue("ultrapeer should not have received the query", 
-				   !drain(ULTRAPEER_2));
+				   !BlockingConnectionUtils.drain(ULTRAPEER_2));
 
 	}
 
@@ -637,7 +637,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         assertEquals("unexpected query", "hello", ((QueryRequest)m).getQuery());
         
         //shouldn't get to this leaf
-        assertTrue(!drain(LEAF));
+        assertTrue(!BlockingConnectionUtils.drain(LEAF));
 
 
         qr = queryRequestFactory.createQuery("\u4f5c\u540d", (byte)2);
@@ -649,7 +649,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         assertEquals("unexpected query", "\u4f5c\uu540d", ((QueryRequest)m).getQuery());
         
         //shouldn't get to ultrapeer
-        assertTrue(!drain(ULTRAPEER_1));
+        assertTrue(!BlockingConnectionUtils.drain(ULTRAPEER_1));
 
 
 
@@ -662,7 +662,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         assertEquals("unexpected query", "\u30b9\u30bf\u30b8\u30aa", ((QueryRequest)m).getQuery());
         
         //shouldn't get to LEAF
-        assertTrue(!drain(LEAF));
+        assertTrue(!BlockingConnectionUtils.drain(LEAF));
 
 
         //should get to both ULTRAPEER_1 and LEAF
@@ -876,9 +876,9 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         ULTRAPEER_1.flush();
               
 		assertTrue("should not have drained ultrapeer successfully", 
-				   !drain(ULTRAPEER_2));
+				   !BlockingConnectionUtils.drain(ULTRAPEER_2));
 		assertTrue("should not have drained leaf successfully", 
-				   !drain(LEAF));
+				   !BlockingConnectionUtils.drain(LEAF));
     }
 
 	/**
@@ -897,7 +897,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         assertEquals("unexpected port", 7399, ((PingReply)m).getPort());        
 
 		assertTrue("should not have drained ultrapeer successfully", 
-				   !drain(ULTRAPEER_2));
+				   !BlockingConnectionUtils.drain(ULTRAPEER_2));
     }
 
 
@@ -922,14 +922,14 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 
         //After closing leaf (give it some time to clean up), make sure
         //duplicate query is dropped.
-        drain(ULTRAPEER_1);
+        BlockingConnectionUtils.drain(ULTRAPEER_1);
         LEAF.close();
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         ULTRAPEER_2.send(qr);
         ULTRAPEER_2.flush();
 
 		assertTrue("should not have drained ultrapeer successfully", 
-				   !drain(ULTRAPEER_1));   
+				   !BlockingConnectionUtils.drain(ULTRAPEER_1));   
     }
 
 	/**

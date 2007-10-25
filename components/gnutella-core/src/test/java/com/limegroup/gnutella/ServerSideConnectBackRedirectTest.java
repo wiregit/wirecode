@@ -106,7 +106,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         Thread.sleep( 1000*2 );        
         
         MessagesSupportedVendorMessage msvm = 
-            (MessagesSupportedVendorMessage)getFirstMessageOfType(LEAF[0],
+            (MessagesSupportedVendorMessage)BlockingConnectionUtils.getFirstMessageOfType(LEAF[0],
                 MessagesSupportedVendorMessage.class, 500);
         assertNotNull(msvm);
         assertGreaterThan(0, msvm.supportsTCPConnectBackRedirect());

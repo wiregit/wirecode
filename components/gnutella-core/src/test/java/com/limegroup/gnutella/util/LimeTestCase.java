@@ -3,18 +3,8 @@ package com.limegroup.gnutella.util;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.limewire.concurrent.ManagedThread;
-import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorCallback;
-import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
@@ -22,22 +12,10 @@ import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.Backend;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeCoreGlue;
-import com.limegroup.gnutella.ProviderHacks;
-import com.limegroup.gnutella.connection.BlockingConnection;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingReplyFactory;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -47,7 +25,6 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 /**
  * Should be used when the test case requires to change settings.
  */
-@SuppressWarnings("unchecked")
 public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback {
     
     protected static File _baseDir;
@@ -88,21 +65,21 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Get test save directory
      */
-    public File getSaveDirectory() {
+    protected File getSaveDirectory() {
         return _savedDir;
     }
     
     /**
      * Get test shared directory
      */
-    public File getSharedDirectory() {
+    protected File getSharedDirectory() {
         return _sharedDir;
     }
     
     /**
      * Get store directory
      */
-    public File getStoreDirectory() {
+    protected File getStoreDirectory() {
         return _storeDir;
     }
     
@@ -112,7 +89,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * @throws <tt>IOException</tt> if the launching of either
      *  backend fails
      */
-    public static void launchAllBackends() throws IOException {
+    protected static void launchAllBackends() throws IOException {
         launchBackend(Backend.BACKEND_PORT);
         launchBackend(Backend.REJECT_PORT);
     }
@@ -121,7 +98,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Launch backend server if it is not running already
      * @throws IOException if attempt to launch backend server fails
      */
-    public static void launchBackend() throws IOException {
+    protected static void launchBackend() throws IOException {
         launchBackend(Backend.BACKEND_PORT);
     }
     
@@ -162,7 +139,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * This must also set the ErrorService's callback, so it
      * associates with the correct test object.
      */
-    public void preSetUp() throws Exception {
+    protected void preSetUp() throws Exception {
         super.preSetUp();        
         setupUniqueDirectories();
         setupSettings();
@@ -181,7 +158,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Called statically before any settings.
      */
-    public static void beforeAllTestsSetUp() throws Throwable {        
+    protected static void beforeAllTestsSetUp() throws Throwable {        
         setupUniqueDirectories();
         setupSettings();
         // SystemUtils must pretend to not be loaded, so the idle
@@ -197,7 +174,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Called after each test's tearDown.
      * Used to remove directories and possibly other things.
      */
-    public void postTearDown() {
+    protected void postTearDown() {
         cleanFiles(_baseDir, false);
         super.postTearDown();
     }
@@ -205,7 +182,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Runs after all tests are completed.
      */
-    public static void afterAllTestsTearDown() throws Throwable {
+    protected static void afterAllTestsTearDown() throws Throwable {
         cleanFiles(_baseDir, true);
         shutdownBackends();
     }
@@ -214,7 +191,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Sets up settings to a pristine environment for this test.
      * Ensures that no settings are saved.
      */
-    public static void setupSettings() throws Exception{
+    protected static void setupSettings() throws Exception{
         SettingsGroupManager.instance().setShouldSave(false);
         SettingsGroupManager.instance().revertToDefault();
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
@@ -231,14 +208,13 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         if(!GraphicsEnvironment.getLocalGraphicsEnvironment().isHeadlessInstance())
             UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
-        setSharedDirectories( new File[] { _sharedDir } );
-      //  LimeCoreGlue.install(ProviderHacks.getNetworkManager());
+        LimeTestUtils.setSharedDirectories( new File[] { _sharedDir } );
     }
     
     /**
      * Creates a new directory prepended by the given name.
      */
-    public static File createNewBaseDirectory(String name) throws Exception {
+    protected static File createNewBaseDirectory(String name) throws Exception {
         File t = getTestDirectory();
         File f = new File(t, name);
         
@@ -254,7 +230,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Sets this test up to have unique directories.
      */
-    public static void setupUniqueDirectories() throws Exception {
+    protected static void setupUniqueDirectories() throws Exception {
         
         if( _baseDir == null ) {
             _baseDir = createNewBaseDirectory( _testClass.getName() );
@@ -292,312 +268,24 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Get tests directory from a marker resource file.
      */
-    public static File getTestDirectory() throws Exception {
+    protected static File getTestDirectory() throws Exception {
         return new File(getRootDir(), "testData");
     }   
     
-    public static File getGUIDir() throws Exception {
+    protected static File getGUIDir() throws Exception {
         return new File(getRootDir(), "gui");
     }
     
-    public static File getCoreDir() throws Exception {
+    protected static File getCoreDir() throws Exception {
         return new File(getRootDir(), "core");        
     }
     
-    public static File getRootDir() throws Exception {
+    protected static File getRootDir() throws Exception {
         // Get a marker file.
         File f = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
         f = f.getCanonicalFile();
                  //gnutella       // limegroup    // com         // tests       // .
         return f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();        
-    }
-    
-    /**
-     * Sets standard settings for a pristine test environment.
-     */
-    public static void setStandardSettings() {
-        SettingsGroupManager.instance().revertToDefault();
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
-		ConnectionSettings.NUM_CONNECTIONS.setValue(4);
-		SearchSettings.GUESS_ENABLED.setValue(true);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        try {
-            FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-                    new String[] {"127.*.*.*",InetAddress.getLocalHost().getHostAddress()});
-        }catch(UnknownHostException bad) {
-            fail(bad);
-        }
-    }
-    
-    
-    ///////////////////////// Useful Testing Methods //////////////////////////
-    public static void setSharedDirectories(File[] dirs) {
-        Set set = new HashSet(Arrays.asList(dirs));
-        SharingSettings.DIRECTORIES_TO_SHARE.setValue(set);
-    }
-    
-    private static final int TIMEOUT = 2000;
-    
-    /**
-     * Sends a pong through all connections to keep them alive.
-     * @param pingReplyFactory 
-     */
-    public static void keepAllAlive(BlockingConnection[] cs, PingReplyFactory pingReplyFactory) throws IOException {
-        for(int i = 0; i < cs.length; i++) {
-            PingReply pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1);
-            cs[i].send(pr);
-            cs[i].flush();
-        }
-    }    
-
-    /** 
-	 * Tries to receive any outstanding messages on c 
-	 *
-     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
-	 */
-    public static boolean drain(BlockingConnection c) throws IOException {
-        return drain(c, TIMEOUT);
-    }
-    
-    public static boolean drain(BlockingConnection c, int timeout) throws IOException {
-        if(!c.isOpen())
-            return false;
-
-        boolean ret=false;
-        for(int i = 0; i < 100; i++) {
-            try {
-                c.receive(timeout);
-                ret = true;
-                i = 0;
-            } catch (InterruptedIOException e) {
-				// we read a null message or received another 
-				// InterruptedIOException, which means a messages was not 
-				// received
-                return ret;
-            } catch (BadPacketException e) {
-                // ignore...
-            }
-        }
-        return ret;
-    }
-    
-    /**
-     * Tries to drain all messages from the array of connections.
-     */
- 	public static void drainAll(BlockingConnection[] conns) throws Exception {
- 	    drainAll(conns, TIMEOUT);
- 	}
-    
-    /**
-     * drains all messages from the given connections simultaneously.
-     */
-    public static void drainAllParallel(final BlockingConnection [] conns) {
-        Thread []r = new Thread[conns.length];
-        for (int i = 0; i < conns.length; i++) {
-            final int index = i;
-            r[i] = ThreadExecutor.newManagedThread(new Runnable() {
-                public void run() {
-                    try {
-                        drain(conns[index],TIMEOUT);
-                    } catch (Exception bad) {
-                        ErrorService.error(bad);
-                    }
-                }
-            });
-            r[i].start();
-        }
-        
-        for (int i = 0; i < r.length; i++) {
-            try {
-                r[i].join();
-            } catch (InterruptedException ignored) {}
-        }
-    }
- 	
- 	public static void drainAll(BlockingConnection[] cs, int tout) throws IOException {
-        for (int i = 0; i < cs.length; i++) {
-            if (cs[i].isOpen())
-                drain(cs[i], tout);
-        }
- 	}
- 	
- 	/**
- 	 * Returns true if no messages beside expected ones (such as QRP, Pings)
- 	 * were received.
- 	 */
- 	public static boolean noUnexpectedMessages(BlockingConnection c) {
- 	    return noUnexpectedMessages(c, TIMEOUT);
- 	}
- 	
- 	public static boolean noUnexpectedMessages(BlockingConnection c, int timeout) {
-        for(int i = 0; i < 100; i++) {
-            if(!c.isOpen())
-                return true;
-            try {
-                Message m = c.receive(timeout);
-                if (m instanceof RouteTableMessage)
-                    ;
-                else if (m instanceof PingRequest)
-                    ;
-                else // we should never get any other sort of message...
-                    return false;
-                i = 0;
-            } catch (InterruptedIOException ie) {
-                return true;
-            } catch (BadPacketException e) {
-                // ignore....
-            } catch (IOException ioe) {
-                // ignore....
-            }
-        }
-        throw new RuntimeException("No IIOE or Message after 100 iterations");
-    }
-    
-    /**
-     * Returns the first message of the expected type, ignoring
-     * RouteTableMessages and PingRequests.
-     */
-    public static <T extends Message> T getFirstMessageOfType(BlockingConnection c, Class<T> type) {
-        return getFirstMessageOfType(c, type, TIMEOUT);
-    }
-
-    public static <T extends Message> T getFirstMessageOfType(BlockingConnection c,
-                                                Class<T> type,
-                                                int timeout) {
-        for(int i = 0; i < 100; i++) {
-            if(!c.isOpen()){
-                //System.out.println(c + " is not open");
-                return null;
-            }
-
-            try {
-                Message m = c.receive(timeout);
-                //System.out.println("m: " + m + ", class: " + m.getClass());
-                if (m instanceof RouteTableMessage)
-                    ;
-                else if (m instanceof PingRequest)
-                    ;
-                else if (type.isInstance(m))
-                    return (T)m;
-                else
-                    return null;  // this is usually an error....
-                i = 0;
-            } catch (InterruptedIOException ie) {
-                //ie.printStackTrace();
-                return null;
-            } catch (BadPacketException e) {
-               // e.printStackTrace();
-                // ignore...
-            } catch (IOException ioe) {
-                //ioe.printStackTrace();
-                // ignore....
-            }
-        }
-        throw new RuntimeException("No IIOE or Message after 100 iterations");
-    }
-    
-    public static <T extends Message> T getFirstInstanceOfMessageType(BlockingConnection c,
-                          Class<T> type) throws BadPacketException {
-        return getFirstInstanceOfMessageType(c, type, TIMEOUT);
-    }
-
-    public static <T extends Message> T getFirstInstanceOfMessageType(BlockingConnection c,
-               Class<T> type, int timeout) throws BadPacketException {
-        for(int i = 0; i < 200; i++) {
-            if(!c.isOpen()){
-                //System.out.println(c + " is not open");
-                return null;
-            }
-
-            try {
-                Message m = c.receive(timeout);
-                //System.out.println("m: " + m + ", class: " + m.getClass());
-                if (type.isInstance(m))
-                    return (T)m;
-                i = 0;
-            } catch (InterruptedIOException ie) {
-//                ie.printStackTrace();
-                return null;            
-            } catch (IOException iox) {
-                //ignore iox
-            }
-        }
-        throw new RuntimeException("No IIOE or Message after 100 iterations");
-    }
-    
-    /**
-     * @return the first message of type <pre>type</pre>.  Read messages within
-     * the time out, so it's possible to wait upto almost 2 * timeout for this
-     * method to return
-     */
-    public static <T extends Message> T getFirstInstanceOfMessage(Socket socket, Class<T> type, 
-                           int timeout) throws IOException, BadPacketException {
-        int oldTimeout = socket.getSoTimeout();
-        try {
-        for(int i=0; i<200; i++) { 
-            if(socket.isClosed())
-                return null;
-            try {
-                socket.setSoTimeout(timeout);
-                Message m=ProviderHacks.getMessageFactory().read(socket.getInputStream(), Network.TCP);
-                if(type.isInstance(m))
-                    return (T)m;
-                else if(m == null) //interruptedIOException thrown
-                    return null;                    
-                i=0;
-            } catch(InterruptedIOException iiox) {
-                return null; 
-            } 
-        }
-        } finally { //before we return reset the so-timeout
-            socket.setSoTimeout(oldTimeout);
-        }
-        return null;
-    }
-
-    public static QueryRequest getFirstQueryRequest(BlockingConnection c) {
-        return getFirstQueryRequest(c, TIMEOUT);
-    }
-    
-    public static QueryRequest getFirstQueryRequest(BlockingConnection c, int tout) {
-        return getFirstMessageOfType(c, QueryRequest.class, tout);
-    }
-    
-    public static QueryReply getFirstQueryReply(BlockingConnection c) {
-        return getFirstQueryReply(c, TIMEOUT);
-    }
-    
-    public static QueryReply getFirstQueryReply(BlockingConnection c, int tout) {
-        return getFirstMessageOfType(c, QueryReply.class, tout);
-    }
-    
-    public static void failIfAnyArrive(final BlockingConnection []connections, final Class type) 
-    throws Exception {
-        Thread [] drainers = new ManagedThread[connections.length];
-        for (int i = 0; i < connections.length; i++) {
-            final int index = i;
-            drainers[i] = ThreadExecutor.newManagedThread(new Runnable() {
-                public void run() {
-                    try {
-                        Message m = 
-                            getFirstInstanceOfMessageType(connections[index],type);
-                        assertNull(m);
-                    } catch (BadPacketException bad) {
-                        fail(bad);
-                    }
-                }
-            });
-            drainers[i].start();
-        }
-        for(int i = 0;i < drainers.length;i++)
-            drainers[i].join();
     }
 }       
 

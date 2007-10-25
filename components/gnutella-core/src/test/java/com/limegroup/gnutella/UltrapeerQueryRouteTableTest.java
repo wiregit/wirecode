@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -8,10 +9,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import junit.framework.Test;
+
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
-
-import junit.framework.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -42,6 +43,8 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -101,9 +104,21 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 	}
     
     private static void setSettings() throws Exception {
-        setStandardSettings();
-        //SearchSettings.PROBE_TTL.setValue((byte)1);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
+        ConnectionSettings.NUM_CONNECTIONS.setValue(4);
+        SearchSettings.GUESS_ENABLED.setValue(true);
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+                    new String[] {"127.*.*.*",InetAddress.getLocalHost().getHostAddress()});
+        
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.PORT.setValue(6332);

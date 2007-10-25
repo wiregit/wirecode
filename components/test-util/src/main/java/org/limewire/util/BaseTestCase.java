@@ -62,7 +62,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
     @SuppressWarnings("unchecked")
-    public static TestSuite buildSingleTestSuite(Class cls) {
+    protected static TestSuite buildSingleTestSuite(Class cls) {
         _testClass = cls;
         
         String method = System.getProperty("junit.test.method");
@@ -83,7 +83,7 @@ public abstract class BaseTestCase extends AssertComparisons {
     }
     
     @SuppressWarnings("unchecked")
-    public static TestSuite buildTestSuite(Class cls) {
+    protected static TestSuite buildTestSuite(Class cls) {
         TestSuite suite = buildSingleTestSuite(cls);
         String timesP = System.getProperty("junit.test.times","1");
         int times = 1 ;
@@ -113,7 +113,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * @param test The name of the test method in cls to be run
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
-    public static TestSuite buildTestSuite(Class cls, String test) {
+    protected static TestSuite buildTestSuite(Class cls, String test) {
         _testClass = cls;
         return buildTestSuite(cls, new String[]{test});
     }
@@ -125,7 +125,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * run
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
-    public static TestSuite buildTestSuite(Class cls, String[] tests) {
+    protected static TestSuite buildTestSuite(Class cls, String[] tests) {
         _testClass = cls;
         TestSuite suite = new LimeTestSuite(false, cls);
         for (int ii = 0; ii < tests.length; ii++) {
@@ -209,7 +209,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * This must also set the ErrorService's callback, so it
      * associates with the correct test object.
      */
-    public void preSetUp() throws Exception {
+    protected void preSetUp() throws Exception {
         _testThread = Thread.currentThread();
         ErrorUtils.setCallback(this);
         setupTestTimer();
@@ -219,12 +219,12 @@ public abstract class BaseTestCase extends AssertComparisons {
      * Called after each test's tearDown.
      * Used to remove directories and possibly other things.
      */
-    public void postTearDown() {
+    protected void postTearDown() {
         stopTestTimer();
     }
     
     /** After all tearDown/postTearDown/globalTearDown teardowns. */
-    public static void afterAllTestsTearDown() throws Throwable {
+    protected static void afterAllTestsTearDown() throws Throwable {
         System.gc();
     }
     
@@ -257,7 +257,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * Fails the test with an AssertionFailedError and another
      * error as the root cause.
      */
-    static public void fail(Throwable e) {
+    public static void fail(Throwable e) {
         fail(null, e);
     }
     
@@ -265,7 +265,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * Fails the test with an AssertionFailedError and another
      * error as the root cause, with a message.
      */
-    static public void fail(String message, Throwable e) {
+    public static void fail(String message, Throwable e) {
         throw new UnexpectedExceptionError(message, e);
     }
             

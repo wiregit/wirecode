@@ -166,7 +166,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             SSLSettings.TLS_OUTGOING.setValue(true);
         
     	setAccepted(false);
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
 
         // make sure leaf is sharing
         assertEquals(2, fileManager.getNumFiles());
@@ -263,7 +263,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             SSLSettings.TLS_INCOMING.setValue(true);
         
     	setAccepted(true);
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         // some setup
         byte[] clientGUID = GUID.makeGuid();
 
@@ -411,7 +411,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         if(settingOn)
             SSLSettings.TLS_INCOMING.setValue(true);
         
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         // some setup
         byte[] clientGUID = GUID.makeGuid();
 
@@ -463,7 +463,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // assume client accepted connections from the outside successfully
         setAccepted(true);
         
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         // some setup
         byte[] clientGUID = GUID.makeGuid();
 

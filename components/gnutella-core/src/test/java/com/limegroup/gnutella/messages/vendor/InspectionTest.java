@@ -27,6 +27,7 @@ import org.limewire.util.ByteOrder;
 
 import com.google.inject.Injector;
 import com.limegroup.bittorrent.bencoding.Token;
+import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
@@ -199,15 +200,15 @@ public class InspectionTest extends ServerSideTestCase {
         
         
         // the one without should not be forwarded
-        drainAll(LEAF);
+        BlockingConnectionUtils.drainAll(LEAF);
         tryMessage(notRouted);
-        assertNull(getFirstMessageOfType(LEAF[0], InspectionRequestImpl.class));
-        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequestImpl.class));
+        assertNull(BlockingConnectionUtils.getFirstMessageOfType(LEAF[0], InspectionRequestImpl.class));
+        assertNull(BlockingConnectionUtils.getFirstMessageOfType(LEAF[1], InspectionRequestImpl.class));
         
         // the one with return address should get answered 
         DatagramSocket socket2 = new DatagramSocket(20000);
         socket2.setSoTimeout(100);
-        drainAll(LEAF);
+        BlockingConnectionUtils.drainAll(LEAF);
         try {
             tryMessage(routed);
             fail("response should have been sent elsewhere");
@@ -217,8 +218,8 @@ public class InspectionTest extends ServerSideTestCase {
         assertEquals(2, MessageSettings.INSPECTION_VERSION.getValue());
         
         // and forwarded to the leaf that supports it.
-        InspectionRequestImpl received = getFirstMessageOfType(LEAF[0], InspectionRequestImpl.class);
-        assertNull(getFirstMessageOfType(LEAF[1], InspectionRequestImpl.class));
+        InspectionRequestImpl received = BlockingConnectionUtils.getFirstMessageOfType(LEAF[0], InspectionRequestImpl.class);
+        assertNull(BlockingConnectionUtils.getFirstMessageOfType(LEAF[1], InspectionRequestImpl.class));
         
         // the forwarded message should be identical
         assertEquals(routed.getGUID(), received.getGUID());

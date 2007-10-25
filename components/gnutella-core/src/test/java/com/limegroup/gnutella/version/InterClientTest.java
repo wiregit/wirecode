@@ -12,6 +12,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.PeerTestCase;
 import com.limegroup.gnutella.connection.BlockingConnection;
@@ -59,7 +60,7 @@ public class InterClientTest extends PeerTestCase {
         super.setUp(LimeTestUtils.createInjector(m));
         setEmpty();
         PEER = connect(true);
-        drain(PEER);
+        BlockingConnectionUtils.drain(PEER);
         doInitialExchange();
     }
     
@@ -85,7 +86,7 @@ public class InterClientTest extends PeerTestCase {
         PEER.flush();
         
         // We should get an UpdateRequest.
-        Message m = getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
         assertNotNull(m);
         assertInstanceof(UpdateRequest.class, m);
         
@@ -95,13 +96,13 @@ public class InterClientTest extends PeerTestCase {
         PEER.flush();
         
         // we shouldn't get a message, since they said they had 5 & we know of 10.
-        m = getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
         assertNull(m);
         
         // Now if they send with 11, we'll request.
         PEER.send(getCVM(11));
         PEER.flush();
-        m = getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
         assertNotNull(m);
         assertInstanceof(UpdateRequest.class, m);
     }
@@ -115,14 +116,14 @@ public class InterClientTest extends PeerTestCase {
         // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequest());
         PEER.flush();
-        Message m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNull(m);
         
         // Alright, set some current bytes so we can do some testing.
         byte[] data = setCurrent(-10);
         PEER.send(new UpdateRequest());
         PEER.flush();
-        m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
         assertInstanceof(UpdateResponse.class, m);
         assertEquals(data, payload(m));
@@ -145,7 +146,7 @@ public class InterClientTest extends PeerTestCase {
         assertEquals(-10, getUpdateHandler().getLatestId());
         
         // Make sure we got a new CapabilitiesVM.
-        Message m = getFirstInstanceOfMessageType(PEER, CapabilitiesVM.class);
+        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, CapabilitiesVM.class);
         assertNotNull(m);
         // TODO: is 65526 right?
         assertEquals(65526, ((CapabilitiesVM)m).supportsUpdate());
@@ -267,14 +268,14 @@ public class InterClientTest extends PeerTestCase {
         UpdateRequestStub request = new UpdateRequestStub(2,true,true);
         PEER.send(new UpdateRequest());
         PEER.flush();
-        Message m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNull(m);
         
         // Alright, set some current bytes so we can do some testing.
         byte[] data = setCurrent(-10);
         PEER.send(request);
         PEER.flush();
-        m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
         assertInstanceof(UpdateResponse.class, m);
         byte [] payload = payload(m);
@@ -289,14 +290,14 @@ public class InterClientTest extends PeerTestCase {
         // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequest());
         PEER.flush();
-        Message m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNull(m);
         
         UpdateRequestStub request = new UpdateRequestStub(2,true,false);
         byte[] data = setCurrent(-10);
         PEER.send(request);
         PEER.flush();
-        m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
         assertInstanceof(UpdateResponse.class, m);
         
@@ -315,14 +316,14 @@ public class InterClientTest extends PeerTestCase {
         // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequest());
         PEER.flush();
-        Message m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNull(m);
         
         UpdateRequestStub request = new UpdateRequestStub(2,false,false);
         byte[] data = setCurrent(-10);
         PEER.send(request);
         PEER.flush();
-        m = getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
         assertEquals(data,payload(m));
     }
@@ -376,7 +377,7 @@ public class InterClientTest extends PeerTestCase {
     private void doInitialExchange() throws Exception {
         PEER.send(getCVM(0));
         PEER.flush();
-        assertNotNull(getFirstInstanceOfMessageType(PEER, UpdateRequest.class));
+        assertNotNull(BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class));
     }
 
     /* Required for PeerTestCase. */

@@ -217,10 +217,10 @@ public abstract class ServerSideTestCase extends LimeTestCase {
  	protected void drainAll() throws Exception {
         for (int i = 0; i < ULTRAPEER.length; i++)
             if(ULTRAPEER[i].isOpen()) 
-                drain(ULTRAPEER[i]);
+                BlockingConnectionUtils.drain(ULTRAPEER[i]);
         for (int i = 0; i < LEAF.length; i++)
             if(LEAF[i].isOpen()) 
-                drain(LEAF[i]);
+                BlockingConnectionUtils.drain(LEAF[i]);
  	}
 
 	/**

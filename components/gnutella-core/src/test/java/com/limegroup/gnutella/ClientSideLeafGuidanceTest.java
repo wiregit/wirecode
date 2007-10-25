@@ -77,7 +77,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
      */
     private QueryStatusResponse getFirstQueryStatus(BlockingConnection c)
                                         throws BadPacketException, IOException {
-        return getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
+        return BlockingConnectionUtils.getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }
     
     public void testBasicGuidance() throws Exception {
@@ -88,7 +88,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         Thread.sleep(250);
 
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
         }
@@ -147,14 +147,14 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
     public void testAdvancedGuidance1() throws Exception {
         
         for (int i = 0; i < testUP.length; i++)
-            drain(testUP[i]);
+            BlockingConnectionUtils.drain(testUP[i]);
         
         // spawn a query and make sure all UPs get it
         GUID queryGuid = new GUID(searchServices.newQueryGUID());
         searchServices.query(queryGuid.bytes(), "susheel daswanu");
 
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
         }
@@ -217,14 +217,14 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         Message m = null;
 
         for (int i = 0; i < testUP.length; i++)
-            drain(testUP[i]);
+            BlockingConnectionUtils.drain(testUP[i]);
         
         // spawn a query and make sure all UPs get it
         GUID queryGuid = new GUID(searchServices.newQueryGUID());
         searchServices.query(queryGuid.bytes(), "anita kesavan");
 
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
         }
@@ -330,14 +330,14 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         Message m = null;
 
         for (int i = 0; i < testUP.length; i++)
-            drain(testUP[i]);
+            BlockingConnectionUtils.drain(testUP[i]);
         
         // spawn a query and make sure all UPs get it
         GUID queryGuid = new GUID(searchServices.newQueryGUID());
         searchServices.query(queryGuid.bytes(), "anita kesavan");
 
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
             assertNotNull(qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
         }
@@ -385,7 +385,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         assertGreaterThan(REPORT_INTERVAL, numToReport);
         
         QueryStatusResponse qsr 
-            = (QueryStatusResponse)getFirstInstanceOfMessageType(testUP[0], QueryStatusResponse.class, TIMEOUT);
+            = (QueryStatusResponse)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], QueryStatusResponse.class, TIMEOUT);
         
         assertEquals(numToReport/4, qsr.getNumResults());
     }
@@ -395,7 +395,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
      * @throws Exception
      */
     private void drainQSRespones() throws Exception {
-        failIfAnyArrive(testUP, QueryStatusResponse.class);
+        BlockingConnectionUtils.failIfAnyArrive(testUP, QueryStatusResponse.class);
     }
 
     private static byte[] myIP() {

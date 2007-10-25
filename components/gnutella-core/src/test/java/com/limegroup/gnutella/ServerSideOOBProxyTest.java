@@ -176,7 +176,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Ultrapeer should get it.
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
@@ -205,7 +205,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Ultrapeer should get it.
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
@@ -231,7 +231,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Ultrapeer should get it and proxy it
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertTrue(queryRec.desiresOutOfBandReplies());
@@ -264,7 +264,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Ultrapeer should get it.
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[1],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[1],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertTrue(queryRec.desiresOutOfBandReplies());
@@ -291,7 +291,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Ultrapeer should get it.
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[1],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[1],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertTrue(queryRec.doNotProxy());
@@ -319,7 +319,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Leaf should get the non-OOB query
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(LEAF[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF[0],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
@@ -340,7 +340,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         sendF(LEAF[0], nonOOB);
         
         QueryRequest OOBv2 = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                          QueryRequest.class);
         // upgraded to v3 and proxied
         assertTrue(OOBv2.desiresOutOfBandRepliesV2());
@@ -364,7 +364,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         sendF(LEAF[0], nonOOB);
         
         QueryRequest OOBv2 = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                          QueryRequest.class);
         // upgraded to v3 and proxied, v2 disabled
         assertFalse(OOBv2.desiresOutOfBandRepliesV2());
@@ -389,7 +389,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
             // the Ultrapeer should get it.
             QueryRequest queryRec = 
-                (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             byte[] proxiedGuid = query.getGUID().clone();
@@ -423,7 +423,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
             // the Ultrapeer should get it.
             QueryRequest queryRec = 
-                (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             // GUID should be the same and not address encoded by the proxying ultrapeer
@@ -451,7 +451,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
             // the Ultrapeer should get it.
             QueryRequest queryRec = 
-                (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             byte[] proxiedGuid = query.getGUID().clone();
@@ -482,7 +482,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
             // the Ultrapeer should get it.
             QueryRequest queryRec = 
-                (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             // GUID should be the same and not address encoded by the proxying ultrapeer
@@ -510,7 +510,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
             // the Ultrapeer should get it.
             QueryRequest queryRec = 
-                (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                              QueryRequest.class);
             assertNotNull(queryRec);
             byte[] proxiedGuid = query.getGUID().clone();
@@ -541,7 +541,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Ultrapeer should get it and proxy it
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertTrue(queryRec.desiresOutOfBandReplies());
@@ -567,7 +567,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             
             // leaf should get a reply with the correct guid
             QueryReply queryRep = 
-            (QueryReply) getFirstInstanceOfMessageType(LEAF[0],
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF[0],
                                                        QueryReply.class);
             assertNotNull(queryRep);
             assertEquals(new GUID(query.getGUID()),new GUID(queryRep.getGUID()));
@@ -603,7 +603,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
             // now we should get a reply at the leaf
             QueryReply queryRep = 
-            (QueryReply) getFirstInstanceOfMessageType(LEAF[0],
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF[0],
                                                        QueryReply.class);
             assertNotNull(queryRep);
             assertEquals(new GUID(query.getGUID()),new GUID(queryRep.getGUID()));
@@ -663,7 +663,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             
             // leaf should get a reply with the correct guid
             QueryReply queryRep = 
-            (QueryReply) getFirstInstanceOfMessageType(LEAF[0],
+            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF[0],
                                                        QueryReply.class);
             assertNotNull(queryRep);
             assertEquals(new GUID(query.getGUID()),new GUID(queryRep.getGUID()));
@@ -691,7 +691,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
         // the Ultrapeer should get it and not modify the guid
         QueryRequest queryRec = 
-            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[1],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[1],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
         assertTrue(queryRec.doNotProxy());

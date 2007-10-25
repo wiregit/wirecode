@@ -11,6 +11,7 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ClientSideTestCase;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -111,7 +112,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
             assertTrue("should be open", testUP[i].isOpen());
             assertTrue("should be up -> leaf", testUP[i].getConnectionCapabilities().isSupernodeClientConnection());
             if (i != testUP.length - 1)
-                drain(testUP[i], 500);
+                BlockingConnectionUtils.drain(testUP[i], 500);
         }
 
         final int upIndex = testUP.length - 1;
@@ -162,7 +163,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         
         Thread.sleep(5 * 1000);
 
-        QueryReply reply = getFirstQueryReply(testUP[1]);
+        QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[1]);
         assertNotNull(reply);
         assertEquals(query.getGUID(), reply.getGUID());
         assertEquals(reply.getResultsAsList().toString(), 4, reply.getResultCount());
@@ -190,7 +191,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         testUP[1].send(query);
         testUP[1].flush();
 
-        QueryReply reply = getFirstQueryReply(testUP[1]);
+        QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[1]);
         assertNotNull(reply);
         assertEquals(query.getGUID(), reply.getGUID());
         assertEquals(reply.getResultsAsList().toString(), 1, reply.getResultCount());
@@ -223,7 +224,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         testUP[1].send(query);
         testUP[1].flush();
 
-        QueryReply reply = getFirstQueryReply(testUP[1]);
+        QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[1]);
         assertNotNull(reply);
         assertEquals(query.getGUID(), reply.getGUID());
         assertEquals(reply.getResultsAsList().toString(), 1, reply.getResultCount());
@@ -256,7 +257,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         testUP[1].send(query);
         testUP[1].flush();
 
-        QueryReply reply = getFirstQueryReply(testUP[1]);
+        QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[1]);
         assertNotNull(reply);
         assertEquals(query.getGUID(), reply.getGUID());
         assertEquals(reply.getResultsAsList().toString(), 2, reply.getResultCount());

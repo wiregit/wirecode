@@ -97,17 +97,17 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
+        assertTrue(BlockingConnectionUtils.noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
 		Response response1=responseFactory.createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
 		QueryReply reply1=queryReplyFactory.createQueryReply(request.getGUID(), (byte)2, 6346,
                 IP, 56, new Response[] {response1}, guid1, false);
-        drain(ULTRAPEER[1]);
+        BlockingConnectionUtils.drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
 		LEAF[0].flush();
-		QueryReply qRep = getFirstQueryReply(ULTRAPEER[1]);
+		QueryReply qRep = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[1]);
         assertNotNull(qRep);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
@@ -120,10 +120,10 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
 
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(LEAF[0], TIMEOUT);
         assertNull("Did not expected a QueryRequest", reqRecvd);
 
-        reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
+        reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -147,17 +147,17 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
+        assertTrue(BlockingConnectionUtils.noUnexpectedMessages(ULTRAPEER[0]));
 
         // make sure probes are routed back correctly....
 		Response response1=responseFactory.createResponse(0L, 0L, "berkeley rocks");
 		byte[] guid1=GUID.makeGuid();
 		QueryReply reply1=queryReplyFactory.createQueryReply(request.getGUID(), (byte)2, 6346,
                 IP, 56, new Response[] {response1}, guid1, false);
-        drain(ULTRAPEER[1]);
+        BlockingConnectionUtils.drain(ULTRAPEER[1]);
 		LEAF[0].send(reply1);
 		LEAF[0].flush();
-		QueryReply qRep = getFirstQueryReply(ULTRAPEER[1]);
+		QueryReply qRep = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[1]);
         assertNotNull(qRep);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
@@ -170,10 +170,10 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
 
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(LEAF[0], TIMEOUT);
         assertNull("Did not expected a QueryRequest", reqRecvd);
 
-        reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
+        reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -195,7 +195,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
+        assertTrue(BlockingConnectionUtils.noUnexpectedMessages(ULTRAPEER[0]));
 
         Thread.sleep(2*1000);
 
@@ -206,11 +206,11 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         // should NOT be forwarded to leaf again....
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(LEAF[0], TIMEOUT);
         assertNull("Did not expected a QueryRequest", reqRecvd);
 
         // should NOT be forwarded to other Ultrapeer....
-        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
+        assertTrue(BlockingConnectionUtils.noUnexpectedMessages(ULTRAPEER[0]));
     }
     
     // makes sure a probe can't be extended twice....
@@ -228,7 +228,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
+        assertTrue(BlockingConnectionUtils.noUnexpectedMessages(ULTRAPEER[0]));
 
         Thread.sleep(2*1000);
 
@@ -238,9 +238,9 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         ULTRAPEER[1].flush();
 
         // leaf should not get anything
-        assertTrue(noUnexpectedMessages(LEAF[0]));
+        assertTrue(BlockingConnectionUtils.noUnexpectedMessages(LEAF[0]));
 
-        reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
+        reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -256,11 +256,11 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         // should NOT be forwarded to leaf again....
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
-        reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+        reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(LEAF[0], TIMEOUT);
         assertNull("Did not expected a QueryRequest", reqRecvd);
 
         // should NOT be forwarded to other Ultrapeer....
-        assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
+        assertTrue(BlockingConnectionUtils.noUnexpectedMessages(ULTRAPEER[0]));
     }
 
     // tries to extend queries with original TTL > 1, should fail...
@@ -279,7 +279,7 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
             // should be forwarded to other Ultrapeer
-            reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
+            reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[0]);
             assertNotNull(reqRecvd);
             assertEquals("berkeley", reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
@@ -295,10 +295,10 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
             // should be counted as a duplicate and not forwarded anywhere...
             // leaves don't get any unexpected messages, no use using
             // noUnenexpectedMessages
-            reqRecvd = getFirstQueryRequest(LEAF[0], TIMEOUT);
+            reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(LEAF[0], TIMEOUT);
             assertNull("Did not expected a QueryRequest", reqRecvd);
 
-            assertTrue(noUnexpectedMessages(ULTRAPEER[0]));
+            assertTrue(BlockingConnectionUtils.noUnexpectedMessages(ULTRAPEER[0]));
         }
     }
 }

@@ -16,6 +16,7 @@ import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ServerSideTestCase;
@@ -110,7 +111,7 @@ public class RoutedConnectionTest extends ServerSideTestCase {
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection in = createLeafConnection();
-        drain(in);
+        BlockingConnectionUtils.drain(in);
         assertEquals(1, cm.getNumConnections());
         
         
@@ -148,14 +149,14 @@ public class RoutedConnectionTest extends ServerSideTestCase {
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection conn = createLeafConnection();
-        drain(conn);
+        BlockingConnectionUtils.drain(conn);
         assertEquals(1, cm.getNumConnections());
         
         
         RoutedConnection out = cm.getConnections().get(0);
 
         out.send(pingReplyFactory.create(GUID.makeGuid(), (byte)1));
-		Message m = getFirstInstanceOfMessageType(conn, PingReply.class);
+		Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(conn, PingReply.class);
 		assertNotNull(m);
 		assertInstanceof("should be a pong", PingReply.class, m);
 		
@@ -190,7 +191,7 @@ public class RoutedConnectionTest extends ServerSideTestCase {
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection out = createLeafConnection();
-        drain(out);
+        BlockingConnectionUtils.drain(out);
         assertEquals(1, cm.getNumConnections());
         RoutedConnection in = cm.getConnections().get(0);
 
@@ -210,7 +211,7 @@ public class RoutedConnectionTest extends ServerSideTestCase {
         assertEquals(0, cm.getNumConnections());
 
         BlockingConnection out = createLeafConnection();
-        drain(out);
+        BlockingConnectionUtils.drain(out);
         assertEquals(1, cm.getNumConnections());
         RoutedConnection in = cm.getConnections().get(0);
         assertTrue("connection should be open", out.isOpen());

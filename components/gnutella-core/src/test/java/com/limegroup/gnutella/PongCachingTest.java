@@ -125,7 +125,7 @@ public final class PongCachingTest extends LimeTestCase {
         // TODO hack: increment static field server port so each test case has its own port
         SERVER_PORT++;
         ConnectionSettings.PORT.setValue(SERVER_PORT);
-        setSharedDirectories(new File[0]);
+        LimeTestUtils.setSharedDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -180,19 +180,19 @@ public final class PongCachingTest extends LimeTestCase {
 	 */
  	private void drainAll() throws Exception {
  		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1, TIMEOUT);
+ 			BlockingConnectionUtils.drain(ULTRAPEER_1, TIMEOUT);
  		}
  		if(ULTRAPEER_2.isOpen()) {
- 			drain(ULTRAPEER_2, TIMEOUT);
+ 			BlockingConnectionUtils.drain(ULTRAPEER_2, TIMEOUT);
  		}
         if(ULTRAPEER_3.isOpen()) {
-            drain(ULTRAPEER_3, TIMEOUT);
+            BlockingConnectionUtils.drain(ULTRAPEER_3, TIMEOUT);
         }
         if(ULTRAPEER_4.isOpen()) {
-            drain(ULTRAPEER_4, TIMEOUT);
+            BlockingConnectionUtils.drain(ULTRAPEER_4, TIMEOUT);
         }
  		if(LEAF.isOpen()) {
- 			drain(LEAF, TIMEOUT);
+ 			BlockingConnectionUtils.drain(LEAF, TIMEOUT);
  		}
  	}
 
@@ -276,7 +276,7 @@ public final class PongCachingTest extends LimeTestCase {
         
         Message received;   
         for(int i=0; i<PongCacher.NUM_HOPS; i++) {
-            received = getFirstMessageOfType(ULTRAPEER_1, PingReply.class, 10000);
+            received = BlockingConnectionUtils.getFirstMessageOfType(ULTRAPEER_1, PingReply.class, 10000);
             assertNotNull("should have gotten pong. hop: " + i, received);
         }
         PingPongSettings.PINGS_ACTIVE.setValue(true);
@@ -342,7 +342,7 @@ public final class PongCachingTest extends LimeTestCase {
         //check for ja pongs
         Message received;   
         for(int i=0; i< PongCacher.NUM_HOPS; i++) {
-            received = getFirstMessageOfType(ULTRAPEER_3, 
+            received = BlockingConnectionUtils.getFirstMessageOfType(ULTRAPEER_3, 
                                              PingReply.class, 
                                              5000);
 
@@ -381,7 +381,7 @@ public final class PongCachingTest extends LimeTestCase {
         //check ofr sv pongs
         List returnedPongs = new ArrayList();
         for(int i = 0; i < PongCacher.NUM_HOPS; i++) {
-            received = getFirstMessageOfType(ULTRAPEER_4, 
+            received = BlockingConnectionUtils.getFirstMessageOfType(ULTRAPEER_4, 
                                              PingReply.class, 
                                              5000);
             assertNotNull("should have gotten pong. hop: " + i, received);

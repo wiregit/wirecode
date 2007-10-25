@@ -1010,8 +1010,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         LEAF[0].flush();
 
         // ultrapeers should NOT get the QR
-        assertNull(getFirstQueryRequest(ULTRAPEER[0]));
-        assertNull(getFirstQueryRequest(ULTRAPEER[1]));
+        assertNull(BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[0]));
+        assertNull(BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[1]));
         
         
         Socket socket = LEAF[0].getSocket();
@@ -1026,11 +1026,11 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         Thread.sleep(4000);
 
         // ultrapeers should get the QR
-        assertNotNull(getFirstQueryRequest(ULTRAPEER[0]) );
-        assertNotNull(getFirstQueryRequest(ULTRAPEER[1]) );
+        assertNotNull(BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[0]) );
+        assertNotNull(BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[1]) );
 
         // LEAF[0] should get the reply
-        assertNotNull(getFirstQueryReply(LEAF[0]));
+        assertNotNull(BlockingConnectionUtils.getFirstQueryReply(LEAF[0]));
     }
 
     // a node should NOT send a reply out of band via UDP if it is not
@@ -1046,7 +1046,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         ULTRAPEER[1].flush();
 
         // ULTRAPEER[1] should get a reply via TCP
-        assertNotNull(getFirstQueryReply(ULTRAPEER[1]));
+        assertNotNull(BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[1]));
     }
 
 

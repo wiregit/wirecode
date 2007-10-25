@@ -162,7 +162,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertTrue("should be open", testUP[i].isOpen());
             assertTrue("should be up -> leaf",
                 testUP[i].getConnectionCapabilities().isSupernodeClientConnection());
-            drain(testUP[i], 100);
+            BlockingConnectionUtils.drain(testUP[i], 100);
             // OOB client side needs server side leaf guidance
             testUP[i].send(messagesSupportedVendorMessage);
             testUP[i].flush();
@@ -181,7 +181,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // set smaller clear times so we can test in a timely fashion
 
         
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -193,7 +193,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -244,7 +244,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public void testDownloadDoneQueryDonePurge() throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -258,7 +258,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -273,7 +273,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Response resp = null;
         QueryReply reply = null;
-        reply = (QueryReply) getFirstInstanceOfMessageType(testUP[0],
+        reply = (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                            QueryReply.class);
         assertNotNull(reply);
         resp = (Response) (reply.getResultsAsList()).get(0);
@@ -365,7 +365,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public void testQueryAliveNoPurge() throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -379,7 +379,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -393,7 +393,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             testUP[0].send(qrTemp);
             testUP[0].flush();
 
-            reply = (QueryReply) getFirstInstanceOfMessageType(testUP[0],
+            reply = (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                                QueryReply.class);
             assertNotNull(reply);
             resp = (Response) (reply.getResultsAsList()).get(0);
@@ -491,7 +491,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     public void testDownloadProgressQueryDoneNoPurge() 
         throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -505,7 +505,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -519,7 +519,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             testUP[0].send(qrTemp);
             testUP[0].flush();
 
-            reply = (QueryReply) getFirstInstanceOfMessageType(testUP[0],
+            reply = (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                                QueryReply.class);
             assertNotNull(reply);
             resp = (Response) (reply.getResultsAsList()).get(0);
@@ -620,7 +620,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public void testBusyDownloadLocatesSources() throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -634,7 +634,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -737,7 +737,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public void testDownloadFinishes() throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -751,7 +751,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -923,7 +923,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public void testUsesCachedQueryKeys() throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -937,7 +937,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -1061,7 +1061,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
     public void testMultipleDownloadsNoPurge() throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -1075,7 +1075,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -1178,7 +1178,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     // previous tests to clear
     public void testUnicasterClearingCode() throws Exception {
 
-        keepAllAlive(testUP, pingReplyFactory);
+        BlockingConnectionUtils.keepAllAlive(testUP, pingReplyFactory);
         // clear up any messages before we begin the test.
         drainAll();
 
@@ -1204,7 +1204,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) getFirstInstanceOfMessageType(testUP[0],
+            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());

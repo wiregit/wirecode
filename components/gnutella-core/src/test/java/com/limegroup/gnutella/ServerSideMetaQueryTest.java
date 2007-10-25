@@ -193,7 +193,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get a reply with 2 responses
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -214,7 +214,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get a reply with 1 response
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[1],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -236,7 +236,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get a reply with 1 response
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[2],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[2],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -267,7 +267,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get a reply with 5 responses
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -300,7 +300,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get a reply with 4 responses
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[1],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -330,7 +330,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get a reply with 3 responses
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[2],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[2],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -359,7 +359,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get a reply with 1 responses
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[1],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -388,7 +388,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get no responses because of the filter
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                       QueryReply.class);
         assertNull(reply);
         }
@@ -410,7 +410,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get no responses because of the filter
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -431,7 +431,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get no responses because of the filter
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[1],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -457,7 +457,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get no responses because of the filter
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[2],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[2],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -484,7 +484,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
         // we should get no responses because of the filter
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+            (QueryReply)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[1],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();

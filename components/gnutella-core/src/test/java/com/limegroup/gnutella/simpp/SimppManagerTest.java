@@ -12,6 +12,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -67,6 +68,8 @@ public class SimppManagerTest extends LimeTestCase {
 
     private LifecycleManager lifecycleManager;
     
+    private MessageFactory messageFactory;
+    
     public SimppManagerTest(String name) {
         super(name);
     }
@@ -87,6 +90,7 @@ public class SimppManagerTest extends LimeTestCase {
 		connectionServices = injector.getInstance(ConnectionServices.class);
 		simppManager = injector.getInstance(SimppManager.class);
 		lifecycleManager = injector.getInstance(LifecycleManager.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
         
 		setSettings();
 		
@@ -221,7 +225,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the TestConnection to have the old version, and expect to
         //not receive a simpprequest
-        TestConnection conn = new TestConnection(OLD, false, false);//!expect, !respond
+        TestConnection conn = new TestConnection(OLD, false, false, messageFactory);//!expect, !respond
         conn.start();
         
         //6s = 2s * 3 (timeout in TestConnection == 2s)
@@ -242,7 +246,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited newer SimppResponse
-        TestConnection conn = new TestConnection(NEW ,false, true, OLD);
+        TestConnection conn = new TestConnection(NEW ,false, true, OLD, messageFactory);
         conn.start();
         //6s = 2s * 3 (timeout in TestConnection == 2s)
         Thread.sleep(6000);//let messages be exchanged, 
@@ -260,7 +264,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited same SimppResponse
-        TestConnection conn = new TestConnection(MIDDLE,false, true);
+        TestConnection conn = new TestConnection(MIDDLE,false, true, messageFactory);
         conn.start();
         //6s = 2s * 3 (timeout in TestConnection == 2s)
         Thread.sleep(6000);//let messages be exchanged, 
@@ -278,7 +282,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited older SimppResponse
-        TestConnection conn = new TestConnection(MIDDLE,false, true, OLD);
+        TestConnection conn = new TestConnection(MIDDLE,false, true, OLD, messageFactory);
         conn.start();
         
         //6s = 2s * 3 (timeout in TestConnection == 2s)
@@ -298,7 +302,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire
-        TestConnection conn = new TestConnection(NEW, true, true);//expect, respond
+        TestConnection conn = new TestConnection(NEW, true, true, messageFactory);//expect, respond
         conn.start();
         
         Thread.sleep(6000);//let the message exchange take place
@@ -317,7 +321,7 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective signature
         //msg
-        TestConnection conn = new TestConnection(DEF_SIGNATURE, true, true, NEW);
+        TestConnection conn = new TestConnection(DEF_SIGNATURE, true, true, NEW, messageFactory);
         conn.start();
         
         Thread.sleep(6000);//let the message exchange take place
@@ -337,7 +341,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective message msg
-        TestConnection conn = new TestConnection(DEF_MESSAGE, true, true, NEW);
+        TestConnection conn = new TestConnection(DEF_MESSAGE, true, true, NEW, messageFactory);
         conn.start();
         
         Thread.sleep(6000);//let the message exchange take place
@@ -357,7 +361,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a bad_xml msg
-        TestConnection conn = new TestConnection(BAD_XML, true, true, NEW);
+        TestConnection conn = new TestConnection(BAD_XML, true, true, NEW, messageFactory);
         conn.start();
         Thread.sleep(6000);//let the message exchange take place
 
@@ -375,7 +379,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a garbage msg
-        TestConnection conn = new TestConnection(RANDOM_BYTES, true, true, NEW);
+        TestConnection conn = new TestConnection(RANDOM_BYTES, true, true, NEW, messageFactory);
         conn.start();
         Thread.sleep(6000);//let the message exchange take place
 
@@ -396,7 +400,7 @@ public class SimppManagerTest extends LimeTestCase {
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(NEW, true, true);
+        TestConnection conn = new TestConnection(NEW, true, true, messageFactory);
         conn.start();
 
         Thread.sleep(6000);//let the message exchange take place
@@ -415,7 +419,7 @@ public class SimppManagerTest extends LimeTestCase {
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(ABOVE_MAX, true, true, NEW);
+        TestConnection conn = new TestConnection(ABOVE_MAX, true, true, NEW, messageFactory);
         conn.start();
         Thread.sleep(6000);//let the message exchange take place
 
@@ -434,7 +438,7 @@ public class SimppManagerTest extends LimeTestCase {
                SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(BELOW_MIN, true, true, NEW);
+        TestConnection conn = new TestConnection(BELOW_MIN, true, true, NEW, messageFactory);
         conn.start();
         
         Thread.sleep(6000);//let the message exchange take place
@@ -453,7 +457,7 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire, but then close the connection while
         //uploading the simpp message
-        TestConnection conn = new TestConnection(NEW, true, true);
+        TestConnection conn = new TestConnection(NEW, true, true, messageFactory);
         conn.setCauseError(true);
         conn.start();
 

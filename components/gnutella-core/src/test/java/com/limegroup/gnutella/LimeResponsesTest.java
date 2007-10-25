@@ -62,7 +62,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
         testUP[0].send(qr);
         testUP[0].flush();
         Thread.sleep(1000);
-        QueryReply r = getFirstQueryReply(testUP[0]);
+        QueryReply r = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
         assertNotNull(r);
         QueryReply expected = staticMessages.getLimeReply();
         assertTrue(expected.getResultsAsList().containsAll(r.getResultsAsList()));
@@ -74,14 +74,14 @@ public class LimeResponsesTest extends ClientSideTestCase {
         testUP[0].send(qr);
         testUP[0].flush();
         Thread.sleep(1000);
-        r = getFirstQueryReply(testUP[0]);
+        r = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
         assertNull(r);
         
         qr = queryRequestFactory.createNonFirewalledQuery("mushroom", (byte)1);
         testUP[0].send(qr);
         testUP[0].flush();
         Thread.sleep(1000);
-        r = getFirstQueryReply(testUP[0]);
+        r = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
         assertNotNull(r);
         assertTrue(expected.getResultsAsList().containsAll(r.getResultsAsList()));
         assertTrue(r.getResultsAsList().containsAll(expected.getResultsAsList()));
@@ -92,14 +92,14 @@ public class LimeResponsesTest extends ClientSideTestCase {
         testUP[0].send(qr);
         testUP[0].flush();
         Thread.sleep(1000);
-        r = getFirstQueryReply(testUP[0]);
+        r = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
         assertNull(r);
     }
     
     public void testQRP() throws Exception {
         RoutedConnection c = connectionManager.getInitializedConnections().get(0);
         c.getRoutedConnectionStatistics().incrementNextQRPForwardTime(0);
-        PatchTableMessage ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 22000);
+        PatchTableMessage ptm = BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 22000);
         assertNotNull(ptm);
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.patch(ptm);
@@ -111,7 +111,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
         SearchSettings.LIME_QRP_ENTRIES.setValue(new String[]{"mushroom"});
         c.getRoutedConnectionStatistics().incrementNextQRPForwardTime(0);
         triggerSimppUpdate();
-        ptm = getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);
+        ptm = BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);
         assertNotNull(ptm);
         qrt.patch(ptm);
         

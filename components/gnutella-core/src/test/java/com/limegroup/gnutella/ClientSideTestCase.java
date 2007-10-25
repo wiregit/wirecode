@@ -272,7 +272,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     //////////////////////////////////////////////////////////////////
 
     protected void drainAll() throws Exception {
-        drainAll(testUP);
+        BlockingConnectionUtils.drainAll(testUP);
     }
 
     /** Marks the Responses of QueryReply as NOT spam */

@@ -135,7 +135,7 @@ public final class ServerSideIntermediateRedirectTest
         
         redirUP.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP.isOpen());
-        drain(redirUP);
+        BlockingConnectionUtils.drain(redirUP);
 
         Message msvm = messagesSupportedVendorMessage;
         redirUP.send(msvm);
@@ -151,7 +151,7 @@ public final class ServerSideIntermediateRedirectTest
             LEAF[0].flush();
 
             TCPConnectBackRedirect tcpR = (TCPConnectBackRedirect)
-                getFirstInstanceOfMessageType(redirUP, 
+                BlockingConnectionUtils.getFirstInstanceOfMessageType(redirUP, 
                                               TCPConnectBackRedirect.class,
                                               TIMEOUT);
             assertNotNull(tcpR);
@@ -168,7 +168,7 @@ public final class ServerSideIntermediateRedirectTest
             LEAF[0].flush();
 
             UDPConnectBackRedirect udpR = (UDPConnectBackRedirect)
-                getFirstInstanceOfMessageType(redirUP, 
+                BlockingConnectionUtils.getFirstInstanceOfMessageType(redirUP, 
                                               UDPConnectBackRedirect.class, 
                                               TIMEOUT);
             assertNotNull(udpR);
@@ -186,7 +186,7 @@ public final class ServerSideIntermediateRedirectTest
         BlockingConnection redirUP1 = blockingConnectionFactory.createConnection("localhost", PORT);
         redirUP1.initialize(headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP1.isOpen());
-        drain(redirUP1);
+        BlockingConnectionUtils.drain(redirUP1);
 
         Message msvm = messagesSupportedVendorMessage;
         redirUP1.send(msvm);
@@ -195,7 +195,7 @@ public final class ServerSideIntermediateRedirectTest
         BlockingConnection redirUP2 = blockingConnectionFactory.createConnection("localhost", PORT);
         redirUP2.initialize( headersFactory.createUltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue(redirUP2.isOpen());
-        drain(redirUP2);
+        BlockingConnectionUtils.drain(redirUP2);
 
         msvm = messagesSupportedVendorMessage;
         redirUP2.send(msvm);
@@ -212,12 +212,12 @@ public final class ServerSideIntermediateRedirectTest
             LEAF[0].flush();
 
             TCPConnectBackRedirect tcpR = (TCPConnectBackRedirect)
-                getFirstInstanceOfMessageType(redirUP1, 
+                BlockingConnectionUtils.getFirstInstanceOfMessageType(redirUP1, 
                                               TCPConnectBackRedirect.class,
                                               TIMEOUT);
             if (tcpR == null)
                 tcpR = (TCPConnectBackRedirect)
-                    getFirstInstanceOfMessageType(redirUP2, 
+                    BlockingConnectionUtils.getFirstInstanceOfMessageType(redirUP2, 
                                                   TCPConnectBackRedirect.class,
                                                   TIMEOUT);
             assertNotNull(tcpR);
@@ -234,12 +234,12 @@ public final class ServerSideIntermediateRedirectTest
             LEAF[0].flush();
 
             UDPConnectBackRedirect udpR = (UDPConnectBackRedirect)
-                getFirstInstanceOfMessageType(redirUP1, 
+                BlockingConnectionUtils.getFirstInstanceOfMessageType(redirUP1, 
                                               UDPConnectBackRedirect.class, 
                                               TIMEOUT);
             if (udpR == null)
                 udpR = (UDPConnectBackRedirect)
-                    getFirstInstanceOfMessageType(redirUP2, 
+                    BlockingConnectionUtils.getFirstInstanceOfMessageType(redirUP2, 
                                                   UDPConnectBackRedirect.class,
                                                   TIMEOUT);
             assertNotNull(udpR);

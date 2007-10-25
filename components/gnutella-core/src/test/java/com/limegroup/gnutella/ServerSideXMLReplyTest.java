@@ -107,7 +107,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         Thread.sleep(750);
 
         // confirm that result has heXML.
-        QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+        QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
         assertNotNull(reply);
         assertNotNull(reply.getXMLBytes());
         assertTrue("xml length = " + reply.getXMLBytes().length,
@@ -129,7 +129,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 
 
         // confirm that result has heXML.
-        QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+        QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
         assertNotNull(reply);
         assertNotNull(reply.getXMLBytes());
         assertTrue("xml length = " + reply.getXMLBytes().length,
@@ -152,7 +152,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we don't get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNull(reply);
         }        
 
@@ -171,7 +171,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we do get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNotNull(reply);
             assertNotNull(reply.getXMLBytes());
             assertTrue("xml length = " + reply.getXMLBytes().length,
@@ -194,7 +194,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we don't get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNull(reply);
         }        
 
@@ -214,7 +214,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we don't get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNull(reply);
         }        
 
@@ -234,7 +234,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we do get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNotNull(reply);
             assertNotNull(reply.getXMLBytes());
             assertTrue("xml length = " + reply.getXMLBytes().length,
@@ -257,7 +257,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we do get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNotNull(reply);
             assertNotNull(reply.getXMLBytes());
             assertTrue("xml length = " + reply.getXMLBytes().length,
@@ -280,7 +280,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we don't get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNull(reply);
         }        
 
@@ -300,7 +300,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             Thread.sleep(750);
 
             // confirm that we don't get a result
-            QueryReply reply = getFirstQueryReply(ULTRAPEER[0]);
+            QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(ULTRAPEER[0]);
             assertNull(reply);
         }        
 

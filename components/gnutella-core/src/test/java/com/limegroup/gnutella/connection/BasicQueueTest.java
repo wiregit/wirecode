@@ -2,14 +2,19 @@ package com.limegroup.gnutella.connection;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ProviderHacks;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -22,6 +27,11 @@ public class BasicQueueTest extends LimeTestCase {
     private BasicQueue QUEUE = new BasicQueue();
 	
     private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
+    
+    private QueryReplyFactory queryReplyFactory;
+    private QueryRequestFactory queryRequestFactory;
+    private PingReplyFactory pingReplyFactory;
+    private PingRequestFactory pingRequestFactory;
 
 	public BasicQueueTest(String name) {
 		super(name);
@@ -33,6 +43,15 @@ public class BasicQueueTest extends LimeTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+        Injector injector = LimeTestUtils.createInjector();
+        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        pingRequestFactory = injector.getInstance(PingRequestFactory.class);
     }
         
     // test buffer doesn't get re-ordered.
@@ -113,15 +132,15 @@ public class BasicQueueTest extends LimeTestCase {
     }
     
     private QueryRequest q(String query) {
-        return ProviderHacks.getQueryRequestFactory().createQuery(query, (byte)5);
+        return queryRequestFactory.createQuery(query, (byte)5);
     }
     
     private PingReply g(int port) {
-        return ProviderHacks.getPingReplyFactory().create(new byte[16], (byte)5, port, IP);
+        return pingReplyFactory.create(new byte[16], (byte)5, port, IP);
     }
     
     private PingRequest p(int ttl) {
-        return ProviderHacks.getPingRequestFactory().createPingRequest((byte)ttl);
+        return pingRequestFactory.createPingRequest((byte)ttl);
     }
     
     private PushRequest s(int port) {
@@ -129,7 +148,7 @@ public class BasicQueueTest extends LimeTestCase {
     }
     
     private QueryReply r(int port) {
-        return ProviderHacks.getQueryReplyFactory().createQueryReply(new byte[16], (byte)5,
+        return queryReplyFactory.createQueryReply(new byte[16], (byte)5,
                 port, IP, 0, new Response[0], new byte[16], false);
     }
     

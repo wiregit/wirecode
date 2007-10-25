@@ -378,7 +378,7 @@ public class LeafRoutingTest extends LimeTestCase {
 
 
     public void testLeafAnswersQueries() throws Exception {
-        drain(ultrapeer2);
+        BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
         assertTrue(fileManager.getNumFiles() == 2);
@@ -414,7 +414,7 @@ public class LeafRoutingTest extends LimeTestCase {
     }
     
     private void URNtest() throws Exception {
-        drain(ultrapeer2);
+        BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
         assertEquals(2, fileManager.getNumFiles());

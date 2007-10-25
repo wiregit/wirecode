@@ -153,7 +153,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
     
     private QueryRequest assertQuery(BlockingConnection c, QueryRequest query, boolean doNotProxy,
             boolean desiresOOB) throws BadPacketException {
-        QueryRequest qr = getFirstInstanceOfMessageType(c, QueryRequest.class);
+        QueryRequest qr = BlockingConnectionUtils.getFirstInstanceOfMessageType(c, QueryRequest.class);
         assertNotNull(qr);
         assertEquals(query.getGUID(), qr.getGUID());
         assertEquals(doNotProxy, qr.doNotProxy());

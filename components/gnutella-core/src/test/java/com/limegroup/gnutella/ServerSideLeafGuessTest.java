@@ -89,7 +89,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         UDP_ACCESS.setSoTimeout(1000 * 20);
 
         for (int i = 0; i < testUP.length; i++) {
-            drain(testUP[i]);
+            BlockingConnectionUtils.drain(testUP[i]);
             // OOB client side needs server side leaf guidance
             testUP[i].send(messagesSupportedVendorMessage);
             testUP[i].flush();

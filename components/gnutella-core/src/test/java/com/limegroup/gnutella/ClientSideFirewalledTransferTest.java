@@ -172,7 +172,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     ///////////////////////// Actual Tests ////////////////////////////
     
     public void testStartsUDPTransfer() throws Exception {
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         drainUDP();
 
         // make sure leaf is sharing
@@ -254,7 +254,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
 
     public void testHTTPRequest() throws Exception {
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         drainUDP();
         // some setup
         byte[] clientGUID = GUID.makeGuid();

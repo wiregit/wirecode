@@ -18,6 +18,7 @@ import org.limewire.mojito.settings.NetworkSettings;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
@@ -192,7 +193,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         try {
             assertTrue(out.isOpen());
             assertTrue(out.isOutgoing());
-            drain(out);
+            BlockingConnectionUtils.drain(out);
             
             // There should be one connection now
             assertEquals(1, connectionManager.getNumConnections());
@@ -279,7 +280,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         try {
             assertTrue(out.isOpen());
             assertTrue(out.isOutgoing());
-            drain(out);
+            BlockingConnectionUtils.drain(out);
             
             // There should be one connection now
             assertEquals(1, connectionManager.getNumConnections());
@@ -338,7 +339,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         try {
             assertTrue(out.isOpen());
             assertTrue(out.isOutgoing());
-            drain(out);
+            BlockingConnectionUtils.drain(out);
             
             // There should be one connection now
             assertEquals(1, connectionManager.getNumConnections());

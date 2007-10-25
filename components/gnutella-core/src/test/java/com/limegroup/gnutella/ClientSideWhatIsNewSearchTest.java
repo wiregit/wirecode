@@ -117,7 +117,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
     }
 
     private QueryRequest assertQuery(BlockingConnection c, GUID guid) throws BadPacketException {
-        QueryRequest qr = getFirstInstanceOfMessageType(c, QueryRequest.class);
+        QueryRequest qr = BlockingConnectionUtils.getFirstInstanceOfMessageType(c, QueryRequest.class);
         assertNotNull(qr);
         assertEquals(guid.bytes(), qr.getGUID());
         return qr;

@@ -107,7 +107,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         assertTrue("should be open", testUP[0].isOpen());
         assertTrue("should be up -> leaf",
                 testUP[0].getConnectionCapabilities().isSupernodeClientConnection());
-        drain(testUP[0], 500);
+        BlockingConnectionUtils.drain(testUP[0], 500);
     }
 
     
@@ -145,11 +145,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	uploadManagerStub.isServiceable = true;
     	uploadManagerStub.mayBeServiceable = true;
     	QueryRequest query = queryRequestFactory.createQuery(SOME_FILE);
-    	drain(testUP[0]);
+    	BlockingConnectionUtils.drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
-    	QueryReply reply = getFirstQueryReply(testUP[0]);
+    	QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
     	List<Response> responses = reply.getResultsAsList();
     	assertEquals(someFileMatches.size(), responses.size());
     	for(Response r: responses)
@@ -162,11 +162,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testNothingSent() throws Exception {
     	uploadManagerStub.mayBeServiceable = false;
     	QueryRequest query = queryRequestFactory.createQuery(SOME_FILE);
-    	drain(testUP[0]);
+    	BlockingConnectionUtils.drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
-    	assertNull(getFirstQueryReply(testUP[0]));
+    	assertNull(BlockingConnectionUtils.getFirstQueryReply(testUP[0]));
     }
     
     /**
@@ -177,11 +177,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	uploadManagerStub.mayBeServiceable = true;
     	uploadManagerStub.isServiceable = false;
     	QueryRequest query = queryRequestFactory.createQuery(TEXT_FILE);
-    	drain(testUP[0]);
+    	BlockingConnectionUtils.drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
-    	assertNull(getFirstQueryReply(testUP[0]));
+    	assertNull(BlockingConnectionUtils.getFirstQueryReply(testUP[0]));
     }
     
     /**
@@ -192,11 +192,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	uploadManagerStub.mayBeServiceable = true;
     	uploadManagerStub.isServiceable = false;
     	QueryRequest query = queryRequestFactory.createQuery(OTHER_TORRENT);
-    	drain(testUP[0]);
+    	BlockingConnectionUtils.drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
-    	QueryReply reply = getFirstQueryReply(testUP[0]);
+    	QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
     	List<Response> responses = reply.getResultsAsList();
     	assertEquals(1, responses.size());
     	assertEquals(OTHER_TORRENT, responses.get(0).getName());
@@ -210,11 +210,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	uploadManagerStub.isServiceable = false;
     	uploadManagerStub.mayBeServiceable = true;
     	QueryRequest query = queryRequestFactory.createQuery(SOME_FILE);
-    	drain(testUP[0]);
+    	BlockingConnectionUtils.drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
-    	QueryReply reply = getFirstQueryReply(testUP[0]);
+    	QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
     	List<Response> responses = reply.getResultsAsList();
     	assertEquals(1, responses.size());
     	assertEquals(TORRENT_FILE, responses.get(0).getName());

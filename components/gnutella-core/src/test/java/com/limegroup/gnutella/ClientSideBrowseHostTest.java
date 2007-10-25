@@ -87,7 +87,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
     public void testHTTPRequest() throws Exception {
         
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
 
@@ -152,7 +152,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         // wait for connections to process any messages
         Thread.sleep(6000);
         
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
 
@@ -264,7 +264,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
 
     public void testSendsPushRequest() throws Exception {
-        drain(testUP[0]);
+        BlockingConnectionUtils.drain(testUP[0]);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
 

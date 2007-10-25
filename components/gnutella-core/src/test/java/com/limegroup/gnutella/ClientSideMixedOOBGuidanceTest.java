@@ -85,7 +85,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
     private QueryStatusResponse getFirstQueryStatus(BlockingConnection c) 
                                        throws IOException, BadPacketException {
         return (QueryStatusResponse)
-            getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }
 
     // TODO move setup stuff out to setUp method
@@ -95,7 +95,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("not open", testUP[i].isOpen());
             assertTrue("not up->leaf", testUP[i].getConnectionCapabilities().isSupernodeClientConnection());
-            drain(testUP[i], 500);
+            BlockingConnectionUtils.drain(testUP[i], 500);
             if ((i==2)) { // i'll send 0 later....
                 testUP[i].send(messagesSupportedVendorMessage);
                 testUP[i].flush();
@@ -150,7 +150,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
         // some connected UPs should get a OOB query
         for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUP[i], TIMEOUT);
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i], TIMEOUT);
             assertNotNull("up " + i + " didn't get query", qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
             if ((i==0) || (i==2))
