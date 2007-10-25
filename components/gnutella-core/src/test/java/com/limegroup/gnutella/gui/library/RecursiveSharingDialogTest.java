@@ -7,8 +7,10 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
+import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
+import com.limegroup.gnutella.gui.GuiCoreMediator;
 import com.limegroup.gnutella.gui.library.RecursiveSharingDialog.State;
 
 public class RecursiveSharingDialogTest extends GUIBaseTestCase {
@@ -20,6 +22,17 @@ public class RecursiveSharingDialogTest extends GUIBaseTestCase {
 	public static Test suite() {
         return buildTestSuite(RecursiveSharingDialogTest.class);
     }
+	
+	@Override
+	protected void setUp() throws Exception {
+	    super.setUp();
+	    LimeTestUtils.createInjector(new AbstractModule() { 
+	        @Override
+	        protected void configure() {
+	            requestStaticInjection(GuiCoreMediator.class);
+	        }
+	    });
+	}
 	
 	public void testShowRecursiveDialogWithEmptyDirs() {
 		File[] dirs = LimeTestUtils.createTmpDirs("emptydir");
