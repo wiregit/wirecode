@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-import org.limewire.rudp.RUDPContext;
-
 import com.google.inject.Guice;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;

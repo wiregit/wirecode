@@ -65,7 +65,7 @@ public class SimppManager {
     private Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     
     @Inject
-    private SimppManager(Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker) {
+    SimppManager(Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker) {
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         boolean problem = false;

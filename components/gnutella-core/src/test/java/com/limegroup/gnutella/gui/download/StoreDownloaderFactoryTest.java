@@ -42,6 +42,7 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
         }catch(NullPointerException e){};
     }
     
+    @SuppressWarnings("deprecation")
     public void testStoreDownloaderFactorySetup() throws Exception{
         
         File file = createNewNamedTestFile(5, "test", _baseDir);
