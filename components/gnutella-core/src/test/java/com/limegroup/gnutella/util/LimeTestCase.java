@@ -158,7 +158,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Called statically before any settings.
      */
-    protected static void beforeAllTestsSetUp() throws Throwable {        
+    public static void beforeAllTestsSetUp() throws Throwable {        
         setupUniqueDirectories();
         setupSettings();
         // SystemUtils must pretend to not be loaded, so the idle
@@ -182,7 +182,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     /**
      * Runs after all tests are completed.
      */
-    protected static void afterAllTestsTearDown() throws Throwable {
+    public static void afterAllTestsTearDown() throws Throwable {
         cleanFiles(_baseDir, true);
         shutdownBackends();
     }

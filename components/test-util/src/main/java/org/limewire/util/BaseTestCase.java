@@ -224,7 +224,7 @@ public abstract class BaseTestCase extends AssertComparisons {
     }
     
     /** After all tearDown/postTearDown/globalTearDown teardowns. */
-    protected static void afterAllTestsTearDown() throws Throwable {
+    public static void afterAllTestsTearDown() throws Throwable {
         System.gc();
     }
     
