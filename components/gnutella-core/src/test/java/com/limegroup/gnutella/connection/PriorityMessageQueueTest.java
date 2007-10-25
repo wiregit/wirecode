@@ -2,16 +2,13 @@ package com.limegroup.gnutella.connection;
 
 import junit.framework.Test;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.Response;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -19,14 +16,12 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class PriorityMessageQueueTest extends LimeTestCase {
     
+    private Mockery context;
+        
     /**
      * A non-blank IP.
      */
     private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
-    
-    private QueryReplyFactory queryReplyFactory;
-    private QueryRequestFactory queryRequestFactory;
-    private PingReplyFactory pingReplyFactory;
     
 	public PriorityMessageQueueTest(String name) {
 		super(name);
@@ -42,39 +37,63 @@ public class PriorityMessageQueueTest extends LimeTestCase {
 
    @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-        queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
-        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+        context = new Mockery();
     }
             
 
+    private QueryReply createQueryReply(final int port, final int priority) {
+       final QueryReply m1 = context.mock(QueryReply.class);
+       context.checking(new Expectations() {{
+           allowing(m1).getTTL(); will(returnValue((byte)5));
+           atLeast(1).of(m1).getPort(); will(returnValue(port));
+           allowing(m1).getIPBytes(); will(returnValue(IP));
+           atLeast(1).of(m1).getPriority(); will(returnValue(priority));
+       }});
+       
+       return m1;
+    }
+    
+    private QueryRequest createQueryRequest(final String query, final byte ttl, final byte hops) {
+        final QueryRequest m1 = context.mock(QueryRequest.class);
+        context.checking(new Expectations() {{
+            allowing(m1).getTTL(); will(returnValue(ttl));
+            atLeast(1).of(m1).getHops(); will(returnValue(hops));
+            allowing(m1).getQuery(); will(returnValue(query));
+        }});
+        
+        return m1;
+    }
+    
+    private PingReply createPingReply(final int port, final byte ttl, final byte hops) {
+        final PingReply m1 = context.mock(PingReply.class);
+        context.checking(new Expectations() {{
+            allowing(m1).getTTL(); will(returnValue(ttl));
+            atLeast(1).of(m1).getHops(); will(returnValue(hops));
+            allowing(m1).getPort(); will(returnValue(port));
+        }});
+        
+        return m1;
+    }
+    
+   
     public void testLegacy() {
-        Message m=null;
 
         //By guid volume
         PriorityMessageQueue q=new PriorityMessageQueue(
             1000, Integer.MAX_VALUE, 100);
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6341,
-                IP, 0, new Response[0], new byte[16], false, false, false, false,
-                false, false);
-        m.setPriority(1000);
-        q.add(m);
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6331,
-                IP, 0, new Response[0], new byte[16], false, false, false, false,
-                false, false);
-        m.setPriority(1000);
-        q.add(m);
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6349,
-                IP, 0, new Response[0], new byte[16], false, false, false, false,
-                false, false);
-        m.setPriority(9000);
-        q.add(m);
-        m=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6340,
-                IP, 0, new Response[0], new byte[16], false, false, false, false,
-                false, false);
-        m.setPriority(0);
-        q.add(m);
+        
+        
+        q.add(createQueryReply(6341,1000));
+        
+        
+        q.add(createQueryReply(6331,1000));
+
+        q.add(createQueryReply(6349,9000));
+        
+        q.add(createQueryReply(6340,0));
+        
+        Message m=null;
+        
         m=q.removeNextInternal();
         assertEquals(6340, ((QueryReply)m).getPort());
         m=q.removeNextInternal();
@@ -88,20 +107,17 @@ public class PriorityMessageQueueTest extends LimeTestCase {
 
         //By hops
         q=new PriorityMessageQueue(1000, Integer.MAX_VALUE, 100);
-        QueryRequest query = queryRequestFactory.createQuery("low hops", (byte)5);
-        q.add(query);
-        query=queryRequestFactory.createQuery("high hops",(byte)5);
-        for (int i=0; i<8; i++)
-            query.hop(); 
-        q.add(query);
-        query=queryRequestFactory.createQuery("medium hops", (byte)5);
-        query.hop();
-        q.add(query);
-        query=queryRequestFactory.createQuery("medium hops2", (byte)5);
-        query.hop();
-        q.add(query);
+        
+        q.add(createQueryRequest("low hops", (byte)5, (byte)0));
+        
+        q.add(createQueryRequest("high hops", (byte)0, (byte)8));
+        
+        q.add(createQueryRequest("medium hops", (byte)4, (byte)1));
+        
+        q.add(createQueryRequest("medium hops2", (byte)4, (byte)1));
+        
 
-        query=(QueryRequest)q.removeNextInternal();
+        QueryRequest query=(QueryRequest)q.removeNextInternal();
         assertEquals("low hops", query.getQuery());
         query=(QueryRequest)q.removeNextInternal();
         assertEquals("medium hops2", query.getQuery());
@@ -114,17 +130,13 @@ public class PriorityMessageQueueTest extends LimeTestCase {
 
         //By negative hops
         q=new PriorityMessageQueue(1000, Integer.MAX_VALUE, 100);
-        PingReply pong=pingReplyFactory.create(
-            new byte[16], (byte)5, 6340, IP, 0, 0);
+        PingReply pong = createPingReply(6340, (byte)5, (byte)0);
         q.add(pong);
-        pong=pingReplyFactory.create(new byte[16], (byte)5, 6330, IP, 0, 0);
+        pong = createPingReply(6330, (byte)5, (byte)0);
         q.add(pong);
-        pong=pingReplyFactory.create(new byte[16], (byte)5, 6342, IP, 0, 0);
-        pong.hop();
-        pong.hop();
+        pong = createPingReply(6342, (byte)3, (byte)2);
         q.add(pong);
-        pong=pingReplyFactory.create(new byte[16], (byte)5, 6341, IP, 0, 0);
-        pong.hop();
+        pong = createPingReply(6341, (byte)4, (byte)1);
         q.add(pong);
         pong=(PingReply)q.removeNextInternal();
         assertEquals(6342, pong.getPort());
@@ -135,6 +147,8 @@ public class PriorityMessageQueueTest extends LimeTestCase {
         pong=(PingReply)q.removeNextInternal();
         assertEquals(6340, pong.getPort());
         assertNull(q.removeNextInternal());
+        
+        context.assertIsSatisfied();
     }
     
 }
