@@ -68,7 +68,7 @@ public class ProxyTest extends BaseTestCase {
     public void tearDown() throws Exception {
         fps.killServers();
         
-        // LimeTestUtils.waitForNIO();
+        LimeTestUtils.waitForNIO();
     }
 
     /**
