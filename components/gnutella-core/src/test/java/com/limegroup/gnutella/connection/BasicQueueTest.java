@@ -118,6 +118,8 @@ public class BasicQueueTest extends LimeTestCase {
         assertEquals(2, ((PatchTableMessage)m).getSequenceNumber());
         
         assertNull(QUEUE.removeNext());
+        
+        context.assertIsSatisfied();
     }
     
     private QueryRequest q(final String query) {
@@ -125,7 +127,7 @@ public class BasicQueueTest extends LimeTestCase {
        
         context.checking(new Expectations() {{
             allowing(qr).getTTL(); will(returnValue((byte)5));
-            allowing(qr).getQuery(); will(returnValue(query));
+            atLeast(1).of(qr).getQuery(); will(returnValue(query));
         }});
         
         return qr;
@@ -136,7 +138,7 @@ public class BasicQueueTest extends LimeTestCase {
         
         context.checking(new Expectations() {{
             allowing(pr).getTTL(); will(returnValue((byte)5));
-            allowing(pr).getPort(); will(returnValue(port));
+            atLeast(1).of(pr).getPort(); will(returnValue(port));
             allowing(pr).getIPBytes(); will(returnValue(IP));
         }});
         
@@ -147,7 +149,7 @@ public class BasicQueueTest extends LimeTestCase {
         final PingRequest pr = context.mock(PingRequest.class);
         
         context.checking(new Expectations() {{
-            allowing(pr).getTTL(); will(returnValue((byte)ttl));
+            atLeast(1).of(pr).getTTL(); will(returnValue((byte)ttl));
         }});
         
         return pr;
@@ -162,7 +164,7 @@ public class BasicQueueTest extends LimeTestCase {
         
         context.checking(new Expectations() {{
             allowing(qr).getTTL(); will(returnValue((byte)5));
-            allowing(qr).getPort(); will(returnValue(port));
+            atLeast(1).of(qr).getPort(); will(returnValue(port));
             allowing(qr).getIPBytes(); will(returnValue(IP));
             allowing(qr).getSpeed(); will(returnValue((long)0));
         }});
