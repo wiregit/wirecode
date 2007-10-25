@@ -26,7 +26,7 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.connection.BlockingConnection;
-import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -405,7 +405,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     /** Builds a single connection with the given headers. */
     protected BlockingConnection createConnection(Properties headers) throws Exception {
-        BlockingConnection c = (BlockingConnection)injector.getInstance(RoutedConnectionFactory.class).createRoutedConnection("localhost", PORT);
+        BlockingConnection c = injector.getInstance(BlockingConnectionFactory.class).createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         return c;
     }
