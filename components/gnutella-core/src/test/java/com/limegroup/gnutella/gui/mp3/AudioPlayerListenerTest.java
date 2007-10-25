@@ -10,7 +10,7 @@ import org.limewire.util.BaseTestCase;
 
 public class AudioPlayerListenerTest extends BaseTestCase {
 
-    static LimewirePlayer player;
+    static LimeWirePlayer player;
     static testAudioPlayerListener listener;
     
     public AudioPlayerListenerTest(String name) {
@@ -22,7 +22,7 @@ public class AudioPlayerListenerTest extends BaseTestCase {
     }
     
     public void setUp() {
-        player = new LimewirePlayer();
+        player = new LimeWirePlayer();
         listener = new testAudioPlayerListener();
         player.addAudioPlayerListener(listener);
     }
