@@ -22,6 +22,7 @@ import org.limewire.io.IPPortCombo;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
@@ -39,6 +40,8 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.connection.CountingConnection;
 import com.limegroup.gnutella.connection.CountingConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -158,7 +161,12 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         setSettings();
         assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
         
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(DHTManager.class).toInstance(new DHTManagerStub());
+            }
+        });
         networkManager = injector.getInstance(NetworkManager.class);
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
@@ -465,13 +473,13 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  	 * udp crawling themselves.
  	 */
  	public void testNewOnly() throws Exception {
- 		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
- 		
+ 	    long savedMinute = Constants.MINUTE;
+ 	    try {
+ 	        Constants.MINUTE = 1;
 
  		//make sure some of our connections support crawling.
  		
- 		MessagesSupportedVendorMessage msvm = (MessagesSupportedVendorMessage)
-			PrivilegedAccessor.invokeConstructor(MessagesSupportedVendorMessage.class, new Object[0]);
+ 		MessagesSupportedVendorMessage msvm = new MessagesSupportedVendorMessage();
  		
  		assertGreaterThan(0,msvm.supportsUDPCrawling());
  		
@@ -483,7 +491,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		assertLessThanOrEquals(1,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		assertLessThanOrEquals(1,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		
- 		PrivilegedAccessor.setValue(supporting,"supportedVendorMessage",msvm);
+ 		supporting.getConnectionCapabilities().setMessagesSupportedVendorMessage(msvm);
  		
  		assertLessThanOrEquals(1,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		assertGreaterThanOrEquals(1,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
@@ -500,7 +508,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		//now, make one other UP support that message as well
  		
- 		PrivilegedAccessor.setValue(notSupporting,"supportedVendorMessage",msvm);
+ 		notSupporting.getConnectionCapabilities().setMessagesSupportedVendorMessage(msvm);
  		
  		assertGreaterThan(0,notSupporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
  		assertGreaterThan(0,supporting.getConnectionCapabilities().remoteHostSupportsUDPCrawling());
@@ -508,6 +516,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		pong = crawlerPongFactory.createUDPCrawlerPong(msgNewOnly);
  		
  		assertEquals(2,pong.getPayload()[0]);
+ 	    } finally {
+ 	        Constants.MINUTE = savedMinute;
+ 	    }
  	}
  	
  	public void testMsgAgents() throws Exception {
@@ -618,10 +629,6 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     }
     
     public void testMsgDHTStatus() throws Exception {
-    //    AbstractLazySingletonProvider ref = (AbstractLazySingletonProvider)PrivilegedAccessor.getValue(
-    //            ROUTER_SERVICE, "DHT_MANAGER_REFERENCE");
-     //   PrivilegedAccessor.setValue(ref, "obj", new DHTManagerStub());
-        
         UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte) (0x1 << 6));
         UDPCrawlerPong pong = crawlerPongFactory.createUDPCrawlerPong(msgDHTStatus);
         byte[] payload = pong.getPayload();

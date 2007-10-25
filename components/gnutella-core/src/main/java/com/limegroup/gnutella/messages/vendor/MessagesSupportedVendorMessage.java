@@ -52,10 +52,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
 
     /**
-     * Private constructor for creating the sole MSVM message of all our
+     * Constructor for creating the sole MSVM message of all our
      * supported messages.
      */
-    MessagesSupportedVendorMessage() {
+    public MessagesSupportedVendorMessage() {
         super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePayload(addSupportedMessages(new HashSet<SupportedMessageBlock>())));
         addSupportedMessages(_messagesSupported);
     }
