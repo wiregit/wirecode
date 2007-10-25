@@ -87,7 +87,7 @@ public class LimeCoreGlueTest extends BaseTestCase {
             Class next = it.next();
             String name = next.getName();
             // remove artificial class name postfix added by Clover 
-            int i = name.indexOf("$__CLOVER_");
+            int i = name.indexOf("$__CLR2_");
             if (i != -1) {
                 name = name.substring(0, i);
             }
