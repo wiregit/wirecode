@@ -21,6 +21,7 @@ public class NetworkManagerStub implements NetworkManager {
     private boolean canDoFWT;
     private GUID udpConnectBackGUI = new GUID();
     private boolean oobCapable;
+    private int stableUDPPort = 7777;
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -126,7 +127,11 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public int getStableUDPPort() {
-        return 0;
+        return stableUDPPort;
+    }
+    
+    public void setStableUDPPort(int port) {
+        stableUDPPort = port;
     }
 
     /**

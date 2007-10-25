@@ -100,7 +100,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
                 uploader, fd);
         Header header = response.getFirstHeader(HTTPHeaderName.FWTPORT.httpStringValue());
         assertNotNull("expected header: " + HTTPHeaderName.FWTPORT.httpStringValue(), header);
-        assertEquals(header.getValue(), networkManager.getPort() + "");
+        assertEquals(networkManager.getStableUDPPort() + "", header.getValue());
     }
 
     public void testFeatureHeaderInterceptor() throws Exception {
