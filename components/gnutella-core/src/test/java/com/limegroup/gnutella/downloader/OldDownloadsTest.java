@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -81,6 +82,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
     /**
      * Records lists of downloads
      */
+    @Singleton
     static class TestActivityCallback extends ActivityCallbackStub {
         List /* of Downloader */ downloaders=new LinkedList();
     
