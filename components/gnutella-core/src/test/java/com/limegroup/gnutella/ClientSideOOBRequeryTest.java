@@ -14,6 +14,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -55,7 +56,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
-@SuppressWarnings( { "unchecked", "cast" } )
 public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
     private static final int UPLOADER_PORT = 10000;
@@ -193,7 +193,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -258,7 +258,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -273,10 +273,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         Response resp = null;
         QueryReply reply = null;
-        reply = (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+        reply = BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                            QueryReply.class);
         assertNotNull(reply);
-        resp = (Response) (reply.getResultsAsList()).get(0);
+        resp = (reply.getResultsAsList()).get(0);
         assertNotNull(resp);
         Response[] res = new Response[] { resp };
 
@@ -379,7 +379,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -393,10 +393,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             testUP[0].send(qrTemp);
             testUP[0].flush();
 
-            reply = (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            reply = BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                                QueryReply.class);
             assertNotNull(reply);
-            resp = (Response) (reply.getResultsAsList()).get(0);
+            resp = (reply.getResultsAsList()).get(0);
 
         }
         assertNotNull(reply);
@@ -505,7 +505,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -519,10 +519,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             testUP[0].send(qrTemp);
             testUP[0].flush();
 
-            reply = (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            reply = BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                                QueryReply.class);
             assertNotNull(reply);
-            resp = (Response) (reply.getResultsAsList()).get(0);
+            resp = (reply.getResultsAsList()).get(0);
 
         }
         assertNotNull(reply);
@@ -634,7 +634,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -751,7 +751,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -867,7 +867,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 InputStream in = new ByteArrayInputStream(pack.getData());
                 m = messageFactory.read(in);
                 if (m instanceof QueryRequest) {
-                    QueryRequest qReq = (QueryRequest) m;
+                    QueryRequest qReq = (QueryRequest)m;
                     Set queryURNs = qReq.getQueryUrns();
                     gotQuery = queryURNs.contains(urn);
                     if (gotQuery) {
@@ -937,7 +937,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -1026,7 +1026,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     InputStream in = new ByteArrayInputStream(pack.getData());
                     m = messageFactory.read(in);
                     if (m instanceof QueryRequest) {
-                        QueryRequest qReq = (QueryRequest) m;
+                        QueryRequest qReq = (QueryRequest)m;
                         Set queryURNs = qReq.getQueryUrns();
                         gotQuery = queryURNs.contains(urn);
                         if (gotQuery)
@@ -1075,7 +1075,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -1204,7 +1204,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
-            (QueryRequest) BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0],
                                                          QueryRequest.class);
         assertNotNull(qr);
         assertTrue(qr.desiresOutOfBandReplies());
@@ -1370,13 +1370,13 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
     
     private RemoteFileDesc makeRFD(URN urn, int port) throws Exception {
-        Set urns = new HashSet();
+        Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         return new RemoteFileDesc("127.0.0.1", port, 1, 
                                   "whatever", 10, GUID.makeGuid(),
                                   1, false, 3, false, null, 
                                   urns, false, false, 
-                                  "LIME", new HashSet(), -1, false);
+                                  "LIME", IpPort.EMPTY_SET, -1, false);
     }
     
     private RemoteFileDesc makeRFD(String sha1) throws Exception {
