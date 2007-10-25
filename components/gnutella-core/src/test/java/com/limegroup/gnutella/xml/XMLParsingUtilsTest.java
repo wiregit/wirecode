@@ -9,17 +9,17 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
-import org.limewire.util.BaseTestCase;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests for the XMLParsingUtils class
  */
 @SuppressWarnings("unchecked")
-public class XMLParsingUtilsTest extends BaseTestCase {
+public class XMLParsingUtilsTest extends LimeTestCase {
     
     private static final String AUDIO_SCHEMA = "http://www.limewire.com/schemas/audio.xsd";
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
