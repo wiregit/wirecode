@@ -194,10 +194,10 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("LOGGING_VIEW_ENABLED", false);
     
     /**
-     * Sets whether or not Library Tab should be enabled.
+     * Sets whether or not SWT Browser Tab should be enabled.
      */
-    public static final BooleanSetting LWS_VIEW_ENABLED =
-        FACTORY.createBooleanSetting("LWS_VIEW_ENABLED", true);    
+    public static final BooleanSetting SWT_BROWSER_VIEW_ENABLED =
+        FACTORY.createBooleanSetting("SWT_BROWSER_VIEW_ENABLED", true);    
     
     /**
 	 * Sets the name of the jar file to load on startup, which is read
