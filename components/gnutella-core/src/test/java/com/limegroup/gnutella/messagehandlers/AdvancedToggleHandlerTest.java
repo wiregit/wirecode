@@ -50,6 +50,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
     private MessageFactory messageFactory;
     
     public void setUp() throws Exception {
+        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"127.0.0.1"});
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -91,7 +92,6 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
         advancedToggleHandler = injector.getInstance(AdvancedToggleHandler.class);
         messageFactory = injector.getInstance(MessageFactory.class);
         
-        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"127.0.0.1"});
         ApplicationSettings.USAGE_STATS.setValue(true);
         addr = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 1000);
         StatisticsManager.instance().setRecordAdvancedStatsManual(false);
@@ -187,7 +187,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());
         
         // now it should be off.
-        Thread.sleep(30);
+        Thread.sleep(40);
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
     }
     
@@ -203,7 +203,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
         assertTrue(StatisticsManager.instance().getRecordAdvancedStats());
         
         // the message asked for 1000ms, but after a 100 ms stats will be off.
-        Thread.sleep(110);
+        Thread.sleep(120);
         assertFalse(StatisticsManager.instance().getRecordAdvancedStats());
     }
     
