@@ -12,7 +12,6 @@ import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
