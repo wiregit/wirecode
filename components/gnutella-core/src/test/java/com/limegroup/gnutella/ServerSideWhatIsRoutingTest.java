@@ -349,6 +349,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     public void testLeafQueryRoutesCorrectly() throws Exception {
         drainAll();
 
+        // send the CapabilitiesVM
+        ULTRAPEER_1.send(capabilitiesVMFactory.getCapabilitiesVM());
+        ULTRAPEER_1.flush();
         // send the query
         QueryRequest whatIsNewQuery = 
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
@@ -377,6 +380,10 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     public void testUnsupportedQueryForwardedCorrectly() throws Exception {
         drainAll();
 
+        // send the CapabilitiesVM
+        ULTRAPEER_1.send(capabilitiesVMFactory.getCapabilitiesVM());
+        ULTRAPEER_1.flush();
+        
         // send the query
         QueryRequest unknownFeatureQuery = 
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
@@ -406,7 +413,10 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     public void testLastHopUnsupportedQueryForwardedCorrectly() 
         throws Exception {
         drainAll();
-
+        // send the CapabilitiesVM
+        ULTRAPEER_1.send(capabilitiesVMFactory.getCapabilitiesVM());
+        ULTRAPEER_1.flush();
+        
         // send the query
         QueryRequest unknownFeatureQuery = 
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,
