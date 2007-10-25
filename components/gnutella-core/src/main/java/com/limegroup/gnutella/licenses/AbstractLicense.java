@@ -14,12 +14,12 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.net.HttpClientManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

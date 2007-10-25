@@ -127,7 +127,6 @@ import com.limegroup.gnutella.handshaking.HandshakeServicesImpl;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
@@ -345,7 +344,6 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(HashTree.class);
         requestStaticInjection(IncompleteFileManager.class);
         requestStaticInjection(AutoDownloadDetails.class);
-        requestStaticInjection(HttpClientManager.class);
         requestStaticInjection(LimeXMLDocument.class);
         requestStaticInjection(StatisticsManager.class);
         requestStaticInjection(MACCalculatorRepositoryManager.class);

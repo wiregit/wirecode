@@ -1,10 +1,4 @@
-/*
- * handles reading off of the input stream
- *
- */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-
-package com.limegroup.gnutella;
+package org.limewire.io;
 
 import java.io.IOException;
 import java.io.InputStream;

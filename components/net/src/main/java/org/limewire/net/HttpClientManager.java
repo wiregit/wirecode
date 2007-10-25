@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.http;
+package org.limewire.net;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,7 +21,6 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 
 import com.google.inject.Inject;
@@ -29,10 +28,9 @@ import com.google.inject.Provider;
 
 
 /**
- * A simple manager class that maintains a single HttpConnectionManager
- * and doles out either a simple one (for Java 1.1.8) or the MultiThreaded
- * one (for all other versions)
+ * A factory for retrieving HttpClient instances.
  */
+// TODO: move to interface/impl, not static.
 public class HttpClientManager {
     
     private static final Log LOG = LogFactory.getLog(HttpClientManager.class);
@@ -66,8 +64,7 @@ public class HttpClientManager {
      */
     private static final HttpConnectionManager MANAGER;
     
-    @Inject
-    static Provider<SocketsManager> socketsManager; 
+    private static Provider<SocketsManager> socketsManager; 
     
     static {
         MANAGER = new MultiThreadedHttpConnectionManager();
@@ -82,6 +79,10 @@ public class HttpClientManager {
     
     /** Ensures this is initialized. */
     public static void initialize() {}
+    
+    @Inject public static void setSocketsManager(Provider<SocketsManager> socketsManager) {
+        HttpClientManager.socketsManager = socketsManager;
+    }
             
     /** Returns a new HttpClient with the appropriate manager. */
     public static HttpClient getNewClient() {

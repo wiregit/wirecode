@@ -13,6 +13,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.io.ByteReader;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
 import org.limewire.util.BaseTestCase;
@@ -21,7 +22,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.HTTPAcceptor;

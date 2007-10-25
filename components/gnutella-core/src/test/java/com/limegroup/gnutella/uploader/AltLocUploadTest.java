@@ -26,6 +26,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.HttpClientManager;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.AbstractModule;
@@ -60,7 +61,6 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;

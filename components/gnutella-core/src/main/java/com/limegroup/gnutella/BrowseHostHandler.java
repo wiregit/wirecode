@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.ByteReader;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;

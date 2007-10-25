@@ -9,13 +9,13 @@ import junit.framework.Test;
 
 import org.apache.commons.httpclient.URI;
 import org.limewire.inject.Providers;
+import org.limewire.net.HttpClientManager;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
-import com.limegroup.gnutella.http.HttpClientManager;
 
 public final class CCLicenseTest extends BaseTestCase {
     

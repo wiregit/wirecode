@@ -5,6 +5,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Iterator;
 
+import org.limewire.io.ByteReader;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;

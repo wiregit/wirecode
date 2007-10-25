@@ -9,8 +9,8 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherSupport;
+import org.limewire.net.HttpClientManager;
 
-import com.limegroup.gnutella.http.HttpClientManager;
 
 /**
  * Responsible for sending commands to the client, acting like a web page.

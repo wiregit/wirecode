@@ -9,8 +9,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.limewire.net.HttpClientManager;
 
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

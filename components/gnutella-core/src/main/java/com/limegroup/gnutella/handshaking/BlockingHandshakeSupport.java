@@ -6,7 +6,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Properties;
 
-import com.limegroup.gnutella.ByteReader;
+import org.limewire.io.ByteReader;
+
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;

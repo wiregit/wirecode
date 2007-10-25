@@ -8,6 +8,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.limewire.net.HttpClientManager;
 import org.limewire.nio.NIODispatcher;
 
 import com.limegroup.gnutella.LimeTestUtils;

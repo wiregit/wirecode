@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.HttpClientManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
 
@@ -21,7 +22,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 class Tracker {

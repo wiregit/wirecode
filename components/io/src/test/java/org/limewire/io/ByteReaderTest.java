@@ -1,16 +1,16 @@
-package com.limegroup.gnutella;
+package org.limewire.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.BaseTestCase;
 
 /**
  * Unit tests for ByteReader
  */
-public class ByteReaderTest extends LimeTestCase {
+public class ByteReaderTest extends BaseTestCase {
     
 	public ByteReaderTest(String name) {
 		super(name);

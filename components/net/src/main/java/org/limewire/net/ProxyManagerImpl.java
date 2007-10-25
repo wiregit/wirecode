@@ -177,7 +177,11 @@ class ProxyManagerImpl implements ProxyManager {
         
 		// username/password 
 		String username = proxySettings.getProxyUsername();
+		if(username == null)
+		    username = "";
 		String password = proxySettings.getProxyPassword();
+		if(password == null)
+		    password = "";
         outgoing = ByteBuffer.allocate(1 + 1 + username.length() + 1 + password.length());
         outgoing.put((byte)0x01);
         outgoing.put((byte)username.length());

@@ -1,4 +1,8 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,13 +16,13 @@ import java.net.SocketException;
 import java.util.StringTokenizer;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.ByteReader;
+import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.service.ErrorService;
-import org.limewire.util.AssertComparisons;
 
-import com.limegroup.gnutella.ByteReader;
 
 // extends AssertCmparisons just to get useful methods.
-public class FakeProxyServer extends AssertComparisons {
+public class FakeProxyServer {
 
     /**
      * The server which we tell limewire is the proxy
@@ -32,7 +36,7 @@ public class FakeProxyServer extends AssertComparisons {
 
     private volatile boolean _proxyOn;
 
-    private volatile int _proxyVersion;
+    private volatile ProxyType _proxyVersion;
     
     private volatile  boolean _authentication;
 
@@ -48,12 +52,14 @@ public class FakeProxyServer extends AssertComparisons {
     
     final static String PASS = "Thadani";
     
+    private final int _destinationPort;
+    
 
     public FakeProxyServer(int proxyPort, int destinationPort) {
-        super("fake");
-        _proxyOn = false;
-        _proxyVersion = ProxyTest.NONE;
+        this._proxyOn = false;
+        _proxyVersion = ProxyType.NONE;
         _authentication = false;
+        this._destinationPort = destinationPort;
         startServers(proxyPort, destinationPort);        
     }
 
@@ -96,11 +102,11 @@ public class FakeProxyServer extends AssertComparisons {
                     fail("LimeWire connected to proxy server instead of directly");
                 InputStream is = incomingProxy.getInputStream();
                 OutputStream os = incomingProxy.getOutputStream();
-                if(_proxyVersion == ProxyTest.SOCKS4)
+                if(_proxyVersion == ProxyType.SOCKS4)
                     checkSOCKS4(is, os);
-                else if(_proxyVersion == ProxyTest.SOCKS5)
+                else if(_proxyVersion == ProxyType.SOCKS5)
                     checkSOCKS5(is, os);
-                else if(_proxyVersion == ProxyTest.HTTP)
+                else if(_proxyVersion == ProxyType.HTTP)
                     checkHTTP(is, os);
                 else
                    assertTrue("test not set up correctly, incorrect proxy version",
@@ -235,7 +241,7 @@ public class FakeProxyServer extends AssertComparisons {
         StringTokenizer tok = new StringTokenizer(line, " :");
         assertEquals("connect string not sent", "CONNECT", tok.nextToken());
         assertEquals("LW sent wrong host", "127.0.0.1", tok.nextToken());
-        assertEquals("LW sent wrong port", "" + ProxyTest.DEST_PORT, tok.nextToken());
+        assertEquals("LW sent wrong port", "" + _destinationPort, tok.nextToken());
         assertEquals("LW didn't send http string", "HTTP/1.0", tok.nextToken());
         if(_makeError)
             os.write("503 Busy\r\nHeader: Value\r\n\r\n".getBytes());
@@ -315,7 +321,7 @@ public class FakeProxyServer extends AssertComparisons {
         _authentication = auth;
     }
 
-    void setProxyVersion(int ver) {
+    void setProxyVersion(ProxyType ver) {
         _proxyVersion = ver;
     }
     

@@ -18,13 +18,13 @@ import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.http.HttpStatus;
+import org.limewire.net.HttpClientManager;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;

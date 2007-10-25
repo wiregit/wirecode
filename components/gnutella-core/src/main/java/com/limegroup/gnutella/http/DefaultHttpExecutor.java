@@ -7,6 +7,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.net.HttpClientManager;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Singleton;

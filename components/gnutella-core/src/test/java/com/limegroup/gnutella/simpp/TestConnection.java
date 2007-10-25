@@ -8,12 +8,12 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.ByteReader;
 import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.BlockingConnectionUtils;
-import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;

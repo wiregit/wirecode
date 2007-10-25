@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,34 +10,22 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.limewire.io.LocalSocketAddressService;
-import org.limewire.net.SocketsManager;
+import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ConnectObserverStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class ProxyTest extends BaseTestCase {
 
     private static final int PROXY_PORT = 9990;
 
-    static final int DEST_PORT = 9999;
+    private final int DEST_PORT = 9999;
 
-    final static int SOCKS4 = 0;
+    private FakeProxyServer fps;
 
-    final static int SOCKS5 = 1;
-
-    final static int HTTP = 2;
-
-    final static int NONE = -1;
-
-    private static FakeProxyServer fps;
-
+    private ProxySettingsStub proxySettings;
     private SocketsManager socketsManager;
 
     public ProxyTest(String name) {
@@ -54,17 +42,26 @@ public class ProxyTest extends BaseTestCase {
 
     @Override
     public void setUp() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
-        ConnectionSettings.PROXY_PORT.setValue(PROXY_PORT);
+        proxySettings = new ProxySettingsStub();
         
-        fps = new FakeProxyServer(9990, 9999);
+        fps = new FakeProxyServer(PROXY_PORT, DEST_PORT);
         fps.setMakeError(false);
         
-        Injector injector = LimeTestUtils.createInjector();        
+        Injector injector = Guice.createInjector(new LimeWireNetModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ProxySettings.class).toInstance(proxySettings);
+                bind(SocketBindingSettings.class).to(EmptySocketBindingSettings.class);
+            }
+        });        
+        
         socketsManager = injector.getInstance(SocketsManager.class);
         
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
+        proxySettings.setProxyForPrivate(true);
+        proxySettings.setProxyHost("127.0.0.1");
+        proxySettings.setProxyPort(PROXY_PORT);
+        proxySettings.setProxyUser("");
+        proxySettings.setProxyPass("");
     }
 
     @Override
@@ -78,10 +75,10 @@ public class ProxyTest extends BaseTestCase {
      * If Proxy is off we should connect directly
      */
     public void testConnectionsWithProxyOff() throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_NO_PROXY);
+        proxySettings.setProxyType(ProxyType.NONE);
         fps.setProxyOn(false);
         fps.setAuthentication(false);
-        fps.setProxyVersion(NONE);
+        fps.setProxyVersion(ProxyType.NONE);
 
         Socket s = socketsManager.connect(new InetSocketAddress("localhost", DEST_PORT), 0);
         // we should be connected to something, NPE is an error
@@ -100,10 +97,10 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runSOCKS5Connection(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
+        proxySettings.setProxyType(ProxyType.SOCKS5);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(SOCKS5);
+        fps.setProxyVersion(ProxyType.SOCKS5);
         connect(nb, true);
     }
 
@@ -119,10 +116,10 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runSOCKS5ConnectionWithError(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
+        proxySettings.setProxyType(ProxyType.SOCKS5);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(SOCKS5);
+        fps.setProxyVersion(ProxyType.SOCKS5);
         fps.setMakeError(true);
         connect(nb, false);
         fps.setMakeError(false);
@@ -140,14 +137,14 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runSOCKS5WithAuth(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
-        ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
-        ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
-        ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
+        proxySettings.setProxyType(ProxyType.SOCKS5);
+        proxySettings.setProxyAuthRequired(true);
+        proxySettings.setProxyUser(FakeProxyServer.USER);
+        proxySettings.setProxyPass(FakeProxyServer.PASS);
 
         fps.setProxyOn(true);
         fps.setAuthentication(true);
-        fps.setProxyVersion(SOCKS5);
+        fps.setProxyVersion(ProxyType.SOCKS5);
         connect(nb, true);
     }
 
@@ -160,10 +157,10 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runSOCKS4Connection(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS4_PROXY);
+        proxySettings.setProxyType(ProxyType.SOCKS4);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(SOCKS4);
+        fps.setProxyVersion(ProxyType.SOCKS4);
         connect(nb, true);
     }
 
@@ -176,10 +173,10 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runSOCKS4ConnectionWithError(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS4_PROXY);
+        proxySettings.setProxyType(ProxyType.SOCKS4);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(SOCKS4);
+        fps.setProxyVersion(ProxyType.SOCKS4);
         fps.setMakeError(true);
         connect(nb, false);
         fps.setMakeError(false);
@@ -194,14 +191,14 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runSOCKS4WithAuth(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS4_PROXY);
-        ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
-        ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
-        ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
+        proxySettings.setProxyType(ProxyType.SOCKS4);
+        proxySettings.setProxyAuthRequired(true);
+        proxySettings.setProxyUser(FakeProxyServer.USER);
+        proxySettings.setProxyPass(FakeProxyServer.PASS);
 
         fps.setProxyOn(true);
         fps.setAuthentication(true);
-        fps.setProxyVersion(SOCKS4);
+        fps.setProxyVersion(ProxyType.SOCKS4);
         connect(nb, true);
     }
 
@@ -217,11 +214,11 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runHTTPProxy(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_HTTP_PROXY);
+        proxySettings.setProxyType(ProxyType.HTTP);
 
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(HTTP);
+        fps.setProxyVersion(ProxyType.HTTP);
         connect(nb, true);
     }
 
@@ -234,11 +231,11 @@ public class ProxyTest extends BaseTestCase {
     }
 
     private void runHTTPProxyWithError(boolean nb) throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_HTTP_PROXY);
+        proxySettings.setProxyType(ProxyType.HTTP);
 
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(HTTP);
+        fps.setProxyVersion(ProxyType.HTTP);
         fps.setMakeError(true);
         connect(nb, false);
     }
@@ -278,16 +275,16 @@ public class ProxyTest extends BaseTestCase {
     }
     
     public void testHTTPClientWithProxyOff() throws Exception {
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_NO_PROXY);
+        proxySettings.setProxyType(ProxyType.NONE);
         fps.setProxyOn(false);
         fps.setAuthentication(false);
-        fps.setProxyVersion(NONE);
+        fps.setProxyVersion(ProxyType.NONE);
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile.txt";
         HttpClient client = HttpClientManager.getNewClient();
         HttpMethod get = new GetMethod(connectTo);
-        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+        get.addRequestHeader("connection", "close");
         client.executeMethod(get);
         byte[] resp = get.getResponseBody();
         assertEquals("invalid response from server", "hello", new String(resp));
@@ -295,16 +292,15 @@ public class ProxyTest extends BaseTestCase {
     }
 
     public void testHTTPClientProxiesWithHttpProxy() throws Exception {
-        // ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_HTTP_PROXY);
+        proxySettings.setProxyType(ProxyType.HTTP);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(HTTP);
+        fps.setProxyVersion(ProxyType.HTTP);
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile2.txt";
         HttpMethod get = new GetMethod(connectTo);
-        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+        get.addRequestHeader("connection", "close");
         HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         client.setHttpConnectionManager(new SimpleHttpConnectionManager());
@@ -315,16 +311,15 @@ public class ProxyTest extends BaseTestCase {
     }
 
     public void testHTTPClientProxiesWithSocks4() throws Exception {
-        // ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS4_PROXY);
+        proxySettings.setProxyType(ProxyType.SOCKS4);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(SOCKS4);
+        fps.setProxyVersion(ProxyType.SOCKS4);
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile3.txt";
         HttpMethod get = new GetMethod(connectTo);
-        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+        get.addRequestHeader("connection", "close");
         HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         client.setHttpConnectionManager(new SimpleHttpConnectionManager());
@@ -335,16 +330,15 @@ public class ProxyTest extends BaseTestCase {
     }
 
     public void testHTTPClientProxiesWithSocks5() throws Exception {
-        // ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
+        proxySettings.setProxyType(ProxyType.SOCKS5);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
-        fps.setProxyVersion(SOCKS5);
+        fps.setProxyVersion(ProxyType.SOCKS5);
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile4.txt";
         HttpMethod get = new GetMethod(connectTo);
-        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+        get.addRequestHeader("connection", "close");
         HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         client.setHttpConnectionManager(new SimpleHttpConnectionManager());
@@ -355,20 +349,19 @@ public class ProxyTest extends BaseTestCase {
     }
 
     public void testHTTPClientProxiesWithAuthSocks4() throws Exception {
-        // ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS4_PROXY);
-        ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
-        ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
-        ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
+        proxySettings.setProxyType(ProxyType.SOCKS4);
+        proxySettings.setProxyAuthRequired(true);
+        proxySettings.setProxyUser(FakeProxyServer.USER);
+        proxySettings.setProxyPass(FakeProxyServer.PASS);
 
         fps.setProxyOn(true);
         fps.setAuthentication(true);
-        fps.setProxyVersion(SOCKS4);
+        fps.setProxyVersion(ProxyType.SOCKS4);
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile3.txt";
         HttpMethod get = new GetMethod(connectTo);
-        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+        get.addRequestHeader("connection", "close");
         HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         client.setHttpConnectionManager(new SimpleHttpConnectionManager());
@@ -379,20 +372,19 @@ public class ProxyTest extends BaseTestCase {
     }
 
     public void testHTTPClientProxiesWithAuthSocks5() throws Exception {
-        // ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
-        ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
-        ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
-        ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
-        ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
+        proxySettings.setProxyType(ProxyType.SOCKS5);
+        proxySettings.setProxyAuthRequired(true);
+        proxySettings.setProxyUser(FakeProxyServer.USER);
+        proxySettings.setProxyPass(FakeProxyServer.PASS);
 
         fps.setProxyOn(true);
         fps.setAuthentication(true);
-        fps.setProxyVersion(SOCKS5);
+        fps.setProxyVersion(ProxyType.SOCKS5);
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile4.txt";
         HttpMethod get = new GetMethod(connectTo);
-        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+        get.addRequestHeader("connection", "close");
         HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         client.setHttpConnectionManager(new SimpleHttpConnectionManager());

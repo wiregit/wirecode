@@ -33,6 +33,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.HttpClientManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -53,7 +54,6 @@ import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
-import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
