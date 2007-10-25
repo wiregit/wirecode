@@ -162,6 +162,8 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         File berkeley = CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
         URN berkeleyURN = (URN) iter.next();
+        while (!berkeleyURN.isSHA1())
+            berkeleyURN = (URN) iter.next();
         
         // we should be able to send a URN query
         QueryRequest goodQuery = queryRequestFactory.createQueryKeyQuery(berkeleyURN, 
@@ -182,7 +184,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertEquals(new GUID(guid), new GUID(qRep.getGUID()));
         iter = qRep.getResults();
         Response first = (Response) iter.next();
-        assertEquals(UrnHelper.calculateAndCacheURN(berkeley, urnCache), first.getUrns());
+        assertTrue(UrnHelper.calculateAndCacheURN(berkeley, urnCache).containsAll(first.getUrns()));
     }
 
 
