@@ -7,7 +7,6 @@ import java.net.SocketAddress;
 /**
  * Defines the interface to authenticate a host based on its IP address, port 
  * or other pieces of data.
- * 
  */
 public interface SecurityToken {
     
@@ -28,7 +27,7 @@ public interface SecurityToken {
     public boolean isFor(TokenData data);
     
     /**
-     * Defines a factory interface to create {@link SecurityToken SecurityTokens}.
+     * Defines a factory interface to create a {@link SecurityToken}.
      */
     public static interface TokenProvider {
         

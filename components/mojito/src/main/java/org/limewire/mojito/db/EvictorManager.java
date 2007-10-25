@@ -27,7 +27,7 @@ import org.limewire.mojito.db.impl.DefaultEvictor;
 import org.limewire.mojito.routing.RouteTable;
 
 /**
- * Manages instances of {@link Evictor Evictors}.
+ * Manages instances of an {@link Evictor}.
  */
 public class EvictorManager {
     

@@ -24,13 +24,13 @@ import java.util.Collection;
 import org.limewire.mojito.result.StoreResult;
 
 /**
- * Defines an interface for returning {@link Storable Storables}, storing the
+ * Defines an interface for returning a {@link Storable} collection, storing the
  * result of a store and for handling contact changes.
  */
 public interface StorableModel {
     
     /**
-     * Returns all <code>Storables</code> that need to be published now.
+     * Returns all <code>Storable</code>s that need to be published now.
      */
     public Collection<Storable> getStorables();
     

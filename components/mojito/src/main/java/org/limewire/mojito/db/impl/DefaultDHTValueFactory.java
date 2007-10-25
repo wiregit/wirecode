@@ -25,7 +25,7 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 /**
- * Creates <code>DHTValues</code> for unknown <code>DHTValueTypes</code>.
+ * Creates <code>DHTValue</code>s for unknown <code>DHTValueType</code>s.
  */
 public class DefaultDHTValueFactory implements DHTValueFactory<DHTValueImpl> {
     

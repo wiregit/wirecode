@@ -32,7 +32,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.result.StoreResult;
 
 /**
- * Manages <code>StorableModels</code>.
+ * Manages multiple instances of a <code>StorableModel</code>.
  */
 public class StorableModelManager {
     

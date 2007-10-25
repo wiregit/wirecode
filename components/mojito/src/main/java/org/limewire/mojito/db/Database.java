@@ -86,17 +86,17 @@ public interface Database extends Serializable {
     public float getRequestLoad(KUID primaryKey, boolean incrementLoad);
     
     /**
-     * Returns all <code>Keys</code>.
+     * Returns all <code>Key</code>s.
      */
     public Set<KUID> keySet();
     
     /**
-     * Returns a Collection of <code>DHTValueEntities</code>.
+     * Returns a collection of <code>DHTValueEntity</code>.
      */
     public Collection<DHTValueEntity> values();
     
     /**
-     * Returns the number of <code>Keys</code> in the Database.
+     * Returns the number of <code>Key</code>s in the Database.
      */
     public int getKeyCount();
     

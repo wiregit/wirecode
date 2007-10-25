@@ -27,8 +27,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
     /** Generates a <code>AddressSecurityToken</code> for a given 
      * <code>SocketAddress</code>. For a given <code>SocketAddress</code>, 
      * using a different SecretKey and/or SecretPad will result in a different 
-     * <code>AddressSecurityToken</code>. The return value is constructed
-     * with prepareForNet equal to true.
+     * <code>AddressSecurityToken</code>. 
      *  
      */
     public AddressSecurityToken (SocketAddress address) {
@@ -36,10 +35,9 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
                 ((InetSocketAddress)address).getPort());
     }
     
-    /** Generates a <code>AddressSecurityToken</code> for a given IP:Port combo.
+    /** Generates an <code>AddressSecurityToken</code> for a given IP:Port combo.
      *  For a given IP:Port combo, using a different SecretKey and/or SecretPad
-     *  will result in a different <code>AddressSecurityToken</code>. The 
-     *  return value is constructed with prepareForNet equal to true.
+     *  will result in a different <code>AddressSecurityToken</code>. 
      *  
      * @param ip the IP address of the other node
      * @param port the port of the other node
@@ -125,7 +123,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
         return isValidSecurityTokenBytes(key);
     }
     
-    /** Embeds the IP address. */
+    /** Converts the IP address and port into an encrypted <code>byte[]</code>. */
     public static class AddressTokenData implements SecurityToken.TokenData {
         protected final byte[] data;
         

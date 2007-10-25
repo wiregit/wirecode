@@ -23,7 +23,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.result.StoreResult;
 
 /**
- * A Key-Value pair that can be stored in the DHT.
+ * A key-value pair that can be stored in the DHT.
  */
 public class Storable {
     

@@ -28,7 +28,7 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 /**
- * Manages {@link DHTValueFactory DHTValueFactories}.
+ * Manages multiple instances of a {@link DHTValueFactory}.
  */
 public class DHTValueFactoryManager {
     
@@ -83,9 +83,13 @@ public class DHTValueFactoryManager {
         return defaultFactory;
     }
     
-    /**
+    /**<p>
      * Creates a <code>DHTValue</code> from the given arguments. This
-     * method takes care of empty values.
+     * method takes care of empty values by creating a <code>DHTValue</code> 
+     * via the default {@link DHTValueFactory}.
+     * </p>
+     * <code>createDHTValue</code> throws a {@link DHTValueException} for 
+     * null <code>DHTValueType</code> or a null <code>Version</code>. 
      */
     public DHTValue createDHTValue(DHTValueType valueType, 
             Version version, byte[] value) throws DHTValueException {

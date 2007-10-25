@@ -29,7 +29,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.settings.DatabaseSettings;
 /**
- * Stores {@link DHTValueEntity DHTValueEntities} in a map.
+ * Stores a {@link DHTValueEntity} in a map.
  */
 public class DHTValueEntityBag implements Serializable {
     

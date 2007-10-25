@@ -10,7 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * An abstract base class to verify {@link SecureMessage SecureMessages}. The
+ * An abstract base class to verify a {@link SecureMessage}. The
  * callback, a {@link SecureMessageCallback} receives notification if the 
  * message is verified.
  */

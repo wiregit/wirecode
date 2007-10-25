@@ -72,7 +72,7 @@ public class DatabaseCleaner implements Runnable {
     }
     
     /**
-     * Removes all expired <code>DHTValueEntities</code> from the <code>Database</code>.
+     * Removes all expired <code>DHTValueEntity</code> from the <code>Database</code>.
      */
     private void cleanupDatabase() {
         EvictorManager evictorManager = context.getEvictorManager();

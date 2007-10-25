@@ -22,8 +22,8 @@ package org.limewire.mojito.db;
 import org.limewire.mojito.routing.RouteTable;
 
 /**
- * Defines an interface to control the removal of expired 
- * {@link DHTValueEntity DHTValueEntities} from the {@link Database}.
+ * Defines an interface to control the removal of an expired 
+ * {@link DHTValueEntity} from the {@link Database}.
  */
 public interface Evictor {
     

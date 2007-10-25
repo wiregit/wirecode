@@ -74,7 +74,7 @@ public class DHTValueEntity implements Serializable {
     private final int hashCode;
     
     /**
-     * Creates and returns <code>DHTValueEntity</code> from a <code>Storable</code>.
+     * Creates and returns a <code>DHTValueEntity</code> from a <code>Storable</code>.
      */
     public static DHTValueEntity createFromStorable(Context context, Storable storable) {
         return new DHTValueEntity(context.getLocalNode(), context.getLocalNode(), 
@@ -82,7 +82,7 @@ public class DHTValueEntity implements Serializable {
     }
 
     /**
-     * Creates and returns <code>DHTValueEntity</code> for the given primary 
+     * Creates and returns a <code>DHTValueEntity</code> for the given primary 
      * key and value.
      */
     public static DHTValueEntity createFromValue(Context context, KUID primaryKey, DHTValue value) {
@@ -91,7 +91,7 @@ public class DHTValueEntity implements Serializable {
     }
     
     /**
-     * Creates and returns <code>DHTValueEntity</code> from arguments that were created.
+     * Creates and returns a <code>DHTValueEntity</code> from arguments that were created.
      */
     public static DHTValueEntity createFromRemote(Contact creator, Contact sender, 
             KUID primaryKey, DHTValue value) {

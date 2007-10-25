@@ -4,9 +4,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-/**
+/**<p>
  * Implements a security token that can write itself to
  * an output stream and queries for its validity.
+ * </p><p>
+ * Subclasses must implement 
+ * {@link #getFromMAC(byte[], org.limewire.security.SecurityToken.TokenData)}.
+ * <code>getFromMAC</code> returns the payload of 
+ * the security token as it will appear on the network. 
+ * </p><p>
+ * See message authentication code, <a 
+ * href="http://en.wikipedia.org/wiki/Message_authentication_code">MAC</a>, for 
+ * more information. </p>
  */
 public abstract class AbstractSecurityToken implements SecurityToken {
 
@@ -50,7 +59,7 @@ public abstract class AbstractSecurityToken implements SecurityToken {
 
     /**
      * Determines if the given <code>TokenData</code> is valid for this 
-     * <code>SecurityToken</code>. By default, all <code>TokenDatas</code> are 
+     * <code>SecurityToken</code>. By default, all <code>TokenData</code>s are 
      * valid.
      */
     protected boolean isValidTokenData(TokenData data) {

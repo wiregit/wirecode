@@ -9,6 +9,7 @@ import java.security.SignatureException;
  */
 public interface SecureMessage {
     
+    //TODO: Make the following final ints into enums.
     /** A message that has not been verified.    */
     public static final int INSECURE = 0;
     /** A message that was attempted to be verified but failed verification.  */

@@ -63,8 +63,8 @@ import org.limewire.mojito.util.ContactUtils;
  */
 
 /**
- * Adds, removes and stores {@link DHTValueEntity DHTValueEntities} in an 
- * in-memory database. 
+ * Adds, removes and stores a {@link DHTValueEntity} to a 
+ * database. Values are stored in-memory. 
  */ 
  /* TODO: For more advanced features we need some definition for
  * DHTValues (non-signed values cannot replace signed values and
@@ -152,8 +152,8 @@ public class DatabaseImpl implements Database {
     }
     
     /**
-     * Adds the given <code>DHTValue</code> to the Database. Returns
-     * <code>true</code> if the operation succeeded.
+     * Adds the given <code>DHTValue</code> to the Database succeeded.
+     * @return true if adding the <code>DHTValueEntity</code succeeded
      */
     public synchronized boolean add(DHTValueEntity entity) {
         KUID primaryKey = entity.getPrimaryKey();
