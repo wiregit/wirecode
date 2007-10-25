@@ -320,7 +320,7 @@
 	    		   haltonerror="@{haltOnError}"
 	    		   failureproperty="testsfailed"
 	    	       showoutput="true"
-	    	       fork="false"
+	    	       fork="true"
 	           	   forkmode="@{forkmode}"
 	        	   timeout="600000"
 	    	>
