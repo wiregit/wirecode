@@ -25,13 +25,11 @@ public class AnnotationsCheckTest extends BaseTestCase {
 
         StringTokenizer st = new StringTokenizer(classPath, System.getProperty("path.separator"));
 
-        String componentTestsPath = File.separator + "build" + File.separator + "tests";
-        String coreAndGuiTestsPath = File.separator + "tests" + File.separator + "build";
         Map<String, String> results = new HashMap<String, String>();
         while (st.hasMoreTokens()) {
             String next = st.nextToken();
             // Ignore test directories..
-            if(next.endsWith(componentTestsPath) || next.endsWith(coreAndGuiTestsPath)) {
+            if(next.endsWith(File.separator + "tests")) {
                 continue;
             }
             results.putAll(InspectionTool.generateMappings(new File(next)));
