@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,8 +67,9 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     protected BlockingConnection testUP[];
 
     private ActivityCallback callback;
-    private LifecycleManager lifecycleManager;
-    private ConnectionServices connectionServices;
+    protected LifecycleManager lifecycleManager;
+    protected ConnectionServices connectionServices;
+    protected Injector injector;
     private PingReplyFactory pingReplyFactory;
     private BlockingConnectionFactory connectionFactory;
     private SpamManager spamManager;
@@ -143,6 +145,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     }
     
     public void setUp(Injector injector) throws Exception {
+        this.injector = injector;
         doSettings();
         
         assertEquals("unexpected port", SERVER_PORT, ConnectionSettings.PORT.getValue());
@@ -185,6 +188,8 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         if (connectionServices != null) {
             connectionServices.disconnect();
         }
+        for (BlockingConnection c : testUP)
+            c.close();
     }
     
      ////////////////////////// Initialization ////////////////////////

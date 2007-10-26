@@ -10,12 +10,14 @@ import junit.framework.Test;
 
 
 import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
@@ -69,7 +71,20 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             // send a MessagesSupportedMessage
             testUP[i].send(messagesSupportedVendorMessage);
+            // does this not flush on purpose?  testBasicGuidance fails if we flush here.
         }
+    }
+    
+    private void establishGuidance() throws Exception {
+        CapabilitiesVMFactory cvmf = injector.getInstance(CapabilitiesVMFactory.class);
+        for (BlockingConnection up : testUP) {
+            up.send(cvmf.getCapabilitiesVM());
+            up.flush();
+        }
+        Thread.sleep(100);
+        ConnectionManager cm = injector.getInstance(ConnectionManager.class);
+        for (RoutedConnection c : cm.getInitializedConnections())
+            assertGreaterThan(0,c.getConnectionCapabilities().remoteHostSupportsLeafGuidance());
     }
     
     /** @return The first QueyrRequest received from this connection.  If null
@@ -140,12 +155,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         }
     }
 
-    public void testRememberToRefactorAndFixThisTestCase() {
-        fail("testAdvancedGuidance1 and testAdvancedGuidance2 only work when testBasicGuidance is called before them");
-    }
-
     public void testAdvancedGuidance1() throws Exception {
-        
+        establishGuidance();
         for (int i = 0; i < testUP.length; i++)
             BlockingConnectionUtils.drain(testUP[i]);
         
@@ -173,6 +184,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
                     true, true, false, false, null);
             testUP[i].send(m);
             testUP[i].flush();
+            System.out.println("sent response from "+testUP[i]);
         }
         
         // all UPs should get a QueryStatusResponse
@@ -213,7 +225,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
 
     public void testAdvancedGuidance2() throws Exception {
-        
+        establishGuidance();
         Message m = null;
 
         for (int i = 0; i < testUP.length; i++)
