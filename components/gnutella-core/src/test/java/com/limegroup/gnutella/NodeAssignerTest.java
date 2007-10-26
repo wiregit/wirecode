@@ -5,16 +5,19 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.ManagedThread;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
@@ -29,7 +32,9 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NodeAssignerTest extends LimeTestCase {
@@ -39,8 +44,15 @@ public class NodeAssignerTest extends LimeTestCase {
     private TestAcceptor testAcceptor;
     private Injector injector;
     private NodeAssigner nodeAssigner;
-    private TestBandwidthTracker bandwidthTracker;
-
+    private BandwidthTracker upTracker, downTracker;
+    private DHTManager dhtManager;
+    private Runnable assignerRunnable;
+    private ConnectionServices connectionServices;
+    private NetworkManager networkManager;
+    private Mockery mockery;
+    private MyConnectionManager connectionManager;
+    private SearchServices searchServices;
+    
     public NodeAssignerTest(String name) {
         super(name);
     }
@@ -55,24 +67,46 @@ public class NodeAssignerTest extends LimeTestCase {
 
     protected void setUp() throws Exception {
         setSettings();
+        mockery = new Mockery();
+        upTracker = mockery.mock(BandwidthTracker.class);
+        downTracker = mockery.mock(BandwidthTracker.class);
+        dhtManager = mockery.mock(DHTManager.class);
+        connectionServices = mockery.mock(ConnectionServices.class);
+        networkManager = mockery.mock(NetworkManager.class);
+        connectionManager = new MyConnectionManager();
+        searchServices = mockery.mock(SearchServices.class);
+        
+        final ScheduledExecutorService ses = new ScheduledExecutorServiceStub() {
+
+            @Override
+            public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+                if (delay == NodeAssigner.TIMER_DELAY && initialDelay == 0)
+                    assignerRunnable = command;
+                return null;
+            }
+            
+        };
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).to(TestBandwidthTracker.class);
-                bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).to(TestBandwidthTracker.class);
-                bind(NetworkManager.class).to(NetworkManagerStub.class);
+                bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).toInstance(upTracker);
+                bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).toInstance(downTracker);
+                bind(DHTManager.class).toInstance(dhtManager);
+                bind(NetworkManager.class).toInstance(networkManager);
+                bind(ConnectionServices.class).toInstance(connectionServices);
+                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(ses);
+                bind(ConnectionManager.class).toInstance(connectionManager);
+                bind(SearchServices.class).toInstance(searchServices);
             } 
         });
         nodeAssigner = injector.getInstance(NodeAssigner.class);
-        bandwidthTracker = (TestBandwidthTracker)injector.getInstance(Key.get(BandwidthTracker.class, Names.named("uploadTracker")));
-        assertSame(bandwidthTracker, injector.getInstance(Key.get(BandwidthTracker.class, Names.named("downloadTracker"))));
-        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
-        networkManager.setAddress(new byte[] { 127, 0, 0, 1 } );
-        networkManager.setPort(6346);
-        networkManager.setSolicitedGUID(new GUID());
         
-        testAcceptor = new TestAcceptor();
-        new ManagedThread(testAcceptor, "TestAcceptor").start();    
+        nodeAssigner.start();
+        assertNotNull(assignerRunnable);
+        
+        // TODO: figure out what is this for and is it necessary
+//        testAcceptor = new TestAcceptor();
+//        new ManagedThread(testAcceptor, "TestAcceptor").start();    
     }
     
     
@@ -103,31 +137,9 @@ public class NodeAssignerTest extends LimeTestCase {
     protected void tearDown() throws Exception {
         if(testAcceptor != null)
             testAcceptor.shutdown();
-        if(injector != null)
-            injector.getInstance(ConnectionServices.class).disconnect();
         Thread.sleep(1000);
     }
         
-    private void setUltrapeerCapabilities() throws Exception{
-        setHardcoreCapabilities();
-        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue());
-        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
-    }
-    
-    private void setDHTCapabilities() throws Exception{
-        setHardcoreCapabilities();
-        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue());
-        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",
-                                    new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
-    }
-    
-    private void setHardcoreCapabilities() throws Exception{
-        bandwidthTracker.setIsGoodBandwidth(true);
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.MODEM_SPEED_INT + 1);
-        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
-        networkManager.setGuessCapable(true);
-    }
     
     public void connect() throws Exception {
         ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
@@ -141,27 +153,56 @@ public class NodeAssignerTest extends LimeTestCase {
     }
     
     public void testUltrapeerConnection() throws Exception{
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
-        ConnectionManager connectionManager = injector.getInstance(ConnectionManager.class);
-        DHTManager dhtManager = injector.getInstance(DHTManager.class);
-        
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        //set up an ultrapeer capable host:
-        setUltrapeerCapabilities();
-        lifecycleManager.start();
-        Thread.sleep(1000);
-        //the node assigner should have worked it's magic
-        assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        testAcceptor.setAcceptsUltrapeers(true);
-        connect();
-        assertTrue("should be an ultrapeer", connectionManager.isActiveSupernode());
-        assertTrue("should be passively connected to the DHT", dhtManager.isRunning() 
-                && (dhtManager.getDHTMode() != DHTMode.ACTIVE));
+
+        mockery.checking(new Expectations(){{
+            
+            // say we have good bandwidth
+            one(upTracker).measureBandwidth();
+            one(downTracker).measureBandwidth();
+            // connection manager is not mocked
+            
+            one(upTracker).getMeasuredBandwidth();
+            will(returnValue(UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() + 2f));
+            one(downTracker).getMeasuredBandwidth();
+            will(returnValue(UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue() + 2f));
+            
+            
+            // set up some conditions for ultrapeer-ness
+            one(connectionServices).isSupernode();
+            will(returnValue(false));
+            one(networkManager).isGUESSCapable();
+            will(returnValue(true));
+            one(networkManager).acceptedIncomingConnection();
+            will(returnValue(true));
+            one(searchServices).getLastQueryTime();
+            will(returnValue(0l)); // long time ago
+            atLeast(1).of(networkManager).getAddress();
+            will(returnValue(new byte[4]));
+            
+            // we're currently not active and disabled
+            exactly(2).of(dhtManager).getDHTMode();
+            will(returnValue(DHTMode.INACTIVE));
+            one(dhtManager).isEnabled();
+            will(returnValue(false));
+            
+        }});
         
-        //make sure you can't be an active DHT node at the same time
-        setDHTCapabilities();
-        Thread.sleep(200);
-        assertNotEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
+        assignerRunnable.run();
+        assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertTrue(connectionManager.invoked.await(3, TimeUnit.SECONDS));
+        assertEquals(4,connectionManager.demotes);
+        mockery.assertIsSatisfied();
+        
+        // this should really be in a separate test
+//        testAcceptor.setAcceptsUltrapeers(true);
+//        connect();
+//        assertTrue("should be an ultrapeer", connectionManager.isActiveSupernode());
+//        assertTrue("should be passively connected to the DHT", dhtManager.isRunning() 
+//                && (dhtManager.getDHTMode() != DHTMode.ACTIVE));
+        
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
@@ -174,7 +215,6 @@ public class NodeAssignerTest extends LimeTestCase {
         connect();
         assertFalse("should be not be an ultrapeer", connectionManager.isSupernode());
         networkManager.setAcceptedIncomingConnection(true);
-        setUltrapeerCapabilities();
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         testAcceptor.setAcceptsUltrapeers(true);
         PrivilegedAccessor.setValue(nodeAssigner, "_lastUltrapeerAttempt", 
@@ -192,7 +232,6 @@ public class NodeAssignerTest extends LimeTestCase {
         NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
         
-        setDHTCapabilities();
         lifecycleManager.start();
         Thread.sleep(1000);
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(0);
@@ -202,7 +241,6 @@ public class NodeAssignerTest extends LimeTestCase {
         assertFalse("should not be an ultrapeer", connectionServices.isSupernode());
         assertEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
         testAcceptor.setAcceptsUltrapeers(true);
-        setUltrapeerCapabilities();
         networkManager.setAcceptedIncomingConnection(true);
         DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
         PrivilegedAccessor.setValue(nodeAssigner, "_lastUltrapeerAttempt", 
@@ -212,32 +250,6 @@ public class NodeAssignerTest extends LimeTestCase {
         
         assertNotEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
         assertTrue("should be an ultrapeer", connectionServices.isSupernode());
-    }
-    
-    @Singleton
-    private static class TestBandwidthTracker implements BandwidthTracker {
-        
-        private boolean isGoodBandwidth;
-        
-        public float getAverageBandwidth() {
-            if(isGoodBandwidth) 
-                return UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue();
-            else
-                return (UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() -1);
-        }
-
-        public float getMeasuredBandwidth() throws InsufficientDataException {
-            if(isGoodBandwidth) 
-                return UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue();
-            else
-                return (UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() - 1);
-        }
-
-        public void measureBandwidth() {}
-        
-        public void setIsGoodBandwidth(boolean good) {
-            isGoodBandwidth = good;
-        }
     }
     
     private class UltrapeerResponder implements HandshakeResponder {
@@ -301,6 +313,21 @@ public class NodeAssignerTest extends LimeTestCase {
             if(incomingConnection != null)
                 incomingConnection.close();
         }
+    }
+    
+    private class MyConnectionManager extends ConnectionManagerStub {
+        volatile int demotes = -1;
+        private final CountDownLatch invoked = new CountDownLatch(1);
+        public MyConnectionManager() {
+            super(null, null, null, null, null,
+                    null, null, null, null,
+                    null, null, null, null,
+                    null, null);
+        }
         
+        public void tryToBecomeAnUltrapeer(int demotes) {
+            this.demotes = demotes;
+            invoked.countDown();
+        }
     }
 }
