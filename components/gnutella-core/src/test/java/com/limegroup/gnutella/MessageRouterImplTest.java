@@ -222,10 +222,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
             QueryRequest query = queryRequestFactory.createQuery("test");
             
             Iterable iter = messageRouterImpl.responsesToQueryReplies(res, query, 10, null); 
-            int size = 0;
-            
-            for(@SuppressWarnings("unused") Object o : iter)
-                size++;
+            int size = sizeof(iter);
 
             assertEquals("responses should have been put in 2 hits", 2, size);
 
@@ -235,23 +232,25 @@ public final class MessageRouterImplTest extends LimeTestCase {
             query.hop();
 
             iter = messageRouterImpl.responsesToQueryReplies(res, query, 10, null);
-            size = 0;
-            for(@SuppressWarnings("unused") Object o : iter) {
-                size++;
-            }
+            size = sizeof(iter);
 
             assertEquals("responses should have been put in 1 hits", 1, size);
 
             iter = messageRouterImpl.responsesToQueryReplies(res, query, 1, null);
-            size = 0;
-            for(@SuppressWarnings("unused") Object o : iter) {
-                size++;
-            }
+            size = sizeof(iter);
 
             assertEquals("responses should have been put in 20 hits", 20, size);
         } finally {
             uploadManager.stop();
         }
+    }
+    
+    @SuppressWarnings("unused")
+    private int sizeof(Iterable iter) {
+        int i = 0;
+        for(Object o : iter)
+            i++;
+        return i;
     }
 
     /**
