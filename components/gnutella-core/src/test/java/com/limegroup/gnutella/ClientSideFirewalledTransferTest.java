@@ -29,7 +29,6 @@ import org.limewire.rudp.UDPConnection;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.Base32;
 
-import com.limegroup.gnutella.connection.BlockingConnection;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -53,7 +52,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
  * redirects properly, etc.  The test includes a leaf attached to 1 Ultrapeer.
  */
-@SuppressWarnings("unchecked")
 public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     protected static final int PORT=6669;
     protected static int TIMEOUT=1000; // should override super
@@ -89,10 +87,6 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     
     public void setSettings() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-    }
-
-    public static void globalSetUp() throws Exception {
-
     }
     
     public void setUp() throws Exception {
@@ -210,7 +204,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         assertEquals(ppi.getPort(), 6355);
         
         assertEquals(ppi.getInetAddress(), 
-                ((BlockingConnection)connectionManager.getConnections().get(0)).getInetAddress()
+                (connectionManager.getConnections().get(0)).getInetAddress()
                 );
 
         // set up a ServerSocket to get give on
@@ -275,7 +269,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         ss.setSoTimeout(15*TIMEOUT);
 
         // send a reply with some PushProxy info
-        Set proxies = new IpPortSet();
+        Set<IpPort> proxies = new IpPortSet();
         proxies.add(new IpPortImpl("127.0.0.1", 7000));
         Response[] res = new Response[1];
         res[0] = responseFactory.createResponse(10, 10, "boalt.org");
