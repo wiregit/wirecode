@@ -1,0 +1,513 @@
+package com.limegroup.gnutella.downloader;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
+import org.limewire.net.SocketsManager;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.PrivilegedAccessor;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadServices;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.util.LimeTestCase;
+
+public class DownloadTestCase extends LimeTestCase {
+
+    private static final Log LOG = LogFactory.getLog(DownloadTestCase.class);
+
+    protected final GUID guid = new GUID(GUID.makeGuid());
+
+    protected static final String filePath = "com/limegroup/gnutella/downloader/DownloadTestData/";
+
+    protected File dataDir = CommonUtils.getResourceFile(filePath);
+
+    protected File saveDir = (CommonUtils.getResourceFile(filePath + "saved")).getAbsoluteFile();
+
+    // a random name for the saved file
+    protected final String savedFileName = "DownloadTester2834343.out";
+
+    protected File savedFile;
+
+    protected TestUploader[] testUploaders = new TestUploader[5];
+
+    protected int[] PORTS = { 6321, 6322, 6323, 6324, 6325 };
+
+    protected Object COMPLETE_LOCK = new Object();
+
+    protected boolean REMOVED = false;
+
+    // default to waiting for 2 defaults.
+    protected final long DOWNLOAD_WAIT_TIME = 1000 * 60 * 4;
+
+    protected boolean saveAltLocs = false;
+
+    protected Set validAlts = null;
+
+    protected Set invalidAlts = null;
+
+    protected Injector injector;
+
+    protected DownloadManager downloadManager;
+
+    protected ActivityCallbackStub activityCallback;
+
+    protected ManagedDownloader managedDownloader;
+
+    protected TigerTreeCache tigerTreeCache;
+
+    protected DownloadServices downloadServices;
+
+    protected AlternateLocationFactory alternateLocationFactory;
+
+    protected NetworkManagerStub networkManager;
+
+    protected UDPService udpService;
+
+    protected PushEndpointFactory pushEndpointFactory;
+
+    protected Acceptor acceptor;
+
+    protected VerifyingFileFactory verifyingFileFactory;
+
+    protected AltLocManager altLocManager;
+
+    protected FileManager fileManager;
+
+    protected SourceRankerFactory sourceRankerFactory;
+
+    protected ContentManager contentManager;
+
+    protected HeadPongFactory headPongFactory;
+
+    protected SocketsManager socketsManager;
+
+    protected MessageFactory messageFactory;
+
+    protected DownloadTestCase(String name) {
+        super(name);
+    }
+
+    protected void setUp() throws Exception {
+        // raise the download-bytes-per-sec so stealing is easier
+        DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
+
+        activityCallback = new MyCallback();
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ActivityCallback.class).toInstance(activityCallback);
+                bind(NetworkManager.class).to(NetworkManagerStub.class);
+                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+            }
+        });
+
+        networkManager = (NetworkManagerStub) injector.getInstance(NetworkManager.class);
+        networkManager.setAcceptedIncomingConnection(true);
+        networkManager.setAddress(NetworkUtils.getLocalAddress().getAddress());
+
+        ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector
+                .getInstance(ConnectionManager.class);
+        connectionManager.setConnected(true);
+
+        downloadManager = injector.getInstance(DownloadManager.class);
+        downloadManager.initialize();
+
+        Runnable click = new Runnable() {
+            public void run() {
+                downloadManager.measureBandwidth();
+            }
+        };
+
+        ScheduledExecutorService scheduledExecutorService = injector.getInstance(Key.get(
+                ScheduledExecutorService.class, Names.named("backgroundExecutor")));
+        scheduledExecutorService.scheduleWithFixedDelay(click, 0, NodeAssigner.TIMER_DELAY,
+                TimeUnit.MILLISECONDS);
+
+        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager.start();
+
+        acceptor = injector.getInstance(Acceptor.class);
+        networkManager.setPort(acceptor.getPort(false));
+
+        managedDownloader = null;
+
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        SSLSettings.TLS_OUTGOING.setValue(false);
+        SSLSettings.TLS_INCOMING.setValue(true);
+
+        // Don't wait for network connections for testing
+        RequeryManager.NO_DELAY = true;
+
+        for (int i = 0; i < testUploaders.length; i++) {
+            testUploaders[i] = injector.getInstance(TestUploader.class);
+            testUploaders[i].start("PORT_" + i, PORTS[i], false);
+        }
+
+        deleteAllFiles();
+
+        dataDir.mkdirs();
+        saveDir.mkdirs();
+
+        SharingSettings.setSaveDirectory(saveDir);
+
+        //Pick random name for file.
+        savedFile = new File(saveDir, savedFileName);
+        savedFile.delete();
+        ConnectionSettings.CONNECTION_SPEED.setValue(1000);
+
+        tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        tigerTreeCache.purgeTree(TestFile.hash());
+
+        downloadServices = injector.getInstance(DownloadServices.class);
+        alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+        udpService = injector.getInstance(UDPService.class);
+        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
+        altLocManager = injector.getInstance(AltLocManager.class);
+        fileManager = injector.getInstance(FileManager.class);
+        sourceRankerFactory = injector.getInstance(SourceRankerFactory.class);
+        contentManager = injector.getInstance(ContentManager.class);
+        headPongFactory = injector.getInstance(HeadPongFactory.class);
+        socketsManager = injector.getInstance(SocketsManager.class);
+        messageFactory = injector.getInstance(MessageFactory.class);
+    }
+
+    protected void tearDown() throws Exception {
+        for (int i = 0; i < testUploaders.length; i++) {
+            if (testUploaders[i] != null) {
+                testUploaders[i].reset();
+                testUploaders[i].stopThread();
+            }
+        }
+
+        deleteAllFiles();
+
+        if (injector != null)
+            injector.getInstance(
+                    Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")))
+                    .shutdownNow();
+    }
+
+    protected void deleteAllFiles() {
+        if (!dataDir.exists())
+            return;
+
+        File[] files = dataDir.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                if (files[i].getName().equalsIgnoreCase("incomplete"))
+                    deleteDirectory(files[i]);
+                else if (files[i].getName().equals(saveDir.getName()))
+                    deleteDirectory(files[i]);
+            }
+        }
+        dataDir.delete();
+    }
+
+    protected void deleteDirectory(File dir) {
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++)
+            files[i].delete();
+        dir.delete();
+    }
+
+    protected void tGeneric(RemoteFileDesc[] rfds) throws Exception {
+        tGeneric(rfds, new RemoteFileDesc[0]);
+    }
+
+    protected void tGeneric(RemoteFileDesc[] rfds, List<? extends RemoteFileDesc> alts)
+            throws Exception {
+        tGeneric(rfds, null, alts);
+    }
+
+    protected void tGeneric(RemoteFileDesc[] now, RemoteFileDesc[] later) throws Exception {
+        tGeneric(now, later, RemoteFileDesc.EMPTY_LIST);
+    }
+
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     */
+    protected void tGeneric(RemoteFileDesc[] rfds, RemoteFileDesc[] later,
+            List<? extends RemoteFileDesc> alts) throws Exception {
+        Downloader download = null;
+
+        download = downloadServices.download(rfds, alts, null, false);
+        if (later != null) {
+            Thread.sleep(100);
+            for (int i = 0; i < later.length; i++)
+                ((ManagedDownloader) download).addDownload(later[i], true);
+        }
+
+        waitForComplete();
+        if (isComplete())
+            LOG.debug("pass" + "\n");
+        else
+            fail("FAILED: complete corrupt");
+
+        IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
+        for (int i = 0; i < rfds.length; i++) {
+            File incomplete = ifm.getFile(rfds[i]);
+            VerifyingFile vf = ifm.getEntry(incomplete);
+            assertNull("verifying file should be null", vf);
+        }
+    }
+
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     */
+    protected void tGenericCorrupt(RemoteFileDesc[] rfds, RemoteFileDesc[] later) throws Exception {
+        Downloader download = null;
+
+        download = downloadServices.download(rfds, false, null);
+        if (later != null) {
+            Thread.sleep(100);
+            for (int i = 0; i < later.length; i++)
+                ((ManagedDownloader) download).addDownload(later[i], true);
+        }
+
+        waitForCorrupt();
+        if (isComplete())
+            fail("should be corrupt");
+        else
+            LOG.debug("pass");
+
+        IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
+        for (int i = 0; i < rfds.length; i++) {
+            File incomplete = ifm.getFile(rfds[i]);
+            VerifyingFile vf = ifm.getEntry(incomplete);
+            assertNull("verifying file should be null", vf);
+        }
+    }
+
+    /**
+     * Performs a generic resume download test.
+     */
+    protected void tResume(File incFile) throws Exception {
+        downloadServices.download(incFile);
+
+        waitForComplete();
+        if (isComplete())
+            LOG.debug("pass" + "\n");
+        else
+            fail("FAILED: complete corrupt");
+
+        IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
+        VerifyingFile vf = ifm.getEntry(incFile);
+        assertNull("verifying file should be null", vf);
+    }
+
+    protected RemoteFileDesc newRFD(int port, boolean useTLS) {
+        return new RemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
+                new byte[16], 100, false, 4, false, null, null, false, false, "", null, -1, useTLS);
+    }
+
+    protected RemoteFileDesc newRFDWithURN(int port, boolean useTLS) {
+        return newRFDWithURN(port, null, useTLS);
+    }
+
+    protected RemoteFileDesc newRFDWithURN(int port, String urn, boolean useTLS) {
+        Set<URN> set = new HashSet<URN>();
+        try {
+            // for convenience, don't require that they pass the urn.
+            // assume a null one is the TestFile's hash.
+            if (urn == null)
+                set.add(TestFile.hash());
+            else
+                set.add(URN.createSHA1Urn(urn));
+        } catch (Exception e) {
+            fail("SHA1 not created for: " + savedFile, e);
+        }
+        return new RemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
+                new byte[16], 100, false, 4, false, null, set, false, false, "", null, -1, useTLS);
+    }
+
+    protected RemoteFileDesc newRFDPush(int port, int suffix) throws Exception {
+        return newRFDPush(port, suffix, 1);
+    }
+
+    protected RemoteFileDesc newRFDPush(int port, int rfdSuffix, int proxySuffix) throws Exception {
+        PushAltLoc al = (PushAltLoc) alternateLocationFactory.create(guid.toHexString()
+                + ";127.0.0." + proxySuffix + ":" + port, TestFile.hash());
+        al.updateProxies(true);
+
+        Set<URN> urns = new HashSet<URN>();
+        urns.add(TestFile.hash());
+
+        return new RemoteFileDesc("127.0.0." + rfdSuffix, 6346, 0, savedFile.getName(), TestFile
+                .length(), 100, false, 1, false, null, urns, false, true, "ALT", 0, al
+                .getPushAddress());
+    }
+
+    /** Returns true if the complete file exists and is complete */
+    protected boolean isComplete() {
+        LOG.debug("file is " + savedFile.getPath());
+        if (savedFile.length() < TestFile.length()) {
+            LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()));
+            return false;
+        } else if (savedFile.length() > TestFile.length()) {
+            LOG.debug("File too large by: " + (savedFile.length() - TestFile.length()));
+            return false;
+        }
+        FileInputStream stream = null;
+        try {
+            stream = new FileInputStream(savedFile);
+            for (int i = 0;; i++) {
+                int c = stream.read();
+                if (c == -1)//eof
+                    break;
+                if ((byte) c != TestFile.getByte(i)) {
+                    LOG.debug("Bad byte at " + i + "\n");
+                    return false;
+                }
+            }
+        } catch (IOException ioe) {
+            //ioe.printStackTrace();
+            return false;
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+        return true;
+    }
+
+    protected final int CORRUPT = 1;
+
+    protected final int COMPLETE = 2;
+
+    protected final int INVALID = 3;
+
+    protected void waitForComplete(boolean corrupt) {
+        waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);
+    }
+
+    protected void waitForCorrupt() {
+        waitForCompleteImpl(CORRUPT);
+    }
+
+    protected void waitForInvalid() {
+        waitForCompleteImpl(INVALID);
+    }
+
+    protected void waitForComplete() {
+        waitForCompleteImpl(COMPLETE);
+    }
+
+    protected void waitForCompleteImpl(int state) {
+        synchronized (COMPLETE_LOCK) {
+            try {
+                REMOVED = false;
+                LOG.debug("starting wait");
+                COMPLETE_LOCK.wait(DOWNLOAD_WAIT_TIME);
+                LOG.debug("finished waiting");
+            } catch (InterruptedException e) {
+                LOG.debug("interrupted", e);
+                //good.
+            }
+        }
+
+        if (!REMOVED) {
+            downloadManager.remove(managedDownloader, false);
+            fail("download did not finish, last state was: " + managedDownloader.getState());
+        }
+
+        if (state == CORRUPT)
+            assertEquals("unexpected state", DownloadStatus.CORRUPT_FILE, managedDownloader
+                    .getState());
+        else if (state == INVALID)
+            assertEquals("unexpected state", DownloadStatus.INVALID, managedDownloader.getState());
+        else if (state == COMPLETE)
+            assertEquals("unexpected state", DownloadStatus.COMPLETE, managedDownloader.getState());
+        else
+            fail("bad expectation: " + state);
+    }
+
+    protected void waitForBusy(Downloader downloader) {
+        for (int i = 0; i < 12; i++) { //wait 12 seconds
+            if (downloader.getState() == DownloadStatus.BUSY)
+                return;
+            try {
+                Thread.sleep(1000);// try again after a second
+            } catch (InterruptedException e) {
+                fail("downloader unexpecteted interrupted", e);
+                return;
+            }
+        }
+        return;
+    }
+
+    protected final class MyCallback extends ActivityCallbackStub {
+
+        @Override
+        public void addDownload(Downloader d) {
+            managedDownloader = (ManagedDownloader) d;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void removeDownload(Downloader d) {
+            synchronized (COMPLETE_LOCK) {
+                REMOVED = true;
+                COMPLETE_LOCK.notify();
+            }
+
+            if (saveAltLocs) {
+                try {
+                    validAlts = new HashSet();
+                    validAlts.addAll((Set) PrivilegedAccessor.getValue(d, "validAlts"));
+
+                    invalidAlts = new HashSet();
+                    invalidAlts.addAll((Set) PrivilegedAccessor.getValue(d, "invalidAlts"));
+                } catch (Exception err) {
+                    throw new RuntimeException(err);
+                }
+            }
+        }
+    }
+
+}
