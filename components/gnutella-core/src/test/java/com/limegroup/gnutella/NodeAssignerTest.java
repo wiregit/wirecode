@@ -152,60 +152,241 @@ public class NodeAssignerTest extends LimeTestCase {
         assertTrue("should be connected", connectionServices.isConnected());
     }
     
-    public void testUltrapeerConnection() throws Exception{
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
-        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-
-        mockery.checking(new Expectations(){{
-            
-            // say we have good bandwidth
+    private Expectations buildBandwdithExpectations(final boolean good) throws Exception {
+        return new Expectations() {{
             one(upTracker).measureBandwidth();
             one(downTracker).measureBandwidth();
             // connection manager is not mocked
             
             one(upTracker).getMeasuredBandwidth();
-            will(returnValue(UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() + 2f));
+            will(returnValue(UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() + (good ? 2f : -2f)));
             one(downTracker).getMeasuredBandwidth();
-            will(returnValue(UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue() + 2f));
+            will(returnValue(UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue() +(good ? 2f : -2f)));
             
+        }};
+    }
+    
+    /**
+     * Builds an ultrapeer environment.
+     * 
+     * @param required if the checks are required or optional
+     */
+    private Expectations buildUltrapeerExpectations(
+            final boolean GUESSCapable,
+            final boolean acceptedIncoming,
+            final long lastQueryTime,
+            final boolean DHTEnabled,
+            final DHTMode currentMode,
+            boolean required
+            ) throws Exception {
+        
+        final int invocations = required ? 1 : 0;
+        
+        return new Expectations(){{
             
-            // set up some conditions for ultrapeer-ness
-            one(connectionServices).isSupernode();
+            // this is a required call
+            atLeast(1).of(connectionServices).isSupernode();
             will(returnValue(false));
-            one(networkManager).isGUESSCapable();
-            will(returnValue(true));
-            one(networkManager).acceptedIncomingConnection();
-            will(returnValue(true));
-            one(searchServices).getLastQueryTime();
-            will(returnValue(0l)); // long time ago
-            atLeast(1).of(networkManager).getAddress();
+            // annoying workaround for NetworkUtils.isPrivate
+            atLeast(invocations).of(networkManager).getAddress();
             will(returnValue(new byte[4]));
             
-            // we're currently not active and disabled
-            exactly(2).of(dhtManager).getDHTMode();
-            will(returnValue(DHTMode.INACTIVE));
-            one(dhtManager).isEnabled();
-            will(returnValue(false));
             
-        }});
+            atLeast(invocations).of(networkManager).isGUESSCapable();
+            will(returnValue(GUESSCapable));
+            atLeast(invocations).of(networkManager).acceptedIncomingConnection();
+            will(returnValue(acceptedIncoming));
+            atLeast(invocations).of(searchServices).getLastQueryTime();
+            will(returnValue(lastQueryTime)); 
+            atLeast(invocations).of(dhtManager).getDHTMode();
+            will(returnValue(currentMode));
+            atLeast(invocations).of(dhtManager).isEnabled();
+            will(returnValue(DHTEnabled));
+        }};
+    }
+    
+    public void testPromotesUltrapeer() throws Exception{
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+
+        // set up some conditions for ultrapeer-ness
+        // all of them are required
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE , true));
         
         assignerRunnable.run();
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertTrue(connectionManager.invoked.await(3, TimeUnit.SECONDS));
+        assertTrue(connectionManager.invoked.await(1, TimeUnit.SECONDS));
         assertEquals(4,connectionManager.demotes);
         mockery.assertIsSatisfied();
-        
-        // this should really be in a separate test
-//        testAcceptor.setAcceptsUltrapeers(true);
-//        connect();
-//        assertTrue("should be an ultrapeer", connectionManager.isActiveSupernode());
-//        assertTrue("should be passively connected to the DHT", dhtManager.isRunning() 
-//                && (dhtManager.getDHTMode() != DHTMode.ACTIVE));
-        
     }
     
+    public void testDoesNotPromoteIfSlow() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        // bandwidth not high enough
+        mockery.checking(buildBandwdithExpectations(false));
+        // all other conditions match, but not all will be checked
+        mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE , false));
+
+        assignerRunnable.run();
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+
+    public void testDoesNotPromoteIfNoUDP() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        // no UDP support
+        mockery.checking(buildUltrapeerExpectations(false, true, 0l, false, DHTMode.INACTIVE , false));
+        assignerRunnable.run();
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotPromoteIfNoTCP() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        // no tcp support
+        mockery.checking(buildUltrapeerExpectations(true, false, 0l, false, DHTMode.INACTIVE, false));
+        assignerRunnable.run();
+        
+        // we are ever_capable because of last time
+        assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotPromoteIfQueryTooSoon() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        // last query now
+        mockery.checking(buildUltrapeerExpectations(true, true, System.currentTimeMillis(), false, DHTMode.INACTIVE, false));
+        assignerRunnable.run();
+        
+        // we are ever_capable because of last time
+        assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotPromoteIfAverageUptimeLow() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        // uptime bad
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() - 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        // last query now
+        mockery.checking(buildUltrapeerExpectations(true, true, System.currentTimeMillis(), false, DHTMode.INACTIVE, false));
+        assignerRunnable.run();
+
+        // did not become capable this time either
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotPromoteIfNeverIncoming() throws Exception {
+        // never incoming
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        // everything else is fine
+        mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE, false));
+        assignerRunnable.run();
+
+        // did not become capable this time either
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotPromoteIfDHTActive() throws Exception {
+        // disallow switch to ultrapeer
+        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(0f);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        // pretend some time passed - the uptime counter in NodeAssigner is very hacky
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime", new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        // enabled and active DHT
+        mockery.checking(buildUltrapeerExpectations(true, true, 0l, true, DHTMode.ACTIVE, false));
+        
+        // but we're not an active ultrapeer and can receive solicited
+        mockery.checking(new Expectations(){{
+            one(connectionServices).isActiveSuperNode();
+            will(returnValue(false));
+            one(networkManager).canReceiveSolicited();
+            will(returnValue(true));
+        }});
+        
+        // but we've been up long enough tob e active in the DHT
+        connectionManager.avgUptime = DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1;
+        
+        assignerRunnable.run();
+
+        assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testPromotesFromActiveDHTIfAllowed() throws Exception {
+        // disallow switch to ultrapeer
+        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1f);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        
+        // pretend some time passed - the uptime counter in NodeAssigner is very hacky
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime", new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        // enabled and active DHT
+        mockery.checking(buildUltrapeerExpectations(true, true, 0l, true, DHTMode.ACTIVE, false));
+        
+        // but we're not an active ultrapeer and can receive solicited
+        mockery.checking(new Expectations(){{
+            one(connectionServices).isActiveSuperNode();
+            will(returnValue(false));
+            one(networkManager).canReceiveSolicited();
+            will(returnValue(true));
+        }});
+        
+        
+        
+        // but we've been up long enough tob e active in the DHT
+        connectionManager.avgUptime = DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1;
+        
+        assignerRunnable.run();
+
+        assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        assertTrue(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        mockery.assertIsSatisfied();
+    }
+    
+    
     public void testLeafToUltrapeerPromotion() throws Exception{
+        fail("rewrite this");
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         ConnectionManager connectionManager = injector.getInstance(ConnectionManager.class);
         DHTManager dhtManager = injector.getInstance(DHTManager.class);
@@ -227,6 +408,7 @@ public class NodeAssignerTest extends LimeTestCase {
     }
     
     public void testDHTtoUltrapeerSwitch() throws Exception{
+        fail("rewrite this");
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         DHTManager dhtManager = injector.getInstance(DHTManager.class);
         NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
@@ -317,6 +499,7 @@ public class NodeAssignerTest extends LimeTestCase {
     
     private class MyConnectionManager extends ConnectionManagerStub {
         volatile int demotes = -1;
+        volatile long avgUptime;
         private final CountDownLatch invoked = new CountDownLatch(1);
         public MyConnectionManager() {
             super(null, null, null, null, null,
@@ -328,6 +511,10 @@ public class NodeAssignerTest extends LimeTestCase {
         public void tryToBecomeAnUltrapeer(int demotes) {
             this.demotes = demotes;
             invoked.countDown();
+        }
+        
+        public long getCurrentAverageUptime() {
+            return avgUptime;
         }
     }
 }
