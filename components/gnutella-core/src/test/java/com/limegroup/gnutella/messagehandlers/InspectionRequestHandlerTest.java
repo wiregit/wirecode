@@ -17,6 +17,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
@@ -56,13 +57,12 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
         injector = LimeTestUtils.createInjector(m);
     }
 
-    @SuppressWarnings("unused")
     public void testLoadsProperties() throws Exception {
         final File props = new File(CommonUtils.getCurrentDirectory(),"inspection.props");
         mockery.checking(new Expectations() {{
             one(inspector).load(props);
         }});
-        InspectionRequestHandler irh = injector.getInstance(InspectionRequestHandler.class);
+        injector.getInstance(InspectionRequestHandler.class); // loads the props
         mockery.assertIsSatisfied();
     }
     
@@ -79,6 +79,7 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
             one(request).requestsTimeStamp();
             will(returnValue(Boolean.TRUE));
             allowing(request).getGUID();
+            will(returnValue(new GUID().bytes()));
             one(inspector).inspect("asdf");
             one(handler).reply((Message)with(Matchers.instanceOf(InspectionResponse.class)));
             one(messageRouter).forwardInspectionRequestToLeaves(request);
