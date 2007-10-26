@@ -3,6 +3,7 @@ package com.limegroup.gnutella.uploader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -24,8 +26,12 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.io.LocalSocketAddressService;
-import org.limewire.net.ConnectionDispatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matchers;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.api.Action;
+import org.jmock.api.Invocation;
 import org.limewire.net.HttpClientManager;
 import org.limewire.util.CommonUtils;
 
@@ -36,15 +42,14 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
+import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.RoutedConnectionStub;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
@@ -57,6 +62,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.connection.ConnectionCapabilities;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -72,7 +79,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AltLocUploadTest extends LimeTestCase {
@@ -120,6 +126,8 @@ public class AltLocUploadTest extends LimeTestCase {
     private Injector injector;
 
     private FileManager fileManager;
+    
+    private LifecycleManager lifecycleManager;
 
     public AltLocUploadTest(String name) {
         super(name);
@@ -160,10 +168,14 @@ public class AltLocUploadTest extends LimeTestCase {
             }
         });
 
+
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager.start();
         uploadManager = (TestUploadManager) injector.getInstance(UploadManager.class);
         
-        startServices();
-        
+//        startServices();
+        fileManager = injector.getInstance(FileManager.class);
+        fileManager.loadSettingsAndWait(2000);
         fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
         assertNotNull(fd);
         
@@ -182,8 +194,10 @@ public class AltLocUploadTest extends LimeTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        stopServices();
-        LimeTestUtils.waitForNIO();
+//        stopServices();
+        lifecycleManager.shutdown();
+        Thread.sleep(1000);
+//        LimeTestUtils.waitForNIO();
     }
 
     private void doSettings() throws UnknownHostException {
@@ -208,34 +222,6 @@ public class AltLocUploadTest extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
     }
-
-    private void startServices() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-        
-        HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
-        httpAcceptor.start();
-        
-        uploadManager.start();
-        
-        // make sure the FileDesc objects in file manager are up-to-date
-        fileManager = injector.getInstance(FileManager.class);
-        fileManager.startAndWait(2000);
-        
-        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
-        connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
-        
-        Acceptor acceptor = injector.getInstance(Acceptor.class);        
-        acceptor.setListeningPort(PORT);
-        acceptor.start();
-        
-        LimeTestUtils.waitForNIO();
-    }
-
-    private void stopServices() throws Exception {
-        Acceptor acceptor = injector.getInstance(Acceptor.class);
-        acceptor.setListeningPort(0);
-        acceptor.shutdown();
-    }    
 
     public void testFALTNotRequested() throws Exception {
         URN sha1 = URN.createSHA1Urn(hash);
@@ -1017,6 +1003,8 @@ public class AltLocUploadTest extends LimeTestCase {
                 HeadPong pong = (HeadPong) messageFactory.read(bais);
                 if (pong.getAltLocs() == null || pong.getAltLocs().isEmpty())
                     break;
+            } catch (IOException iox) {
+                fail("didn't get response "+i,iox);
             } finally {
                 if (sock != null)
                     sock.close();
@@ -1033,22 +1021,58 @@ public class AltLocUploadTest extends LimeTestCase {
         MessageRouter messageRouter = injector.getInstance(MessageRouter.class);
         
         FilterSettings.FILTER_HASH_QUERIES.setValue(false); // easier with hash
-        MyReplyHandler handler = new MyReplyHandler();
+        
+        Mockery mockery = new Mockery();
+        final RoutedConnection handler = mockery.mock(RoutedConnection.class);
+        final ConnectionCapabilities capabilities = mockery.mock(ConnectionCapabilities.class);
 
         assertTrue(altLocManager.hasAltlocs(fd.getSHA1Urn()));
         int i = 0;
         for (; i < 20; i++) {
-            QueryRequest request = queryRequestFactory.createQuery(fd.getSHA1Urn());
+            
+            final QueryRequest request = queryRequestFactory.createQuery(fd.getSHA1Urn());
+            final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
+            final Action checkAlts = new Action() {
+
+                public void describeTo(Description description) {
+                    description.appendText("checks if query reply has altlocs");
+                }
+
+                public Object invoke(Invocation invocation) throws Throwable {
+                    QueryReply reply = (QueryReply) invocation.getParameter(0);
+                    replyRef.set(reply);
+                    return null;
+                }
+            };
+            mockery.checking(new Expectations(){{
+                one(handler).handleQueryReply(with(Matchers.notNullValue(QueryReply.class)), with(Matchers.nullValue(ReplyHandler.class)));
+                will(checkAlts);
+                
+                // various stubbed out methods
+                allowing(handler).isOpen();
+                will(returnValue(true));
+                allowing(handler).getConnectionCapabilities();
+                will(returnValue(capabilities));
+                allowing(capabilities).isOldLimeWire();
+                will(returnValue(false));
+                allowing(handler).isPersonalSpam(request);
+                will(returnValue(false));
+                allowing(handler).isSupernodeClientConnection();
+                will(returnValue(false));
+                allowing(handler).isGoodUltrapeer();
+                will(returnValue(false));
+            }});
+            
             messageRouter.handleMessage(request, handler);
-            assertNotNull(handler.received);
+            mockery.assertIsSatisfied();
+            QueryReply replied = replyRef.get();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            handler.received.write(baos);
+            replied.write(baos);
             ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
             QueryReply reply = (QueryReply) messageFactory.read(bais);
             Response resp = reply.getResultsArray()[0];
             if (resp.getLocations().isEmpty())
                 break;
-            handler.received = null;
         }
 
         assertGreaterThan(1, i);
@@ -1353,15 +1377,4 @@ public class AltLocUploadTest extends LimeTestCase {
             activeUploads.clear();
         }
     }
-
-    private static class MyReplyHandler extends RoutedConnectionStub {
-        public QueryReply received;
-
-        public void handleQueryReply(QueryReply queryReply,
-                ReplyHandler receivingConnection) {
-            received = queryReply;
-        }
-
-    }
-
 }
