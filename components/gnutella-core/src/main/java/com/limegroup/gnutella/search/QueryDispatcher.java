@@ -43,7 +43,7 @@ public final class QueryDispatcher implements Runnable {
         public Object inspect() {
             List<Object> l = new ArrayList<Object>(QUERIES.size());
             for(QueryHandler qh : QUERIES.values())
-                l.add(qh.inspect());
+                l.add(((Inspectable)qh).inspect());
             return l;
         }
     };

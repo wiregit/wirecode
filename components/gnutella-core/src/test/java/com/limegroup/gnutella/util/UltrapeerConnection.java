@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
 
@@ -12,6 +14,8 @@ import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.connection.ConnectionCapabilities;
+import com.limegroup.gnutella.connection.ConnectionCapabilitiesDelegator;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
@@ -58,8 +62,25 @@ public final class UltrapeerConnection extends NewConnection {
             }
         }
     }
-
-    public boolean supportsProbeQueries() {
-        return true;
+    
+    private final AtomicReference<ConnectionCapabilities> connectionCapabilitiesRef = new AtomicReference<ConnectionCapabilities>();
+    @Override
+    public ConnectionCapabilities getConnectionCapabilities() {
+        if (connectionCapabilitiesRef.get() == null)
+            connectionCapabilitiesRef.compareAndSet(null, new StubCapabilities(super
+                    .getConnectionCapabilities()));
+        return connectionCapabilitiesRef.get();
+    }
+    
+    
+    private static class StubCapabilities extends ConnectionCapabilitiesDelegator {
+        public StubCapabilities(ConnectionCapabilities delegate) {
+            super(delegate);
+        }
+        
+        @Override
+        public boolean supportsProbeQueries() {
+            return true;
+        }
     }
 }

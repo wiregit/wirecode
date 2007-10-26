@@ -1,13 +1,10 @@
 package com.limegroup.gnutella.search;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
-
-import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -15,7 +12,6 @@ import com.google.inject.Module;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -47,11 +43,6 @@ public final class QueryHandlerTest extends LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        
-    }
     
     private Injector createInjector(Module... modules) {
         Injector injector = LimeTestUtils.createInjector(modules);
@@ -71,25 +62,24 @@ public final class QueryHandlerTest extends LimeTestCase {
         
         ReplyHandler rh = testConnectionFactory.createUltrapeerConnection();        
         QueryRequest query = queryRequestFactory.createQuery("test", (byte)1);
-        QueryHandler qh = queryHandlerFactory.createHandler(query, rh, new TestResultCounter());
+        QueryHandlerImpl qh = (QueryHandlerImpl)queryHandlerFactory.createHandler(query, rh, new TestResultCounter());
         GnutellaConnection mc = testConnectionFactory.createUltrapeerConnection();
 
         qh.sendQueryToHost(query, mc);
 
-        // TODO remove reflection
-        List hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        List hostsQueried = qh.getQueriedConnections();
         assertEquals("should not have added host", 0, hostsQueried.size());
 
         // make sure we add the connection to the queries handlers
         // if it doesn't support probe queries and the TTL is 1
         qh.sendQueryToHost(query, testConnectionFactory.createLeafConnection(false));
-        hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        hostsQueried = qh.getQueriedConnections();
         assertEquals("should have added host", 1, hostsQueried.size());
 
         // make sure it adds the connection when the ttl is higher
         // than one and the connection supports probe queries
         qh.sendQueryToHost(queryRequestFactory.createQuery("test"), testConnectionFactory.createUltrapeerConnection());
-        hostsQueried = (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        hostsQueried = qh.getQueriedConnections();
         assertEquals("should have added host", 2, hostsQueried.size());
     }    
 
@@ -97,35 +87,18 @@ public final class QueryHandlerTest extends LimeTestCase {
      * Tests the method for calculating the next TTL.
      */
     public void testCalculateNewTTL() throws Exception {
-        Class[] params = new Class[]{Integer.TYPE, Integer.TYPE, Byte.TYPE};
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "calculateNewTTL",
-                                         params);        
-        byte ttl = getTTL(m, 2000, 15, (byte)5);
+        byte ttl = QueryHandlerImpl.calculateNewTTL(2000, 15, (byte)5);
         assertEquals("unexpected ttl", 3, ttl);
 
-        ttl = getTTL(m, 200, 15, (byte)5);
+        ttl = QueryHandlerImpl.calculateNewTTL(200, 15, (byte)5);
         assertEquals("unexpected ttl", 2, ttl);
 
 
-        ttl = getTTL(m, 200000, 15, (byte)4);
+        ttl = QueryHandlerImpl.calculateNewTTL(200000, 15, (byte)4);
         assertEquals("unexpected ttl", 4, ttl);
 
-        ttl = getTTL(m, 20000, 5, (byte)2);
+        ttl = QueryHandlerImpl.calculateNewTTL(20000, 5, (byte)2);
         assertEquals("unexpected ttl", 2, ttl);
-    }
-
-    /**
-     * Convenience method for getting the TTL from QueryHandler.
-     */
-    private byte getTTL(Method m, int hosts, int degree, byte maxTTL) 
-        throws Exception {
-        byte ttl = 
-            ((Byte)m.invoke(null, new Object[] {
-                new Integer(hosts), new Integer(degree), 
-                new Byte(maxTTL)})).byteValue();
-        return ttl;
     }
 
     /**
@@ -210,19 +183,11 @@ public final class QueryHandlerTest extends LimeTestCase {
     public void testCalculateNewHosts() throws Exception {
         createInjector();
         
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "calculateNewHosts",
-                                         new Class[]{BlockingConnection.class, 
-                                                     Byte.TYPE});
-        
         // test for a degree 19, ttl 4 network
         GnutellaConnection mc = testConnectionFactory.createNewConnection(19);
         int horizon = 0;
         for(int i=0; i<19; i++) {
-            horizon += 
-                ((Integer)m.invoke(null, 
-                                  new Object[]{mc, new Byte((byte)4)})).intValue();
+            horizon += QueryHandlerImpl.calculateNewHosts(mc, (byte)4);
         }                
         assertEquals("incorrect horizon", 117325, horizon);
 
@@ -230,9 +195,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         mc = testConnectionFactory.createNewConnection(30);
         horizon = 0;
         for(int i=0; i<30; i++) {
-            horizon += 
-                ((Integer)m.invoke(null, 
-                                   new Object[]{mc, new Byte((byte)3)})).intValue();
+            horizon += QueryHandlerImpl.calculateNewHosts(mc, (byte)3);
         }                
         assertEquals("incorrect horizon", 26130, horizon);
     }
@@ -258,7 +221,7 @@ public final class QueryHandlerTest extends LimeTestCase {
         
         // just send queries to all connections
         for(int i=0; i<numConnections; i++) {
-            handler.sendQuery(connections);
+            ((QueryHandlerImpl)handler).sendQuery(connections);
         }
         // just make sure all of the connections received the query
         Iterator<NewConnection> iter = connections.iterator();

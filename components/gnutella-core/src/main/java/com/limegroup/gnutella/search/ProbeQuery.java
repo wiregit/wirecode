@@ -41,7 +41,7 @@ final class ProbeQuery {
      */
     ProbeQuery(List<? extends RoutedConnection> connections, QueryHandler qh) {
         QUERY_HANDLER = qh;
-        List<List<RoutedConnection>> lists = createProbeLists(connections, qh.QUERY);
+        List<List<RoutedConnection>> lists = createProbeLists(connections, qh.getTemplateQueryRequest());
 
         TTL_1_PROBES = lists.get(0);
         TTL_2_PROBES = lists.get(1);        
