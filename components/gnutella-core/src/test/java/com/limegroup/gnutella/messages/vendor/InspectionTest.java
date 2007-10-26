@@ -25,7 +25,10 @@ import org.limewire.security.Verifier;
 import org.limewire.util.Base32;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
@@ -40,17 +43,16 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 
-@SuppressWarnings("unused")
+@Singleton
 public class InspectionTest extends ServerSideTestCase {
-
+    
     /**
      * Ultrapeer 1 UDP connection.
      */
     private DatagramSocket UDP_ACCESS;
     
-    @InspectablePrimitive("")
-    private String inspectedValue;
-    private String otherValue;
+    @InspectablePrimitive("") @SuppressWarnings("unused") private String inspectedValue;
+    @SuppressWarnings("unused") private String otherValue;
 
     private MessageFactory messageFactory;
 
@@ -96,7 +98,15 @@ public class InspectionTest extends ServerSideTestCase {
     
     @Override
     public void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                // This test uses the default SMV for inspection.
+                bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).to(SecureMessageVerifier.class);
+                // Binding must be applied otherwise InspectionUtil won't find it.
+                bind(InspectionTest.class).toInstance(InspectionTest.this);
+            }
+        });
         super.setUp(injector);
         messageFactory = injector.getInstance(MessageFactory.class);
         messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
@@ -220,6 +230,7 @@ public class InspectionTest extends ServerSideTestCase {
         // and forwarded to the leaf that supports it.
         InspectionRequestImpl received = BlockingConnectionUtils.getFirstMessageOfType(LEAF[0], InspectionRequestImpl.class);
         assertNull(BlockingConnectionUtils.getFirstMessageOfType(LEAF[1], InspectionRequestImpl.class));
+        assertNotNull(received);
         
         // the forwarded message should be identical
         assertEquals(routed.getGUID(), received.getGUID());

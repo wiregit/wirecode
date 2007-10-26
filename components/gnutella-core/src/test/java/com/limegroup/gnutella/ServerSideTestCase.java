@@ -66,11 +66,6 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
     protected Injector injector;
 
-	/**
-	 * The central Ultrapeer used in the test.
-	 */
-	//protected static RouterService ROUTER_SERVICE;
-
     public ServerSideTestCase(String name) {
         super(name);
     }
@@ -87,7 +82,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         }
     }
 
-    public final void doSettings() throws Exception {
+    protected final void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
@@ -120,20 +115,20 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	/**
 	 * Can be overridden in subclasses.
 	 */
-	public void setSettings() throws Exception {
+    protected void setSettings() throws Exception {
 	}
 	
 	/**
 	 * Can be overriden in subclasses. Returns 2 by default.
 	 */
-	public int getNumberOfUltrapeers() {
+    protected int getNumberOfUltrapeers() {
 	    return 2;
 	}
 	
 	/**
      * Can be overriden in subclasses. Returns 2 by default.
      */
-	public int getNumberOfLeafpeers() {
+    protected int getNumberOfLeafpeers() {
 	    return 2;
 	}
 	
@@ -141,7 +136,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	 * Can be overridden in subclasses.
 	 * @throws Exception 
 	 */
-	public void setUpQRPTables() throws Exception {
+    protected void setUpQRPTables() throws Exception {
 	    
 	}
     
@@ -149,7 +144,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         setUp(LimeTestUtils.createInjector());
     }
     
-    public void setUp(Injector injector) throws Exception {
+    protected void setUp(Injector injector) throws Exception {
         doSettings();
         
         this.injector = injector;
