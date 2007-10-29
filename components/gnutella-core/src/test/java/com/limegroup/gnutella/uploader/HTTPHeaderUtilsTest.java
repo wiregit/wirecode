@@ -26,6 +26,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -201,7 +202,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         
     /** A fake ConnectionManager with custom proxies. */
     @Singleton
-    private static class StubConnectionManager extends ConnectionManager {
+    private static class StubConnectionManager extends ConnectionManagerImpl {
 
         @Inject
         public StubConnectionManager(NetworkManager networkManager,

@@ -39,6 +39,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -562,7 +563,7 @@ public class PushUploadTest extends LimeTestCase {
     }
 
     @Singleton
-    private static class MyConnectionManager extends ConnectionManager {
+    private static class MyConnectionManager extends ConnectionManagerImpl {
 
         private Set<Connectable> proxies = new TreeSet<Connectable>();
 

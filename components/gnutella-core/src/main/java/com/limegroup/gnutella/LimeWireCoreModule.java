@@ -330,6 +330,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ByteBufferCache.class).toProvider(ByteBufferCacheProvider.class);
         bind(ResponseVerifier.class).to(ResponseVerifierImpl.class);
         bind(HandshakeServices.class).to(HandshakeServicesImpl.class);
+        bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

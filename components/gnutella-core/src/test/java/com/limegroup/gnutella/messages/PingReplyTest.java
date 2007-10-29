@@ -27,6 +27,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
@@ -1123,7 +1124,7 @@ public class PingReplyTest extends LimeTestCase {
      * number of free leaf and ultrapeer slots.
      */
     @Singleton
-    private static class TestConnectionManager extends ConnectionManager {
+    private static class TestConnectionManager extends ConnectionManagerImpl {
         private int NUM_FREE_NON_LEAF_SLOTS;
         private int NUM_FREE_LEAF_SLOTS;
 

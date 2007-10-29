@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageRouter;
@@ -36,7 +36,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * Helper class that supplies the list of connections for searching.
  */
 @Singleton
-public class TestConnectionManager extends ConnectionManager {
+public class TestConnectionManager extends ConnectionManagerImpl {
     
     /**
      * The list of ultrapeer <tt>Connection</tt> instances

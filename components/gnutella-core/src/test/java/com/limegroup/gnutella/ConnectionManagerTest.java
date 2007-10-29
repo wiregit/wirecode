@@ -162,19 +162,19 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testAllowUltrapeer2UltrapeerConnection() throws Exception {
         HandshakeResponse hr = createTestResponse("Morpheus 3.3");
-        boolean allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
+        boolean allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
         assertFalse("connection should not have been allowed", allow);
         
         hr = createTestResponse("Bearshare 3.3");
-        allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
+        allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("LimeWire 3.3");
-        allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
+        allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("Shareaza 3.3");
-        allow = ConnectionManager.allowUltrapeer2UltrapeerConnection(hr);
+        allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
     }
     
@@ -186,19 +186,19 @@ public class ConnectionManagerTest extends LimeTestCase {
     public void testAllowUltrapeer2LeafConnection() throws Exception {
         
         HandshakeResponse hr = createTestResponse("Morpheus 3.3");
-        boolean allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
+        boolean allow = ConnectionManagerImpl.allowUltrapeer2LeafConnection(hr);
         assertFalse("connection should not have been allowed", allow);
         
         hr = createTestResponse("Bearshare 3.3");
-        allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
+        allow = ConnectionManagerImpl.allowUltrapeer2LeafConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("LimeWire 3.3");
-        allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
+        allow = ConnectionManagerImpl.allowUltrapeer2LeafConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("Shareaza 3.3");
-        allow = ConnectionManager.allowUltrapeer2LeafConnection(hr);
+        allow = ConnectionManagerImpl.allowUltrapeer2LeafConnection(hr);
         assertTrue("connection should have been allowed", allow);
     }    
 
