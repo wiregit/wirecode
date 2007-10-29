@@ -192,7 +192,7 @@ public final class CreationTimeCache {
     /**
      * Clears away any URNs for files that do not exist anymore.
      */
-    public synchronized void pruneTimes() {
+    public void pruneTimes() {
         pruneTimes(true);
     }
 
@@ -255,7 +255,7 @@ public final class CreationTimeCache {
      * want all, give Integer.MAX_VALUE.
      * @return a List ordered by younger URNs.
      */
-    public synchronized List<URN> getFiles(final int max)
+    public List<URN> getFiles(final int max)
         throws IllegalArgumentException {
         return getFiles(null, max);
     }    
@@ -324,7 +324,7 @@ public final class CreationTimeCache {
 
     /** Returns all of the files URNs, from youngest to oldest.
      */
-    public synchronized List<URN> getFiles() {
+    public List<URN> getFiles() {
         return getFiles(Integer.MAX_VALUE);
     }
     
