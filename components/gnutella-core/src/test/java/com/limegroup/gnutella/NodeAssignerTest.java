@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +31,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -50,7 +48,7 @@ public class NodeAssignerTest extends LimeTestCase {
     private ConnectionServices connectionServices;
     private NetworkManager networkManager;
     private Mockery mockery;
-    private MyConnectionManager connectionManager;
+    private ConnectionManager cManager;
     private SearchServices searchServices;
     
     public NodeAssignerTest(String name) {
@@ -73,8 +71,8 @@ public class NodeAssignerTest extends LimeTestCase {
         dhtManager = mockery.mock(DHTManager.class);
         connectionServices = mockery.mock(ConnectionServices.class);
         networkManager = mockery.mock(NetworkManager.class);
-        connectionManager = new MyConnectionManager();
         searchServices = mockery.mock(SearchServices.class);
+        cManager = mockery.mock(ConnectionManager.class);
         
         final ScheduledExecutorService ses = new ScheduledExecutorServiceStub() {
 
@@ -95,7 +93,7 @@ public class NodeAssignerTest extends LimeTestCase {
                 bind(NetworkManager.class).toInstance(networkManager);
                 bind(ConnectionServices.class).toInstance(connectionServices);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(ses);
-                bind(ConnectionManager.class).toInstance(connectionManager);
+                bind(ConnectionManager.class).toInstance(cManager);
                 bind(SearchServices.class).toInstance(searchServices);
             } 
         });
@@ -156,12 +154,14 @@ public class NodeAssignerTest extends LimeTestCase {
         return new Expectations() {{
             one(upTracker).measureBandwidth();
             one(downTracker).measureBandwidth();
-            // connection manager is not mocked
+            one(cManager).measureBandwidth();
             
             one(upTracker).getMeasuredBandwidth();
             will(returnValue(UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() + (good ? 2f : -2f)));
             one(downTracker).getMeasuredBandwidth();
             will(returnValue(UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue() +(good ? 2f : -2f)));
+            allowing(cManager).getMeasuredUpstreamBandwidth();
+            allowing(cManager).getMeasuredDownstreamBandwidth();
             
         }};
     }
@@ -205,6 +205,15 @@ public class NodeAssignerTest extends LimeTestCase {
         }};
     }
     
+    private Expectations buildPromotionExpectations(final boolean promote) {
+        return new Expectations(){{
+            if (promote)
+                one(cManager).tryToBecomeAnUltrapeer(4);
+            else
+                never(cManager).tryToBecomeAnUltrapeer(4);
+        }};
+    }
+    
     public void testPromotesUltrapeer() throws Exception{
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
@@ -214,11 +223,11 @@ public class NodeAssignerTest extends LimeTestCase {
         // all of them are required
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE , true));
+        mockery.checking(buildPromotionExpectations(true));
         
         assignerRunnable.run();
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertTrue(connectionManager.invoked.await(1, TimeUnit.SECONDS));
-        assertEquals(4,connectionManager.demotes);
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -231,10 +240,12 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildBandwdithExpectations(false));
         // all other conditions match, but not all will be checked
         mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE , false));
+        // will not get promoted
+        mockery.checking(buildPromotionExpectations(false));
 
         assignerRunnable.run();
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
 
@@ -246,9 +257,11 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildBandwdithExpectations(true));
         // no UDP support
         mockery.checking(buildUltrapeerExpectations(false, true, 0l, false, DHTMode.INACTIVE , false));
+        // will not get promoted
+        mockery.checking(buildPromotionExpectations(false));
         assignerRunnable.run();
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -260,11 +273,13 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildBandwdithExpectations(true));
         // no tcp support
         mockery.checking(buildUltrapeerExpectations(true, false, 0l, false, DHTMode.INACTIVE, false));
+        // will not get promoted
+        mockery.checking(buildPromotionExpectations(false));
         assignerRunnable.run();
         
         // we are ever_capable because of last time
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -276,11 +291,13 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildBandwdithExpectations(true));
         // last query now
         mockery.checking(buildUltrapeerExpectations(true, true, System.currentTimeMillis(), false, DHTMode.INACTIVE, false));
+        // will not get promoted
+        mockery.checking(buildPromotionExpectations(false));
         assignerRunnable.run();
         
         // we are ever_capable because of last time
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -291,13 +308,14 @@ public class NodeAssignerTest extends LimeTestCase {
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         
         mockery.checking(buildBandwdithExpectations(true));
-        // last query now
-        mockery.checking(buildUltrapeerExpectations(true, true, System.currentTimeMillis(), false, DHTMode.INACTIVE, false));
+        mockery.checking(buildUltrapeerExpectations(true, true, 0L, false, DHTMode.INACTIVE, false));
+        // will not get promoted
+        mockery.checking(buildPromotionExpectations(false));
         assignerRunnable.run();
 
         // did not become capable this time either
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -310,11 +328,13 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildBandwdithExpectations(true));
         // everything else is fine
         mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE, false));
+        // will not get promoted
+        mockery.checking(buildPromotionExpectations(false));
         assignerRunnable.run();
 
         // did not become capable this time either
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -333,20 +353,23 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildUltrapeerExpectations(true, true, 0l, true, DHTMode.ACTIVE, false));
         
         // but we're not an active ultrapeer and can receive solicited
+        // and we've been up long enough tob e active in the DHT
         mockery.checking(new Expectations(){{
             one(connectionServices).isActiveSuperNode();
             will(returnValue(false));
             one(networkManager).canReceiveSolicited();
             will(returnValue(true));
+            atLeast(1).of(cManager).getCurrentAverageUptime();
+            will(returnValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1));
         }});
         
-        // but we've been up long enough tob e active in the DHT
-        connectionManager.avgUptime = DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1;
+        // will not get promoted
+        mockery.checking(buildPromotionExpectations(false));
         
         assignerRunnable.run();
 
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertFalse(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -365,22 +388,23 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildUltrapeerExpectations(true, true, 0l, true, DHTMode.ACTIVE, false));
         
         // but we're not an active ultrapeer and can receive solicited
+        // but we've been up long enough tob e active in the DHT
         mockery.checking(new Expectations(){{
             one(connectionServices).isActiveSuperNode();
             will(returnValue(false));
             one(networkManager).canReceiveSolicited();
             will(returnValue(true));
+            atLeast(1).of(cManager).getCurrentAverageUptime();
+            will(returnValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1));
         }});
         
-        
-        
-        // but we've been up long enough tob e active in the DHT
-        connectionManager.avgUptime = DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1;
+        // will get promoted
+        mockery.checking(buildPromotionExpectations(true));
         
         assignerRunnable.run();
 
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        assertTrue(connectionManager.invoked.await(1, TimeUnit.SECONDS));
+        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -494,27 +518,6 @@ public class NodeAssignerTest extends LimeTestCase {
                 serverSocket.close();
             if(incomingConnection != null)
                 incomingConnection.close();
-        }
-    }
-    
-    private class MyConnectionManager extends ConnectionManagerStub {
-        volatile int demotes = -1;
-        volatile long avgUptime;
-        private final CountDownLatch invoked = new CountDownLatch(1);
-        public MyConnectionManager() {
-            super(null, null, null, null, null,
-                    null, null, null, null,
-                    null, null, null, null,
-                    null, null);
-        }
-        
-        public void tryToBecomeAnUltrapeer(int demotes) {
-            this.demotes = demotes;
-            invoked.countDown();
-        }
-        
-        public long getCurrentAverageUptime() {
-            return avgUptime;
         }
     }
 }
