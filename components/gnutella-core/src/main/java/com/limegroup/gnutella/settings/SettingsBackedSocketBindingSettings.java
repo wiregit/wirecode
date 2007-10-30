@@ -4,6 +4,10 @@ import org.limewire.net.SocketBindingSettings;
 
 import com.google.inject.Singleton;
 
+/**
+ * An implementation of {@link SocketBindingSettings} that is based on
+ * LimeWire's settings from {@link ConnectionSettings}.
+ */
 @Singleton
 public class SettingsBackedSocketBindingSettings implements SocketBindingSettings {
 

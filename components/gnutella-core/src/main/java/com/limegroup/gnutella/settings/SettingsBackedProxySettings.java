@@ -4,15 +4,23 @@ import org.limewire.net.ProxySettings;
 
 import com.google.inject.Singleton;
 
+/**
+ * An implementation of {@link ProxySettings} that is based on LimeWire's
+ * settings from {@link ConnectionSettings}.
+ */
 @Singleton
 public class SettingsBackedProxySettings implements ProxySettings {
 
     public ProxyType getCurrentProxyType() {
-        switch(ConnectionSettings.CONNECTION_METHOD.getValue()) {
-        case ConnectionSettings.C_HTTP_PROXY: return ProxyType.HTTP;
-        case ConnectionSettings.C_SOCKS4_PROXY: return ProxyType.SOCKS4;
-        case ConnectionSettings.C_SOCKS5_PROXY: return ProxyType.SOCKS5;
-        default: return ProxyType.NONE; 
+        switch (ConnectionSettings.CONNECTION_METHOD.getValue()) {
+        case ConnectionSettings.C_HTTP_PROXY:
+            return ProxyType.HTTP;
+        case ConnectionSettings.C_SOCKS4_PROXY:
+            return ProxyType.SOCKS4;
+        case ConnectionSettings.C_SOCKS5_PROXY:
+            return ProxyType.SOCKS5;
+        default:
+            return ProxyType.NONE;
         }
     }
 
