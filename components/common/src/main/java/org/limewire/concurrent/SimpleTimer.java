@@ -25,10 +25,7 @@ import org.limewire.service.ErrorService;
  * This also exposes all the functionality of a {@link ScheduledExecutorService}.
  */
 public class SimpleTimer extends AbstractExecutorService implements ScheduledExecutorService {
-        
-    /** Timer to be shared. */
-    private static SimpleTimer sharedTimer;
-    
+            
     /** The underlying Timer of this SimpleTimer. */
     private final Timer TIMER;
     
