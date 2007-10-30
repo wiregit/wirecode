@@ -29,14 +29,6 @@ public class SimpleTimer extends AbstractExecutorService implements ScheduledExe
     /** Timer to be shared. */
     private static SimpleTimer sharedTimer;
     
-    /** Returns a timer that can be shared amongst everything. */
-    @Deprecated
-    public static synchronized SimpleTimer sharedTimer() {
-        if(sharedTimer == null)
-            sharedTimer = new SimpleTimer(true);        
-        return sharedTimer;
-    }
-    
     /** The underlying Timer of this SimpleTimer. */
     private final Timer TIMER;
     

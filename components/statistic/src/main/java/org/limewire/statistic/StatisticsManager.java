@@ -69,7 +69,7 @@ public final class StatisticsManager implements Runnable {
 	 * Constructor the the <tt>StatisticsManager</tt> -- only accessed once.
 	 */
 	private StatisticsManager() {
-	    ScheduledExecutorService executorService = defaultExecutor != null ? defaultExecutor : SimpleTimer.sharedTimer();
+	    ScheduledExecutorService executorService = defaultExecutor != null ? defaultExecutor : new SimpleTimer(true);
         executorService.scheduleWithFixedDelay(this, 0, 1000, TimeUnit.MILLISECONDS);
 	}
 

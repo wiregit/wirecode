@@ -139,7 +139,7 @@ public class Pools {
             }
             if(delay > 0) {
                 _evictor = new Evictor();
-                ScheduledExecutorService executorService = defaultExecutor != null ? defaultExecutor : SimpleTimer.sharedTimer();
+                ScheduledExecutorService executorService = defaultExecutor != null ? defaultExecutor : new SimpleTimer(true);
                 executorService.scheduleWithFixedDelay(_evictor, delay, delay, TimeUnit.MILLISECONDS);
             }
         }

@@ -49,7 +49,7 @@ public class MACCalculatorRepositoryManager {
      * Creates a token smith with the specified <tt>SettingsProvider</tt>
      */
     public MACCalculatorRepositoryManager(SettingsProvider provider) {
-        repository = new MACCalculatorRotator(defaultExecutor != null ? defaultExecutor : SimpleTimer.sharedTimer(),
+        repository = new MACCalculatorRotator(defaultExecutor != null ? defaultExecutor : new SimpleTimer(true),
                                               new TEAMACCalculatorFactory(),
                                               provider);
     }
