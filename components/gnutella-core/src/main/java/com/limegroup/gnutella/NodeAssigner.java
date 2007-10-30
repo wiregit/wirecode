@@ -1,12 +1,12 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.OSUtils;
 
@@ -111,6 +111,7 @@ public class NodeAssigner {
     private final SearchServices searchServices;
     private final Provider<DHTManager> dhtManager;
     private final ScheduledExecutorService backgroundExecutor;
+    private final Executor unlimitedExecutor;
     private final ConnectionServices connectionServices;
     
 
@@ -131,6 +132,7 @@ public class NodeAssigner {
                         SearchServices searchServices,
                         Provider<DHTManager> dhtManager,
                         @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                        @Named("unlimitedExecutor") Executor unlimitedExecutor,
                         ConnectionServices connectionServices) {
         this.uploadTracker = uploadTracker;
         this.downloadTracker = downloadTracker;  
@@ -140,6 +142,7 @@ public class NodeAssigner {
         this.dhtManager = dhtManager;
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
+        this.unlimitedExecutor = unlimitedExecutor;
     }
     
     /**
@@ -302,7 +305,7 @@ public class NodeAssigner {
                 }
             };
                 
-            ThreadExecutor.startThread(ultrapeerRunner, "UltrapeerAttemptThread");
+            unlimitedExecutor.execute(ultrapeerRunner);
             return;
         } 
         
@@ -513,7 +516,7 @@ public class NodeAssigner {
             }
         };
         
-        ThreadExecutor.startThread(init, "DHT-InitializeThread");
+        unlimitedExecutor.execute(init);
     }
     
     

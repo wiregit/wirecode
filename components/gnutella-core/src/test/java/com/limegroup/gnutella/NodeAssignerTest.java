@@ -1,16 +1,14 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.hamcrest.Matchers;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.util.PrivilegedAccessor;
@@ -18,28 +16,18 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.connection.BlockingConnection;
-import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NodeAssignerTest extends LimeTestCase {
     
-    private final int TEST_PORT = 6667;
-    
-    private TestAcceptor testAcceptor;
     private Injector injector;
     private NodeAssigner nodeAssigner;
     private BandwidthTracker upTracker, downTracker;
@@ -50,6 +38,11 @@ public class NodeAssignerTest extends LimeTestCase {
     private Mockery mockery;
     private ConnectionManager cManager;
     private SearchServices searchServices;
+    private final Executor immediateExecutor = new Executor() {
+        public void execute(Runnable r) {
+            r.run();
+        }
+    };
     
     public NodeAssignerTest(String name) {
         super(name);
@@ -95,16 +88,13 @@ public class NodeAssignerTest extends LimeTestCase {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(ses);
                 bind(ConnectionManager.class).toInstance(cManager);
                 bind(SearchServices.class).toInstance(searchServices);
+                bind(Executor.class).annotatedWith(Names.named("unlimitedExecutor")).toInstance(immediateExecutor);
             } 
         });
         nodeAssigner = injector.getInstance(NodeAssigner.class);
         
         nodeAssigner.start();
         assertNotNull(assignerRunnable);
-        
-        // TODO: figure out what is this for and is it necessary
-//        testAcceptor = new TestAcceptor();
-//        new ManagedThread(testAcceptor, "TestAcceptor").start();    
     }
     
     
@@ -133,22 +123,9 @@ public class NodeAssignerTest extends LimeTestCase {
     }
 
     protected void tearDown() throws Exception {
-        if(testAcceptor != null)
-            testAcceptor.shutdown();
-        Thread.sleep(1000);
+        nodeAssigner.stop();
     }
         
-    
-    public void connect() throws Exception {
-        ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
-        HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
-        hostCatcher.clear();
-        connectionServices.connect();
-        assertFalse("should not be connected", connectionServices.isConnected());
-        hostCatcher.add(new Endpoint("localhost", TEST_PORT + 1), true);
-        Thread.sleep(2000);
-        assertTrue("should be connected", connectionServices.isConnected());
-    }
     
     private Expectations buildBandwdithExpectations(final boolean good) throws Exception {
         return new Expectations() {{
@@ -184,8 +161,7 @@ public class NodeAssignerTest extends LimeTestCase {
         
         return new Expectations(){{
             
-            // this is a required call
-            atLeast(1).of(connectionServices).isSupernode();
+            atLeast(invocations).of(connectionServices).isSupernode();
             will(returnValue(false));
             // annoying workaround for NetworkUtils.isPrivate
             atLeast(invocations).of(networkManager).getAddress();
@@ -227,7 +203,6 @@ public class NodeAssignerTest extends LimeTestCase {
         
         assignerRunnable.run();
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -245,7 +220,6 @@ public class NodeAssignerTest extends LimeTestCase {
 
         assignerRunnable.run();
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
 
@@ -261,7 +235,6 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildPromotionExpectations(false));
         assignerRunnable.run();
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -279,7 +252,6 @@ public class NodeAssignerTest extends LimeTestCase {
         
         // we are ever_capable because of last time
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -297,7 +269,6 @@ public class NodeAssignerTest extends LimeTestCase {
         
         // we are ever_capable because of last time
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -315,7 +286,6 @@ public class NodeAssignerTest extends LimeTestCase {
 
         // did not become capable this time either
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -334,7 +304,40 @@ public class NodeAssignerTest extends LimeTestCase {
 
         // did not become capable this time either
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotPromoteIfSupernodeDisabled() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+
+        // user disabled
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
+        // everything else fine
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE , false));
+        mockery.checking(buildPromotionExpectations(false));
+        
+        assignerRunnable.run();
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotPromoteModemSpeed() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ApplicationSettings.AVERAGE_UPTIME.setValue(UltrapeerSettings.MIN_AVG_UPTIME.getValue() + 1);
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+
+        // modem connection
+        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.MODEM_SPEED_INT);
+        // everything else fine
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildUltrapeerExpectations(true, true, 0l, false, DHTMode.INACTIVE , false));
+        mockery.checking(buildPromotionExpectations(false));
+        
+        assignerRunnable.run();
+        assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         mockery.assertIsSatisfied();
     }
     
@@ -369,7 +372,6 @@ public class NodeAssignerTest extends LimeTestCase {
         assignerRunnable.run();
 
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
@@ -404,120 +406,252 @@ public class NodeAssignerTest extends LimeTestCase {
         assignerRunnable.run();
 
         assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
-        Thread.sleep(1000);
         mockery.assertIsSatisfied();
     }
     
     
-    public void testLeafToUltrapeerPromotion() throws Exception{
-        fail("rewrite this");
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
-        ConnectionManager connectionManager = injector.getInstance(ConnectionManager.class);
-        DHTManager dhtManager = injector.getInstance(DHTManager.class);
-        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
-        
-        lifecycleManager.start();
-        connect();
-        assertFalse("should be not be an ultrapeer", connectionManager.isSupernode());
-        networkManager.setAcceptedIncomingConnection(true);
-        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
-        testAcceptor.setAcceptsUltrapeers(true);
-        PrivilegedAccessor.setValue(nodeAssigner, "_lastUltrapeerAttempt", 
-                new Long(System.currentTimeMillis() - 24L*60L*60L*1000L));
-        
-        Thread.sleep(2 * NodeAssigner.TIMER_DELAY);
-        
-        assertTrue("should be an ultrapeer", connectionManager.isActiveSupernode());
-        assertNotEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
+    private Expectations buildDHTExpectations(
+            final DHTMode currentDHTMode,
+            final boolean enabled,
+            final boolean canReceiveSolicited,
+            final boolean isGUESSCapable,
+            final long currentAvgUptime,
+            final boolean supernode,
+            boolean required
+            ) {
+        final int invocations = required ? 1 : 0;
+        return new Expectations(){{
+            // annoying workaround for NetworkUtils.isPrivate
+            allowing(networkManager).getAddress();
+            will(returnValue(new byte[4]));
+            
+            // some stuff to prevent us from becoming an ultrapeer
+            allowing(networkManager).acceptedIncomingConnection();
+            will(returnValue(false));
+            allowing(searchServices).getLastQueryTime();
+            will(returnValue(System.currentTimeMillis()));
+            
+            
+            atLeast(invocations).of(dhtManager).getDHTMode();
+            will(returnValue(currentDHTMode));
+            atLeast(invocations).of(dhtManager).isEnabled();
+            will(returnValue(enabled));
+            
+            atLeast(invocations).of(networkManager).canReceiveSolicited();
+            will(returnValue(canReceiveSolicited));
+            atLeast(invocations).of(networkManager).isGUESSCapable();
+            will(returnValue(isGUESSCapable));
+            atLeast(invocations).of(cManager).getCurrentAverageUptime();
+            will(returnValue(currentAvgUptime));
+            
+            atLeast(invocations).of(connectionServices).isSupernode();
+            will(returnValue(supernode));
+            atLeast(invocations).of(connectionServices).isActiveSuperNode();
+            will(returnValue(supernode));
+            
+        }};
     }
     
-    public void testDHTtoUltrapeerSwitch() throws Exception{
-        fail("rewrite this");
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
-        DHTManager dhtManager = injector.getInstance(DHTManager.class);
-        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
-        ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
+    public void testAssignsActiveDHT() throws Exception {
         
-        lifecycleManager.start();
-        Thread.sleep(1000);
-        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(0);
-        testAcceptor.setAcceptsUltrapeers(false);
-        connect();
-        Thread.sleep(1000);
-        assertFalse("should not be an ultrapeer", connectionServices.isSupernode());
-        assertEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
-        testAcceptor.setAcceptsUltrapeers(true);
-        networkManager.setAcceptedIncomingConnection(true);
-        DHTSettings.SWITCH_TO_ULTRAPEER_PROBABILITY.setValue(1);
-        PrivilegedAccessor.setValue(nodeAssigner, "_lastUltrapeerAttempt", 
-                new Long(System.currentTimeMillis() - 24L*60L*60L*1000L));
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
         
-        Thread.sleep(2 * NodeAssigner.TIMER_DELAY);
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, true, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
         
-        assertNotEquals(DHTMode.ACTIVE, dhtManager.getDHTMode());
-        assertTrue("should be an ultrapeer", connectionServices.isSupernode());
+        mockery.checking(new Expectations(){{
+            one(dhtManager).start(DHTMode.ACTIVE);
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
     }
     
-    private class UltrapeerResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing)  {
-            Properties props = injector.getInstance(HeadersFactory.class).createUltrapeerHeaders("localhost"); 
-            props.put(HeaderNames.X_DEGREE, "42");           
-            return HandshakeResponse.createResponse(props);
-        }
+    public void testAssignsPassiveDHTIfUltrapeer() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue()));
         
-        public void setLocalePreferencing(boolean b) {}
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, true, 
+                DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                true, false));
+        
+        mockery.checking(new Expectations(){{
+            one(dhtManager).start(DHTMode.PASSIVE);
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
     }
     
-    private class NoUltrapeerResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing)  {
-            Properties props= injector.getInstance(HeadersFactory.class).createUltrapeerHeaders("localhost");
-            props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
-            return HandshakeResponse.createResponse(props);
-        }
+    public void testAssignsPassiveLeaf() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()));
         
-        public void setLocalePreferencing(boolean b) {}
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, false, // can't receive unsolicited 
+                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
+        
+        mockery.checking(new Expectations(){{
+            one(dhtManager).start(DHTMode.PASSIVE_LEAF);
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
     }
     
-    private class TestAcceptor implements Runnable {
-        private volatile boolean acceptsUltrapeers = true;        
-        private volatile BlockingConnection incomingConnection;
-        private volatile boolean keepRunning = true;
-        private volatile ServerSocket serverSocket;
+    public void testDoesNotAssignLowInitialUptime() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+
+        // no initial uptime
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, true, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
         
-        public void run(){
-            while(keepRunning) {
-                try {
-                    serverSocket=new ServerSocket(TEST_PORT+1);
-                    serverSocket.setSoTimeout(10000);
-                    Socket socket = serverSocket.accept();
-                    serverSocket.close();
-                    serverSocket = null;
-                    socket.setSoTimeout(1000);
-                    incomingConnection = injector.getInstance(BlockingConnectionFactory.class).createConnection(socket);
-                    if(acceptsUltrapeers) {
-                        incomingConnection.initialize(null, new UltrapeerResponder(), 0);
-                    } else {
-                        incomingConnection.initialize(null, new NoUltrapeerResponder(), 0);
-                    }
-                } catch (IOException e) {
-                    if(keepRunning)
-                        throw new RuntimeException(e);
-                }
-            }
-        }
+        mockery.checking(new Expectations(){{
+            never(dhtManager).start(with(Matchers.any(DHTMode.class)));
+        }});
         
-        public void setAcceptsUltrapeers(boolean acceptsUltrapeers) {
-            this.acceptsUltrapeers = acceptsUltrapeers;
-        }
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotAssignLowAverageUptime() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
+
+
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, true, 
+                0,         // no average uptime 
+                false, false));
         
-        public void shutdown() throws Exception {
-            keepRunning = false;
-            if(serverSocket != null)
-                serverSocket.close();
-            if(incomingConnection != null)
-                incomingConnection.close();
-        }
+        mockery.checking(new Expectations(){{
+            never(dhtManager).start(with(Matchers.any(DHTMode.class)));
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotAssignActiveIfNotHardcore() throws Exception {
+        // not accepted incoming previously therefore not hardcore
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, true, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
+        
+        mockery.checking(new Expectations(){{
+            one(dhtManager).start(DHTMode.PASSIVE_LEAF);
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testPassiveLeafDoesNotNeedHardCore() throws Exception {
+      // not accepted incoming previously therefore not hardcore
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, false, // can't receive unsolicited 
+                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
+        
+        mockery.checking(new Expectations(){{
+            one(dhtManager).start(DHTMode.PASSIVE_LEAF);
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotAssignDHTIfDisabled() throws Exception {
+        
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                false, true, true, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
+        
+        mockery.checking(new Expectations(){{
+            never(dhtManager).start(with(Matchers.any(DHTMode.class)));
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testStopsDHTWhenDisabled() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.ACTIVE, 
+                false, true, true, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
+        
+        mockery.checking(new Expectations(){{
+            one(dhtManager).stop();
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotAssignPassiveIfDisabled() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        DHTSettings.ENABLE_PASSIVE_DHT_MODE.setValue(false);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, true, 
+                DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                true, false));
+        
+        mockery.checking(new Expectations(){{
+            never(dhtManager).start(with(Matchers.any(DHTMode.class)));
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testDoesNotAssignPassiveLeafIfDisabled() throws Exception {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.setValue(false);
+        PrivilegedAccessor.setValue(nodeAssigner,"_currentUptime",new Long(DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()));
+        
+        mockery.checking(buildBandwdithExpectations(true));
+        mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
+                true, true, false, // can't receive unsolicited 
+                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()+1, 
+                false, false));
+        
+        mockery.checking(new Expectations(){{
+            never(dhtManager).start(with(Matchers.any(DHTMode.class)));
+        }});
+        
+        assignerRunnable.run();
+        mockery.assertIsSatisfied();
     }
 }
