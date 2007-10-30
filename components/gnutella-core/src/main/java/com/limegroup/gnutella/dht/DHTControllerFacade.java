@@ -11,7 +11,7 @@ import org.limewire.mojito.io.MessageDispatcherFactory;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
 
-/* This really isn't the best name for the object, but I don't know what'd be right. */
+/* TODO: This really isn't the best name for the object, but I don't know what'd be right. */
 public interface DHTControllerFacade {
 
     MessageDispatcherFactory getMessageDispatcherFactory();

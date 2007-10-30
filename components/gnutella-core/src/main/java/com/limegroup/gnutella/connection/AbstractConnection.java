@@ -28,6 +28,45 @@ import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
+/**
+ * A basic implementation of {@link Connection}. The only methods that
+ * subclasses must implement are <code>send</code> and <code>closeImpl</code>.
+ * However, in order to be useful in any manner, it is recommended that
+ * subclasses expose some way of starting the Connection. A blocking
+ * implementation might expose a <code>read</code> method that returns
+ * <code>Message</code>s as they're read. An asynchronous implementation (as
+ * used by implementations of {@link RoutedConnection} would expose a method to
+ * start receiving messages and would internally funnel them to a piece of code
+ * that would handle the incoming messages.
+ * <p>
+ * 
+ * <code>AbstractConnection</code> will maintain all features and capabilities
+ * sent & received by headers and vendor messages. Additionally, it will keep
+ * track of the bandwidth used by compressed connections (incoming or outgoing),
+ * TLS-encoded connections, and the raw bandwidth used without the wrapping
+ * protocols.
+ * <p>
+ * 
+ * An <code>AbstractConnection</code> can either be outgoing or incoming. If
+ * the class is constructed with a host/port, it is an outgoing connection and
+ * the socket must be set after the connection is finished with
+ * {@link #setSocket(Socket)}. Incoming connections must be constructed with a
+ * preconnected Socket.
+ * <p>
+ * 
+ * Subclasses should do the following to ensure that
+ * <code>AbstractConnection</code> is setup correctly.
+ * <ul>
+ * <li> Call {@link #initializeHandshake()} after connecting, prior to
+ * performing a handshake, to validate the connection is allowed.</li>
+ * <li> Call {@link #handshakeInitialized(Handshaker)} after the handshake is
+ * finished, to ensure all headers are processed correctly.</li>
+ * <li> Call {@link #processReadMessage(Message)} when a new
+ * <code>Message</code> is read, and {@link #processWrittenMessage(Message)}
+ * when a new <code>Message</code> is written. These ensure that the bandwidth
+ * statistics are kept up-to-date.</li>
+ * </ul>
+ */
 public abstract class AbstractConnection implements Connection {
 
     /** Lock for maintaining accurate data for when to allow ping forwarding. */
@@ -55,7 +94,7 @@ public abstract class AbstractConnection implements Connection {
 
     /** True if this was an outgoing connection. */
     private final boolean outgoing;
-    
+
     private volatile byte softMax;
 
     /**
@@ -95,7 +134,7 @@ public abstract class AbstractConnection implements Connection {
     private final NetworkManager networkManager;
 
     private final Acceptor acceptor;
-    
+
     private final SimpleProtocolBandwidthTracker simpleProtocolBandwidthTracker;
 
     /**
@@ -113,9 +152,10 @@ public abstract class AbstractConnection implements Connection {
      */
     AbstractConnection(String host, int port, ConnectType connectType,
             CapabilitiesVMFactory capabilitiesVMFactory,
-            MessagesSupportedVendorMessage supportedVendorMessage,
-            NetworkManager networkManager, Acceptor acceptor) {
-        this(host, port, connectType, null, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+            MessagesSupportedVendorMessage supportedVendorMessage, NetworkManager networkManager,
+            Acceptor acceptor) {
+        this(host, port, connectType, null, capabilitiesVMFactory, supportedVendorMessage,
+                networkManager, acceptor);
     }
 
     /**
@@ -125,17 +165,17 @@ public abstract class AbstractConnection implements Connection {
      *        and nothing else must have been read from the socket.
      */
     AbstractConnection(Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
-            MessagesSupportedVendorMessage supportedVendorMessage,
-            NetworkManager networkManager, Acceptor acceptor) {
+            MessagesSupportedVendorMessage supportedVendorMessage, NetworkManager networkManager,
+            Acceptor acceptor) {
         this(socket.getInetAddress().getHostAddress(), socket.getPort(), SSLUtils
                 .isTLSEnabled(socket) ? ConnectType.TLS : ConnectType.PLAIN, socket,
                 capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
     }
 
-    private AbstractConnection(String host, int port, ConnectType connectType, 
-            Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
-            MessagesSupportedVendorMessage supportedVendorMessage,
-            NetworkManager networkManager, Acceptor acceptor) {
+    private AbstractConnection(String host, int port, ConnectType connectType, Socket socket,
+            CapabilitiesVMFactory capabilitiesVMFactory,
+            MessagesSupportedVendorMessage supportedVendorMessage, NetworkManager networkManager,
+            Acceptor acceptor) {
         if (host == null)
             throw new NullPointerException("null host");
         if (!NetworkUtils.isValidPort(port))
@@ -152,14 +192,13 @@ public abstract class AbstractConnection implements Connection {
         this.connectionBandwidthStatistics = new ConnectionBandwidthStatisticsImpl();
         this.networkManager = networkManager;
         this.acceptor = acceptor;
-        this.simpleProtocolBandwidthTracker = new SimpleProtocolBandwidthTracker();        
+        this.simpleProtocolBandwidthTracker = new SimpleProtocolBandwidthTracker();
 
-        if(!outgoing) {
-            connectionBandwidthStatistics.setTlsOption(
-                    SSLUtils.isTLSEnabled(socket),
-                    SSLUtils.getSSLBandwidthTracker(socket));
+        if (!outgoing) {
+            connectionBandwidthStatistics.setTlsOption(SSLUtils.isTLSEnabled(socket), SSLUtils
+                    .getSSLBandwidthTracker(socket));
         }
-        
+
         connectionBandwidthStatistics.setRawBandwidthTracker(simpleProtocolBandwidthTracker);
     }
 
@@ -307,8 +346,7 @@ public abstract class AbstractConnection implements Connection {
     /** Sets the socket this is using. */
     protected void setSocket(Socket socket) {
         this.socket = socket;
-        getConnectionBandwidthStatistics().setTlsOption(
-                SSLUtils.isTLSEnabled(socket),
+        getConnectionBandwidthStatistics().setTlsOption(SSLUtils.isTLSEnabled(socket),
                 SSLUtils.getSSLBandwidthTracker(socket));
     }
 
@@ -377,6 +415,10 @@ public abstract class AbstractConnection implements Connection {
         closeImpl();
     }
 
+    /**
+     * This should be implemented by subclasses to close any resources they
+     * acquired during the lifetime of the connection.
+     */
     protected abstract void closeImpl();
 
     /*
@@ -470,15 +512,15 @@ public abstract class AbstractConnection implements Connection {
             return true;
         }
     }
-    
+
     protected void processReadMessage(Message m) {
         simpleProtocolBandwidthTracker.addRead(m.getTotalLength());
     }
-    
+
     protected void processWrittenMessage(Message m) {
         simpleProtocolBandwidthTracker.addWritten(m.getTotalLength());
     }
-    
+
     protected void initializeHandshake() throws IOException {
         // Check to see if close() was called while the socket was initializing
         if (!isOpen()) {
@@ -498,7 +540,7 @@ public abstract class AbstractConnection implements Connection {
         // TODO: move out of here!
         acceptor.setAddress(localAddress);
     }
-    
+
     protected byte getSoftMax() {
         return softMax;
     }

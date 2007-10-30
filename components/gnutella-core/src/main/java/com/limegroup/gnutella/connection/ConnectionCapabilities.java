@@ -4,6 +4,14 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 
+/**
+ * Defines the interface from which all capabilities of a {@link Connection} can
+ * be queried. Capabilities can range from those describes in headers to
+ * capabilities as expressed from specific vendor messages.
+ * <code>ConnectionCapabilities</code> also contains some methods that combine
+ * multiple headers & capabilities in order to return a coherent multi-value
+ * result, such as {@link #isOldLimeWire()), {@link #isGoodLeaf()} and others.
+ */
 public interface ConnectionCapabilities {
 
     public static enum Capability {
@@ -83,6 +91,10 @@ public interface ConnectionCapabilities {
      */
     public int remoteHostSupportsLeafGuidance();
 
+    /**
+     * @return -1 if the message isn't supported, else the version number
+     *         supported.
+     */
     public int remoteHostSupportsHeaderUpdate();
 
     /**
@@ -143,18 +155,15 @@ public interface ConnectionCapabilities {
      */
     public boolean isLimeWire();
 
+    /** Returns whether or not this is considered an 'old' LimeWire. */
     public boolean isOldLimeWire();
 
-    // inherit doc comment
     public boolean isGoodUltrapeer();
 
-    // inherit doc comment
     public boolean isGoodLeaf();
 
-    // inherit doc comment
     public boolean supportsPongCaching();
 
-    // implements ReplyHandler interface -- inherit doc comment
     public boolean isHighDegreeConnection();
 
     /**

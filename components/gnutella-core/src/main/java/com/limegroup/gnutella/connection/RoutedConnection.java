@@ -9,8 +9,16 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.routing.RouteTableMessage;
 
-// TODO: can ReplyHandler be taken out of this?  is only necessary for MessageRouter
+/**
+ * Extends {@link Connection} to provide more fine-grained control over a
+ * Gnutella connection. <code>RoutedConnection</code> defines the interface to
+ * allow a Connection to act asynchronously, receiving messages and handshaking
+ * in the background. Additional methods are provided to react
+ * {@link RouteTableMessage RouteTableMessages}, poll for bandwidth, and more
+ * detailed Gnutella functionality.
+ */
 public interface RoutedConnection extends Connection, ReplyHandler {
 
     /**

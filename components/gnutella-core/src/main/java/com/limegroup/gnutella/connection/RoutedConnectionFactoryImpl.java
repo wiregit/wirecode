@@ -29,6 +29,9 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 
+/**
+ * An implementation of {@link RoutedConnectionFactory} that constructs {@link GnutellaConnection GnutellaConnections}.
+ */
 @Singleton
 public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
 

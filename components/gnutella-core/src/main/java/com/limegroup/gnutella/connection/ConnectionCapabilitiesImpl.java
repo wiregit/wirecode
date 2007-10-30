@@ -5,12 +5,19 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 
+/**
+ * A {@link ConnectionCapabilities} that delegates to {@link HandshakeResponse}
+ * objects to keep track of what headers were read or written, and
+ * {@link CapabilitiesVM} and {@link MessagesSupportedVendorMessage} objects to
+ * keep track of what vendor messages & capabilities are supported. 
+ */
 public class ConnectionCapabilitiesImpl implements ConnectionCapabilities {
 
     private volatile CapabilitiesVM capabilitiesVendorMessage;
 
     // start with empty responses
     private volatile HandshakeResponse headersRead = HandshakeResponse.createEmptyResponse();
+
     private volatile HandshakeResponse headersWritten = HandshakeResponse.createEmptyResponse();
 
     private volatile MessagesSupportedVendorMessage messagesSupportedVendorMessage;
