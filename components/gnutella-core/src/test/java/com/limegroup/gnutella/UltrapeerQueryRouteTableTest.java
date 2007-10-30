@@ -226,7 +226,14 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         // The TTL on the sent query should be 1 because the other Ultrapeer
         // should have a "hit" in its QRP table.  When there's a hit, we 
         // send with TTL 1 simply because it's likely that it's popular.
-        assertEquals("wrong ttl "+qSent, 1, qSent.getTTL());
+        if (qSent.getTTL() != 1) {
+            // see if qrp got exchanged properly
+            int num = connectionManager.getInitializedClientConnections().size();
+            double totalQrp = 0;
+            for (RoutedConnection rc : connectionManager.getInitializedClientConnections())
+                totalQrp += rc.getRoutedConnectionStatistics().getQueryRouteTablePercentFull();
+            fail("ttl was not 1 but "+qSent.getTTL()+" there were "+num+" connections with qrp total "+totalQrp);
+        }
         assertEquals("wrong hops", 0, qSent.getHops());
         assertEquals("wrong query", qr.getQuery(), qSent.getQuery());
         assertEquals("wrong guid", qr.getGUID(), qSent.getGUID());        
