@@ -79,7 +79,7 @@ public class DownloadTestCase extends LimeTestCase {
     protected boolean REMOVED = false;
 
     // default to waiting for 2 defaults.
-    protected final long DOWNLOAD_WAIT_TIME = 1000 * 60 * 4;
+    protected final long DOWNLOAD_WAIT_TIME = 1000 * 60 * 1;
 
     protected boolean saveAltLocs = false;
 
