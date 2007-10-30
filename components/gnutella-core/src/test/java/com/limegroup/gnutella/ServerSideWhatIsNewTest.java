@@ -73,7 +73,7 @@ public class ServerSideWhatIsNewTest
     }
     
     @Override
-    public void setSettings() {
+    public void setSettings() throws Exception {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
@@ -93,11 +93,18 @@ public class ServerSideWhatIsNewTest
         susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir
-        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        File berkeleyDest = new File(_sharedDir, "berkeley.txt");
+        File susheelDest = new File(_sharedDir, "susheel.txt");
         
-        berkeley = new File(_sharedDir, "berkeley.txt");
-        susheel = new File(_sharedDir, "susheel.txt");
+        FileUtils.copy(berkeley, berkeleyDest);
+        // make sure their creation times are a little different.
+        do {
+            Thread.sleep(10);
+            FileUtils.copy(susheel, susheelDest);
+        } while (susheelDest.lastModified() == berkeleyDest.lastModified());
+        
+        berkeley = berkeleyDest;
+        susheel = susheelDest;
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
@@ -537,22 +544,27 @@ public class ServerSideWhatIsNewTest
 
     // test that the FileManager.removeFileIfShared method works    
     public void testRemoveSharedFile() throws Exception {
+        testAddSharedFiles();
         FileManager fm = fileManager;
                 
+        FileUtils.copy(tempFile1, tempFile2);
+        fm.loadSettingsAndWait(2000);
         
-        int size = 0;
+        // 4 shared files
+        assertEquals(4,fm.getNumFiles());
+        
+        // 3 different urns 
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
             assertEquals(urnToLong.toString(), 3, urnToLong.size());
         }
-        
+        // 3 different creation times 
         {
             Map longToUrns = creationTimeCache.getTimeToUrn();
-            size = longToUrns.size();
-            assertTrue((longToUrns.size() == 2) || (longToUrns.size() == 3));
+            assertEquals(3,longToUrns.size());
         }
         
-        // tempFile1 is the same URN as tempFile2
+        // tempFile1 and 2 have the same URN
         fm.removeFileIfShared(tempFile1);
         {
             Map urnToLong = creationTimeCache.getUrnToTime();  
@@ -560,10 +572,10 @@ public class ServerSideWhatIsNewTest
         }
         {
             Map longToUrns = creationTimeCache.getTimeToUrn();
-            assertEquals(longToUrns.size(), size);
+            assertEquals(3, longToUrns.size());
         }
         
-        // tempFile2 should result in a delete
+        // tempFile2 should result in a removal of an URN
         fm.removeFileIfShared(tempFile2);
 
         {
@@ -572,7 +584,7 @@ public class ServerSideWhatIsNewTest
         }
         {
             Map longToUrns =creationTimeCache.getTimeToUrn();
-            assertEquals(longToUrns.size(), (size-1));
+            assertEquals(2, longToUrns.size());
         }
     }
 
