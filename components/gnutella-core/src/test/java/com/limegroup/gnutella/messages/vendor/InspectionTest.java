@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +17,7 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.security.SecureMessage;
-import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
-import org.limewire.security.Verifier;
 import org.limewire.util.Base32;
 import org.limewire.util.ByteOrder;
 
@@ -65,6 +61,7 @@ public class InspectionTest extends ServerSideTestCase {
     private ConnectionManager connectionManager;
 
     private NetworkManager networkManager;
+
     
     public InspectionTest(String name) {
         super(name);
@@ -189,6 +186,7 @@ public class InspectionTest extends ServerSideTestCase {
     public void testRouting() throws Exception {
         // one of the leafs supports inspections
         LEAF[0].send(messagesSupportedVendorMessage);
+        LEAF[0].flush();
         
         // create a request with a return address and one without
         String routedStr = "TJDZMNSU2BMQBE665ZF6V2EFAAYQCAEZAAAAATCJJVCR4AABADBSCSMBIR4JYJOHXME4AMAMAXAILAXWJBX5EC73EEGPUGCLZ36CS4W56UYNE2MQDVTZD6BJVAZBSMSZSD2MER3MXI6RO6WN6CDKY276YV4FQDZ6TO5RVYCCKJAUOAT7AECACICOQFLECAWDAJJUEQEDKNEUO3ZQFUBBKAET3DOHWUHCAUYMMHGNC3JX2SE2FZNQIKACCRYF4HPDK5WODOJ2N2EWPEAFHYEKJNGF5Q";
@@ -302,18 +300,3 @@ class BEObject implements Inspectable {
         return m;
     }
 }   
-class TestVerifier implements SecureMessageVerifier {
-    public void verify(Verifier verifier) {
-        verifier.getSecureMessageCallback().handleSecureMessage(verifier.getSecureMessage(), true);
-    }
-
-    public void verify(SecureMessage sm, SecureMessageCallback smc) {
-        smc.handleSecureMessage(sm, true);
-    }
-
-    public void verify(PublicKey pubKey, String algorithm, 
-            SecureMessage sm, SecureMessageCallback smc) {
-        smc.handleSecureMessage(sm, true);
-    }
-}
-
