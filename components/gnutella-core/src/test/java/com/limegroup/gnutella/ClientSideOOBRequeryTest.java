@@ -463,10 +463,15 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertTrue("file should be shared",
             new File(_sharedDir, "berkeley.txt").exists());
         
-        downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
-        
+        Downloader d = downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        fileManager.addFileEventListener(new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent fme) {
+                System.out.println(fme);
+            }
+        });
         // sleep to make sure the download starts 
-        Thread.sleep(5000);
+        while(!d.isCompleted())
+            Thread.sleep(1000);
         
         assertTrue("file should saved", 
             new File( _savedDir, "berkeley.txt").exists());
@@ -653,8 +658,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter,
-                ipFilter);
+        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter);
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
@@ -770,8 +774,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter,
-                ipFilter);
+        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter);
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         URN urn = TestFile.hash();
@@ -888,8 +891,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback.clearGUID();
 
         // create a new Uploader to service the download
-        TestUploader uploader2 = new TestUploader(alternateLocationFactory, featuresWriter,
-                ipFilter);
+        TestUploader uploader2 = new TestUploader(alternateLocationFactory, featuresWriter);
         uploader2.start("whatever", UPLOADER_PORT+1, false);
         uploader2.setRate(100);
 
@@ -956,8 +958,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter,
-                ipFilter);
+        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter);
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
@@ -1094,14 +1095,12 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter,
-                ipFilter);
+        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter);
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         
-        TestUploader uploader2 = new TestUploader(alternateLocationFactory, featuresWriter,
-                ipFilter);
+        TestUploader uploader2 = new TestUploader(alternateLocationFactory, featuresWriter);
         uploader2.start("whatever", UPLOADER_PORT*2, false);
         uploader2.setBusy(true);
         RemoteFileDesc rfd2 = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
@@ -1223,8 +1222,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // create a test uploader and send back that response
-        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter,
-                ipFilter);
+        TestUploader uploader = new TestUploader(alternateLocationFactory, featuresWriter);
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
