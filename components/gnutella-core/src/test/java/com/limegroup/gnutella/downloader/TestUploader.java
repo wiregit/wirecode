@@ -27,22 +27,21 @@ import org.limewire.collection.IntPair;
 import org.limewire.collection.RoundRobinQueue;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.BandwidthThrottle;
+import org.limewire.io.IP;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 // NOT A SINGLETON!!
@@ -198,7 +197,10 @@ public class TestUploader {
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
      */
-    private final IPFilter IP_FILTER;
+    private static final IPList local = new IPList();
+    static {
+        local.add("127.0.0.1");
+    }
     
     
     /**
@@ -211,20 +213,10 @@ public class TestUploader {
     private final FeaturesWriter featuresWriter;
     
     @Inject
-    public TestUploader(AlternateLocationFactory alternateLocationFactory, FeaturesWriter featuresWriter,
-            @Named("ipFilter") IPFilter filter) {
+    public TestUploader(AlternateLocationFactory alternateLocationFactory, FeaturesWriter featuresWriter) {
         this.alternateLocationFactory = alternateLocationFactory;
         this.featuresWriter = featuresWriter;
-        
-        // ensure that only local machines can connect!!
-       FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-           new String[] {"*.*.*.*"});
-       FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-           new String[] {"127.*.*.*"});
-       this.IP_FILTER = filter;
-       IP_FILTER.refreshHosts();
     }
-
 
     /** 
      * Starts the TestUploader listening on the given port.  Will upload a
@@ -608,7 +600,7 @@ public class TestUploader {
      * @return true iff ip is a banned address.
      */
     public boolean isBannedIP(String ip) {        
-        return !IP_FILTER.allow(ip);
+        return !local.contains(new IP(ip));
     }
     
     

@@ -39,6 +39,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 
 public class DownloadPushTest extends DownloadTestCase {
 
@@ -57,6 +58,11 @@ public class DownloadPushTest extends DownloadTestCase {
 
     public static Test suite() {
         return buildTestSuite(DownloadPushTest.class);
+    }
+    
+    protected void setUp() throws Exception {
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[]{"127.*.*.*","1.1.1.1"});
+        super.setUp();
     }
 
     public void testSimplePushDownload() throws Exception {
