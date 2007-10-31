@@ -122,7 +122,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * (Which implicitly means that shutdownBackend[] must
      *  stay static also.)
      */
-    private static void shutdownBackends() {
+    protected static void shutdownBackends() {
         for (int ii = 0; ii < 2; ii++) {
             if (shutdownBackend[ii]) Backend.shutdown(ii == 1);
         }

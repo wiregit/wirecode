@@ -167,6 +167,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
             Thread.sleep(500);
         }
         assertTrue("should be connected", connectionServices.isConnected());
+        assertFalse(connectionManager.getInitializedConnections().isEmpty());
         
         SENT.clear();
         REPLIES.clear();
@@ -184,6 +185,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 	    lifecycleManager.shutdown();
 	    if (!disconnectLatch.await(3, TimeUnit.SECONDS))
             fail("teardown failed");
+        shutdownBackends();
 	}
     
     /**
@@ -228,7 +230,7 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         // send with TTL 1 simply because it's likely that it's popular.
         if (qSent.getTTL() != 1) {
             // see if qrp got exchanged properly
-            int num = connectionManager.getInitializedClientConnections().size();
+            int num = connectionManager.getInitializedConnections().size();
             double totalQrp = 0;
             for (RoutedConnection rc : connectionManager.getInitializedClientConnections())
                 totalQrp += rc.getRoutedConnectionStatistics().getQueryRouteTablePercentFull();
