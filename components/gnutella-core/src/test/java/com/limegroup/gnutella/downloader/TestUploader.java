@@ -32,6 +32,8 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -210,12 +212,25 @@ public class TestUploader {
 
     private final AlternateLocationFactory alternateLocationFactory;
 
-    private final FeaturesWriter featuresWriter;
+    private final NetworkManager networkManager;
+    
+    /**
+     * If the network manager we got is a stub, keep a ref here 
+     * so it can be customized.
+     * INVARIANT: networkManagerStub == networkManager
+     */
+    private final NetworkManagerStub networkManagerStub;
     
     @Inject
-    public TestUploader(AlternateLocationFactory alternateLocationFactory, FeaturesWriter featuresWriter) {
+    public TestUploader(Injector injector) {
+        this(injector.getInstance(AlternateLocationFactory.class),injector.getInstance(NetworkManager.class));
+    }
+    
+    public TestUploader(AlternateLocationFactory alternateLocationFactory, NetworkManager networkManager) {
         this.alternateLocationFactory = alternateLocationFactory;
-        this.featuresWriter = featuresWriter;
+        this.networkManager = networkManager;
+        this.networkManagerStub = networkManager instanceof NetworkManagerStub ? 
+                (NetworkManagerStub) networkManager : null;
     }
 
     /** 
@@ -504,6 +519,8 @@ public class TestUploader {
      * sets whether the uploader is firewalled, which affects headers written
      */
     public void setFirewalled(boolean yes) {
+        if (networkManagerStub != null)
+            networkManagerStub.setAcceptedIncomingConnection(!yes);
         isFirewalled=yes;
     }
     
@@ -828,14 +845,8 @@ public class TestUploader {
                                   out);
         }
         if(interestedInFalts) {
-            if (!isFirewalled) 
-                featuresWriter.writeFeatures(out);
-            else {                
-                NetworkManagerStub stub = new NetworkManagerStub();
-                stub.setAcceptedIncomingConnection(false);
-                FeaturesWriter writer = new FeaturesWriter(stub);
-                writer.writeFeatures(out);
-            }
+            FeaturesWriter featuresWriter = new FeaturesWriter(networkManager);
+            featuresWriter.writeFeatures(out);
         }
         
 

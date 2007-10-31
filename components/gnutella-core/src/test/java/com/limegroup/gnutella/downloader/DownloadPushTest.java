@@ -30,8 +30,10 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -40,6 +42,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class DownloadPushTest extends DownloadTestCase {
 
@@ -61,7 +64,8 @@ public class DownloadPushTest extends DownloadTestCase {
     }
     
     protected void setUp() throws Exception {
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[]{"127.*.*.*","1.1.1.1"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[]{"127.*.*.*",
+                "1.1.1.1","1.2.3.4","6.7.8.9"});
         super.setUp();
     }
 
@@ -327,12 +331,15 @@ public class DownloadPushTest extends DownloadTestCase {
         final int RATE = 100;
         final int FWTPort = 7498;
 
+        NetworkManagerStub uploaderNetworkManager = new NetworkManagerStub();
+        uploaderNetworkManager.setAcceptedIncomingConnection(false);
+        uploaderNetworkManager.setCanDoFWT(true);
         udpService.setReceiveSolicited(true);
         testUploaders[0].setRate(RATE);
         testUploaders[0].stopAfter(900000);
         testUploaders[0].setInterestedInFalts(true);
 
-        TestUploader pusher2 = injector.getInstance(TestUploader.class);
+        TestUploader pusher2 = new TestUploader(injector.getInstance(AlternateLocationFactory.class), uploaderNetworkManager);
         pusher2.start("firewalled pusher");
         pusher2.setRate(RATE);
         pusher2.stopAfter(200000);
@@ -368,6 +375,7 @@ public class DownloadPushTest extends DownloadTestCase {
         ManagedDownloader download = (ManagedDownloader) downloadServices.download(now,
                 RemoteFileDesc.EMPTY_LIST, null, false);
         Thread.sleep(2000);
+        LOG.debug("adding regular downloader");
         // also download from uploader1, so it gets the proxy headers from pusher2
         download.addDownload(openRFD, false);
         waitForComplete();
@@ -401,7 +409,7 @@ public class DownloadPushTest extends DownloadTestCase {
         int sleep = DownloadSettings.WORKER_INTERVAL.getValue();
 
         // make sure we use the ping ranker
-        PrivilegedAccessor.setValue(udpService, "_acceptedSolicitedIncoming", Boolean.TRUE);
+        networkManager.setCanReceiveSolicited(true);
         assertTrue(networkManager.canReceiveSolicited());
         assertTrue(sourceRankerFactory.getAppropriateRanker() instanceof PingRanker);
 

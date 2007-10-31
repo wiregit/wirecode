@@ -357,7 +357,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	TestFile.length();
         try {
             //Start uploader and download.
-            uploader = new TestUploader(injector.getInstance(AlternateLocationFactory.class), injector.getInstance(FeaturesWriter.class));
+            uploader = new TestUploader(injector.getInstance(AlternateLocationFactory.class), injector.getInstance(NetworkManager.class));
             uploader.start("ManagedDownloaderTest", PORT, false);
             uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);
