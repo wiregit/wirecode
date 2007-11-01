@@ -404,7 +404,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<A
             if(location.length() < port+1)
                 throw new IOException("invalid location: " + location);
             try {
-                port = Short.parseShort(location.substring(port+1));
+                port = Integer.parseInt(location.substring(port+1));
             } catch(NumberFormatException nfe) {
                 throw new IOException("invalid location: " + location);
             }
