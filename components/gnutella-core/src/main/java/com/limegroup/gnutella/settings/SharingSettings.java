@@ -36,13 +36,15 @@ public class SharingSettings extends LimeProps {
 	
     
     public static final File DEFAULT_SAVE_DIR =
-        new File(CommonUtils.getUserHomeDir(), "Shared");
+        new File(CommonUtils.getUserHomeDir(), "LimeWire Saved");
     
+    public static final File DEFAULT_SHARE_DIR = 
+        new File(CommonUtils.getUserHomeDir(), "LimeWire Shared");
     /**
      * Default directory for songs purchased from LWS
      */
     public static final File DEFAULT_SAVE_LWS_DIR = 
-        new File(CommonUtils.getUserHomeDir(), "LimeWireStore");
+        new File(CommonUtils.getUserHomeDir(), "LimeWire Store Purchased");
     
     /**
      * Whether or not we're going to add an alternate for ourselves
