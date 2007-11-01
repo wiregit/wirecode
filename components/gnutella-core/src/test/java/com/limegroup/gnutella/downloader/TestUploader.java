@@ -1034,7 +1034,7 @@ public class TestUploader {
 	 */
 	private void readAlternateLocations (String altHeader, final boolean good) {
         String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
-        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, good, alternateLocationFactory, new Function<AlternateLocation, Void>() {
+        AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 if(location instanceof PushAltLoc)
                     ((PushAltLoc)location).updateProxies(good);

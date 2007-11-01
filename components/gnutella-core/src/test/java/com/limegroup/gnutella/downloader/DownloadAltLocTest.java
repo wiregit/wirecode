@@ -39,6 +39,11 @@ public class DownloadAltLocTest extends DownloadTestCase {
         return buildTestSuite(DownloadAltLocTest.class);
     }
 
+    public void setUp() throws Exception {
+        super.setUp();
+        // need some extra time for these tests
+        setDownloadWaitTime(2 * 60 * 1000L);
+    }
 
     public void testTwoAlternateLocations() throws Exception {  
         LOG.info("-Testing Two AlternateLocations...");
@@ -128,7 +133,8 @@ public class DownloadAltLocTest extends DownloadTestCase {
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
     
-    public void testAlternateLocationsAreRemoved() throws Exception {  
+    public void testAlternateLocationsAreRemoved() throws Exception {
+        DOWNLOAD_WAIT_TIME = 2 * 60 * 1000;
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
         LOG.info("-Testing swarming from two sources one based on alt...");
@@ -237,12 +243,9 @@ public class DownloadAltLocTest extends DownloadTestCase {
     }
 
     public void testAddSelfToMeshWithTree() throws Exception {
-        
         // change the minimum required bytes so it'll be added.
-        PrivilegedAccessor.setValue(HTTPDownloader.class,
-            "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
-        PrivilegedAccessor.setValue(acceptor,
-            "_acceptedIncoming", Boolean.TRUE );
+        HTTPDownloader.MIN_PARTIAL_FILE_BYTES = 1;
+        networkManager.setAcceptedIncomingConnection(true);
             
         LOG.info("-Testing that downloader adds itself to the mesh if it has a tree");
         
@@ -260,7 +263,7 @@ public class DownloadAltLocTest extends DownloadTestCase {
         // the rate must be absurdly slow for the incomplete file.length()
         // check in HTTPDownloader to be updated.
         final int RATE=50;
-        final int STOP_AFTER = (TestFile.length()/2)+1;
+        final int STOP_AFTER = ((TestFile.length()*2)/3)+1;
         testUploaders[0].setRate(RATE);
         testUploaders[0].stopAfter(STOP_AFTER);
         testUploaders[0].setSendThexTreeHeader(true);

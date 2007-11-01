@@ -79,7 +79,8 @@ public class DownloadTestCase extends LimeTestCase {
     protected boolean REMOVED = false;
 
     // default to waiting for 2 defaults.
-    protected final long DOWNLOAD_WAIT_TIME = 1000 * 60 * 1;
+    protected final long DEFAULT_WAIT_TIME = 1000 * 60 * 1;
+    protected long DOWNLOAD_WAIT_TIME = DEFAULT_WAIT_TIME;
 
     protected boolean saveAltLocs = false;
 
@@ -129,7 +130,12 @@ public class DownloadTestCase extends LimeTestCase {
         super(name);
     }
 
+    protected void setDownloadWaitTime(long time) {
+        DOWNLOAD_WAIT_TIME = time;
+    }
+    
     protected void setUp() throws Exception {
+        setDownloadWaitTime(DEFAULT_WAIT_TIME);
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 
