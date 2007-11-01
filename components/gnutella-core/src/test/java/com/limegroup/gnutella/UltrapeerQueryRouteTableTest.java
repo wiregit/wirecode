@@ -163,7 +163,9 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
                 Backend.BACKEND_PORT, ConnectType.PLAIN);    
         // Wait for awhile after the connection to make sure the hosts have 
         // time to exchange QRP tables.
-        while(mc.get() == null || mc.get().getRoutedConnectionStatistics().getQueryRouteTablePercentFull() == 0) {
+        int sleeps = 0;
+        while((sleeps++ < 10) && 
+                (mc.get() == null || mc.get().getRoutedConnectionStatistics().getQueryRouteTablePercentFull() == 0)) {
             Thread.sleep(500);
         }
         assertTrue("should be connected", connectionServices.isConnected());

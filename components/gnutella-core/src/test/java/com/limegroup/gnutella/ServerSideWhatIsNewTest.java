@@ -98,10 +98,13 @@ public class ServerSideWhatIsNewTest
         
         FileUtils.copy(berkeley, berkeleyDest);
         // make sure their creation times are a little different.
+        int sleeps = 0;
         do {
             Thread.sleep(10);
             FileUtils.copy(susheel, susheelDest);
-        } while (susheelDest.lastModified() == berkeleyDest.lastModified());
+        } while (susheelDest.lastModified() == berkeleyDest.lastModified() && ++sleeps < 100);
+        if (sleeps >= 10 && susheelDest.lastModified() == berkeleyDest.lastModified())
+            fail("couldn't create a file with newer timestamp");
         
         berkeley = berkeleyDest;
         susheel = susheelDest;
