@@ -525,6 +525,7 @@ public class DownloadTest extends DownloadTestCase {
     }
     
     public void testReuseHostWithBadTreeAndNoContentLength() throws Exception {
+        setDownloadWaitTime(2 * DOWNLOAD_WAIT_TIME);
         LOG.info("-Testing that a host with a bad tree will be used");
         final int RATE=500;
         testUploaders[0].setRate(RATE);
@@ -738,6 +739,7 @@ public class DownloadTest extends DownloadTestCase {
     }
     
     public void testBusyHostIsUsed() throws Exception {
+        setDownloadWaitTime(2 * DEFAULT_WAIT_TIME);
         LOG.info("-Testing a once-busy host is reused.");
         
         //Throttle rate to give opportunities for swarming.
