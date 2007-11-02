@@ -130,7 +130,7 @@ public class GenericsUtils {
                 if(value == null || !v.isAssignableFrom(value.getClass())) {
                     switch(mode) {
                     case EXCEPTION:
-                        throw new ClassCastException();
+                        throw new ClassCastException("wanted an instanceof: " + v + ", but was: " + (value == null ? "null" : value.getClass()));
                     case REMOVE:
                         i.remove();
                         break;

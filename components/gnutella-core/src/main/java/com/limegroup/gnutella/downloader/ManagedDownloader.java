@@ -221,7 +221,7 @@ public class ManagedDownloader extends AbstractDownloader
     private static final Log LOG = LogFactory.getLog(ManagedDownloader.class);
     
     /** Ensures backwards compatibility. */
-    static final long serialVersionUID = 2772570805975885257L;
+    private static final long serialVersionUID = 2772570805975885257L;
     
     /** Make everything transient */
     private static final ObjectStreamField[] serialPersistentFields = 

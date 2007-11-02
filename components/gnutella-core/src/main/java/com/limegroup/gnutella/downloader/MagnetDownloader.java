@@ -48,7 +48,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     private static final Log LOG = LogFactory.getLog(MagnetDownloader.class);
 
     /** Prevent versioning problems. */
-    static final long serialVersionUID = 9092913030585214105L;
+    private static final long serialVersionUID = 9092913030585214105L;
 
 	private static final transient String MAGNET = "MAGNET"; 
 

@@ -151,7 +151,7 @@ public class RequeryDownloadTest extends LimeTestCase {
         downloadManager = injector.getInstance(DownloadManager.class);
         downloadManager.initialize();
         downloadManager.scheduleWaitingPump();
-        boolean ok = downloadManager.readSnapshot(snapshot);
+        boolean ok = downloadManager.readAndInitializeSnapshot(snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         testUploader = injector.getInstance(TestUploader.class);
         testUploader.start("uploader 6666", 6666, false);

@@ -28,6 +28,8 @@ import com.limegroup.gnutella.settings.SharingSettings;
  */
 public class StoreDownloader extends ManagedDownloader implements Serializable { 
     
+    private static final long serialVersionUID = 1672575739103885243L;
+    
     private static final Log LOG = LogFactory.getLog(StoreDownloader.class);
     
     public StoreDownloader(RemoteFileDesc rfd, IncompleteFileManager ifc, 

@@ -102,13 +102,13 @@ public class ConverterObjectInputStream extends ObjectInputStream {
     protected ObjectStreamClass readClassDescriptor() throws 
       IOException, ClassNotFoundException { 
         ObjectStreamClass read = super.readClassDescriptor(); 
-        String className = read.getName(); 
-        
+        String className = read.getName();        
+
+        ObjectStreamClass clazzToReturn; 
         String newName = lookups.get(className);
         if (newName != null) {
-            return ObjectStreamClass.lookup(Class.forName(newName));
-        }
-        else {
+            clazzToReturn = ObjectStreamClass.lookup(Class.forName(newName));
+        } else {
             int index = className.lastIndexOf('.');
             // use "" as lookup key for default package
             String oldPackage = index != -1 ? className.substring(0, index) : "";
@@ -116,11 +116,16 @@ public class ConverterObjectInputStream extends ObjectInputStream {
             if (newPackage != null) {
                 if (newPackage.length() == 0) {
                     // mapped to default package
-                    ObjectStreamClass.lookup(Class.forName(className.substring(index + 1)));
+                    clazzToReturn = ObjectStreamClass.lookup(Class.forName(className.substring(index + 1)));
+                } else {
+                    clazzToReturn = ObjectStreamClass.lookup(Class.forName(newPackage + '.' + className.substring(index + 1)));
                 }
-                return ObjectStreamClass.lookup(Class.forName(newPackage + '.' + className.substring(index + 1)));
+            } else {
+                // Nothing it maps to -- must be the real name!
+                clazzToReturn = read;
             }
         }
-        return read;
+
+        return clazzToReturn;
     } 
 }

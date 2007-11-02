@@ -48,7 +48,7 @@ public class DownloadManagerStub extends DownloadManager {
     @Override
     public synchronized int downloadsInProgress() { return 0; }
     @Override
-    public synchronized boolean readSnapshot(File file) { return false; }
+    public synchronized boolean readAndInitializeSnapshot(File file) { return false; }
     @Override
     public synchronized boolean writeSnapshot() { return true; }
 

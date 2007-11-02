@@ -17,7 +17,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
  */
 public class InNetworkDownloader extends ManagedDownloader implements Serializable {
     /** Ensures backwards compatibility of the downloads.dat file. */
-    static final long serialVersionUID = 5713913674943019353L;
+    private static final long serialVersionUID = 5713913674943019353L;
     
     /** The size of the completed file. */    
     private final long size;

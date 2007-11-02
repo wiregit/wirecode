@@ -41,7 +41,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
  */
 public class IncompleteFileManager implements Serializable {
     /** Ensures backwards compatibility. */
-    static final long serialVersionUID = -7658285233614679878L;
+    private static final long serialVersionUID = -7658285233614679878L;
 
     /** The delimiter to use between the size and a real name of a temporary
      * file.  To make it easier to break the temporary name into its constituent

@@ -33,7 +33,7 @@ import com.limegroup.gnutella.security.SHA1;
  */
 public class BTMetaInfo implements Serializable {
 
-	static final long serialVersionUID = -2693983731217045071L;
+	private static final long serialVersionUID = -2693983731217045071L;
 	
 	private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
@@ -240,7 +240,7 @@ public class BTMetaInfo implements Serializable {
 	        Object metaInfo = Token.parse(torrent);
 	        if(!(metaInfo instanceof Map))
 	            throw new ValueException("metaInfo not a Map!");
-	        return new BTMetaInfo(new BTData((Map)metaInfo));
+	        return new BTMetaInfo(new BTDataImpl((Map)metaInfo));
 	    } catch (IOException bad) {
 	        LOG.error("read failed", bad);
 	        throw bad;
@@ -250,7 +250,7 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * Constructs a BTMetaInfo based on the BTData.
 	 */
-	private BTMetaInfo(BTData data) throws IOException {
+	public BTMetaInfo(BTData data) throws IOException {
 		try {
 			URI trackerURI = new URI(data.getAnnounce());
 			validateURI(trackerURI);

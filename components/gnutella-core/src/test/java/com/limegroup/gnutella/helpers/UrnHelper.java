@@ -66,7 +66,8 @@ public class UrnHelper {
      */
     public static final URN.Type[] URN_TYPES = new URN.Type[VALID_URN_STRINGS.length];
     
-    public static final Set[] URN_SETS = new Set[VALID_URN_STRINGS.length];
+    @SuppressWarnings("unchecked")
+    public static final Set<URN>[] URN_SETS = new Set[VALID_URN_STRINGS.length];
 
 
     /**

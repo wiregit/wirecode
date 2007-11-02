@@ -69,7 +69,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         DownloadManager dm = downloadManager;
         dm.initialize();
         assertTrue("unable to read snapshot!",
-            dm.readSnapshot(CommonUtils.getResourceFile(filePath + file)));
+            dm.readAndInitializeSnapshot(CommonUtils.getResourceFile(filePath + file)));
         assertEquals("unexpected amount of downloaders added to gui",
              1, callback.downloaders.size());
         ManagedDownloader md=(ManagedDownloader)callback.downloaders.get(0);

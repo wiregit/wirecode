@@ -23,7 +23,7 @@ import com.limegroup.gnutella.util.QueryUtils;
 public class ResumeDownloader extends ManagedDownloader 
         implements Serializable {
     /** Ensures backwards compatibility of the downloads.dat file. */
-    static final long serialVersionUID = -4535935715006098724L;
+    private static final long serialVersionUID = -4535935715006098724L;
     
     /** The temporary file to resume to. */
     private volatile File _incompleteFile;

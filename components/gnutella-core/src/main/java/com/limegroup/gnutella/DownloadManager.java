@@ -217,10 +217,10 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
         File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
         // Try once with the real file, then with the backup file.
-        if( !readSnapshot(real) ) {
+        if( !readAndInitializeSnapshot(real) ) {
             LOG.debug("Reading real downloads.dat failed");
             // if backup succeeded, copy into real.
-            if( readSnapshot(backup) ) {
+            if( readAndInitializeSnapshot(backup) ) {
                 LOG.debug("Reading backup downloads.bak succeeded.");
                 copyBackupToReal();
             // only show the error if the files existed but couldn't be read.
@@ -574,33 +574,14 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. 
      *  It is public for testing purposes only!  
      *  @param file the downloads.dat snapshot file */
-    public synchronized boolean readSnapshot(File file) {
-        //Read downloaders from disk.
-        List<AbstractDownloader> buf=null;
-        ObjectInputStream in = null;
+    public synchronized boolean readAndInitializeSnapshot(File file) {
+        List<AbstractDownloader> buf;
         try {
-            in = new ConverterObjectInputStream(
-                                    new BufferedInputStream(
-                                        new FileInputStream(file)));
-            //This does not try to maintain backwards compatibility with older
-            //versions of LimeWire, which only wrote the list of downloaders.
-            //Note that there is a minor race condition here; if the user has
-            //started some downloads before this method is called, the new and
-            //old downloads will use different IncompleteFileManager instances.
-            //This doesn't really cause an errors, however.
-            buf = GenericsUtils.scanForList(in.readObject(), AbstractDownloader.class, ScanMode.REMOVE);
-            incompleteFileManager=(IncompleteFileManager)in.readObject();
-        } catch(Throwable t) {
-            LOG.error("Unable to read download file", t);
+            buf = readSnapshot(file);
+        } catch(IOException iox) {
+            LOG.warn("Couldn't read snapshot", iox);
             return false;
-        } finally {
-            IOUtils.close(in);
         }
-        
-        // Pump the downloaders through a set, to remove duplicate values.
-        // This is necessary in case LimeWire got into a state where a
-        // downloader was written to disk twice.
-        buf = new LinkedList<AbstractDownloader>(new LinkedHashSet<AbstractDownloader>(buf));
 
         //Initialize and start downloaders. This code is a little tricky.  It is
         //important that instruction (3) follow (1) and (2), because we must not
@@ -625,6 +606,36 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             if (incompleteFileManager.initialPurge(getActiveDownloadFiles(buf)))
                 writeSnapshot();
         }
+    }
+    
+    /* public for testing only right now. */
+    public List<AbstractDownloader> readSnapshot(File file) throws IOException {        
+        //Read downloaders from disk.
+        List<AbstractDownloader> buf=null;
+        ObjectInputStream in = null;
+        try {
+            in = new ConverterObjectInputStream(
+                                    new BufferedInputStream(
+                                        new FileInputStream(file)));
+            //This does not try to maintain backwards compatibility with older
+            //versions of LimeWire, which only wrote the list of downloaders.
+            //Note that there is a minor race condition here; if the user has
+            //started some downloads before this method is called, the new and
+            //old downloads will use different IncompleteFileManager instances.
+            //This doesn't really cause an errors, however.
+            buf = GenericsUtils.scanForList(in.readObject(), AbstractDownloader.class, ScanMode.REMOVE);
+            incompleteFileManager=(IncompleteFileManager)in.readObject();
+        } catch(Throwable t) {
+            LOG.error("Unable to read download file", t);
+            throw (IOException)new IOException().initCause(t);
+        } finally {
+            IOUtils.close(in);
+        }
+        
+        // Pump the downloaders through a set, to remove duplicate values.
+        // This is necessary in case LimeWire got into a state where a
+        // downloader was written to disk twice.
+        return new LinkedList<AbstractDownloader>(new LinkedHashSet<AbstractDownloader>(buf));
     }
     
     private static Collection<File> getActiveDownloadFiles(List<AbstractDownloader> downloaders) {
