@@ -17,6 +17,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
@@ -25,6 +26,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
@@ -52,6 +54,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * existing Contact it will forward it to its leafs
  */
 public class PassiveLeafForwardContactsTest extends LimeTestCase {
+    
     
     private static final int PORT = 6667;
     
@@ -83,10 +86,12 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     protected void setUp() throws Exception {
         doSettings();
         
+        final NodeAssigner na = new NodeAssignerStub();
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImplStub.class);
+                bind(NodeAssigner.class).toInstance(na);
             }            
         });
 
@@ -307,7 +312,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue(in.isPushProxyFor());
             
             dhtManager.start(DHTMode.PASSIVE);
-            Thread.sleep(250);
+            Thread.sleep(350);
             assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
             
             // Bootstrap the Ultrapeer
@@ -408,5 +413,26 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         BlockingConnection c = injector.getInstance(BlockingConnectionFactory.class).createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         return c;
+    }
+    
+    private class NodeAssignerStub extends NodeAssigner {
+        @Inject
+        public NodeAssignerStub() {
+            super(null,null,null,null,null,null,null,null,null);
+        }
+
+        @Override
+        public boolean isTooGoodUltrapeerToPassUp() {
+            return false;
+        }
+
+        @Override
+        public void start() {
+        }
+
+        @Override
+        public void stop() {
+        }
+        
     }
 }
