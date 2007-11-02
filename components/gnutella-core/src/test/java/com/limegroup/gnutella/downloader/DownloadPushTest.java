@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -22,7 +23,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.service.ErrorService;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
@@ -33,7 +33,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -447,7 +446,7 @@ public class DownloadPushTest extends DownloadTestCase {
         // only one ping should have been sent to the second uploader
         assertEquals(1, l.pings);
 
-        l.interrupt();
+        l.shutdown();
     }
     
 
@@ -456,6 +455,7 @@ public class DownloadPushTest extends DownloadTestCase {
      * tests that bad push locs get removed
      */
     public void testBadPushLocGetsDemotedNotAdvertised() throws Exception {
+        setDownloadWaitTime(2 * DOWNLOAD_WAIT_TIME);
         LOG.info("test that bad push loc gets demoted and not advertised");
         // this test needs to go slowly so that the push attempt may time out
         final int RATE=15;
@@ -521,6 +521,8 @@ public class DownloadPushTest extends DownloadTestCase {
         public int pings;
 
         private String startedInTest;
+        
+        private volatile boolean shutdown;
 
         public UDPAcceptor(int port) {
             startedInTest = "began in test: " + _currentTestName;
@@ -553,6 +555,11 @@ public class DownloadPushTest extends DownloadTestCase {
             start();
         }
 
+        public void shutdown() {
+            shutdown = true;
+            interrupt();
+        }
+        
         public void run() {
             DatagramPacket p = new DatagramPacket(new byte[1024], 1024);
             Message m = null;
@@ -592,6 +599,9 @@ public class DownloadPushTest extends DownloadTestCase {
 
             } catch (BadPacketException bad) {
                 ErrorService.error(bad, startedInTest);
+            } catch (InterruptedIOException stop){
+                if (!shutdown)
+                    ErrorService.error(stop, startedInTest);
             } catch (IOException bad) {
                 ErrorService.error(bad, startedInTest);
             } finally {
