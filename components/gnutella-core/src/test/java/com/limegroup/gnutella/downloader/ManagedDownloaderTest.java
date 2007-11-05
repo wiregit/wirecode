@@ -64,8 +64,6 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -87,6 +85,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private NetworkManagerStub networkManager;
     private DownloadReferencesFactory downloadReferencesFactory;
     private Injector injector;
+    private ScheduledExecutorService background;
 
     public ManagedDownloaderTest(String name) {
         super(name);
@@ -105,6 +104,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     }
     
     private void doSetUp(Module... modules) throws Exception {
+        
         List<Module> allModules = new LinkedList<Module>();
         allModules.add(new AbstractModule() {
            @Override
@@ -132,9 +132,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
         downloadReferencesFactory = injector.getInstance(DownloadReferencesFactory.class);
         
         downloadManager.initialize();
+        downloadManager.scheduleWaitingPump();
+        background = injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
         RequeryManager.NO_DELAY = false;
     }
 
+    protected void tearDown() throws Exception {
+        background.shutdown();
+    }
     
     /**
      * tests if firewalled altlocs are added to the file descriptor
@@ -357,7 +362,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	TestFile.length();
         try {
             //Start uploader and download.
-            uploader = new TestUploader(injector.getInstance(AlternateLocationFactory.class), injector.getInstance(NetworkManager.class));
+            uploader = new TestUploader(injector);
             uploader.start("ManagedDownloaderTest", PORT, false);
             uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);
@@ -367,6 +372,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                         new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())}, new IncompleteFileManager(), null);
             downloader.initialize(downloadReferencesFactory.create(downloader));
             requestStart(downloader);
+            Thread.sleep(1000);
             //Wait for it to download until error, need to wait 
             uploader.waitForUploaderToStop();
         
