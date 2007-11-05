@@ -104,10 +104,13 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 gotUDP = true;
             }
         } while (!gotTCP || !gotUDP);
-
         // client side seems to follow the setup process A-OK
     }
 
+    public void testReminderToRemoveStaticLimit() throws Exception {
+        fail("the static limit on immediate connectback requests has to become per-session");
+    }
+    
     // This test checks that if _acceptedIncoming is false, connect back
     // messages are NOT sent
     public void testTCPExpireRequestsNotSent() throws Exception {

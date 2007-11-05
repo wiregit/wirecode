@@ -160,13 +160,13 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * The maximum number of times ManagedConnection instances should send UDP
      * ConnectBack requests.
      */
-    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
+    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 150;
 
     /**
      * The maximum number of times ManagedConnection instances should send TCP
      * ConnectBack requests.
      */
-    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
+    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 100;
 
     /**
      * Filter for filtering out messages that are considered spam.
