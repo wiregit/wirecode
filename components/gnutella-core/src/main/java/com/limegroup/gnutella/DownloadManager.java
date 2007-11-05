@@ -53,7 +53,6 @@ import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
-import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.downloader.AbstractDownloader.DownloaderType;
@@ -591,10 +590,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         //thread must obtain the monitor to acquire a queue slot.)
         try {
             for (AbstractDownloader downloader : buf) {                
-                // ignore RequeryDownloaders -- they're legacy
-                if(downloader instanceof RequeryDownloader)
-                    continue;
-                
                 waiting.add(downloader);
                 downloader.initialize(downloadReferencesFactory.create(downloader));
                 callback(downloader).addDownload(downloader);

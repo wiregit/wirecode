@@ -1,18 +1,9 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.ObjectStreamField;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
 import org.limewire.util.FileUtils;
-import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.Torrent.TorrentState;
@@ -35,10 +26,6 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 public class BTDownloader extends AbstractDownloader 
                           implements TorrentEventListener {
 	
-	private static final long serialVersionUID = -7785186190441081641L;
-
-	private static final ObjectStreamField[] serialPersistentFields = 
-    	ObjectStreamClass.NO_FIELDS;
     
 	private static final String METAINFO = "metainfo";
 
@@ -81,9 +68,9 @@ public class BTDownloader extends AbstractDownloader
     /** Whether finish() has been invoked on this */
     private volatile boolean finished;
 
-    private transient volatile Provider<TorrentManager> torrentManager;
+    private volatile Provider<TorrentManager> torrentManager;
 
-    private transient volatile BTUploaderFactory btUploaderFactory;
+    private volatile BTUploaderFactory btUploaderFactory;
 
 	BTDownloader(BTMetaInfo info, BTContextFactory btContextFactory, SaveLocationManager saveLocationManager, Provider<TorrentManager> torrentManager, BTUploaderFactory btUploaderFactory) {
 	    super(saveLocationManager);
@@ -421,37 +408,6 @@ public class BTDownloader extends AbstractDownloader
 		    assert(_torrent instanceof FinishedTorrentDownload);
 		}
 	}
-	
-	private void writeObject(ObjectOutputStream out) 
-	throws IOException {
-		Map<String, Serializable> m = new HashMap<String, Serializable>();
-		synchronized(this) {
-            if (finished) // do not write finished downloads
-                return;
-			m.putAll(propertiesMap);
-		}
-		assert(m.containsKey(METAINFO));
-		out.writeObject(m);
-	}
-	
-	private void readObject(ObjectInputStream in)
-	throws IOException, ClassNotFoundException {
-		Object read = in.readObject();
-		propertiesMap = GenericsUtils.scanForMap(read, 
-				String.class, Serializable.class, 
-				GenericsUtils.ScanMode.EXCEPTION);
-		read = propertiesMap.get(ATTRIBUTES);
-		attributes = GenericsUtils.scanForMap(read, 
-				String.class, Serializable.class, 
-				GenericsUtils.ScanMode.EXCEPTION);
-		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
-		urn = _info.getURN();
-		fileSystem = _info.getFileSystem();
-		if (attributes == null || _info == null)
-			throw new IOException("invalid serailized data");
-		averagedBandwidth = new NumericBuffer<Float>(10);
-		
-	}
 
 	public void initialize(DownloadReferences downloadReferences) {
 	    this.saveLocationManager = downloadReferences.getDownloadManager();
@@ -504,7 +460,7 @@ public class BTDownloader extends AbstractDownloader
 	public boolean conflictsWithIncompleteFile(File incomplete) {
 		return fileSystem.conflictsIncomplete(incomplete); 
 	}
-
+	
 	public synchronized void finish() {
         finished = true;
 		torrentManager.get().removeEventListener(this);

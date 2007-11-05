@@ -4,11 +4,6 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.ObjectStreamField;
-import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +28,6 @@ import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
-import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ApplicationServices;
@@ -219,16 +213,6 @@ public class ManagedDownloader extends AbstractDownloader
     */
     
     private static final Log LOG = LogFactory.getLog(ManagedDownloader.class);
-    
-    /** Ensures backwards compatibility. */
-    private static final long serialVersionUID = 2772570805975885257L;
-    
-    /** Make everything transient */
-    private static final ObjectStreamField[] serialPersistentFields = 
-    	ObjectStreamClass.NO_FIELDS;
-
-    /** counter to distinguish between downloads that were not deserialized ok */
-    private static int unknownIndex = 0;
     
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
@@ -530,91 +514,6 @@ public class ManagedDownloader extends AbstractDownloader
 			propertiesMap.put(DEFAULT_FILENAME,rfd.getFileName());
 		if (propertiesMap.get(FILE_SIZE) == null)
 			propertiesMap.put(FILE_SIZE,Long.valueOf(rfd.getSize()));
-    }
-    
-    /** 
-     * See note on serialization at top of file 
-     * <p>
-     * Note that we are serializing a new BandwidthImpl to the stream. 
-     * This is for compatibility reasons, so the new version of the code 
-     * will run with an older download.dat file.     
-     */
-    private void writeObject(ObjectOutputStream stream)
-            throws IOException {
-        
-        Set<RemoteFileDesc> cached = new HashSet<RemoteFileDesc>();
-        Map<String, Serializable> properties = new HashMap<String, Serializable>();
-        IncompleteFileManager ifm;
-        
-        
-        synchronized(this) {
-            if ( !propertiesMap.containsKey(ATTRIBUTES) )
-                propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
-            cached.addAll(cachedRFDs);
-            properties.putAll(propertiesMap);
-            ifm = incompleteFileManager;
-        }
-        
-        stream.writeObject(cached);
-        
-        //Blocks can be written to incompleteFileManager from other threads
-        //while this downloader is being serialized, so lock is needed.
-        synchronized (ifm) {
-            stream.writeObject(ifm);
-        }
-
-        stream.writeObject(properties);
-    }
-
-    /** See note on serialization at top of file.  You must call initialize on
-     *  this!  
-     * Also see note in writeObjects about why we are not using 
-     * BandwidthTrackerImpl after reading from the stream
-     */
-    private void readObject(ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-        deserializedFromDisk = true;
-		
-        Object next = stream.readObject();
-        
-		RemoteFileDesc defaultRFD = null;
-		
-        // old format
-        if (next instanceof RemoteFileDesc[]) {
-            RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
-            if (rfds.length > 0) 
-                defaultRFD = rfds[0];
-            cachedRFDs = new HashSet<RemoteFileDesc>(Arrays.asList(rfds));
-        } else if(next instanceof Set) {
-            cachedRFDs = GenericsUtils.scanForSet(next, RemoteFileDesc.class, GenericsUtils.ScanMode.REMOVE);
-            if (cachedRFDs.size() > 0) {
-                defaultRFD = cachedRFDs.iterator().next();
-            }
-        }
-		
-        incompleteFileManager=(IncompleteFileManager)stream.readObject();
-        
-        Object map = stream.readObject();
-        if (map instanceof Map)
-            propertiesMap = GenericsUtils.scanForMap(map, String.class, Serializable.class, GenericsUtils.ScanMode.REMOVE);
-        else if (propertiesMap == null)
-            propertiesMap =  new HashMap<String, Serializable>();
-		
-		if (defaultRFD != null) {
-			initPropertiesMap(defaultRFD);
-		}
-        
-        if (propertiesMap.get(DEFAULT_FILENAME) == null) {
-            propertiesMap.put(DEFAULT_FILENAME,"Unknown "+(++unknownIndex));
-        }
-        
-        if (propertiesMap.containsKey(ATTRIBUTES))  {
-            attributes = GenericsUtils.scanForMap(propertiesMap.get(ATTRIBUTES),
-                    String.class, Serializable.class, GenericsUtils.ScanMode.REMOVE);
-        }
-
-    	if (attributes == null)
-    	    attributes = new HashMap<String, Serializable>();
     }
 
     /** 

@@ -2,7 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.Set;
 
@@ -26,9 +25,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
  *  Allows the rest of LimeWire to treat this as a regular download. Handles downloading
  *  an item purchased off of the Lime Wire Store (LWS) website
  */
-public class StoreDownloader extends ManagedDownloader implements Serializable { 
-    
-    private static final long serialVersionUID = 1672575739103885243L;
+public class StoreDownloader extends ManagedDownloader { 
     
     private static final Log LOG = LogFactory.getLog(StoreDownloader.class);
     

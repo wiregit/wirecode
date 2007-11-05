@@ -1,10 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.io.ObjectInputStream.GetField;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationManager;
@@ -20,10 +16,7 @@ import com.limegroup.gnutella.util.QueryUtils;
  * confused by the name; ManagedDownloader CAN resume from incomplete files,
  * but it is less strict about its choice of download.
  */
-public class ResumeDownloader extends ManagedDownloader 
-        implements Serializable {
-    /** Ensures backwards compatibility of the downloads.dat file. */
-    private static final long serialVersionUID = -4535935715006098724L;
+public class ResumeDownloader extends ManagedDownloader {
     
     /** The temporary file to resume to. */
     private volatile File _incompleteFile;
@@ -31,11 +24,6 @@ public class ResumeDownloader extends ManagedDownloader
     /** The name and size of the completed file, extracted from
      *  _incompleteFile. */
     private volatile String _name;
-    
-    /** The old size field.  Kept around for backwards-compatibility */
-    @Deprecated
-    @SuppressWarnings("unused")
-    private volatile int _size;
     
     /** The size of the file*/
     private volatile long _size64;
@@ -160,18 +148,5 @@ public class ResumeDownloader extends ManagedDownloader
             return queryRequestFactory.createQuery(queryName);
         else
             return queryRequestFactory.createQuery(queryName);
-    }
-    
-    private void readObject(ObjectInputStream stream)
-    throws IOException, ClassNotFoundException {
-        GetField gets = stream.readFields();
-        _hash = (URN)gets.get("_hash", null);
-        _name = (String) gets.get("_name", null);
-        _incompleteFile = (File)gets.get("_incompleteFile",null);
-        
-        // try to read the long size first, if not there read the int
-        _size64 = gets.get("_size64", -1L);
-        if (_size64 == -1L)
-            _size64 = gets.get("_size",0);
     }
 }

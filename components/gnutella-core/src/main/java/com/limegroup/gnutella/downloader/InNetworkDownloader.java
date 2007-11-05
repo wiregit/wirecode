@@ -2,7 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -15,9 +14,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
 /**
  * A downloader that works in the background, using the network to continue itself.
  */
-public class InNetworkDownloader extends ManagedDownloader implements Serializable {
-    /** Ensures backwards compatibility of the downloads.dat file. */
-    private static final long serialVersionUID = 5713913674943019353L;
+public class InNetworkDownloader extends ManagedDownloader {
     
     /** The size of the completed file. */    
     private final long size;

@@ -2,8 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.Set;
 
@@ -43,14 +41,11 @@ import com.limegroup.gnutella.util.QueryUtils;
  * simply make a HEAD request to get the content length before starting the
  * download.  
  */
-public class MagnetDownloader extends ManagedDownloader implements Serializable {
+public class MagnetDownloader extends ManagedDownloader {
 
     private static final Log LOG = LogFactory.getLog(MagnetDownloader.class);
-
-    /** Prevent versioning problems. */
-    private static final long serialVersionUID = 9092913030585214105L;
-
-	private static final transient String MAGNET = "MAGNET"; 
+    
+	private static final String MAGNET = "MAGNET"; 
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
@@ -127,36 +122,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         return super.initializeDownload();
     }
     
-    /**
-     * Overrides ManagedDownloader to ensure that the default location is tried.
-     *
-    protected int performDownload() {     
-
-		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
-			//Send HEAD request to default location (if present)to get its size.
-			//This can block, so it must be done here instead of in constructor.
-			//See class overview and ManagedDownloader.tryAllDownloads.
-            try {
-                RemoteFileDesc defaultRFD = 
-                    createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
-                
-                //Add the faked up location before starting download. Note that 
-                //we must force ManagedDownloader to accept this RFD in case 
-                //it has no hash and a name that doesn't match the search 
-                //keywords.
-                super.addDownloadForced(defaultRFD,true);
-                
-            }catch(IOException badRFD) {
-                if(LOG.isWarnEnabled())
-                    LOG.warn("Ignoring magnet url: " + _defaultURLs[i]);
-            }
-		}
-
-        //Start the downloads for real.
-        return super.performDownload();
-		}*/
-
-
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
@@ -252,33 +217,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			initPropertiesMap(rfd);
 		return super.addDownloadForced(rfd, cache);
 	}
-
-	/**
-	 * Creates a magnet downloader object when converting from the old 
-	 * downloader version.
-	 * 
-	 * @throws IOException when the created magnet is not downloadable
-	 */
-	private void readObject(ObjectInputStream stream)
-	throws IOException, ClassNotFoundException {
-        MagnetOptions magnet = getMagnet();
-		if (magnet == null) {
-			ObjectInputStream.GetField fields = stream.readFields();
-			String textQuery = (String) fields.get("_textQuery", null);
-			URN urn = (URN) fields.get("_urn", null);
-			String fileName = (String) fields.get("_filename", null);
-			String[] defaultURLs = (String[])fields.get("_defaultURLs", null);
-			magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
-			if (!magnet.isDownloadable()) {
-				throw new IOException("Old undownloadable magnet");
-			}
-			propertiesMap.put(MAGNET, magnet);
-		}
-        
-        if (propertiesMap.get(DEFAULT_FILENAME) == null) 
-            propertiesMap.put(DEFAULT_FILENAME, magnet.getFileNameForSaving());
-        
-    }
 
     /**
 	 * Only allow requeries when <code>downloadSHA1</code> is not null.
