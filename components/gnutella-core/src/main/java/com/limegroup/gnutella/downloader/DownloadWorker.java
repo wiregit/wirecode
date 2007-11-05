@@ -368,7 +368,7 @@ public class DownloadWorker {
         _downloader.consumeBody(new State() {
             protected void handleState(boolean success) {
                 if (!success)
-                    handleRFDFailure(_rfd);
+                    handleRFDFailure();
             }
         });
         return true;
@@ -379,11 +379,12 @@ public class DownloadWorker {
      * 
      * @param rfd
      */
-    private void handleRFDFailure(RemoteFileDesc rfd) {
+    private void handleRFDFailure() {
         _rfd.incrementFailedCount();
-
+        LOG.debug("handling rfd failure for "+_rfd+" with count now "+_rfd.getFailedCount());
         // if this RFD had a failure, try it again.
         if (_rfd.getFailedCount() < 2) {
+            LOG.debug("will try again in a minute");
             // set retry after, wait a little before retrying this RFD
             _rfd.setRetryAfter(FAILED_RETRY_AFTER);
             _manager.addRFD(_rfd);
@@ -478,7 +479,7 @@ public class DownloadWorker {
                     synchronized (_manager) {
                         if (!success) {
                             _downloader.stop();
-                            handleRFDFailure(_rfd);
+                            handleRFDFailure();
                         } else {
                             _manager.informMesh(_rfd, true);
                             if (!_currentState.isHttp11()) // no need to add
@@ -782,7 +783,7 @@ public class DownloadWorker {
     private void connectWithPush(PushConnector observer) {
         if (!_interrupted.get()) {
             if (LOG.isTraceEnabled())
-                LOG.trace("WORKER: attempt push connection to: " + _rfd);
+                LOG.trace("WORKER: attempt push connection to: " + _rfd+" proxies "+_rfd.getPushProxies());
             _connectObserver = null;
 
             // When the push is complete and we have a socket ready to use
@@ -1456,7 +1457,7 @@ public class DownloadWorker {
     }
 
     private ConnectionStatus handleIO() {
-        handleRFDFailure(_rfd);
+        handleRFDFailure();
 
         return ConnectionStatus.getNoFile();
     }
