@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -394,6 +396,23 @@ public class StringUtils {
 			}
 		}
 		return sb.toString();
+    }
+    
+    /**
+     * Returns the tokens of a collection concanated to a delimited by the given
+     * delimiter.
+     */
+    public static String explode(Collection<String> collection, String delimiter) {
+        StringBuilder sb = new StringBuilder();
+        if (!collection.isEmpty()) {
+            Iterator<String> i = collection.iterator(); 
+            sb.append(i.next());
+            while (i.hasNext()) {
+                sb.append(delimiter);
+                sb.append(i.next());
+            }
+        }
+        return sb.toString();
     }
     
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils

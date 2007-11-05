@@ -1,6 +1,8 @@
 package org.limewire.util;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import junit.framework.Test;
 
@@ -250,7 +252,7 @@ public class StringUtilsTest extends BaseTestCase {
                      StringUtils.compareFullPrimary(a2, a3));
         
     }
-    
+
     public void testExplode() {
     	String[] in = new String[] {"a" , "b", " c "}; 
     	assertEquals("a/b/ c ", StringUtils.explode(in, "/"));
@@ -268,5 +270,25 @@ public class StringUtilsTest extends BaseTestCase {
         assertEquals("ab", StringUtils.explode(in, ""));
     }
     
+    public void testCollectionExplode() {
+        Collection<String> in = Arrays.asList("a" , "b", " c "); 
+        assertEquals("a/b/ c ", StringUtils.explode(in, "/"));
+
+        in = Collections.emptyList(); 
+        assertEquals("", StringUtils.explode(in, "/"));
+
+        in =  Collections.emptyList();
+        assertEquals("", StringUtils.explode(in, ""));
+
+        in = Arrays.asList("a", "b"); 
+        assertEquals("a  b", StringUtils.explode(in, "  "));
+
+        in = Arrays.asList("a", "b"); 
+        assertEquals("ab", StringUtils.explode(in, ""));
+        
+        // single element
+        in = Collections.singletonList("h");
+        assertEquals("h", StringUtils.explode(in, "kfkdf"));
+    }
 }
 
