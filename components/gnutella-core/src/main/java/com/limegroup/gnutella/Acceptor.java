@@ -10,6 +10,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -111,22 +112,18 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	private volatile boolean _acceptedIncoming = false;
 	
     /**
-     * Keep track of the last time _acceptedIncoming was set - we want to
-     * revalidate it every so often.
+     * Keep track of the last time we re-validated.
      */
-    private volatile long _lastIncomingTime = 0;
+    private volatile long _lastConnectBackTime = 0;
 
-    /**
-     * The last time you did a connect back check.  It is set to the time
-     * we start up since we try once when we start up.
-     */
-    private volatile long _lastConnectBackTime = System.currentTimeMillis();
-    
     /**
      * Whether or not this Acceptor was started.  All connections accepted prior
      * to starting are dropped.
      */
     private volatile boolean _started;
+    
+    /** Future for our resetter */
+    private volatile Future<?> resetterFuture;
     
     private final NetworkManager networkManager;
     private final Provider<UDPService> udpService;
@@ -555,14 +552,18 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 	private boolean setIncoming(boolean status) {
 		if (_acceptedIncoming == status)
 			return false;
+        if (status) {
+            Future<?> resetter = resetterFuture;
+            if (resetter != null)
+                resetter.cancel(false);
+        }
 	    _acceptedIncoming = status;
 		activityCallback.get().acceptedIncomingChanged(status);
 	    return true;
 	}
 	
 	public void acceptConnection(String word, Socket s) {
-        if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
-            checkFirewall(s.getInetAddress());
+	    checkFirewall(s.getInetAddress());
         IOUtils.close(s);
 	}
 	
@@ -579,7 +580,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             synchronized (Acceptor.class) {
                 changed = setIncoming(true);
                 ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-                _lastIncomingTime = System.currentTimeMillis();
             }
         }
         if(changed)
@@ -638,11 +638,6 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             if (LOG.isDebugEnabled())
                 LOG.debug("Dispatching new client connecton: " + address);
 
-            // if we want to unset firewalled from any connection,
-            // do it here.
-            if (!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
-                checkFirewall(client.getInetAddress());
-
             // Set our IP address of the local address of this socket.
             InetAddress localAddress = client.getLocalAddress();
             setAddress(localAddress);
@@ -696,8 +691,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
      * Resets the last connectback time.
      */
     void resetLastConnectBackTime() {
-        _lastConnectBackTime = 
-             System.currentTimeMillis() - incomingExpireTime - 1;
+        _lastConnectBackTime = 0; // long ago 
     }
 
     /**
@@ -726,36 +720,27 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
     private class IncomingValidator implements Runnable {
         public IncomingValidator() {}
         public void run() {
-            // clear and revalidate if 1) we haven't had in incoming 
-            // or 2) we've never had incoming and we haven't checked
+            // clear and revalidate if we haven't done so in a while
             final long currTime = System.currentTimeMillis();
-            if (
-                (_acceptedIncoming && //1)
-                 ((currTime - _lastIncomingTime) > incomingExpireTime)) 
-                || 
-                (!_acceptedIncoming && //2)
-                 ((currTime - _lastConnectBackTime) > incomingExpireTime))
-                ) {
+            if (currTime - _lastConnectBackTime > incomingExpireTime){
                 // send a connectback request to a few peers and clear
                 // _acceptedIncoming IF some requests were sent.
                 if(connectionManager.get().sendTCPConnectBackRequests())  {
-                    _lastConnectBackTime = System.currentTimeMillis();
+                    _lastConnectBackTime = currTime;
                     Runnable resetter = new Runnable() {
                         public void run() {
                             boolean changed = false;
                             synchronized (Acceptor.class) {
-                                if (_lastIncomingTime < currTime) {
-                                    changed = setIncoming(false);
-                                }
+                                changed = setIncoming(false);
                             }
                             if(changed)
                                 networkManager.incomingStatusChanged();
                         }
                     };
-                    backgroundExecutor.scheduleWithFixedDelay(resetter, 
+                    resetterFuture = backgroundExecutor.scheduleWithFixedDelay(resetter, 
                                            waitTimeAfterRequests, 0, TimeUnit.MILLISECONDS);
-                }
-            }
+                } 
+            } 
         }
     }
 

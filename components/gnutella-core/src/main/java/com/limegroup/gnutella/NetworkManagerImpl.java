@@ -145,7 +145,6 @@ public class NetworkManagerImpl implements NetworkManager {
         // reset the last connect back time so the next time the TCP/UDP
         // validators run they try to connect back.
         acceptor.get().resetLastConnectBackTime();
-        acceptor.get().resetLastConnectBackTime();
         
         // Notify the DHT
         dhtManager.get().addressChanged();

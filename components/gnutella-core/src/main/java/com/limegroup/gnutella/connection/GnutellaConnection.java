@@ -256,7 +256,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * The class wide static counter for the number of tcp connect back request
      * sent.
      */
-    private static int _numTCPConnectBackRequests = 0;
+    private volatile static int _numTCPConnectBackRequests = 0;
 
     /**
      * Variable for the <tt>QueryRouteTable</tt> received for this connection.

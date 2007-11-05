@@ -326,15 +326,6 @@ public final class ConnectionSettings extends LimeProps {
         FACTORY.createBooleanSetting("DO_NOT_MULTICAST_BOOTSTRAP", false);
         
     /**
-     * Setting for whether or not firewalled checking is done from any
-     * incoming connection or just connectbacks.
-     */
-    public static final BooleanSetting UNSET_FIREWALLED_FROM_CONNECTBACK =
-        FACTORY.createRemoteBooleanSetting("UNSET_FIREWALLED_FROM_CONNECTBACK",
-                                             false,
-                                             "connectbackfirewall");
-                                             
-    /**
      * Time in milliseconds to delay prior to flushing data on peer -> peer connections
      */
     public static final LongSetting FLUSH_DELAY_TIME =

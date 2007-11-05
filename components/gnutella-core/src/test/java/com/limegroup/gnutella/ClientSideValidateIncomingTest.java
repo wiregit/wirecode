@@ -83,7 +83,6 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     
     @Override
     public void setSettings() throws Exception {
-        ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
 
@@ -169,9 +168,8 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     public void testTCPRedundantRequestsSent() throws Exception {
         BlockingConnectionUtils.drainAllParallel(testUP);
         // wait some time - both UPs should get a single connect back
-        
         //sleep
-        Thread.sleep(MY_VALIDATE_TIME+1000);
+        Thread.sleep(MY_EXPIRE_TIME+1000);
         readNumConnectBacks(1,testUP[0], TIMEOUT);
         readNumConnectBacks(1,testUP[1], TIMEOUT);
         
@@ -201,7 +199,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             do {
                 m = conn.receive(timeout);
             } while (!(m instanceof TCPConnectBackVendorMessage));
-            fail ("got extra message on "+conn);
+            fail ("got extra message "+m.getClass()+" on "+conn);
         } catch (IOException expected) {}
     }
 
