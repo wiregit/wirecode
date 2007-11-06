@@ -394,13 +394,14 @@ public class ServerSideWhatIsNewTest
             long modified = tempFile1.lastModified();
             while (modified == System.currentTimeMillis())
                 Thread.sleep(10);
-            writer = new FileWriter(tempFile1);
-            writer.write(berkeley.getName(), 0, berkeley.getName().length());
-            writer.flush();
-            writer.close();
             // the filesystem is not too responsive
-            while(tempFile1.lastModified() == modified)
+            while(tempFile1.lastModified() == modified) {
+                writer = new FileWriter(tempFile1);
+                writer.write(berkeley.getName(), 0, berkeley.getName().length());
+                writer.flush();
+                writer.close();
                 Thread.sleep(10);
+            }
         }
 
         final FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
