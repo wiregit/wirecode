@@ -26,6 +26,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 import org.limewire.service.ErrorService;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -129,7 +130,10 @@ public class AcceptorTest extends LimeTestCase {
 
         try {
             acceptor.setListeningPort(portToTry);
-            fail("had no trouble binding TCP port!");
+            if (OSUtils.isWindows())
+                fail("jvm oddity - disable socketResueAddress");
+            else
+                fail("had no trouble binding TCP port!");
         }
         catch (IOException expected) {
             try {
