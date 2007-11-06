@@ -322,7 +322,7 @@
 	    	       showoutput="true"
 	    	       fork="true"
 	           	   forkmode="@{forkmode}"
-	        	   timeout="600000"
+	        	   timeout="1200000"
 	    	>
 	            <sysproperty key="java.library.path"      		 value="${@{nativePathRefId}}"/>
 	    		<sysproperty key="junit.test.method"      		 value="${method}"/>
