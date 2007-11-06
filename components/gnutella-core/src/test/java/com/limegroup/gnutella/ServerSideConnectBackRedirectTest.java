@@ -9,6 +9,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+
 import junit.framework.Test;
 
 import org.limewire.io.IOUtils;
@@ -182,10 +185,15 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         tempSock.close();
     }
 
-
-    public void testTCPConnectBackRedirect() throws Exception {
+    
+    public void testTCPTSLConnectBackRedirect() throws Exception {
         drainAll();
-        
+
+        // first attempt with be with TLS
+        TCP_ACCESS.close();
+        TCP_ACCESS = SSLServerSocketFactory.getDefault().createServerSocket(TCP_ACCESS_PORT);
+        SSLServerSocket sslss = (SSLServerSocket)TCP_ACCESS;
+        sslss.setEnabledCipherSuites(new String[]{"TLS_DH_anon_WITH_AES_128_CBC_SHA"});
         TCPConnectBackRedirect tcp = 
             new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                        TCP_ACCESS.getLocalPort());
@@ -215,7 +223,6 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         } catch (IOException bad) {
             fail("got IOX", bad);
         }
-
     }
 
     public void testTCPConnectBackAlreadyConnected() throws Exception {
@@ -316,8 +323,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             Socket x = TCP_ACCESS.accept();
             byte[] read = new byte["CONNECT BACK\r\n\r\n".length() + 1];
             int n = x.getInputStream().read(read);
-            assertEquals(read.length - 1, n);
-            assertEquals("CONNECT BACK\r\n\r\n\u0000".getBytes(), read);
+            assertGreaterThan(read.length - 1, n); // tls
+            assertFalse((new String(read).contains("CONNECT BACK"))); // encrypted
         } catch (IOException bad) {
             fail("got IOX", bad);
         }

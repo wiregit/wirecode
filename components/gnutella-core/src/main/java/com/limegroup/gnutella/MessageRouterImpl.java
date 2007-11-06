@@ -1408,12 +1408,18 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 try {
                     try {
                         sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 6000, ConnectType.TLS);
+                        sock.setSoTimeout(6000);
+                        OutputStream os = sock.getOutputStream();
+                        os.write("CONNECT BACK\r\n\r\n".getBytes());
+                        os.flush();
                     } catch (IOException noTls) {
-                        sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000, ConnectType.PLAIN);
+                        IOUtils.close(sock);
+                        sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000, ConnectType.PLAIN);                        
+                        sock.setSoTimeout(12000);
+                        OutputStream os = sock.getOutputStream();
+                        os.write("CONNECT BACK\r\n\r\n".getBytes());
+                        os.flush();
                     }
-                    OutputStream os = sock.getOutputStream();
-                    os.write("CONNECT BACK\r\n\r\n".getBytes());
-                    os.flush();
                     if(LOG.isTraceEnabled())
                         LOG.trace("Succesful connectback to: " + addrToContact);
                     try {
