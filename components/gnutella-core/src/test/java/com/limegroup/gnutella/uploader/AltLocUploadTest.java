@@ -11,9 +11,11 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.AssertionFailedError;
@@ -42,6 +44,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Message;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -72,6 +75,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -1016,7 +1020,6 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     private void drainResponse() throws Exception {
-        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         MessageRouter messageRouter = injector.getInstance(MessageRouter.class);
         
@@ -1030,12 +1033,16 @@ public class AltLocUploadTest extends LimeTestCase {
         int i = 0;
         for (; i < 20; i++) {
             
-            final QueryRequest request = queryRequestFactory.createQuery(fd.getSHA1Urn());
+            final int iteration = i; // just for documentation
+            
+            final QueryRequest request = mockery.mock(QueryRequest.class);
+            final Set<URN> urns = new HashSet<URN>();
+            urns.add(fd.getSHA1Urn());
             final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
             final Action checkAlts = new Action() {
 
                 public void describeTo(Description description) {
-                    description.appendText("checks if query reply has altlocs");
+                    description.appendText("checks if query reply has altlocs at iteration "+iteration);
                 }
 
                 public Object invoke(Invocation invocation) throws Throwable {
@@ -1061,6 +1068,36 @@ public class AltLocUploadTest extends LimeTestCase {
                 will(returnValue(false));
                 allowing(handler).isGoodUltrapeer();
                 will(returnValue(false));
+                
+                // some request-specific conditions
+                one(request).hop();
+                atLeast(1).of(request).getQueryUrns();
+                will(returnValue(urns));
+                atLeast(1).of(request).getNetwork();
+                will(returnValue(Network.TCP));
+                atLeast(1).of(request).getHandlerClass();
+                will(returnValue(QueryRequest.class));
+                atLeast(1).of(request).getQuery();
+                will(returnValue(""));
+                atLeast(1).of(request).getGUID(); // its important that the guid be different
+                will(returnValue((new GUID()).bytes())); // every iteration
+                atLeast(1).of(request).desiresAll();
+                will(returnValue(true));
+
+                // stubbed out with default return values
+                ignoring(request).getTotalLength();
+                ignoring(request).isFirewalledSource();
+                ignoring(request).canDoFirewalledTransfer();
+                ignoring(request).desiresOutOfBandReplies();
+                ignoring(request).isWhatIsNewRequest();
+                ignoring(request).getTTL();
+                ignoring(request).getHops();
+                ignoring(request).getRichQuery();
+                ignoring(request).isQueryForLW();
+                ignoring(request).getFeatureSelector();
+                ignoring(request).isFeatureQuery();
+                ignoring(request).desiresXMLResponses();
+                ignoring(request).isMulticast();
             }});
             
             messageRouter.handleMessage(request, handler);
