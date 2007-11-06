@@ -1,9 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Properties;
 
+import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
@@ -174,6 +178,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         LEAF = new BlockingConnection[numLs];
 
         connect();
+        establishIncoming(injector.getInstance(Acceptor.class).getPort(false));
         
         for (int i = 0; i < ULTRAPEER.length; i++) {
             assertTrue("should be open, index = " + i, ULTRAPEER[i].isOpen());
@@ -187,6 +192,25 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         }
     }
 
+    /**
+     * Establishes an incoming connection.  It is necessary to send a proper
+     * connect back string.  We ignore exceptions because various components 
+     * may have been stubbed out in the specific test case.
+     * @param port where to establish the connection to.
+     */
+    private void establishIncoming(int port) {
+        Socket s = null;
+        try {
+            s = new Socket();
+            s.connect(new InetSocketAddress("127.0.0.1",port));
+            s.getOutputStream().write("CONNECT ".getBytes());
+            s.getOutputStream().flush();
+            s.close();
+        } catch (IOException ignore) {}
+        finally {
+            IOUtils.close(s);
+        }
+    }
 
 	public void tearDown() throws Exception {
 	    // there was an error in setup, return so we can see the actual exception
