@@ -43,7 +43,7 @@ public class StatusBarSettings extends LimeProps {
      * Whether or not Lime Wire Store status should be displayed.
      */
     public static BooleanSetting STORE_DISPLAY_ENABLED =
-        FACTORY.createBooleanSetting("STORE_DISPLAY_ENABLED", true);
+        FACTORY.createBooleanSetting("STORE_DISPLAY_ENABLED", false);
 
     /**
      * Whether or not bandwidth consumption should be displayed.
