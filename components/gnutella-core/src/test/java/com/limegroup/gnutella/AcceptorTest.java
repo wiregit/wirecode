@@ -22,6 +22,7 @@ import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 import org.limewire.service.ErrorService;
@@ -183,6 +184,100 @@ public class AcceptorTest extends LimeTestCase {
                                       port), 12);
                  os = sock.getOutputStream();
                  os.write("\n\n".getBytes());
+                 os.flush();
+             } catch (IOException ignored) {
+             } catch (SecurityException ignored) {
+             } catch (Throwable t) {
+                 ErrorService.error(t);
+             } finally {
+                 if(sock != null)
+                     try { sock.close(); } catch(IOException ignored) {}
+                 if(os != null)
+                     try { os.close(); } catch(IOException ignored) {}
+             }
+         }        
+
+         Thread.sleep(250);
+         // CONNECT-BACK is hardcoded on
+         assertFalse(acceptor.acceptedIncoming());
+     }
+     
+     public void testAcceptedConnectBack() throws Exception {
+         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+         int port = bindAcceptor();
+         assertFalse(acceptor.acceptedIncoming());
+         // open up incoming to the test node
+         {
+             Socket sock = null;
+             OutputStream os = null;
+             try {
+                 sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                                      port), 12);
+                 os = sock.getOutputStream();
+                 os.write("CONNECT ".getBytes());
+                 os.flush();
+             } catch (IOException ignored) {
+             } catch (SecurityException ignored) {
+             } catch (Throwable t) {
+                 ErrorService.error(t);
+             } finally {
+                 if(sock != null)
+                     try { sock.close(); } catch(IOException ignored) {}
+                 if(os != null)
+                     try { os.close(); } catch(IOException ignored) {}
+             }
+         }        
+
+         Thread.sleep(250);
+         // test on acceptor since network manager is stubbed
+         assertTrue(acceptor.acceptedIncoming());
+     }
+
+     public void testTLSAcceptedIncoming() throws Exception {
+         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+         int port = bindAcceptor();
+         assertFalse(acceptor.acceptedIncoming());
+         // open up incoming to the test node
+         {
+             Socket sock = null;
+             OutputStream os = null;
+             try {
+                 sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                                      port), 12, ConnectType.TLS);
+                 os = sock.getOutputStream();
+                 os.write("\n\n".getBytes());
+                 os.flush();
+             } catch (IOException ignored) {
+             } catch (SecurityException ignored) {
+             } catch (Throwable t) {
+                 ErrorService.error(t);
+             } finally {
+                 if(sock != null)
+                     try { sock.close(); } catch(IOException ignored) {}
+                 if(os != null)
+                     try { os.close(); } catch(IOException ignored) {}
+             }
+         }        
+
+         Thread.sleep(250);
+         // CONNECT-BACK is hardcoded on
+         assertFalse(acceptor.acceptedIncoming());
+     }
+     
+     public void testTLSAcceptedConnectBack() throws Exception {
+         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+         int port = bindAcceptor();
+         assertFalse(acceptor.acceptedIncoming());
+         // open up incoming to the test node
+         {
+             Socket sock = null;
+             OutputStream os = null;
+             try {
+                 sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                                      port), 12, ConnectType.TLS);
+                 os = sock.getOutputStream();
+                 os.write("CONNECT ".getBytes());
+                 os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
              } catch (Throwable t) {
