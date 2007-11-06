@@ -16,7 +16,6 @@ import junit.framework.Test;
 import org.limewire.io.ByteReader;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
-import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -51,13 +50,14 @@ import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
 /*
  * Tests queuing and stalled upload timeouts.
  */
-public class UploadQueueingTest extends BaseTestCase {
+public class UploadQueueingTest extends LimeTestCase {
 
     private HTTPUploadManager uploadManager;
 
