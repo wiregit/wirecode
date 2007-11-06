@@ -3,7 +3,10 @@ package com.limegroup.gnutella.util;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
+import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorCallback;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BaseTestCase;
@@ -286,6 +289,26 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         f = f.getCanonicalFile();
                  //gnutella       // limegroup    // com         // tests       // .
         return f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();        
+    }
+    
+    /**
+     * Establishes an incoming connection.  It is necessary to send a proper
+     * connect back string.  We ignore exceptions because various components 
+     * may have been stubbed out in the specific test case.
+     * @param port where to establish the connection to.
+     */
+    protected static void establishIncoming(int port) {
+        Socket s = null;
+        try {
+            s = new Socket();
+            s.connect(new InetSocketAddress("127.0.0.1",port));
+            s.getOutputStream().write("CONNECT ".getBytes());
+            s.getOutputStream().flush();
+            s.close();
+        } catch (IOException ignore) {}
+        finally {
+            IOUtils.close(s);
+        }
     }
 }       
 
