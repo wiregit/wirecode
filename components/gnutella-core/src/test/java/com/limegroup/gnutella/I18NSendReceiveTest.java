@@ -155,7 +155,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
         CONN_1 = connectionFactory.createConnection("localhost", TEST_PORT, ConnectType.PLAIN);
         CONN_1.initialize(headers, new EmptyResponder(), 1000);
         BlockingConnectionUtils.drain(CONN_1);
-        establishIncoming(TEST_PORT);
+        LimeTestUtils.establishIncoming(TEST_PORT);
     }
 
 

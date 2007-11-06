@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
 
@@ -203,6 +206,26 @@ public class LimeTestUtils {
         @Override
         protected void configure() {
             bind(BlockingConnectionFactory.class).to(BlockingConnectionFactoryImpl.class);
+        }
+    }
+
+    /**
+     * Establishes an incoming connection.  It is necessary to send a proper
+     * connect back string.  We ignore exceptions because various components 
+     * may have been stubbed out in the specific test case.
+     * @param port where to establish the connection to.
+     */
+    public static void establishIncoming(int port) {
+        Socket s = null;
+        try {
+            s = new Socket();
+            s.connect(new InetSocketAddress("127.0.0.1",port));
+            s.getOutputStream().write("CONNECT ".getBytes());
+            s.getOutputStream().flush();
+            s.close();
+        } catch (IOException ignore) {}
+        finally {
+            IOUtils.close(s);
         }
     }
 }
