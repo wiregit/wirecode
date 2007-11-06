@@ -37,6 +37,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
@@ -1405,7 +1406,11 @@ public abstract class MessageRouterImpl implements MessageRouter {
             public void run() {
                 Socket sock = null;
                 try {
-                    sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000);
+                    try {
+                        sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 6000, ConnectType.TLS);
+                    } catch (IOException noTls) {
+                        sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000, ConnectType.PLAIN);
+                    }
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();
