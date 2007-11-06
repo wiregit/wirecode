@@ -117,7 +117,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
                 sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                      SERVER_PORT), 12);
                 os = sock.getOutputStream();
-                os.write("\n\n".getBytes());
+                os.write("CONNECT BACK\n\n".getBytes());
             } catch (IOException ignored) {
             } catch (SecurityException ignored) {
             } catch (Throwable t) {
