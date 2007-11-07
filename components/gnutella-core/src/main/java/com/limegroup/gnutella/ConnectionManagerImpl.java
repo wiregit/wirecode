@@ -52,6 +52,7 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
@@ -107,6 +108,20 @@ public class ConnectionManagerImpl implements ConnectionManager {
     /** The minimum amount of idle time before we switch to using 1 connection. */
     private static final int MINIMUM_IDLE_TIME = 30 * 60 * 1000; // 30 minutes
     
+    /**
+     * The maximum number of times ManagedConnection instances should send UDP
+     * ConnectBack requests.
+     * visible for testing purposes
+     */
+    static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
+
+    /**
+     * The maximum number of times ManagedConnection instances should send TCP
+     * ConnectBack requests.
+     * Visible for testing purposes
+     */
+    static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
+    
     // for inspection...
     @SuppressWarnings("unused")
     @InspectionPoint("leaf connections")
@@ -147,6 +162,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
     /** The current number of connections we want to maintain. */
     @InspectablePrimitive("preferred connections")
     private volatile int _preferredConnections = -1;
+    /** The number of tcp connect backs sent this session */
+    @InspectablePrimitive("number tcp connectbacks")
+    private volatile int numTCPConnectBacksLeft;
+    /** The number of udp connect backs sent this session */
+    @InspectablePrimitive("number udp connectbacks")
+    private volatile int numUDPConnectBacksLeft;
     
 
     /** Threads trying to maintain the NUM_CONNECTIONS.
@@ -1537,6 +1558,8 @@ public class ConnectionManagerImpl implements ConnectionManager {
         _connectionAttempts = 0;
         _lastConnectionCheck = 0;
         _lastSuccessfulConnect = 0;
+        numTCPConnectBacksLeft = MAX_TCP_CONNECT_BACK_ATTEMPTS;
+        numUDPConnectBacksLeft = MAX_UDP_CONNECT_BACK_ATTEMPTS;
 
 
         // Notify HostCatcher that we've connected.
@@ -2516,6 +2539,23 @@ public class ConnectionManagerImpl implements ConnectionManager {
             count += c.getConnectionMessageStatistics().getNumMessagesReceived();
         }
         return count;
+    }
+    
+    public boolean canSendConnectBack(Network network) {
+        if (network == Network.TCP) 
+            return numTCPConnectBacksLeft > 0;
+        if (network == Network.UDP)
+           return numUDPConnectBacksLeft > 0;
+        return false;
+    }
+    
+    public void connectBackSent(Network network) {
+        if (network == Network.TCP)
+            numTCPConnectBacksLeft--;
+        else if (network == Network.UDP)
+           numUDPConnectBacksLeft--;
+        else
+            throw new IllegalArgumentException("which network?");
     }
 
     /** 

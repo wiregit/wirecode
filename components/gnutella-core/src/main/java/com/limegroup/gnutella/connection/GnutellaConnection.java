@@ -157,18 +157,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH = 8000;
 
     /**
-     * The maximum number of times ManagedConnection instances should send UDP
-     * ConnectBack requests.
-     */
-    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 150;
-
-    /**
-     * The maximum number of times ManagedConnection instances should send TCP
-     * ConnectBack requests.
-     */
-    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 100;
-
-    /**
      * Filter for filtering out messages that are considered spam.
      */
     private volatile SpamFilter _routeFilter;
@@ -245,18 +233,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * Whether I am a push proxy for this connection
      */
     private volatile boolean pushProxyFor;
-
-    /**
-     * The class wide static counter for the number of udp connect back request
-     * sent.
-     */
-    private static int _numUDPConnectBackRequests = 0;
-
-    /**
-     * The class wide static counter for the number of tcp connect back request
-     * sent.
-     */
-    private volatile static int _numTCPConnectBackRequests = 0;
 
     /**
      * Variable for the <tt>QueryRouteTable</tt> received for this connection.
@@ -1096,21 +1072,21 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
             // do i need to send any ConnectBack messages????
             if (!networkManager.canReceiveUnsolicited()
-                    && (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS)
+                    && connectionManager.canSendConnectBack(Network.UDP)
                     && (getConnectionCapabilities().remoteHostSupportsUDPRedirect() > -1)) {
                 GUID connectBackGUID = networkManager.getUDPConnectBackGUID();
                 Message udp = new UDPConnectBackVendorMessage(networkManager.getPort(),
                         connectBackGUID);
                 send(udp);
-                _numUDPConnectBackRequests++;
+                connectionManager.connectBackSent(Network.UDP);
             }
 
             if (!networkManager.acceptedIncomingConnection()
-                    && (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS)
+                    && connectionManager.canSendConnectBack(Network.TCP)
                     && (getConnectionCapabilities().remoteHostSupportsTCPRedirect() > -1)) {
                 Message tcp = new TCPConnectBackVendorMessage(networkManager.getPort());
                 send(tcp);
-                _numTCPConnectBackRequests++;
+                connectionManager.connectBackSent(Network.TCP);
             }
 
             // disable oobv2 explicitly.

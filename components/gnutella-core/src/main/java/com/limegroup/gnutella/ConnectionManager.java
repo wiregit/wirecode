@@ -15,6 +15,7 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -511,5 +512,15 @@ public interface ConnectionManager extends ConnectionAcceptor,
      * Count up all the messages on active connections
      */
     public int getActiveConnectionMessages();
+    
+    /** 
+     * @return true if a connect back request can be sent on the provided network
+     */
+    public boolean canSendConnectBack(Network network);
+    
+    /**
+     * notification that a connect back request has been sent on the given network 
+     */
+    public void connectBackSent(Network network);
     
 }

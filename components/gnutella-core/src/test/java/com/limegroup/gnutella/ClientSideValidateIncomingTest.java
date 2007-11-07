@@ -12,6 +12,7 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import static com.limegroup.gnutella.ConnectionManagerImpl.MAX_TCP_CONNECT_BACK_ATTEMPTS;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -107,8 +108,25 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         // client side seems to follow the setup process A-OK
     }
 
-    public void testReminderToRemoveStaticLimit() throws Exception {
-        fail("the static limit on immediate connectback requests has to become per-session");
+    
+    /**
+     * Tests that only a limited number of connect back messages are 
+     * sent upon connection initialization.
+     */
+    public void testLimitedConnectBacksSent() throws Exception {
+        final int max = MAX_TCP_CONNECT_BACK_ATTEMPTS + 3; // not exact
+        int received = 0;
+        for (int i = 0; i < max; i++) {
+            testUP[0].send(messagesSupportedVendorMessage);
+            testUP[0].flush();
+            testUP[1].send(messagesSupportedVendorMessage);
+            testUP[1].flush();
+            while(BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], TCPConnectBackVendorMessage.class, 100) != null)
+                received++;
+            while(BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[1], TCPConnectBackVendorMessage.class, 100) != null) 
+                received++;
+        }
+        assertLessThan(max,received);
     }
     
     // This test checks that if _acceptedIncoming is false, connect back
