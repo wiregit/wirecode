@@ -1,5 +1,8 @@
 package org.limewire.statistic;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -341,6 +344,23 @@ public class StatsUtils {
             writeBuffer[2] = (byte)(v >>>  8);
             writeBuffer[3] = (byte)(v >>>  0);
             return writeBuffer;
+        }
+        
+        /**
+         * Decodes byte array to a double value.
+         */
+        public static double bytesToDouble(byte [] b) {
+            if (b == null)
+                return Double.NaN;
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(b));
+            try {
+                if (b.length == 4) 
+                    return dis.readFloat();
+                else
+                    return dis.readDouble();
+            } catch (IOException bad) {
+                return Double.NaN;
+            }
         }
     }
 
