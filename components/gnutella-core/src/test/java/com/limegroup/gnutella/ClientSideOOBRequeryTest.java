@@ -141,6 +141,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         networkManagerStub.setCanReceiveSolicited(true);
         networkManagerStub.setCanReceiveUnsolicited(true);
         networkManagerStub.setOOBCapable(true);
+        networkManagerStub.setPort(SERVER_PORT);
         
         fileManager.loadSettingsAndWait(2000);
         
@@ -325,7 +326,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // now do the download, wait for it to finish, and then bypassed results
         // should be empty again
         RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData());
-        
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
         assertTrue("file should be shared",
