@@ -760,51 +760,40 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     	assertEquals(1, ack.getNumResults());
         return ack.getSecurityToken();
     }
-
+    
     // tests that the expirer works
+    // this test needs to be more black-boxyish but its hard
     public void testExpirer() throws Exception {
-        fail("this test relies on the others being run before it so it needs to be rewritten entirely");
-        // see if anything is going to be expired
+        establishOOBAbility();
         GuidMapManager gmm = injector.getInstance(GuidMapManager.class);
         List expireList = (List) PrivilegedAccessor.getValue(gmm, 
                                                              "toExpire");
-        System.out.println(expireList);
-        assertNotNull(expireList);
-        Thread.sleep(EXPIRE_TIME*2);  // old guids should be expired...
-        synchronized (gmm) {
-            assertEquals(1, expireList.size());
-            // iterator through all the maps and confirm they are empty
-            for(Iterator i = expireList.iterator(); i.hasNext(); ) {
-                Object guidMapImpl = i.next();
-                synchronized(guidMapImpl) {
-                    Map currMap = (Map)PrivilegedAccessor.invokeMethod(guidMapImpl, "getMap", (Object[])null);
-                    assertTrue(currMap.isEmpty());
-                }
-            }
-        }
-
-        // now add a few queries and make sure some are expired but others not
+        
+        // nothing to expire at first
+        assertTrue(expireList.isEmpty());
+        
         {
-        QueryRequest query = queryRequestFactory.createQuery("sumeet");
-        sendF(LEAF[0], query);
-        Thread.sleep(500);
-        QueryStatusResponse resp = 
-            new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
-        sendF(LEAF[0], resp);
-        Thread.sleep(500);
+            QueryRequest query = queryRequestFactory.createQuery("sumeet");
+            sendF(LEAF[0], query);
+            Thread.sleep(500);
+            QueryStatusResponse resp = 
+                new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
+            sendF(LEAF[0], resp);
+            Thread.sleep(500);
         }
         {
-        QueryRequest query = queryRequestFactory.createQuery("berlin");
-        sendF(LEAF[0], query);
-        Thread.sleep(500);
-        QueryStatusResponse resp = 
-            new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
-        sendF(LEAF[0], resp);
-        Thread.sleep(500);
+            QueryRequest query = queryRequestFactory.createQuery("berlin");
+            sendF(LEAF[0], query);
+            Thread.sleep(500);
+            QueryStatusResponse resp = 
+                new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
+            sendF(LEAF[0], resp);
+            Thread.sleep(500);
         }
         Thread.sleep(EXPIRE_TIME*2);
-        
+
         synchronized (gmm) {
+            assertFalse(expireList.isEmpty());
             // iterator through all the maps and confirm they are empty
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
                 Object guidMapImpl = i.next();
