@@ -29,7 +29,6 @@ import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -455,14 +454,12 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             new File(_sharedDir, "berkeley.txt").exists());
         
         Downloader d = downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
-        fileManager.addFileEventListener(new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent fme) {
-                System.out.println(fme);
-            }
-        });
-        // sleep to make sure the download starts 
-        while(!d.isCompleted())
+        // sleep to make sure the download starts
+        int sleeps = 0;
+        while(sleeps++ < 30 && !d.isCompleted())
             Thread.sleep(1000);
+        
+        assertTrue("download took too long",d.isCompleted());
         
         assertTrue("file should saved", 
             new File( _savedDir, "berkeley.txt").exists());
