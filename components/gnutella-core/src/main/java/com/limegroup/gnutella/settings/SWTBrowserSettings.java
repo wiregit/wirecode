@@ -24,13 +24,4 @@ public final class SWTBrowserSettings extends LimeProps {
         FACTORY.createRemoteStringSetting("REMOTE_LIME_WIRE_STORE_URL", 
                                           "http://limewire.com/store", 
                                           "SWTBrowserSettings.remoteLimeWireStoreUrl");
-    
-    /** 
-     * Local String for The Lime Wire Store
-     */ 
-    public static final StringSetting LOCAL_LIME_WIRE_STORE_URL =
-        FACTORY.createRemoteStringSetting("LOCAL_LIME_WIRE_STORE_URL", 
-                                          "http://localhost:8080/store/app/pages/Welcome",
-                                          "SWTBrowserSettings.localLimeWireStoreUrl");
-
 }
