@@ -24,4 +24,12 @@ public final class SWTBrowserSettings extends LimeProps {
         FACTORY.createRemoteStringSetting("REMOTE_LIME_WIRE_STORE_URL", 
                                           "http://limewire.com/store", 
                                           "SWTBrowserSettings.remoteLimeWireStoreUrl");
+    
+     /**
+      * The name of the browser in the tab.
+      */
+    public static final StringSetting SWT_BROWSER_TITLE =
+        FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE", 
+                                          "Browse the Web", 
+                                          "SWTBrowserSettings.swtBrowserTitle");
 }
