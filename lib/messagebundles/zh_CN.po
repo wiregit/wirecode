@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-27 16:43-0400\n"
+"POT-Creation-Date: 2007-10-23 14:19-0400\n"
 "PO-Revision-Date: 2007-09-13 11:10+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -15,8 +15,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-10-23 03:54+0000\n"
+"X-Launchpad-Export-Date: 2007-11-07 21:27+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
+
+#~ msgid "Loading magnet Management..."
+#~ msgstr "加载磁铁管理"
+
+#, fuzzy
+#~ msgid "&Download .torrent"
+#~ msgstr "下载"
+
+#~ msgid "Waiting"
+#~ msgstr "等待"
+
+#~ msgid "&MagnetMix"
+#~ msgstr "&MagnetMix"
 
 #, fuzzy
 #~ msgid "test1"
@@ -85,9 +98,6 @@ msgstr ""
 
 #~ msgid "Querying Network"
 #~ msgstr "正在 请求 网络"
-
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "请求 已发出, 等待 {0}秒 返回 结果"
 
 #~ msgid "End Chat"
 #~ msgstr "结束聊天"
@@ -240,19 +250,19 @@ msgstr ""
 #~ msgid "THEX Request"
 #~ msgstr "THEX 请求"
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:34
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr "由於您的硬盘容量已满，因此LimeWire无法记录有关文档。如要继续使用LimeWire，请腾出硬盘容量。"
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:35
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr "由於另一个程序锁了有关文档，因此LimeWire无法打开该文档。LimeWire可能采取意料外的行动直至该文档被解放。"
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:36
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:37
 msgid ""
 "LimeWire was unable to write a necessary file because you do not have the "
 "necessary permissions. Your preferences may not be maintained the next time "
@@ -261,26 +271,26 @@ msgstr ""
 "由於您并没有得到有关允许，因此LimeWire无法记录有关文档。在下一次开启LimeWire时，您的优先选择有可能无法保持，或LimeWire可能会有意料"
 "外的行为。"
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:37
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:38
 msgid ""
 "LimeWire cannot open a necessary file because the filename contains "
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr "由於您的开机系统无法支持有关文档使用的符号，因此LimeWire无法打开该文档。LimeWire可能会有意料外的行为。"
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:39
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:40
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr "由於您的硬盘容量已满，因此LimeWire无法下载有关文档。如要下载更多文档，请腾出硬盘容量。"
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:40
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:41
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr "由於另一个程序正使用有关文档，因此LimeWire无法下载该文档。请关闭有关程序并再次尝试下载。"
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:41
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:42
 msgid ""
 "LimeWire was unable to create or continue writing an incomplete file for the "
 "selected download because you do not have permission to write files to the "
@@ -288,7 +298,7 @@ msgid ""
 "Save Folder."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:42
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:43
 msgid ""
 "LimeWire was unable to open the incomplete file for the selected download "
 "because the filename contains characters which are not supported by your "
@@ -297,155 +307,155 @@ msgstr ""
 
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
-#: components/setting/src/main/java/org/limewire/setting/SettingsFactory.java:186
+#: components/setting/src/main/java/org/limewire/setting/SettingsFactory.java:187
 msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
 msgstr ""
 
-#: core/com/limegroup/gnutella/Acceptor.java:287
-#: core/com/limegroup/gnutella/browser/HTTPAcceptor.java:89
+#: core/com/limegroup/gnutella/Acceptor.java:290
+#: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManager.java:216
+#: core/com/limegroup/gnutella/DownloadManager.java:229
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr "对不起，LimeWire无法重新启动您的旧下载。"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:277
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:303
 msgid "Loading TLS Encryption..."
 msgstr "加载TLS加码程序"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:289
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:315
 msgid "Loading Safe Content Management..."
 msgstr "加载安全内容管理"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:294
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:320
 msgid "Loading Message Router..."
 msgstr "加载通信路线器"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:299
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:325
 msgid "Loading Upload Management..."
 msgstr "加载上载管理"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:308
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:335
 msgid "Loading Connection Listener..."
 msgstr "加载联结聆听者"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:317
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:344
 msgid "Loading Connection Management..."
 msgstr "加载联结管理"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:322
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:349
 msgid "Loading Download Management..."
 msgstr "加载下载管理"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:327
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:355
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "加载超同级/DHT管理"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:332
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:360
 msgid "Locating Peers..."
 msgstr "搜寻侪"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:348
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
 msgid "Loading Shared Files..."
 msgstr "加载共享文档"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:353
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:381
 msgid "Loading bittorrent Management..."
 msgstr "加载bittorrent管理"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:358
-msgid "Loading magnet Management..."
-msgstr "加载磁铁管理"
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:364
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:387
 msgid "Loading Old Downloads..."
 msgstr "加载旧下载"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:392
 msgid "Checking for Updates..."
 msgstr "检查升级中"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:397
 msgid "Loading Directed Querier..."
 msgstr "加载 directed querier..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:379
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:402
 msgid "Loading Magnet Listener..."
 msgstr "加载 MAGNET listener..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:413
 msgid "Loading Peer Listener..."
 msgstr "加载侪聆听者"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:418
 msgid "Loading Stale Connection Management..."
 msgstr "加载 stale connection management..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:394
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:423
 msgid "Loading Saved Files..."
 msgstr "加载已存文档"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:399
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:428
 #, fuzzy
 msgid "Loading Spam Management..."
 msgstr "加载 connection management..."
 
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:433
+msgid "Loading Network Listeners..."
+msgstr ""
+
 #. These are used as resource keys to retreive descriptions in the GUI
-#: core/com/limegroup/gnutella/MediaType.java:41
+#: core/com/limegroup/gnutella/MediaType.java:44
 msgid "All Types"
 msgstr "全部类型"
 
-#: core/com/limegroup/gnutella/MediaType.java:42
+#: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Documents"
 msgstr "文件"
 
-#: core/com/limegroup/gnutella/MediaType.java:43
+#: core/com/limegroup/gnutella/MediaType.java:47
 msgid "Programs"
 msgstr "程序"
 
-#: core/com/limegroup/gnutella/MediaType.java:44
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:86
+#: core/com/limegroup/gnutella/MediaType.java:48
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
 msgstr "音频"
 
-#: core/com/limegroup/gnutella/MediaType.java:45
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:102
+#: core/com/limegroup/gnutella/MediaType.java:49
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
 msgstr "视频"
 
-#: core/com/limegroup/gnutella/MediaType.java:46
+#: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
 msgstr "图片"
 
 #. show warning and return
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:194
+#: core/com/limegroup/gnutella/browser/ExternalControl.java:190
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:123
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
 msgstr ""
 
 #. show warning but proceed
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:200
+#: core/com/limegroup/gnutella/browser/ExternalControl.java:196
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:128
 msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
 
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:211
+#: core/com/limegroup/gnutella/browser/ExternalControl.java:207
 #, java-format
 msgid "You have already downloaded {0}"
 msgstr "您已经下载了{0}"
 
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:216
+#: core/com/limegroup/gnutella/browser/ExternalControl.java:212
 #, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "您已经下载此文档于{0}"
@@ -495,172 +505,186 @@ msgstr "保持因特网的开放。请买LimeWire PRO。"
 msgid "Developing LimeWire costs real money. Get PRO."
 msgstr "开发LimeWire需要钱。请买PRO。"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:255
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
 #, fuzzy
 msgid "Title"
 msgstr "标题:"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:257
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:56
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:42
 msgid "Artist"
 msgstr "演艺员"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:259
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:57
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
 #, fuzzy
 msgid "Album"
 msgstr "专辑"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:261
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:106
 msgid "Genre"
 msgstr ""
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:263
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:73
 msgid "Track"
 msgstr "曲目"
 
-#. *
-#. * The resource to use for the extension property.
-#. 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:105
-#: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:38
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:57
-#: gui/com/limegroup/gnutella/gui/search/SelectorsHandler.java:147
-#: gui/com/limegroup/gnutella/gui/search/SelectorsHandler.java:156
+#: gui/com/limegroup/gnutella/gui/search/Selector.java:81
 msgid "Type"
 msgstr "类型:"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:35
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:267
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
 msgstr "时间"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:265
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:131
 msgid "Year"
 msgstr "年份"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Language"
 msgstr "语言:"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:43
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:269
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
 msgid "Bitrate"
 msgstr "比特率"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 msgid "Comments"
 msgstr "评语"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
 msgstr "行动"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
+#: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:271
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:98
 msgid "Copyright"
 msgstr "版权"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:128
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:135
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
 msgstr "许可证类型"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
 msgstr "导演"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 msgid "Producer"
 msgstr "出品人"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 msgid "Studio"
 msgstr "工作室"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
 msgstr "星星"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
 msgstr "字幕"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
 msgstr "排名"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
 msgstr "高度"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
 msgstr "宽度"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:122
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 msgid "Image"
 msgstr "图象"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
 msgstr "说明"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:142
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:148
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:261
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:41
 msgid "License"
 msgstr "许可证"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:129
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 msgid "Document"
 msgstr "文件"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
 msgstr "课题"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
 msgstr "作者"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:136
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 msgid "Application"
 msgstr "应用"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:364
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:365
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:88
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:27
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:34
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:52
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:218
 msgid "Name"
 msgstr "名称"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
 msgstr "出版社"
 
-#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
+#: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
 msgstr "平台"
 
@@ -686,19 +710,19 @@ msgid ""
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
 
-#: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:15
+#: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 #, fuzzy
 msgid "Automatically start torrents"
 msgstr "自动 滚动."
 
-#: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:17
+#: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:18
 #, fuzzy
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr "你 可以 选择 是否 自动 清除 已完成的 下载 条目."
 
-#: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:25
+#: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
 msgid "Start automatically"
 msgstr "自动启动"
 
@@ -741,11 +765,11 @@ msgstr ""
 msgid "Experimental disk access"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:71
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:75
 msgid "Internal Error"
 msgstr "内部错误"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:377
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:382
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To aid with debugging, please click "
@@ -753,7 +777,7 @@ msgid ""
 "'Review' to look at the information that will be sent. Thank you."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:379
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:384
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, click "
@@ -761,53 +785,53 @@ msgid ""
 "about the error."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:390
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:395
 msgid "Send"
 msgstr "发送"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:398
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:403
 msgid "Review"
 msgstr "复查"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:411
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:416
 msgid "Discard"
 msgstr "去掉"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:428
-#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:95
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:433
+#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "时常即时发送"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:429
-#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:434
+#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "时常要求复查"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:430
-#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:435
+#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "时常去掉所有错误"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:504
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:509
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:533
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:538
 msgid "Copy Report"
 msgstr "复制报告"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:541
-#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:87
-#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:133
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:546
+#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
+#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:112
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:246
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:334
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:148
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:37
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:146
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:301
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
@@ -830,8 +854,11 @@ msgid "LimeWire"
 msgstr "LimeWire &PRO"
 
 #. set up close button
+#. *
+#. * 'Close'.
+#. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:78
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
 #, fuzzy
 msgid "Close"
 msgstr "关闭 (&C)"
@@ -928,21 +955,21 @@ msgstr ""
 #. *
 #. * The select all action.
 #. 
-#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:317
-#: gui/com/limegroup/gnutella/gui/LimeTextField.java:73
+#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:568
+#: gui/com/limegroup/gnutella/gui/LimeTextField.java:74
 #, fuzzy
 msgid "Select All"
 msgstr "选择 文件夹"
 
-#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:319
+#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:570
 msgid "Marks all Items as Selected"
 msgstr "将全部条目标识为全选"
 
-#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:334
+#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:588
 msgid "Deselect All"
 msgstr "取消全选"
 
-#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:336
+#: gui/com/limegroup/gnutella/gui/CheckBoxList.java:590
 msgid "Deselects all Items in the List"
 msgstr "取消所选表内的全部条目"
 
@@ -950,30 +977,31 @@ msgstr "取消所选表内的全部条目"
 msgid "Clear History"
 msgstr "消除记录"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:133
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
+#: gui/com/limegroup/gnutella/gui/Console.java:136
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:40
 msgid "Apply"
 msgstr "应用"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:140
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:787
+#: gui/com/limegroup/gnutella/gui/Console.java:143
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:774
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:50
 #, fuzzy
 msgid "Clear"
 msgstr "颜色"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:147
+#: gui/com/limegroup/gnutella/gui/Console.java:150
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:115
 msgid "Save"
 msgstr "保存"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:543
+#: gui/com/limegroup/gnutella/gui/Console.java:545
 #, fuzzy
 msgid "Save As"
 msgstr "保存..."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:93
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:169
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:94
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:170
 msgid "What's New"
 msgstr "新特点"
 
@@ -1057,7 +1085,7 @@ msgstr "T3 或 更高"
 msgid "Ethernet"
 msgstr "Ethernet"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:111
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:113
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1766
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
@@ -1066,47 +1094,47 @@ msgid ""
 "\"Disconnect\" from the File menu."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:122
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 #, fuzzy
 msgid "&Search"
 msgstr "搜索"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:121
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:123
 #, fuzzy
 msgid "&Monitor"
 msgstr "监视"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:122
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:124
 #, fuzzy
 msgid "&Connections"
 msgstr "所有 邻居"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:123
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
 #, fuzzy
 msgid "&Library"
 msgstr "收藏"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:124
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 #, fuzzy
 msgid "C&onsole"
 msgstr "连接 (&O)"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
 msgid "Lo&gging"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:139
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:141
 #, java-format
 msgid "Display the {0} Screen"
 msgstr "显示{0}荧幕"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:213
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:215
 msgid "LimeWire: Enabling Open Information Sharing"
 msgstr "LimeWire: 运行在 Gnutella 网络"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:393
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:397
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:401
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:405
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -1117,7 +1145,7 @@ msgid ""
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:486
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:494
 msgid ""
 "LimeWire is unable to find a license for this file. Download anyway?\n"
 "\n"
@@ -1155,69 +1183,69 @@ msgstr ""
 msgid "LimeWire could not launch the specified file."
 msgstr "因为安全的 原因, LimeWire 将不会运行指定的 文件."
 
-#: gui/com/limegroup/gnutella/gui/GUIUtils.java:132
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:229
+#: gui/com/limegroup/gnutella/gui/GUIUtils.java:135
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:230
 msgid "KB"
 msgstr "KB"
 
-#: gui/com/limegroup/gnutella/gui/GUIUtils.java:134
+#: gui/com/limegroup/gnutella/gui/GUIUtils.java:137
 msgid "MB"
 msgstr "MB"
 
-#: gui/com/limegroup/gnutella/gui/GUIUtils.java:136
+#: gui/com/limegroup/gnutella/gui/GUIUtils.java:139
 msgid "GB"
 msgstr "GB"
 
-#: gui/com/limegroup/gnutella/gui/GUIUtils.java:138
+#: gui/com/limegroup/gnutella/gui/GUIUtils.java:141
 msgid "TB"
 msgstr "TB"
 
-#: gui/com/limegroup/gnutella/gui/GUIUtils.java:140
+#: gui/com/limegroup/gnutella/gui/GUIUtils.java:143
 msgid "KB/s"
 msgstr "KB/秒"
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:269
+#: gui/com/limegroup/gnutella/gui/Initializer.java:280
 msgid "Loading HTML Engine..."
 msgstr "加载 HTML Engine..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:305
+#: gui/com/limegroup/gnutella/gui/Initializer.java:319
 msgid "Loading User Interface..."
 msgstr "加载 用户 界面..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:322
+#: gui/com/limegroup/gnutella/gui/Initializer.java:340
 msgid "Loading Core Components..."
 msgstr "加载 核心 组件..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:339
+#: gui/com/limegroup/gnutella/gui/Initializer.java:361
 msgid ""
 "LimeWire was unable to create your settings directory and is using a "
 "temporary directory.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:367
+#: gui/com/limegroup/gnutella/gui/Initializer.java:390
 msgid "Loading Icons..."
 msgstr "加载图标"
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:374
+#: gui/com/limegroup/gnutella/gui/Initializer.java:396
 msgid "Loading Internationalization Support..."
 msgstr "加载 internationalization support..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:397
+#: gui/com/limegroup/gnutella/gui/Initializer.java:418
 msgid "Loading Digital Audio Access Protocol..."
 msgstr "加载 Digital Audio Access Protocol..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:401
+#: gui/com/limegroup/gnutella/gui/Initializer.java:424
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol Service (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:449
+#: gui/com/limegroup/gnutella/gui/Initializer.java:472
 msgid "This Alpha version has expired.  Press Ok to exit. "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:455
+#: gui/com/limegroup/gnutella/gui/Initializer.java:478
 msgid ""
 "LimeWire was unable to initialize and start. This is usually due to a "
 "firewall program blocking LimeWire's access to the internet or loopback "
@@ -1225,7 +1253,7 @@ msgid ""
 "internet and restart LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:461
+#: gui/com/limegroup/gnutella/gui/Initializer.java:484
 msgid ""
 "LimeWire could not create a temporary preferences directory.\n"
 "\n"
@@ -1237,31 +1265,31 @@ msgid ""
 "LimeWire will now exit.  Thank You."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:471
+#: gui/com/limegroup/gnutella/gui/Initializer.java:494
 #: gui/com/limegroup/gnutella/gui/MessageService.java:97
 #: gui/com/limegroup/gnutella/gui/MessageService.java:113
 #: gui/com/limegroup/gnutella/gui/MessageService.java:229
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:903
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:917
 msgid "Error"
 msgstr "错误"
 
-#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:66
+#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:67
 msgid "Input"
 msgstr "输入"
 
-#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
-#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:146
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:114
+#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:89
+#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:188
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:262
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:336
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:801
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:862
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:788
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:849
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:376
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:239
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:467
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:786
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:792
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:476
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:800
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:806
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:159
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:38
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:244
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:117
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:110
@@ -1270,15 +1298,15 @@ msgstr "输入"
 msgid "Cancel"
 msgstr "撤销"
 
-#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:92
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:43
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:45
+#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:93
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:44
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:46
 #, fuzzy
 msgid "Apply Operation"
 msgstr "取消 操作."
 
-#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:93
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:44
+#: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:94
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:45
 msgid "Cancel Operation"
 msgstr "取消 操作."
 
@@ -1311,23 +1339,22 @@ msgstr "稍后提醒"
 msgid "Do not Show Again"
 msgstr "请别再显示"
 
-#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:43
+#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:173
+msgid "LimeWire must be restarted for the new language to take effect."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
 msgstr "更改语言"
 
-#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:88
-#, fuzzy
-msgid "Show Language in status bar"
-msgstr "显示 高级 统计:"
-
-#. 
-#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:97
+#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
 msgstr "协助翻译LimeWire"
 
-#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:119
-msgid "LimeWire must be restarted for the new language to take effect."
-msgstr ""
+#: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
+#, fuzzy
+msgid "Show Language in status bar"
+msgstr "显示 高级 统计:"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:383
 msgid "Verify"
@@ -1422,28 +1449,29 @@ msgstr "许可证资料"
 #. *
 #. * The undo action.
 #. 
-#: gui/com/limegroup/gnutella/gui/LimeTextField.java:28
+#: gui/com/limegroup/gnutella/gui/LimeTextField.java:29
 msgid "Undo"
 msgstr "取消"
 
 #. *
 #. * The cut action
 #. 
-#: gui/com/limegroup/gnutella/gui/LimeTextField.java:37
+#: gui/com/limegroup/gnutella/gui/LimeTextField.java:38
 msgid "Cut"
 msgstr "裁剪"
 
 #. *
 #. * The copy action.
 #. 
-#: gui/com/limegroup/gnutella/gui/LimeTextField.java:46
+#: gui/com/limegroup/gnutella/gui/LimeTextField.java:47
 msgid "Copy"
 msgstr "复制"
 
 #. *
 #. * The paste action.
 #. 
-#: gui/com/limegroup/gnutella/gui/LimeTextField.java:55
+#: gui/com/limegroup/gnutella/gui/LimeTextField.java:56
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:222
 #, fuzzy
 msgid "Paste"
 msgstr "粘贴"
@@ -1451,25 +1479,26 @@ msgstr "粘贴"
 #. *
 #. * The delete action.
 #. 
-#: gui/com/limegroup/gnutella/gui/LimeTextField.java:64
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:785
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:791
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1266
+#: gui/com/limegroup/gnutella/gui/LimeTextField.java:65
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:799
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:805
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1282
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:119
 msgid "Delete"
 msgstr "刪除"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
+#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:114
 msgid "Add"
 msgstr "添加"
 
 #. remove
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:282
-#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:93
-#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:103
-#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:43
+#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:94
+#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:104
+#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:44
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:223
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:43
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:49
 msgid "Remove"
 msgstr "去掉"
 
@@ -1508,23 +1537,23 @@ msgstr "警告"
 #: gui/com/limegroup/gnutella/gui/MessageService.java:448
 #: gui/com/limegroup/gnutella/gui/MessageService.java:482
 #: gui/com/limegroup/gnutella/gui/MessageService.java:530
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:841
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:855
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:24
-#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:264
+#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:263
 msgid "Message"
 msgstr "通信"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:534
 #: gui/com/limegroup/gnutella/gui/MessageService.java:537
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:164
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:45
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:165
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:414
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:424
 msgid "Yes"
 msgstr "是"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:535
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:417
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:427
 msgid "No"
@@ -1561,6 +1590,15 @@ msgstr "显示最新"
 msgid "Searches"
 msgstr "搜索"
 
+#: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:23
+msgid "My Shared Files"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
+#, java-format
+msgid "View My {0} Shared Files"
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:37
 msgid ""
 "Your save folder is not valid. It may have been deleted, you may not have "
@@ -1585,152 +1623,159 @@ msgstr "关闭LimeWire中"
 msgid "Please wait while LimeWire shuts down..."
 msgstr "LimeWire 正在 扫描 你的 硬盘, 请等待..."
 
-#: gui/com/limegroup/gnutella/gui/SplashWindow.java:85
+#: gui/com/limegroup/gnutella/gui/SplashWindow.java:102
 #, fuzzy
 msgid "Loading LimeWire..."
 msgstr "加载 资源..."
 
-#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:93
-#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:103
-#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:42
+#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:94
+#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:104
+#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:43
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:217
-#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:114
 #, fuzzy
 msgid "Add..."
 msgstr "添加"
 
-#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:330
+#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:331
 msgid "Add New List Item"
 msgstr "添加 新的 列表 条目"
 
-#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:363
+#: gui/com/limegroup/gnutella/gui/StandardListEditor.java:364
 msgid "Remove Selected Item"
 msgstr "去掉所选条目"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:127
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:132
 msgid "Loading Status Window..."
 msgstr "加载 状态 窗口..."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:448
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:480
 msgid "LimeWire has not detected a firewall"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:451
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:483
 msgid "LimeWire has detected a firewall"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:536
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:493
+msgid "Lime Wire Store has not been found"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:496
+msgid "Lime Wire Store has been found"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:588
 #, fuzzy
 msgid "Connection"
 msgstr "连接 (&O)"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:539
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:591
 msgid "Disconnected"
 msgstr "断开的"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:540
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:592
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:543
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:595
 #, fuzzy
 msgid "Starting"
 msgstr "共享"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:544
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:596
 #, fuzzy
 msgid "You are currently connecting to the network"
 msgstr "连接 到 网络"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:547
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:599
 #, fuzzy
 msgid "Poor"
 msgstr "端口"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:548
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:600
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:551
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:603
 msgid "Fair"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:552
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:604
 msgid "Your connection to the network is getting stronger"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:555
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:607
 msgid "Good"
 msgstr "好"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:556
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:608
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:560
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:612
 msgid "Excellent"
 msgstr "很好"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:561
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:613
 msgid "Your connection to the network is very strong"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:564
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:616
 msgid "Turbo-Charged"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:565
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:617
 msgid "Your connection to the network is extremely strong"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:566
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:618
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:573
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:625
 #, fuzzy
 msgid "Waking Up"
 msgstr "请求 已发出, 等待"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:574
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:626
 msgid "LimeWire is waking up from sleep mode"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:677
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:729
 #, fuzzy
 msgid "Show Connection Quality"
 msgstr "连接 到其他 客户端"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:693
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:745
 msgid "Show Shared Files Count"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:709
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:761
 #, fuzzy
 msgid "Show Language Status"
 msgstr "显示 高级 统计:"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:730
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:782
 msgid "Show Firewall Status"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:746
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:798
 msgid "Show Bandwidth Consumption"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:762
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:814
 #, fuzzy
 msgid "Show Media Player"
 msgstr "LimeWire 多媒体 播放器"
 
 #. {0}: number of shared files
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:832
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:884
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
@@ -1738,47 +1783,59 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. {0}: number of shared files
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:835
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:887
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:901
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:953
 #, fuzzy
 msgid "Downloads:"
 msgstr "下载"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:903
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:955
 #, fuzzy
 msgid "Uploads:"
 msgstr "正在 上载"
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:48
+#. *
+#. * The title for the TOTD window.
+#. 
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:53
 #, fuzzy
 msgid "Tip of the Day"
 msgstr "显示 Tip of the Day 窗口."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:54
+#. *
+#. * The 'Did You Know' intro.
+#. 
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:58
 msgid "Did You Know..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:60
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:64
 msgid "Show Tips At Startup"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:66
+#. *
+#. * 'Next'.
+#. 
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:69
 #, fuzzy
 msgid "Next Tip"
 msgstr "前进"
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:72
+#. *
+#. * 'Previous'.
+#. 
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:74
 #, fuzzy
 msgid "Previous Tip"
 msgstr "后退"
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:331
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:329
 #, fuzzy
 msgid "Loading tips..."
 msgstr "加载 用户 设置..."
@@ -2693,35 +2750,35 @@ msgid ""
 "search is in progress. "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:36
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:38
 msgid "New Version Available!"
 msgstr "新版本已出了！"
 
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:103
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:105
 msgid "A new version of LimeWire is available."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:156
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:158
 msgid "Update Now"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:159
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:192
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:161
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:195
 msgid "Visit http://www.limewire.com to update!"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:169
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:172
 msgid ""
 "LimeWire needs to be restarted to install the update. If you choose not to "
 "update now, LimeWire will update automatically when you close. Would you "
 "like to update now?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:170
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:173
 msgid "Update Ready"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:189
+#: gui/com/limegroup/gnutella/gui/UpdateDialog.java:192
 msgid "Update Later"
 msgstr ""
 
@@ -2731,27 +2788,27 @@ msgstr ""
 msgid "A newer version is available, update?"
 msgstr "升级 LimeWire"
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:63
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:64
 msgid "Upgrade to PRO"
 msgstr "升级 到 “增强版”"
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:65
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:66
 msgid ""
 "For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will "
 "love the improved performance of PRO. Thank you for helping keep the "
 "Internet open by running LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:66
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:67
 msgid "Upgrade to LimeWire PRO?"
 msgstr "升级 到 “LimeWire 增强版”?"
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:73
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:74
 #, fuzzy
 msgid "Upgrade Your Java"
 msgstr "升级 到 “增强版”"
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:75
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:76
 msgid ""
 "LimeWire has detected that you are using an out-of-date version of Java. "
 "LimeWire looks and acts much better with newer versions of Java. Features "
@@ -2759,28 +2816,28 @@ msgid ""
 "improvements."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:76
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:77
 msgid "Would you like to get your free Java upgrade?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:166
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:167
 msgid "Get LimeWire PRO Now"
 msgstr "现在就要 “LimeWire 增强版”"
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:168
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:169
 msgid "Why"
 msgstr "为什么"
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:170
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:171
 msgid "What does PRO give me?"
 msgstr "“增强版” 带来什么?"
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:172
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:173
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:200
 msgid "Later"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:174
+#: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:175
 msgid "Get LimeWire PRO Later"
 msgstr "以后 再要 “LimeWire 增强版”"
 
@@ -2811,7 +2868,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:33
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
 msgid "Lookup File with Bitzi"
 msgstr "Bitzi 网 查找..."
 
@@ -2829,73 +2886,75 @@ msgid ""
 "hosts are firewalled."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:37
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:46
 msgid "C&onnect"
 msgstr "连接 (&O)"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:38
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:47
 msgid "Connect to the Network"
 msgstr "连接 到 网络"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:66
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:75
 msgid "D&isconnect"
 msgstr "断开 连接 (&I)"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:67
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:76
 msgid "Disconnect from the Network"
 msgstr "断开 网络 连接"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:96
-msgid "Open .&torrent"
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:107
+msgid "O&pen Magnet or Torrent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:97
-msgid "Opens a .torrent file from your hard drive"
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:108
+msgid "Opens a magnet link or torrent file"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:117
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:132
+msgid "Open Magnet or Torrent"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:165
+msgid ""
+"Type a magnet link, or the path or Web address of a torrent file, and "
+"LimeWire will download it for you."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:172
+msgid "Open:"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:233
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:139
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:117
+#: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:200
 #, fuzzy
-msgid "&Download .torrent"
-msgstr "下载"
+msgid "Browse..."
+msgstr "浏览器"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:118
-msgid "Downloads a .torrent file from the WWW"
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:254
+msgid ""
+"LimeWire cannot download this address. Make sure you typed it correctly, and "
+"then try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:130
-msgid "Download .torrent file from the web"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:145
-msgid "URL"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:159
-msgid "Paste from Clipboard"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:187
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:207
-msgid "The specified URL is not valid. Please check your input."
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:252
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:331
 msgid "&Close"
 msgstr "&关闭"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:253
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:332
 msgid "Close the Program"
 msgstr "关闭 程序"
 
-#: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:33
+#: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:34
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:35
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:744
-#: gui/com/limegroup/gnutella/gui/search/SearchResultMenu.java:114
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:731
+#: gui/com/limegroup/gnutella/gui/search/AbstractSearchResult.java:169
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:44
+#: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:45
 #, java-format
 msgid "Search for: {0}"
 msgstr ""
@@ -2909,24 +2968,24 @@ msgstr ""
 msgid "Search for {0}: {1}"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:27
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:33
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:28
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:34
 #, fuzzy
 msgid "Share New File..."
 msgstr "保存中 文件..."
 
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:34
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:35
 #, fuzzy
 msgid "Share"
 msgstr "保存"
 
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:51
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:52
 #, java-format
 msgid "The file \"{0}\" is already shared."
 msgstr ""
 
 #. like FailedEvent, but potentially others too.
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:53
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:54
 #, java-format
 msgid "LimeWire was unable to share the file \"{0}\"."
 msgstr ""
@@ -2944,7 +3003,7 @@ msgstr ""
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat block sender button.
 #. 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:50
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:52
 msgid "Block Host"
 msgstr "屏蔽 对方"
 
@@ -2952,7 +3011,7 @@ msgstr "屏蔽 对方"
 #. * Constant for the locale-specific resource key for the label of the
 #. * chat send button.
 #. 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:56
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:58
 msgid "Send Message"
 msgstr "发送通信"
 
@@ -2960,7 +3019,7 @@ msgstr "发送通信"
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat block sender button.
 #. 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:62
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:64
 msgid "Block Current Host"
 msgstr "屏蔽 对方."
 
@@ -2968,53 +3027,53 @@ msgstr "屏蔽 对方."
 #. * Constant for the locale-specific resource key for the toolTip of the
 #. * chat send button.
 #. 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:68
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:70
 msgid "Send a Message to a Host"
 msgstr "发送通信予主机。"
 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:70
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:72
 msgid "Chatting with"
 msgstr "正在 聊天和"
 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:72
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:74
 msgid "Host is unavailable"
 msgstr "连接 不上 主机"
 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:74
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:76
 msgid "You"
 msgstr "您"
 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:228
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:230
 msgid "A connection error has occurred"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:249
+#: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:251
 #, fuzzy
 msgid "Could not send chat message"
 msgstr "不能 浏览 主机 {0} ."
 
-#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:44
+#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:45
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:230
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:906
-#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
-#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:43
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:893
+#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 #, fuzzy
 msgid "Browse Host"
 msgstr "浏览器 选项"
 
-#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:47
+#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:48
 msgid "Create a New Outgoing Connection"
 msgstr "产生 一个 新的 传出 连接."
 
-#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:48
+#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:49
 msgid "Remove the Selected Connections"
 msgstr "去掉所选的连接"
 
-#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:49
-#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:48
+#: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:50
+#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:49
 msgid "View All Files on the Selected Computer"
 msgstr "观看所选计算机的全部文档。"
 
@@ -3025,7 +3084,7 @@ msgid "Host"
 msgstr "主机"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:35
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:380
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:381
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:242
 #, fuzzy
 msgid "Status"
@@ -3048,14 +3107,14 @@ msgid "Protocol"
 msgstr "协议"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:74
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:420
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:421
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:282
 #, fuzzy
 msgid "Vendor/Version"
 msgstr "软件"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:82
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:412
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:413
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:30
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:274
 #, fuzzy
@@ -3080,7 +3139,7 @@ msgid "QRP Empty"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:120
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:63
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:64
 #, fuzzy
 msgid "Connecting..."
 msgstr "连接 (&O)"
@@ -3157,7 +3216,7 @@ msgstr "主机"
 #. * label on the port text field.
 #. 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:377
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:54
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:55
 msgid "Port:"
 msgstr "端口"
 
@@ -3181,7 +3240,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:93
-#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:259
+#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:258
 msgid "All folders you select will also have their subfolders shared."
 msgstr ""
 
@@ -3214,215 +3273,218 @@ msgstr ""
 msgid "Queue"
 msgstr "等候"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:57
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:58
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:58
 #, fuzzy
 msgid "Queued"
 msgstr "等候"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:66
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:67
 #, java-format
 msgid "Connecting ({0} hosts tried)..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:72
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:73
 msgid "Waiting On Busy Hosts"
 msgstr "等待繁忙主机"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:78
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:79
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:71
 msgid "Complete"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:84
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:85
 msgid "Aborted"
 msgstr "放弃"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:90
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:91
 msgid "Awaiting Sources"
 msgstr "等待资源"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:96
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:97
 msgid "Downloading from"
 msgstr "从...下载"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:103
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:104
 msgid "Disk Problem"
 msgstr "磁碟问题"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:109
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:110
 msgid "File Corrupted"
 msgstr "文档已毁坏"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:115
-msgid "Waiting"
-msgstr "等待"
+#. *
+#. * Constant for the "Waiting for Results" download state.
+#. 
+#. s stands for seconds
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:116
+#, java-format
+msgid "Waiting {0}s for Sources"
+msgstr "请求 已发出, 等待 {0}秒 返回 结果"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:121
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:122
 #, fuzzy
 msgid "Need More Sources"
 msgstr "秒 返回 结果"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:127
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:128
 #, fuzzy
 msgid "Waiting for Stable Connections"
 msgstr "加载 stale connection management..."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:133
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:134
 #, fuzzy
 msgid "Waiting in Line, Position"
 msgstr "等待因为繁忙"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:139
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:140
 msgid "Verifying File Contents..."
 msgstr "文档内容核实中..."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:145
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:146
 msgid "Saving File..."
 msgstr "文档保存中..."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:151
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:152
 msgid "Recovering Corrupted File"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:157
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:158
 msgid "Pausing..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:163
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:164
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:39
 #, fuzzy
 msgid "Paused"
 msgstr "停留"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:167
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:168
 msgid "Content Removed"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:171
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:172
 msgid "Resuming..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:175
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:176
 #, fuzzy
 msgid "Downloading .torrent file..."
 msgstr "加载 saved files..."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:181
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:182
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:125
 msgid "Average Bandwidth"
 msgstr "宽频平均"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:187
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:188
 msgid "Valid Alternate Locations"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:193
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:194
 msgid "Invalid Alternate Locations"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:199
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:200
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:131
 msgid "Started On"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:205
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:206
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:137
 #, fuzzy
 msgid "Finished On"
 msgstr "完成"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:211
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:212
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:143
 msgid "Time Spent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:217
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:218
 msgid "Chunks"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:223
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:224
 #, fuzzy
 msgid "Lost To Corruption"
 msgstr "主机 联系"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:235
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:236
 msgid "hosts"
 msgstr "主机"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:238
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:239
 msgid "host"
 msgstr "主机"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:244
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:245
 msgid "A more specific search may be required..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:248
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:249
 msgid ""
 "The owner of this content has requested that this file be removed from the "
 "network. To learn more, double-click on the download (or click preview)."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:254
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:255
 #, fuzzy
 msgid "Possible Hosts"
 msgstr "过滤 主机"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:257
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:258
 #, fuzzy
 msgid "Busy Hosts"
 msgstr "屏蔽 对方"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:260
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:261
 msgid "Remotely Queued"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:263
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:264
 #, fuzzy
 msgid "Locating Sources..."
 msgstr "加载 资源..."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:266
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:267
 msgid "LimeWire cannot download this torrent.  The tracker responded"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:356
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:357
 #, fuzzy
 msgid "Priority"
 msgstr "端口"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:372
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:373
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:96
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:114
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:62
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:234
 #, fuzzy
 msgid "Size"
 msgstr "大小:"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:388
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:342
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:389
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:72
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:250
 #, fuzzy
 msgid "Chat"
 msgstr "聊天..."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:396
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:397
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:258
 #, fuzzy
 msgid "Progress"
 msgstr "程序"
 
-#. *
-#. * The resource to use for the speed property.
-#. 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:404
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:313
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
-#: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:43
+#. addOption(STORE_KEY, STORE_ADVANCED_KEY, GUIMediator.getStringResource("Template"), StoreDirectoryTemplatePaneItem.class);
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:405
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:67
-#: gui/com/limegroup/gnutella/gui/search/SelectorsHandler.java:157
+#: gui/com/limegroup/gnutella/gui/search/Selector.java:82
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:266
 #, fuzzy
 msgid "Speed"
@@ -3431,35 +3493,35 @@ msgstr "速度:"
 #. connectionsPane.add(new AutoConnectPaneItem("AUTO_CONNECT"));
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
 #. bittorrent
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:950
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:328
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:955
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:342
 msgid "BitTorrent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1011
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:793
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1229
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1016
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:780
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1243
 #, fuzzy
 msgid "Launch"
 msgstr "运行 文件."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1013
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1231
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1018
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1245
 msgid "Launch Selected Files"
 msgstr "运行所选文档"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1030
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1035
 #, fuzzy
 msgid "Show in Library"
 msgstr "收藏"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1032
+#: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1037
 #, fuzzy
 msgid "Show Download in Library"
 msgstr "正在 下载 从"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:186
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:315
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
 #, fuzzy
 msgid "Downloads"
 msgstr "下载"
@@ -3469,38 +3531,38 @@ msgid "Loading Download Window..."
 msgstr "加载 下载 窗口..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:259
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:769
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:756
 #, fuzzy
 msgid "Find More Sources for Download"
 msgstr "Try to locate other sources for failed download."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:261
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:771
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:758
 msgid "Find Sources"
 msgstr "寻找资源"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:263
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:773
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:760
 msgid "Try to Find Additional Sources for Downloads"
 msgstr "尝试为下载寻找其他资源"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:267
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:776
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:763
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:923
 msgid "Resume Download"
 msgstr "恢复下载"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:269
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:778
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:938
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1322
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:765
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:925
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1338
 #, fuzzy
 msgid "Resume"
 msgstr "资源 (&R)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:271
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:780
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:940
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:767
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:927
 msgid "Reattempt Selected Downloads"
 msgstr "重试所选下载"
 
@@ -3536,125 +3598,125 @@ msgid ""
 msgstr ""
 
 #. could not read torrent file or bad torrent file.
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:455
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:442
 msgid ""
 "LimeWire was unable to load the specified torrent file, - it may be "
 "malformed or LimeWire does not have permission to access this file."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:614
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:601
 msgid "Choose Save Location"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:713
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:700
 #, fuzzy
 msgid "Search..."
 msgstr "搜索"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:772
 #, fuzzy
 msgid "Clear Download"
 msgstr "清除 下载 条目"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:789
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:776
 #, fuzzy
 msgid "Clear Selected Downloads"
 msgstr "取消 选中的 下载."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:791
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:778
 #, fuzzy
 msgid "Launch Download"
 msgstr "取消 下载"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:795
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:782
 #, fuzzy
 msgid "Launch Selected Downloads"
 msgstr "取消 选中的 下载."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:799
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:860
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:786
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:847
 msgid "Cancel Download"
 msgstr "取消 下载"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:803
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:864
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:790
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:851
 msgid "Cancel Selected Downloads"
 msgstr "取消所选下载"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:805
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:918
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:792
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:905
 msgid "Preview Download"
 msgstr "预览下载"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:807
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:920
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:794
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:907
 msgid "Preview"
 msgstr "预览"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:809
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:922
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:796
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:909
 #, fuzzy
 msgid "Preview Selected Downloads"
 msgstr "取消 选中的 下载."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:877
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:864
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:46
 #, fuzzy
 msgid "Chat with Host"
 msgstr "和对方 聊天"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:889
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:876
 #, fuzzy
 msgid "Clear All Inactive Downloads"
 msgstr "移除 不活动的 下载."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:891
-#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:878
+#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:45
 msgid "Clear Inactive"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:893
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:880
 msgid "Remove Inactive Downloads"
 msgstr "去掉不活跃下载"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:953
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:940
 #, fuzzy
 msgid "Pause Download"
 msgstr "取消 下载"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:955
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:942
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:100
 msgid "Pause"
 msgstr "暂停"
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:957
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:944
 #, fuzzy
 msgid "Pause Selected Downloads"
 msgstr "取消 选中的 下载."
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:969
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:971
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:855
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:956
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:958
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:915
 msgid "Explore"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:973
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:960
 msgid "Open Folder Containing the File"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:986
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:973
 msgid "Move the Selected Download Closer to Becoming Active"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1005
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:992
 msgid "Move the Selected Download Further from Becoming Active"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1024
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1011
 msgid "Change File Location..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1027
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1014
 msgid "Edit the Final Filename of the Download"
 msgstr ""
 
@@ -3703,7 +3765,7 @@ msgid "Overwrite the Existing File"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:334
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:42
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:48
 msgid "Save As..."
 msgstr "另存为"
 
@@ -3732,7 +3794,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:185
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1020
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1033
 #, java-format
 msgid "You are already downloading this file to \"{0}\"."
 msgstr ""
@@ -3761,7 +3823,7 @@ msgid "Save Download As"
 msgstr "取消 下载"
 
 #: gui/com/limegroup/gnutella/gui/download/MagnetDownloaderFactory.java:32
-#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:282
+#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:281
 #, fuzzy
 msgid "No Filename"
 msgstr "文件名"
@@ -3771,40 +3833,40 @@ msgstr "文件名"
 msgid "Active"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:33
+#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "File & Protocol Associations"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:33
+#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "What type of resources should LimeWire open?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:64
+#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:65
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:69
 msgid "What should LimeWire do with the selected associations on startup?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:66
+#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:67
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:71
 #, fuzzy
 msgid "Always take the selected associations."
 msgstr "删除 选中的 连接."
 
-#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:68
+#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:69
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:73
 msgid "Ignore all missing associations."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:70
+#: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:71
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:75
 msgid "Ask me what to do when an association is missing."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:25
+#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:26
 msgid "Content Filtering"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:26
+#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:27
 msgid ""
 "LimeWire can filter files that copyright owners request not be shared. By "
 "enabling filtering, you are telling LimeWire to confirm all files you "
@@ -3812,7 +3874,7 @@ msgid ""
 "time by choosing Filters -> Configure Content Filters from the main menu."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:37
+#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:38
 msgid "Enable Content Filtering"
 msgstr ""
 
@@ -3826,12 +3888,12 @@ msgid ""
 "button to begin using LimeWire."
 msgstr "LimeWire 安装成功. 请按 “完成” 按钮, 开始 使用 LimeWire."
 
-#: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:22
+#: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:23
 #, fuzzy
 msgid "Firewall Setup"
 msgstr "防火墙"
 
-#: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:23
+#: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:24
 msgid ""
 "LimeWire performs best with full access to the Internet. If firewall or "
 "security warnings appear, please unblock LimeWire and choose to remember the "
@@ -3852,58 +3914,52 @@ msgstr ""
 msgid "Choose Language:"
 msgstr "语言:"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:49
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:50
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:324
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:47
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:36
+#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:29
 #, fuzzy
 msgid "Save Folder"
 msgstr "文件夹:"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:50
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:51
 msgid ""
 "Please choose a folder where you would like your files to be downloaded. "
 "This folder will also be shared with other gnutella users by default."
 msgstr "请 选择 你 希望 保存 下载 文件的 文件夹. 此 文件夹 缺省的 与其他 Gnutella 用户 同享."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:68
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:69
 msgid "Save Folder:"
 msgstr "保存文件夹:"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:118
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:119
 msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
 "a different folder."
 msgstr "LimeWire 不能 够 使用 指定的 保存 文件夹. 请 选择 另 一个 文件夹."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:126
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:87
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:127
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
 #, fuzzy
 msgid "Use Default"
 msgstr "缺省 设置"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:127
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:89
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:128
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:88
 #, fuzzy
 msgid "Use the Default Folder"
 msgstr "缺省 设置"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:138
-#: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:200
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:86
-#, fuzzy
-msgid "Browse..."
-msgstr "浏览器"
-
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:139
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:88
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:140
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 msgid "Choose Another Folder"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:45
+#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:46
 msgid "Confirm Scan"
 msgstr "确认扫描"
 
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:46
+#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:47
 msgid ""
 "We identified the folders below as ones that you might like to share. If you "
 "would like to share one of these folders, simply check its associated "
@@ -3912,65 +3968,65 @@ msgstr ""
 "我们鉴定那些 文件夹 下面的 东西有 共享的 可能. 如果 你 想 共享 这些 文件夹, 仅仅检查它相关的 选择 框. 共享的 文件夹的 子 文件夹 "
 "目录 也将被 共享."
 
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:61
+#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:62
 msgid ""
 "LimeWire was unable to locate any files that may be shared. To continue "
 "configuring LimeWire, click \"Next\"."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:72
+#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:73
 #, fuzzy
 msgid "The selected folders below (and their subfolders) will be shared."
 msgstr "错误的 共享 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置."
 
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:33
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:34
 msgid "Scan for Files"
 msgstr "扫描文档"
 
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:34
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:35
 msgid ""
 "Would you like LimeWire to quickly scan your hard drive for other media "
 "files? You will have the opportunity to specify which folders you would like "
 "to share when the scan is complete."
 msgstr "你 想要 LimeWire 迅速为其他媒介 文件 扫描 你的 硬盘 吗? 你 将有机会确切说明当扫描完成时, 你 想分享哪份 文件夹."
 
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:51
+#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:52
 #, fuzzy
 msgid "Scan Hard Drive?"
 msgstr "正在 扫描硬盘"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:227
-msgid "Limewire Setup Dialog"
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:231
+msgid "LimeWire Setup Dialog"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:478
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:487
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
 msgid "Next >>"
 msgstr "前进"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:489
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:498
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:266
 msgid "<< Back"
 msgstr "<<返回"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:500
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:509
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:277
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:163
 msgid "Finish"
 msgstr "完成"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:131
-#: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:74
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
 msgid "Learn more about this option..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:39
-#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:40
+#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:23
 #, fuzzy
 msgid "Connection Speed"
 msgstr "启动 时 连接"
 
-#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:40
+#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:41
 msgid ""
 "Please choose the speed of your Internet connection. Setting this speed "
 "correctly is important for optimum network performance. If you are not sure "
@@ -3980,13 +4036,13 @@ msgstr ""
 "请 选择 你的 因特网 连接 速度. 正确的 设定此 速度 对于优化 网络 非常重要. 如果 你 不能 确认 你 是何种 网络 连接 类型或者 网络 "
 "类型 没有 列出, 只 需简单地 选择 看上去最合适的 ."
 
-#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:48
+#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:49
 #, fuzzy
 msgid "Select Speed"
 msgstr "搜索 结果 速度"
 
 #: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:31
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
 #, fuzzy
 msgid "System Startup"
@@ -4025,11 +4081,11 @@ msgstr "正在 扫描硬盘"
 msgid "Cancel Scan"
 msgstr "取消 操作."
 
-#: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:19
+#: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:20
 msgid "Welcome"
 msgstr "欢迎"
 
-#: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:21
+#: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:22
 msgid ""
 "Welcome to the LimeWire setup wizard. LimeWire has recently added new "
 "features that require your configuration. LimeWire will guide you through a "
@@ -4039,36 +4095,48 @@ msgstr ""
 "your configuration. LimeWire will guide you through a series of steps to "
 "configure these new features."
 
-#: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:22
+#: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:23
 msgid ""
 "Welcome to the LimeWire setup wizard. LimeWire will guide you through a "
 "series of steps to configure LimeWire for optimum performance."
 msgstr "欢迎 使用 LimeWire 安装向导. LimeWire 将指导 你 通过一系列步骤配置 LimeWire, 达到最佳性能."
 
 #: gui/com/limegroup/gnutella/gui/library/IncompleteDirectoryHolder.java:15
-#: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:21
 msgid "Incomplete Files"
 msgstr "不完整文档"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:102
+#: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:21
+msgid "Individual Store Files"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:26
+msgid "List of All Individual Purchased Files"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:107
 msgid "Loading Library Window..."
 msgstr "加载库藏窗口..."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:234
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:240
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:122
 msgid ""
 "The selected folder cannot be shared.  Please select another folder to share."
 msgstr "错误的 共享 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:366
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:371
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:936
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:379
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:384
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:996
 #, fuzzy
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr "你 可以 选择 保存 文件的 文件夹."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:370
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:383
 msgid "Configure..."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:399
+msgid "Songs purchased from the Lime Wire Store"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:54
@@ -4078,7 +4146,7 @@ msgstr "搜索 和 下载 文件"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:72
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:295
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:553
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:559
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
 #, fuzzy
 msgid "Search"
@@ -4092,7 +4160,7 @@ msgid ""
 msgstr "你 必须键入至少 3 个字符, 从 而避免阻塞 网络."
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:83
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:388
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:427
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
@@ -4118,7 +4186,7 @@ msgstr "路径"
 
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:122
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:318
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:332
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:54
 #, fuzzy
 msgid "Uploads"
@@ -4136,118 +4204,119 @@ msgstr "位置"
 msgid "Last Modified"
 msgstr ""
 
+#. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:228
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:309
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:353
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:317
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:367
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:19
 msgid "Sharing"
 msgstr "共享"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:278
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:307
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:311
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:330
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
-#: gui/com/limegroup/gnutella/gui/search/SearchResultMenu.java:130
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:314
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:319
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:344
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:219
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:55
 msgid "Advanced"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:781
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:795
 msgid "Move to Recycle Bin"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:782
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:796
 msgid "Move to Trash"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:830
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:844
 msgid "Are you sure you want to delete the selected file(s)?"
 msgstr "你 确认要 删除 选中的 文件 吗?"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:896
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:910
 msgid ""
 "The following files could not be deleted. They may be in use by another "
 "application or are currently being downloaded to."
 msgstr ""
 
 #. notify the user that renaming failed
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:969
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:982
 msgid ""
 "Unable to rename the file '{0}'. It may be in use by another application."
 msgstr "不能 重命名 此 文件 {0} . 它可能 正在 被别的 程序 使用."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1028
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1041
 #, java-format
 msgid ""
 "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1244
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1258
 msgid "Enqueue"
 msgstr "添加 到 播放列表"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1246
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1260
 msgid "Add Selected Files to the Playlist"
 msgstr "添加 选中的 文件 到 播放列表."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1268
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1284
 msgid "Delete Selected Files"
 msgstr "删除 选中的 文件."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1281
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1297
 msgid "Describe..."
 msgstr "注释..."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1283
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1299
 msgid "Add Description to Selected File"
 msgstr "所 选 文件的 注释."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1296
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1312
 msgid "Publish..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1298
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1314
 msgid "Publish under Creative Commons License"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1311
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1327
 msgid "Edit License..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1324
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1340
 msgid "Continue Downloading Selected Incomplete File"
 msgstr "重新 尝试 下载."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1337
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1353
 msgid "Rename"
 msgstr "重命名"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1351
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1367
 msgid "Share File"
 msgstr "共享文件"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1378
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1394
 msgid "Stop Sharing File"
 msgstr "停止共享文件"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1405
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:797
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1421
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:857
 msgid "Share Folder"
 msgstr "共享文件夹"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1435
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:749
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1451
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:798
 msgid "Stop Sharing Folder"
 msgstr "停止 共享"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1462
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1478
 msgid "Show Magnet Details"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1474
-#: gui/com/limegroup/gnutella/gui/search/SearchResultMenu.java:63
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1490
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:176
 msgid "View License"
 msgstr ""
 
@@ -4256,52 +4325,56 @@ msgstr ""
 msgid "Saved Files"
 msgstr "共享 文件夹"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:561
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:606
 #, fuzzy
 msgid "LimeWire cannot stop sharing this folder."
 msgstr "你 确认要 停止 共享 此 文件夹 吗?"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:563
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:608
 msgid "Are you sure you want to stop sharing this folder?"
 msgstr "你 确认要 停止 共享 此 文件夹 吗?"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:632
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:677
 msgid ""
 "LimeWire will not allow you delete to the folder reserved for incomplete "
 "files."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:733
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:782
 #, fuzzy
 msgid "Shared Files"
 msgstr "共享 文件夹"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:761
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:809
+msgid "Store"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:821
 msgid "Add Folder Contents to Playlist"
 msgstr "添加到 播放列表"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:808
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:868
 msgid "Hide .torrent Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:811
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:871
 #, fuzzy
 msgid "Show .torrent Files"
 msgstr "扫描 文件"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:839
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:899
 msgid "Refresh"
 msgstr "刷新"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:841
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:901
 msgid "Reload Shared Folders"
 msgstr "刷新 共享 目录."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:857
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:917
 msgid "Open Library Folder"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:935
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:995
 #, fuzzy
 msgid "Configure Sharing Options"
 msgstr "更多 搜索 选项"
@@ -4319,7 +4392,7 @@ msgstr ""
 
 #. center
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:114
-#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
+#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:34
 msgid "Shared Folders"
 msgstr "共享 文件夹"
 
@@ -4487,19 +4560,11 @@ msgstr "结果"
 msgid "Show Search Result Filters"
 msgstr "搜索 结果 等级"
 
-#: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:32
-msgid "&MagnetMix"
-msgstr "&MagnetMix"
-
-#: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:33
-msgid "Show Magnetmix Button"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:28
+#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:29
 msgid "Sho&w/Hide"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:44
+#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:45
 #, java-format
 msgid "Show {0} Window"
 msgstr ""
@@ -4623,7 +4688,7 @@ msgid "Previous"
 msgstr "后退"
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:164
-#: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:332
+#: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:333
 msgid "LimeWire Media Player"
 msgstr "LimeWire 多媒体 播放器"
 
@@ -4647,166 +4712,177 @@ msgstr "传输完 退出"
 msgid "Exit"
 msgstr "退出"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:53
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:54
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:543
 #, fuzzy
 msgid "Restore Defaults"
 msgstr "缺省 设置"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:54
+#: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:55
 msgid "Revert All Settings to the Factory Defaults"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:198
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:204
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:76
 #, fuzzy
 msgid "Options"
 msgstr "选项... (&O)"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:215
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:221
 msgid ""
 "You have made changes to some settings. Would you like to save these changes?"
 msgstr ""
 
 #. set text before adding the document listener
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:246
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:252
 #, fuzzy
 msgid "Search here"
 msgstr "搜索"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:305
+#. for saving gnutella
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:312
 msgid "Saving"
 msgstr "保存"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:306
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:310
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:319
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:367
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:313
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:318
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:333
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:343
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Basic"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
+msgid "Types"
+msgstr ""
+
+#. store options
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
+msgid "Lime Wire Store"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:334
 msgid "Slots"
 msgstr "扩展槽"
 
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
 #, fuzzy
 msgid "Connections"
 msgstr "连接 (&O)"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:338
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:352
 msgid "System Tray"
 msgstr "关闭"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:354
 msgid "Updates"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:344
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:358
 msgid "Player"
 msgstr "播放器"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:360
 msgid "Status Bar"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:349
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:363
 msgid "iTunes"
 msgstr "iTunes"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:351
-#: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:14
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:365
+#: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:370
 msgid "Helper Apps"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:359
-#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:35
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:76
 msgid "Bug Reports"
 msgstr "Bug reports"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:361
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:375
 msgid "View"
 msgstr "查看"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:362
-#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:376
+#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
 #, fuzzy
 msgid "Popups"
 msgstr "Hops"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:363
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:377
 msgid "Autocompletion"
 msgstr ""
 
 #. search options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:366
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 msgid "Searching"
 msgstr "搜索"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:368
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:382
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:31
 msgid "Quality"
 msgstr ""
 
 #. filter options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:372
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
 msgid "Filters"
 msgstr "过滤器"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:387
 #, fuzzy
 msgid "Content"
 msgstr "连接 (&O)"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:388
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:254
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:366
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:420
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:442
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:351
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:463
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:522
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:549
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 msgid "Junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:375
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
 msgid "Keywords"
 msgstr "关键词"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:376
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
 msgid "Hosts"
 msgstr "主机"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:394
 msgid "Preferencing"
 msgstr "优先 选择"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:395
 msgid "Firewall Config"
 msgstr "防火墙"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:382
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:396
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
 msgid "Proxy"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
-#: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:56
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
+#: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:57
 #, fuzzy
 msgid "File Associations"
 msgstr "位置"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:387
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:401
 msgid "Performance"
 msgstr ""
 
@@ -4819,6 +4895,28 @@ msgstr "加载 选项 窗口..."
 msgid ""
 "One or more options will take effect the next time LimeWire is restarted."
 msgstr ""
+
+#. *
+#. * Constant for the key of the locale-specific <code>String</code> for the
+#. * label on the component that allows to user to change the setting for this
+#. * <tt>PaneItem</tt>.
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:34
+msgid "Folder:"
+msgstr "文件夹:"
+
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:56
+msgid "You can choose the folder for saving files."
+msgstr "你 可以 选择 保存 文件的 文件夹."
+
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:132
+#: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:124
+#, fuzzy
+msgid ""
+"The selected save folder is invalid. You may not have permissions to write "
+"to the selected folder. LimeWire will revert to your previously selected "
+"folder."
+msgstr "你的 保存 文件夹 不正确. 它可能 被 删除了, 你 可能 没有 写的 权限或者是其他问题. 请 选择 另 一个 文件夹."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AllowMessagesPaneItem.java:26
 msgid "Allow Hosts"
@@ -4850,11 +4948,11 @@ msgstr ""
 msgid "Use LimeWire for..."
 msgstr "使用 LimeWire (&U)"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:22
 msgid "Audio Options"
 msgstr "音频 选项"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:24
 #, fuzzy
 msgid "You can choose which audio player to use."
 msgstr "你 可以 选用 何种 浏览器."
@@ -4864,56 +4962,56 @@ msgstr "你 可以 选用 何种 浏览器."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:30
+#: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:31
 #, fuzzy
 msgid "Audio Player"
 msgstr "播放器"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:21
 msgid "Clear Downloads"
 msgstr "清除 下载 条目"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:23
 msgid ""
 "You can choose whether or not to automatically clear downloads that have "
 "completed."
 msgstr "你 可以 选择 是否 自动 清除 已完成的 下载 条目."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:30
 msgid "Clear Completed Downloads:"
 msgstr "自动 清除 已完成的 下载 条目:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:17
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:18
 msgid "Clear Uploads"
 msgstr "清除 上载"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:20
 msgid ""
 "You can choose whether or not to automatically clear uploads that have "
 "completed."
 msgstr "你 可以 选择 是否 自动 清除 已完成的 上载."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:26
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:27
 msgid "Automatically Clear Completed Uploads:"
 msgstr "自动 清楚 已完成的 上载:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:18
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:19
 msgid "Text Autocompletion"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:21
 msgid "You can enable or disable autocompletion of text fields."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:28
 msgid "Enable Autocompletion of Text Fields:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:28
 msgid "Browser Options"
 msgstr "浏览器 选项"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:30
 msgid "You can choose which browser to use."
 msgstr "你 可以 选用 何种 浏览器."
 
@@ -4922,11 +5020,15 @@ msgstr "你 可以 选用 何种 浏览器."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:36
+#: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:37
 msgid "Browser"
 msgstr "浏览器"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:37
+#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:42
+msgid "View Example"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:78
 msgid ""
 "You can choose how bug reports should be sent. To view an example bug "
 "report, click 'View Example'. Choosing 'Always Send Immediately' will "
@@ -4936,79 +5038,75 @@ msgid ""
 "All Errors' will cause LimeWire to ignore all bugs (this is not recommended)."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:43
-msgid "View Example"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
+#: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:99
 msgid "Send Errors Automatically if LimeWire is Frozen"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:20
 msgid "Host Communication"
 msgstr "主机 联系"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:22
 msgid "You can turn chat on or off."
 msgstr "你 可以 设置 聊天为 开启 和 关闭 状态."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:29
 msgid "Enable Chat:"
 msgstr "开启 聊天功 能:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:20
 msgid "Connect on Startup"
 msgstr "启动 时 连接"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:22
 msgid ""
 "You can choose whether or not to automatically connect to the network when "
 "the application starts up."
 msgstr "你 可以 选择 应用 程序 启动 时 是否 自动 连接 到 网络 上."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:29
 msgid "Connect on Startup:"
 msgstr "启动 时 连接:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:24
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:25
 msgid "Connection Preferencing"
 msgstr "连接 优先 选择"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:26
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:27
 msgid ""
 "You can limit who is able to connect to you based on the number of files "
 "they share."
 msgstr "你 可以 根据 他们 共享 文件的 数目 来限 制谁能 连接 你."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:33
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:34
 msgid "Files You Must Share to Not be a Freeloader:"
 msgstr "不使 你 成为 白食者 而必须 共享的 文件 数:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:40
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:41
 msgid "Allow Freeloaders:"
 msgstr "允许 白食者:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:47
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:48
 msgid "Rarely"
 msgstr "几乎不"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:54
+#: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:55
 msgid "Always"
 msgstr "始终"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:17
+#: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:18
 #, fuzzy
 msgid "Content Filters"
 msgstr "过滤器"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:20
 msgid ""
 "You can tell LimeWire to filter files that copyright owners request not be "
 "shared. By enabling filtering, you are instructing LimeWire to confirm all "
 "files you download or share with a list of removed content."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:28
 msgid "Enable Content Filters"
 msgstr ""
 
@@ -5023,66 +5121,66 @@ msgid ""
 "higher setting may use more memory."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:24
 msgid "Password Protection"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:25
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:26
 msgid "You can limit the access to this service with a password."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:31
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:32
 msgid "Require Password:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:37
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:47
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:38
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:48
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:596
 msgid "Password:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:21
 msgid ""
 "You can share your Music on the Local Area Network and make it accessible "
 "for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:24
 msgid "Share My Music:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:26
+#: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:27
 #, fuzzy
 msgid "Shared Name:"
 msgstr "共享 文件夹"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:23
 msgid "File Already Exists Behavior"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:24
+#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:25
 msgid ""
 "You can choose the default action that LimeWire will perform when you try to "
 "download a file that already exists on disk."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:48
+#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:49
 msgid "Always Show the 'Save As' Dialog"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:49
+#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:50
 msgid "Always Append (#) to the Filename"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:50
+#: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:51
 msgid "Always Ask What to do"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:23
 msgid "Capabilities"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:24
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:25
 msgid ""
 "If your computer has a fast internet connection, LimeWire may act as an "
 "\"Ultrapeer\" and/or connect to the Mojito DHT.  LimeWire can also use a "
@@ -5090,65 +5188,65 @@ msgid ""
 "You can disable these if needed."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:38
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:39
 msgid "Disable Ultrapeer Capabilities:"
 msgstr "设置 超级 节点为无效:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:40
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:41
 #, fuzzy
 msgid "Disable Mojito DHT Capabilities:"
 msgstr "设置 超级 节点为无效:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:44
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:45
 #, fuzzy
 msgid "Disable TLS Capabilities:"
 msgstr "设置 超级 节点为无效:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:20
 #, fuzzy
 msgid "OOB Searching"
 msgstr "搜索"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:22
 msgid ""
 "Out-Of-Band Searching results in faster result delivery to your client, "
 "though some internet connections may not work well with this feature."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:29
 #, fuzzy
 msgid "Enable OOB Searching:"
 msgstr "搜索"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:28
 msgid "Download Bandwidth"
 msgstr "下载 带宽"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:30
 msgid "You can set the percentage of your bandwidth devoted to downloads."
 msgstr "你 可以 设置 一定比例的 下载 带宽."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:37
+#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:38
 msgid "Download Speed:"
 msgstr "下载 带宽:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:45
-#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:45
+#: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:46
+#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:46
 msgid "Unlimited"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:21
 msgid "License Warning"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:23
 #, fuzzy
 msgid ""
 "You can choose whether to be warned about downloading a file without a "
 "license."
 msgstr "你 可以 选择 是否 自动 清除 已完成的 下载 条目."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:30
 msgid "Show License Warning:"
 msgstr ""
 
@@ -5170,11 +5268,11 @@ msgstr ""
 msgid "Do not display junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:25
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:26
 msgid "Shared Extensions"
 msgstr "共享 扩展"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:28
 msgid "You can choose which file extensions you would like to share."
 msgstr "你 可以 选择 你 要 共享的 是那种类型的 文件."
 
@@ -5183,15 +5281,16 @@ msgstr "你 可以 选择 你 要 共享的 是那种类型的 文件."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:34
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:35
 msgid "Extensions:"
 msgstr "扩展名:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:60
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:61
 msgid "Use Defaults"
 msgstr "缺省 设置"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:62
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:63
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:544
 msgid "Share the Default File Extensions"
 msgstr "设置 缺省的 文件 扩展名"
 
@@ -5238,11 +5337,11 @@ msgid ""
 msgstr ""
 "通过添加 IP 地址到 禁止 列表, 你 可以 不 允许 接受 下列 主机 发送的 消息 (例如: “18.239.0.1” 或 “18.*.*.*”)."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:22
 msgid "Filter Result Types"
 msgstr "过滤 类型"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:24
 msgid "You can specify general types of search results to filter."
 msgstr "你 可以 设置 下列 几种 过滤 类型."
 
@@ -5250,7 +5349,7 @@ msgstr "你 可以 设置 下列 几种 过滤 类型."
 #. * Key for the locale-specifis string for the adult content check box
 #. * label.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:49
+#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:50
 msgid "Ignore Adult Content"
 msgstr "忽略 成人 内容"
 
@@ -5258,7 +5357,7 @@ msgstr "忽略 成人 内容"
 #. * Key for the locale-specifis string for the html file check box
 #. * label.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:55
+#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:56
 msgid "Ignore .htm/.html Files"
 msgstr "忽略 .htm/.html 文件"
 
@@ -5266,14 +5365,14 @@ msgstr "忽略 .htm/.html 文件"
 #. * Key for the locale-specifis string for the vbs file check box
 #. * label.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:61
+#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:62
 msgid "Ignore .vbs Files"
 msgstr "忽略 .vbs 文件"
 
 #. *
 #. * Key for the locale-specific string for the wmv and asf file check box label.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:66
+#: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:67
 #, fuzzy
 msgid "Ignore .wmv/.asf files"
 msgstr "忽略 .vbs 文件"
@@ -5286,11 +5385,11 @@ msgstr "过滤"
 msgid "You can filter out search results containing specific words."
 msgstr "你 可以 过滤 调包含特殊 文字的 搜索 结果."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:28
 msgid "Image Options"
 msgstr "图片 选项"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:30
 #, fuzzy
 msgid "You can choose which image viewer to use."
 msgstr "你 可以 选用 何种 浏览器."
@@ -5300,29 +5399,29 @@ msgstr "你 可以 选用 何种 浏览器."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:36
+#: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:37
 msgid "Image Viewer"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:18
+#: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:19
 #, fuzzy
 msgid "Locale Preferencing"
 msgstr "优先 选择"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:21
 msgid "You can choose to preference hosts using the same language as you."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:24
 #, fuzzy
 msgid "Turn preferencing on:"
 msgstr "优先 选择"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:20
 msgid "Maximum Downloads"
 msgstr "最多 下载 数目"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:22
 msgid "You can set the maximum number of simultaneous downloads."
 msgstr "你 可以 设置 同时 下载的 最多的 数目."
 
@@ -5331,15 +5430,15 @@ msgstr "你 可以 设置 同时 下载的 最多的 数目."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumDownloadsPaneItem.java:29
 msgid "Maximum Downloads:"
 msgstr "最多 下载 数:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:20
 msgid "Maximum Searches"
 msgstr "最多 搜索 数目"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:22
 msgid ""
 "You can set the maximum number of simultaneous searches you can perform."
 msgstr "你 可以 设置 你 能 执行的 最多的 同时 搜索的 数目."
@@ -5349,15 +5448,15 @@ msgstr "你 可以 设置 你 能 执行的 最多的 同时 搜索的 数目."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumSearchesPaneItem.java:29
 msgid "Maximum Searches:"
 msgstr "最多 搜索 数:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:20
 msgid "Max Upload Slots"
 msgstr "最大 上载 槽"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:22
 msgid ""
 "Never allow more than this many uploads. This value will only be reached if "
 "you have enough bandwidth."
@@ -5368,22 +5467,13 @@ msgstr "不允许 超过 此 数目的 上载. 这个值 只 有在 带宽 足�
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/MaximumUploadsPaneItem.java:29
 msgid "Max Upload Slots:"
 msgstr "最大 上载 槽:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:46
 msgid "Media Type"
 msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:124
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:142
-#, fuzzy
-msgid ""
-"The selected save folder is invalid. You may not have permissions to write "
-"to the selected folder. LimeWire will revert to your previously selected "
-"folder."
-msgstr "你的 保存 文件夹 不正确. 它可能 被 删除了, 你 可能 没有 写的 权限或者是其他问题. 请 选择 另 一个 文件夹."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:202
 #, fuzzy
@@ -5418,41 +5508,41 @@ msgid ""
 "this machine. Outgoing connections will bind to any arbitrary interface."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:20
 #, fuzzy
 msgid "Notifications"
 msgstr "位置"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:22
 msgid ""
 "LimeWire can display popups to notify you when certain things happen, such "
 "as a download completing. "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:24
+#: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:25
 msgid "Show Notifications:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:18
+#: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:19
 msgid "Partial Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:21
 #, fuzzy
 msgid ""
 "You can choose whether or not to automatically share partially downloaded "
 "files."
 msgstr "你 可以 选择 是否 自动 清除 已完成的 下载 条目."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:28
 msgid "Allow Partial Sharing:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:20
 msgid "Uploads Per Person"
 msgstr "每个人的 上载 数"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:22
 msgid "Allow this many uploads per person."
 msgstr "允许 每个人 这么多的 上载 数目."
 
@@ -5461,41 +5551,41 @@ msgstr "允许 每个人 这么多的 上载 数目."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/PerPersonUploadsPaneItem.java:29
 msgid "Uploads Per Person:"
 msgstr "每个人的 上载 数:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:20
 msgid "Player Options"
 msgstr "播放器 选项"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:22
 msgid ""
 "You can choose to play media with LimeWire or your system's default player. "
 "The media player and playlist will appear only if this option is set. A "
 "restart will be required when enabling or disabling the media controls."
 msgstr "你 可以 选用 内部 播放器 或者系统 缺省的 播放器."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/PlayerPreferencePaneItem.java:29
 msgid "Use LimeWire Media Player:"
 msgstr "选用 LimeWire MP3 播放器:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:22
 msgid ""
 "Redisplay messages for which you have chosen 'Do not display this message "
 "again' or 'Always use this answer'."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:29
 #, fuzzy
 msgid "Revert to Default:"
 msgstr "缺省 设置"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:23
 msgid "Listening Port"
 msgstr "监听 端口"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:24
+#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:25
 msgid ""
 "You can set the local network port that listens for incoming connections. "
 "This port can be freely changed in case of conflict with another service on "
@@ -5508,52 +5598,52 @@ msgstr "你 可以 为其他 主机 设置 你的 网络 监听 端口 号."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:31
+#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:32
 msgid "Listen on Port:"
 msgstr "监听 端口:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:91
+#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:92
 msgid "Port not available. Please select a different port."
 msgstr "端口 不可提供. 请 选择 一个 不同的 端口."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:96
+#: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:97
 msgid "Please enter a port between 1 and 65535."
 msgstr "请输入 1 到 65535的 端口 号."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:24
 msgid "Login Details"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:25
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:26
 msgid "Configure username and password to be used for the proxy."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:33
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:34
 msgid "Enable Authentication (Does Not Work for HTTP Proxies):"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:40
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:593
 msgid "Username:"
 msgstr "用户名"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:30
 msgid "Configure Proxy Options for LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:36
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:37
 msgid "No Proxy"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:38
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:39
 msgid "Socks v4"
 msgstr "Socks v4"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:40
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:41
 msgid "Socks v5"
 msgstr "Socks v5"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:42
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:43
 msgid "HTTP"
 msgstr "HTTP"
 
@@ -5561,11 +5651,11 @@ msgstr "HTTP"
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
 #. * label on the proxy host field.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:48
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:49
 msgid "Proxy:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:23
 msgid "You can automatically delete old incomplete download files."
 msgstr "你 可以 自动 删除 老的 不完全的 下载 文件."
 
@@ -5574,123 +5664,112 @@ msgstr "你 可以 自动 删除 老的 不完全的 下载 文件."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:30
 msgid "Days to Keep Incomplete Files:"
 msgstr "不完全 文件 保留天 数:"
-
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:38
-msgid "You can choose the folder for saving files."
-msgstr "你 可以 选择 保存 文件的 文件夹."
-
-#. *
-#. * Constant for the key of the locale-specific <code>String</code> for the
-#. * label on the component that allows to user to change the setting for this
-#. * <tt>PaneItem</tt>.
-#. 
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:45
-msgid "Folder:"
-msgstr "文件夹:"
 
 #. *
 #. *  The mediator's description label id.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:69
+#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:45
 msgid "You can specify a download location for each media type."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:210
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:214
+#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:118
+#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:122
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:63
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:67
 msgid ""
 "Invalid folder for saving files. Please use another folder or revert to the "
 "default."
 msgstr "错误的 保存 文件的 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:223
+#: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:131
 msgid ""
 "Would you like to share your new save folders? The following new folders "
 "will be shared:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:22
 msgid "Search Result Quality"
 msgstr "搜索 结果 等级"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:24
 msgid ""
 "You can select the \"quality\" of search results to display. Four star "
 "results indicate that the host returning the result is not firewalled and "
 "has free upload slots."
 msgstr "你 可以 选择 搜索 结果中的 “等级” 进行 显示. 四星 指示 搜索 返回的 结果 没有 防火墙 并且 可以 自由 下载."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:65
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:66
 msgid "Show Only Four Star Results"
 msgstr "只 显示 四星 级 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:67
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:68
 msgid "Show Only Three and Four Star Results"
 msgstr "只 显示 三星 和 四星 级 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:69
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:70
 msgid "Show Only Two, Three, and Four Star Results"
 msgstr "只 显示 两星, 三星 和 四星 级 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:71
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:72
 msgid "Show All Qualities"
 msgstr "显示 全部 等级的 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:23
 msgid "Search Result Speed"
 msgstr "搜索 结果 速度"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:24
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:25
 msgid "You can select the minimum speed of search results to display."
 msgstr "你 可以 选择 搜索 结果中的 最小 速度 进行 显示."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:58
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:59
 msgid "Show Only Results of T3 Speed or Higher"
 msgstr "只 显示 T3 或更高 速度的 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:59
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:60
 msgid "Show Only Results of T1 Speed or Higher"
 msgstr "只 显示 T1 或更高 速度的 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:60
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:61
 msgid "Show Only Results of Cable/DSL Speed or Higher"
 msgstr "只 显示 Cable/DSL 或更高 速度的 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:61
+#: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:62
 msgid "Show All Speeds"
 msgstr "显示 全部 速度的 搜索 结果"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:14
+#: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:15
 #, fuzzy
 msgid "Download Sharing"
 msgstr "正在 下载 从"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:16
+#: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:17
 msgid "You can share files that you download to unshared folders."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:24
 #, fuzzy
 msgid "Share Finished Downloads:"
 msgstr "搜索 和 下载 文件"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:14
+#: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 #, fuzzy
 msgid "Torrent Sharing"
 msgstr "你 正在 共享 文件的 数目."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:16
+#: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:17
 #, fuzzy
 msgid "You can automatically share .torrent files."
 msgstr "你 可以 自动 删除 老的 不完全的 下载 文件."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:24
 msgid "Share .torrent files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:35
+#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:36
 msgid ""
 "You can choose the folders for sharing files. Files in these folders are "
 "displayed in the library."
@@ -5716,7 +5795,7 @@ msgstr "传输 完后 关闭"
 msgid "Minimize to System Tray"
 msgstr "最小化 到系统托盘"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
 #, fuzzy
 msgid "Start Upload Slots"
 msgstr "起始 上载 槽:"
@@ -5726,13 +5805,13 @@ msgstr "起始 上载 槽:"
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:21
-#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:22
+#: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:29
 msgid "Start Upload Slots:"
 msgstr "起始 上载 槽:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
-msgid "Sensivity"
+msgid "Sensitivity"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
@@ -5751,7 +5830,7 @@ msgstr ""
 msgid "Strict"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:24
+#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:25
 msgid ""
 "You can specify your connection speed so that LimeWire can optimize "
 "performance."
@@ -5762,7 +5841,7 @@ msgstr "你 可以 指定 你的 连接 速度 从 而进行性能 优化."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:38
+#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:39
 msgid "Speed:"
 msgstr "速度:"
 
@@ -5778,68 +5857,141 @@ msgstr "你 可以 选择 是否 自动 清除 已完成的 上载."
 msgid "Run on System Startup:"
 msgstr "启动 时 连接:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:20
 #, fuzzy
 msgid "Bandwidth Indicator"
 msgstr "带宽 (入/出)"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:22
 msgid "You can display your bandwidth consumption in the status bar."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:29
 msgid "Show Bandwidth Indicator:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:20
 msgid "Connection Quality Indicator"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:22
 msgid ""
 "You can display a measurement of your connection quality in the status bar."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:29
 msgid "Show Connection Quality Indicator:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:20
 #, fuzzy
 msgid "Firewall Indicator"
 msgstr "防火墙"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:22
 msgid "You can display your firewall status in the status bar."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:29
 msgid "Show Firewall Indicator:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:20
 #, fuzzy
 msgid "Shared Files Indicator"
 msgstr "共享 文件夹"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:21
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:22
 msgid "You can display how many files you are sharing in the status bar."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:29
 msgid "Show Shared Files Indicator:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:18
+#. *
+#. * Title of the item in the pane, this name will be displayed in a line border
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:33
+msgid "Lime Wire Store - Subfolder Template"
+msgstr ""
+
+#. *
+#. * General description of what this item is, and what its used for
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:38
+msgid ""
+"You can customize where store files are saved. By creating a template Lime "
+"Wire can automatically save purchased files into folders using the artists "
+"name and album title. \n"
+"\n"
+"e.g:\n"
+"Purchased song: Artist Name - Track 1\n"
+" Template: ${artist} \n"
+" How its saved: LimeWireStore/Artist Name/Artist Name - Track 1"
+msgstr ""
+
+#. *
+#. * Label for the finished template
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:43
+msgid "Template"
+msgstr ""
+
+#. *
+#. * Label for a drop down with options that can be added to the template
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:48
+msgid "Variables"
+msgstr ""
+
+#. *
+#. * Label for predefined templates
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:53
+msgid "Templates"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:124
+msgid "Insert a Variable"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:155
+msgid "Insert a template"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:159
+msgid "iTunes like"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:196
+#, java-format
+msgid "Invalid template {0}"
+msgstr ""
+
+#. *
+#. * Title of the item in the pane, this name will be displayed in a line border
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:20
+msgid "Lime Wire Store - Save Folder"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:22
+msgid ""
+"You can choose the folder for saving files purchased from the Lime Wire "
+"Store."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:19
 #, fuzzy
 msgid "System Tray Icon"
 msgstr "关闭"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
+#: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:21
 msgid "You can display the system tray icon while LimeWire is visible."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:28
 #, fuzzy
 msgid "Show System Tray Icon:"
 msgstr "关闭"
@@ -5865,25 +6017,25 @@ msgstr ""
 msgid "Major Releases"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:28
 msgid "Upload Bandwidth"
 msgstr "上载 带宽"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:30
 msgid ""
 "You can set the percentage of your bandwidth devoted to uploads. To turn off "
 "uploads, reduce your upload slots to zero."
 msgstr "你 可以 设置 一定比例的 上载 带宽. 关闭 上载, 减少 上载 槽至 0."
 
-#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:37
+#: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:38
 msgid "Upload Speed:"
 msgstr "上载 带宽:"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:27
+#: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:28
 msgid "Video Options"
 msgstr "视频 选项"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:30
 #, fuzzy
 msgid "You can choose which video player to use."
 msgstr "你 可以 选用 何种 浏览器."
@@ -5893,74 +6045,90 @@ msgstr "你 可以 选用 何种 浏览器."
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:36
+#: gui/com/limegroup/gnutella/gui/options/panes/VideoPlayerPaneItem.java:37
 #, fuzzy
 msgid "Video Player"
 msgstr "播放器"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:16
+#: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:17
 msgid "You can have LimeWire import newly downloaded songs into iTunes."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:19
+#: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:20
 msgid "Enable iTunes importing:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:41
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:47
 msgid "Open..."
 msgstr "打开..."
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:46
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:53
 msgid "Open an Existing Playlist"
 msgstr "打开 一个 新的 存在的 播放列表."
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:47
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:54
 msgid "Save the Current Playlist to a File"
 msgstr "保存 当前的 播放列表."
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:48
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:55
 msgid "Remove Selected File from Playlist"
 msgstr "从 播放列表中 删除 选中的 文件."
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:138
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:56
+msgid "Removes all Files from Playlist"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:26
+#: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:36
+msgid "#"
+msgstr "#"
+
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:90
+msgid "Comment"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:156
 msgid "MP3 Playlist"
 msgstr "MP3 播放列表"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:149
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:178
 msgid "Loading Playlist Window..."
 msgstr "加载 播放列表 窗口..."
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:372
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:529
 msgid "Play Options:"
 msgstr "播放 选项:"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:375
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:532
 msgid "Shuffle"
 msgstr "跳跃"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:380
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:537
 msgid "Continuous"
 msgstr "连续"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:457
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:608
 msgid "Open Playlist (.m3u)"
 msgstr "选择 播放列表 (.m3u)"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:482
-msgid ""
-"You have some songs in the playlist.  Would you like to clear them and start "
-"a new playlist?"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:514
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:683
 msgid "Save Playlist As"
 msgstr "保存 播放列表 到..."
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:597
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:695
+msgid "Warning file already exists. Overwrite this file?"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:804
 msgid "Playlist Files (*.m3u)"
 msgstr "播放列表 文件 (*.m3u)"
 
-#: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:24
+#: gui/com/limegroup/gnutella/gui/search/AbstractSearchResult.java:154
+#, fuzzy
+msgid "Search More"
+msgstr "搜索"
+
+#: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:25
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:314
 msgid "Multiple"
 msgstr ""
@@ -5969,30 +6137,27 @@ msgstr ""
 msgid "Option"
 msgstr "选项"
 
-#: gui/com/limegroup/gnutella/gui/search/FilterInputPanel.java:66
+#: gui/com/limegroup/gnutella/gui/search/FilterInputPanel.java:67
 #, fuzzy
 msgid "Filter Results:"
 msgstr "过滤"
 
-#: gui/com/limegroup/gnutella/gui/search/FilterInputPanel.java:139
 #: gui/com/limegroup/gnutella/gui/search/FilterInputPanel.java:140
+#: gui/com/limegroup/gnutella/gui/search/FilterInputPanel.java:141
 #, fuzzy
 msgid "Back To Search"
 msgstr "关闭 搜索"
 
-#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:255
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:174
+#, fuzzy
+msgid "Download As..."
+msgstr "下载"
+
+#: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:254
 msgid "Would you like to start downloads from the following magnets?"
 msgstr ""
 
-#. *
-#. * The resource to use for the vendor property.
-#. 
-#: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:48
-#: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:82
-msgid "Vendor"
-msgstr "软件"
-
-#: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:590
+#: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:575
 msgid "All"
 msgstr "全部"
 
@@ -6022,30 +6187,45 @@ msgid ""
 msgstr ""
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:252
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:352
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:439
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:349
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:449
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:546
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Not Junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:255
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:367
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:421
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:443
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:352
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:464
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:523
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:550
 msgid "Mark selected search results as Junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:353
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:440
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:450
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:547
 msgid "Mark selected search results as Not Junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:526
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:635
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:856
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:972
+#, java-format
+msgid ""
+"You are sharing {0} files. You can control which files LimeWire shares."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:974
+msgid "Configure"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:975
+#: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:37
+msgid "Library"
+msgstr "库藏"
+
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1022
 msgid "More Info..."
 msgstr ""
 
@@ -6074,26 +6254,26 @@ msgstr ""
 msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:41
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:81
+#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:83
 msgid "Download"
 msgstr "下载"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
+#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
 #, fuzzy
 msgid "Stop Search"
 msgstr "关闭 搜索"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:46
+#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:47
 msgid "Download All Selected Files"
 msgstr "下载 所有 选中的 文件."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:47
+#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:48
 msgid "View All Files on Selected Computer"
 msgstr "浏览已 选中的 计算机上的 所有 共享 文件."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:48
+#: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:49
 msgid "Stop Collecting Search Results for Selected Tab"
 msgstr "终止为已选清单收集寻结果"
 
@@ -6102,164 +6282,159 @@ msgstr "终止为已选清单收集寻结果"
 msgid "New"
 msgstr "网络"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:167
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:168
 #, fuzzy
 msgid "Keyword"
 msgstr "关键词"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:171
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:345
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:172
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:351
 #, fuzzy
 msgid "Direct Connect"
 msgstr "断开 连接 (&I)"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:319
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:325
 msgid "Got Friends?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:323
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:329
 msgid ""
 "Enter the IP address of a friend you'd like to connect to, click 'Direct "
 "Connect', and LimeWire will try to browse the files of that user."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:360
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:366
 msgid "When your friends want to connect to you, they should enter"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:365
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:371
 msgid ""
 "Your computer is behind a firewall or router and cannot receive direct "
 "connections."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:379
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:385
 msgid "Don't Know"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:383
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:389
 msgid "What To Look For?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:387
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:393
 msgid ""
 "A \"What's New\" search will search for files that have been recently added "
 "to the network."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:398
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:404
 #, fuzzy
 msgid "Current Search:"
 msgstr "关闭 搜索"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:418
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:424
 msgid "Hide Adult Content"
 msgstr "隐藏色情内容"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:528
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:534
 msgid "Filename"
 msgstr "文档名"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:555
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:561
 msgid "Search the Network for the Given Words"
 msgstr "以给定的 文字 搜索 网络."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:650
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:656
 msgid "The address format is incorrect, please use host:port."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:83
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
 msgid "Close Search"
 msgstr "关闭 搜索"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
 msgid "Launch Action"
 msgstr "运行"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
 msgid "Chat With Host"
 msgstr "和对方 聊天"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 msgid "Repeat Search"
 msgstr "重新 搜索"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Block Hosts"
 msgstr "屏蔽 对方"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Mark As"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
 #, fuzzy
 msgid "Get More Results"
 msgstr "过滤"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:134
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:143
 msgid "Loading Search Window..."
 msgstr "加载 搜索 窗口..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:383
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:422
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
 msgstr "你 必须键入至少 3 个字符, 从 而避免阻塞 网络."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:391
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:395
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:430
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:434
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:400
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:439
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:409
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:448
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
 msgstr ""
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:412
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:451
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:707
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:760
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
 msgstr "选中的 文件中 包含可执行程序 可能 携带病毒. 你 确认要 下载 吗?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:363
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:374
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "不能 浏览 主机 {0} ."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultMenu.java:61
-#, fuzzy
-msgid "Download As..."
-msgstr "下载"
-
-#: gui/com/limegroup/gnutella/gui/search/SearchResultMenu.java:100
-#, fuzzy
-msgid "Search More"
-msgstr "搜索"
-
-#: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:36
-msgid "#"
-msgstr "#"
+#: gui/com/limegroup/gnutella/gui/search/SearchResultMenu.java:37
+msgid "You may only multiply-select similar kinds of search results"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:77
 msgid "Location"
 msgstr "位置"
+
+#: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:82
+#: gui/com/limegroup/gnutella/gui/search/Selector.java:83
+msgid "Vendor"
+msgstr "软件"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:87
 msgid "Created"
@@ -6269,13 +6444,84 @@ msgstr ""
 msgid "Junk Rating"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/Selector.java:206
+#: gui/com/limegroup/gnutella/gui/search/Selector.java:268
 msgid "Media"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/TableLine.java:673
+#: gui/com/limegroup/gnutella/gui/search/TableLine.java:680
 msgid ""
 "This is a secure result. No information in this result has been tampered."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:159
+msgid "View in Browser..."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:57
+msgid "Extension Sharing Settings"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
+msgid ""
+"This options clears any extension sharing changes you made and sets "
+"LimeWire's extension sharing preferences to the original preferences. Do you "
+"wish to continue?"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:60
+msgid "Enter the extension pattern:"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:61
+msgid "The extension name was not valid, could not add."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:62
+msgid "To allow selection enable sharing of sensitive types."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:66
+msgid "Sharing Extensions"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:69
+msgid ""
+"Select the types of files on your computer that you wish to share with "
+"LimeWire."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:90
+msgid "My Extensions"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:91
+msgid "Other"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:526
+msgid "Add New Extension"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:527
+msgid "Add a New Extension to My Extensions"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:562
+msgid "Do Not Share Sensitive File Types"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:563
+msgid ""
+"This stops LimeWire from sharing certain files that may contain sensitive "
+"information."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:721
+msgid "File types you added to share."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:725
+msgid "Other types of files."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
@@ -6286,13 +6532,13 @@ msgstr ""
 msgid "\"magnet:\" links"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:46
+#: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:47
 msgid ""
 "One or more files or protocols that LimeWire uses are no longer associated "
 "with LimeWire. Would you like LimeWire to fix this?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:48
+#: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:49
 msgid "Details"
 msgstr ""
 
@@ -6336,10 +6582,6 @@ msgstr "关闭 (&C)"
 #, fuzzy
 msgid "View Console Messages"
 msgstr "Vendor 平均"
-
-#: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:37
-msgid "Library"
-msgstr "库藏"
 
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:38
 msgid "View Repository of Saved Files"
@@ -6395,17 +6637,17 @@ msgid ""
 "theme."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:42
+#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:43
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:39
 #, fuzzy
 msgid "Kill Upload"
 msgstr "清除 上载"
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:47
+#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:48
 msgid "Stop Selected Uploads"
 msgstr "终止已选上载。"
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:49
+#: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:50
 msgid "Remove Inactive Uploads"
 msgstr "清除 不活动的 上载."
 
