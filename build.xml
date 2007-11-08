@@ -122,6 +122,8 @@
   	    </do.clover-setup>
   	</target>
 
+    <property name="translation.cutoff" value="60"/>
+
     <target name="lw-gettext-extract"
      description="Extracts message keys from the source code"
      depends="init.gettext">
@@ -154,7 +156,7 @@
     <!-- generate complete bundles -->
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
      poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"
-    percentage="65"/>
+    percentage="${translation.cutoff}"/>
 
     <!-- generate the empty en.po file without percentage  -->
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
@@ -170,7 +172,7 @@
     <!-- generate incomplete ones -->
     <gettext-dist targetBundle="org.limewire.i18n.Messages"
      poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"
-    percentage="65" moreOrLess="less"/>
+    percentage="${translation.cutoff}" moreOrLess="less"/>
 
     <delete>
     <fileset dir="lib/messagebundles/org/limewire/i18n/" includes="**/Messages_en*"/>
