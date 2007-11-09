@@ -551,17 +551,16 @@ public class ServerSideWhatIsNewTest
     public void testRemoveSharedFile() throws Exception {
         testAddSharedFiles();
         FileManager fm = fileManager;
-                
-        FileUtils.copy(tempFile1, tempFile2);
-        fm.loadSettingsAndWait(2000);
+        assertEquals(4,fm.getNumFiles());
+        
         
         // 4 shared files
         assertEquals(4,fm.getNumFiles());
         
-        // 3 different urns 
+        // 4 different urns 
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
-            assertEquals(urnToLong.toString(), 3, urnToLong.size());
+            assertEquals(urnToLong.toString(), 4, urnToLong.size());
         }
         // 3 different creation times 
         {
