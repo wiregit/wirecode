@@ -20,7 +20,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
@@ -94,7 +94,7 @@ public final class MessageReaderTest extends LimeTestCase {
         Message out3 = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
                 true, true, true, false, null);
-        Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
+        Message out4 = new PushRequestImpl(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = pingReplyFactory.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         Message[] allOut = new Message[] { out1, out2, out3, out4, out5 };
         READER.setReadChannel(channel(buffer(allOut)));
@@ -122,7 +122,7 @@ public final class MessageReaderTest extends LimeTestCase {
         Message out3 = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
                 true, true, true, false, null);
-        Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
+        Message out4 = new PushRequestImpl(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = pingReplyFactory.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
         ByteBuffer b2 = buffer(out2);
@@ -151,7 +151,7 @@ public final class MessageReaderTest extends LimeTestCase {
         Message out3 = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
                 true, true, true, false, null);
-        Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
+        Message out4 = new PushRequestImpl(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = pingReplyFactory.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
         ByteBuffer b2 = buffer(out2);
@@ -186,7 +186,7 @@ public final class MessageReaderTest extends LimeTestCase {
         Message out3 = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
                 IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
                 true, true, true, false, null);
-        Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
+        Message out4 = new PushRequestImpl(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = pingReplyFactory.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
         ByteBuffer b2 = buffer(out2);

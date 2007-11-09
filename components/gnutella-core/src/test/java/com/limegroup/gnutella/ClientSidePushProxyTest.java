@@ -34,6 +34,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -214,7 +215,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             ss.setSoTimeout(TIMEOUT);
             ss.bind(new InetSocketAddress(9000));
             // test that the client responds to a PushRequest
-            PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
+            PushRequest pr = new PushRequestImpl(GUID.makeGuid(), (byte) 1, 
                                              applicationServices.getMyGUID(),
                                              0, 
                                              InetAddress.getLocalHost().getAddress(),

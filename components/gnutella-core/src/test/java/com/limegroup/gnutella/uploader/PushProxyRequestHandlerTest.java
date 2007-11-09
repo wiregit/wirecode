@@ -336,5 +336,9 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             
         }
 
+        public ReplyHandler getPushHandler(byte[] guid) {
+            return null;
+        }
+
     }
 }

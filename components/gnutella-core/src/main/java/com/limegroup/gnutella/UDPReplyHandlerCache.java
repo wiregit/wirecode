@@ -6,7 +6,7 @@ import com.limegroup.gnutella.filters.SpamFilter;
 
 public interface UDPReplyHandlerCache {
 
-    public UDPReplyHandler getUDPReplyHandler(InetSocketAddress addr);
+    public ReplyHandler getUDPReplyHandler(InetSocketAddress addr);
 
     public void setPersonalFilter(SpamFilter personalFilter);
 

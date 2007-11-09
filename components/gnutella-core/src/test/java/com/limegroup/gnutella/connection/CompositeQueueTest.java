@@ -13,6 +13,7 @@ import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -88,11 +89,11 @@ public class CompositeQueueTest extends LimeTestCase {
         QUEUE.add(m);
         
         // send 3 push requests
-        QUEUE.add(new PushRequest(new byte[16], (byte)5, new byte[16],
+        QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
                                  0, IP, 6340));
-        QUEUE.add(new PushRequest(new byte[16], (byte)5, new byte[16],
+        QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
                                  0, IP, 6341));
-        QUEUE.add(new PushRequest(new byte[16], (byte)5, new byte[16],
+        QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
                                  0, IP, 6342));
                                  
         // send QueryReply with priority 1
@@ -102,13 +103,13 @@ public class CompositeQueueTest extends LimeTestCase {
         QUEUE.add(m);
                                  
         // send 4 push requests                                 
-        QUEUE.add(new PushRequest(new byte[16], (byte)5, new byte[16],
+        QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
                                  0, IP, 6343));
-        QUEUE.add(new PushRequest(new byte[16], (byte)5, new byte[16],
+        QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
                                  0, IP, 6344));
-        QUEUE.add(new PushRequest(new byte[16], (byte)5, new byte[16],
+        QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
                                  0, IP, 6345));
-        QUEUE.add(new PushRequest(new byte[16], (byte)5, new byte[16],
+        QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
                                  0, IP, 6346));                                                                                                                                    
                                  
         // send QueryReply with priority 7                                 

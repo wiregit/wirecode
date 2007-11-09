@@ -339,4 +339,13 @@ public interface MessageRouter {
      */
     public long getOOBExpireTime();
 
+    /**
+     * Returns the push handler registered for the <code>guid</code>, could also
+     * be {@link ForMeReplyHandler}.
+     * 
+     * @param guid the client guid
+     * 
+     * @return null if no reply handler is registered for the guid
+     */
+    ReplyHandler getPushHandler(byte[] guid);
 }

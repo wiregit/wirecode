@@ -39,6 +39,7 @@ import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageDispatcher;
+import com.limegroup.gnutella.MessageHandlerBinder;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.MulticastService;
 import com.limegroup.gnutella.NetworkManager;
@@ -397,8 +398,8 @@ public class RequeryDownloadTest extends LimeTestCase {
                 Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
                 Statistics statistics,
                 ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
-                PingRequestFactory pingRequestFactory) {
-            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory);
+                PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder) {
+            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder);
         } 
         
         public void sendDynamicQuery(QueryRequest query) {

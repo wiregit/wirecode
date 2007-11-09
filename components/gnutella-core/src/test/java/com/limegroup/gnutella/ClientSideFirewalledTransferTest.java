@@ -35,6 +35,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -213,7 +214,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         ss.setSoTimeout(TIMEOUT);
 
         // test that the client responds to a PushRequest
-        PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
+        PushRequest pr = new PushRequestImpl(GUID.makeGuid(), (byte) 1, 
                                          applicationServices.getMyGUID(),
                                          PushRequest.FW_TRANS_INDEX, 
                                          InetAddress.getLocalHost().getAddress(),

@@ -15,6 +15,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -336,7 +337,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		BlockingConnectionUtils.drain(ULTRAPEER_1);
 
 		PushRequest push1 = 
-            new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 0, 
+            new PushRequestImpl(GUID.makeGuid(), (byte)2, clientGUID, 0, 
                             IP, 6346);
 		LEAF.send(push1);
 		LEAF.flush();
@@ -350,7 +351,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		
         // check that pushes with unmatching client guids are not forwarded
 		PushRequest push2 = 
-            new PushRequest(GUID.makeGuid(),(byte)2, guid2, 1, 
+            new PushRequestImpl(GUID.makeGuid(),(byte)2, guid2, 1, 
                             IP, 6346);
 		LEAF.send(push2);
 		LEAF.flush();
@@ -373,7 +374,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 		assertTrue("unexpected GUID", 
 				   Arrays.equals(clientGUID, replyRead.getClientGUID()));
 		PushRequest push3 =
-			new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 3, IP, 6346);
+			new PushRequestImpl(GUID.makeGuid(), (byte)2, clientGUID, 3, IP, 6346);
 		LEAF.send(push3);
 		LEAF.flush();
 

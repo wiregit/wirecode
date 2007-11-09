@@ -14,6 +14,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.stubs.WriteBufferChannel;
@@ -262,6 +263,6 @@ public final class MessageWriterTest extends LimeTestCase {
     }
     
     private PushRequest s(int port) {
-        return new PushRequest(new byte[16], (byte)5, new byte[16], 0, IP, port);
+        return new PushRequestImpl(new byte[16], (byte)5, new byte[16], 0, IP, port);
     }
 }

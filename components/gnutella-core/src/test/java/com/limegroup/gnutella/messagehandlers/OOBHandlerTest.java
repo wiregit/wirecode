@@ -771,6 +771,10 @@ public class OOBHandlerTest extends BaseTestCase {
 
         public void unregisterMessageListener(byte[] guid, MessageListener ml) {
         }
+
+        public ReplyHandler getPushHandler(byte[] guid) {
+            return null;
+        }
     }
     
     private static class MyReplyHandler extends ReplyHandlerStub {

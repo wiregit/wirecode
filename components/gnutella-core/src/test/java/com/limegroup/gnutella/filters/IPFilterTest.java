@@ -19,6 +19,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -201,11 +202,11 @@ public class IPFilterTest extends LimeTestCase {
 
     public void testFilterByPushRequest() {
 
-        PushRequest push1 = new PushRequest(new byte[16], (byte) 3,
+        PushRequest push1 = new PushRequestImpl(new byte[16], (byte) 3,
                 new byte[16], 0l, whiteListedAddress, 6346);
         assertTrue(filter.allow(push1));
 
-        PushRequest push2 = new PushRequest(new byte[16], (byte) 3,
+        PushRequest push2 = new PushRequestImpl(new byte[16], (byte) 3,
                 new byte[16], 0l, blackListedAddress, 6346);
         assertFalse(filter.allow(push2));
     }

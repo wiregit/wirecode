@@ -35,7 +35,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)1};
         int port=6346;
 
-        PushRequest pr=new PushRequest(guid, (byte)0,
+        PushRequest pr=new PushRequestImpl(guid, (byte)0,
                                        clientGUID, index, ip, port);
         assertTrue(Arrays.equals(pr.getClientGUID(), clientGUID));
         assertEquals(index, pr.getIndex());
@@ -45,7 +45,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         //Test some maximum values
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
-        pr=new PushRequest(guid, (byte)0,
+        pr=new PushRequestImpl(guid, (byte)0,
                            clientGUID, u4, ip, u2);
         assertEquals(u4, pr.getIndex());
         assertEquals(u2, pr.getPort());
@@ -126,7 +126,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
             assertEquals("byte # " + i + " not equal", bytes[i], outBytes[i]);
         assertTrue(pr.isTLSCapable());
         
-        pr = new PushRequest(new byte[16], (byte)3, new byte[16], (byte)3,
+        pr = new PushRequestImpl(new byte[16], (byte)3, new byte[16], (byte)3,
                              new byte[] { (byte)254, 0, 0, 0 }, 1, Network.UNKNOWN, true);
         pr.hop(); // make ttl & hops match up
         out=new ByteArrayOutputStream();
@@ -162,7 +162,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)1};
         int port=6346;
 
-        PushRequest pr=new PushRequest(guid, (byte)0,
+        PushRequest pr=new PushRequestImpl(guid, (byte)0,
                                        clientGUID, index, ip, port,
                                        Network.UDP);
         

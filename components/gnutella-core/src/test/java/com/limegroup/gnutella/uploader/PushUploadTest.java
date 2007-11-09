@@ -65,6 +65,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -349,7 +350,7 @@ public class PushUploadTest extends LimeTestCase {
             if (reply == null)
                 throw new IOException("didn't get query reply in time");
 
-            PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 3, reply
+            PushRequest push = new PushRequestImpl(GUID.makeGuid(), (byte) 3, reply
                     .getClientGUID(), 0, new byte[] { (byte) 127, (byte) 0,
                     (byte) 0, (byte) 1 }, PUSH_PORT);
 
@@ -418,7 +419,7 @@ public class PushUploadTest extends LimeTestCase {
 
             // send push
             guid = reply.getClientGUID();
-            PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 3, guid,
+            PushRequest push = new PushRequestImpl(GUID.makeGuid(), (byte) 3, guid,
                     0, new byte[] { (byte) 127, (byte) 0, (byte) 0, (byte) 1 },
                     PUSH_PORT);
             connection.send(push);

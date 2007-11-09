@@ -24,6 +24,7 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.statistics.UploadStat;
 
@@ -191,7 +192,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
      */
     private boolean sendRequest(PushProxyRequest request) {
         byte[] clientGUID = GUID.fromHexString(request.getClientGUID());
-        PushRequest push = new PushRequest(GUID.makeGuid(), (byte) 0,
+        PushRequest push = new PushRequestImpl(GUID.makeGuid(), (byte) 0,
                 clientGUID, request.getFileIndex(), request.getAddress()
                         .getAddress().getAddress(), request.getAddress()
                         .getPort(), Network.TCP, request.isUseTLS());

@@ -132,6 +132,7 @@ import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerImpl;
+import com.limegroup.gnutella.messagehandlers.MessageHandlerBinderImpl;
 import com.limegroup.gnutella.messages.LocalPongInfo;
 import com.limegroup.gnutella.messages.LocalPongInfoImpl;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -331,6 +332,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ResponseVerifier.class).to(ResponseVerifierImpl.class);
         bind(HandshakeServices.class).to(HandshakeServicesImpl.class);
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
+        bind(MessageHandlerBinder.class).to(MessageHandlerBinderImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

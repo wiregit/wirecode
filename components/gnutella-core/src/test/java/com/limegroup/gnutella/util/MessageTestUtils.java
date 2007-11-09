@@ -5,8 +5,10 @@ import org.jmock.Mockery;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
@@ -44,6 +46,24 @@ public class MessageTestUtils {
         PingReply pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 6346, 
             new byte[]{a,b,c,d}, 10, 10, true, ggep);
         return pr;
+    }
+    
+    public static Expectations createDefaultMessageExpectations(final Message msg, final Class<? extends Message> handlerClass) {
+        return new Expectations() {{
+            allowing(msg).getGUID();
+            will(returnValue(new GUID().bytes()));
+            allowing(msg).getHops();
+            will(returnValue((byte)6));
+            allowing(msg).getTTL();
+            will(returnValue((byte)2));
+            allowing(msg).getTotalLength();
+            will(returnValue(32));
+            allowing(msg).getHandlerClass();
+            will(returnValue(handlerClass));
+            allowing(msg).getNetwork();
+            will(returnValue(Network.TCP));
+            allowing(msg).hop();
+        }};
     }
     
     /**

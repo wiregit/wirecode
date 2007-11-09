@@ -332,6 +332,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private final Provider<AdvancedToggleHandler> advancedToggleHandlerFactory;
 
     private final PingRequestFactory pingRequestFactory;
+
+    private final MessageHandlerBinder messageHandlerBinder;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -375,7 +377,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
             Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -408,6 +410,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.udpCrawlerPingHandlerFactory = udpCrawlerPingHandlerFactory;
         this.advancedToggleHandlerFactory = advancedToggleHandlerFactory;
         this.pingRequestFactory = pingRequestFactory;
+        this.messageHandlerBinder = messageHandlerBinder;
         this.multicastGuidMap = guidMapManager.getMap();
         this.udpReplyHandlerCache = udpReplyHandlerCache;
         this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
@@ -545,11 +548,12 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // handler for inspection requests
         InspectionRequestHandler inspectionHandler = inspectionRequestHandlerFactory.get();
         
+        messageHandlerBinder.bind(this);
+        
         setMessageHandler(PingRequest.class, new PingRequestHandler());
         setMessageHandler(PingReply.class, new PingReplyHandler());
         setMessageHandler(QueryRequest.class, new QueryRequestHandler());
         setMessageHandler(QueryReply.class, new QueryReplyHandler());
-        setMessageHandler(PushRequest.class, new PushRequestHandler());
         setMessageHandler(ResetTableMessage.class, new ResetTableHandler());
         setMessageHandler(PatchTableMessage.class, new PatchTableHandler());
         setMessageHandler(TCPConnectBackVendorMessage.class, new TCPConnectBackHandler());
@@ -572,7 +576,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
         setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
         setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
-        setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
         setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
         setUDPMessageHandler(UDPCrawlerPing.class, udpCrawlerPingHandlerFactory.get());
@@ -586,7 +589,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
         setMulticastMessageHandler(PingRequest.class, new MulticastPingRequestHandler());
         //setMulticastMessageHandler(PingReply.class, new MulticastPingReplyHandler());
-        setMulticastMessageHandler(PushRequest.class, new MulticastPushRequestHandler());
     }
 
     /* (non-Javadoc)
@@ -708,7 +710,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             }
         }
         
-        UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
+        ReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
         MessageHandler msgHandler = getUDPMessageHandler(msg.getHandlerClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
@@ -750,7 +752,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             return;
         }
 
-        UDPReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
+        ReplyHandler replyHandler = udpReplyHandlerCache.getUDPReplyHandler(addr);
         
         MessageHandler msgHandler = getMulticastMessageHandler(msg.getHandlerClass());
         if (msgHandler != null) {
@@ -2170,40 +2172,11 @@ public abstract class MessageRouterImpl implements MessageRouter {
     }
 
     /**
-     * The default handler for PushRequests received in
-     * RoutedConnection.loopForMessages().  This implementation
-     * uses the push route table to route a push request.  If an appropriate
-     * route doesn't exist, records the error statistics.  On sucessful routing,
-     * the PushRequest count is incremented.
-     *
-     * Override as desired, but you probably want to call
-     * super.handlePushRequest if you do.
-     */
-    protected void handlePushRequest(PushRequest request,
-                                  ReplyHandler handler) {
-        if(request == null) {
-            throw new NullPointerException("null request");
-        }
-        if(handler == null) {
-            throw new NullPointerException("null ReplyHandler");
-        }
-        // Note the use of getClientGUID() here, not getGUID()
-        ReplyHandler replyHandler = getPushHandler(request.getClientGUID());
-
-        if(replyHandler != null)
-            replyHandler.handlePushRequest(request, handler);
-        else {
-			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
-            handler.countDroppedMessage();
-        }
-    }
-    
-    /**
      * Returns the appropriate handler from the _pushRouteTable.
      * This enforces that requests for my clientGUID will return
      * FOR_ME_REPLY_HANDLER, even if it's not in the table.
      */
-    protected ReplyHandler getPushHandler(byte[] guid) {
+    public ReplyHandler getPushHandler(byte[] guid) {
         ReplyHandler replyHandler = _pushRouteTable.getReplyHandler(guid);
         if(replyHandler != null)
             return replyHandler;
@@ -3027,13 +3000,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
     
-    private class PushRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
-            handlePushRequest((PushRequest)msg, handler);
-        }
-    }
-    
     private class ResetTableHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
@@ -3182,13 +3148,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
     
-    private class UDPPushRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
-            handlePushRequest((PushRequest)msg, handler);
-        }
-    }
-    
     private class UDPLimeACKVendorMessageHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
@@ -3252,14 +3211,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 ReplyHandler handler) {
             ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
-        }
-    }
-    
-    public class MulticastPushRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, 
-                ReplyHandler handler) {
-            ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
-            handlePushRequest((PushRequest)msg, handler);
         }
     }
  

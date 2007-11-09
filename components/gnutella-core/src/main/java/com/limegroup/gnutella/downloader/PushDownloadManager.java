@@ -48,6 +48,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -213,7 +214,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
             int port = networkManager.getNonForcedPort();
             if( NetworkUtils.isValidAddress(addr) &&
                 NetworkUtils.isValidPort(port) ) {
-                PushRequest pr = new PushRequest(guid,
+                PushRequest pr = new PushRequestImpl(guid,
                                          (byte)1, //ttl
                                          file.getClientGUID(),
                                          file.getIndex(),
@@ -237,7 +238,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      */    
     private boolean sendPushUDP(RemoteFileDesc file, byte[] guid) {
         PushRequest pr = 
-                new PushRequest(guid,
+                new PushRequestImpl(guid,
                                 (byte)2,
                                 file.getClientGUID(),
                                 file.getIndex(),
@@ -319,7 +320,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
             return;
         }
 
-        PushRequest pr = new PushRequest(data.getGuid(), 
+        PushRequest pr = new PushRequestImpl(data.getGuid(), 
                                          ConnectionSettings.TTL.getValue(),
                                          data.getFile().getClientGUID(),
                                          data.getFile().getIndex(),

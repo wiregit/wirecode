@@ -102,7 +102,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
             Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
             Statistics statistics,
             ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -114,7 +114,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 backgroundExecutor, pongCacher, simppManager, updateHandler,
                 guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
                 udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory,
-                pingRequestFactory);
+                pingRequestFactory, messageHandlerBinder);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
     }
@@ -127,6 +127,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
      * @param ping the <tt>PingRequest</tt> to respond to
      * @param handler the <tt>ReplyHandler</tt> to send any pongs to
      */
+    @Override
     protected void respondToPingRequest(PingRequest ping,
                                         ReplyHandler handler) {
         //If this wasn't a handshake or crawler ping, check if we can accept
@@ -196,6 +197,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
      * @param handler the <tt>ReplyHandler</tt> that should handle any
      *  replies
 	 */
+    @Override
 	protected void respondToUDPPingRequest(PingRequest request, 
 										   InetSocketAddress addr,
                                            ReplyHandler handler) {
@@ -288,6 +290,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         //as ping will be broadcasted to them (since TTL=2)        
     }
     
+    @Override
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                             byte[] clientGUID,
                                             ReplyHandler handler) {
@@ -426,6 +429,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
      *
      * @return a new <tt>List</tt> of <tt>QueryReply</tt> instances
      */
+    @Override
     protected List<QueryReply> createQueryReply(byte[] guid, byte ttl,
                                     long speed, Response[] res,
                                     byte[] clientGUID, 

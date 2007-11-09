@@ -9,6 +9,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
@@ -156,7 +157,7 @@ public class BasicQueueTest extends LimeTestCase {
     }
     
     private PushRequest s(int port) {
-        return new PushRequest(new byte[16], (byte)5, new byte[16], 0, IP, port);
+        return new PushRequestImpl(new byte[16], (byte)5, new byte[16], 0, IP, port);
     }
     
     private QueryReply r(final int port) {

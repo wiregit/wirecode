@@ -141,7 +141,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     private static class PushRequestParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
-            return new PushRequest(guid, ttl, hops, payload, network);
+            return new PushRequestImpl(guid, ttl, hops, payload, network);
         }
     }
     
