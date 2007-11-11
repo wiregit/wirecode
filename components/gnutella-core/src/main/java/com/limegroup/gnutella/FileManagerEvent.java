@@ -51,7 +51,10 @@ public class FileManagerEvent extends EventObject {
         super(manager);
         this.type = type;
         this.fds = fds;
-        this.files = null;
+        this.files = new File[fds != null ? fds.length : 0];
+        for (int i = 0; fds != null && i < fds.length; i++) {
+            files[i] = fds[i].getFile();
+        }
     }
     
     /**
