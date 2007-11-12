@@ -18,7 +18,7 @@ public final class LWSSettings extends LimeProps {
      * The hostname to which we connect for authentication.
      */
     public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_HOSTNAME", "", "LWSSettings.lwsAuthenticationHostname");
+            "LWS_AUTHENTICATION_HOSTNAME", "localhost", "LWSSettings.lwsAuthenticationHostname");
 
     /**
      * The port on which we connect for authentication. This can be
@@ -32,7 +32,7 @@ public final class LWSSettings extends LimeProps {
      * The hostname to which we connect for downloads.
      */
     public static final StringSetting LWS_DOWNLOAD_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_DOWNLOAD_HOSTNAME", "", "LWSSettings.lwsDownloadHostname");
+            "LWS_DOWNLOAD_HOSTNAME", "jeffpalm.com", "LWSSettings.lwsDownloadHostname");
 
     /**
      * The port on which we connect for downloads. This can be
