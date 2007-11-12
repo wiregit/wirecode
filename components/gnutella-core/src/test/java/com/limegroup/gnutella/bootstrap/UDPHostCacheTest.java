@@ -90,7 +90,7 @@ public class UDPHostCacheTest extends LimeTestCase {
                 new Object[] { ds } ,
                 new Class[] { DatagramSocket.class });
                 
-        messageRouter.initialize();
+        messageRouter.start();
     }
     
     @Override

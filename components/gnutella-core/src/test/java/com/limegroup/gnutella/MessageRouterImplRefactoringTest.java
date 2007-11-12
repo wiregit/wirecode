@@ -12,7 +12,10 @@ import org.limewire.util.BaseTestCase;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.limegroup.gnutella.connection.ConnectionCapabilities;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.TestConnectionManager;
 
@@ -46,7 +49,7 @@ public class MessageRouterImplRefactoringTest extends BaseTestCase {
         Injector injector = LimeTestUtils.createInjector(modules);
 //        testConnectionFactory = injector.getInstance(TestConnectionFactory.class);
         messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
-        messageRouterImpl.initialize();
+        messageRouterImpl.start();
         return injector;
     }
     
@@ -154,4 +157,29 @@ public class MessageRouterImplRefactoringTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
+    public void testConnectionsAreRemoved() {
+        final QueryDispatcher queryDispatcher = context.mock(QueryDispatcher.class);
+        Injector injector = createDefaultInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(QueryDispatcher.class).toInstance(queryDispatcher);
+            }
+        });
+        ConnectionManager connectionManager = injector.getInstance(ConnectionManager.class);
+        final RoutedConnection connection = context.mock(RoutedConnection.class);
+        final ConnectionCapabilities connectionCapabilities = context.mock(ConnectionCapabilities.class);
+        
+        context.checking(new Expectations() {{
+            allowing(connection).getConnectionCapabilities();
+            will(returnValue(connectionCapabilities));
+            allowing(connection).getAddress();
+            will(returnValue("127.0.0.1"));
+            ignoring(connection);
+            ignoring(connectionCapabilities);
+            one(queryDispatcher).removeReplyHandler(with(same(connection)));
+        }});
+        
+        connectionManager.remove(connection);
+        context.assertIsSatisfied();
+    }
 }

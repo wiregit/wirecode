@@ -71,7 +71,7 @@ public class ContentManagerTest extends LimeTestCase {
     }
     
     public void teardown() throws Exception {
-        mgr.shutdown();
+        mgr.stop();
     }
     
     /**
@@ -135,7 +135,7 @@ public class ContentManagerTest extends LimeTestCase {
     
     /** Makes sure that stuff times out. */
     public void testTimeout() throws Exception {
-        mgr.initialize(); // must start timeout thread.
+        mgr.start(); // must start timeout thread.
         mgr.request(URN_1, one, 1);
         mgr.request(URN_2, two, 1);
         
@@ -155,7 +155,7 @@ public class ContentManagerTest extends LimeTestCase {
     
     /** Makes sure that isVerified works */
     public void testIsVerified() throws Exception {
-        mgr.initialize();
+        mgr.start();
         assertFalse(mgr.isVerified(URN_1));
         mgr.request(URN_1, one, 2000);
         assertFalse(mgr.isVerified(URN_1));
@@ -177,7 +177,7 @@ public class ContentManagerTest extends LimeTestCase {
     
     /** Checks blocking requests. */
     public void testBlockingRequest() throws Exception {
-        mgr.initialize();
+        mgr.start();
         
         Thread responder = ThreadExecutor.newManagedThread(new Runnable() {
             public void run() {
@@ -209,7 +209,7 @@ public class ContentManagerTest extends LimeTestCase {
     }
     
     public void testVaryingTimeouts() throws Exception {
-        mgr.initialize();
+        mgr.start();
         mgr.request(URN_1, one, 6000);
         mgr.request(URN_2, two, 2000);
         mgr.request(URN_3, three, 10000);

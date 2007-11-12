@@ -49,6 +49,8 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.Connection;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -334,6 +336,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private final PingRequestFactory pingRequestFactory;
 
     private final MessageHandlerBinder messageHandlerBinder;
+
+    private final ConnectionListener connectionListener = new ConnectionListener();
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -526,9 +530,12 @@ public abstract class MessageRouterImpl implements MessageRouter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.MessageRouter#initialize()
      */
-    public void initialize() {
+    public void start() {
 		_bypassedResultsCache = new BypassedResultsCache(activityCallback.get(), downloadManager);
         
+		// TODO listener leaking, we should have a shutdown event
+		connectionManager.addEventListener(connectionListener);
+		
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies
@@ -590,6 +597,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setMulticastMessageHandler(PingRequest.class, new MulticastPingRequestHandler());
         //setMulticastMessageHandler(PingReply.class, new MulticastPingReplyHandler());
     }
+    
+    public void stop() {
+        connectionManager.removeEventListener(connectionListener);
+    }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.MessageRouter#originateQueryGUID(byte[])
@@ -647,7 +658,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.MessageRouter#removeConnection(com.limegroup.gnutella.ReplyHandler)
      */
-    public void removeConnection(ReplyHandler rh) {
+    private void removeConnection(ReplyHandler rh) {
         queryDispatcher.removeReplyHandler(rh);
         _pingRouteTable.removeReplyHandler(rh);
         _queryRouteTable.removeReplyHandler(rh);
@@ -3263,5 +3274,15 @@ public abstract class MessageRouterImpl implements MessageRouter {
         public Object inspect() {
             return counts;
         }
+    }
+    
+    private class ConnectionListener implements ConnectionLifecycleListener {
+
+        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+            if (evt.isConnectionClosedEvent()) {
+                removeConnection(evt.getConnection());
+            }
+        }
+        
     }
 }

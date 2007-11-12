@@ -65,7 +65,7 @@ public class OOBHandlerTest extends BaseTestCase {
     
     public void setUp() throws Exception {
         router = new MyMessageRouter();
-        router.initialize();
+        router.start();
         handler = new OOBHandler(router);
         g = new GUID(GUID.makeGuid());
         address = InetAddress.getByName("1.2.3.4");
@@ -712,7 +712,7 @@ public class OOBHandlerTest extends BaseTestCase {
         public void handleUDPMessage(Message msg, InetSocketAddress addr) {
         }
 
-        public void initialize() {
+        public void start() {
         }
 
         public boolean isHostUnicastQueried(GUID guid, IpPort host) {
@@ -774,6 +774,9 @@ public class OOBHandlerTest extends BaseTestCase {
 
         public ReplyHandler getPushHandler(byte[] guid) {
             return null;
+        }
+
+        public void stop() {
         }
     }
     

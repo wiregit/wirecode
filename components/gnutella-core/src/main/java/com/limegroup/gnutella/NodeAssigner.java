@@ -35,6 +35,7 @@ import com.limegroup.gnutella.statistics.NodeAssignerStat;
  * It then updates the UltrapeerCapable and DHTCapable status of this node
  * 
  */
+// TODO starts DHTManager, should also stop it
 @Singleton
 public class NodeAssigner {
     

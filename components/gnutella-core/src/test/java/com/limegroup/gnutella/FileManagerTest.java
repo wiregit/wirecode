@@ -134,7 +134,7 @@ public class FileManagerTest extends LimeTestCase {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
         ContentManager cm = injector.getInstance(ContentManager.class);
-        cm.initialize();
+        cm.start();
         // request the urn so we can use the response.
         cm.request(u1, new StubContentResponseObserver(), 1000);
         cm.handleContentResponse(new ContentResponse(u1, false));

@@ -165,6 +165,8 @@ import com.limegroup.gnutella.rudp.LimeUDPService;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageFactory;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
+import com.limegroup.gnutella.search.QueryDispatcher;
+import com.limegroup.gnutella.search.QueryDispatcherImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
@@ -333,6 +335,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HandshakeServices.class).to(HandshakeServicesImpl.class);
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
         bind(MessageHandlerBinder.class).to(MessageHandlerBinderImpl.class);
+        bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

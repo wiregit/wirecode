@@ -249,7 +249,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             
         }
 
-        public void initialize() {
+        public void start() {
             // TODO Auto-generated method stub
             
         }
@@ -338,6 +338,9 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
 
         public ReplyHandler getPushHandler(byte[] guid) {
             return null;
+        }
+
+        public void stop() {
         }
 
     }

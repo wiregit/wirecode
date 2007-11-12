@@ -282,7 +282,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
     private final Provider<SimppManager> simppManager;
     private final CapabilitiesVMFactory capabilitiesVMFactory;
     private final RoutedConnectionFactory managedConnectionFactory;
-    private final Provider<MessageRouter> messageRouter;
     private final Provider<QueryUnicaster> queryUnicaster;
     private final SocketsManager socketsManager;
     private final ConnectionServices connectionServices;
@@ -315,7 +314,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
         this.simppManager = simppManager;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.managedConnectionFactory = managedConnectionFactory;
-        this.messageRouter = messageRouter;
         this.queryUnicaster = queryUnicaster;
         this.socketsManager = socketsManager;
         this.connectionServices = connectionServices;
@@ -1663,9 +1661,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
         // step (3) to ensure that dead connections are not added to the route
         // table, resulting in dangling references.
         c.close();
-
-        // 3) Clean up route tables.
-        messageRouter.get().removeConnection(c);
 
         // 4) Notify the listener
         dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this, 

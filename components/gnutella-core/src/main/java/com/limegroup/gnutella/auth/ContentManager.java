@@ -17,6 +17,7 @@ import org.limewire.service.ErrorService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Service;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -25,7 +26,7 @@ import com.limegroup.gnutella.settings.ContentSettings;
  * Keeps track of content requests & responses.
  */
 @Singleton
-public class ContentManager {
+public class ContentManager implements Service {
     
     private static final Log LOG = LogFactory.getLog(ContentManager.class);
     
@@ -80,7 +81,7 @@ public class ContentManager {
     /**
      * Initializes this content manager.
      */
-    public void initialize() {
+    public void start() {
         CACHE.initialize();
         startProcessingThread();
     }
@@ -88,7 +89,7 @@ public class ContentManager {
     /**
      * Shuts down this ContentManager.
      */
-    public void shutdown() {
+    public void stop() {
         shutdown = true;
         CACHE.writeToDisk();
     }

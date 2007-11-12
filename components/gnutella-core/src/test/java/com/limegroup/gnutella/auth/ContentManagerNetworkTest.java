@@ -61,7 +61,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         udpService    = injector.getInstance(UDPService.class);
         
         
-        messageRouter.initialize();
+        messageRouter.start();
         
         LISTEN_PORT++; // TODO: Remove port hack, new port needed on each run
         acceptor.setListeningPort(LISTEN_PORT); 
@@ -84,7 +84,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     
     @Override
     public void tearDown() throws Exception {
-        mgr.shutdown();
+        mgr.stop();
         
         acceptor.shutdown();
         udpService.shutdown();
@@ -125,7 +125,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         socket.setSoTimeout(5000);
         final IpPort authority = new IpPortImpl("127.0.0.1", socket.getLocalPort());
         
-        mgr.shutdown();
+        mgr.stop();
         mgr = new ContentManager(ipPortContentAuthorityFactory) {
             protected ContentAuthority getDefaultContentAuthority() {
                 return ipPortContentAuthorityFactory
@@ -133,7 +133,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
             }
         };
         mgr.request(URN_1, one, 2000);
-        mgr.initialize();
+        mgr.start();
         
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
         socket.receive(packet);
@@ -154,7 +154,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     }
     
     public void testResponseReceived() throws Exception {        
-        mgr.shutdown();
+        mgr.stop();
         mgr = injector.getInstance(ContentManager.class);
         mgr.request(URN_1, one, 4000);
         udpService.send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);

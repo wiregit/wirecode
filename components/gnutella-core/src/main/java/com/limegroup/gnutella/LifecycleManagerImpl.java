@@ -314,12 +314,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		// Now, link all the pieces together, starting the various threads.            
         LOG.trace("START ContentManager");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Safe Content Management..."));
-        contentManager.get().initialize();
+        contentManager.get().start();
         LOG.trace("STOP ContentManager");
 
         LOG.trace("START MessageRouter");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Message Router..."));
-		messageRouter.get().initialize();
+		messageRouter.get().start();
 		LOG.trace("STOPMessageRouter");
 
         LOG.trace("START HTTPUploadManager");
@@ -535,7 +535,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         licenseFactory.get().persistCache();
         
-        contentManager.get().shutdown();
+        contentManager.get().stop();
+        
+        messageRouter.get().stop();
         
         runShutdownItems();
         

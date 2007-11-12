@@ -130,7 +130,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector(modules);
         testConnectionFactory = injector.getInstance(TestConnectionFactory.class);
         messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
-        messageRouterImpl.initialize();
+        messageRouterImpl.start();
         return injector;
     }
     

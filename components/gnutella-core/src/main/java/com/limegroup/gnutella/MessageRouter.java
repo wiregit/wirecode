@@ -18,7 +18,7 @@ import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 
-public interface MessageRouter {
+public interface MessageRouter extends Service {
 
     /**
      * Installs a MessageHandler for "regular" Messages.
@@ -100,11 +100,6 @@ public interface MessageRouter {
             Class<? extends Message> clazz);
 
     /**
-     * Links the MessageRouter up with the other back end pieces
-     */
-    public void initialize();
-
-    /**
      * Routes a query GUID to yourself.
      */
     public void originateQueryGUID(byte[] guid);
@@ -136,12 +131,6 @@ public interface MessageRouter {
     public String getQueryRouteTableDump();
 
     public String getPushRouteTableDump();
-
-    /**
-     * A callback for ConnectionManager to clear a <tt>ReplyHandler</tt> from
-     * the routing tables when the connection is closed.
-     */
-    public void removeConnection(ReplyHandler rh);
 
     /**
      * The handler for all message types.  Processes a message based on the 
