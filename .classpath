@@ -32,9 +32,9 @@
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/java"/>
 	<classpathentry kind="src" output="components/mojito-ui/build/classes" path="components/mojito-ui/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito-ui/build/misc" path="components/mojito-ui/misc/java"/>
+	<classpathentry kind="src" output="components/lwsserver/build/classes" path="components/lwsserver/src/main/java"/>
+	<classpathentry kind="src" output="components/lwsserver/build/tests" path="components/lwsserver/src/test/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
-	<classpathentry kind="src" path="components/lwsserver/src/main/java"/>
-	<classpathentry kind="src" path="components/lwsserver/src/test/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar" sourcepath="lib/sources/commons-httpclient-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
@@ -82,7 +82,6 @@
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="lib" path="lib/jars/jflac.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jogg.jar"/>
@@ -90,5 +89,7 @@
 	<classpathentry kind="lib" path="lib/jars/mp3spi.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.6.0/lib/jsse.jar"/>
+	<classpathentry kind="var" path="JRE_LIB"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

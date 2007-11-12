@@ -1452,7 +1452,7 @@ public abstract class FileManager {
                 }
 
                 // check LimeXML to determine if is a store file
-                if( isStoreXML(fd.getXMLDocument())){ 
+                if(isStoreXML(fd.getXMLDocument())){ 
                     addStoreFile(file, urns, addFileType, notify, callback);
                 }
                 // if a shared request
@@ -2215,7 +2215,7 @@ public abstract class FileManager {
     /**
      * Returns true if the XML doc contains information regarding the LWS
      */
-    private boolean isStoreXML(LimeXMLDocument doc) { 
+    private boolean isStoreXML(LimeXMLDocument doc) {
        return doc != null && doc.getLicenseString() != null &&
                doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
     }

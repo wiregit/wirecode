@@ -119,8 +119,8 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
         beforeSetup();
         
-        LWSSettings.AUTHENTICATION_HOSTNAME.setValue("localhost");
-        LWSSettings.AUTHENTICATION_PORT.setValue(8080);
+        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("localhost");
+        LWSSettings.LWS_AUTHENTICATION_PORT.setValue(8080);
         
         Injector inj = LimeTestUtils.createInjector(new AbstractModule() {
             protected void configure() {
@@ -184,8 +184,6 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
     protected final String doAuthenticate(final String privateKey) {
         Map<String, String> args = new HashMap<String, String>();
-//        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
-//        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.AUTHENTICATE, args);
         args.put("private", privateKey);
         return sendMessageFromWebpageToClient("authenticate", args);        
     }

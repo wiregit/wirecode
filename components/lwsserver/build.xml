@@ -14,7 +14,6 @@
 		<do.setup-properties component="lwsserver">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar" />
-				<pathelement location="${limewire.lib.jars}/commons-pool.jar" />
 				<pathelement location="${limewire.lib.jars}/jakarta-httpcore.jar"/>
 				<path refid="build.limewire.components.common.buildpath" />
 				<path refid="build.limewire.components.http.buildpath" />

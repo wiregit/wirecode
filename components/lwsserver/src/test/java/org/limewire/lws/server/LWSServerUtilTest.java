@@ -3,18 +3,20 @@ package org.limewire.lws.server;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.util.regex.Pattern;
+
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
-public class AddURLEncodedArgumentsTest extends BaseTestCase {
+public class LWSServerUtilTest extends BaseTestCase {
     
-    public AddURLEncodedArgumentsTest(String s) { super(s); }
+    public LWSServerUtilTest(String s) { super(s); }
     
     public static Test suite() {
-        return buildTestSuite(AddURLEncodedArgumentsTest.class);
+        return buildTestSuite(LWSServerUtilTest.class);
     }
     
     public static void main(String[] args) {
@@ -104,4 +106,16 @@ public class AddURLEncodedArgumentsTest extends BaseTestCase {
         assertEquals(wantString, haveString);
         assertEquals(wantArgs, haveArgs);
     } 
+    
+	public void testCookiesTasteGood() {
+		String str = LWSServerUtil.createCookieDate();
+		//
+		// Wdy, DD-Mon-YYYY HH:MM:SS GMT
+		// Thu, 10-05-2007 15:53:12 GMT
+		//
+		boolean b = Pattern.matches(
+                "[A-Z][a-z][a-z], \\d\\d-\\d\\d-\\d\\d\\d\\d \\d\\d:\\d\\d:\\d\\d GMT", 
+                str);
+		assertTrue(str, b);
+	}    
 }

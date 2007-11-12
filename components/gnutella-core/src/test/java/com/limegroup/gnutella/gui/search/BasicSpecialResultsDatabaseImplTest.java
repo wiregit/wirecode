@@ -28,14 +28,6 @@ public class BasicSpecialResultsDatabaseImplTest extends LimeTestCase {
         helper.setUp();
     }
     
-    public void testFromFile() throws IOException {
-        runTest("test.txt", "cat", 1);
-    }  
-    
-    public void testFromFile50() throws IOException {
-        runTest("test50.txt", "cat", 3);
-    } 
-    
     public void testNone() throws IOException {
         runTestWithString(S0, "cat", 0);
     }

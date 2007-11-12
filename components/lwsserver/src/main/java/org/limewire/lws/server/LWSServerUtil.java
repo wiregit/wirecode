@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
 /**
@@ -114,7 +115,7 @@ public final class LWSServerUtil {
      * @param error the error message
      * @return the appropriate string for identifying an error
      */
-    static String wrapError(final String error) {
+    public static String wrapError(final String error) {
         return ERROR_START + error;
     }
 
@@ -185,7 +186,7 @@ public final class LWSServerUtil {
         if (addr == null)
             return null;
         byte[] bs = addr.getAddress();
-        return bs[0] + "." + bs[1] + "." + bs[2] + "." + bs[3];
+        return NetworkUtils.ip2string(bs);
     }
 
     /**

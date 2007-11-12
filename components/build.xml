@@ -85,6 +85,7 @@
 			<include name="${limewire.components.mojito-ui.relative.antglob.allsources}"/>
 	     	<include name="${limewire.components.http.relative.antglob.allsources}"/>    
 	     	<include name="${limewire.components.net.relative.antglob.allsources}"/>    
+    		<include name="${limewire.components.lwsserver.relative.antglob.allsources}"/>
    			<!-- Add as components are added! -->
 		</fileset>
     
@@ -194,7 +195,8 @@
     			<fileset dir="${build.limewire.components.mojito.tests}" includes="**/*Test.class"/>
                	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
                	<fileset dir="${build.limewire.components.http.tests}" includes="**/*Test.class"/>
-               	<fileset dir="${build.limewire.components.lwsserver.tests}" includes="**/*Test.class"/>
+           	<fileset dir="${build.limewire.components.net.tests}" includes="**/*Test.class"/>
+           	<fileset dir="${build.limewire.components.lwsserver.tests}" includes="**/*Test.class"/>
 	            <!-- Add as tests are added. -->
 	         </testLocations>
 	    </do.test-all>

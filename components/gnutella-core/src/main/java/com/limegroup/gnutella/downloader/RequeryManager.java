@@ -231,7 +231,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     private static final int MIN_NUM_CONNECTIONS      = 2;
     private static final int MIN_CONNECTION_MESSAGES  = 6;
     private static final int MIN_TOTAL_MESSAGES       = 45;
-    static boolean   NO_DELAY                 = false; // For testing
+    public static boolean   NO_DELAY                 = false; // For testing
     
     /**
      *  Determines if we have any stable connections to send a requery down.

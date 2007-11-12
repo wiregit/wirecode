@@ -14,6 +14,8 @@ import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
+import org.limewire.lws.server.LWSDispatcherFactoryImpl;
+import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
@@ -38,8 +40,8 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
         = "/store/app/pages/client/ClientCom/command/";
         
-    private LWSDispatcher dispatcher;
-    private final Map<String, Handler> commands2handlers = new HashMap<String, Handler>();
+    private final LWSDispatcher dispatcher;
+    private final Map<String, LWSManagerCommandResponseHandler> commands2handlers = new HashMap<String, LWSManagerCommandResponseHandler>();
     private final Map<String, List<Listener>> commands2listenerLists = new HashMap<String, List<Listener>>();
     
     /** This is provided by {@link LWSSettings}. */
@@ -50,13 +52,19 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     
     @Inject
     public LWSManagerImpl(HttpExecutor exe) {
-        this(exe, LWSSettings.AUTHENTICATION_HOSTNAME.getValue(), LWSSettings.AUTHENTICATION_PORT.getValue());
+        this(exe, new LWSDispatcherFactoryImpl()); //TODO: inject
+    }    
+    
+    //todo @Inject
+    public LWSManagerImpl(HttpExecutor exe, LWSDispatcherFactory lwsDispatcherFactory) {
+        this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue(), 
+             LWSSettings.LWS_AUTHENTICATION_PORT.getValue(), lwsDispatcherFactory);
     }
     
-    public LWSManagerImpl(HttpExecutor exe, String host, int port) {
+    public LWSManagerImpl(HttpExecutor exe, String host, int port, LWSDispatcherFactory lwsDispatcherFactory) {
         
         this.exe = exe;
-        this.dispatcher = LWSDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
+        this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
             public String receiveCommand(String cmd, Map<String, String> args) {
                 return LWSManagerImpl.this.dispatch(cmd, args);
             }            
@@ -76,6 +84,19 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                 LWSManagerImpl.this.isConnected = isConnected;
             }
             
+        });
+        //
+        // Add handler to check if we are still connected
+        // 
+        registerHandler("IsConnected", new LWSManagerCommandResponseHandlerWithCallback("IsConnected") {
+            @Override
+            protected String handleRest(Map<String, String> args) {
+                //
+                // If we're connected with the correct private key this will be
+                // fine
+                //
+                return LWSDispatcherSupport.Responses.OK;
+            } 
         });
     }
  
@@ -100,7 +121,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         return isConnected;
     }
   
-    public final boolean registerHandler(String cmd, Handler lis) {
+    public final boolean registerHandler(String cmd, LWSManagerCommandResponseHandler lis) {
         if (lis == null) throw new NullPointerException("Handlers can't be null");
         String hash = hash(cmd);
         commands2handlers.put(hash, lis);
@@ -179,7 +200,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
 
     private String dispatch(String cmd, Map<String, String> args) {
         String hash = hash(cmd);
-        Handler h = commands2handlers.get(hash);
+        LWSManagerCommandResponseHandler h = commands2handlers.get(hash);
         String res = null;
         boolean handled = false;
         if (h != null) {

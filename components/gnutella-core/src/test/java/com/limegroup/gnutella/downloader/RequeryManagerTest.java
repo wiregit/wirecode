@@ -37,6 +37,7 @@ import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.NullDHTController;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
+import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -446,10 +447,11 @@ public class RequeryManagerTest extends LimeTestCase {
                 Provider<PushDownloadManager> pushDownloadManager,
                 BrowseHostHandlerManager browseHostHandlerManager,
                 GnutellaDownloaderFactory gnutellaDownloaderFactory,
-                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+                PurchasedStoreDownloaderFactory purchasedDownloaderFactory,
+                Provider<LWSManager> lwsManager) {
             super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory,
                     downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
-                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
+                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory, lwsManager);
         }
 
         private volatile ManagedDownloader requerier;

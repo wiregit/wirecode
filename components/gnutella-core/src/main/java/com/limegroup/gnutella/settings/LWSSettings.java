@@ -17,21 +17,49 @@ public final class LWSSettings extends LimeProps {
     /**
      * The hostname to which we connect for authentication.
      */
-    public static final StringSetting AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "AUTHENTICATION_HOSTNAME", "", "LWSSettings.authenticationHostname");
+    public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
+            "LWS_AUTHENTICATION_HOSTNAME", "", "LWSSettings.lwsAuthenticationHostname");
 
     /**
      * The port on which we connect for authentication. This can be
      * <code><= 0</code> for no port.
      */
-    public static final IntSetting AUTHENTICATION_PORT = FACTORY.createRemoteIntSetting(
-            "AUTHENTICATION_PORT", 8080, "LWSSettings.authenticationPort", -Integer.MIN_VALUE,
+    public static final IntSetting LWS_AUTHENTICATION_PORT = FACTORY.createRemoteIntSetting(
+            "LWS_AUTHENTICATION_PORT", 8080, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
             10000);
+    
+    /**
+     * The hostname to which we connect for downloads.
+     */
+    public static final StringSetting LWS_DOWNLOAD_HOSTNAME = FACTORY.createRemoteStringSetting(
+            "LWS_DOWNLOAD_HOSTNAME", "", "LWSSettings.lwsDownloadHostname");
+
+    /**
+     * The port on which we connect for downloads. This can be
+     * <code><= 0</code> for no port.
+     */
+    public static final IntSetting LWS_DOWNLOAD_PORT = FACTORY.createRemoteIntSetting(
+            "LWS_DOWNLOAD_PORT", 80, "LWSSettings.lwsDownloadPost", -Integer.MIN_VALUE,
+            10000);   
+    
+    /**
+     * The hostname to which we connect for adding to playlists.
+     */
+    public static final StringSetting LWS_ADD_TO_PLAYLIST_HOSTNAME = FACTORY.createRemoteStringSetting(
+            "LWS_ADD_TO_PLAYLIST_HOSTNAME", "", "LWSSettings.lwsAddToPlaylistHostname");
+
+    /**
+     * The port on which we connect for adding to playlists. This can be
+     * <code><= 0</code> for no port.
+     */
+    public static final IntSetting LWS_ADD_TO_PLAYLIST_PORT = FACTORY.createRemoteIntSetting(
+            "LWS_ADD_TO_PLAYLIST_PORT", 80, "LWSSettings.lwsAddToPlaylistPost", -Integer.MIN_VALUE,
+            10000);  
 
     /**
      * Allow us to disable the lws server.
      */
-    public static final BooleanSetting IS_ENABLED = FACTORY.createRemoteBooleanSetting(
-            "IS_ENABLED", true, "LWSSettings.isEnabled");
+    public static final BooleanSetting LWS_IS_ENABLED = FACTORY.createRemoteBooleanSetting(
+            "LWS_IS_ENABLED", true, "LWSSettings.lwsIsEnabled");
 
 }

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.downloader;
+package com.limegroup.gnutella.gui.download;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -22,6 +22,8 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.RequeryManager;
+import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;

@@ -7,13 +7,14 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 
+
 /**
  * The interface to which GUI and other units program for the store server. This
  * class contains an instance of {@link HttpRequestHandler} which can attach to
- * an acceptor. <br/><br/> One can add {@link Handler}s and {@link Listener}s
+ * an acceptor. <br/><br/> One can add {@link LWSManagerCommandResponseHandler}s and {@link Listener}s
  * to an instance by calling the following methods:
  * <ul>
- * <li>{@link #registerHandler(String, com.limegroup.gnutella.store.storeserver.LWSManager.Handler)}</li>
+ * <li>{@link #registerHandler(String, com.limegroup.gnutella.store.storeserver.LWSManager.LWSManagerCommandResponseHandler)}</li>
  * <li>{@link #registerListener(String, com.limegroup.gnutella.store.storeserver.LWSManager.Listener)}</li>
  * </ul>
  * with the rules that only <u>one</u> handler may be registered per command
@@ -96,45 +97,23 @@ public interface LWSManager {
     boolean removeConnectionListener(LWSConnectionListener lis);    
     
     /**
-     * Defines the interface to handle commands sent to a {@link LWSManager}.
-     */
-    public interface Handler {
-    
-        /**
-         * Perform some operation on the incoming message and return the result.
-         * 
-         * @param args CGI params
-         * @return the result of performing some operation on the incoming
-         *         message
-         */
-        String handle(Map<String, String> args);
-    
-        /**
-         * Returns the unique name of this instance.
-         * 
-         * @return the unique name of this instance
-         */
-        String name();
-    }
-    
-    /**
      * Register a handler for the command <code>cmd</code>There
-     * can be only <b>one</b> {@link LWSManager.Handler} for every
+     * can be only <b>one</b> {@link LWSManagerCommandResponseHandler} for every
      * command.  If one already exists, it will be overwritten.
      * 
      * @param cmd String that invokes this listener
      * @param lis handler
      * @return <code>true</code> if we added <code>lis</code>
      */
-    boolean registerHandler(String cmd, Handler lis);
+    boolean registerHandler(String cmd, LWSManagerCommandResponseHandler lis);
     
     /**
      * Unregisters a handler for the command <code>cmd</code>, and returns
      * <code>true</code> on success and <code>false</code> on failure. There can be
-     * only <b>one</b> {@link LWSManager.Handler} for every command.
+     * only <b>one</b> {@link LWSManagerCommandResponseHandler} for every command.
      * 
      * @param cmd String that invokes this listener
-     * @return <code>true</code> if we removed the {@link Handler} for
+     * @return <code>true</code> if we removed the {@link LWSManagerCommandResponseHandler} for
      *         <code>cmd</code>
      */
     boolean unregisterHandler(String cmd);
@@ -182,10 +161,10 @@ public interface LWSManager {
     boolean unregisterListener(String cmd);
     
     /**
-     * An abstract implementation of {@link Handler} that abstracts away
+     * An abstract implementation of {@link LWSManagerCommandResponseHandler} that abstracts away
      * {@link #name()}.
      */
-    public abstract class AbstractHandler implements Handler {
+    public abstract class AbstractHandler implements LWSManagerCommandResponseHandler {
 
         private final String name;
 

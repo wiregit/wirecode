@@ -34,7 +34,7 @@ import org.limewire.service.ErrorService;
  *  |    +---------------+
  *  +--&gt; | Communicating |
  *       +---------------+
- * &lt;pre&gt;
+ * </pre>
  * 
  */
 public final class LWSDispatcherImpl extends LWSDispatcherSupport {
@@ -162,11 +162,12 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
                     public void process(String response) {
                         //
                         // This could have a trailing space, so be nice
+                        //
                         cb.process(response.indexOf(Responses.OK) != -1 ? publicKey : "0");
                     }
                 });
             } catch (IOException e) {
-                ErrorService.error(e, "StartCom.handleRest");
+                // ignored
             }
         }
     }

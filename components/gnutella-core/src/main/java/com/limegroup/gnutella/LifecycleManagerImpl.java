@@ -436,7 +436,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP register connection dispatchers");
 
         // Allow us to disable this remotely is needed
-        if (LWSSettings.IS_ENABLED.getValue()) {
+        if (LWSSettings.LWS_IS_ENABLED.getValue()) {
             LOG.trace("START StoreServer");
             localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  lwsManager.get().getHandler());
             LOG.trace("END StoreServer");

@@ -21,6 +21,7 @@ import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class BypassedResultsCacheTest extends BaseTestCase {
@@ -141,10 +142,11 @@ public class BypassedResultsCacheTest extends BaseTestCase {
                 Provider<PushDownloadManager> pushDownloadManager,
                 BrowseHostHandlerManager browseHostHandlerManager,
                 GnutellaDownloaderFactory gnutellaDownloaderFactory,
-                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+                PurchasedStoreDownloaderFactory purchasedDownloaderFactory,
+                Provider<LWSManager> lwsManager) {
             super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory,
                     downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
-                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
+                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory, lwsManager);
         }
 
 

@@ -5,6 +5,8 @@ import junit.textui.TestRunner;
 
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
+import com.limegroup.gnutella.settings.LWSSettings;
+
 /**
  * Tests basic authentication.
  */
@@ -23,6 +25,7 @@ public class AuthenticateTest extends AbstractCommunicationSupportWithNoLocalSer
   public void testAuthenticate() {
     final String res = doAuthenticate();
     assertEquals("invalid private key '" + res + "'", Responses.OK, res);
+    
   }
 
 }

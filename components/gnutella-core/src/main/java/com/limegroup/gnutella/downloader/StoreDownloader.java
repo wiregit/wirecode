@@ -31,7 +31,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
     private static final long serialVersionUID = 1672575739103885243L;
     
     private static final Log LOG = LogFactory.getLog(StoreDownloader.class);
-    
+        
     public StoreDownloader(RemoteFileDesc rfd, IncompleteFileManager ifc, 
             File saveDirectory, String fileName, boolean overwrite,
             SaveLocationManager manager) throws SaveLocationException {
@@ -47,7 +47,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * since we can't requery the store
      */
     @Override
-    protected QueryRequest newRequery(int numRequeries)
+    public QueryRequest newRequery(int numRequeries)
         throws CantResumeException {
             return null;
     }
@@ -57,7 +57,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * added
      */
     @Override
-    protected boolean allowAddition(RemoteFileDesc other) {        
+    public boolean allowAddition(RemoteFileDesc other) {        
         return false;
     }
     
@@ -66,7 +66,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * the LWS.
      */
     @Override
-    protected boolean canSendRequeryNow() {
+    public boolean canSendRequeryNow() {
         return false;
     }
     
@@ -204,7 +204,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
         if (urn!=null)
             urns.add(urn);
         
-        URI uri = new URI(url);
+        URI uri = new URI(url);    
 
         return new URLRemoteFileDesc(
                 url.getHost(),  
@@ -225,6 +225,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
                 null,           //no push proxies
                 0);         //assume no firewall transfer
     } 
+    
     
 
 

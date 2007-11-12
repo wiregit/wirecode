@@ -29,10 +29,12 @@ public abstract class AbstractReceivesCommandsFromDispatcher implements LWSRecei
     }
 
     public final boolean addConnectionListener(LWSConnectionListener lis) {
-        return connectionListeners.contains(lis) ? false : connectionListeners.add(lis);
+        synchronized (connectionListeners) {
+            return connectionListeners.contains(lis) ? false : connectionListeners.add(lis);
+        }
     }
 
     public final boolean removeConnectionListener(LWSConnectionListener lis) {
-        return !connectionListeners.contains(lis) ? false : connectionListeners.remove(lis);
+        return connectionListeners.remove(lis);
     }
 }

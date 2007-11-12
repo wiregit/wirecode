@@ -97,8 +97,10 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     protected abstract String getCommand(String request);
     
     /**
-     * Returns the arguments portion of a request.
+     * Returns the arguments portion of a request in the same order they appear.
+     * 
      * <p>
+     * 
      * For example, in the case of {@link LWSDispatcherImpl} we would have the
      * following:
      * 
@@ -117,7 +119,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * </pre>
      * 
      * @param request
-     * @return
+     * @return arugments in the order they are placed in the URL
      */
     protected abstract Map<String,String> getArgs(String request);
     
@@ -201,7 +203,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
 
     final void note(String pattern, Object... os) {
         if (LOG.isDebugEnabled()) LOG.info(MessageFormat.format(pattern, os));
-//        System.out.println("[" + getClass().getName() + "] " + MessageFormat.format(pattern, os));
     }    
    
     /**
@@ -230,7 +231,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * @return the message <tt>msg</tt> using callback function
      *         <tt>callback</tt>
      */
-    protected static final String wrapCallback(final String callback, final String msg) {
+    public static final String wrapCallback(final String callback, final String msg) {
         if (LWSServerUtil.isEmpty(callback)) {
             return msg;
         } else {
@@ -571,6 +572,11 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * No IP was given.  In ths real system this will not be used.
          */
         String MISSING_IP_PARAMETER = "missing.ip.parameter";
+        
+        /**
+         * A parameter was missing.
+         */
+        String MISSING_PARAMETER = "missing.parameter";
     
     }
 

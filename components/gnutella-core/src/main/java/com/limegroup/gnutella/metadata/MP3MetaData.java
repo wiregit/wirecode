@@ -156,6 +156,8 @@ public class MP3MetaData extends AudioMetaData {
             
             byte[] contentBytes = frame.getContent();
             String frameContent = null;
+            
+            String s = new String(contentBytes);
 
             if (contentBytes.length > 0) {
                 try {
