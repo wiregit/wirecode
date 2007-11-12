@@ -35,7 +35,7 @@ public class MP3MetaData extends AudioMetaData {
      * LimeWire would prefer to use ID3V2 tags, so we try to parse the ID3V2
      * tags first, and then v1 to get any missing tags.
      */
-    protected void parseFile(File file) throws IOException {
+    protected void parseFile(File file) throws IOException { 
         parseID3v2Data(file);
         
         MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
@@ -156,8 +156,6 @@ public class MP3MetaData extends AudioMetaData {
             
             byte[] contentBytes = frame.getContent();
             String frameContent = null;
-            
-            String s = new String(contentBytes);
 
             if (contentBytes.length > 0) {
                 try {
@@ -170,14 +168,10 @@ public class MP3MetaData extends AudioMetaData {
 
             // need to check is PRIV field here since frameContent may be null in ISO_LATIN format
             //  but not in UTF-8 format
-            if( (frameContent == null || frameContent.trim().equals("")) ) {
+            if( (frameContent == null || frameContent.trim().equals("")) ) { 
                 // PRIV fields in LWS songs are encoded in UTF-8 format
                 if (MP3DataEditor.PRIV_ID.equals(frameID)) {
-                    try {
-                        String content = new String(contentBytes,"UTF-8");
-                        checkLWS(content);
-                    } catch (UnsupportedEncodingException e) {
-                    }
+                    isPRIVCheck(contentBytes);
                 }
                 continue;
             }
@@ -253,11 +247,26 @@ public class MP3MetaData extends AudioMetaData {
                 setLicense(frameContent);
                 checkLWS(frameContent );
             }
+            else if( MP3DataEditor.PRIV_ID.equals(frameID)) { 
+                isPRIVCheck(contentBytes);
+            }
             // another key we don't care about except for searching for 
             //  protected content
-            else {
+            else { 
                 checkLWS(frameContent );
             }
+        }
+    }
+    
+    /**
+     * Checks the PRIV field for the magic String. This is always in UTF-8 encoding so use the 
+     * content byte array instead. 
+     */
+    private void isPRIVCheck(byte[] contentBytes) {
+        try {
+            String content = new String(contentBytes,"UTF-8");
+            checkLWS(content);
+        } catch (UnsupportedEncodingException e) {
         }
     }
 
@@ -266,7 +275,7 @@ public class MP3MetaData extends AudioMetaData {
      * it is a LWS song
      * @param content - ID3 tag to scan for a substring
      */
-    private void checkLWS(String content) {
+    private void checkLWS(String content) { 
         if( getLicenseType() == null || !getLicenseType().equals(MAGIC_KEY))
             if( content.indexOf(MAGIC_KEY) != -1)
                 setLicenseType(MAGIC_KEY);

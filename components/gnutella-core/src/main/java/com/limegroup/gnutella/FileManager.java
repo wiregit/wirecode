@@ -2097,15 +2097,8 @@ public abstract class FileManager {
     /**
      * Returns true if the folder is completely shared, false otherwise
 	 */
-    public boolean isFolderShared(File f) {
-        if( SharingSettings.DIRECTORIES_TO_SHARE.contains(f))
-            return true;
-        while( f != null && f.getParentFile() != null ) {
-            f = f.getParentFile();
-            if( SharingSettings.DIRECTORIES_TO_SHARE.contains(f))
-                return true;
-        }
-        return false;
+    public boolean isFolderShared(File f) { 
+    	return _sharedDirectories.containsKey(f);
     }
        
     /**
@@ -2238,15 +2231,7 @@ public abstract class FileManager {
     public boolean isStoreDirectory(File file) {
         return _storeDirectories.contains(file);
     }
-    
-    /**
-	 *	Returns true if this directory is the directory for saving
-	 *	downloads from gnutella and false otherwise
-	 */
-    public boolean isSavedDirectory(File file) {
-        return SharingSettings.getSaveDirectory().equals(file);
-    }
-    
+       
     /**
      * Returns true if this file is not too large, not too small,
      * not null, is a directory, can be read, is not hidden.  
