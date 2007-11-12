@@ -91,15 +91,6 @@ public class BasicSpecialResultsDatabaseImplTest extends LimeTestCase {
        +"cat|url=http://limewire.com\tsize=1230\tartist=0\talbum=the turtle looked over the wall to see his shadow0\tcreation_time=1231230\tvendor=someone0\tgenre=childrens0\tlicense=free\n"
 
         ; 
-
-    private void runTest(String filename, String query, int numEntries) throws IOException {
-        String path ="tests/com/limegroup/gnutella/gui/search/" + filename;
-        BufferedReader in = new BufferedReader(new FileReader(path));
-        StringBuffer sb = new StringBuffer();
-        String line;
-        while ((line = in.readLine()) != null) sb.append(line).append("\n");
-        runTestWithString(sb.toString(), query, numEntries);
-    }
     
     private void runTestWithString(String buf, String query, int numEntries) throws IOException {
         BasicSpecialResultsDatabaseImpl db = helper.newDatabase(buf);     

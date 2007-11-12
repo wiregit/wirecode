@@ -286,8 +286,8 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
                 String[] urns = decodedURNs.split(" ");
                 for (AbstractDownloader d : activeAndWaiting) {
                     urnLoop: for (String urn : urns) {
+                        if (d == null) continue;                        
                         if (d.getSHA1Urn() != null && urn.equals(d.getSHA1Urn().toString())) {
-                            if (d == null) continue;
                             long read = d.getAmountRead();
                             long total = d.getContentLength();
                             String ratio = String.valueOf((float)read / (float)total);

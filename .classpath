@@ -89,7 +89,5 @@
 	<classpathentry kind="lib" path="lib/jars/mp3spi.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.6.0/lib/jsse.jar"/>
-	<classpathentry kind="var" path="JRE_LIB"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
