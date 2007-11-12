@@ -5,8 +5,6 @@ import junit.textui.TestRunner;
 
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
-import com.limegroup.gnutella.settings.LWSSettings;
-
 /**
  * Tests basic authentication.
  */

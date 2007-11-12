@@ -17,7 +17,6 @@ import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in

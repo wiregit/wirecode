@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.service.ErrorService;
-
 
 /**
  * Dispatches commands after going through an authentication phase explained

@@ -6,10 +6,8 @@ import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.lws.server.LWSDispatcherSupport.ErrorCodes;
 import org.limewire.lws.server.LWSDispatcherSupport.Parameters;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.lws.server.LWSManager.AbstractHandler;
-import com.limegroup.gnutella.util.Tagged;
 
 /**
      * A {@link LWSManagerCommandResponseHandler} requiring a callback specified by the

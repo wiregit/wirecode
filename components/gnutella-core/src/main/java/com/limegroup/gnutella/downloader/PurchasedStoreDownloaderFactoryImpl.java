@@ -7,7 +7,6 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 /**
  * A default implementation of {@link PurchasedStoreDownloaderFactory}   
