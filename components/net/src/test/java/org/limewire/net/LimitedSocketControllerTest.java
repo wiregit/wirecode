@@ -14,15 +14,15 @@ import org.limewire.util.BaseTestCase;
 
 public class LimitedSocketControllerTest extends BaseTestCase {
     
-    private static final int TIMEOUT = 30000;
-    private static final NBSocketFactory FACTORY = new NIOSocketFactory();
+    private final int TIMEOUT = 30000;
+    private final NBSocketFactory FACTORY = new NIOSocketFactory();
     
-    private int BAD_PORT = 9998;
-    private InetSocketAddress BAD_ADDR = new InetSocketAddress("127.0.0.1", BAD_PORT);
-    private int LISTEN_PORT = 9999;
-    private InetSocketAddress LISTEN_ADDR = new InetSocketAddress("127.0.0.1", LISTEN_PORT);
-    private int BAD_GOOGLE_PORT = 6666;
-    private InetSocketAddress BAD_GOOGLE_ADDR = new InetSocketAddress("www.google.com", BAD_GOOGLE_PORT);
+    private final int BAD_PORT = 9998;
+    private final InetSocketAddress BAD_ADDR = new InetSocketAddress("127.0.0.1", BAD_PORT);
+    private final int LISTEN_PORT = 9999;
+    private final InetSocketAddress LISTEN_ADDR = new InetSocketAddress("127.0.0.1", LISTEN_PORT);
+    private final int BAD_GOOGLE_PORT = 6666;
+    private final InetSocketAddress BAD_GOOGLE_ADDR = new InetSocketAddress("www.google.com", BAD_GOOGLE_PORT);
     
     private ServerSocket listenSocket;
     private LimitedSocketController controller;

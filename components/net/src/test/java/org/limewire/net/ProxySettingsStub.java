@@ -2,7 +2,7 @@ package org.limewire.net;
 
 public class ProxySettingsStub implements ProxySettings {
     
-    private ProxyType proxyType;
+    private ProxyType proxyType = ProxyType.NONE;
     private String proxyHost;
     private String proxyPass;
     private String proxyUser;

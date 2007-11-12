@@ -59,6 +59,7 @@ class ProxyManagerImpl implements ProxyManager {
 		// to the network, we will use that proxy unless the host we
 		// want to connect to is a private address
         ProxyType connectionType = proxySettings.getCurrentProxyType();
+        assert connectionType != null;
 		boolean valid =  connectionType != ProxyType.NONE &&
                         (!NetworkUtils.isPrivateAddress(address) ||
                          proxySettings.isProxyForPrivateEnabled());
