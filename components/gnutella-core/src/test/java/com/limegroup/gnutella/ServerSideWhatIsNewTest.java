@@ -308,6 +308,7 @@ public class ServerSideWhatIsNewTest
         
         Map urnToLong = creationTimeCache.getUrnToTime();
         long previousTime = (Long)urnToLong.get(berkeleyURN);
+        previousTime = Math.max(previousTime, (Long)urnToLong.get(susheelURN));
         FileWriter writer = null;
         int attempts = 0;
         do {
