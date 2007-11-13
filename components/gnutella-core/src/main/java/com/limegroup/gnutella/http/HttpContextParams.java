@@ -41,6 +41,11 @@ public class HttpContextParams {
         Object o = context.getAttribute(CONNECTION_DATA);
         return (o != null) ? ((HTTPConnectionData) o).isFirewalled() : false;
     }
+    
+    public static String getClientGUID(final HttpContext context) {
+        Object o = context.getAttribute(CONNECTION_DATA);
+        return (o != null) ? ((HTTPConnectionData) o).getClientGUID() : null;
+    }
 
     public static void setConnectionData(final HttpContext context, final HTTPConnectionData data) {
         context.setAttribute(CONNECTION_DATA, data);

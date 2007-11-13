@@ -72,6 +72,7 @@ import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class ManagedDownloaderTest extends LimeTestCase {
@@ -693,6 +694,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final Provider<CreationTimeCache> creationTimeCache;
         private final BandwidthManager bandwidthManager;
         private final Provider<PushEndpointCache> pushEndpointCache;
+        private final HTTPHeaderUtils httpHeaderUtils;
 
         @Inject
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
@@ -700,20 +702,22 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 DownloadManager downloadManager,
                 Provider<CreationTimeCache> creationTimeCache,
                 BandwidthManager bandwidthManager,
-                Provider<PushEndpointCache> pushEndpointCache) {
+                Provider<PushEndpointCache> pushEndpointCache,
+                HTTPHeaderUtils httpHeaderUtils) {
             this.networkManager = networkManager;
             this.alternateLocationFactory = alternateLocationFactory;
             this.downloadManager = downloadManager;
             this.creationTimeCache = creationTimeCache;
             this.bandwidthManager = bandwidthManager;
             this.pushEndpointCache = pushEndpointCache;
+            this.httpHeaderUtils = httpHeaderUtils;
         }
         
         public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
                 VerifyingFile incompleteFile, boolean inNetwork) {
             return new AltLocDownloaderStub(rfd, incompleteFile,
                     networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache.get(), bandwidthManager, pushEndpointCache);
+                    creationTimeCache.get(), bandwidthManager, pushEndpointCache, httpHeaderUtils);
         }
 
     }
@@ -725,9 +729,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	public AltLocDownloaderStub(RemoteFileDesc rfd, VerifyingFile incompleteFile,
                 NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                 DownloadManager downloadManager, CreationTimeCache creationTimeCache,
-                BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache) {
+                BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
+                HTTPHeaderUtils httpHeaderUtils) {
             super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache, bandwidthManager, pushEndpointCache);
+                    creationTimeCache, bandwidthManager, pushEndpointCache, httpHeaderUtils);
             this.rfd = rfd;
         }
     	

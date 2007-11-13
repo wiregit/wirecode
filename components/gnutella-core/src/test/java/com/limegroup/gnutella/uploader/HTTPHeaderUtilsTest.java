@@ -187,6 +187,16 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", header.getValue());
     }
     
+    public void testGetFirewallHeaders() throws Exception {
+        connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
+        connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, true));
+        connectionManager.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
+        connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, true));
+        connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
+        List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
+        assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", headers.get(0).getValue());
+    }
+    
     private Collection<DirectAltLoc> altsFor(String... locs) throws Exception {
         List<DirectAltLoc> alts = new ArrayList<DirectAltLoc>(locs.length);
         for(String loc : locs) {

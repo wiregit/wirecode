@@ -6,12 +6,12 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
@@ -26,8 +26,6 @@ import org.limewire.util.BufferUtils;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.http.SimpleHTTPHeaderValue;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -208,23 +206,22 @@ public class InstantMessengerImpl implements InstantMessenger {
 
     private List<IOState> createIncomingShakeStates() {
         List<IOState> states = new ArrayList<IOState>(3);
+        List<Header> emptyHeaders = Collections.emptyList();
         states.add(new ReadChatConnectHeaderState());
-        states.add(new SimpleWriteHeaderState(CHAT_OK,
-                new HashMap<HTTPHeaderName, HTTPHeaderValue>(), null));
+        states.add(new SimpleWriteHeaderState(CHAT_OK, emptyHeaders, null));
         states.add(new ReadChatHeaderState());
         return states;
     }
 
     private List<IOState> createOutgoingShakeStates() {
-        Map<HTTPHeaderName, HTTPHeaderValue> headers = new HashMap<HTTPHeaderName, HTTPHeaderValue>();
-        headers.put(HTTPHeaderName.USER_AGENT, new SimpleHTTPHeaderValue(
-                LimeWireUtils.getVendor()));
+        List<Header> headers = new ArrayList<Header>();
+        headers.add(HTTPHeaderName.USER_AGENT.create(LimeWireUtils.getVendor()));
+        List<Header> emptyHeaders = Collections.emptyList();
 
         List<IOState> states = new ArrayList<IOState>(3);
         states.add(new SimpleWriteHeaderState(CHAT_CONNECT, headers, null));
         states.add(new ReadChatHeaderState());
-        states.add(new SimpleWriteHeaderState(CHAT_OK,
-                new HashMap<HTTPHeaderName, HTTPHeaderValue>(), null));
+        states.add(new SimpleWriteHeaderState(CHAT_OK, emptyHeaders, null));
         return states;
     }
 

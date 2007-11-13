@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.uploader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
@@ -59,14 +62,15 @@ public class HTTPHeaderUtils {
             }
         }
     }
-
+    
     /**
-     * Writes out the X-Push-Proxies header as specified by section 4.2 of the
-     * Push Proxy proposal, v. 0.7
+     * Encodes string of push proxies.
+     * 
+     * @return null when host is not firewalled.
      */
-    public void addProxyHeader(HttpResponse response) {
+    private String encodePushProxies() {
         if (networkManager.acceptedIncomingConnection())
-            return;
+            return null;
 
         Set<? extends Connectable> proxies = connectionManager.get().getPushProxies();
 
@@ -94,14 +98,40 @@ public class HTTPHeaderUtils {
         if (proxiesWritten > 0)
             buf.deleteCharAt(buf.length() - 1);
         else
-            return;
-
-        response.addHeader(HTTPHeaderName.PROXIES.create(buf.toString()));
+            return null;
         
-        // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
-        // for future fw-fw transfers
-        if (networkManager.canDoFWT()) {
-            response.addHeader(HTTPHeaderName.FWTPORT.create(networkManager.getStableUDPPort() + ""));
+        return buf.toString();
+    }
+
+    /**
+     * Returns the http headers used for firewalled transfers, include
+     * push proxies and port for fw-fw transfers.
+     * 
+     * @return empty list if this host is not firewalled and there is no
+     * need for push proxies.
+     */
+    public List<Header> getFirewalledHeaders() {
+        String proxies = encodePushProxies();
+        if (proxies != null) {
+            Header proxiesHeader = HTTPHeaderName.PROXIES.create(proxies);
+            // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
+            // for future fw-fw transfers
+            if (networkManager.canDoFWT()) {
+                return Arrays.asList(proxiesHeader, HTTPHeaderName.FWTPORT.create(networkManager.getStableUDPPort() + "")); 
+            } else {
+                return Collections.singletonList(proxiesHeader);
+            }
+        }
+        return Collections.emptyList();
+    }
+    
+    /**
+     * Writes out the X-Push-Proxies header as specified by section 4.2 of the
+     * Push Proxy proposal, v. 0.7
+     */
+    public void addProxyHeader(HttpResponse response) {
+        for (Header header : getFirewalledHeaders()) {
+            response.addHeader(header);
         }
     }
 
@@ -170,5 +200,7 @@ public class HTTPHeaderUtils {
                     new HTTPHeaderValueCollection(features)));
         }
     }
+
+    
 
 }

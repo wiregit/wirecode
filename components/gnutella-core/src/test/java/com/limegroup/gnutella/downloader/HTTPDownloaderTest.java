@@ -48,6 +48,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
@@ -61,6 +62,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     private BandwidthManager bandwidthManager;
     private PushEndpointCache pushEndpointCache;
     private VerifyingFileFactory verifyingFileFactory;
+    private HTTPHeaderUtils headerUtils;
 
     public HTTPDownloaderTest(String name) {
         super(name);
@@ -80,8 +82,9 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		pushEndpointCache = injector.getInstance(PushEndpointCache.class);
 		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 		verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
+		headerUtils = injector.getInstance(HTTPHeaderUtils.class);
         
-		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager, alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager, Providers.of(pushEndpointCache));
+		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager, alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager, Providers.of(pushEndpointCache), headerUtils);
     }
     
     public void testWrittenAltHeadersWithTLS() throws Exception {

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.IntervalSet;
@@ -68,7 +68,6 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-import com.limegroup.gnutella.http.SimpleHTTPHeaderValue;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ChatSettings;
@@ -78,6 +77,7 @@ import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -282,6 +282,8 @@ public class HTTPDownloader implements BandwidthTracker {
     private final CreationTimeCache creationTimeCache;
     private final BandwidthManager bandwidthManager;
     private final Provider<PushEndpointCache> pushEndpointCache;
+
+    private final HTTPHeaderUtils httpHeaderUtils;
     
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
@@ -290,7 +292,9 @@ public class HTTPDownloader implements BandwidthTracker {
             DownloadManager downloadManager,
             CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache) {
+            Provider<PushEndpointCache> pushEndpointCache,
+            HTTPHeaderUtils httpHeaderUtils) {
+        
         if (rfd == null)
             throw new NullPointerException("null rfd");
         if(requireSocket && socket == null)
@@ -302,6 +306,7 @@ public class HTTPDownloader implements BandwidthTracker {
         this.creationTimeCache = creationTimeCache;
         this.bandwidthManager = bandwidthManager;
         this.pushEndpointCache = pushEndpointCache;
+        this.httpHeaderUtils = httpHeaderUtils;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -472,14 +477,16 @@ public class HTTPDownloader implements BandwidthTracker {
 		
         observerHandler.setDelegate(observer);
         
-        Map<HTTPHeaderName, HTTPHeaderValue> headers = new LinkedHashMap<HTTPHeaderName, HTTPHeaderValue>();
+        List<Header> headers = new ArrayList<Header>();
         Set<HTTPHeaderValue> features = new HashSet<HTTPHeaderValue>();
         
-        headers.put(HTTPHeaderName.HOST, new SimpleHTTPHeaderValue(_host + ":" + _port));
-        headers.put(HTTPHeaderName.USER_AGENT, ConstantHTTPHeaderValue.USER_AGENT);
+        headers.add(HTTPHeaderName.HOST.create(_host + ":" + _port));
+        headers.add(HTTPHeaderName.USER_AGENT.create(ConstantHTTPHeaderValue.USER_AGENT));
+        
+        headers.addAll(httpHeaderUtils.getFirewalledHeaders());
 
         if (supportQueueing) {
-            headers.put(HTTPHeaderName.QUEUE, ConstantHTTPHeaderValue.QUEUE_VERSION);
+            headers.add(HTTPHeaderName.QUEUE.create(ConstantHTTPHeaderValue.QUEUE_VERSION));
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
         }
         
@@ -504,7 +511,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
-            headers.put(HTTPHeaderName.GNUTELLA_CONTENT_URN, sha1);
+            headers.add(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(sha1));
 
         writeAlternateLocations(headers, HTTPHeaderName.ALT_LOCATION, _goodLocs, _writtenGoodLocs, true);
         writeAlternateLocations(headers, HTTPHeaderName.NALTS, _badLocs, _writtenBadLocs, false);
@@ -522,30 +529,30 @@ public class HTTPDownloader implements BandwidthTracker {
             writeAlternateLocations(headers, HTTPHeaderName.BFALT_LOCATION, _badPushLocs, _writtenBadPushLocs, false);
         }
         
-        headers.put(HTTPHeaderName.RANGE, new SimpleHTTPHeaderValue("bytes=" + _initialReadingPoint + "-" + (stop-1)));
+        headers.add(HTTPHeaderName.RANGE.create("bytes=" + _initialReadingPoint + "-" + (stop-1)));
         
 		if (networkManager.acceptedIncomingConnection() &&
            !NetworkUtils.isPrivateAddress(networkManager.getAddress())) {
             int port = networkManager.getPort();
             String host = NetworkUtils.ip2string(networkManager.getAddress());
-            headers.put(HTTPHeaderName.NODE, new SimpleHTTPHeaderValue(host + ":" + port));
+            headers.add(HTTPHeaderName.NODE.create(host + ":" + port));
             features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
             // Legacy chat header. Replaced by X-Features header / X-Node
             // header
             if (ChatSettings.CHAT_ENABLED.getValue()) {
-                headers.put(HTTPHeaderName.CHAT, new SimpleHTTPHeaderValue(host + ":" + port));
+                headers.add(HTTPHeaderName.CHAT.create(host + ":" + port));
                 features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
             }
         }	
 		
 		// Write X-Features header.
         if (features.size() > 0)
-            headers.put(HTTPHeaderName.FEATURES, new HTTPHeaderValueCollection(features));
+            headers.add(HTTPHeaderName.FEATURES.create(new HTTPHeaderValueCollection(features)));
 		
         // Write X-Downloaded header to inform uploader about
         // how many bytes already transferred for this file
         if ( amountDownloaded > 0 ) {
-            headers.put(HTTPHeaderName.DOWNLOADED, new SimpleHTTPHeaderValue("" + amountDownloaded));
+            headers.add(HTTPHeaderName.DOWNLOADED.create("" + amountDownloaded));
         }
 		
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
@@ -564,7 +571,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	}
     
     /** Adds some locations to the set of locations we'll write, and stores them in the already-written set. */
-    private <T extends AlternateLocation> void writeAlternateLocations(Map<HTTPHeaderName, HTTPHeaderValue> headers, HTTPHeaderName header, Set<T> locs, Set<T> stored, boolean includeTLS) {        
+    private <T extends AlternateLocation> void writeAlternateLocations(List<Header> headers, HTTPHeaderName header, Set<T> locs, Set<T> stored, boolean includeTLS) {        
         //We don't want to hold locks while doing network operations, so we use
         //this variable to clone the location before writing to the network
         List<HTTPHeaderValue> valuesToWrite = null;
@@ -608,7 +615,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 });
             }
             
-            headers.put(header, new HTTPHeaderValueCollection(valuesToWrite));
+            headers.add(header.create(new HTTPHeaderValueCollection(valuesToWrite)));
         }
     }
 	
@@ -647,9 +654,9 @@ public class HTTPDownloader implements BandwidthTracker {
         
         observerHandler.setDelegate(observer);
         
-        Map<HTTPHeaderName, HTTPHeaderValue> headers = new LinkedHashMap<HTTPHeaderName, HTTPHeaderValue>();
-        headers.put(HTTPHeaderName.HOST, new SimpleHTTPHeaderValue(_host + ":" + _port));
-        headers.put(HTTPHeaderName.USER_AGENT, ConstantHTTPHeaderValue.USER_AGENT);
+        List<Header >headers = new ArrayList<Header>();
+        headers.add(HTTPHeaderName.HOST.create(_host + ":" + _port));
+        headers.add(HTTPHeaderName.USER_AGENT.create(ConstantHTTPHeaderValue.USER_AGENT));
         
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
                 "GET " + _thexUri + " HTTP/1.1",

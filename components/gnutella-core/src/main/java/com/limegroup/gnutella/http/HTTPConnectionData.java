@@ -10,6 +10,8 @@ public class HTTPConnectionData {
     private boolean firewalled;
     
     private boolean push;
+    
+    private String clientGUID;
 
     public boolean isLocal() {
         return local;
@@ -35,4 +37,14 @@ public class HTTPConnectionData {
         this.push = push;
     }
     
+    public void setClientGUID(String clientGUID) {
+        this.clientGUID = clientGUID;
+    }
+    
+    /**
+     * @return null if none is set
+     */
+    public String getClientGUID() {
+        return clientGUID;
+    }
 }

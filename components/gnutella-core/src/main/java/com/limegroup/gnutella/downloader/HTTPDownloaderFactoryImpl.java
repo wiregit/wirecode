@@ -12,6 +12,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 @Singleton
 public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
@@ -22,6 +23,7 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
     private final Provider<CreationTimeCache> creationTimeCache;
     private final BandwidthManager bandwidthManager;
     private final Provider<PushEndpointCache> pushEndpointCache;
+    private final HTTPHeaderUtils httpHeaderUtils;
 
 
     /**
@@ -37,13 +39,15 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
             DownloadManager downloadManager,
             Provider<CreationTimeCache> creationTimeCache,
             BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache) {
+            Provider<PushEndpointCache> pushEndpointCache,
+            HTTPHeaderUtils httpHeaderUtils) {
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
         this.bandwidthManager = bandwidthManager;
         this.pushEndpointCache = pushEndpointCache;
+        this.httpHeaderUtils = httpHeaderUtils;
     }
     
 
@@ -54,7 +58,7 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
             VerifyingFile incompleteFile, boolean inNetwork) {
         return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork, true,
                 networkManager, alternateLocationFactory, downloadManager,
-                creationTimeCache.get(), bandwidthManager, pushEndpointCache);
+                creationTimeCache.get(), bandwidthManager, pushEndpointCache, httpHeaderUtils);
     }
 
 
