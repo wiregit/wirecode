@@ -301,6 +301,11 @@ public class ServerSideWhatIsNewTest
         tempFile2 = new File("tempFile2.txt");
         tempFile1.deleteOnExit(); tempFile2.deleteOnExit();
 
+        // we start with one or two timestamps
+        Map longToUrns = creationTimeCache.getTimeToUrn();
+        int startTimeStamps = longToUrns.size();
+        assertTrue(""+longToUrns, startTimeStamps == 1 || startTimeStamps == 2);
+        
         FileWriter writer = null;
         {
             writer = new FileWriter(tempFile1);
@@ -336,10 +341,9 @@ public class ServerSideWhatIsNewTest
         assertNotNull(""+urnToLong, urnToLong.get(tempFile1URN));
         assertNotNull(""+urnToLong, urnToLong.get(tempFile2URN));
         
-        Map longToUrns = creationTimeCache.getTimeToUrn();
-        assertTrue(""+longToUrns, 
-                (longToUrns.size() == 2) || (longToUrns.size() == 3) ||
-                (longToUrns.size() == 4));
+        // we end with 2, 3 or 4 timestamps, depending on fs performance
+        assertGreaterThan(startTimeStamps, longToUrns.size());
+        assertLessThan(5, longToUrns.size());
     }
 
     // test that after the sharing of additional files, the what is new query
@@ -562,10 +566,13 @@ public class ServerSideWhatIsNewTest
             Map urnToLong = creationTimeCache.getUrnToTime();
             assertEquals(urnToLong.toString(), 4, urnToLong.size());
         }
-        // 3 different creation times 
+        
+        Map longToUrns = creationTimeCache.getTimeToUrn();
+        int startTimeStamps = longToUrns.size();
+        // 2,3 or 4 different creation times 
         {
-            Map longToUrns = creationTimeCache.getTimeToUrn();
-            assertEquals(3,longToUrns.size());
+            assertGreaterThan(1,longToUrns.size());
+            assertLessThan(5, longToUrns.size());
         }
         
         // tempFile1 and 2 have the same URN
@@ -574,22 +581,18 @@ public class ServerSideWhatIsNewTest
             Map urnToLong = creationTimeCache.getUrnToTime();  
             assertEquals(3, urnToLong.size());
         }
-        {
-            Map longToUrns = creationTimeCache.getTimeToUrn();
-            assertEquals(3, longToUrns.size());
-        }
+        // they may or may not have the same timestamp
+        assertLessThanOrEquals(startTimeStamps, longToUrns.size());
         
         // tempFile2 should result in a removal of an URN
+        // as well as a timestamp
         fm.removeFileIfShared(tempFile2);
 
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
             assertEquals(2, urnToLong.size());
         }
-        {
-            Map longToUrns =creationTimeCache.getTimeToUrn();
-            assertEquals(2, longToUrns.size());
-        }
+        assertLessThan(startTimeStamps, longToUrns.size());
     }
 
 
