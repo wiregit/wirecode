@@ -55,7 +55,6 @@ public class PlayListItemTest extends BaseTestCase {
         String artist = "artist";
         String bitrate = "128";
         String comment = "comments";
-        String copyright = "copyright holder";
         String genre = "genre";
         String length = "min:sec";
         String size = "200000";
@@ -70,7 +69,6 @@ public class PlayListItemTest extends BaseTestCase {
         map.put(PlayListItem.ARTIST, artist);
         map.put(PlayListItem.BITRATE, bitrate);
         map.put(PlayListItem.COMMENT, comment);
-        map.put(PlayListItem.COPYRIGHT, copyright);
         map.put(PlayListItem.GENRE, genre);
         map.put(PlayListItem.LENGTH, length);
         map.put(PlayListItem.SIZE, size);
@@ -93,7 +91,6 @@ public class PlayListItemTest extends BaseTestCase {
         assertEquals(item.getProperty(PlayListItem.ARTIST),artist);
         assertEquals(item.getProperty(PlayListItem.BITRATE),bitrate);
         assertEquals(item.getProperty(PlayListItem.COMMENT),comment);
-        assertEquals(item.getProperty(PlayListItem.COPYRIGHT),copyright);
         assertEquals(item.getProperty(PlayListItem.GENRE),genre);
         assertEquals(item.getProperty(PlayListItem.LENGTH),length);
         assertEquals(item.getProperty(PlayListItem.SIZE),size);
