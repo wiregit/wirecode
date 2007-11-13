@@ -85,5 +85,6 @@
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
+	<classpathentry kind="lib" path="lib/jars/swt-stub.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
