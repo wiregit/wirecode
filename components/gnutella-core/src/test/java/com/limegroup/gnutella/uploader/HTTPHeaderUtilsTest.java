@@ -12,7 +12,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpResponse;
-import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.ConnectionDispatcher;
@@ -25,9 +24,11 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
@@ -41,7 +42,6 @@ import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -55,6 +55,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
     private HTTPHeaderUtils httpHeaderUtils;
     private AlternateLocationFactory alternateLocationFactory;
     private NetworkManagerStub networkManager;
+    private ApplicationServices applicationServices;
 
     public HTTPHeaderUtilsTest(String name) {
         super(name);
@@ -78,8 +79,8 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         connectionManager = (StubConnectionManager) injector.getInstance(ConnectionManager.class);
         connectionManager.proxies = new StrictIpPortSet<Connectable>();
         altLocManager = new AltLocManager();
-        
-        httpHeaderUtils = new HTTPHeaderUtils(new FeaturesWriter(networkManager), networkManager, Providers.of((ConnectionManager) connectionManager));
+        httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
+        applicationServices = injector.getInstance(ApplicationServices.class);
     }
 
     @Override
@@ -197,9 +198,10 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         networkManager.setCanDoFWT(true);
         networkManager.setStableUDPPort(4545);
         List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
-        assertEquals(2, headers.size());
+        assertEquals(3, headers.size());
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", headers.get(0).getValue());
-        assertEquals("4545", headers.get(1).getValue());
+        assertEquals(new GUID(applicationServices.getMyGUID()).toHexString(), headers.get(1).getValue());
+        assertEquals("4545", headers.get(2).getValue());
     }
     
     public void testGetEmptyFirewalledHeaders() {
@@ -212,7 +214,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         networkManager.setCanDoFWT(false);
         networkManager.setStableUDPPort(4545);
         List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
-        assertEquals(1, headers.size());
+        assertEquals(2, headers.size());
     }
     
     private Collection<DirectAltLoc> altsFor(String... locs) throws Exception {

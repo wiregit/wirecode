@@ -134,7 +134,10 @@ public enum HTTPHeaderName {
     FWTPORT("X-FWTP"),
     
     /** The transfer encoding. */
-    TRANSFER_ENCODING("Transfer-Encoding");
+    TRANSFER_ENCODING("Transfer-Encoding"),
+    
+    /** The guid of this client */
+    CLIENT_GUID("X-ClientGUID");
     
     /**
      * Constant for the HTTP header name as a string.

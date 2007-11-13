@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +39,12 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
@@ -109,17 +111,19 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
      * connection for this to happend. 
      */
     public void testProxiesHeaderIsWritten() throws Exception {
-        // precondition
-        assertFalse(networkManager.acceptedIncomingConnection());
-        
         final ConnectionManager connectionManager = context.mock(ConnectionManager.class);
-        setupInjector(new AbstractModule() {
+        Injector  injector = setupInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).toInstance(connectionManager);
             }
         });
-        final Set<Connectable> proxies = new HashSet<Connectable>();
+        ApplicationServices applicationServices = injector.getInstance(ApplicationServices.class);
+        
+        // precondition
+        assertFalse(networkManager.acceptedIncomingConnection());
+
+        final Set<Connectable> proxies = new LinkedHashSet<Connectable>();
         proxies.add(new ConnectableImpl("192.168.0.1", 5555, false));
         proxies.add(new ConnectableImpl("192.168.0.2", 6666, true));
         context.checking(new Expectations() {{
@@ -133,9 +137,31 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
             }
         });
         
-        String value = headers.get(HTTPHeaderName.PROXIES.httpStringValue());
-        assertEquals("pptls=4,192.168.0.1:5555,192.168.0.2:6666", value);
+        assertEquals("pptls=4,192.168.0.1:5555,192.168.0.2:6666", headers.get(HTTPHeaderName.PROXIES.httpStringValue()));
+        assertEquals(new GUID(applicationServices.getMyGUID()).toHexString(), headers.get(HTTPHeaderName.CLIENT_GUID.httpStringValue()));
         context.assertIsSatisfied();
+    }
+    
+    /**
+     * Tests that proxies header is not written if client is not firewalled. 
+     */
+    public void testProxyiesHeaderIsNotWritten() throws Exception {
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        setupInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        networkManagerStub.setAcceptedIncomingConnection(true);
+        
+        Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
+            public Void apply(HTTPDownloader dl) {
+                return null;
+            }
+        });
+        
+        assertNull(headers.get(HTTPHeaderName.PROXIES.httpStringValue()));
     }
     
     /**
