@@ -306,19 +306,29 @@ public class ServerSideWhatIsNewTest
         int startTimeStamps = longToUrns.size();
         assertTrue(""+longToUrns, startTimeStamps == 1 || startTimeStamps == 2);
         
+        Map urnToLong = creationTimeCache.getUrnToTime();
+        long previousTime = (Long)urnToLong.get(berkeleyURN);
         FileWriter writer = null;
-        {
+        int attempts = 0;
+        do {
             writer = new FileWriter(tempFile1);
             writer.write(tempFile1.getName(), 0, tempFile1.getName().length());
             writer.flush();
             writer.close();
-        }
-        {
+            Thread.sleep(100);
+        } while(tempFile1.lastModified() == previousTime && attempts++ < 10);
+        
+        assertNotEquals("couldn't set up test",tempFile1.lastModified(), previousTime);
+        
+        attempts = 0;
+        do {
             writer = new FileWriter(tempFile2);
             writer.write(tempFile2.getName(), 0, tempFile2.getName().length());
             writer.flush();
             writer.close();
-        }
+            Thread.sleep(100);
+        } while(tempFile2.lastModified() == previousTime && attempts++ < 10);
+        assertNotEquals("couldn't set up test",tempFile2.lastModified(), previousTime);
         
         // now move them to the share dir
         FileUtils.copy(tempFile1, new File(_sharedDir, "tempFile1.txt"));
@@ -334,7 +344,6 @@ public class ServerSideWhatIsNewTest
         URN tempFile1URN = fm.getURNForFile(tempFile1);
         URN tempFile2URN = fm.getURNForFile(tempFile2);
 
-        Map urnToLong = creationTimeCache.getUrnToTime();
         assertEquals(4, urnToLong.size());
         assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
         assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
