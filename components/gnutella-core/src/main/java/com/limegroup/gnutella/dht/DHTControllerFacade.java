@@ -19,10 +19,14 @@ public interface DHTControllerFacade {
     DHTValueFactory getAltLocValueFactory();
 
     DHTValueFactory getPushProxyValueFactory();
+    
+    DHTValueFactory getPrivateGroupsValueFactory();
 
     StorableModel getAltLocModel();
 
     StorableModel getPushProxyModel();
+    
+    StorableModel getPrivateGroupsModel();
 
     boolean isActiveSupernode();
 

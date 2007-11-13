@@ -36,6 +36,7 @@ public class BootstrapSettings extends MojitoProps {
      */
     public static final IntSetting MAX_BOOTSTRAP_FAILURES
         = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 40);
+        //= FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 1);
 
     
     /**
@@ -43,9 +44,11 @@ public class BootstrapSettings extends MojitoProps {
      * before it's interrupted
      */
     public static final LongSetting BOOTSTRAP_TIMEOUT
+        //= FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
+        //        8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
         = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
-                8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
-    
+            1L*1000L, "Mojito.BootstrapTimeout", 1L*1000L, 1L*1000L);
+
     /**
      * The IS_BOOTSTRAPPED_RATIO is used to determinate if a Node's RouteTable
      * is good enough to say it's bootstrapped

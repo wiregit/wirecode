@@ -21,6 +21,8 @@ import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.db.AltLocModel;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
+import com.limegroup.gnutella.dht.db.PrivateGroupsModel;
+import com.limegroup.gnutella.dht.db.PrivateGroupsValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesModel;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -38,8 +40,10 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     private final ConnectionServices connectionServices;
     private final Provider<AltLocValueFactory> altLocValueFactory;
     private final Provider<PushProxiesValueFactory> pushProxyValueFactory;
+    private final Provider<PrivateGroupsValueFactory> privateGroupsValueFactory;
     private final Provider<AltLocModel> altLocModel;
     private final Provider<PushProxiesModel> pushProxyModel;
+    private final Provider<PrivateGroupsModel> privateGroupsModel;
     private final Provider<MessageDispatcherFactory> messageDispatcherFactory;
     private final DHTBootstrapperFactory dhtBootstrapperFactory;
         
@@ -53,8 +57,10 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
             ConnectionServices connectionServices,
             Provider<AltLocValueFactory> altLocValueFactory,
             Provider<PushProxiesValueFactory> pushProxyValueFactory,
+            Provider<PrivateGroupsValueFactory> privateGroupsValueFactory,
             Provider<AltLocModel> altLocModel,
             Provider<PushProxiesModel> pushProxyModel,
+            Provider<PrivateGroupsModel> privateGroupsModel,
             Provider<MessageDispatcherFactory> messageDispatcherFactory,
             DHTBootstrapperFactory dhtBootstrapperFactory) {
         this.networkManager = networkManager;
@@ -66,8 +72,10 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
         this.connectionServices = connectionServices;
         this.altLocValueFactory = altLocValueFactory;
         this.pushProxyValueFactory = pushProxyValueFactory;
+        this.privateGroupsValueFactory = privateGroupsValueFactory;
         this.altLocModel = altLocModel;
         this.pushProxyModel = pushProxyModel;
+        this.privateGroupsModel = privateGroupsModel;
         this.messageDispatcherFactory = messageDispatcherFactory;
         this.dhtBootstrapperFactory = dhtBootstrapperFactory;
     }
@@ -106,6 +114,13 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     
     public DHTValueFactory getPushProxyValueFactory() {
         return pushProxyValueFactory.get();
+    }
+    
+    public StorableModel getPrivateGroupsModel(){
+        return privateGroupsModel.get();
+    }
+    public DHTValueFactory getPrivateGroupsValueFactory(){
+        return privateGroupsValueFactory.get();
     }
     
     public boolean isActiveSupernode() {

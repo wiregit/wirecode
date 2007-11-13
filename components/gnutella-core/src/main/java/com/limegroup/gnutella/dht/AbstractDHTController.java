@@ -41,6 +41,7 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AbstractAltLocValue;
+import com.limegroup.gnutella.dht.db.AbstractPrivateGroupsValue;
 import com.limegroup.gnutella.dht.db.AbstractPushProxiesValue;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -156,6 +157,9 @@ public abstract class AbstractDHTController implements DHTController {
         dht.getDHTValueFactoryManager().addValueFactory(
                 AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyValueFactory());
         
+        dht.getDHTValueFactoryManager().addValueFactory(
+                AbstractPrivateGroupsValue.PRIVATE_GROUPS, dhtControllerFacade.getPrivateGroupsValueFactory());
+        
         try {
             PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
             KeyPair keyPair = new KeyPair(publicKey, null);
@@ -178,6 +182,10 @@ public abstract class AbstractDHTController implements DHTController {
             dht.getStorableModelManager().addStorableModel(
                     AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyModel());
         }
+        
+        //add PrivateGroups storable into the manager
+        dht.getStorableModelManager().addStorableModel(
+                AbstractPrivateGroupsValue.PRIVATE_GROUPS, dhtControllerFacade.getPrivateGroupsModel());
         
         this.bootstrapper = dhtControllerFacade.getDHTBootstrapper(this);
         

@@ -26,15 +26,16 @@ public class Main {
     public static void main(String[] args) throws Exception {
         
         int count = 0;
-        int port = 0;
+        int port = 9000;
         
         InetSocketAddress bootstrapHost = null;
         
         if (args.length != 2 && args.length != 4) {
             System.out.println("java Main count port");
             System.out.println("java Main count port host port");
-            System.exit(-1);
+            //System.exit(-1);
         } else {
+            
             count = Integer.parseInt(args[0]);
             port = Integer.parseInt(args[1]);
             
@@ -42,6 +43,7 @@ public class Main {
                 bootstrapHost = new InetSocketAddress(args[2], Integer.parseInt(args[3]));
             }
         }
+        
         
         LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
             public byte[] getLocalAddress() {
@@ -65,8 +67,10 @@ public class Main {
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
         NetworkSettings.FILTER_CLASS_C.setValue(false);
         
-        List<MojitoDHT> dhts = standalone(null, port, count);
-        
+        //List<MojitoDHT> dhts = standalone(null, port, count);
+
+        List<MojitoDHT> dhts = standalone(null, port, 5);
+
         if (dhts.isEmpty()) {
             System.out.println("No Nodes to run");
             System.exit(0);
@@ -91,21 +95,22 @@ public class Main {
         if (count > 1) {
             BucketRefresherSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.setValue(true);
         }
+       
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>(count);
-        
+
         for(int i = 0; i < count; i++) {
             try {
+               
                 //MojitoDHT dht = new MojitoDHT("DHT" + i, false);
                 MojitoDHT dht = MojitoFactory.createDHT("DHT" + i);
-                
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
                 } else {
                     dht.bind(new InetSocketAddress(port+i));
                 }
                 
-                //dht.start();
+                dht.start();
 
                 dhts.add(dht);
                 System.out.println(i + ": " + ((Context)dhts.get(dhts.size()-1)).getLocalNode());

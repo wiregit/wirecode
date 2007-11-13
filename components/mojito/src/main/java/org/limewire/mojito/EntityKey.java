@@ -174,11 +174,11 @@ public class EntityKey {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("Contact: ").append(getContact()).append("\n");
+        //buffer.append("Contact: ").append(getContact()).append("\n");
         buffer.append("PrimaryKey: ").append(getPrimaryKey()).append("\n");
-        buffer.append("SecondaryKey: ").append(getSecondaryKey()).append("\n");
+        //buffer.append("SecondaryKey: ").append(getSecondaryKey()).append("\n");
         buffer.append("DHTValueType: ").append(getDHTValueType()).append("\n");
-        buffer.append("IsLookupKey: ").append(isLookupKey()).append("\n");
+        //buffer.append("IsLookupKey: ").append(isLookupKey()).append("\n");
         return buffer.toString();
     }
 }

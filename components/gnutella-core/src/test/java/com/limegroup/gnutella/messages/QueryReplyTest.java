@@ -1483,7 +1483,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         
     }
     
+
     public void testParseResults() throws Exception{
+               
         QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
         
         /*

@@ -606,9 +606,9 @@ public class NIODispatcher implements Runnable {
                     startSelect = System.currentTimeMillis();
                 
                 if(!immediate) {
-                	long delay = nextSelectTimeout();
-                	if (delay == 0) {
-                		immediate = true;
+                    long delay = nextSelectTimeout();
+                    if (delay == 0) {
+                        immediate = true;
                     } else {
                         long nanoNow = System.nanoTime();
                         try {
@@ -683,7 +683,7 @@ public class NIODispatcher implements Runnable {
             
             long now = System.currentTimeMillis();
             for(SelectionKey sk : allKeys) 
-				process(now, sk, sk.attachment(), 0xFFFF);
+                process(now, sk, sk.attachment(), 0xFFFF);
             
             keys.clear();
             iteration++;

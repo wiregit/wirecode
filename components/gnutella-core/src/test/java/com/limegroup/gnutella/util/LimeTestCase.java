@@ -257,7 +257,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
 
         // Expand the xml.war file.
         File f = getRootDir();
-        File xmlWar = new File(f, "gui/xml.war");
+        File xmlWar = new File(f, "limewire/gui/xml.war");
         assertTrue(xmlWar.exists());
         Expand.expandFile(xmlWar, _settingsDir);
         //make sure it'll delete even if something odd happens.

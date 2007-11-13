@@ -57,6 +57,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
     private final Provider<TorrentManager> torrentManager;
     private final BTUploaderFactory btUploaderFactory;
     private final ApplicationServices applicationServices;
+    private final Provider<PrivateGroupsManagerFactory> privateGroupsManagerFactory;
     
     @Inject
     public DownloadReferencesFactoryImpl(
@@ -85,7 +86,8 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
             Provider<TigerTreeCache> tigerTreeCache, 
             Provider<TorrentManager> torrentManager, 
             BTUploaderFactory btUploaderFactory,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices,
+            Provider<PrivateGroupsManagerFactory> privateGroupsManagerFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -112,6 +114,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
         this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
         this.applicationServices = applicationServices;
+        this.privateGroupsManagerFactory = privateGroupsManagerFactory;
     }
 
     public DownloadReferences create(Downloader downloader) {
@@ -126,7 +129,7 @@ public class DownloadReferencesFactoryImpl implements DownloadReferencesFactory 
                         .get(), diskController.get(), ipFilter.get(),
                 requeryManagerFactory.get(), btContextFactory.get(), 
                 backgroundExecutor, messageRouter, tigerTreeCache, torrentManager, 
-                btUploaderFactory, applicationServices
+                btUploaderFactory, applicationServices, privateGroupsManagerFactory.get()
                 );
     }
 

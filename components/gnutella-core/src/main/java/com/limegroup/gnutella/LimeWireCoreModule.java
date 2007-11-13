@@ -96,6 +96,8 @@ import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactoryImpl;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
+import com.limegroup.gnutella.dht.db.PrivateGroupsValueFactory;
+import com.limegroup.gnutella.dht.db.PrivateGroupsValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
@@ -110,6 +112,8 @@ import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.InNetworkCallback;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.PrivateGroupsManagerFactory;
+import com.limegroup.gnutella.downloader.PrivateGroupsManagerFactoryImpl;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
@@ -312,6 +316,11 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPPinger.class).to(UDPPingerImpl.class);
         bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
         bind(Inspector.class).to(InspectorImpl.class);
+        bind(PrivateGroupsValueFactory.class).to(PrivateGroupsValueFactoryImpl.class);
+        bind(PrivateGroupsManagerFactory.class).to(PrivateGroupsManagerFactoryImpl.class);
+        
+        
+        
         bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
         bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);

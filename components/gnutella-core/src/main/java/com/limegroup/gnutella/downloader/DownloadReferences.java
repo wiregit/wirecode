@@ -51,6 +51,8 @@ public class DownloadReferences {
     private final Provider<TorrentManager> torrentManager;
     private final BTUploaderFactory btUploaderFactory;
     private final ApplicationServices applicationServices;
+    
+    private final PrivateGroupsManagerFactory privateGroupsManagerFactory;
 
     public DownloadReferences(DownloadManager downloadManager,
             FileManager fileManager, DownloadCallback downloadCallback,
@@ -73,7 +75,9 @@ public class DownloadReferences {
             Provider<TigerTreeCache> tigerTreeCache,
             Provider<TorrentManager> torrentManager,
             BTUploaderFactory btUploaderFactory,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices,
+            
+            PrivateGroupsManagerFactory privateGroupsFactory) {
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.downloadCallback = downloadCallback;
@@ -99,6 +103,11 @@ public class DownloadReferences {
         this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
         this.applicationServices = applicationServices;
+        
+        
+        
+        
+        this.privateGroupsManagerFactory = privateGroupsFactory;
     }
     
     public DownloadManager getDownloadManager() {
@@ -199,5 +208,9 @@ public class DownloadReferences {
     
     public ApplicationServices getApplicationServices() {
         return applicationServices;
+    }
+    
+    public PrivateGroupsManagerFactory getPrivateGroupsManagerFactory(){
+        return privateGroupsManagerFactory;
     }
 }

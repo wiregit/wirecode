@@ -26,7 +26,7 @@ public class XMLUtils {
     private XMLUtils() {}
     
     /**
-     * Returns a newly created document from the given XML.
+     * Returns a newly created document from+ the given XML.
      * Any errors while parsing will be printed to the XMLUtils.class log. 
      */
     public static Document getDocument(String xml) throws IOException {

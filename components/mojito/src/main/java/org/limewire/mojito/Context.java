@@ -164,7 +164,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     Context(String name, Vendor vendor, Version version, boolean firewalled) {
         this.name = name;
-        
+              
         PublicKey masterKey = null;
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());

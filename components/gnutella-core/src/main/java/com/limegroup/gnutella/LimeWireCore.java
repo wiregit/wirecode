@@ -50,6 +50,7 @@ import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
+import com.limegroup.gnutella.downloader.PrivateGroupsManager;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
@@ -250,6 +251,10 @@ public class LimeWireCore {
 
     public ConnectionManager getConnectionManager() {
         return injector.getInstance(ConnectionManager.class);
+    }
+    
+    public PrivateGroupsManager getPrivateGroupsManager(){
+        return injector.getInstance(PrivateGroupsManager.class);
     }
 
     public NetworkManager getNetworkManager() {

@@ -193,7 +193,7 @@ public class NIODispatcherTest extends BaseTestCase {
         if(c2.socket().getLocalPort() != r2.socket().getPort()) {
             SocketChannel temp = r3;
             r3 = r2;
-            r2 = temp;
+            r2 = temp; 
         }
         assertEquals(c2.socket().getLocalPort(), r2.socket().getPort());
         assertFalse(r2.isBlocking());

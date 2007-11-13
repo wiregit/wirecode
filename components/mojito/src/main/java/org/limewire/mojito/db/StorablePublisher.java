@@ -73,8 +73,8 @@ public class StorablePublisher implements Runnable {
     public void run() {
         
         // Do not publish values if we're not bootstrapped!
-        if (context.isBootstrapped() 
-                && !context.isBootstrapping()) {
+        if (context.isBootstrapped()){
+ //               && !context.isBootstrapping()) {
             if (publishTask.isDone()) {
                 
                 if (LOG.isInfoEnabled()) {
@@ -138,6 +138,7 @@ public class StorablePublisher implements Runnable {
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " has " 
+                        
                         + valuesToPublish.size() + " DHTValues to process");
             }
             
@@ -158,6 +159,8 @@ public class StorablePublisher implements Runnable {
             
             while(values.hasNext()) {
                 Storable storable = values.next();
+                
+                System.out.println(storable);
                 if (publish(storable)) {
                     return true;
                 }
