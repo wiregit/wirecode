@@ -54,6 +54,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
     private AltLocManager altLocManager;
     private HTTPHeaderUtils httpHeaderUtils;
     private AlternateLocationFactory alternateLocationFactory;
+    private NetworkManagerStub networkManager;
 
     public HTTPHeaderUtilsTest(String name) {
         super(name);
@@ -65,7 +66,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
 
     @Override
     public void setUp() throws Exception {
-        final NetworkManager networkManager = new NetworkManagerStub();
+        networkManager = new NetworkManagerStub();
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -187,14 +188,31 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", header.getValue());
     }
     
-    public void testGetFirewallHeaders() throws Exception {
+    public void testGetFullFirewalledHeaders() throws Exception {
         connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
         connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, true));
         connectionManager.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
         connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, true));
         connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
+        networkManager.setCanDoFWT(true);
+        networkManager.setStableUDPPort(4545);
         List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
+        assertEquals(2, headers.size());
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", headers.get(0).getValue());
+        assertEquals("4545", headers.get(1).getValue());
+    }
+    
+    public void testGetEmptyFirewalledHeaders() {
+        assertTrue(httpHeaderUtils.getFirewalledHeaders().isEmpty());
+    }
+    
+    public void testFirewalledHeadersNoFWTPort() throws Exception {
+        connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
+        connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, false));
+        networkManager.setCanDoFWT(false);
+        networkManager.setStableUDPPort(4545);
+        List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
+        assertEquals(1, headers.size());
     }
     
     private Collection<DirectAltLoc> altsFor(String... locs) throws Exception {

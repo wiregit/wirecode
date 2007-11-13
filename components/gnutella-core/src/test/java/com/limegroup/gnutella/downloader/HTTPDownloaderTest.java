@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,20 +21,26 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.Range;
 import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.limegroup.gnutella.BandwidthManager;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -44,9 +51,11 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
@@ -63,6 +72,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     private PushEndpointCache pushEndpointCache;
     private VerifyingFileFactory verifyingFileFactory;
     private HTTPHeaderUtils headerUtils;
+    private Mockery context;
 
     public HTTPDownloaderTest(String name) {
         super(name);
@@ -72,8 +82,13 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         return buildTestSuite(HTTPDownloaderTest.class);
     }
     
-    public void setUp() {
-		Injector injector = LimeTestUtils.createInjector();
+    @Override
+    protected void setUp() throws Exception {
+        context = new Mockery();
+    }
+    
+    private Injector setupInjector(Module... modules) {
+		Injector injector = LimeTestUtils.createInjector(modules);
 		networkManager = injector.getInstance(NetworkManager.class);
 		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 		downloadManager = injector.getInstance(DownloadManager.class);
@@ -85,9 +100,79 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		headerUtils = injector.getInstance(HTTPHeaderUtils.class);
         
 		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager, alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager, Providers.of(pushEndpointCache), headerUtils);
+		
+		return injector;
+    }
+    
+    /**
+     * Tests if proxies header is written. Must not have accepted an incoming
+     * connection for this to happend. 
+     */
+    public void testProxiesHeaderIsWritten() throws Exception {
+        // precondition
+        assertFalse(networkManager.acceptedIncomingConnection());
+        
+        final ConnectionManager connectionManager = context.mock(ConnectionManager.class);
+        setupInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ConnectionManager.class).toInstance(connectionManager);
+            }
+        });
+        final Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("192.168.0.1", 5555, false));
+        proxies.add(new ConnectableImpl("192.168.0.2", 6666, true));
+        context.checking(new Expectations() {{
+            one(connectionManager).getPushProxies();
+            will(returnValue(proxies));
+        }});
+        
+        Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
+            public Void apply(HTTPDownloader dl) {
+                return null;
+            }
+        });
+        
+        String value = headers.get(HTTPHeaderName.PROXIES.httpStringValue());
+        assertEquals("pptls=4,192.168.0.1:5555,192.168.0.2:6666", value);
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Tests if FTWPORT header is written, must have at least one push proxy
+     * for this to happen.
+     */
+    public void testFWTPortHeaderIsWritten() throws Exception {
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        final ConnectionManager connectionManager = context.mock(ConnectionManager.class);
+        setupInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+                bind(ConnectionManager.class).toInstance(connectionManager);
+            }
+        });
+        
+        context.checking(new Expectations() {{
+            one(connectionManager).getPushProxies();
+            will(returnValue(Collections.singleton(new ConnectableImpl("192.168.0.2", 4545, false))));
+        }});
+        networkManagerStub.setCanDoFWT(true);
+        networkManagerStub.setAcceptedIncomingConnection(false);
+        networkManagerStub.setStableUDPPort(3333);
+        
+        Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
+            public Void apply(HTTPDownloader dl) {
+                return null;
+            }
+        });
+        
+        String value = headers.get(HTTPHeaderName.FWTPORT.httpStringValue());
+        assertEquals("3333", value);
     }
     
     public void testWrittenAltHeadersWithTLS() throws Exception {
+        setupInjector();
         final Set<IpPort> sT, fT, sN, fN;
         sT = new IpPortSet(); fT = new IpPortSet(); sN = new IpPortSet(); fN = new IpPortSet();
         
@@ -175,6 +260,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testReadXAltsWithTLS() throws Exception {
+        setupInjector();
         String str;        
         HTTPDownloader dl;
         Collection<RemoteFileDesc> receivedLocations;
@@ -213,6 +299,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     
     
     public void testParseContentRange() throws Throwable {
+        setupInjector();
         int length = 1000;
         RemoteFileDesc rfd= new RemoteFileDesc("1.2.3.4", 1, 1, "file",
                                             length, new byte[16], 1,
@@ -278,6 +365,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testLegacy() throws Throwable {
+        setupInjector();
         //readHeaders tests
 		String str;
 		HTTPDownloader down;
