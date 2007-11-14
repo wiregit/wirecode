@@ -66,32 +66,6 @@ public interface MessageCallback {
     void showError(String messageKey, Switch ignore);
     
     /**
-     * Displays an error to the user based on the provided message key.  This
-     * appends the locale-specific string with another non-locale-specific
-     * string, such as a file name.
-     * 
-     * @param messageKey the key for the locale-specific message to display
-     * @param message the string to append to the locale-specific message, such
-     *  as a file name
-     */
-    void showError(String messageKey, String message);
-    
-    /**
-     * Displays an error to the user based on the provided message key.  This
-     * appends the locale-specific string with another non-locale-specific
-     * string, such as a file name.
-     * The message is only displayed if the Switch indicates the user
-     * has chosen to display the message.
-     * 
-     * @param messageKey the key for the locale-specific message to display
-     * @param message the string to append to the locale-specific message, such
-     *  as a file name
-     * @param ignore the BooleanSetting that stores whether or not the user
-     *        has chosen to receive future warnings of this message.
-     */
-    void showError(String messageKey, String message, Switch ignore);
-    
-    /**
      * Shows a locale-specific error message to the user, using the
      * given message key & the arguments for that key.
      */

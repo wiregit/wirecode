@@ -1,14 +1,12 @@
 package com.limegroup.gnutella.gui.search;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.limegroup.gnutella.util.LimeTestCase;
-
 import junit.framework.Test;
+
+import com.limegroup.gnutella.util.LimeTestCase;
 
 public class BasicSpecialResultsDatabaseImplTest extends LimeTestCase {
     

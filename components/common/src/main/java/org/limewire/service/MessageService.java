@@ -53,37 +53,6 @@ public class MessageService {
 
     /**
      * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles.  Also appends a second,
-     * non-locale-specific string to this message, such as a file name.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     * @param message a non-locale-specific message that will be appended as-is
-     *  to the message displayed to the user, such as a file name
-     */
-    public static void showError(String messageKey, String message) {
-        _callback.showError(messageKey, message);
-    }
-
-    /**
-     * Shows a locale-specific message to the user using the specified key to
-     * look up the message in the resource bundles if the Switch
-     * indicates to do so.  Also appends a second,
-     * non-locale-specific string to this message, such as a file name.
-     * 
-     * @param messageKey the key for looking up the message to display in the
-     *  resource bundles
-     * @param message a non-locale-specific message that will be appended as-is
-     *  to the message displayed to the user, such as a file name
-     */
-    public static void showError(String messageKey,
-                                 String message,
-                                 Switch ignore) {
-        _callback.showError(messageKey, message, ignore);
-    }
-
-    /**
-     * Shows a locale-specific message to the user using the specified key to
      * look up the message in the resource bundles.
      * 
      * @param messageKey the key for looking up the message to display in the
