@@ -122,6 +122,8 @@ public class TorrentFileSystem implements Serializable {
 		}
 		
 		_totalSize = calculateTotalSize(_files);
+        if (_totalSize <= 0)
+            throw new ValueException("invalid size "+_totalSize);
 	}
 	
 	/**
