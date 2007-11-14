@@ -165,7 +165,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     /**
-     * Tests if FTWPORT header is written, must have at least one push proxy
+     * Tests if FWTPORT header is written, must have at least one push proxy
      * for this to happen.
      */
     public void testFWTPortHeaderIsWritten() throws Exception {
