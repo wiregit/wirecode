@@ -90,7 +90,7 @@
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
-	<classpathentry kind="lib" path="lib/jars/smack.jar"/>
+	<classpathentry kind="lib" path="lib/jars/smack.jar" sourcepath="lib/sources/smack-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx-debug.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx-jingle.jar"/>
