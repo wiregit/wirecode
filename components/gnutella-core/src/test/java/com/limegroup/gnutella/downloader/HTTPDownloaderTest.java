@@ -33,6 +33,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -139,6 +140,8 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         
         assertEquals("pptls=4,192.168.0.1:5555,192.168.0.2:6666", headers.get(HTTPHeaderName.PROXIES.httpStringValue()));
         assertEquals(new GUID(applicationServices.getMyGUID()).toHexString(), headers.get(HTTPHeaderName.CLIENT_GUID.httpStringValue()));
+        // should be not set since node is firewalled
+        assertNull(headers.get(HTTPHeaderName.NODE.httpStringValue()));
         context.assertIsSatisfied();
     }
     
@@ -154,6 +157,9 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
             }
         });
         networkManagerStub.setAcceptedIncomingConnection(true);
+        networkManagerStub.setAddress(new byte[] { (byte)129, 34, 4, 5 });
+        
+        assertFalse(NetworkUtils.isPrivateAddress(networkManagerStub.getAddress()));
         
         Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
             public Void apply(HTTPDownloader dl) {
@@ -162,6 +168,8 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         });
         
         assertNull(headers.get(HTTPHeaderName.PROXIES.httpStringValue()));
+        // should be there, since not firewalled and address not private
+        assertNotNull(headers.get(HTTPHeaderName.NODE.httpStringValue()));
     }
     
     /**

@@ -41,7 +41,9 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 	
     private HttpResponse lastResponse;
 
-    private String clientGUID;
+    private int fwtPort;
+
+    private byte[] clientGUID;
     
     public HTTPUploader(String fileName, HTTPUploadSession session) {
         super(fileName, session);
@@ -239,12 +241,12 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         return super.isBrowseHostEnabled() && getGnutellaPort() != -1;
     }
 
-    public void setClientGUID(String clientGUID) {
-        this.clientGUID = clientGUID;
+    public void setFWTPort(int fwtPort) {
+        this.fwtPort = fwtPort;
     }
-    
-    public String getClientGUID() {
-        return clientGUID;
+
+    public void setClientGUID(byte[] clientGUID) {
+        this.clientGUID = clientGUID;
     }
 
 }

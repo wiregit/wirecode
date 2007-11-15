@@ -203,7 +203,6 @@ public final class PushManager {
             this.data.setPush(true);
             this.data.setLocal(data.isLan());
             this.data.setFirewalled(fwTransfer);
-            this.data.setClientGUID(data.getGuid());
             this.httpAcceptor = httpAcceptor;
             
             socket.setSoTimeout(30 * 1000);

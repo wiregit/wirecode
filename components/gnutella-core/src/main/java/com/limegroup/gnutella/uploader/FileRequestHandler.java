@@ -32,7 +32,6 @@ import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -163,7 +162,6 @@ public class FileRequestHandler implements HttpRequestHandler {
         HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
                 context, type, fd.getFileName());
         uploader.setFileDesc(fd);
-        uploader.setClientGUID(HttpContextParams.getClientGUID(context));
 
         // process headers
         BasicHeaderProcessor processor = new BasicHeaderProcessor();

@@ -18,6 +18,7 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.PushEndpointCache.CachedPushEndpoint;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 
 /**
@@ -390,32 +391,15 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		
 		}
 		
-		int proxiesWritten=0;
-        int proxyIndex = httpString.length();
         Set<? extends IpPort> proxies = getProxies();
-        BitNumbers bn = new BitNumbers(proxies.size());
-        for(IpPort cur : proxies) {
-            if(proxiesWritten >= MAX_PROXIES)
-                break;
-			
-            if(cur instanceof Connectable && ((Connectable)cur).isTLSCapable())
-                bn.set(proxiesWritten);
-                
-            // use getInetAddress.getAddress to guarantee it's in bitform
-			httpString.append(NetworkUtils.ip2string(
-				        cur.getInetAddress().getAddress()));
-			httpString.append(":").append(cur.getPort()).append(";");
-			proxiesWritten++;
-		}
-        
-        if(!bn.isEmpty())
-            httpString.insert(proxyIndex, PPTLS_HTTP + "=" + bn.toHexString() + ";");
-		
-		//trim the ; at the end
-		httpString.deleteCharAt(httpString.length()-1);
-		
+        if (!proxies.isEmpty()) {
+            httpString.append(HTTPHeaderUtils.encodePushProxies(proxies, ";", PushEndpoint.MAX_PROXIES));
+        } else {
+            //trim the ; at the end
+            httpString.deleteCharAt(httpString.length()-1);
+        }
+
 		return httpString.toString();
-		
 	}
 	
 	/**

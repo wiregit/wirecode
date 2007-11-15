@@ -10,7 +10,6 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 
@@ -114,7 +113,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
             // only the first occurence of port:ip is parsed
             if (addr==null) {
                 try {
-                    addr = parsePortIp(current);
+                    addr = NetworkUtils.parsePortIp(current);
                 }catch(IOException notBad) {}
             }
             
@@ -184,38 +183,5 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
     public PushEndpoint createForSelf() {
         return selfProvider.get(); 
     }    
-    
-    /** 
-     * @param http a string representing a port and an ip
-     * @return an object implementing IpPort 
-     * @throws IOException parsing failed.
-     */
-    // NOTE: this is parse PORT IP, not parseIpPort
-    private IpPort parsePortIp(String http) throws IOException{
-        int separator = http.indexOf(":");
-    	
-    	//see if this is a valid ip:port address; 
-    	if (separator == -1 || separator!= http.lastIndexOf(":") ||
-    			separator == http.length())
-    		throw new IOException();
-    	
-    	String portS = http.substring(0,separator);
-    	int port =0;
-    	
-    	try {
-    		port = Integer.parseInt(portS);
-    		if(!NetworkUtils.isValidPort(port))
-    		    throw new IOException();
-    	}catch(NumberFormatException failed) {
-    	    throw new IOException(failed.getMessage());
-    	}
-    	
-    	String host = http.substring(separator+1);
-    	
-    	if (!NetworkUtils.isValidAddress(host) || NetworkUtils.isPrivateAddress(host))
-    	    throw new IOException();
-    	
-    	return new IpPortImpl(host,port);
-    }
 
 }

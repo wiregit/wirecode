@@ -1,17 +1,21 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -32,6 +36,7 @@ import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
+import com.limegroup.gnutella.http.HTTPUtils;
 
 /**
  * Provides methods to add commonly used headers to {@link HttpResponse}s.
@@ -69,6 +74,83 @@ public class HTTPHeaderUtils {
     }
     
     /**
+     * Encodes a collection of push proxies as an HTTP value string. Checks if the
+     * push proxies implement {@link Connectable} and encodes their TLS capabilities. 
+     * 
+     * @param proxies collection of push proxies
+     * @param separator separator between individual proxy entries
+     * @param max the maximum number of push proxies to encode, the first <code>max</code>
+     * push proxies will be encoded
+     * 
+     * @throws IllegalArgumentException if collection is empty
+     */
+    public static String encodePushProxies(Collection<? extends IpPort> proxies, String separator, int max) {
+        if (proxies.isEmpty()) {
+            throw new IllegalArgumentException("Can't encode empty set of proxies");
+        }
+        StringBuilder buf = new StringBuilder();
+        int proxiesWritten = 0;
+        BitNumbers bn = new BitNumbers(proxies.size());
+        for(IpPort current : proxies) {
+            if(proxiesWritten >= max)
+                break;
+            
+            if(current instanceof Connectable && ((Connectable)current).isTLSCapable())
+                bn.set(proxiesWritten);
+
+            buf.append(current.getAddress())
+               .append(":")
+               .append(current.getPort())
+               .append(separator);
+
+            proxiesWritten++;
+        }
+        
+        if(!bn.isEmpty())
+            buf.insert(0, PushEndpoint.PPTLS_HTTP + "=" + bn.toHexString() + separator);
+
+        buf.deleteCharAt(buf.length() - 1);
+        return buf.toString();
+    }
+    
+    /**
+     * Decodes an http value string into a set of push proxies.
+     * 
+     * @param httpValue the http value to be decoded
+     * @param separator the separator that was used for encoding it
+     * 
+     * @return an empty set if no pushproxies could be decoded
+     */
+    public static Set<? extends Connectable> decodePushProxies(String httpValue, String separator) {
+        Set<Connectable> newSet = new HashSet<Connectable>();
+        StringTokenizer tok = new StringTokenizer(httpValue, separator);
+        BitNumbers tlsProxies = null;
+        while(tok.hasMoreTokens()) {
+            String proxy = tok.nextToken().trim();
+            // only read features when we haven't read proxies yet.
+            if(newSet.size() == 0 && proxy.startsWith(PushEndpoint.PPTLS_HTTP)) {
+                try {
+                    String value = HTTPUtils.parseValue(proxy);
+                    if(value != null) {
+                        try {
+                            tlsProxies = new BitNumbers(value);
+                        } catch(IllegalArgumentException ignored) {}
+                    }
+                } catch(IOException invalid) {}
+                continue;
+            }
+            
+            boolean tlsCapable = tlsProxies != null && tlsProxies.isSet(newSet.size());
+            try {
+                newSet.add(NetworkUtils.parseIpPort(proxy, tlsCapable));
+            } catch(IOException ohWell){
+                tlsProxies = null; // unset, since index may be off.
+            }
+        }
+        return newSet;
+    }
+    
+    /**
      * Encodes string of push proxies.
      * 
      * @return null when host is not firewalled.
@@ -76,36 +158,8 @@ public class HTTPHeaderUtils {
     private String encodePushProxies() {
         if (networkManager.acceptedIncomingConnection())
             return null;
-
         Set<? extends Connectable> proxies = connectionManager.get().getPushProxies();
-
-        StringBuilder buf = new StringBuilder();
-        int proxiesWritten = 0;
-        BitNumbers bn = new BitNumbers(proxies.size());
-        for(Connectable current : proxies) {
-            if(proxiesWritten >= 4)
-                break;
-            
-            if(current.isTLSCapable())
-                bn.set(proxiesWritten);
-
-            buf.append(current.getAddress())
-               .append(":")
-               .append(current.getPort())
-               .append(",");
-
-            proxiesWritten++;
-        }
-        
-        if(!bn.isEmpty())
-            buf.insert(0, PushEndpoint.PPTLS_HTTP + "=" + bn.toHexString() + ",");
-
-        if (proxiesWritten > 0)
-            buf.deleteCharAt(buf.length() - 1);
-        else
-            return null;
-        
-        return buf.toString();
+        return !proxies.isEmpty() ? encodePushProxies(proxies, ",", PushEndpoint.MAX_PROXIES) : null;
     }
 
     /**
