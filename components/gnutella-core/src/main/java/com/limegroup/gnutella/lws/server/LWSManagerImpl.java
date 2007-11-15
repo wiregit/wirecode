@@ -36,7 +36,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @Singleton
 public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToServer {
     
-    /** The page for making commands to The Lime Wire Store server. */
+    /** The page for making commands to The LimeWire Store server. */
     final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
         = "/store/app/pages/client/ClientCom/command/";
         

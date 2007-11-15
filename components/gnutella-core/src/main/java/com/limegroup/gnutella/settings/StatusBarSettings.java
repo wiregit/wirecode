@@ -40,7 +40,7 @@ public class StatusBarSettings extends LimeProps {
         FACTORY.createBooleanSetting("FIREWALL_DISPLAY_ENABLED", true);
 
     /**
-     * Whether or not Lime Wire Store status should be displayed.
+     * Whether or not LimeWire Store status should be displayed.
      */
     public static BooleanSetting LWS_DISPLAY_ENABLED =
         FACTORY.createBooleanSetting("LWS_DISPLAY_ENABLED", false);

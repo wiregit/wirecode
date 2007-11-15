@@ -24,7 +24,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  *  Allows the rest of LimeWire to treat this as a regular download. Handles downloading
- *  an item purchased off of the Lime Wire Store (LWS) website
+ *  an item purchased off of the LimeWire Store (LWS) website
  */
 public class StoreDownloader extends ManagedDownloader implements Serializable { 
     

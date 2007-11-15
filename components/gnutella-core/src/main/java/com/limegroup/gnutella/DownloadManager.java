@@ -257,7 +257,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
                                SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);
         
         //
-        // Add a handler for the Lime Wire Store Server so that
+        // Add a handler for the LimeWire Store Server so that
         // we can keep track of downloads that were made on the
         // DownloadMediator
         // 
@@ -842,7 +842,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     }
 
     /**
-     * Creates a new Lime Wire Store (LWS) download. Store downloads are handled in a similar fashion as
+     * Creates a new LimeWire Store (LWS) download. Store downloads are handled in a similar fashion as
      * MAGNET links except there are no alternative locations.  <tt>filename</tt> should always
      * be specified since we have complete control over META-DATA for these downloads, it will 
      * be used as the name of the complete file. Unlike all other downloads performed here, 

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.settings;
 import org.limewire.setting.StringSetting;
 
 /**
- * Settings for The Lime Wire Store&#8482; song search results. This is used by
+ * Settings for The LimeWire Store&#8482; song search results. This is used by
  * {@link RemoteStringBasicSpecialResultsDatabaseImpl} to store the search
  * index.
  */

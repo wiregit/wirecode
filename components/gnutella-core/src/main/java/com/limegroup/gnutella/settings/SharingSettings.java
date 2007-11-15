@@ -61,14 +61,14 @@ public class SharingSettings extends LimeProps {
             DEFAULT_SAVE_DIR).setAlwaysSave(true);
     
     /**
-     * Directory for saving songs purchased from Lime Wire Store (LWS)
+     * Directory for saving songs purchased from LimeWire Store (LWS)
      */
     public static final FileSetting DIRECTORY_FOR_SAVING_LWS_FILES = 
         FACTORY.createFileSetting("DIRETORY_FOR_SAVING_LWS_FILES",
                 DEFAULT_SAVE_LWS_DIR).setAlwaysSave(true);
     
     /**
-     * Template for substructure when saving songs purchased from Lime Wire Store (LWS)
+     * Template for substructure when saving songs purchased from LimeWire Store (LWS)
      * The template allows purchased songs to be saved in a unique fashion, 
      * ie. LWS_dir/artist/album/songX.mp3
      */
@@ -258,7 +258,7 @@ public class SharingSettings extends LimeProps {
     
     
     /**
-     * @return directory of where to save songs purchased from Lime Wire Store
+     * @return directory of where to save songs purchased from LimeWire Store
      * @throws IllegalTemplateException 
      */
     public static final File getSaveLWSDirectory(File incompleteFile) {
@@ -300,7 +300,7 @@ public class SharingSettings extends LimeProps {
     }
     
     /**
-     * @return directory of where to save songs purchased from Lime Wire Store
+     * @return directory of where to save songs purchased from LimeWire Store
      */
     public static final File getSaveLWSDirectory() {
         final File f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();        

@@ -5,7 +5,7 @@ import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringSetting;
 
 /**
- * Settings for The Lime Wire Store&#8482;. This is used by
+ * Settings for The LimeWire Store&#8482;. This is used by
  * {@link LWSManagerImpl} for the host name to which we connect for
  * authentication.
  */

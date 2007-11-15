@@ -18,7 +18,7 @@ public final class SWTBrowserSettings extends LimeProps {
         FACTORY.createRemoteBooleanSetting("USE_SWT_BROWSER", true, "SWTBrowserSettings.useSwtBrowser"); 
     
     /** 
-     * Remote String for The Lime Wire Store
+     * Remote String for The LimeWire Store
      */ 
     public static final StringSetting REMOTE_LIME_WIRE_STORE_URL =
         FACTORY.createRemoteStringSetting("REMOTE_LIME_WIRE_STORE_URL", 
