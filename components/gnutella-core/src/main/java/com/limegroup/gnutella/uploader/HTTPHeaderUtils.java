@@ -20,10 +20,8 @@ import org.limewire.io.NetworkUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
@@ -47,15 +45,12 @@ public class HTTPHeaderUtils {
     private final NetworkManager networkManager;
     private final FeaturesWriter featuresWriter;
     private final Provider<ConnectionManager> connectionManager;
-    private final ApplicationServices applicationServices;
     
     @Inject
-    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager, Provider<ConnectionManager> connectionManager,
-            ApplicationServices applicationServices) {
+    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager, Provider<ConnectionManager> connectionManager) {
         this.networkManager = networkManager;
         this.featuresWriter = featuresWriter;
         this.connectionManager = connectionManager;
-        this.applicationServices = applicationServices;
     }
     
     /**
@@ -173,13 +168,12 @@ public class HTTPHeaderUtils {
         String proxies = encodePushProxies();
         if (proxies != null) {
             Header proxiesHeader = HTTPHeaderName.PROXIES.create(proxies);
-            Header clientGUIDHeader = HTTPHeaderName.CLIENT_GUID.create(new GUID(applicationServices.getMyGUID()).toHexString());
             // write out X-FWPORT if we support firewalled transfers, so the other side gets our port
             // for future fw-fw transfers
             if (networkManager.canDoFWT()) {
-                return Arrays.asList(proxiesHeader, clientGUIDHeader, HTTPHeaderName.FWTPORT.create(networkManager.getStableUDPPort() + "")); 
+                return Arrays.asList(proxiesHeader, HTTPHeaderName.FWTPORT.create(networkManager.getStableUDPPort() + "")); 
             } else {
-                return Arrays.asList(proxiesHeader, clientGUIDHeader);
+                return Arrays.asList(proxiesHeader);
             }
         }
         return Collections.emptyList();

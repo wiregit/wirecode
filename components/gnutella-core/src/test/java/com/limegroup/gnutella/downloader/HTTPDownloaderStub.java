@@ -10,12 +10,12 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**
  * stubbed out HTTPDownloader.  Extend this stub to override specific behavior
@@ -26,10 +26,10 @@ public class HTTPDownloaderStub extends HTTPDownloader {
             NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
             CreationTimeCache creationTimeCache, BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache, HTTPHeaderUtils httpHeaderUtils) {
+            Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory) {
         super(null, rfd, incompleteFile, false, false, networkManager,
                 alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                pushEndpointCache, httpHeaderUtils);
+                pushEndpointCache, pushEndpointFactory);
     }
 	
 	public void addFailedAltLoc(AlternateLocation loc) {

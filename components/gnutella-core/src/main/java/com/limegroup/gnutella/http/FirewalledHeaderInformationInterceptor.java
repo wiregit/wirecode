@@ -6,9 +6,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HeaderInterceptor;
-import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
 /**
@@ -24,43 +22,10 @@ public class FirewalledHeaderInformationInterceptor implements HeaderInterceptor
     }
     
     public void process(Header header, HttpContext context) throws HttpException, IOException {
-        if (readPushProxies(header))
-            ;
-        else if (readClientGUID(header))
-            ;
-        else if (readFWTPort(header))
-            ;
+        readPushEndPoint(header);
     }
 
-    boolean readFWTPort(Header header) {
-        if (HTTPHeaderName.FWTPORT.matches(header)) {
-            try {
-                int port = Integer.parseInt(header.getValue());
-                if (NetworkUtils.isValidPort(port)) {
-                    uploader.setFWTPort(port);
-                }
-            } catch (NumberFormatException nfe) { }
-            return true;
-        } else {
-            return false;
-        }
+    void readPushEndPoint(Header header) {
     }
-
-    boolean readClientGUID(Header header) {
-        if (HTTPHeaderName.CLIENT_GUID.matches(header)) {
-            String guidHex = header.getValue();
-            try {
-                byte[] guid = GUID.fromHexString(guidHex);
-                uploader.setClientGUID(guid);
-            } catch (IllegalArgumentException iae) { }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    boolean readPushProxies(Header header) {
-        return false;
-    }
-
+    
 }

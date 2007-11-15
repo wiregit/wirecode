@@ -137,7 +137,7 @@ public enum HTTPHeaderName {
     TRANSFER_ENCODING("Transfer-Encoding"),
     
     /** The guid of this client */
-    CLIENT_GUID("X-Client-GUID");
+    FWT_NODE("X-FWT-Node");
     
     /**
      * Constant for the HTTP header name as a string.

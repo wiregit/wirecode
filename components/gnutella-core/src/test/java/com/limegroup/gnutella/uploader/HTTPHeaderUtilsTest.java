@@ -24,11 +24,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
@@ -55,7 +53,6 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
     private HTTPHeaderUtils httpHeaderUtils;
     private AlternateLocationFactory alternateLocationFactory;
     private NetworkManagerStub networkManager;
-    private ApplicationServices applicationServices;
 
     public HTTPHeaderUtilsTest(String name) {
         super(name);
@@ -80,7 +77,6 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         connectionManager.proxies = new StrictIpPortSet<Connectable>();
         altLocManager = new AltLocManager();
         httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
-        applicationServices = injector.getInstance(ApplicationServices.class);
     }
 
     @Override
@@ -198,10 +194,9 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         networkManager.setCanDoFWT(true);
         networkManager.setStableUDPPort(4545);
         List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
-        assertEquals(3, headers.size());
+        assertEquals(2, headers.size());
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", headers.get(0).getValue());
-        assertEquals(new GUID(applicationServices.getMyGUID()).toHexString(), headers.get(1).getValue());
-        assertEquals("4545", headers.get(2).getValue());
+        assertEquals("4545", headers.get(1).getValue());
     }
     
     public void testGetEmptyFirewalledHeaders() {
@@ -214,7 +209,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         networkManager.setCanDoFWT(false);
         networkManager.setStableUDPPort(4545);
         List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
-        assertEquals(2, headers.size());
+        assertEquals(1, headers.size());
     }
     
     private Collection<DirectAltLoc> altsFor(String... locs) throws Exception {

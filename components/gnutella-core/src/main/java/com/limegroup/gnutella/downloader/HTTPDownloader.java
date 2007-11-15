@@ -54,6 +54,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocUtils;
@@ -77,7 +78,6 @@ import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
-import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -283,8 +283,8 @@ public class HTTPDownloader implements BandwidthTracker {
     private final BandwidthManager bandwidthManager;
     private final Provider<PushEndpointCache> pushEndpointCache;
 
-    private final HTTPHeaderUtils httpHeaderUtils;
-    
+    private final PushEndpointFactory pushEndpointFactory;
+
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
             boolean requireSocket, NetworkManager networkManager,
@@ -293,7 +293,8 @@ public class HTTPDownloader implements BandwidthTracker {
             CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager,
             Provider<PushEndpointCache> pushEndpointCache,
-            HTTPHeaderUtils httpHeaderUtils) {
+            PushEndpointFactory pushEndpointFactory) {
+        
         
         if (rfd == null)
             throw new NullPointerException("null rfd");
@@ -306,7 +307,7 @@ public class HTTPDownloader implements BandwidthTracker {
         this.creationTimeCache = creationTimeCache;
         this.bandwidthManager = bandwidthManager;
         this.pushEndpointCache = pushEndpointCache;
-        this.httpHeaderUtils = httpHeaderUtils;
+        this.pushEndpointFactory = pushEndpointFactory;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -483,8 +484,6 @@ public class HTTPDownloader implements BandwidthTracker {
         headers.add(HTTPHeaderName.HOST.create(_host + ":" + _port));
         headers.add(HTTPHeaderName.USER_AGENT.create(ConstantHTTPHeaderValue.USER_AGENT));
         
-        headers.addAll(httpHeaderUtils.getFirewalledHeaders());
-
         if (supportQueueing) {
             headers.add(HTTPHeaderName.QUEUE.create(ConstantHTTPHeaderValue.QUEUE_VERSION));
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
@@ -544,6 +543,12 @@ public class HTTPDownloader implements BandwidthTracker {
                 features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
             }
         }	
+		
+		// if this node is firewalled but supports fwts, send its push proxy info and guid so
+		// the uploader can connect back for browses and such
+		if (!networkManager.acceptedIncomingConnection() && networkManager.canDoFWT()) {
+		    headers.add(HTTPHeaderName.FWT_NODE.create(pushEndpointFactory.createForSelf()));
+		}
 		
 		// Write X-Features header.
         if (features.size() > 0)

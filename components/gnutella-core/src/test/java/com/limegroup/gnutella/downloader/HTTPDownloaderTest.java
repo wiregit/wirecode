@@ -40,16 +40,16 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SelfEndpoint;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -60,36 +60,44 @@ import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
-import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
-    
+
     private HTTPDownloaderFactory httpDownloaderFactory;
+
     private NetworkManager networkManager;
+
     private AlternateLocationFactory alternateLocationFactory;
+
     private DownloadManager downloadManager;
+
     private CreationTimeCache creationTimeCache;
+
     private BandwidthManager bandwidthManager;
+
     private PushEndpointCache pushEndpointCache;
+
     private VerifyingFileFactory verifyingFileFactory;
-    private HTTPHeaderUtils headerUtils;
+
     private Mockery context;
+
+    private PushEndpointFactory pushEndpointFactory;
 
     public HTTPDownloaderTest(String name) {
         super(name);
     }
-    
+
     public static Test suite() {
         return buildTestSuite(HTTPDownloaderTest.class);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
     }
-    
+
     private Injector setupInjector(Module... modules) {
 		Injector injector = LimeTestUtils.createInjector(modules);
 		networkManager = injector.getInstance(NetworkManager.class);
@@ -100,55 +108,63 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		pushEndpointCache = injector.getInstance(PushEndpointCache.class);
 		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 		verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
-		headerUtils = injector.getInstance(HTTPHeaderUtils.class);
+		pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
         
-		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager, alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager, Providers.of(pushEndpointCache), headerUtils);
+		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager,
+                alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
+                Providers.of(pushEndpointCache), pushEndpointFactory);
 		
 		return injector;
     }
-    
+
     /**
-     * Tests if proxies header is written. Must not have accepted an incoming
-     * connection for this to happend. 
+     * Tests if FTW-Node header is written. Must not have accepted an incoming
+     * connection for this to happend.
      */
-    public void testProxiesHeaderIsWritten() throws Exception {
+    public void testFWTNodeHeaderIsWritten() throws Exception {
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setCanDoFWT(true);
         final ConnectionManager connectionManager = context.mock(ConnectionManager.class);
-        Injector  injector = setupInjector(new AbstractModule() {
+        Injector injector = setupInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).toInstance(connectionManager);
+                bind(NetworkManager.class).toInstance(networkManagerStub);
             }
         });
-        ApplicationServices applicationServices = injector.getInstance(ApplicationServices.class);
-        
+        SelfEndpoint selfEndPpoint = injector.getInstance(SelfEndpoint.class);
+
         // precondition
         assertFalse(networkManager.acceptedIncomingConnection());
+        assertTrue(networkManager.canDoFWT());
 
         final Set<Connectable> proxies = new LinkedHashSet<Connectable>();
         proxies.add(new ConnectableImpl("192.168.0.1", 5555, false));
         proxies.add(new ConnectableImpl("192.168.0.2", 6666, true));
-        context.checking(new Expectations() {{
-            one(connectionManager).getPushProxies();
-            will(returnValue(proxies));
-        }});
-        
+        context.checking(new Expectations() {
+            {
+                allowing(connectionManager).getPushProxies();
+                will(returnValue(proxies));
+            }
+        });
+
         Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
             public Void apply(HTTPDownloader dl) {
                 return null;
             }
         });
-        
-        assertEquals("pptls=4,192.168.0.1:5555,192.168.0.2:6666", headers.get(HTTPHeaderName.PROXIES.httpStringValue()));
-        assertEquals(new GUID(applicationServices.getMyGUID()).toHexString(), headers.get(HTTPHeaderName.CLIENT_GUID.httpStringValue()));
+
+        assertEquals(selfEndPpoint.httpStringValue(), headers.get(HTTPHeaderName.FWT_NODE
+                .httpStringValue()));
         // should be not set since node is firewalled
         assertNull(headers.get(HTTPHeaderName.NODE.httpStringValue()));
         context.assertIsSatisfied();
     }
-    
+
     /**
-     * Tests that proxies header is not written if client is not firewalled. 
+     * Tests that FWT-Node header is not written if client is not firewalled.
      */
-    public void testProxyiesHeaderIsNotWritten() throws Exception {
+    public void testFWTNodeHeaderIsNotWritten() throws Exception {
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         setupInjector(new AbstractModule() {
             @Override
@@ -157,106 +173,81 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
             }
         });
         networkManagerStub.setAcceptedIncomingConnection(true);
-        networkManagerStub.setAddress(new byte[] { (byte)129, 34, 4, 5 });
-        
+        networkManagerStub.setAddress(new byte[] { (byte) 129, 34, 4, 5 });
+
         assertFalse(NetworkUtils.isPrivateAddress(networkManagerStub.getAddress()));
-        
+
         Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
             public Void apply(HTTPDownloader dl) {
                 return null;
             }
         });
-        
-        assertNull(headers.get(HTTPHeaderName.PROXIES.httpStringValue()));
+
+        assertNull(headers.get(HTTPHeaderName.FWT_NODE.httpStringValue()));
         // should be there, since not firewalled and address not private
         assertNotNull(headers.get(HTTPHeaderName.NODE.httpStringValue()));
     }
-    
-    /**
-     * Tests if FWTPORT header is written, must have at least one push proxy
-     * for this to happen.
-     */
-    public void testFWTPortHeaderIsWritten() throws Exception {
-        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
-        final ConnectionManager connectionManager = context.mock(ConnectionManager.class);
-        setupInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(NetworkManager.class).toInstance(networkManagerStub);
-                bind(ConnectionManager.class).toInstance(connectionManager);
-            }
-        });
-        
-        context.checking(new Expectations() {{
-            one(connectionManager).getPushProxies();
-            will(returnValue(Collections.singleton(new ConnectableImpl("192.168.0.2", 4545, false))));
-        }});
-        networkManagerStub.setCanDoFWT(true);
-        networkManagerStub.setAcceptedIncomingConnection(false);
-        networkManagerStub.setStableUDPPort(3333);
-        
-        Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
-            public Void apply(HTTPDownloader dl) {
-                return null;
-            }
-        });
-        
-        String value = headers.get(HTTPHeaderName.FWTPORT.httpStringValue());
-        assertEquals("3333", value);
-    }
-    
+
     public void testWrittenAltHeadersWithTLS() throws Exception {
         setupInjector();
         final Set<IpPort> sT, fT, sN, fN;
-        sT = new IpPortSet(); fT = new IpPortSet(); sN = new IpPortSet(); fN = new IpPortSet();
-        
+        sT = new IpPortSet();
+        fT = new IpPortSet();
+        sN = new IpPortSet();
+        fN = new IpPortSet();
+
         Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
             public Void apply(HTTPDownloader dl) {
                 try {
-                    // Add some alternate locations (succesful & not, TLS & not).
-                    // Do it randomly, but force atleast 1 TLS in both failed & success
+                    // Add some alternate locations (succesful & not, TLS &
+                    // not).
+                    // Do it randomly, but force atleast 1 TLS in both failed &
+                    // success
                     // (Go from 20 -> 40 so we all have the same # of digits.)
-                    for(int i = 20; i < 40; i++) {
+                    for (int i = 20; i < 40; i++) {
                         boolean tls = false;
                         boolean failed = false;
-                        AlternateLocation loc;            
-                        if(i == 25 || i == 30 || Math.random() < 0.5) {
-                            loc = alternateLocationFactory.create("1.2.3." + i, UrnHelper.URNS[0], true);
+                        AlternateLocation loc;
+                        if (i == 25 || i == 30 || Math.random() < 0.5) {
+                            loc = alternateLocationFactory.create("1.2.3." + i, UrnHelper.URNS[0],
+                                    true);
                             tls = true;
                         } else {
-                            loc = alternateLocationFactory.create("1.2.3." + i, UrnHelper.URNS[0], false);
+                            loc = alternateLocationFactory.create("1.2.3." + i, UrnHelper.URNS[0],
+                                    false);
                         }
-                        
-                        if(i != 30 && (i == 25 || Math.random() < 0.5)) {
+
+                        if (i != 30 && (i == 25 || Math.random() < 0.5)) {
                             failed = true;
                             dl.addFailedAltLoc(loc);
                         } else {
                             dl.addSuccessfulAltLoc(loc);
                         }
-                        
-                        IpPort host = ((DirectAltLoc)loc).getHost();
-                        if(tls && failed)
+
+                        IpPort host = ((DirectAltLoc) loc).getHost();
+                        if (tls && failed)
                             fT.add(host);
-                        else if(tls)
+                        else if (tls)
                             sT.add(host);
-                        else if(failed)
+                        else if (failed)
                             fN.add(host);
                         else
                             sN.add(host);
                     }
-                } catch(IOException iox) {
+                } catch (IOException iox) {
                     throw new RuntimeException(iox);
                 }
-                
+
                 return null;
             }
         });
-        
+
         // Verify NAlts has all the correct IPs.
         String nalts = headers.get("X-NAlt");
         assertFalse("shouldn't have tls indexes!", nalts.contains("tls"));
-        for(IpPort ipp : new MultiIterable<IpPort>(fT, fN)) {
-            assertTrue("couldn't find: " + ipp + ", in: " + nalts, nalts.contains(ipp.getInetAddress().getHostAddress()));
+        for (IpPort ipp : new MultiIterable<IpPort>(fT, fN)) {
+            assertTrue("couldn't find: " + ipp + ", in: " + nalts, nalts.contains(ipp
+                    .getInetAddress().getHostAddress()));
             nalts = nalts.replace(ipp.getInetAddress().getHostAddress(), "");
         }
         // Remove all commas too...
@@ -265,325 +256,296 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 
         // Verify Alts has all the correct IPs
         String originalAlts = headers.get("X-Alt");
-        assertTrue("no tls indexes!", originalAlts.startsWith("tls="));    
+        assertTrue("no tls indexes!", originalAlts.startsWith("tls="));
         // Remove the TLS= index for right now..
-        String alts = originalAlts.substring(originalAlts.indexOf(",")+1);
+        String alts = originalAlts.substring(originalAlts.indexOf(",") + 1);
         // verify all the IPs exist
-        for(IpPort ipp : new MultiIterable<IpPort>(sT, sN)) {
-            assertTrue("couldn't find: " + ipp + ", in: " + originalAlts, alts.contains(ipp.getInetAddress().getHostAddress()));
+        for (IpPort ipp : new MultiIterable<IpPort>(sT, sN)) {
+            assertTrue("couldn't find: " + ipp + ", in: " + originalAlts, alts.contains(ipp
+                    .getInetAddress().getHostAddress()));
             alts = alts.replace(ipp.getInetAddress().getHostAddress(), "");
         }
         // Remove all commas too...
         removedCommas = alts.replace(",", "").trim();
-        assertEquals("wrong alts leftover! " + alts, "", removedCommas);        
-        
+        assertEquals("wrong alts leftover! " + alts, "", removedCommas);
+
         // Verify the tls= index is correct...
-        alts = originalAlts.substring(originalAlts.indexOf(",")+1);
+        alts = originalAlts.substring(originalAlts.indexOf(",") + 1);
         StringTokenizer tokenizer = new StringTokenizer(alts, ",");
         List<IpPort> ips = new ArrayList<IpPort>();
-        while(tokenizer.hasMoreTokens()) {
+        while (tokenizer.hasMoreTokens()) {
             String ip = tokenizer.nextToken();
             ips.add(new IpPortImpl(ip, 6346));
-        }        
+        }
         BitNumbers bn = new BitNumbers(ips.size());
-        for(int i = 0; i < ips.size(); i++) {
-            if(sT.contains(ips.get(i)))
+        for (int i = 0; i < ips.size(); i++) {
+            if (sT.contains(ips.get(i)))
                 bn.set(i);
-        }        
+        }
         assertTrue(originalAlts.startsWith("tls=" + bn.toHexString()));
     }
-    
+
     public void testReadXAltsWithTLS() throws Exception {
         setupInjector();
-        String str;        
+        String str;
         HTTPDownloader dl;
         Collection<RemoteFileDesc> receivedLocations;
-                
-        str = "HTTP/1.1 200 OK\r\n" + 
-              "X-Alt: tls=AB8,1.2.3.4:5,4.3.2.1,2.3.4.5:6,5.4.3.2:1,3.4.5.6:7,6.5.4.3:2,4.5.6.7:8,7.6.5.4:3,5.6.7.8:9,8.7.6.5:4\r\n"; 
+
+        str = "HTTP/1.1 200 OK\r\n"
+                + "X-Alt: tls=AB8,1.2.3.4:5,4.3.2.1,2.3.4.5:6,5.4.3.2:1,3.4.5.6:7,6.5.4.3:2,4.5.6.7:8,7.6.5.4:3,5.6.7.8:9,8.7.6.5:4\r\n";
         dl = newHTTPDownloaderWithHeader(str);
         assertEquals(0, dl.getLocationsReceived().size());
-        
+
         readHeaders(dl);
-        
+
         receivedLocations = dl.getLocationsReceived();
-        assertEquals(10, receivedLocations.size());        
+        assertEquals(10, receivedLocations.size());
         dl.stop();
-        
-        Set<IpPort> tlsExpected = new IpPortSet(new IpPortImpl("1.2.3.4:5"), new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7"), new IpPortImpl("4.5.6.7:8"), new IpPortImpl("7.6.5.4:3"), new IpPortImpl("5.6.7.8:9"));
-        Set<IpPort> normalExpected = new IpPortSet(new IpPortImpl("4.3.2.1:6346"), new IpPortImpl("5.4.3.2:1"), new IpPortImpl("6.5.4.3:2"), new IpPortImpl("8.7.6.5:4"));
+
+        Set<IpPort> tlsExpected = new IpPortSet(new IpPortImpl("1.2.3.4:5"), new IpPortImpl(
+                "2.3.4.5:6"), new IpPortImpl("3.4.5.6:7"), new IpPortImpl("4.5.6.7:8"),
+                new IpPortImpl("7.6.5.4:3"), new IpPortImpl("5.6.7.8:9"));
+        Set<IpPort> normalExpected = new IpPortSet(new IpPortImpl("4.3.2.1:6346"), new IpPortImpl(
+                "5.4.3.2:1"), new IpPortImpl("6.5.4.3:2"), new IpPortImpl("8.7.6.5:4"));
 
         Set<Connectable> allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
         allLocs.retainAll(tlsExpected);
         assertEquals(allLocs, tlsExpected);
-        for(Connectable c : allLocs)
+        for (Connectable c : allLocs)
             assertTrue(c.isTLSCapable());
-        
+
         allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
         allLocs.retainAll(normalExpected);
         assertEquals(normalExpected, allLocs);
-        for(Connectable c : allLocs)
+        for (Connectable c : allLocs)
             assertFalse(c.isTLSCapable());
-        
+
         allLocs = new StrictIpPortSet<Connectable>(receivedLocations);
         allLocs.removeAll(tlsExpected);
         allLocs.removeAll(normalExpected);
         assertTrue(allLocs.isEmpty());
     }
-    
-    
+
     public void testParseContentRange() throws Throwable {
         setupInjector();
         int length = 1000;
-        RemoteFileDesc rfd= new RemoteFileDesc("1.2.3.4", 1, 1, "file",
-                                            length, new byte[16], 1,
-                                            false, 2, false, null,
-                                            null, false, false, "LIME",
-                                            null, -1, false);
+        RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", 1, 1, "file", length, new byte[16], 1,
+                false, 2, false, null, null, false, false, "LIME", null, -1, false);
         File f = new File("sam");
         VerifyingFile vf = verifyingFileFactory.createVerifyingFile(length);
         vf.open(f);
         HTTPDownloader dl = httpDownloaderFactory.create(null, rfd, vf, false);
-        
+
         PrivilegedAccessor.setValue(dl, "_amountToRead", new Long(rfd.getSize()));
-        
-        
-        assertEquals(Range.createRange(1, 9), 
-                    parseContentRange(dl, "Content-range: bytes 1-9/10"));
-                        
-        assertEquals(Range.createRange(1, 9),
-                    parseContentRange(dl, "Content-range:bytes=1-9/10"));
-                        
-        // should this work?  the server says the size is 10, we think it's 
-        // 1000.  throw IllegalArgumentException or ProblemReadingHeader?
-        assertEquals(Range.createRange(0, 999),
-                    parseContentRange(dl, "Content-range:bytes */10"));
-                        
-        assertEquals(Range.createRange(0, 999),
-                    parseContentRange(dl, "Content-range:bytes */*"));
-                    
-        assertEquals(Range.createRange(1, 9),
-                    parseContentRange(dl, "Content-range:bytes 1-9/*"));
-                    
-        // should this work?  the server says the size is 10, we think it's
-        // 1000.  throw IllegalArgumentException or ProblemReadingHeader?
+
+        assertEquals(Range.createRange(1, 9), parseContentRange(dl, "Content-range: bytes 1-9/10"));
+
+        assertEquals(Range.createRange(1, 9), parseContentRange(dl, "Content-range:bytes=1-9/10"));
+
+        // should this work? the server says the size is 10, we think it's
+        // 1000. throw IllegalArgumentException or ProblemReadingHeader?
+        assertEquals(Range.createRange(0, 999), parseContentRange(dl, "Content-range:bytes */10"));
+
+        assertEquals(Range.createRange(0, 999), parseContentRange(dl, "Content-range:bytes */*"));
+
+        assertEquals(Range.createRange(1, 9), parseContentRange(dl, "Content-range:bytes 1-9/*"));
+
+        // should this work? the server says the size is 10, we think it's
+        // 1000. throw IllegalArgumentException or ProblemReadingHeader?
         // Putting aside the "should it work" question, this is the faulty
         // header from LimeWire 0.5, in which we subtract 1 from the
         // sizes (they send exclusive instead of inclusive values).
-        assertEquals(Range.createRange(0, 9),
-                    parseContentRange(dl, "Content-range:bytes 1-10/10"));
-                    
-        Range iv = null;        
+        assertEquals(Range.createRange(0, 9), parseContentRange(dl, "Content-range:bytes 1-10/10"));
+
+        Range iv = null;
         try {
             iv = parseContentRange(dl, "Content-range:bytes 1 10 10");
             fail("Parsed invalid content range.  Got: " + iv);
-        } catch (ProblemReadingHeaderException ignored) {}
-        
+        } catch (ProblemReadingHeaderException ignored) {
+        }
+
         // low is less than high
         try {
             iv = parseContentRange(dl, "Content-range:bytes 10-9/*");
             fail("Parsed invalid content range.  Got: " + iv);
-        } catch(ProblemReadingHeaderException ignored) {}
-        
+        } catch (ProblemReadingHeaderException ignored) {
+        }
+
         // negative values.
         try {
             iv = parseContentRange(dl, "Content-range: bytes -10--5/*");
             fail("Parsed invalid content range.  Got: " + iv);
-        } catch(ProblemReadingHeaderException ignored) {}
-        
+        } catch (ProblemReadingHeaderException ignored) {
+        }
+
         // negative high.
         try {
             iv = parseContentRange(dl, "Content-range:bytes 0--10/*");
             fail("Parsed invalid content range.  Got: " + iv);
-        } catch(ProblemReadingHeaderException ignored) {}
+        } catch (ProblemReadingHeaderException ignored) {
+        }
     }
-    
+
     public void testLegacy() throws Throwable {
         setupInjector();
-        //readHeaders tests
-		String str;
-		HTTPDownloader down;
+        // readHeaders tests
+        String str;
+        HTTPDownloader down;
 
-		str = "HTTP/1.1 200 OK\r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		readHeaders(down);
-        down.stop();
-		
-		
-		str = "HTTP/1.1 301 Moved Permanently\r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		try {
-			readHeaders(down);
-			down.stop();
-			fail("exception should have been thrown");
-		} catch (IOException e) {}
-
-        str = "HTTP/1.1 300 Multiple Choices\r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		try {
-			readHeaders(down);
-			down.stop();
-			fail("exception should have been thrown");
-		} catch (IOException e) {}
-
-		str = "HTTP/1.1 404 File Not Found \r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		try {
-			readHeaders(down);
-			down.stop();
-			fail("exception should have been thrown");
-		} catch (FileNotFoundException e) {}
-
-		str = "HTTP/1.1 410 Not Sharing \r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		try {
-			readHeaders(down);
-			down.stop();
-			fail("exception should have been thrown");
-		} catch (NotSharingException e) {}
-
-		str = "HTTP/1.1 412 \r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		try {
-			readHeaders(down);
-			down.stop();
-			fail("exception should have been thrown");
-		} catch (IOException e) {}
-
-		str = "HTTP/1.1 503 \r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		try {
-			readHeaders(down);
-			down.stop();
-			fail("exception should have been thrown");
-		} catch (TryAgainLaterException e) {}
-
-		str = "HTTP/1.1 210 \r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		readHeaders(down);
-		down.stop();
-
-		str = "HTTP/1.1 204 Partial Content\r\n";
-		down = newHTTPDownloaderWithHeader(str);
+        str = "HTTP/1.1 200 OK\r\n";
+        down = newHTTPDownloaderWithHeader(str);
         readHeaders(down);
         down.stop();
 
+        str = "HTTP/1.1 301 Moved Permanently\r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        try {
+            readHeaders(down);
+            down.stop();
+            fail("exception should have been thrown");
+        } catch (IOException e) {
+        }
 
-		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		readHeaders(down);
-		down.stop();
-		
-		str = "200 OK\r\n";
-		down = newHTTPDownloaderWithHeader(str);
-		try {
-			readHeaders(down);
-			down.stop();
-			fail("exception should have been thrown.");
-		} catch (NoHTTPOKException e) {}
-	}
-	
-	private static Range parseContentRange(HTTPDownloader dl,
-                                              String s) throws Throwable {
-	    try {
-            return (Range)PrivilegedAccessor.invokeMethod(
-                dl , "parseContentRange", new Object[] {s});
-        } catch(Exception e) {
-            if ( e.getCause() != null ) 
-                throw e.getCause();
-            else throw e;
+        str = "HTTP/1.1 300 Multiple Choices\r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        try {
+            readHeaders(down);
+            down.stop();
+            fail("exception should have been thrown");
+        } catch (IOException e) {
+        }
+
+        str = "HTTP/1.1 404 File Not Found \r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        try {
+            readHeaders(down);
+            down.stop();
+            fail("exception should have been thrown");
+        } catch (FileNotFoundException e) {
+        }
+
+        str = "HTTP/1.1 410 Not Sharing \r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        try {
+            readHeaders(down);
+            down.stop();
+            fail("exception should have been thrown");
+        } catch (NotSharingException e) {
+        }
+
+        str = "HTTP/1.1 412 \r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        try {
+            readHeaders(down);
+            down.stop();
+            fail("exception should have been thrown");
+        } catch (IOException e) {
+        }
+
+        str = "HTTP/1.1 503 \r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        try {
+            readHeaders(down);
+            down.stop();
+            fail("exception should have been thrown");
+        } catch (TryAgainLaterException e) {
+        }
+
+        str = "HTTP/1.1 210 \r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        readHeaders(down);
+        down.stop();
+
+        str = "HTTP/1.1 204 Partial Content\r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        readHeaders(down);
+        down.stop();
+
+        str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        readHeaders(down);
+        down.stop();
+
+        str = "200 OK\r\n";
+        down = newHTTPDownloaderWithHeader(str);
+        try {
+            readHeaders(down);
+            down.stop();
+            fail("exception should have been thrown.");
+        } catch (NoHTTPOKException e) {
         }
     }
-    
-    private Map<String, String> getWrittenHeaders(Function<HTTPDownloader, Void> func) throws Exception {
+
+    private static Range parseContentRange(HTTPDownloader dl, String s) throws Throwable {
+        try {
+            return (Range) PrivilegedAccessor.invokeMethod(dl, "parseContentRange",
+                    new Object[] { s });
+        } catch (Exception e) {
+            if (e.getCause() != null)
+                throw e.getCause();
+            else
+                throw e;
+        }
+    }
+
+    private Map<String, String> getWrittenHeaders(Function<HTTPDownloader, Void> func)
+            throws Exception {
         ServerSocket server = new ServerSocket();
         server.setReuseAddress(true);
         server.bind(new InetSocketAddress(0));
-        
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1",
-                                                server.getLocalPort(),
-                                                1,
-                                                "file",
-                                                1000,
-                                                new byte[16],
-                                                1,
-                                                false,
-                                                1,
-                                                false,
-                                                null,
-                                                UrnHelper.URN_SETS[0],
-                                                false,
-                                                false,
-                                                "TEST",
-                                                Collections.EMPTY_SET,
-                                                -1,
-                                                0,
-                                                false);
-                                                
+
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", server.getLocalPort(), 1, "file",
+                1000, new byte[16], 1, false, 1, false, null, UrnHelper.URN_SETS[0], false, false,
+                "TEST", Collections.EMPTY_SET, -1, 0, false);
+
         VerifyingFile vf = verifyingFileFactory.createVerifyingFile(1000);
-        
+
         Socket socket = new NIOSocket("127.0.0.1", server.getLocalPort());
         Socket accept = server.accept();
-        
+
         HTTPDownloader dl = httpDownloaderFactory.create(socket, rfd, vf, false);
         func.apply(dl);
-        
+
         dl.initializeTCP();
         IOStateObserverStub observer = new IOStateObserverStub();
         dl.connectHTTP(0, 500, true, observer);
         observer.waitForFinish();
-        
+
         InputStream in = accept.getInputStream();
         byte[] read = new byte[5000];
         int amtRead = in.read(read);
         assertGreaterThan(0, amtRead);
-        
+
         String headers = new String(read, 0, amtRead);
-        return parseHeaders(headers, "GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue() + " HTTP/1.1");
+        return parseHeaders(headers, "GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue()
+                + " HTTP/1.1");
     }
-    
+
     private Map<String, String> parseHeaders(String headers, String firstLine) throws Exception {
         BufferedReader reader = new BufferedReader(new StringReader(headers));
         String line = reader.readLine();
         Map map = new HashMap();
         assertEquals("GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue() + " HTTP/1.1", line);
-        while( (line = reader.readLine()) != null && line.length() != 0) {
+        while ((line = reader.readLine()) != null && line.length() != 0) {
             int colon = line.indexOf(":");
             assertNotEquals("couldn't find colon, line is: " + line, -1, colon);
-            map.put(line.substring(0, colon).trim(), line.substring(colon+1).trim());
+            map.put(line.substring(0, colon).trim(), line.substring(colon + 1).trim());
         }
         return map;
     }
-    
-    
+
     private HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
         s += "\r\n";
         SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
         reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1",
-                                                1,
-                                                1,
-                                                "file",
-                                                1000,
-                                                new byte[16],
-                                                1,
-                                                false,
-                                                1,
-                                                false,
-                                                null,
-                                                UrnHelper.URN_SETS[0],
-                                                false,
-                                                false,
-                                                "TEST",
-                                                Collections.EMPTY_SET,
-                                                -1,
-                                                0,
-                                                false);
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", 1, 1, "file", 1000, new byte[16], 1,
+                false, 1, false, null, UrnHelper.URN_SETS[0], false, false, "TEST",
+                Collections.EMPTY_SET, -1, 0, false);
         HTTPDownloader d = httpDownloaderFactory.create(null, rfd, null, false);
         PrivilegedAccessor.setValue(d, "_headerReader", reader);
         return d;
     }
-    
+
     private static void readHeaders(HTTPDownloader d) throws Exception {
         d.parseHeaders();
     }
