@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -990,11 +991,12 @@ public abstract class FileManager {
         // Do not share sensitive directories
         if (isSensitiveDirectory(directory)) {
             //  go through directories that explicitly should not be shared
-            if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory))
+            if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory)) {
                 return;
+            }
             
             // if we haven't already validated the sensitive directory, ask about it.
-            if (_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
+            if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
                 if (!fileManagerController.warnAboutSharingSensitiveDirectory(directory))
@@ -2290,6 +2292,18 @@ public abstract class FileManager {
             }
         }
         
+        // Check for the folder name being 'Cookies', or 'Cookies\Low' [vista]
+        // TODO: Make sure this is i18n-safe
+        String name = folder.getName().toLowerCase(Locale.US);
+        if(name.equals("cookies"))
+            return false;
+        else if(name.equals("low")) {
+            String parent = folder.getParent();
+            if(parent != null && parent.toLowerCase(Locale.US).equals("cookies"))
+                return false;
+        }
+        
+        
         return true;
     }
 	
@@ -2309,20 +2323,22 @@ public abstract class FileManager {
         String[] sensitive;
         if (OSUtils.isWindowsVista()) {
             //Windows Vista does not have the "My" prefix for the "My Documents" folder.  It is simply "Documents"
+            // TODO: Are Local Settings & everything after that right for Vista?
             sensitive = new String[] { "Documents and Settings",
-                    userHomeShortDir + File.separator + "Documents", "Desktop", "Program Files", "Windows",
-                    "WINNT", "Users" };
+                    userHomeShortDir + File.separator + "Documents", "Desktop", "Program Files",
+                    "Windows", "WINNT", "Users", "Local Settings", "Application Data", "Temp",
+                    "Temporary Internet Files" };
         } else if (OSUtils.isWindows()) {
-            sensitive = new String[] { "Documents and Settings",
-                    "My Documents", "Desktop", "Program Files", "Windows",
-                    "WINNT", "Users" };
+            sensitive = new String[] { "Documents and Settings", "My Documents", "Desktop",
+                    "Program Files", "Windows", "WINNT", "Users", "Local Settings",
+                    "Application Data", "Temp", "Temporary Internet Files" };
         } else if (OSUtils.isMacOSX()) {
-            sensitive = new String[] { "Users", "System", "System Folder",
-                    "Previous Systems", "private", "Volumes", "Desktop",
-                    "Applications", "Applications (Mac OS 9)", "Network" };
+            sensitive = new String[] { "Users", "System", "System Folder", "Previous Systems",
+                    "private", "Volumes", "Desktop", "Applications", "Applications (Mac OS 9)",
+                    "Network" };
         } else if (OSUtils.isPOSIX()) {
-            sensitive = new String[] { "bin", "boot", "dev", "etc", "home",
-                    "mnt", "opt", "proc", "root", "sbin", "usr", "var" };
+            sensitive = new String[] { "bin", "boot", "dev", "etc", "home", "mnt", "opt", "proc",
+                    "root", "sbin", "usr", "var" };
         } else {
             sensitive = new String[0];
         }
