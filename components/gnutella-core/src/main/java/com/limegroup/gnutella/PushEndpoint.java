@@ -137,7 +137,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     
     private final PushEndpointCache pushEndpointCache;
 
-    PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features,
+    public PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features,
             int version, IpPort addr, PushEndpointCache pushEndpointCache) {
         this.pushEndpointCache = pushEndpointCache;
         

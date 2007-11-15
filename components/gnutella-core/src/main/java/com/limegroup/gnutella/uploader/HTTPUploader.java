@@ -244,4 +244,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         this.pushEndpoint = pushEndpoint;
     }
 
+    public PushEndpoint getPushEndpoint() {
+        return pushEndpoint;
+    }
 }
