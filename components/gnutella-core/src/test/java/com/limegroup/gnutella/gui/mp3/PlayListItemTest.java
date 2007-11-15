@@ -80,11 +80,11 @@ public class PlayListItemTest extends BaseTestCase {
         assert(url != null );
         URI uri = url.toURI();
         
-        PlayListItem item = new PlayListItem(uri, new AudioSource(url),"test", false, true, map);
+        PlayListItem item = new PlayListItem(uri, new AudioSource(url),"test", false, false, map);
         
         assertEquals(item.getURI(), uri);
         assertEquals(item.getName(), "test");
-        assertEquals(item.isStorePreview(), true);
+        assertEquals(item.isStorePreview(), false);
         assertEquals(item.isFile(), false);
 
         assertEquals(item.getProperty(PlayListItem.ALBUM),album);
