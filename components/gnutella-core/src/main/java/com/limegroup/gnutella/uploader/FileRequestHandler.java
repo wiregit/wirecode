@@ -24,12 +24,14 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
+import com.limegroup.gnutella.http.FWTNodeInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -76,6 +78,8 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final Provider<DownloadManager> downloadManager;
 
     private final Provider<TigerTreeCache> tigerTreeCache;
+
+    private final PushEndpointFactory pushEndpointFactory;
     
     @Inject
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
@@ -85,7 +89,8 @@ public class FileRequestHandler implements HttpRequestHandler {
             AltLocManager altLocManager,
             AlternateLocationFactory alternateLocationFactory,
             Provider<DownloadManager> downloadManager,
-            Provider<TigerTreeCache> tigerTreeCache) {
+            Provider<TigerTreeCache> tigerTreeCache,
+            PushEndpointFactory pushEndpointFactory) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -96,6 +101,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
         this.tigerTreeCache = tigerTreeCache;
+        this.pushEndpointFactory = pushEndpointFactory;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -169,6 +175,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         processor.addInterceptor(rangeHeaderInterceptor);
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
         processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager, alternateLocationFactory));
+        processor.addInterceptor(new FWTNodeInterceptor(uploader, pushEndpointFactory));
         if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }

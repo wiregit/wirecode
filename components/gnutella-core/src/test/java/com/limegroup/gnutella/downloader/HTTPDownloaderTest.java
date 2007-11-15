@@ -54,6 +54,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
@@ -156,6 +157,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 
         assertEquals(selfEndPpoint.httpStringValue(), headers.get(HTTPHeaderName.FWT_NODE
                 .httpStringValue()));
+        assertTrue(headers.get(HTTPHeaderName.FEATURES.httpStringValue()).contains(HTTPConstants.BROWSE_PROTOCOL));
         // should be not set since node is firewalled
         assertNull(headers.get(HTTPHeaderName.NODE.httpStringValue()));
         context.assertIsSatisfied();

@@ -548,6 +548,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		// the uploader can connect back for browses and such
 		if (!networkManager.acceptedIncomingConnection() && networkManager.canDoFWT()) {
 		    headers.add(HTTPHeaderName.FWT_NODE.create(pushEndpointFactory.createForSelf()));
+		    features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
 		}
 		
 		// Write X-Features header.
