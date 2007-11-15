@@ -339,7 +339,7 @@ public class SharingSettings extends LimeProps {
      * Default disabled extensions.
      */
     private static final String DEFAULT_EXTENSIONS_TO_DISABLE =
-        "doc";
+        "doc;pdf;xls;rtf;bak;csv;dat;docx;xlsx";
         
     
     /**
