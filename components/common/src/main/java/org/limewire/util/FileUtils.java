@@ -751,7 +751,7 @@ public class FileUtils {
         
         URL messagesURL = classLoader.getResource(markerFile);
         if (messagesURL != null) {
-            String url = CommonUtils.decode(messagesURL.toExternalForm());
+            String url = messagesURL.toExternalForm();
             if (url != null && url.startsWith("jar:file:")) {
                 url = url.substring("jar:file:".length(), url.length());
                 url = url.substring(0, url.length() - markerFile.length() - "!/".length());
