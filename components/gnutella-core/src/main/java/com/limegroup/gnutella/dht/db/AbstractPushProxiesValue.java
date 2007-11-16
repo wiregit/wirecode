@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
-import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.db.DHTValueType;
@@ -14,6 +13,7 @@ import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**
  * An implementation of DHTValue for Gnutella Push Proxies
@@ -161,15 +161,6 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     }
     
     static BitNumbers getNumbersFromProxies(Set<? extends IpPort> proxies) {
-        BitNumbers tlsInfo = BitNumbers.synchronizedBitNumbers(new BitNumbers(proxies.size()));
-        int i = 0;
-        for (IpPort proxy : proxies) {
-            if (proxy instanceof Connectable) {
-                if (((Connectable)proxy).isTLSCapable())
-                    tlsInfo.set(i);
-            }
-            i++;
-        }
-        return tlsInfo;
+        return BitNumbers.synchronizedBitNumbers(HTTPHeaderUtils.getTLSIndices(proxies));
     }
 }

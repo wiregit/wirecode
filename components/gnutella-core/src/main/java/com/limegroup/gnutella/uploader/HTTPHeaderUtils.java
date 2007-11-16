@@ -85,14 +85,10 @@ public class HTTPHeaderUtils {
         }
         StringBuilder buf = new StringBuilder();
         int proxiesWritten = 0;
-        BitNumbers bn = new BitNumbers(proxies.size());
+        BitNumbers bn = getTLSIndices(proxies, max);
         for(IpPort current : proxies) {
             if(proxiesWritten >= max)
                 break;
-            
-            if(current instanceof Connectable && ((Connectable)current).isTLSCapable())
-                bn.set(proxiesWritten);
-
             buf.append(current.getAddress())
                .append(":")
                .append(current.getPort())
@@ -143,6 +139,33 @@ public class HTTPHeaderUtils {
             }
         }
         return newSet;
+    }
+
+    /**
+     * Returns a bit numbers object that encodes the indices of 
+     * of {@link IpPort}s in <code>ipPorts</code> that support TLS. 
+     */
+    public static BitNumbers getTLSIndices(Collection<? extends IpPort> ipPorts) {
+        return getTLSIndices(ipPorts, ipPorts.size());
+    }
+    
+    /**
+     * Returns a bit numbers object that encodes the indices of 
+     * of {@link IpPort}s in <code>ipPorts</code> that support TLS.
+     * 
+     * @param max stop encoding indices after max elements have been seen
+     */
+    public static BitNumbers getTLSIndices(Collection<? extends IpPort> ipPorts, int max) {
+        BitNumbers bn = new BitNumbers(max);
+        int i = 0;
+        for (IpPort ipp : ipPorts) {
+            if (i >= max)
+                break;
+            if (ipp instanceof Connectable && ((Connectable) ipp).isTLSCapable())
+                bn.set(i);
+            i++;
+        }
+        return bn; 
     }
     
     /**

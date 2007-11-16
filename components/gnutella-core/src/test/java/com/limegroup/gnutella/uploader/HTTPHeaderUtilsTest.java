@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.uploader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,8 +14,11 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpResponse;
+import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
@@ -201,6 +206,30 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
     
     public void testGetEmptyFirewalledHeaders() {
         assertTrue(httpHeaderUtils.getFirewalledHeaders().isEmpty());
+    }
+    
+    public void testGetTLSIndices() throws Exception {
+       Collection<? extends IpPort> proxies = Arrays.asList(new ConnectableImpl("localhost", 4545, true),
+               new IpPortImpl("helloword.com", 6666),
+               new ConnectableImpl("192.168.0.1", 7777, true));
+       BitNumbers bn = HTTPHeaderUtils.getTLSIndices(proxies);
+       assertFalse(bn.isEmpty());
+       assertTrue(bn.isSet(0));
+       assertFalse(bn.isSet(1));
+       assertTrue(bn.isSet(2));
+       assertEquals(3, bn.getMax());
+       
+       bn = HTTPHeaderUtils.getTLSIndices(proxies, 2);
+       assertFalse(bn.isEmpty());
+       assertTrue(bn.isSet(0));
+       assertFalse(bn.isSet(1));
+       assertFalse(bn.isSet(2));
+       assertEquals(2, bn.getMax());
+       
+       // empty set
+       proxies = Collections.emptyList();
+       bn = HTTPHeaderUtils.getTLSIndices(proxies);
+       assertTrue(bn.isEmpty());
     }
     
     public void testFirewalledHeadersNoFWTPort() throws Exception {

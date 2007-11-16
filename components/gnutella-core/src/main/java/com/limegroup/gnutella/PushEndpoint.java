@@ -216,7 +216,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		}
         
         // If we're including TLS, then add a byte for which proxies support it.
-        BitNumbers bn = new BitNumbers(Math.min(proxies.size(), MAX_PROXIES));
+        
         int pptlsIdx = offset;
         int i=0;
         if(includeTLS) {
@@ -240,9 +240,6 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
             if(i >= MAX_PROXIES)
                 break;
             
-            if(includeTLS && ppi instanceof Connectable && ((Connectable)ppi).isTLSCapable())
-                bn.set(i);
-            
 			byte [] addr = ppi.getInetAddress().getAddress();
 			short port = (short)ppi.getPort();
 			
@@ -253,7 +250,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 			i++;
 		}
         
-        // insert the tls indexes & turn the feature on!
+        // insert the tls indices & turn the feature on if TLS should be included
+        BitNumbers bn = includeTLS ? HTTPHeaderUtils.getTLSIndices(proxies, (Math.min(proxies.size(), MAX_PROXIES))) : BitNumbers.EMPTY_BN;
         if(!bn.isEmpty()) {
             byte[] tlsIndexes = bn.toByteArray();
             assert tlsIndexes.length == 1;
