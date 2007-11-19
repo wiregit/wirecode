@@ -38,6 +38,7 @@ import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
@@ -166,6 +167,27 @@ public class ConnectionManager implements ConnectionAcceptor,
      * This is done to ensure that the network is not solely LimeWire centric.
      */
     public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
+    
+    /**
+     * The maximum number of times ManagedConnection instances should send UDP
+     * ConnectBack requests.
+     * visible for testing purposes
+     */
+    static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
+
+    /**
+     * The maximum number of times ManagedConnection instances should send TCP
+     * ConnectBack requests.
+     * Visible for testing purposes
+     */
+    static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
+    
+    /** The number of tcp connect backs sent this session */
+    @InspectablePrimitive
+    private volatile int numTCPConnectBacksLeft;
+    /** The number of udp connect backs sent this session */
+    @InspectablePrimitive
+    private volatile int numUDPConnectBacksLeft;
 
     /**
      * The current number of connections we want to maintain.
@@ -1555,7 +1577,8 @@ public class ConnectionManager implements ConnectionAcceptor,
         _connectionAttempts = 0;
         _lastConnectionCheck = 0;
         _lastSuccessfulConnect = 0;
-
+        numTCPConnectBacksLeft = MAX_TCP_CONNECT_BACK_ATTEMPTS;
+        numUDPConnectBacksLeft = MAX_UDP_CONNECT_BACK_ATTEMPTS;
 
         // Notify HostCatcher that we've connected.
         _catcher.expire();
@@ -2574,6 +2597,22 @@ public class ConnectionManager implements ConnectionAcceptor,
         return count;
     }
     
+    public boolean canSendConnectBack(Network network) {
+        if (network == Network.TCP)
+            return numTCPConnectBacksLeft > 0;
+            if (network == Network.UDP)
+                return numUDPConnectBacksLeft > 0;
+                return false;
+    }
+
+    public void connectBackSent(Network network) {
+        if (network == Network.TCP)
+            numTCPConnectBacksLeft--;
+        else if (network == Network.UDP)
+            numUDPConnectBacksLeft--;
+        else
+            throw new IllegalArgumentException("which network?");
+    }
 }
 
 /** 

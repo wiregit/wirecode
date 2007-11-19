@@ -150,16 +150,6 @@ public class ManagedConnection extends Connection
      *  in BYTES (not bits) per second. */
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=8000;
 
-    /** The maximum number of times ManagedConnection instances should send UDP
-     *  ConnectBack requests.
-     */
-    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
-
-    /** The maximum number of times ManagedConnection instances should send TCP
-     *  ConnectBack requests.
-     */
-    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
-
 	/** Handle to the <tt>ConnectionManager</tt>.
 	 */
     private ConnectionManager _manager;
@@ -249,18 +239,6 @@ public class ManagedConnection extends Connection
      */
     private volatile boolean pushProxyFor;
     
-    /** 
-     * The class wide static counter for the number of udp connect back 
-     *  request sent.
-     */
-    private static int _numUDPConnectBackRequests = 0;
-
-    /** 
-     * The class wide static counter for the number of tcp connect back 
-     *  request sent.
-     */
-    private static int _numTCPConnectBackRequests = 0;
-
     /**
      * Variable for the <tt>QueryRouteTable</tt> received for this 
      * connection.
@@ -905,7 +883,7 @@ public class ManagedConnection extends Connection
 			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
             _connectionStats.addReceivedDropped();
         } else {
-            if(m instanceof QueryReply){ 
+            if(m instanceof QueryReply){
             	_connectionStats.replyReceived((QueryReply)m);
             	if(m.getHops() == 0)
             		clientGUID = ((QueryReply)m).getClientGUID();
@@ -1198,21 +1176,21 @@ public class ManagedConnection extends Connection
 
             // do i need to send any ConnectBack messages????
             if (!UDPService.instance().canReceiveUnsolicited() &&
-                (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
+                RouterService.getConnectionManager().canSendConnectBack(Network.UDP)  &&
                 (remoteHostSupportsUDPRedirect() > -1)) {
                 GUID connectBackGUID = RouterService.getUDPConnectBackGUID();
                 Message udp = new UDPConnectBackVendorMessage(RouterService.getPort(),
                                                               connectBackGUID);
                 send(udp);
-                _numUDPConnectBackRequests++;
+                RouterService.getConnectionManager().connectBackSent(Network.UDP);
             }
 
             if (!RouterService.acceptedIncomingConnection() &&
-                (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
+                    RouterService.getConnectionManager().canSendConnectBack(Network.TCP)  &&
                 (remoteHostSupportsTCPRedirect() > -1)) {
                 Message tcp = new TCPConnectBackVendorMessage(RouterService.getPort());
                 send(tcp);
-                _numTCPConnectBackRequests++;
+                RouterService.getConnectionManager().connectBackSent(Network.TCP);
             }
 
             // disable oobv2 explicitly.
