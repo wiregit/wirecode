@@ -54,6 +54,9 @@ public class BTData {
     /** A list of all subfolders this torrent uses.  null if a single file. */
     private final Set<String> folders;
     
+    /** Whether the private flag is present */
+    private final boolean isPrivate;
+    
     /** Constructs a new BTData out of the map of properties. */
     public BTData(Map<?, ?> torrentFileMap) throws ValueException {
         Object tmp;
@@ -70,6 +73,12 @@ public class BTData {
         
         Map infoMap = (Map)tmp;
         infoHash = calculateInfoHash(infoMap);
+        
+        tmp = infoMap.get("private");
+        if (tmp instanceof Long) {
+            isPrivate = ((Long)tmp).intValue() == 1;
+        } else
+            isPrivate = false;
         
         tmp = infoMap.get("pieces");
         if(tmp instanceof byte[])
@@ -251,6 +260,10 @@ public class BTData {
         return folders;
     }
 
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+    
     public byte[] getInfoHash() {
         return infoHash;
     }

@@ -103,12 +103,21 @@ public class BTMetaInfo implements Serializable {
 	private float historicRatio;
     
 	/**
+	 * Whether this torrent has the private flag set
+	 */
+	private volatile boolean isPrivate;
+    
+	/**
 	 * @return piece length for this torrent
 	 */
 	public int getPieceLength() {
 		return _pieceLength;
 	}
 
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+    
 	public TorrentFileSystem getFileSystem() {
 		return fileSystem;
 	}
@@ -250,6 +259,8 @@ public class BTMetaInfo implements Serializable {
 			throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
+        isPrivate = data.isPrivate();
+        
 		// TODO: add proper support for multi-tracker torrents later.
 		_infoHash = data.getInfoHash();
 		
@@ -285,7 +296,7 @@ public class BTMetaInfo implements Serializable {
     
     // keys used between read/write object.
     private static enum SerialKeys {
-        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA;
+        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA, PRIVATE;
     }
 	
 	/**
@@ -302,6 +313,8 @@ public class BTMetaInfo implements Serializable {
 		toWrite.put(SerialKeys.TRACKERS,_trackers);
 		toWrite.put(SerialKeys.RATIO, getRatio());		
 		toWrite.put(SerialKeys.FOLDER_DATA,context.getDiskManager().getSerializableObject());
+         if (isPrivate())
+            toWrite.put(SerialKeys.PRIVATE, Boolean.TRUE);
         
 		out.writeObject(toWrite);
 	}
@@ -340,6 +353,9 @@ public class BTMetaInfo implements Serializable {
         
 		historicRatio = ratio.floatValue();
 		_pieceLength = pieceLength.intValue();
+        
+        if (toRead.containsKey(SerialKeys.PRIVATE))
+            isPrivate = true;
 	}
 
 	/**
