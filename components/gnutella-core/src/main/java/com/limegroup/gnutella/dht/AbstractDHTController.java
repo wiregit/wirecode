@@ -382,7 +382,8 @@ public abstract class AbstractDHTController implements DHTController {
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
         
-        dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
+        if (isRunning())
+            dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
     
     /**
