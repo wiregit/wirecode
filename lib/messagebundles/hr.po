@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-10-23 14:19-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-11-12 23:14+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-11-07 21:27+0000\n"
+"X-Launchpad-Export-Date: 2007-11-17 03:40+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -81,16 +81,21 @@ msgstr ""
 #~ msgstr "G"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
+#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
+"LimeWire nije mogao spremiti potreban fajl jer je vaš tvrdi disk pun. Za "
+"nastavak korištenja LimeWirea morate osloboditi mjesta na vašem tvrdom disku."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
+"LimeWire nije mogao otvoriti potreban fajl jer je drugi program zaključao "
+"taj fajl. LimeWire se može ponašati neočekivano dok se taj fajl ne oslobodi."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:37
 msgid ""
@@ -105,18 +110,26 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
+"LimeWire ne može otvoriti potreban fajl jer ime fajla sadrži znakove koji "
+"nisu podržani od strane vašeg operativnog sustava. LimeWire se može ponašati "
+"na neočekivane načine"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:40
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"LimeWire ne može skinuti označeni fajl jer je vaš tvrdi disk pun. Za daljnje "
+"skidanje fajlova morate osloboditi prostor na vašem tvrdom disku."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:41
+#, fuzzy
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
+"LimeWire nije mogao skinuti označeni fajl jer drugi program koristi taj "
+"fajl. Molimo vas da zatvorite drugi program i ponovno pokušate skinuti fajl."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:42
 msgid ""

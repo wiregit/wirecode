@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-10-23 14:19-0400\n"
-"PO-Revision-Date: 2007-10-31 22:17+0000\n"
+"PO-Revision-Date: 2007-11-14 13:54+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-07 21:27+0000\n"
+"X-Launchpad-Export-Date: 2007-11-17 03:40+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Loading magnet Management..."
@@ -1508,16 +1508,16 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"Limewire non può scrivere un file perchè il disco fisso è pieno. Per "
-"continuare ad usare LimeWire devi liberare spazio nel tuo disco fisso."
+"Limewire non può scrivere file perchè il disco fisso è pieno. Per continuare "
+"ad usare LimeWire devi liberare spazio nel tuo disco fisso."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:36
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"Limewire non può aprire il file perchè un altro programma ha bloccato il "
-"file. Limewire può rimanere in attesa fino a che il file venga rilasciato "
+"Limewire non può aprire il file perchè è usato da un altro programma. "
+"Limewire può rimanere in attesa fino a che il file venga rilasciato "
 "dall'altra applicazione."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:37
@@ -1526,10 +1526,9 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"Limewire non può scrivere un file perchè non disponi deei necessari "
-"permessi. Le tue impostazioni potrebbero non essere disponibili al prossimo "
-"riavvio di Limewire, o Limewire potrebbe essere in una condizione non "
-"prevista."
+"Limewire non può scrivere un file perchè non disponi dei permessi necessari. "
+"Le tue impostazioni potrebbero non essere disponibili al prossimo riavvio di "
+"Limewire, o Limewire potrebbe comportarsi in modo inatteso."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:38
 msgid ""
@@ -1605,11 +1604,11 @@ msgstr "Spiacenti, ma Limewire non può riavviare i vecchi download."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:303
 msgid "Loading TLS Encryption..."
-msgstr "Caricamento Crittazione TLS..."
+msgstr "Caricamento Crittografia TLS..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:315
 msgid "Loading Safe Content Management..."
-msgstr "Caricamento Gestore di Contenuti Sicuri..."
+msgstr "Caricamento del Gestore di Contenuti Sicuri..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:320
 msgid "Loading Message Router..."
@@ -1720,7 +1719,7 @@ msgstr "Immagini"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:123
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "non posso processare link MAGNET corrotti {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:196
@@ -2072,7 +2071,7 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:102
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Accesso al disco sperimentale"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:75
 msgid "Internal Error"
@@ -3014,12 +3013,12 @@ msgstr "ricerche"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:23
 msgid "My Shared Files"
-msgstr ""
+msgstr "I Miei File Condivisi"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
 #, java-format
 msgid "View My {0} Shared Files"
-msgstr ""
+msgstr "guarda i miei {0} files condivisi"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:37
 msgid ""
@@ -3084,11 +3083,11 @@ msgstr "Limewire ha verificato la presenza di un firewall."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:493
 msgid "Lime Wire Store has not been found"
-msgstr ""
+msgstr "Lime Wire Store non è stato trovato"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:496
 msgid "Lime Wire Store has been found"
-msgstr ""
+msgstr "Lime Wire Store non è stato trovato"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:588
 msgid "Connection"

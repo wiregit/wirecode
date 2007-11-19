@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-10-23 14:19-0400\n"
-"PO-Revision-Date: 2007-10-22 19:27+0000\n"
+"PO-Revision-Date: 2007-11-08 22:42+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-07 21:27+0000\n"
+"X-Launchpad-Export-Date: 2007-11-17 03:40+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Loading magnet Management..."
@@ -1572,12 +1572,13 @@ msgstr ""
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
 #: components/setting/src/main/java/org/limewire/setting/SettingsFactory.java:187
+#, fuzzy
 msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
 msgstr ""
 "Ένα αρχείο που χρησιμοποιούνταν για την αποθήκευση των προτιμήσεών σας έχει "
-"φθαρεί. Το Limewire θα χρησιμοποιήσει τις προκαθορισμένες θέσεις."
+"φθαρεί. Το Limewire θα χρησιμοποιήσει τις προκαθορισμένες τιμές."
 
 #: core/com/limegroup/gnutella/Acceptor.java:290
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35

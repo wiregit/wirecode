@@ -10,14 +10,14 @@ msgstr ""
 "Project-Id-Version: fr\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-10-23 14:19-0400\n"
-"PO-Revision-Date: 2007-10-28 18:42+0000\n"
+"PO-Revision-Date: 2007-11-11 20:29+0000\n"
 "Last-Translator: Steffen Pingel <steffenp@gmx.de>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2007-11-07 21:27+0000\n"
+"X-Launchpad-Export-Date: 2007-11-17 03:40+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1724,12 +1724,14 @@ msgid "LimeWire has detected a firewall"
 msgstr "LimeWire a détecté un pare-feu"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:493
+#, fuzzy
 msgid "Lime Wire Store has not been found"
-msgstr ""
+msgstr "Le magasin Lime Wire n'a pas été trouvé"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:496
+#, fuzzy
 msgid "Lime Wire Store has been found"
-msgstr ""
+msgstr "Le magasin Lime Wire a été trouvé"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:588
 msgid "Connection"
@@ -2334,12 +2336,15 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:64
+#, fuzzy
 msgid ""
 "Have a lot of files? Try an instant search at the top of the Library window."
 msgstr ""
+"vous avez beaucoup de fichiers ? Essayez une recherche instantanée en haut "
+"de la fenêtre \"Bibliothèque\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
-#, java-format
+#, fuzzy
 msgid ""
 "You can publish your original work on the Gnutella network with a Creative "
 "Commons license. Select the .ogg or .mp3 shared file in the Library and "
@@ -2356,11 +2361,15 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:67
+#, fuzzy
 msgid ""
 "Are you behind a firewall? At the bottom of LimeWire in the status bar, look "
 "for the globe. If there is a brick wall in front of it, your Internet "
 "connection is firewalled."
 msgstr ""
+"Êtes-vous protégé par un Pare-feu ? En haut de la barre de statut de "
+"Limewire, regardez le globe. Si une brique murale rouge se trouve devant, "
+"votre connexion Internet est sécurisée par un Pare-feu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:68
 msgid ""
@@ -2668,11 +2677,16 @@ msgstr ""
 "top!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
+#, fuzzy
 msgid ""
 "LimeWire is written in Java, which means that having the latest version of "
 "Java will improve LimeWire's speed and stability. You can find the most "
 "recent Java release at <a href=\"{0}\">www.java.com</a>."
 msgstr ""
+"LimeWire comprend le langage Java, ce qui signifie qu'avoir la dernière "
+"version de Java améliore la vitesse et la stabilité de LimeWire. Vous pouvez "
+"trouver la dernière version de Java sur le lien suivant : <a "
+"href=\"{0}\">www.java.com</a>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:109
 msgid ""
@@ -2687,14 +2701,23 @@ msgid ""
 "Are you unhappy with the small number of search results you received? Right-"
 "click a search result, then choose Search More, then Get More Results. "
 msgstr ""
+"Vous n'êtes pas satisfaits par le petit nombre de résultats de votre "
+"recherche ? Faites un clique-droit sur le nom de votre recherche, choisissez "
+"\"Chercher davantage\" puis cliquez sur \"Plus de résultats\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:111
+#, fuzzy
 msgid ""
 "Can't connect to the Gnutella network? If you are using a firewall, make "
 "sure that a port is opened for LimeWire (both incoming and outgoing, UPD and "
 "TCP). Go to Tools &gt; Options &gt; Advanced &gt; Firewall Config to find "
 "the port number. "
 msgstr ""
+"Vous ne pouvez vous connecter au réseau Internet Gnutella ? Si vous utilisez "
+"un pare-feu, vérifiez que les ports sont ouverts pour LimeWire (entrants et "
+"sortants, UDP et TCP). Allez dans le menu \"Outils\" puis \"Options\" et "
+"dans \"Avancé\" cliquez sur \"Configuration du pare-feu\" pour trouver le "
+"nombre du port. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:112
 msgid ""
@@ -3384,10 +3407,13 @@ msgid "Browse..."
 msgstr "Navigateur"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:254
+#, fuzzy
 msgid ""
 "LimeWire cannot download this address. Make sure you typed it correctly, and "
 "then try again."
 msgstr ""
+"LimeWire ne peut télécharger cette adresse. Verifiez que vous l'avez "
+"correctement tapée, et essayez de nouveau."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:331
 msgid "&Close"
@@ -3494,7 +3520,7 @@ msgstr "Vous"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:230
 msgid "A connection error has occurred"
-msgstr ""
+msgstr "Une erreur de connexion est survenue."
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:251
 #, fuzzy
@@ -4410,7 +4436,7 @@ msgstr "Rétablit le dossier de chargement par défaut."
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:140
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 msgid "Choose Another Folder"
-msgstr ""
+msgstr "Choisissez un autre dossier."
 
 #: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:46
 msgid "Confirm Scan"
@@ -4480,7 +4506,7 @@ msgstr "Terminer"
 #: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:131
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
 msgid "Learn more about this option..."
-msgstr ""
+msgstr "A propos de cette option..."
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:40
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:23
@@ -4580,8 +4606,9 @@ msgid "Individual Store Files"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:26
+#, fuzzy
 msgid "List of All Individual Purchased Files"
-msgstr ""
+msgstr "Liste de tous les fichiers individuels achetés"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:107
 msgid "Loading Library Window..."
@@ -4858,7 +4885,7 @@ msgstr "Configurer les options de partage"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:68
 msgid "Folders to share"
-msgstr ""
+msgstr "Fichiers à partager"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:76
 msgid ""
@@ -5122,19 +5149,19 @@ msgstr "Sélectionnez vos préférences linguistiques."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:152
 msgid "The file type is not recognized."
-msgstr ""
+msgstr "Ce type de fichier n'est pas reconnu."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:155
 msgid "The file cannot be found."
-msgstr ""
+msgstr "Le fichier n'a pu être trouvé."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:158
 msgid "The file is corrupt."
-msgstr ""
+msgstr "Le fichier est corrompu."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:161
 msgid "There is an unknown error with the audio file."
-msgstr ""
+msgstr "Une erreur inconnue est survenue avec le fichier audio."
 
 #: gui/com/limegroup/gnutella/gui/mp3/BasicPlayer.java:164
 msgid "The file cannot be parsed."
@@ -5224,8 +5251,9 @@ msgstr "Enregistrement"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:333
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:343
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
+#, fuzzy
 msgid "Basic"
-msgstr ""
+msgstr "Méthode Basique"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
 msgid "Types"
@@ -5756,8 +5784,9 @@ msgstr "Vitesse de chargement :"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:46
+#, fuzzy
 msgid "Unlimited"
-msgstr ""
+msgstr "Illimité"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:21
 msgid "License Warning"
@@ -6080,7 +6109,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:25
 msgid "Show Notifications:"
-msgstr ""
+msgstr "Afficher les notifications :"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:19
 msgid "Partial Files"
@@ -6574,6 +6603,8 @@ msgid ""
 "You can choose the folder for saving files purchased from the Lime Wire "
 "Store."
 msgstr ""
+"Vous pouvez choisir un dossier spécifique pour sauvegarder les fichiers "
+"achetés depuis le magasin Lime Wire."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:19
 msgid "System Tray Icon"
@@ -6671,8 +6702,9 @@ msgid "Remove Selected File from Playlist"
 msgstr "Ôte le média sélectionné de la liste actuelle."
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:56
+#, fuzzy
 msgid "Removes all Files from Playlist"
-msgstr ""
+msgstr "Supprimer tous les fichiers de la liste de lecture"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:26
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:36
@@ -6681,7 +6713,7 @@ msgstr "Nb."
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:90
 msgid "Comment"
-msgstr ""
+msgstr "Description"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:156
 msgid "MP3 Playlist"
@@ -6712,8 +6744,10 @@ msgid "Save Playlist As"
 msgstr "Enregistrer la Liste de lecture sous"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:695
+#, fuzzy
 msgid "Warning file already exists. Overwrite this file?"
 msgstr ""
+"Attention, le fichier existe déjà. Souhaitez-vous remplacer le fichier ?"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:804
 msgid "Playlist Files (*.m3u)"
@@ -6726,7 +6760,7 @@ msgstr "Chercher davantage"
 #: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:25
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:314
 msgid "Multiple"
-msgstr ""
+msgstr "Plusieurs"
 
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:82
 msgid "Option"
@@ -7112,10 +7146,13 @@ msgid ""
 "Select the types of files on your computer that you wish to share with "
 "LimeWire."
 msgstr ""
+"Sélectionnez les types de fichiers de votre ordinateur que vous souhaitez "
+"partager avec LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:90
+#, fuzzy
 msgid "My Extensions"
-msgstr ""
+msgstr "Mes Extensions"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:91
 msgid "Other"
@@ -7127,7 +7164,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:527
 msgid "Add a New Extension to My Extensions"
-msgstr ""
+msgstr "Ajouter une nouvelle extension à \"Mes extensions\""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:562
 msgid "Do Not Share Sensitive File Types"
@@ -7140,12 +7177,13 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:721
+#, fuzzy
 msgid "File types you added to share."
-msgstr ""
+msgstr "Types de fichiers que vous avez ajoutés à partager"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:725
 msgid "Other types of files."
-msgstr ""
+msgstr "Autres types de fichiers."
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
@@ -7293,7 +7331,7 @@ msgstr "Transfert interrompu"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:77
 msgid "File Not Found"
-msgstr ""
+msgstr "Fichier introuvable"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:83
 msgid "Queued at"

@@ -10,14 +10,14 @@ msgstr ""
 "Project-Id-Version: ja\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-10-23 14:19-0400\n"
-"PO-Revision-Date: 2007-11-07 13:11+0000\n"
+"PO-Revision-Date: 2007-11-15 00:04+0000\n"
 "Last-Translator: Steffen Pingel <steffenp@gmx.de>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-11-07 21:27+0000\n"
+"X-Launchpad-Export-Date: 2007-11-17 03:40+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -286,7 +286,7 @@ msgstr "接続管理をロード中..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:433
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "ネットワーク視聴者をロード中です。"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -1119,7 +1119,7 @@ msgstr "セキュリティ上の理由から、LimeWireは選択したファイ�
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1694
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1717
-#, java-format
+#, fuzzy
 msgid ""
 "LimeWire could not launch the specified file.\n"
 "\n"
@@ -1569,7 +1569,7 @@ msgstr "検索"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:23
 msgid "My Shared Files"
-msgstr ""
+msgstr "私の共有されるファイル"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
 #, java-format
@@ -1636,12 +1636,14 @@ msgid "LimeWire has detected a firewall"
 msgstr "LimeWireはファイアウォールを検知しました"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:493
+#, fuzzy
 msgid "Lime Wire Store has not been found"
-msgstr ""
+msgstr "LimeWireストアは見つかりませんでした。"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:496
+#, fuzzy
 msgid "Lime Wire Store has been found"
-msgstr ""
+msgstr "LimeWireストアは見つかりました。"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:588
 msgid "Connection"
@@ -2112,7 +2114,7 @@ msgid ""
 "Want to share a file on your desktop with LimeWire? Simply drag the file or "
 "folder from your desktop to the LimeWire Library. Select Individually Shared "
 "Files to see your newly shared file in the Library."
-msgstr ""
+msgstr "デスクトップ上のファイルを共有しますか？　フォルダ又はファイルをデスクトップからLimeWireLibraryへドラッグして下さい。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -2315,6 +2317,8 @@ msgid ""
 "Curious about the inner workings of LimeWire? Go to View &gt; Show/Hide &gt; "
 "Console to see LimeWire's source code in action! (not for the faint of heart)"
 msgstr ""
+"LimeWireの内部の作用について知りたいですか?  表示(V) &gt; 表示/隠す(W) &gt; Console "
+"に行って、活動しているLimeWireのソース・コードを見てください! (心臓の気絶のためにではない)"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
 msgid ""
@@ -2465,7 +2469,7 @@ msgstr ""
 msgid ""
 "Are you unhappy with the small number of search results you received? Right-"
 "click a search result, then choose Search More, then Get More Results. "
-msgstr ""
+msgstr "あなたは検索結果の件数に満足していますか？　右クリックでSearch Moreを選びましょう。検索件数が増えます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:111
 msgid ""
@@ -2496,7 +2500,7 @@ msgstr ""
 msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "right-click it and choose Stop Sharing File. "
-msgstr ""
+msgstr "共有をしたくないファイルをダウンロードしましたか？　ライブラリで右クリックし「ファイル共有を停止」を選びましょう。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:115
 msgid ""
@@ -2504,6 +2508,7 @@ msgid ""
 "images, in different folders on your computer automatically? Just go to "
 "Tools &gt; Options &gt; Saving to choose the location for each type of file. "
 msgstr ""
+"自動的にPCが動画、音楽や画像をそれぞれ違うフォルダにセーブすることを知っていましたか？　ツールからオプションを選択し保存の項目で設定しましょう。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:116
 msgid ""
