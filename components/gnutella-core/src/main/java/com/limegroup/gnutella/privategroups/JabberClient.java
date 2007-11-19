@@ -2,26 +2,37 @@ package com.limegroup.gnutella.privategroups;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.AndFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.filter.PacketIDFilter;
+import org.jivesoftware.smack.filter.PacketTypeFilter;
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.provider.ProviderManager;
 
 public class JabberClient{
 
-    //current ipAddress of the client
-    private String ipAddress;
-    
-    //public key
     private BigInteger publicKey;
     private BigInteger privateKey;
     private BigInteger modulus;
+    private String ipAddress;
+    private String port;
+    private HashMap<String, ClientSocket> msgSockets = new HashMap<String, ClientSocket>();
+    private String localUsername;
+    
+    
+    
     
     public JabberClient(){
     }
@@ -41,7 +52,6 @@ public class JabberClient{
             e.printStackTrace();
         }
         return conn1;
-
     }
     
     public XMPPConnection connectToServerPort(String serverAddress, int portAddress){
@@ -58,6 +68,10 @@ public class JabberClient{
         return conn2;
     }
     
+    /**
+     * see the roster list
+     * 
+     */
     public void viewRoster(XMPPConnection connection){
         System.out.println("view roster");
         Roster roster = connection.getRoster();
@@ -115,22 +129,88 @@ public class JabberClient{
         }
     }
     
-    public void loginAccount(String username, String password, XMPPConnection connection){
+    public void loginAccount(String username, String password, XMPPConnection conn){
         try {
-            //
-            connection.login(username, password);
-            
+
+            conn.login(username, password);
             System.out.println("connected successfully");
             
-            //generate and store public keys etc.
+            localUsername = username;
+            
+            //register IQ provider
+            ProviderManager providerManager = ProviderManager.getInstance();
+            providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
+            
+
+            //generate keys
+            
+            RSA keyGen = new RSA(32);
+            
+            publicKey = keyGen.getPublicKey();
+            privateKey = keyGen.getPrivateKey();
+            modulus= keyGen.getModulus();
+            
+            ipAddress = "10.254.0.30";//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
+            port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
             
             
+            //store ip address, port, and public key in the server
+            ValueStorage storagePacket = new ValueStorage();
+            storagePacket.setType("SET");
+            storagePacket.setUsername(username);
+            storagePacket.setTo("lw-intern02");
+            storagePacket.setIPAddress(ipAddress);
+            storagePacket.setPort(port);
+            storagePacket.setPublicKey(publicKey.toString());
             
+            conn.sendPacket(storagePacket);
             
+            //start serverSocket
+//            ServerSocketClass serverSocket = new ServerSocketClass();
+//            serverSocket.initializeServerSocket(9999);
             
         } catch (XMPPException e) {
             System.out.println("Could not connect to the server");
         }
+    }
+    
+    public void sendMessage(String username, String message){
+        
+        //get socket from hashmap
+        ClientSocket msgSocket = (ClientSocket) msgSockets.get(username);
+        if (msgSocket!=null){
+            msgSocket.sendMessage(message);
+        }
+    }
+    
+    private void setRemoteConnection(String username, XMPPConnection conn){
+        
+        //use valueStorage packet to get ip address, port, and public key
+        ValueStorage storagePacket = new ValueStorage();
+        storagePacket.setTo("lw-intern02");
+        storagePacket.setUsername(username);
+        storagePacket.setType("GET");
+        
+        PacketFilter filter = new AndFilter(new PacketIDFilter(storagePacket.getPacketID()),
+                new PacketTypeFilter(IQ.class));
+        PacketCollector collector = conn.createPacketCollector(filter);
+
+        conn.sendPacket(storagePacket);
+
+        IQ result = (IQ)collector.nextResult(SmackConfiguration.getPacketReplyTimeout());
+        
+        if (result instanceof ValueStorage) {
+            ValueStorage data = (ValueStorage) result;
+            System.out.println(data.getIPAddress());
+            System.out.println(data.getPort());
+            System.out.println(data.getPublicKey());
+            
+            //establish connection with remote user and put connection into map
+            ClientSocket clientSocket = new ClientSocket(data.getIPAddress(), 9999, localUsername);
+            clientSocket.createClientConnection();
+            
+            msgSockets.put(username, clientSocket);
+        }   
     }
     
     public void addToRoster(String username, String nickName, String groupName, XMPPConnection connection) {
@@ -194,16 +274,16 @@ public class JabberClient{
         }   
     }
   
-    /**
-     * testing method to view the attribute values
-     * @param connection
-     */
-    private void viewAttributes(XMPPConnection connection) {
-        Map <String, String> attributes = connection.getAccountManager().getAccountAttributesMap();
-        System.out.println("passphrase: " + attributes.get("passphrase"));
-        System.out.println("publickey: " + attributes.get("publickey"));
-        System.out.println("DONE");
-    }
+//    /**
+//     * testing method to view the attribute values
+//     * @param connection
+//     */
+//    private void viewAttributes(XMPPConnection connection) {
+//        Map <String, String> attributes = connection.getAccountManager().getAccountAttributesMap();
+//        System.out.println("passphrase: " + attributes.get("passphrase"));
+//        System.out.println("publickey: " + attributes.get("publickey"));
+//        System.out.println("DONE");
+//    }
     
     /**
      *  sets subscription mode to manual so that other users must agree to allow 
@@ -237,18 +317,26 @@ public class JabberClient{
         
         XMPPConnection.DEBUG_ENABLED = true;
         
-        JabberClient manager = new JabberClient();
-        //XMPPConnection connection = manager.connectToServerNoPort("lw-intern02");
-        XMPPConnection connection = manager.connectToServerPort("10.254.0.30", 5222);
-        //manager.loginAccount("elven", "Elven", connection);
+        JabberClient client = new JabberClient();
+        XMPPConnection connection = client.connectToServerNoPort("lw-intern02");
+        //XMPPConnection connection = manager.connectToServerPort("10.254.0.30", 5222);
+        //manager.loginAccount("admin", "admin", connection);
         //System.out.println(manager.findRosterUserName(connection, "anthony@lw-intern02"));
         //  Create account
-        manager.createAccount("lulu", "Lulu", connection);      
+        //manager.createAccount("lulu4", "Lulu4", connection);      
+        client.loginAccount("lulu4", "Lulu4", connection);
+        
+        //get remote user info
+        client.setRemoteConnection("lulu", connection);
+        client.sendMessage("lulu", "hi");
+       
+        
+//        client.loginAccount("lulu", "Lulu", connection);
+        
   
         //  Login with an account
         
-        
-        manager.setSubscriptionMode(connection);
+        //manager.setSubscriptionMode(connection);
   
         //Remove user account
         //manager.removeAccount(connection);
@@ -267,10 +355,10 @@ public class JabberClient{
         
         
         // Look at roster
-        System.out.println("************************* roster list after add **********************************");
+//        System.out.println("************************* roster list after add **********************************");
         //manager.viewAttributes(connection);
         
-        manager.viewRoster(connection);
+//        client.viewRoster(connection);
         
         //  Remove from roster group
         
@@ -284,7 +372,7 @@ public class JabberClient{
         manager.removeRosterGroup("ex-employee", "Limewire-ex", connection);*/
         
         // Look at roster
-        System.out.println("************************* roster list after delete **********************************");
+//        System.out.println("************************* roster list after delete **********************************");
         
         //manager.getUserID()
         //manager.viewRoster(connection);

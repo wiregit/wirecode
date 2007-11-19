@@ -39,7 +39,7 @@ public class ServerSocketClass {
             
             try{
                 MyService = new ServerSocket(port);
-                System.out.println("done");
+                System.out.println("server socket started successfully");
             }
             catch(IOException e){
                 System.out.println(e);
@@ -105,7 +105,7 @@ public class ServerSocketClass {
                                 System.out.println("Body: " + parsedMsg.getBody());
                                 
                                 
-                                buffer.append(PrivateGroupsUtils.createMessage("remote user", "received").toXML());
+                                buffer.append(PrivateGroupsUtils.createMessage("remote user", "return message").toXML());
                             }
                         }
                     } catch (IOException e) {

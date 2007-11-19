@@ -1,0 +1,179 @@
+package com.limegroup.gnutella.privategroups;
+
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.util.StringUtils;
+
+public class ValueStorage extends IQ {
+
+    
+    private String username = null;
+    private String password = null;
+    private String ipAddress = null;
+    private String port = null;
+    private String publicKey = null;
+    
+    
+    public ValueStorage() {
+    }
+    
+    
+    public void setType(String type) {
+        if(type.equals("GET"))
+            setType(IQ.Type.GET);
+        else if (type.equals("SET"))
+            setType(IQ.Type.SET);
+        else{
+            //neither get or set}
+        }
+    }
+
+    /**
+     * Returns the username, or <tt>null</tt> if the username hasn't been sent.
+     *
+     * @return the username.
+     */
+    public String getUsername() {
+        return username;
+    }
+    
+    
+    
+    
+    /**
+     * Sets the username.
+     *
+     * @param username the username.
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    /**
+     * Returns the plain text password or <tt>null</tt> if the password hasn't
+     * been set.
+     *
+     * @return the password.
+     */
+    public String getPassword() {
+        return password;
+    }   
+
+    /**
+     * Sets the plain text password.
+     *
+     * @param password the password.
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    /**
+     * Returns the ipAddress or <tt>null</tt> if the ipAddress hasn't
+     * been set.
+     *
+     * @return the ipAddress.
+     */
+    public String getIPAddress() {
+        return ipAddress;
+    }   
+
+    /**
+     * Sets ipAddress.
+     *
+     * @param ipAddress the ipAddress.
+     */
+    public void setIPAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+    
+    /**
+     * Returns the port or <tt>null</tt> if the port hasn't
+     * been set.
+     *
+     * @return the port.
+     */
+    public String getPort() {
+        return port;
+    }   
+
+    /**
+     * Sets the port
+     *
+     * @param port the port
+     */
+    public void setPort(String port) {
+        this.port = port;
+    }
+    
+    /**
+     * Returns the publicKey <tt>null</tt> if the publicKey hasn't
+     * been set.
+     *
+     * @return the publicKey.
+     */
+    public String getPublicKey() {
+        return publicKey;
+    }   
+
+    /**
+     * Sets the publicKey
+     *
+     * @param publicKey the publicKey
+     */
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+    
+    public String getChildElementXML() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("<valueStorage xmlns=\"jabber:iq:stor\">");
+        if (username != null) {
+            if (username.equals("")) {
+                buf.append("<username/>");
+            }
+            else {
+                buf.append("<username>").append(username).append("</username>");
+            }
+        }
+        if (password != null) {
+            if (password.equals("")) {
+                buf.append("<password/>");
+            }
+            else {
+                buf.append("<password>").append(StringUtils.escapeForXML(password)).append("</password>");
+            }
+        }   
+        
+        if (ipAddress != null) {
+            if (ipAddress.equals("")) {
+                buf.append("<ipAddress/>");
+            }
+            else {
+                buf.append("<ipAddress>").append(StringUtils.escapeForXML(ipAddress)).append("</ipAddress>");
+            }
+        }
+        
+        if (port != null) {
+            if (port.equals("")) {
+                buf.append("<port/>");
+            }
+            else {
+                buf.append("<port>").append(StringUtils.escapeForXML(port)).append("</port>");
+            }
+        }
+        
+        if (publicKey != null) {
+            if (publicKey.equals("")) {
+                buf.append("<publicKey/>");
+            }
+            else {
+                buf.append("<publicKey>").append(StringUtils.escapeForXML(publicKey)).append("</publicKey>");
+            }
+        }
+        
+
+        buf.append("</valueStorage>");
+        return buf.toString();
+    }
+
+}
