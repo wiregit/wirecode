@@ -11,7 +11,7 @@ import java.util.Properties;
  * Create a <code>FileSetting</code> object with a 
  * {@link SettingsFactory#createFileSetSetting(String, File[])}.
  */
-public class FileSetting extends Setting {
+public class FileSetting extends AbstractSetting {
     
     private File value;
     private String absolutePath;
@@ -45,7 +45,7 @@ public class FileSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(File value) {
-		super.setValue(value.getAbsolutePath());
+	    setValueInternal(value.getAbsolutePath());
 	}
      
     /**

@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
  * Create a <code>StringSetSetting</code> object with a 
  * {@link SettingsFactory#createStringSetSetting(String, String)}.
  */
-public class StringSetSetting extends Setting {
+public class StringSetSetting extends AbstractSetting {
 
     private Set<String> value;
 
@@ -90,12 +90,12 @@ public class StringSetSetting extends Setting {
      * @param value the value to store
      */
     public synchronized void setValue(Set<String> value) {
-        super.setValue(decode(value));
+        setValueInternal(decode(value));
     }
 
     public synchronized boolean add(String s) {
         if (value.add(s)) {
-            setValue(decode(value));
+            setValueInternal(decode(value));
             return true;
         }
         return false;
@@ -103,7 +103,7 @@ public class StringSetSetting extends Setting {
 
     public synchronized boolean remove(String s) {
         if (value.remove(s)) {
-            setValue(decode(value));
+            setValueInternal(decode(value));
             return true;
         }
         return false;

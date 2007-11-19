@@ -1,9 +1,10 @@
 package org.limewire.setting.evt;
 
+import org.limewire.setting.AbstractSetting;
 import org.limewire.setting.Setting;
 
 /**
- * SettingEvent are fired when a {@link Setting} changed its state
+ * SettingEvent are fired when a {@link AbstractSetting} changed its state
  */
 public class SettingEvent {
     

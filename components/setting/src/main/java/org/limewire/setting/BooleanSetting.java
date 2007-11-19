@@ -12,7 +12,7 @@ import org.limewire.service.Switch;
  * You can create a <code>BooleanSetting</code> object with a 
  * {@link SettingsFactory#createBooleanSetting(String, boolean)}.
  */
-public final class BooleanSetting extends Setting implements Switch {
+public final class BooleanSetting extends AbstractSetting implements Switch {
     
     /** Current value of the setting. */
     private boolean value;
@@ -44,7 +44,7 @@ public final class BooleanSetting extends Setting implements Switch {
 	 * @param bool the <tt>boolean</tt> to store
 	 */
 	public void setValue(boolean bool) {
-        super.setValue(String.valueOf(bool));
+	    setValueInternal(String.valueOf(bool));
 	}
     
     /**

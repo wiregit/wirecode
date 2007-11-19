@@ -10,9 +10,9 @@ import java.util.Properties;
  * Create a <code>StringSetting</code> object with a 
  * {@link SettingsFactory#createStringSetting(String, String)}.
  */
-public final class StringSetting extends Setting {
+public final class StringSetting extends AbstractSetting {
     
-    String value;
+    private String value;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -41,7 +41,7 @@ public final class StringSetting extends Setting {
 	 * @param str the <tt>String</tt> to store
 	 */
 	public void setValue(String str) {
-		super.setValue(str);
+	    setValueInternal(str);
 	}
     
     /** Load value from property string value

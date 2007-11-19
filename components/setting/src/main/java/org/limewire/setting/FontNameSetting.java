@@ -16,7 +16,7 @@ import java.util.Properties;
  * to the themes.txt format since right now it has three properties
  * (name, style, size) that define a single font.
  */
-public final class FontNameSetting extends Setting {
+public final class FontNameSetting extends AbstractSetting {
    
     private String _fontName;
 
@@ -29,7 +29,7 @@ public final class FontNameSetting extends Setting {
       * @param fontName
       */
     public void setValue(String fontName) {
-        super.setValue(fontName);
+        setValueInternal(fontName);
     }
 
     public String getValue() {

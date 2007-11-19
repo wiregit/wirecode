@@ -2,6 +2,7 @@ package org.limewire.setting;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Properties;
@@ -17,8 +18,8 @@ import org.limewire.util.OSUtils;
  */
 public class SettingTest extends BaseTestCase {
     
-    private static final long EXPIRY_INTERVAL = 15 * 24 * 60 * 60 * 1000l; //15 days
-    private static final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
+    private final long EXPIRY_INTERVAL = 15 * 24 * 60 * 60 * 1000l; //15 days
+    private final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
     
     private File settingsFile;
     
@@ -312,6 +313,7 @@ public class SettingTest extends BaseTestCase {
      */
     public void testFileArraySetting() throws Exception {
         File f = new File("testSettings.props");
+        f.delete();
         f.deleteOnExit();
         SettingsFactory factory = new SettingsFactory(f);
         FileArraySetting setting = factory.createFileArraySetting("FILE_ARRAY_SETTING", files);
@@ -353,6 +355,7 @@ public class SettingTest extends BaseTestCase {
     
     public void testProbabilisticBoolean() throws Exception {
         File f = new File("testSettings.props");
+        f.delete();
         f.deleteOnExit();
         SettingsFactory factory = new SettingsFactory(f);
         int yes = 0;
@@ -399,6 +402,7 @@ public class SettingTest extends BaseTestCase {
     
     public void testPBooleanArraySetting() throws Exception {
         File f = new File("testSettings.props");
+        f.delete();
         f.deleteOnExit();
         SettingsFactory factory = new SettingsFactory(f);
         
@@ -441,5 +445,23 @@ public class SettingTest extends BaseTestCase {
         }
         bitset.xor(other);
         assertGreaterThan(0, bitset.cardinality());
+    }
+    
+    public void testSetAlwaysSaveTrue() throws Exception {
+        File f = new File("testSettings.props");
+        f.delete();
+        f.deleteOnExit();
+        
+        SettingsFactory factory = new SettingsFactory(f);        
+        StringSetting setting = factory.createStringSetting("KEY", "defaultValue");
+        setting.setAlwaysSave(true);
+        
+        factory.save();
+     
+        // assert that the default value was written out, because
+        // setAlwaysSave(true) was called.
+        Properties readProps = new Properties();
+        readProps.load(new FileInputStream(f));
+        assertEquals("defaultValue", readProps.get("KEY"));
     }
 }

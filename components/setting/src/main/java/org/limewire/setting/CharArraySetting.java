@@ -10,7 +10,7 @@ import java.util.Properties;
  * Create a <code>CharArraySetting</code> object with a 
  * {@link SettingsFactory#createCharArraySetting(String, char[])}. 
  */
-public final class CharArraySetting extends Setting {
+public final class CharArraySetting extends AbstractSetting {
     
     /**
      * Cached value.
@@ -52,7 +52,7 @@ public final class CharArraySetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(char[] value) {
-		super.setValue(new String(value));
+	    setValueInternal(new String(value));
 	}
      
     /**

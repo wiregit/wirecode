@@ -49,7 +49,7 @@ public class FloatSetting extends AbstractNumberSetting<Float> {
 	 * @param value the value to store
 	 */
 	public void setValue(float value) {
-		super.setValue(String.valueOf(value));
+	    setValueInternal(String.valueOf(value));
 	}
     
     /** Load value from property string value

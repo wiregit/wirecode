@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
  * {@link SettingsFactory#createFileSetSetting(String, File[])}.
  */
  
-public class FileSetSetting extends Setting {
+public class FileSetSetting extends AbstractSetting {
     
     private Set<File> value;
 
@@ -57,7 +57,7 @@ public class FileSetSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(Set<? extends File> value) {
-		super.setValue(decode(value));
+	    setValueInternal(decode(value));
 	}
 
 	/**

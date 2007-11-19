@@ -18,7 +18,7 @@ import org.limewire.util.FileUtils;
  * {@link SettingsFactory#createFileArraySetting(String, File[])}.
  */
  
-public class FileArraySetting extends Setting {
+public class FileArraySetting extends AbstractSetting {
     
     private File[] value;
 
@@ -50,7 +50,7 @@ public class FileArraySetting extends Setting {
 	 * @param value the value to store
 	 */
 	public synchronized void setValue(File[] value) {
-		super.setValue(decode(value));
+	    setValueInternal(decode(value));
 	}
 
 	/**

@@ -49,7 +49,7 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
 	 * @param value the value to store
 	 */
 	public void setValue(int value) {
-		super.setValue(String.valueOf(value));
+	    setValueInternal(String.valueOf(value));
 	}
     
     /** Load value from property string value

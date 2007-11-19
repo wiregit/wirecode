@@ -18,7 +18,7 @@ import org.limewire.util.StringUtils;
  * {@link SettingsFactory#createStringArraySetting(String, String[])}.
  */
  
-public class StringArraySetting extends Setting {
+public class StringArraySetting extends AbstractSetting {
     
     public static final char SEPARATOR = ';';
     
@@ -50,7 +50,7 @@ public class StringArraySetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(String[] value) {
-		super.setValue(decode(value));
+	    setValueInternal(decode(value));
 	}
     
     /** Load value from property string value

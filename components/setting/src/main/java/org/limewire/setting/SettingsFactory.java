@@ -21,7 +21,7 @@ import org.limewire.util.FileUtils;
 
 /**
  * Coordinates the creating, storing and reloading of persistent data to and 
- * from disk for {@link Setting} objects. Each <code>Setting</code> creation 
+ * from disk for {@link AbstractSetting} objects. Each <code>Setting</code> creation 
  * method takes the name of the key and the default value, and all settings 
  * are typed. Since duplicate keys aren't allowed, you must choose a unique 
  * string for your setting key name, otherwise an exception, 
@@ -75,7 +75,7 @@ With the call sf.save(), setting.txt now includes:
  * If setting.txt didn't have the key MAX_MESSAGE_SIZE prior to the 
  * <code>createIntSetting</code> call, then the MAX_MESSAGE_SIZE is 0.
  */
-public final class SettingsFactory implements Iterable<Setting>, RemoteSettingController {    
+public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteSettingController {    
     /** Time interval, after which the accumulated information expires */
     private static final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
     
@@ -98,7 +98,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
      * List of all settings associated with this factory 
      * LOCKING: must hold this monitor
      */
-    private ArrayList<Setting> settings = new ArrayList<Setting>(10);
+    private ArrayList<AbstractSetting> settings = new ArrayList<AbstractSetting>(10);
 
     /**
      * A mapping of remoteKeys to Settings. Only remote Enabled settings will be
@@ -106,7 +106,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
      * that when remote settings are loaded, it's easy to find the targeted
      * settings.
      */
-    private Map<String, Setting> remoteKeyToSetting = new HashMap<String, Setting>();
+    private Map<String, AbstractSetting> remoteKeyToSetting = new HashMap<String, AbstractSetting>();
     
     /**
      * The RemoteSettingsManager being used to control remote settings.
@@ -146,7 +146,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
      * LOCKING: The caller must ensure that this factory's monitor
      *   is held while iterating over the iterator.
      */
-    public synchronized Iterator<Setting> iterator() {
+    public synchronized Iterator<AbstractSetting> iterator() {
         return settings.iterator();
     }
 
@@ -320,9 +320,9 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
     }
     
     public synchronized boolean updateSetting(String remoteKey, String value) {
-        Setting setting = remoteKeyToSetting.get(remoteKey);                    
+        AbstractSetting setting = remoteKeyToSetting.get(remoteKey);                    
         if(setting != null) {
-            setting.setValue(value);
+            setting.setValueInternal(value);
             return true;
         } else {
             return false;
@@ -773,7 +773,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
         return result;
     }
     
-    private synchronized void handleSettingInternal(Setting setting, 
+    private synchronized void handleSettingInternal(AbstractSetting setting, 
                                                            String remoteKey) {
         settings.add(setting);
         setting.reload();
@@ -785,7 +785,7 @@ public final class SettingsFactory implements Iterable<Setting>, RemoteSettingCo
             
             String remoteValue = remoteManager.getUnloadedValueFor(remoteKey);
             if(remoteValue != null)
-                setting.setValue(remoteValue);
+                setting.setValueInternal(remoteValue);
             //update the mapping of the remote key to the setting.
             remoteKeyToSetting.put(remoteKey, setting);
         }

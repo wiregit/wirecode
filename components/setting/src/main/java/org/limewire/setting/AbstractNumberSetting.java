@@ -13,7 +13,7 @@ import java.util.Properties;
  * Additionally, <code>AbstractNumber</code> defines a method 
  * for subclasses to convert a string to a {@link Comparable}. 
  */
-public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> extends Setting {
+public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> extends AbstractSetting {
 
     /**
      * Adds a safeguard against remote making a setting take a value beyond the
@@ -41,20 +41,21 @@ public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> ex
         }
         MAX_VALUE = max;
         MIN_VALUE = min;
-        setValue(getValueAsString()); // performs normalization
+        setValueInternal(getValueAsString()); // performs normalization
     }
 
     /**
      * Set new property value
      * @param value new property value
      */
-    public void setValue(String value) {
+    @Override
+    protected void setValueInternal(String value) {
         if(remote) {
             assert MAX_VALUE != null : "remote setting created with no max";
             assert MIN_VALUE != null : "remote setting created with no min";
         }
         value = normalizeValue(value);
-        super.setValue(value);
+        super.setValueInternal(value);
     }
 
 

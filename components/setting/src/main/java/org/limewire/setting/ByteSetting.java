@@ -48,7 +48,7 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
 	 * @param value the value to store
 	 */
 	public void setValue(byte value) {
-		super.setValue(String.valueOf(value));
+		setValueInternal(String.valueOf(value));
 	}
      
     /**

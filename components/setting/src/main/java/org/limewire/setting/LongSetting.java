@@ -45,7 +45,7 @@ public class LongSetting extends AbstractNumberSetting<Long> {
 	 * @param value the value to store
 	 */
 	public void setValue(long value) {
-		super.setValue(String.valueOf(value));
+	    setValueInternal(String.valueOf(value));
 	}
     
     /** Load value from property string value

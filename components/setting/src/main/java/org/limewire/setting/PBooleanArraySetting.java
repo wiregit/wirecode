@@ -5,7 +5,7 @@ import java.util.Properties;
 
 import org.limewire.util.StringUtils;
 
-public class PBooleanArraySetting extends Setting {
+public class PBooleanArraySetting extends AbstractSetting {
 
     private volatile BitSet values = new BitSet();
     private volatile int size;
@@ -34,7 +34,7 @@ public class PBooleanArraySetting extends Setting {
     }
     
     public void setValue(String... value) {
-        super.setValue(decode(value));
+        setValueInternal(decode(value));
     }
     
     public int length() {
