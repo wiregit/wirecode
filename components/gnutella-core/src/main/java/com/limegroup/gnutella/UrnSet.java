@@ -24,8 +24,8 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     
     private static final long serialVersionUID = -1065284624401321676L;
 
-    /** The sole URN this knows about. */
-    private URN sha1;
+    /** The sole URNs this knows about. */
+    private URN sha1, ttroot;
     
     /** Constructs an empty UrnSet. */
     public UrnSet() {}
@@ -41,7 +41,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     }
     
     public String toString() {
-        return isEmpty() ? "{Empty UrnSet}" : "UrnSet of: " + sha1;
+        return isEmpty() ? "{Empty UrnSet}" : "UrnSet of: " + sha1+" tt "+ttroot;
     }
     
     /** Clones this set. */
@@ -56,6 +56,13 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         return sha1 == null ? 0 : sha1.hashCode();
     }
     
+    URN getSHA1() {
+        return sha1;
+    }
+    
+    URN getTTRoot() {
+        return ttroot;
+    }
     
     /**
      * Determines if this set contains all the same objects
@@ -96,8 +103,10 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         if(o.isSHA1() && sha1 == null) {
             sha1 = o;
             return true;
+        } else if (o.isTTRoot() && ttroot == null) {
+            ttroot = o;
+            return true;
         }
-        
         return false;
     }
 
@@ -117,25 +126,30 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     }
 
     public void clear() {
-        sha1 = null;       
+        sha1 = null;
+        ttroot = null;
     }
 
     public boolean contains(Object o) {
-        return o.equals(sha1);
+        return o.equals(sha1) || o.equals(ttroot);
     }
 
     public boolean containsAll(Collection<?> c) {
-        if(c.size() > 1)
+        if(c.size() > 2)
             return false;
         if(c.isEmpty())
             return true;
-        if(sha1 == null)
+        if(isEmpty())
             return false;
-        return sha1.equals(c.iterator().next());
+        
+        boolean ret = true;
+        for (Object o : c)
+            ret &= contains(o);
+        return ret;
     }
 
     public boolean isEmpty() {
-        return sha1 == null;
+        return sha1 == null && ttroot == null;
     }
 
     public Iterator<URN> iterator() {
@@ -148,37 +162,60 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
             return true;
         }
         
-        return false;
-    }
-
-    public boolean removeAll(Collection<?> c) {
-        if(sha1 == null)
-            return false;
-        
-        for(Object o : c) {
-            remove(o);
-            if(sha1 == null)
-                return true;
-        }
-        
-        return false;
-    }
-
-    public boolean retainAll(Collection<?> c) {
-        if(sha1 != null && !c.contains(sha1)) {
-            sha1 = null;
+        if(ttroot != null && o.equals(ttroot)) {
+            ttroot = null;
             return true;
         }
         
         return false;
     }
 
+    public boolean removeAll(Collection<?> c) {
+        if(sha1 == null && ttroot == null || c.isEmpty())
+            return false;
+        
+        boolean ret = false;
+        for(Object o : c) {
+            ret |= remove(o);
+            if (isEmpty())
+                break;
+        }
+        
+        return ret;
+    }
+
+    public boolean retainAll(Collection<?> c) {
+        boolean ret = false;
+        if(sha1 != null && !c.contains(sha1)) {
+            sha1 = null;
+            ret = true;
+        }
+        if(ttroot != null && !c.contains(ttroot)) {
+            ttroot = null;
+            ret = true;
+        }
+        
+        return ret;
+    }
+
     public int size() {
-        return sha1 == null ? 0 : 1;
+        int ret = 0;
+        if (sha1 != null)
+            ret++;
+        if (ttroot != null)
+            ret++;
+        return ret;
     }
 
     public Object[] toArray() {
-        return sha1 == null ? new Object[0] : new Object[] { sha1 };
+        switch(size()) {
+        case 0: return new Object[0];
+        case 1: Object o = sha1 != null ? sha1 : ttroot;
+            return new Object[]{o};
+        case 2: return new Object[]{sha1, ttroot};
+        default:
+            throw new IllegalStateException();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -187,8 +224,15 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         if (a.length < size)
             a = (T[])Array.newInstance(a.getClass().getComponentType(), size);
         
-        if(size == 1)
+        switch(size) {
+        case 1 :
+            URN present = sha1 != null ? sha1 : ttroot;
+                    a[0] = (T)present;
+                    break;
+        case 2 :
             a[0] = (T)sha1;
+            a[1] = (T)ttroot;
+        }
         
         if(a.length > size)
             a[size] = null;
@@ -197,24 +241,35 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     
     /** Iterator that returns each of the Urn Types in turn. */
     private class UrnIterator implements Iterator<URN> {
-        private int idx = 0;
-
+        private boolean givenSHA1,givenTTRoot;
+        
         public boolean hasNext() {
-            return idx == 0 && sha1 != null;
+            return (!givenSHA1 && sha1 != null) ||
+               (!givenTTRoot && ttroot != null);
         }
 
         public URN next() {
-            if(idx != 0 || sha1 == null)
+            if (!hasNext())
                 throw new NoSuchElementException();
-            idx++;
-            return sha1;
+            
+            if (!givenSHA1 && sha1 != null) {
+                givenSHA1 = true;
+                return sha1;
+            }
+            if (!givenTTRoot && ttroot != null) {
+                givenTTRoot = true;
+                return ttroot;
+            }
+            throw new IllegalStateException();
         }
 
         public void remove() {
-            if(idx == 0)
+            if (!(givenSHA1 || givenTTRoot))
                 throw new IllegalStateException();
             
-            if(idx == 1)
+            if (givenTTRoot) 
+                ttroot = null;
+            else if (givenSHA1) 
                 sha1 = null;
         }
 

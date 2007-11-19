@@ -16,7 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +28,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
+
 
 
 /**
@@ -51,16 +55,22 @@ public final class UrnCache {
      */
     private static final File URN_CACHE_BACKUP_FILE = 
         new File(CommonUtils.getUserSettingsDir(), "fileurns.bak");
-
+    
     /**
      * UrnCache instance variable.  LOCKING: obtain UrnCache.class.
      */
     private static UrnCache instance = null;
-
+    
     /**
-     * UrnCache container.  LOCKING: obtain this.
+     * Returns the <tt>UrnCache</tt> instance.
+     *
+     * @return the <tt>UrnCache</tt> instance
      */
-    private final Map<UrnSetKey, /*Unmodifyable*/Set<URN>> URN_MAP;
+    public static synchronized UrnCache instance() {
+        if (instance == null)
+            instance = new UrnCache();
+        return instance;
+    }
     
     /**
      * The ProcessingQueue that Files are hashed in.
@@ -75,27 +85,25 @@ public final class UrnCache {
     /**
      * Whether or not data is dirty since the last time we saved.
      */
-    private boolean dirty = false;
-
-    /**
-	 * Returns the <tt>UrnCache</tt> instance.
-	 *
-	 * @return the <tt>UrnCache</tt> instance
-     */
-    public static synchronized UrnCache instance() {
-		if (instance == null)
-			instance = new UrnCache();
-        return instance;
-    }
+    private volatile boolean dirty = false;
+    
+    /** The future that will contain the URN_MAP when it is done. */
+    private final Future<Map<UrnSetKey, Set<URN>>> deserializer;
 
     /**
      * Create and initialize urn cache.
      */
-    @SuppressWarnings("unchecked")
-    private UrnCache() {
-        Map map = createMap();
-		dirty = scanAndRemoveOldEntries(map);
-        URN_MAP = map;
+    public UrnCache() {
+        deserializer = QUEUE.submit(new Callable<Map<UrnSetKey, Set<URN>>>() {
+            @SuppressWarnings("unchecked")
+            public Map<UrnSetKey, Set<URN>> call() {
+                // This cannot be inside a synchronized block, otherwise other methods
+                // can block its construction.
+                Map map = createMap();
+                dirty = scanAndRemoveOldEntries(map);
+                return map;
+            }
+        });
 	}
 
     /**
@@ -177,7 +185,7 @@ public final class UrnCache {
      * set.
      */
     public Set<URN> calculateUrns(File file) throws IOException, InterruptedException {
-        return new UrnSet(URN.createSHA1Urn(file));
+        return URN.createSHA1AndTTRootUrns(file);
 	}
     
     /**
@@ -198,7 +206,7 @@ public final class UrnCache {
 		UrnSetKey key = new UrnSetKey(file);
 
         // one or more "urn:" names for this file 
-		Set<URN> cachedUrns = URN_MAP.get(key);
+		Set<URN> cachedUrns = getUrnMap().get(key);
 		if(cachedUrns == null)
 			return Collections.emptySet();
 
@@ -210,7 +218,7 @@ public final class UrnCache {
      */
     public synchronized void removeUrns(File f) {
         UrnSetKey k = new UrnSetKey(f);
-        URN_MAP.remove(k);
+        getUrnMap().remove(k);
         dirty = true;
     }
 
@@ -221,7 +229,7 @@ public final class UrnCache {
      */
     public synchronized void addUrns(File file, Set<? extends URN> urns) {
 		UrnSetKey key = new UrnSetKey(file);
-        URN_MAP.put(key, Collections.unmodifiableSet(urns));
+        getUrnMap().put(key, Collections.unmodifiableSet(urns));
         dirty = true;
     }
         
@@ -229,7 +237,7 @@ public final class UrnCache {
      * Loads values from cache file, if available.  If the cache file is
      * not readable, tries the backup.
      */
-    private Map createMap() {
+    private static Map createMap() {
         Map result;
         result = readMap(URN_CACHE_FILE);
         if(result == null)
@@ -312,6 +320,8 @@ public final class UrnCache {
      * Write cache so that we only have to calculate them once.
      */
     public synchronized void persistCache() {
+        getUrnMap(); // make sure it's finished constructing.
+        
         if(!dirty)
             return;
         
@@ -322,7 +332,7 @@ public final class UrnCache {
         try {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(new FileOutputStream(URN_CACHE_FILE)));
-            oos.writeObject(URN_MAP);
+            oos.writeObject(getUrnMap());
             oos.flush();
         } catch (IOException e) {
             LOG.error("Unable to persist cache", e);
@@ -331,6 +341,16 @@ public final class UrnCache {
         }
         
         dirty = false;
+    }
+    
+    private Map<UrnSetKey, Set<URN>> getUrnMap() {
+        try {
+            return deserializer.get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private class Processor implements Runnable {
