@@ -92,6 +92,7 @@ import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 
@@ -1364,10 +1365,20 @@ public abstract class MessageRouter {
             public void run() {
                 Socket sock = null;
                 try {
-                    sock = Sockets.connect(new InetSocketAddress(addrToContact, portToContact), 12000);
-                    OutputStream os = sock.getOutputStream();
-                    os.write("CONNECT BACK\r\n\r\n".getBytes());
-                    os.flush();
+                    try {
+                        sock = Sockets.connect(new InetSocketAddress(addrToContact, portToContact), 6000, ConnectType.TLS);
+                        sock.setSoTimeout(6000);
+                        OutputStream os = sock.getOutputStream();
+                        os.write("CONNECT BACK\r\n\r\n".getBytes());
+                        os.flush();
+                    } catch (IOException noTls) {
+                        IOUtils.close(sock);
+                        sock = Sockets.connect(new InetSocketAddress(addrToContact, portToContact), 12000, ConnectType.PLAIN);                        
+                        sock.setSoTimeout(12000);
+                        OutputStream os = sock.getOutputStream();
+                        os.write("CONNECT BACK\r\n\r\n".getBytes());
+                        os.flush();
+                    }
                     if(LOG.isTraceEnabled())
                         LOG.trace("Succesful connectback to: " + addrToContact);
                     try {
