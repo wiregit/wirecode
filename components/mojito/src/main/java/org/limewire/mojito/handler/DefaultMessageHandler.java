@@ -122,6 +122,10 @@ public class DefaultMessageHandler {
                     
                     // Update the new Contact in the RouteTable and 
                     // mark it as shutdown
+                    // mark the existing contact as shutdown if its alive or
+                    // it will not be removed.
+                    if (existing.isAlive())
+                        existing.shutdown(true);
                     routeTable.add(node);
                     node.shutdown(true);
                 }
