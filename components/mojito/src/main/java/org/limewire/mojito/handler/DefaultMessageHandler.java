@@ -169,7 +169,7 @@ public class DefaultMessageHandler {
             Contact existing = routeTable.get(nodeId);
             
             if (existing == null
-                    || !existing.isAlive()
+                    || existing.isDead()
                     || existing.getInstanceID() != node.getInstanceID()) {
                 
                 // Store forward only if we're bootstrapped
@@ -273,7 +273,7 @@ public class DefaultMessageHandler {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         RouteTable routeTable = context.getRouteTable();
         List<Contact> nodes = CollectionUtils.toList(
-                routeTable.select(valueId, k, SelectMode.ALIVE_WITH_LOCAL));
+                routeTable.select(valueId, k, SelectMode.ALL));
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);
         
@@ -345,7 +345,7 @@ public class DefaultMessageHandler {
         //    the furthest away Node (we).
         } else if (nodes.size() >= k 
                 && context.isLocalNode(furthest)
-                && (existing == null || !existing.isAlive())) {
+                && (existing == null || existing.isDead())) {
             
             KUID nodeId = node.getNodeID();
             KUID furthestId = furthest.getNodeID();
