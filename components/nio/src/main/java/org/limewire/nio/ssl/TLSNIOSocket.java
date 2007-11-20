@@ -85,13 +85,11 @@ public class TLSNIOSocket extends NIOSocket {
         tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor(), NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
     }
     
-    
-    /** Ensures the TLS layer is closed properly. */
     @Override
-    protected void shutdownImpl() {
-        super.shutdownImpl();
+    protected void shutdownObservers() {
         if(tlsLayer != null)
             tlsLayer.shutdown();
+        super.shutdownObservers();
     }
     
     /* package */ SSLReadWriteChannel getSSLChannel() {

@@ -512,13 +512,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             }
         }
         
-        reader.shutdown();
-        writer.shutdown();
-        if(connecter != null)
-            connecter.shutdown();
-        if(shutdownObserver != null)
-            shutdownObserver.shutdown();
-        
+        shutdownObservers();
+                
         NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
             public void run() {
                 if(nioOutputStream != null)
@@ -530,6 +525,16 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 shutdownObserver = null;
             }
         });
+    }
+    
+    /** Shuts down all observers. */
+    protected void shutdownObservers() {
+        reader.shutdown();
+        writer.shutdown();
+        if(connecter != null)
+            connecter.shutdown();
+        if(shutdownObserver != null)
+            shutdownObserver.shutdown();
     }
     
     /** Shuts down the socket and channels. */
