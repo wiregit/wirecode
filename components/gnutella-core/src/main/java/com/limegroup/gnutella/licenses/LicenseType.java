@@ -66,7 +66,8 @@ public enum LicenseType {
     }
     
     private static boolean hasCCLicense(String license, String type) {
-        license = license.toLowerCase(Locale.US);
+        if(license != null)
+            license = license.toLowerCase(Locale.US);
         return (type != null && type.equals(CCConstants.CC_URI_PREFIX)) ||
                (license != null && license.indexOf(CCConstants.CC_URI_PREFIX) != -1
                                 && license.indexOf(CCConstants.URL_INDICATOR) != -1)
