@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.licenses;
 
+import java.util.Locale;
+
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
@@ -81,7 +83,7 @@ public final class LicenseFactoryImpl implements LicenseFactory {
     
     /** Determines if the given string can be a CC license. */
     private static boolean isCCLicense(String s) {
-        return s.indexOf(CCConstants.URL_INDICATOR) != -1;
+        return s.toLowerCase(Locale.US).indexOf(CCConstants.URL_INDICATOR) != -1;
     }
     
     /** Determines if the given string can be a Weed license. */
@@ -125,6 +127,8 @@ public final class LicenseFactoryImpl implements LicenseFactory {
         
     /** Gets a CC license URI from the given license string. */
     private static URI getCCLicenseURI(String license) {
+        license = license.toLowerCase(Locale.US);
+        
         // find where the URL should begin.
         int verifyAt = license.indexOf(CCConstants.URL_INDICATOR);
         if(verifyAt == -1)

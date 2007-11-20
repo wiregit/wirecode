@@ -3,6 +3,7 @@ package com.limegroup.gnutella.licenses;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.WRMXML;
@@ -65,6 +66,7 @@ public enum LicenseType {
     }
     
     private static boolean hasCCLicense(String license, String type) {
+        license = license.toLowerCase(Locale.US);
         return (type != null && type.equals(CCConstants.CC_URI_PREFIX)) ||
                (license != null && license.indexOf(CCConstants.CC_URI_PREFIX) != -1
                                 && license.indexOf(CCConstants.URL_INDICATOR) != -1)
