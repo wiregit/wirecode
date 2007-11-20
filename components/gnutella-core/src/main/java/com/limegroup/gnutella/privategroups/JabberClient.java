@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.privategroups;
 
 import java.math.BigInteger;
+import java.net.Socket;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,14 +29,24 @@ public class JabberClient{
     private BigInteger modulus;
     private String ipAddress;
     private String port;
-    private HashMap<String, ClientSocket> msgSockets = new HashMap<String, ClientSocket>();
     private String localUsername;
+    private HashMap<String, Socket> msgSockets = new HashMap<String, Socket>();
     
     
     
     
     public JabberClient(){
     }
+    
+    
+    /**
+     * Returns a singleton UserManager instance.
+     *
+     * @return a UserManager instance.
+     */
+//    public static JabberClient getInstance() {
+//        return instance;
+//    }
     
     public XMPPConnection connectToServerNoPort(String serverAddress){
         
@@ -325,7 +336,7 @@ public class JabberClient{
         //  Create account
         //manager.createAccount("lulu4", "Lulu4", connection);      
         client.loginAccount("lulu4", "Lulu4", connection);
-        
+
         //get remote user info
         client.setRemoteConnection("lulu", connection);
         client.sendMessage("lulu", "hi");

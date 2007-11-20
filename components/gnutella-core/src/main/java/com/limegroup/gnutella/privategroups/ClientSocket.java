@@ -14,7 +14,7 @@ import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-public class ClientSocket {
+public class ClientSocket extends Socket{
     
     private String ipaddress;
     private int portNumber;

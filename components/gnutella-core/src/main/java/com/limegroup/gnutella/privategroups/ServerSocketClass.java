@@ -15,7 +15,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 public class ServerSocketClass {
     
-       private ServerSocket MyService = null;
+        private ServerSocket MyService = null;
         private static StringBuffer buffer = new StringBuffer(100);
         private static BufferedReader is;
         private static PrintWriter os;
@@ -49,6 +49,9 @@ public class ServerSocketClass {
                 
                 try{
                     Socket clientSocketConnection = MyService.accept();
+                    
+                    //JabberClient currentClient = JabberClient.getInstance();
+                    
                     
                     Runnable r = new ClientReader(clientSocketConnection);
                     Thread t = new Thread(r);
