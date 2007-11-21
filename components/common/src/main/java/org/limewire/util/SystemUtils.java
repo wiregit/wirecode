@@ -406,6 +406,32 @@ public class SystemUtils {
         
         throw new IOException("native code not linked");
     }
+    
+    /**
+     * Runs a path using the default program on the native platform.
+     *
+     * Given a path to a program, runs that program.
+     * Given a path to a document, opens it in the default program for that kind of document.
+     * Given a path to a folder, opens it in the shell.
+     *
+     * Note: this method accepts a parameter list thus should
+     *        be generally used with executable files
+     *
+     * This method returns immediately, not later after the program exits.
+     * On Windows, this method does the same thing as Start, Run.
+     *
+     * @param path The complete path to run, like "C:\folder\file.ext"
+     * @param path The list of parameters to pass to the file
+     * @return     0, in place of the process exit code
+     */
+    public static int openFile(String path, String params) throws IOException {
+        if(OSUtils.isWindows() && isLoaded) {
+            openFileParamsNative(path, params);
+            return 0; // program's running, no way to get exit code.
+        }
+
+        throw new IOException("native code not linked");
+    }
 
     /**
      * Moves a file to the platform-specific trash can or recycle bin.
@@ -488,6 +514,7 @@ public class SystemUtils {
     private static final native String getSpecialPathNative(String name);    
     private static final native void openURLNative(String url);
     private static final native void openFileNative(String path);
+    private static final native void openFileParamsNative(String path, String params);
     private static final native boolean recycleNative(String path);
     private static final native int setFileWriteable(String path);
     private static final native long idleTime();

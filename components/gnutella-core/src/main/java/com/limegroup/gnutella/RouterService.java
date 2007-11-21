@@ -42,6 +42,8 @@ import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
+import org.limewire.util.SystemUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentManager;
@@ -1245,11 +1247,35 @@ public class RouterService {
         shutdown();
         if (toExecute != null) {
             try {
-                Runtime.getRuntime().exec(toExecute);
+                if (OSUtils.isWindowsVista()) {
+                    String cmd = parseCommand(toExecute).trim();
+                    String params = toExecute.substring(cmd.length()).trim();
+                    SystemUtils.openFile(cmd, params);
+                } else
+                    Runtime.getRuntime().exec(toExecute);
             } catch (IOException tooBad) {}
         }
     }
-    
+
+    private static String parseCommand(String toCall) {
+        if (toCall.startsWith("\"")) {
+            int end;
+            if ((end = toCall.indexOf("\"", 1)) > -1) {
+                return toCall.substring(0,end+1);
+            }
+            else {
+                return toCall+"\"";
+            }
+        }
+        int space;
+        if ((space = toCall.indexOf(" ")) > -1) {
+            return toCall.substring(0, space);
+        }
+
+        return toCall;
+    }
+
+        
     /**
      * Deletes all preview files.
      */
