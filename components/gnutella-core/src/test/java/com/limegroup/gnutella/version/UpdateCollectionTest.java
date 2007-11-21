@@ -393,6 +393,19 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	    assertNull(data);
     }
     
+    public void testQuotesAroundUCommand() throws Exception {
+        UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+            "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                "<lang id='en'>WTG Quotes.</lang>" +
+            "</msg>" +
+        "</update>");
+        
+        UpdateData data = uc.getUpdateDataFor(new Version("9.9.0"), "en", false, UpdateInformation.STYLE_BETA, null);       
+        assertEquals("WTG Quotes.", data.getUpdateText());
+        assertEquals("\"name with spaces\" after quote", data.getUpdateCommand());
+        
+    }
+    
     
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);

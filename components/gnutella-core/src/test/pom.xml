@@ -32,6 +32,7 @@
       <groupId>org.limewire</groupId>
       <artifactId>lw-inspection-tool</artifactId>
       <version>1.0</version>
+      <scope>test</scope>
     </dependency>
     <!-- Ibiblio Jars -->
     <dependency>
