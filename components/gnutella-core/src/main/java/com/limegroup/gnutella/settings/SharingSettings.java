@@ -346,7 +346,7 @@ public class SharingSettings extends LimeProps {
      * The list of extensions shared by default
      */
     public static final String[] getDefaultExtensions() {
-        return StringArraySetting.encode(DEFAULT_EXTENSIONS_TO_SHARE); 
+        return StringArraySetting.decode(DEFAULT_EXTENSIONS_TO_SHARE); 
     }
     
     /**
@@ -360,7 +360,7 @@ public class SharingSettings extends LimeProps {
      * The list of extensions disabled by default in the file types sharing screen
      */
     public static final String[] getDefaultDisabledExtensions() {
-        return StringArraySetting.encode(DEFAULT_EXTENSIONS_TO_DISABLE); 
+        return StringArraySetting.decode(DEFAULT_EXTENSIONS_TO_DISABLE); 
     }
     
     /**
@@ -471,7 +471,21 @@ public class SharingSettings extends LimeProps {
      */
     public static final BooleanSetting FRIENDLY_HASHING =
         FACTORY.createBooleanSetting("FRIENDLY_HASHING", true);	
+    
+    /** 
+     * Setting for the threshold of when to warn the user that a lot of 
+     *  files are being shared
+     */
+    public static final IntSetting FILES_FOR_WARNING =
+        FACTORY.createIntSetting("FILES_FOR_WARNING", 1000);
 
+    /** 
+     * Setting for the threshold of when to warn the user that a lot of 
+     *  files are being shared
+     */
+    public static final IntSetting DEPTH_FOR_WARNING =
+        FACTORY.createIntSetting("DEPTH_FOR_WARNING", 4);
+    
 	/**
 	 * Returns the download directory file setting for a mediatype. The
 	 * settings are created lazily when they are requested for the first time.

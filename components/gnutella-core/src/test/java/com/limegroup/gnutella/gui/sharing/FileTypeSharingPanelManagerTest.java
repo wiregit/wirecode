@@ -67,7 +67,10 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
         assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
         assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
-        assertEquals(SharingSettings.EXTENSIONS_TO_SHARE.getValue(),"mp3;wav;hello");
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("wav"));
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().matches("^[^;]*;[^;]*;[^;]*$"));
         assertEquals(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue(), "hello");
         assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
         assertTrue(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("doc"));
@@ -89,7 +92,10 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
         assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
         assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
-        assertEquals(SharingSettings.EXTENSIONS_TO_SHARE.getValue(),"mp3;wav;hello");
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("wav"));
+        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().matches("^[^;]*;[^;]*;[^;]*$"));
         assertEquals(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue(), "hello");
         assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
         assertTrue(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("doc"));
@@ -216,7 +222,7 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         
         for ( String ext : SharingSettings.getDefaultExtensions() ) {
             int index;
-            if ((index = find(StringArraySetting.encode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue()), ext)) != -1) {
+            if ((index = find(StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue()), ext)) != -1) {
                 if (taken.contains(index)) {
                     fail("Warning -- duplicate extension in defaults: " + ext);
                 } 

@@ -39,6 +39,7 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
@@ -872,10 +873,36 @@ public abstract class FileManager {
             // Reset the file list info
             resetVariables();
 
-            // Load the extensions.
-            String[] extensions = StringUtils.split(SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
-            for(int i = 0; i < extensions.length; i++)
-                _extensions.add(extensions[i].toLowerCase());
+            // Load the extensions. 
+            String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase());
+                        
+            for( String ext : extensions ) {
+                _extensions.add(ext);
+            }
+            
+            // Add any extra extensions per chance           
+            if (SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().length() > 0) {
+                String[] array = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue());                
+                for( String ext : array ) {
+                    _extensions.add(ext);
+                }
+            }
+            
+            // Assert no sensitive extensions are shared            
+            if (SharingSettings.DISABLE_SENSITIVE.getValue()) {
+                for( String ext : SharingSettings.getDefaultDisabledExtensions() ) {
+                    _extensions.remove(ext);
+                }
+            }
+            
+            // Assert no disabled extensions are shared            
+            if (SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().length() > 0) {
+                String[] array = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue());                
+                for( String ext : array ) {
+                    _extensions.remove(ext);
+                }
+            }
+
 
             //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
             //C:\dir\subdir.  Although this isn't needed for correctness, it may
@@ -956,6 +983,11 @@ public abstract class FileManager {
         tryToFinish();
     }
     
+    
+    private void updateSharedDirectories(File directory, File parent, int revision) {
+        updateSharedDirectories(directory, directory, parent, revision, 1);
+    }
+    
     /**
      * Recursively adds this directory and all subdirectories to the shared
      * directories as well as queueing their files for sharing.  Does nothing
@@ -969,7 +1001,7 @@ public abstract class FileManager {
      *           directory's parent is not shared.
      * @modifies this
      */
-    private void updateSharedDirectories(File directory, File parent, int revision) {
+    private void updateSharedDirectories(File rootShare, File directory, File parent, int revision, int depth) {
 //        if(LOG.isDebugEnabled())
 //            LOG.debug("Attempting to share directory: " + directory);
         
@@ -1021,7 +1053,7 @@ public abstract class FileManager {
 				_completelySharedDirectories.add(directory);
             if (!isForcedShare) {
                 dispatchFileEvent(
-                    new FileManagerEvent(this, Type.ADD_FOLDER, directory, parent));
+                        new FileManagerEvent(this, Type.ADD_FOLDER, rootShare, depth, directory, parent));
             }
         }
         // STEP 2:
@@ -1048,7 +1080,7 @@ public abstract class FileManager {
         File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
         if(dir_list != null) {
             for(int i = 0; i < dir_list.length && _revision == revision; i++)
-                updateSharedDirectories(dir_list[i], directory, revision);
+                updateSharedDirectories(rootShare, dir_list[i], directory, revision, depth+1);
         }
     }
 

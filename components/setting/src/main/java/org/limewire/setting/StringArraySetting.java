@@ -32,7 +32,7 @@ public class StringArraySetting extends AbstractSetting {
 	 */
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
                                                        String[] defaultValue) {
-		super(defaultProps, props, key, decode(defaultValue));
+		super(defaultProps, props, key, encode(defaultValue));
 	}
         
 	/**
@@ -50,7 +50,7 @@ public class StringArraySetting extends AbstractSetting {
 	 * @param value the value to store
 	 */
 	public void setValue(String[] value) {
-	    setValueInternal(decode(value));
+	    setValueInternal(encode(value));
 	}
     
     /** Load value from property string value
@@ -58,13 +58,13 @@ public class StringArraySetting extends AbstractSetting {
      *
      */
     protected void loadValue(String sValue) {
-		value = encode(sValue);
+		value = decode(sValue);
     }
     
     /**
      * Splits the string into an Array
      */
-    public static final String[] encode(String src) {
+    public static final String[] decode(String src) {
         
         if (src == null || src.length()==0) {
             return (new String[0]);
@@ -76,7 +76,7 @@ public class StringArraySetting extends AbstractSetting {
     /**
      * Separates each field of the array by a semicolon
      */
-    public static final String decode(String[] src) {
+    public static final String encode(String[] src) {
         
         if (src == null || src.length==0) {
             return "";
@@ -94,6 +94,6 @@ public class StringArraySetting extends AbstractSetting {
     }
 
     public String toString() {
-        return decode(getValue());
+        return encode(getValue());
     }
 }

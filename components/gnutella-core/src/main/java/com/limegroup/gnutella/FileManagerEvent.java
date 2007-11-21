@@ -33,6 +33,9 @@ public class FileManagerEvent extends EventObject {
     private final Type type;
     private final FileDesc[] fds;
     private final File[] files;
+    
+    private final int relativeDepth;
+    private final File rootShare;
 
     /**
      * Constructs a FileManagerEvent
@@ -42,6 +45,8 @@ public class FileManagerEvent extends EventObject {
         this.type = type;
         this.fds = null;
         this.files = null;
+        this.relativeDepth = -1;
+        this.rootShare = null;
     }
     
     /**
@@ -51,6 +56,9 @@ public class FileManagerEvent extends EventObject {
         super(manager);
         this.type = type;
         this.fds = fds;
+        this.relativeDepth = -1;
+        this.rootShare = null;
+        
         this.files = new File[fds != null ? fds.length : 0];
         for (int i = 0; fds != null && i < fds.length; i++) {
             files[i] = fds[i].getFile();
@@ -65,6 +73,18 @@ public class FileManagerEvent extends EventObject {
         this.type = type;
         this.files = files;
         this.fds = null;
+        this.relativeDepth = 0;
+        this.rootShare = null;
+    }
+
+    public FileManagerEvent(FileManager manager, Type type, File rootShare, int relativeDepth, File... files) {
+        super(manager);
+        this.type = type;
+        this.files = files;
+        this.fds = null;
+        
+        this.relativeDepth = relativeDepth;
+        this.rootShare = rootShare;
     }
     
     /**
@@ -95,6 +115,22 @@ public class FileManagerEvent extends EventObject {
      */
     public File[] getFiles() {
         return files;
+    }
+
+    /** 
+     * Gets the the relative depth of the folder from where the sharing was initiated from
+     *  with an ADD_FOLDER event
+     */
+    public int getRelativeDepth() {
+        return relativeDepth;
+    }
+    
+    /** 
+     * Gets the top level directory that sharing was recursivly initiated on
+     *  for an ADD_FOLDER event
+     */
+    public File getRootShare() {
+        return rootShare;
     }
     
     /**
