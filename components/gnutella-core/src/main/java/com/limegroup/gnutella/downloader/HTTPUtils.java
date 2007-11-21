@@ -44,7 +44,7 @@ public class HTTPUtils {
             //we expect only 200.
             if (head.getStatusCode() != HttpStatus.SC_OK)
                 throw new IOException("Got " + head.getStatusCode() +
-                                      " instead of 200");
+                                      " instead of 200 for URL: " + url);
             
             long length = head.getResponseContentLength();
             if (length<0)
