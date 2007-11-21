@@ -41,6 +41,9 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
+import org.limewire.util.Base32;
 import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
@@ -108,6 +111,7 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.LimeSentMessageStat;
@@ -297,6 +301,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     @InspectionPoint("routed messages")
     private final MessageCounter messageCounter = new MessageCounter();
+    
+    @InspectionPoint("guid tracker")
+    @SuppressWarnings("unused")
+    private final GUIDTracker guidTracker = new GUIDTracker();
     
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
@@ -3275,6 +3283,76 @@ public abstract class MessageRouterImpl implements MessageRouter {
             return counts;
         }
     }
+    
+    /**
+     * tracks information about messages with a specified guid.
+     */
+    private class GUIDTracker implements Inspectable, MessageListener, SettingListener {
+        private final List<Map<String,Object>> l = 
+            Collections.synchronizedList(new ArrayList<Map<String,Object>>());
+        
+        private volatile long start;
+        
+        private volatile byte[] lastGuid;
+        public GUIDTracker() {
+            MessageSettings.TRACKING_GUID.addSettingListener(this);
+        }
+        
+        public Object inspect() {
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("start",start);
+            if (lastGuid != null)
+                ret.put("guid", Base32.encode(lastGuid));
+            ret.put("messages",l);
+            return ret;
+        }
+        
+        public void processMessage(Message m, ReplyHandler handler) {
+            Map<String,Object> data = new HashMap<String,Object>();
+            data.put("ver",1);
+            data.put("time", System.currentTimeMillis());
+            data.put("source",handler.getInetAddress()+":"+handler.getPort());
+            data.put("type",m.getClass().getName());
+            data.put("hops",m.getHops());
+            data.put("ttl",m.getTTL());
+            data.put("net",m.getNetwork());
+            data.put("len",m.getLength()); // why not
+            l.add(data);
+        }
+        
+        public void registered(final byte[] guid) {
+            start = System.currentTimeMillis();
+            lastGuid = guid;
+            // don't keep history for ever.
+            backgroundExecutor.schedule(new Runnable() {
+                public void run () {
+                    byte [] last = lastGuid;
+                    if (last != null && Arrays.equals(guid,last))
+                        unregisterMessageListener(guid, GUIDTracker.this);
+                }
+            }, 300, TimeUnit.SECONDS);
+        }
+        
+        public void unregistered(byte[] guid) {
+            start = 0;
+            lastGuid = null;
+            l.clear(); // this is the only list manipulation outside of messagedispatch thread
+        }
+        
+        public void settingChanged(SettingEvent evt) {
+            if (evt.getEventType() != SettingEvent.EventType.VALUE_CHANGED ||
+                    evt.getSetting() != MessageSettings.TRACKING_GUID)
+                return;
+            byte [] last = lastGuid;
+            if (last != null)
+                unregisterMessageListener(last, this);
+            String newGuid = MessageSettings.TRACKING_GUID.getValue();
+            if (newGuid.length() == 0)
+                return;
+            byte[] guid = Base32.decode(newGuid);
+            registerMessageListener(guid, this);
+        }
+    }        
     
     private class ConnectionListener implements ConnectionLifecycleListener {
 

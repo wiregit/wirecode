@@ -4,6 +4,7 @@ import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetting;
 
 /**
  * Settings for messages
@@ -36,4 +37,10 @@ public class MessageSettings extends LimeProps {
     public static final StringArraySetting CUSTOM_FD_CRITERIA =
         FACTORY.createRemoteStringArraySetting("CUSTOM_FD_CRITERIA", 
                 new String[]{"false"}, "MessageSettings.customFDCriteria");
+    
+    /**
+     * A guid to track.
+     */
+    public static final StringSetting TRACKING_GUID = 
+        FACTORY.createRemoteStringSetting("TRACKNG_GUID", "", "MessageSettings.trackingGUID");
 }
