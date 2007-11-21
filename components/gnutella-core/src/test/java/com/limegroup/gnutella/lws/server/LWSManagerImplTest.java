@@ -7,6 +7,7 @@ import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.StringCallback;
 
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.lws.server.LWSManagerImpl;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
