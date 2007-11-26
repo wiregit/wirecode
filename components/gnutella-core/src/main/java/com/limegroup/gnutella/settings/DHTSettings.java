@@ -83,7 +83,7 @@ public class DHTSettings extends LimeProps {
     // Was DHT.MinDHTInitialUptime
     public static final LongSetting MIN_ACTIVE_DHT_INITIAL_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinActiveInitialUptime", 1L, 48L*60L*60L*1000L);
+                "DHT.MinActiveInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
@@ -101,7 +101,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final LongSetting MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME 
         = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinPassiveLeafInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+                "DHT.MinPassiveLeafInitialUptime", 1L, 48L*60L*60L*1000L);
     
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
