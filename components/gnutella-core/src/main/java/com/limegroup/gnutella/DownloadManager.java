@@ -264,41 +264,47 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         // INPUT
         //  urns - space-separated string of urns
         // OUTPUT
-        //  URN of download - a string of form
-        //          <URN> ' ' <percentage-downloaded> [ '|' <URN> ' ' <percentage-downloaded> ]
+        //  ID of download - a string of form
+        //          <ID> ' ' <percentage-downloaded> [ '|' <ID> ' ' <percentage-downloaded> ]
+        //  This ID is the identity hash code
         //
         lwsManager.get().registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {
 
             protected String handleRest(Map<String, String> args) {
                         
-                Tagged<String> urnsString = LWSUtil.getArg(args, "urns", "GetDownloadProgress");
-                if (!urnsString.isValid()) return urnsString.getValue();
+                // TODO: These aren't URNs, they are identity hash codes
+                //       But I don't really care right
+                Tagged<String> idsString = LWSUtil.getArg(args, "urns", "GetDownloadProgress");
+                if (!idsString.isValid()) return idsString.getValue();
                 //
                 // Return a string mapping urns to download percentages
                 //
                 StringBuffer res = new StringBuffer();
-                String decodedURNs = null;
+                String decodedIDs = null;
                 try {
-                    decodedURNs = URLDecoder.decode(urnsString.getValue());
+                    decodedIDs = URLDecoder.decode(idsString.getValue());
                 } catch (IOException e) {
-                    return "invalid.urns";
+                    return "invalid.ids";
                 }
-                String[] urns = decodedURNs.split(" ");
-                for (AbstractDownloader d : activeAndWaiting) {
-                    urnLoop: for (String urn : urns) {
-                        if (d == null) continue;                        
-                        if (d.getSHA1Urn() != null && urn.equals(d.getSHA1Urn().toString())) {
-                            long read = d.getAmountRead();
-                            long total = d.getContentLength();
-                            String ratio = String.valueOf((float)read / (float)total);
-                            res.append(urn);
-                            res.append(" ");
-                            res.append(ratio);
-                            res.append("!");
-                            break urnLoop;
+                String[] downloaderIDs = decodedIDs.split(" ");
+                synchronized (activeAndWaiting) {
+                    for (AbstractDownloader d : activeAndWaiting) {
+                        if (d == null) continue;
+                        urnLoop: for (String downloaderID : downloaderIDs) {
+                            String id = String.valueOf(System.identityHashCode(d));
+                            if (downloaderID.equals(id)) {
+                                long read = d.getAmountRead();
+                                long total = d.getContentLength();
+                                String ratio = String.valueOf((float)read / (float)total);
+                                res.append(downloaderID);
+                                res.append(" ");
+                                res.append(ratio);
+                                res.append("|");
+                                break urnLoop;
+                            }
                         }
                     }
-                }                
+                }
                 return res.toString(); 
             }            
         });                 
