@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
+
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
@@ -21,14 +23,15 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
     
     private final LWSManager lwsManager;
     private final DownloadServices downloadServices;
-    private final LWSIntegrationServicesDelegate del;
+    private final LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate;
     
+    @Inject
     public LWSIntegrationServicesImpl(LWSManager lwsManager, 
                                       DownloadServices downloadServices,
-                                      LWSIntegrationServicesDelegate del) {
+                                      LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate) {
         this.lwsManager = lwsManager;
         this.downloadServices = downloadServices;
-        this.del = del;
+        this.lwsIntegrationServicesDelegate = lwsIntegrationServicesDelegate;
     }
     
 
@@ -64,8 +67,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     return "invalid.ids";
                 }
                 String[] downloaderIDs = decodedIDs.split(" ");
-                synchronized (del) {
-                    for (AbstractDownloader d : del.getAllDownloaders()) {
+                synchronized (lwsIntegrationServicesDelegate) {
+                    for (AbstractDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
                         if (d == null) continue;
                         urnLoop: for (String downloaderID : downloaderIDs) {
                             String id = String.valueOf(System.identityHashCode(d));
@@ -161,7 +164,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // OUTPUT
         //  OK
         //
-        lwsManager.registerHandler("PauseDownload", new LWSManagerCommandResponseForDownloading("PauseDownload", del) {
+        lwsManager.registerHandler("PauseDownload", new LWSManagerCommandResponseForDownloading("PauseDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.pause();
@@ -175,7 +178,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // OUTPUT
         //  OK
         //
-        lwsManager.registerHandler("StopDownload", new LWSManagerCommandResponseForDownloading("StopDownload", del) {
+        lwsManager.registerHandler("StopDownload", new LWSManagerCommandResponseForDownloading("StopDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.stop();
@@ -189,7 +192,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // OUTPUT
         //  OK
         //
-        lwsManager.registerHandler("ResumeDownload", new LWSManagerCommandResponseForDownloading("ResumeDownload", del) {
+        lwsManager.registerHandler("ResumeDownload", new LWSManagerCommandResponseForDownloading("ResumeDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.resume();

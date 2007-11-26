@@ -110,7 +110,9 @@ import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.InNetworkCallback;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
+import com.limegroup.gnutella.downloader.LWSIntegrationServicesImpl;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactoryImpl;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
@@ -316,6 +318,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
         bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);
+        bind(LWSIntegrationServices.class).to(LWSIntegrationServicesImpl.class);
         bind(LWSIntegrationServicesDelegate.class).to(DownloadManager.class);
         bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
         bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
