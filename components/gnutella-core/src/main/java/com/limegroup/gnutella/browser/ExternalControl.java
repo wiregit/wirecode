@@ -119,13 +119,6 @@ public class ExternalControl {
 	    LOG.trace("enter handleMagnetRequest");
 
 	    ActivityCallback callback = restoreApplication();
-        // No reason to make sure connections are active.  We don't even know
-        // at this point if the magnet requires a search.
-//		if ( RouterService.getNumInitializedConnections() <= 0 ) 
-//		    RouterService.connect();
-
-
-
 	    MagnetOptions options[] = MagnetOptions.parseMagnet(arg);
 
 		if (options.length == 0) {
