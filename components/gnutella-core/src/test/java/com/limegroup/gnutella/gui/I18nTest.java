@@ -25,22 +25,22 @@ public class I18nTest extends BaseTestCase {
     }
     
     public void testSingularNoArgsQuote() {
-        String result = I18n.tr("singular 'hi!'", "plural 'his!'", 1);
+        String result = I18n.trn("singular 'hi!'", "plural 'his!'", 1);
         assertEquals("singular 'hi!'", result); 
     }
     
     public void testPluralNoArgsQuote() {
-        String result = I18n.tr("singular 'hi!'", "plural 'his!'", 2);
+        String result = I18n.trn("singular 'hi!'", "plural 'his!'", 2);
         assertEquals("plural 'his!'", result); 
     }
     
     public void testSingularArgsQuote() {
-        String result = I18n.tr("singular 'hi!' {0}", "plural 'his!' {0}", 1, "yuck");
+        String result = I18n.trn("singular 'hi!' {0}", "plural 'his!' {0}", 1, "yuck");
         assertEquals("singular 'hi!' yuck", result); 
     }
     
     public void testPluralArgsQuote() {
-        String result = I18n.tr("singular 'hi!'", "plural 'his!'", 2, "yuck");
+        String result = I18n.trn("singular 'hi!' {0}", "plural 'his!' {0}", 2, "yuck");
         assertEquals("plural 'his!' yuck", result); 
     }
 
