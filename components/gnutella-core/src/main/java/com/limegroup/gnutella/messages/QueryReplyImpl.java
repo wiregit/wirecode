@@ -39,6 +39,7 @@ import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.HostDataFactory;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -657,6 +658,11 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         //verified for these to be acceptable.  Also note that exceptions are
         //silently caught.
         int left=getResultCount();          //number of records left to get
+        
+        // sanity check
+        if (left > FilterSettings.MAX_RESPONSES_PER_REPLY.getValue())
+            return;
+        
         Response[] responses=new Response[left];
         Set<URN> urns = new HashSet<URN>(responses.length); // set for the urns carried in this reply
         short uniqueURNs = 0;

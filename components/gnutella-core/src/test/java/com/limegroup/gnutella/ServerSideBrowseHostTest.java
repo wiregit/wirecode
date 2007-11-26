@@ -1,11 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Iterator;
 
 import org.limewire.io.ByteReader;
+import org.limewire.util.FileUtils;
 
 import junit.framework.Test;
 
@@ -18,6 +20,7 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.FilterSettings;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For
@@ -113,6 +116,20 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
     }
 
     public void testHTTPRequest() throws Exception {
+        FilterSettings.MAX_RESPONSES_PER_REPLY.setValue(10);
+        
+        // make sure more than FilterSettings.MAX_RESPONSES_PER_REPLY files
+        // are shared
+        for (int i = 0; i < FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() * 2; i++) {
+            File f = new File(_sharedDir, "sharedFile"+i+".txt");
+            f.deleteOnExit();
+            FileUtils.writeObject(f.getAbsolutePath(), new Integer(i));
+        }
+        
+        FileManager fm = injector.getInstance(FileManager.class);
+        fm.loadSettingsAndWait(2000);
+        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getNumFiles());
+        
         String result = null;
 
         Socket s = new Socket("localhost", PORT);
@@ -136,7 +153,16 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
             currLine = in.readLine();
         } while ((currLine != null) && !currLine.equals(""));
 
+        // 10 in the first
         QueryReply qr = (QueryReply) messageFactory.read(s.getInputStream());
+        assertEquals(10, qr.getResultCount());
+        
+        // 10 in the second
+        qr = (QueryReply) messageFactory.read(s.getInputStream());
+        assertEquals(10, qr.getResultCount());
+        
+        // 2 in the 3rd.
+        qr = (QueryReply) messageFactory.read(s.getInputStream());
         assertEquals(2, qr.getResultCount());
 
         assertNull(in.readLine());

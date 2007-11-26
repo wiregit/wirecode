@@ -55,6 +55,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -1514,7 +1515,45 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(28 /* length of invalid unicode */ + 2 /* zero bytes */ + 8 /* index + size */, response.getIncomingLength());
         assertNotEquals(28, response.getName().getBytes("UTF-8").length);
     }
-      
+    
+    public void testMaxResponses() throws Exception {
+        nResponseTest(FilterSettings.MAX_RESPONSES_PER_REPLY.getValue());
+    }
+    
+    public void testOverMaxResponses() throws Exception {
+        try {
+            nResponseTest(FilterSettings.MAX_RESPONSES_PER_REPLY.getValue()+1);
+            fail("should not have parsed");
+        } catch (BadPacketException expected) {}
+    }
+     
+    private void nResponseTest(int limit) throws Exception {
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
+        // try a reply with max number of responses
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(limit); // # of results
+        ByteOrder.short2leb((short)6346, out); // port
+        out.write(IP); // ip
+        ByteOrder.int2leb(1, out);
+        for (int i = 0; i < limit; i++) 
+            responseFactory.createResponse(i, 1, "test"+i).writeToStream(out);
+        
+        out.write(new byte[] { 'L', 'I', 'M', 'E' });
+        out.write(4); // common payload length
+        out.write(0x3C); // flags (control no push) 
+        out.write(0x21); // control (yes ggep, flag busy)
+        ByteOrder.short2leb((short)1, out); // xml size
+        out.write(0); // no chat
+        out.write(0); // null after XML
+        out.write(new byte[16]); // clientGUID
+        
+        QueryReply reply = queryReplyFactory.createFromNetwork(new byte[16], (byte)1,
+                (byte)1, out.toByteArray());
+        
+        assertEquals(limit,reply.getResultsAsList().size());
+    }
+    
     /*
      * All the below crap is because we can't subclass Signature and instead need to provide an SPI.
      */

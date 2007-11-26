@@ -139,4 +139,11 @@ public class FilterSettings extends LimeProps {
     public static final IntSetting MAX_ALTS_TO_DISPLAY =
         FACTORY.createRemoteIntSetting("MAX_ALTS_TO_DISPLAY", 15,
                 "FilterSettings.maxAltsToDisplay", 5, 100);
+    
+    /**
+     * How many responses to allow per QueryReply message.
+     */
+    public static final IntSetting MAX_RESPONSES_PER_REPLY =
+        FACTORY.createRemoteIntSetting("MAX_RESPONSES_PER_REPLY", 10, 
+                "FilterSettings.maxResponsesPerReply", 10, 20);
 }
