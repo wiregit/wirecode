@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.PacketParserUtils;
+import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.PrivateGroupsUtils;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -20,18 +22,18 @@ public class ClientSocket extends Socket{
     private int portNumber;
     private Socket clientSocketConnection;
     private String localUsername;
+    private SocketsManagerImpl socketsManager = new SocketsManagerImpl();
     
     
     public ClientSocket(String ipaddress, int portNumber, String localUsername){
         this.ipaddress = ipaddress;
         this.portNumber = portNumber;
         this.localUsername = localUsername;
-       
     }
 
     public void createClientConnection(){
         try {
-               clientSocketConnection = new Socket(ipaddress, portNumber);
+               clientSocketConnection = socketsManager.connect(new InetSocketAddress(ipaddress, portNumber), 3); //new Socket(ipaddress, portNumber);
                System.out.println("connected");
                              
                //execute thread for receiving input

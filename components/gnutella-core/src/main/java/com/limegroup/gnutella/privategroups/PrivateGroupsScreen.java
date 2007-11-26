@@ -81,7 +81,7 @@ public class PrivateGroupsScreen{
         public void run() {
             //call serversocketclass 
             ServerSocketClass serverSocket = new ServerSocketClass();
-            serverSocket.initializeServerSocket(socketPort);
+            //serverSocket.initializeServerSocket(socketPort);
         }
     }
     

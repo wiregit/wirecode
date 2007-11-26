@@ -24,7 +24,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * ValueStorage Provider
  *
  */
-public class ValueStorageProvider implements IQProvider {
+public class ServerIPQueryProvider implements IQProvider {
 
     private static final String PREFERRED_ENCODING = "UTF-8";
 
@@ -52,7 +52,7 @@ public class ValueStorageProvider implements IQProvider {
                     default:
                 }
 
-                if (event == XmlPullParser.END_TAG && "stor".equals(parser.getName())) break;
+                if (event == XmlPullParser.END_TAG && "serveripquery".equals(parser.getName())) break;
 
                 event = parser.next();
             }
@@ -65,7 +65,7 @@ public class ValueStorageProvider implements IQProvider {
         }
 
         String xmlText = sb.toString();
-        return createValueStorageFromXML(xmlText);
+        return createServerIPQueryFromXML(xmlText);
     }
 
     /**
@@ -75,33 +75,31 @@ public class ValueStorageProvider implements IQProvider {
      * @return the ValueStorage.
      * @throws
      */
-    public static ValueStorage createValueStorageFromXML(String xml) throws Exception {
-        ValueStorage stor = new ValueStorage();
+    public static ServerIPQuery createServerIPQueryFromXML(String xml) throws Exception {
+        ServerIPQuery serverIPQueryValue = new ServerIPQuery();
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = documentBuilder.parse(
                 new ByteArrayInputStream(xml.getBytes(PREFERRED_ENCODING)));
 
-        new ValueStorageReader(stor, document).initializeFields();
-        return stor;
+        new ServerIPQueryReader(serverIPQueryValue, document).initializeFields();
+        return serverIPQueryValue;
     }
 
-    private static class ValueStorageReader {
+    private static class ServerIPQueryReader {
 
-        private final ValueStorage storValue;
+        private final ServerIPQuery serverIPQueryValue;
         private final Document document;
 
-        ValueStorageReader(ValueStorage value, Document document) {
-            this.storValue = value;
+        ServerIPQueryReader(ServerIPQuery value, Document document) {
+            this.serverIPQueryValue = value;
             this.document = document;
         }
 
         public void initializeFields() {
             
-            storValue.setIPAddress(getTagContents("ipAddress"));
-            storValue.setPort(getTagContents("port"));
-            storValue.setPublicKey(getTagContents("publicKey"));
+            serverIPQueryValue.setUsername(getTagContents("username"));
         }
 
   

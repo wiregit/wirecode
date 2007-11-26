@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.privategroups;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import org.jivesoftware.smack.AccountManager;
@@ -21,7 +22,12 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.limewire.util.PrivateGroupsUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+@Singleton
 public class JabberClient{
 
     private BigInteger publicKey;
@@ -30,11 +36,11 @@ public class JabberClient{
     private String ipAddress;
     private String port;
     private String localUsername;
-    private HashMap<String, Socket> msgSockets = new HashMap<String, Socket>();
+    private static JabberClient instance = new JabberClient();
+    //private SocketsManagerImpl socketsManager = new SocketsManagerImpl();
+    private BuddyListManager listManager = new BuddyListManager();
     
-    
-    
-    
+    @Inject
     public JabberClient(){
     }
     
@@ -44,9 +50,10 @@ public class JabberClient{
      *
      * @return a UserManager instance.
      */
-//    public static JabberClient getInstance() {
-//        return instance;
-//    }
+    public static JabberClient getInstance() {
+        return instance;
+    }
+    
     
     public XMPPConnection connectToServerNoPort(String serverAddress){
         
@@ -69,7 +76,7 @@ public class JabberClient{
         
      // Create a connection to the jabber.org server on a specific port.
         ConnectionConfiguration config = new ConnectionConfiguration(serverAddress, portAddress);
-        XMPPConnectionPGRP conn2 = new XMPPConnectionPGRP(config);
+        XMPPConnection conn2 = new XMPPConnection(config);
         try {
             conn2.connect();
         } catch (XMPPException e) {
@@ -178,7 +185,7 @@ public class JabberClient{
             
             //start serverSocket
 //            ServerSocketClass serverSocket = new ServerSocketClass();
-//            serverSocket.initializeServerSocket(9999);
+//            serverSocket.initializeServerSocket(9999, conn);
             
         } catch (XMPPException e) {
             System.out.println("Could not connect to the server");
@@ -187,10 +194,11 @@ public class JabberClient{
     
     public void sendMessage(String username, String message){
         
-        //get socket from hashmap
-        ClientSocket msgSocket = (ClientSocket) msgSockets.get(username);
-        if (msgSocket!=null){
-            msgSocket.sendMessage(message);
+        BuddySession buddySession = BuddyListManager.getInstance().getSession(username);
+        if(buddySession!=null)
+            buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
+        else{
+            System.out.println("error sending message");
         }
     }
     
@@ -212,15 +220,20 @@ public class JabberClient{
         
         if (result instanceof ValueStorage) {
             ValueStorage data = (ValueStorage) result;
-            System.out.println(data.getIPAddress());
-            System.out.println(data.getPort());
-            System.out.println(data.getPublicKey());
             
             //establish connection with remote user and put connection into map
-            ClientSocket clientSocket = new ClientSocket(data.getIPAddress(), 9999, localUsername);
-            clientSocket.createClientConnection();
+//            ClientSocket clientSocket = new ClientSocket(data.getIPAddress(), 9999, localUsername);
+//            clientSocket.createClientConnection();
             
-            msgSockets.put(username, clientSocket);
+            //create new session and add to buddyListManager
+            try {
+//                InetSocketAddress remoteHost = new InetSocketAddress(data.getIPAddress(), new Integer(data.getPort()));
+                BuddyListManager.getInstance().addBuddySession(username, new Socket(data.getIPAddress(),  9999));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }   
     }
     
@@ -279,7 +292,6 @@ public class JabberClient{
                 try {
                     roster.removeEntry(nextEntry);
                 } catch (XMPPException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
         }   
@@ -341,7 +353,7 @@ public class JabberClient{
         client.setRemoteConnection("lulu", connection);
         client.sendMessage("lulu", "hi");
        
-        
+     
 //        client.loginAccount("lulu", "Lulu", connection);
         
   

@@ -5,7 +5,6 @@ import org.jivesoftware.smack.util.StringUtils;
 
 public class ValueStorage extends IQ {
 
-    
     private String username = null;
     private String password = null;
     private String ipAddress = null;
@@ -23,7 +22,7 @@ public class ValueStorage extends IQ {
         else if (type.equals("SET"))
             setType(IQ.Type.SET);
         else{
-            //neither get or set}
+            //neither get or set
         }
     }
 
@@ -35,9 +34,6 @@ public class ValueStorage extends IQ {
     public String getUsername() {
         return username;
     }
-    
-    
-    
     
     /**
      * Sets the username.
@@ -174,6 +170,15 @@ public class ValueStorage extends IQ {
 
         buf.append("</valueStorage>");
         return buf.toString();
+    }
+    
+    public enum Type {
+
+        /**
+         * The IQ is a request for information or requirements.
+         */
+        serverget
+
     }
 
 }
