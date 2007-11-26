@@ -447,11 +447,10 @@ public class RequeryManagerTest extends LimeTestCase {
                 Provider<PushDownloadManager> pushDownloadManager,
                 BrowseHostHandlerManager browseHostHandlerManager,
                 GnutellaDownloaderFactory gnutellaDownloaderFactory,
-                PurchasedStoreDownloaderFactory purchasedDownloaderFactory,
-                Provider<LWSManager> lwsManager) {
+                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
             super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory,
                     downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
-                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory, lwsManager);
+                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
         }
 
         private volatile ManagedDownloader requerier;

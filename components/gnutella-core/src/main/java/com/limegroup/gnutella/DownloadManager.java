@@ -49,6 +49,7 @@ import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
@@ -91,7 +92,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
  */
 @Singleton
 // TODO: make a DownloadManager interface, for easier testing
-public class DownloadManager implements BandwidthTracker, SaveLocationManager {
+public class DownloadManager implements BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
@@ -171,7 +172,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     private final BrowseHostHandlerManager browseHostHandlerManager;
     private final GnutellaDownloaderFactory gnutellaDownloaderFactory;
     private final PurchasedStoreDownloaderFactory purchasedDownloaderFactory;
-    private final Provider<LWSManager> lwsManager;
     
     @Inject
     public DownloadManager(NetworkManager networkManager,
@@ -185,8 +185,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             Provider<PushDownloadManager> pushDownloadManager,
             BrowseHostHandlerManager browseHostHandlerManager,
             GnutellaDownloaderFactory gnutellaDownloaderFactory,
-            PurchasedStoreDownloaderFactory purchasedDownloaderFactory,
-            Provider<LWSManager> lwsManager) {
+            PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
         this.networkManager = networkManager;
         this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
@@ -199,7 +198,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.gnutellaDownloaderFactory = gnutellaDownloaderFactory;
         this.purchasedDownloaderFactory = purchasedDownloaderFactory;
-        this.lwsManager = lwsManager;
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -254,54 +252,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         };
         backgroundExecutor.scheduleWithFixedDelay(checkpointer, 
                                SNAPSHOT_CHECKPOINT_TIME, 
-                               SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);
-        
-        //
-        // Add a handler for the LimeWire Store Server so that
-        // we can keep track of downloads that were made on the
-        // DownloadMediator
-        // 
-        // INPUT
-        //  urns - space-separated string of urns
-        // OUTPUT
-        //  URN of download - a string of form
-        //          <URN> ' ' <percentage-downloaded> [ '|' <URN> ' ' <percentage-downloaded> ]
-        //
-        lwsManager.get().registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {
-
-            protected String handleRest(Map<String, String> args) {
-                        
-                Tagged<String> urnsString = LWSUtil.getArg(args, "urns", "GetDownloadProgress");
-                if (!urnsString.isValid()) return urnsString.getValue();
-                //
-                // Return a string mapping urns to download percentages
-                //
-                StringBuffer res = new StringBuffer();
-                String decodedURNs = null;
-                try {
-                    decodedURNs = URLDecoder.decode(urnsString.getValue());
-                } catch (IOException e) {
-                    return "invalid.urns";
-                }
-                String[] urns = decodedURNs.split(" ");
-                for (AbstractDownloader d : activeAndWaiting) {
-                    urnLoop: for (String urn : urns) {
-                        if (d == null) continue;                        
-                        if (d.getSHA1Urn() != null && urn.equals(d.getSHA1Urn().toString())) {
-                            long read = d.getAmountRead();
-                            long total = d.getContentLength();
-                            String ratio = String.valueOf((float)read / (float)total);
-                            res.append(urn);
-                            res.append(" ");
-                            res.append(ratio);
-                            res.append("!");
-                            break urnLoop;
-                        }
-                    }
-                }                
-                return res.toString(); 
-            }            
-        });                 
+                               SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);                
                                
         guiInit = true;
     }      
@@ -591,6 +542,8 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         for(Downloader md : buf ) 
             md.stop();
     }   
+    
+    
 
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
@@ -1397,6 +1350,13 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
 			fileName = rfds[i].getFileName();
 		}
 		return fileName;
-	}    
+	}
+	
+	// ---------------------------------------------------------------
+	// Implementation of LWSIntegrationServicesDelegate
+
+    public final Iterable<AbstractDownloader> getAllDownloaders() {
+        return activeAndWaiting;
+    }    
 
 }

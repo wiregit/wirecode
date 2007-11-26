@@ -40,6 +40,7 @@ import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.licenses.LicenseFactory;
@@ -113,6 +114,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<ControlRequestAcceptor> controlRequestAcceptor;
     private final Provider<LimeCoreGlue> limeCoreGlue;
     private final Provider<LWSManager> lwsManager;
+    private final Provider<LWSIntegrationServices> lwsItegrationServices;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -167,7 +169,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<IncomingConnectionHandler> incomingConnectionHandler,
             Provider<LicenseFactory> licenseFactory,
             Provider<LimeCoreGlue> limeCoreGlue,
-            Provider<LWSManager> lwsManager) { 
+            Provider<LWSManager> lwsManager,
+            Provider<LWSIntegrationServices> lwsItegrationServices) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -209,6 +212,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.licenseFactory = licenseFactory;
         this.limeCoreGlue = limeCoreGlue;
         this.lwsManager = lwsManager;
+        this.lwsItegrationServices = lwsItegrationServices;
     }
     
     /* (non-Javadoc)
@@ -388,6 +392,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Old Downloads..."));
         downloadManager.get().postGuiInit();
         LOG.trace("STOP DownloadManager.postGuiInit");
+        
+        LOG.trace("START LWSIntegrationServices.postGuiInit");
+        activityCallback.get().componentLoading(I18nMarker.marktr("Attaching LWS Listeners..."));
+        lwsItegrationServices.get().init();
+        LOG.trace("STOP LWSIntegrationServices.postGuiInit");
         
         LOG.trace("START UpdateManager.instance");
         activityCallback.get().componentLoading(I18nMarker.marktr("Checking for Updates..."));

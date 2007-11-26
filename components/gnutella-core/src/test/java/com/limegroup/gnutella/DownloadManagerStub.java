@@ -37,9 +37,8 @@ public class DownloadManagerStub extends DownloadManager {
             Provider<PushDownloadManager> pushDownloadManager,
             BrowseHostHandlerManager browseHostHandlerManager,
             GnutellaDownloaderFactory gnutellaDownloaderFactory,
-            PurchasedStoreDownloaderFactory purchasedDownloaderFactory,
-            Provider<LWSManager> lwsManager) {
-        super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory, downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager, browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory, lwsManager);
+            PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+        super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory, downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager, browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
     }
 
     @Override
