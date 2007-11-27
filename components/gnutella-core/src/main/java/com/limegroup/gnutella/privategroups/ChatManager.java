@@ -75,7 +75,7 @@ public class ChatManager {
     
     
         
-    private static void appendBuffer(Packet packet){
+    public static void appendBuffer(Packet packet){
         if(packet instanceof Message)
             buffer.append(packet.toXML());
     }
@@ -146,6 +146,7 @@ public class ChatManager {
                             System.out.println("Body: " + parsedMsg.getBody());
                             
                             //fireMessageEvent to appropriate GUI window
+                           
                             
                         }
                     }

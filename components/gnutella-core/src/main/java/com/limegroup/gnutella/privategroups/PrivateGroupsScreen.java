@@ -23,7 +23,6 @@ public class PrivateGroupsScreen{
     
     public PrivateGroupsScreen(){
         this.client = new JabberClient();
-       // this.dhtManager = GuiCoreMediator.getDHTManager();
     }
     
     
@@ -47,13 +46,7 @@ public class PrivateGroupsScreen{
         
         try{
             connection = createConnection(serverName);
-            client.loginAccount(username, password, connection);
-            
-            //after login, start server socket to listen for client connections
-            
-            Runnable r = new ServerSocketListener();
-            Thread t = new Thread(r);
-            t.start();        
+            client.loginAccount(username, password, connection); 
         }
         catch(Exception e){
             //could not login properly
@@ -74,28 +67,5 @@ public class PrivateGroupsScreen{
         }
         return true;
     }
-    
-    
-    private class ServerSocketListener implements Runnable{
 
-        public void run() {
-            //call serversocketclass 
-            ServerSocketClass serverSocket = new ServerSocketClass();
-            //serverSocket.initializeServerSocket(socketPort);
-        }
-    }
-    
-    //dictates what happens when clicking on the register account button
-    private class RegisterButtonListener implements ActionListener{
-
-        public void actionPerformed(ActionEvent e) {
-            //use e.getSource() to determine who triggered the event and perform the corresponding action 
-        }
-    }
-    
-    public static void main(String[] args) {
-        //ClientSocket clientSocket = new ClientSocket("69.201.186.164", 9999);
-        //clientSocket.createClientConnection();
-        
-    }
 }
