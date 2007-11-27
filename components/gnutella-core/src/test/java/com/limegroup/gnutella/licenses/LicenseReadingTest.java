@@ -99,7 +99,7 @@ public final class LicenseReadingTest extends LimeTestCase {
         // don't validate -- don't wanna hit the web.
         assertEquals("http://creativecommons.org/licenses/sampling+/1.0/",
                      l.getLicenseDeed(null).toString());
-        assertEquals("http://ccmixter.org/file/Wired/61", l.getLicenseURI().toString());
+        assertEquals("http://ccmixter.org/file/wired/61", l.getLicenseURI().toString());
     }
     
     public void testReadOGG() throws Exception {
