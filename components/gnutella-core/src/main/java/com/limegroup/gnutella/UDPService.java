@@ -9,13 +9,17 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -168,6 +172,9 @@ public class UDPService implements ReadWriteObserver {
 
 
     private final PingRequestFactory pingRequestFactory;
+    
+    @InspectionPoint("udp sent messages")
+    private final SentMessageCounter sentMessageCounter = new SentMessageCounter();
 
 	@Inject
     public UDPService(NetworkManager networkManager,
@@ -522,6 +529,8 @@ public class UDPService implements ReadWriteObserver {
         buffer.flip();
         if (msg instanceof PingRequest)
             mutateGUID(buffer.array(), addr.getAddress(), addr.getPort());
+        
+        sentMessageCounter.countMessage(msg);
         send(buffer, addr, false);
     }
     
@@ -824,5 +833,25 @@ public class UDPService implements ReadWriteObserver {
     }
 
 
+    private class SentMessageCounter implements Inspectable {
+        private Map<Class, Map<String,Long>> counts = 
+            new HashMap<Class, Map<String,Long>>();
+        
+        synchronized void countMessage(Message msg) {
+            Map<String,Long> m = counts.get(msg.getClass());
+            if (m == null) {
+                m = new HashMap<String,Long>();
+                m.put("num", 0L);
+                m.put("size", 0L);
+                counts.put(msg.getClass(),m);
+            }
+            m.put("num", m.get("num")+1);
+            m.put("size", m.get("size")+msg.getLength());
+        }
+        
+        public Object inspect() {
+            return counts;
+        }
+    }
 
 }

@@ -3261,22 +3261,28 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     /**
      * counts messages by type and network they came on. 
+     * also counts size in bytes.
      */
     private static class MessageCounter implements Inspectable {
         
-        private Map<Class, EnumMap<Message.Network, Integer>> counts = 
-            new HashMap<Class, EnumMap<Message.Network,Integer>>();
+        private Map<Class, EnumMap<Message.Network, Map<String,Long>>> counts = 
+            new HashMap<Class, EnumMap<Message.Network,Map<String,Long>>>();
         
         public synchronized void countMessage(Message msg) {
-            EnumMap<Message.Network, Integer> m = counts.get(msg.getClass());
+            EnumMap<Message.Network, Map<String,Long>> m = counts.get(msg.getClass());
             if (m == null) {
-                m = new EnumMap<Message.Network, Integer>(Message.Network.class);
+                m = new EnumMap<Message.Network, Map<String,Long>>(Message.Network.class);
                 counts.put(msg.getClass(),m);
             }
-            Integer count = m.get(msg.getNetwork());
-            if (count == null)
-                count = 0;
-            m.put(msg.getNetwork(),++count);
+            Map<String,Long> count = m.get(msg.getNetwork());
+            if (count == null) {
+                count = new HashMap<String,Long>();
+                count.put("num", 0L);
+                count.put("size", 0L);
+                m.put(msg.getNetwork(),count);
+            }
+            count.put("num", count.get("num")+1);
+            count.put("size", count.get("size")+msg.getLength());
         }
         
         public Object inspect() {
