@@ -107,6 +107,11 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 Tagged<String> urlString = LWSUtil.getArg(args, "url", "downloading");
                 if (!urlString.isValid()) return urlString.getValue();
                 //
+                // The file name
+                //
+                Tagged<String> fileString = LWSUtil.getArg(args, "file", "downloading");
+                if (!fileString.isValid()) return fileString.getValue();                
+                //
                 // The id of the tag we want to associate with the URN we return
                 // 
                 Tagged<String> idOfTheProgressBarString = LWSUtil.getArg(args, "id", "downloading");
@@ -123,7 +128,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     baseDir += ":" + port;
                 }
                 String msg = null;
-                String fileName = fileNameFromURL(urlString.getValue());
+                String fileName = fileString.getValue();
+                if (fileName == null) {
+                    fileName = fileNameFromURL(urlString.getValue());
+                }
                 String baseURL = baseDir + urlString.getValue();
                 try {
                     String urlStr = URLDecoder.decode(baseURL);
