@@ -34,6 +34,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -157,7 +158,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             FileRequest fileRequest, FileDesc fd) throws IOException,
             HttpException {
         // create uploader
-        UploadType type = (FileManager.isForcedShare(fd)) ? UploadType.FORCED_SHARE
+        UploadType type = (SharingUtils.isForcedShare(fd)) ? UploadType.FORCED_SHARE
                 : UploadType.SHARED_FILE;
         HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
                 context, type, fd.getFileName());

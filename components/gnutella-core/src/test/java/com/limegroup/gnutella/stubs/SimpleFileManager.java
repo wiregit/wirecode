@@ -11,8 +11,8 @@ import org.limewire.collection.NameValue;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerController;
+import com.limegroup.gnutella.FileManagerImpl;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -26,7 +26,7 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
  * MetaFileManager didn't exist.
  */
 @Singleton
-public class SimpleFileManager extends FileManager {
+public class SimpleFileManager extends FileManagerImpl {
     LimeXMLDocumentFactory factory;
     
     @Inject

@@ -56,6 +56,7 @@ import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
@@ -473,7 +474,7 @@ public class UpdateHandler implements HttpClientListener {
         if (info == null || info.getUpdateCommand() == null)
             return;
         
-        File path = FileManager.PREFERENCE_SHARE.getAbsoluteFile();
+        File path = SharingUtils.PREFERENCE_SHARE.getAbsoluteFile();
         String name = info.getUpdateFileName();
         
         try {
@@ -572,7 +573,7 @@ public class UpdateHandler implements HttpClientListener {
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            FileDesc [] shared = fileManager.get().getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
+            FileDesc [] shared = fileManager.get().getSharedFileDescriptors(SharingUtils.PREFERENCE_SHARE);
             for (int i = 0; i < shared.length; i++) {
             	if (shared[i].getSHA1Urn() != null &&
             			!urns.contains(shared[i].getSHA1Urn())) {

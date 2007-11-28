@@ -10,8 +10,8 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerController;
+import com.limegroup.gnutella.FileManagerImpl;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -22,7 +22,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 @SuppressWarnings("unchecked")
 @Singleton
-public class FileManagerStub extends FileManager {
+public class FileManagerStub extends FileManagerImpl {
 
 	private Map _urns,_files;
     private List _descs;

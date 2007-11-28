@@ -44,7 +44,7 @@ public class StoreFileManagerTest extends FileManagerTest {
                 bind(FileManager.class).to(SimpleFileManager.class);
             }
         });
-        fman = injector.getInstance(FileManager.class);
+        fman = (FileManagerImpl)injector.getInstance(FileManager.class);
     }
     
     @Override

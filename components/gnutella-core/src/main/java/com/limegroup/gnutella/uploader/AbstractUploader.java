@@ -9,9 +9,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.ssl.SSLUtils;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /**
@@ -124,8 +124,8 @@ public abstract class AbstractUploader implements Uploader {
         if (LOG.isDebugEnabled())
             LOG.debug("Setting file description for " + this + ": " + fd);
         this.fileDesc = fd;
-        this.forcedShare = FileManager.isForcedShare(fd);
-        this.priorityShare = FileManager
+        this.forcedShare = SharingUtils.isForcedShare(fd);
+        this.priorityShare = SharingUtils
                 .isApplicationSpecialShare(fd.getFile());
         this.index = fd.getIndex();
         setFileSize(fd.getFileSize());

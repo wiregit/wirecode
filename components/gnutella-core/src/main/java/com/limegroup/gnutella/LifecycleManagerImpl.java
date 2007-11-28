@@ -43,6 +43,7 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.messages.StaticMessages;
@@ -690,7 +691,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
             }
         };
         
-        File[] file_list = FileManager.APPLICATION_SPECIAL_SHARE.listFiles(filter);
+        File[] file_list = SharingUtils.APPLICATION_SPECIAL_SHARE.listFiles(filter);
         if(file_list == null) {
             return;
         }

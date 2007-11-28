@@ -19,9 +19,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.FileManagerImpl;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileManagerEvent.Type;
@@ -33,7 +33,7 @@ import com.limegroup.gnutella.metadata.AudioMetaData;
  * in replies.
  */
 @Singleton
-public class MetaFileManager extends FileManager {
+public class MetaFileManager extends FileManagerImpl {
 
     private static final Log LOG = LogFactory.getLog(MetaFileManager.class);
 

@@ -24,6 +24,7 @@ import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -283,7 +284,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
         
         Runnable r = new Runnable() {
             public void run() {
-            	if (FileManager.isFilePhysicallyShareable(f))
+            	if (SharingUtils.isFilePhysicallyShareable(f))
             		fileManager.addFileForSession(f);
             }
         };
@@ -319,7 +320,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      */
     public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
         String fileName = info.getFileSystem().getName().concat(".torrent");
-        File f = new File(FileManager.APPLICATION_SPECIAL_SHARE, fileName);
+        File f = new File(SharingUtils.APPLICATION_SPECIAL_SHARE, fileName);
         return f;
     }
 }	

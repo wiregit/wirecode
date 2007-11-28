@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -52,10 +53,10 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void setSettings() throws Exception {
     	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
     	File textFile = new File(_sharedDir,TEXT_FILE);
-    	File torrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
+    	File torrentFile = new File(SharingUtils.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
     	File userTorrentFile = new File(_sharedDir,USER_TORRENT);
-    	File appTextFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,APP_TXT);
-    	File appTorrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE, OTHER_TORRENT);
+    	File appTextFile = new File(SharingUtils.APPLICATION_SPECIAL_SHARE,APP_TXT);
+    	File appTorrentFile = new File(SharingUtils.APPLICATION_SPECIAL_SHARE, OTHER_TORRENT);
     	someFileMatches.add(TEXT_FILE);
     	someFileMatches.add(TORRENT_FILE);
     	someFileMatches.add(USER_TORRENT);

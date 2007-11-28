@@ -54,6 +54,7 @@ import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -1430,7 +1431,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 // use files with a $ because they'll generally
                 // trigger a single-response return, which is
                 // easier to check
-                return FileManager.isFilePhysicallyShareable(file) && file.getName().indexOf("$") != -1;
+                return SharingUtils.isFilePhysicallyShareable(file) && file.getName().indexOf("$") != -1;
             }
         });
 

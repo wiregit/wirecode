@@ -19,6 +19,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -762,18 +763,18 @@ public class ServerSideWhatIsNewTest
         File osxInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
 
         //  Gotta make use of the force-share folder for this test
-        if( FileManager.PROGRAM_SHARE.exists() ) {
-            File [] toDelete = FileManager.PROGRAM_SHARE.listFiles();
+        if( SharingUtils.PROGRAM_SHARE.exists() ) {
+            File [] toDelete = SharingUtils.PROGRAM_SHARE.listFiles();
             for (int j = 0; j < toDelete.length; j++) {
                 toDelete[j].delete();
             }
         } else {
-            FileManager.PROGRAM_SHARE.mkdir();
+            SharingUtils.PROGRAM_SHARE.mkdir();
         }
 
-        File winDst = new File(FileManager.PROGRAM_SHARE, "LimeWireWin3.69.0010.exe");
-        File linDst = new File(FileManager.PROGRAM_SHARE, "LimeWireLinux.bin");
-        File osxDst = new File(FileManager.PROGRAM_SHARE, "LimeWireOSX.dmg");
+        File winDst = new File(SharingUtils.PROGRAM_SHARE, "LimeWireWin3.69.0010.exe");
+        File linDst = new File(SharingUtils.PROGRAM_SHARE, "LimeWireLinux.bin");
+        File osxDst = new File(SharingUtils.PROGRAM_SHARE, "LimeWireOSX.dmg");
         
         FileUtils.copy(winInstaller, winDst);
         FileUtils.copy(linInstaller, linDst);
@@ -836,11 +837,11 @@ public class ServerSideWhatIsNewTest
             }
         
         } finally {        
-            File [] toDelete = FileManager.PROGRAM_SHARE.listFiles();
+            File [] toDelete = SharingUtils.PROGRAM_SHARE.listFiles();
             for (int j = 0; j < toDelete.length; j++) {
                 toDelete[j].delete();
             }
-            FileManager.PROGRAM_SHARE.delete();
+            SharingUtils.PROGRAM_SHARE.delete();
 
         }
     }

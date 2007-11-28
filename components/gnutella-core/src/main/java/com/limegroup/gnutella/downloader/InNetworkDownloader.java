@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
 
@@ -58,7 +58,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      */
     protected File getIncompleteFile(IncompleteFileManager ifm, String name,
                                      URN urn, int length) throws IOException {
-        return ifm.getFile(name, urn, length, new File(FileManager.PREFERENCE_SHARE, "Incomplete"));
+        return ifm.getFile(name, urn, length, new File(SharingUtils.PREFERENCE_SHARE, "Incomplete"));
     }
     
     /**

@@ -13,6 +13,7 @@ import org.limewire.util.I18NConvert;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.FileManagerImpl;
 import com.limegroup.gnutella.FileManagerTest;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
@@ -55,7 +56,7 @@ public class MetaFileManagerTest extends FileManagerTest {
 
         injector.getInstance(Acceptor.class).setAddress(InetAddress.getLocalHost());
 
-        fman = injector.getInstance(FileManager.class);
+        fman = (FileManagerImpl)injector.getInstance(FileManager.class);
 
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
         

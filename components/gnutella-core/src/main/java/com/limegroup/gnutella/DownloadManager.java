@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -59,9 +58,7 @@ import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.downloader.AbstractDownloader.DownloaderType;
-import com.limegroup.gnutella.lws.server.LWSManager;
-import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCallback;
-import com.limegroup.gnutella.lws.server.LWSUtil;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -69,8 +66,6 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
-import com.limegroup.gnutella.util.Tagged;
-import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 
@@ -932,7 +927,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      */
     public synchronized Downloader download(DownloadInformation info, long now) 
     throws SaveLocationException {
-        File dir = FileManager.PREFERENCE_SHARE;
+        File dir = SharingUtils.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
         if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))

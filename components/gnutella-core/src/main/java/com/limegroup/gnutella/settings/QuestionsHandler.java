@@ -215,4 +215,15 @@ public class QuestionsHandler extends LimeWireSettings {
     public static final IntSetting PLAYLIST_OVERWRITE_OK =
         FACTORY.createIntSetting("PLAYLIST_OVERWRITE_OK", 0);
 
+
+    /**
+     * Stores whether the user wants to overwrite or append to songs in the
+     * playlist
+     */
+    public static final BooleanSetting DONT_WARN_SHARING =
+        FACTORY.createBooleanSetting("DONT_WARN_SHARING", false);
+    
+
 }
+
+
