@@ -7,7 +7,8 @@ import org.jivesoftware.smack.packet.Packet;
 
 /**
  * 
- * Each buddy session has 1 chatmanager
+ * A buddy session represents a live direct ip connection with another user. Every buddy session 
+ * contains 1 chat manager.  A user can send packets to another user through their established sessions.
  *
  */
 public class BuddySession {

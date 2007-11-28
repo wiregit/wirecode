@@ -3,6 +3,12 @@ package com.limegroup.gnutella.privategroups;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.util.StringUtils;
 
+/**
+ * A ServerIPQuery encapsulates username and ipAddress information.  It is used when a user receives a 
+ * direct connection request from remote user.  The user sends a ServerIPQuery object (containing ipAddress info)
+ *  to the server to obtain the username belonging to the specific ipAddress.
+ *
+ */
 public class ServerIPQuery extends IQ {
 
     private String username = null;

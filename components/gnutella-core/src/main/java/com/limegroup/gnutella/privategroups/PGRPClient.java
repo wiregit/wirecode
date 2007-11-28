@@ -2,10 +2,10 @@ package com.limegroup.gnutella.privategroups;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class JabberClient{
+public class PGRPClient{
 
     private BigInteger publicKey;
     private BigInteger privateKey;
@@ -36,28 +36,29 @@ public class JabberClient{
     private String ipAddress;
     private String port;
     private String localUsername;
-    private static JabberClient instance = new JabberClient();
-    //private SocketsManagerImpl socketsManager = new SocketsManagerImpl();
-    private BuddyListManager listManager = new BuddyListManager();
-    private Thread serverSocketThread;
+    private static PGRPClient instance;
+    private PGRPServerSocket serverSocket;
     private static String servername = "lw-intern02";
+    private XMPPConnection connection;
     
     @Inject
-    public JabberClient(){
+    public PGRPClient(XMPPConnection connection){
+        this.connection = connection;
+        PGRPClient.instance = this;
     }
     
     
     /**
-     * Returns a singleton UserManager instance.
+     * Returns a singleton PGRPClient instance.
      *
-     * @return a UserManager instance.
+     * @return a PGRPClient instance.
      */
-    public static JabberClient getInstance() {
+    public static PGRPClient getInstance() {
         return instance;
     }
     
     
-    public XMPPConnection connectToServerNoPort(String serverAddress){
+    public static XMPPConnection connectToServerNoPort(String serverAddress){
         
         // Create a connection to the jabber.org server.
         XMPPConnection conn1 = new XMPPConnection(serverAddress);
@@ -91,7 +92,7 @@ public class JabberClient{
      * see the roster list
      * 
      */
-    public void viewRoster(XMPPConnection connection){
+    public void viewRoster(){
         System.out.println("view roster");
         Roster roster = connection.getRoster();
         if(roster!=null){
@@ -106,17 +107,13 @@ public class JabberClient{
         }
     }
     
-    public boolean createAccount(String username, String password, XMPPConnection connection){
+    public boolean createAccount(String username, String password){
         AccountManager accountManager = new AccountManager(connection);
         if(accountManager.supportsAccountCreation()){
             try {
                 
                 accountManager.createAccount(username, password);
-                //Roster roster = connection.getRoster();
-                //roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
-                System.out.println("created account successfully");
-        
-                
+                System.out.println("created account successfully");  
             } catch (XMPPException e) {
                 e.printStackTrace();
                 return false;
@@ -129,7 +126,7 @@ public class JabberClient{
         return true;
     }
     
-    public boolean removeAccount(XMPPConnection connection) throws XMPPException{
+    public boolean removeAccount() throws XMPPException{
         AccountManager accountManager = new AccountManager(connection);
         
         //remove all roster entries
@@ -152,26 +149,26 @@ public class JabberClient{
             e.printStackTrace();
             return false;
         }
+        
+        logoff();
         return true;
     }
     
-    public boolean loginAccount(String username, String password, XMPPConnection conn){
+    public boolean loginAccount(String username, String password){
         try {
 
-            conn.login(username, password);
+            connection.login(username, password);
             System.out.println("login successful");
             
             localUsername = username;
             
-            //set subscription mode
-            setSubscriptionMode(conn);
+            //set subscription manual mode
+            setSubscriptionModeManual();
             
             //register IQ provider
             ProviderManager providerManager = ProviderManager.getInstance();
             providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
             
-            
-
             //generate keys
             
             //RSA keyGen = new RSA(32);
@@ -193,11 +190,11 @@ public class JabberClient{
             storagePacket.setPort(port);
             storagePacket.setPublicKey(publicKey.toString());
             
-            conn.sendPacket(storagePacket);
+            connection.sendPacket(storagePacket);
             
             //start serverSocket
-//            Thread serverSocketThread = new Thread(new ServerSocketClass(9999, conn));
-//            serverSocketThread.start();
+            serverSocket = new PGRPServerSocket(connection);
+            serverSocket.start();
 
             return true;
             
@@ -207,8 +204,11 @@ public class JabberClient{
         }
     }
     
-    public boolean logoff(XMPPConnection connection){
+    public boolean logoff(){
         try{
+            
+            if(serverSocket!=null)
+                serverSocket.closeSocket();
             connection.disconnect();
             System.out.println("logged off");
         
@@ -220,16 +220,18 @@ public class JabberClient{
     }
     
     public void sendMessage(String username, String message){
-        
         BuddySession buddySession = BuddyListManager.getInstance().getSession(username);
-        if(buddySession!=null)
-            buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
-        else{
-            System.out.println("error sending message");
+        if(buddySession== null){
+            //need to get remote user info and establish session
+            setRemoteConnection(username);
+            buddySession = BuddyListManager.getInstance().getSession(username);
         }
+        
+        buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
+
     }
     
-    private void setRemoteConnection(String username, XMPPConnection conn){
+    private void setRemoteConnection(String username){
         
         //use valueStorage packet to get ip address, port, and public key
         ValueStorage storagePacket = new ValueStorage();
@@ -239,9 +241,9 @@ public class JabberClient{
         
         PacketFilter filter = new AndFilter(new PacketIDFilter(storagePacket.getPacketID()),
                 new PacketTypeFilter(IQ.class));
-        PacketCollector collector = conn.createPacketCollector(filter);
+        PacketCollector collector = connection.createPacketCollector(filter);
 
-        conn.sendPacket(storagePacket);
+        connection.sendPacket(storagePacket);
 
         IQ result = (IQ)collector.nextResult(SmackConfiguration.getPacketReplyTimeout());
         
@@ -259,7 +261,7 @@ public class JabberClient{
         }   
     }
     
-    public boolean addToRoster(String username, String nickName, String groupName, XMPPConnection connection) {
+    public boolean addToRoster(String username, String nickName, String groupName) {
         Roster roster = connection.getRoster();
         String jid = username + "@"+ servername;
         
@@ -289,7 +291,7 @@ public class JabberClient{
         return true;
     }
     
-    public boolean removeFromRoster(String username, String groupName, XMPPConnection connection){
+    public boolean removeFromRoster(String username, String groupName){
         Roster roster = connection.getRoster();
         String usernameserver = username+ "@" + servername;
 
@@ -332,16 +334,15 @@ public class JabberClient{
         return true;
     }
   
-//    /**
-//     * testing method to view the attribute values
-//     * @param connection
-//     */
-//    private void viewAttributes(XMPPConnection connection) {
-//        Map <String, String> attributes = connection.getAccountManager().getAccountAttributesMap();
-//        System.out.println("passphrase: " + attributes.get("passphrase"));
-//        System.out.println("publickey: " + attributes.get("publickey"));
-//        System.out.println("DONE");
-//    }
+    /**
+     * test method to view attribute values
+     */
+    private void viewAttributes() {
+        Map <String, String> attributes = connection.getAccountManager().getAccountAttributesMap();
+        System.out.println("passphrase: " + attributes.get("passphrase"));
+        System.out.println("publickey: " + attributes.get("publickey"));
+        System.out.println("DONE");
+    }
     
     /**
      *  sets subscription mode to manual so that other users must agree to allow 
@@ -349,7 +350,7 @@ public class JabberClient{
      * 
      */
   
-    private void setSubscriptionMode(XMPPConnection connection) {
+    private void setSubscriptionModeManual() {
 
         Roster roster = connection.getRoster();
         roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
@@ -358,7 +359,7 @@ public class JabberClient{
     /**
      * test method to find user in the roster
      */
-    public boolean findRosterUserName(XMPPConnection connection, String username){
+    public boolean findRosterUserName(String username){
         Roster roster = connection.getRoster();
         Collection <RosterEntry> usernames = roster.getEntries();
         for(Iterator i = usernames.iterator(); i.hasNext();){
@@ -369,26 +370,74 @@ public class JabberClient{
         return false;
     }
     
+    /**
+     * test method only --> for the client to not have a server socket (when testing on the same computer)
+     */
+    public boolean loginAccountNoServerSocket(String username, String password){
+        try {
+
+            connection.login(username, password);
+            System.out.println("login successful");
+            
+            localUsername = username;
+            
+            //set subscription manual mode
+            setSubscriptionModeManual();
+            
+            //register IQ provider
+            ProviderManager providerManager = ProviderManager.getInstance();
+            providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
+            
+            //generate keys
+            
+            //RSA keyGen = new RSA(32);
+            
+            publicKey = new BigInteger("19");//keyGen.getPublicKey();
+            //privateKey = keyGen.getPrivateKey();
+            //modulus= keyGen.getModulus();
+            
+            ipAddress = "10.254.0.30";//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
+            port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
+            
+            
+            //store ip address, port, and public key in the server
+            ValueStorage storagePacket = new ValueStorage();
+            storagePacket.setType("SET");
+            storagePacket.setUsername(username);
+            storagePacket.setTo(servername);
+            storagePacket.setIPAddress(ipAddress);
+            storagePacket.setPort(port);
+            storagePacket.setPublicKey(publicKey.toString());
+            
+            connection.sendPacket(storagePacket);
+
+            return true;
+            
+        } catch (XMPPException e) {
+            System.out.println("Could not login to the server");
+            return false;
+        }
+    }
     
+
     public static void main(String[] args) throws XMPPException {
         
         XMPPConnection.DEBUG_ENABLED = true;
         
-        JabberClient client = new JabberClient();
-        XMPPConnection connection = client.connectToServerNoPort(servername);
+        PGRPClient client = new PGRPClient(connectToServerNoPort(servername));
         
         //manager.loginAccount("admin", "admin", connection);
         //System.out.println(manager.findRosterUserName(connection, "anthony@lw-intern02"));
         //  Create account
         //manager.createAccount("lulu4", "Lulu4", connection);      
-        client.loginAccount("lulu4", "Lulu4", connection);
-
-        //get remote user info
-        client.setRemoteConnection("lulu", connection);
-        client.sendMessage("lulu", "hi");
+//        client.loginAccount("lulu4", "Lulu4");
+//
+//        //get remote user info
+//        client.setRemoteConnection("lulu");
+//        client.sendMessage("lulu", "hi");
        
-     
-//        client.loginAccount("lulu", "Lulu", connection);
+  
+        client.loginAccount("lulu", "Lulu");
         
   
         //  Login with an account

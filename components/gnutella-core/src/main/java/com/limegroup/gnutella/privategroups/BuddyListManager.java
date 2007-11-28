@@ -5,6 +5,12 @@ import java.util.HashMap;
 
 import com.google.inject.Singleton;
 
+
+/**
+ * A manager that contains a list of buddy sessions, which represents a live direct
+ * connection with another user. 
+ * 
+ */
 @Singleton
 public class BuddyListManager {
 

@@ -145,9 +145,8 @@ public class ChatManager {
                             System.out.println("From: " + parsedMsg.getFrom());
                             System.out.println("Body: " + parsedMsg.getBody());
                             
-                            //fireMessageEvent to appropriate GUI window
-                           
-                            
+                            //fireMessageEvent to appropriate GUI window?
+
                         }
                     }
                 }catch(IOException e){

@@ -3,10 +3,16 @@ package com.limegroup.gnutella.privategroups;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.util.StringUtils;
 
+
+/**
+ * A class that encapsulates username, ipAddress, port, and public key information.  A ValueStorage object
+ * is used to get or set username, ipAddress, port, and public key information on the server.  The "set" 
+ * operation is used when the user first logs in (so current ip and public key info can be stored).  The 
+ * "get" operation is used to get information about a remote user prior to establishing a direct connection.
+ */
 public class ValueStorage extends IQ {
 
     private String username = null;
-    private String password = null;
     private String ipAddress = null;
     private String port = null;
     private String publicKey = null;
@@ -44,24 +50,6 @@ public class ValueStorage extends IQ {
         this.username = username;
     }
     
-    /**
-     * Returns the plain text password or <tt>null</tt> if the password hasn't
-     * been set.
-     *
-     * @return the password.
-     */
-    public String getPassword() {
-        return password;
-    }   
-
-    /**
-     * Sets the plain text password.
-     *
-     * @param password the password.
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
     
     /**
      * Returns the ipAddress or <tt>null</tt> if the ipAddress hasn't
@@ -131,14 +119,7 @@ public class ValueStorage extends IQ {
                 buf.append("<username>").append(username).append("</username>");
             }
         }
-        if (password != null) {
-            if (password.equals("")) {
-                buf.append("<password/>");
-            }
-            else {
-                buf.append("<password>").append(StringUtils.escapeForXML(password)).append("</password>");
-            }
-        }   
+  
         
         if (ipAddress != null) {
             if (ipAddress.equals("")) {
@@ -170,15 +151,6 @@ public class ValueStorage extends IQ {
 
         buf.append("</valueStorage>");
         return buf.toString();
-    }
-    
-    public enum Type {
-
-        /**
-         * The IQ is a request for information or requirements.
-         */
-        serverget
-
     }
 
 }

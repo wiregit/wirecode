@@ -21,7 +21,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * ValueStorage Provider
+ * The ValueStorage Provider provides a class to parse ServerIPQuery responses from the server.
+ * They must be registered with the ProviderManager
  *
  */
 public class ValueStorageProvider implements IQProvider {
@@ -68,13 +69,8 @@ public class ValueStorageProvider implements IQProvider {
         return createValueStorageFromXML(xmlText);
     }
 
-    /**
-     * Builds a users ValueStorage from xml file.
-     *
-     * @param xml the xml representing a users ValueStorage.
-     * @return the ValueStorage.
-     * @throws
-     */
+    
+    // Builds a users ValueStorage from xml file.
     public static ValueStorage createValueStorageFromXML(String xml) throws Exception {
         ValueStorage stor = new ValueStorage();
 
