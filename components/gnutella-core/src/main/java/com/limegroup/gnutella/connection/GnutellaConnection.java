@@ -56,6 +56,7 @@ import com.limegroup.gnutella.handshaking.HandshakeObserver;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.Handshaker;
+import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -1311,6 +1312,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("pln", getConnectionCapabilities().remoteHostIsPassiveLeafNode());
         data.put("pdn", getConnectionCapabilities().remostHostIsPassiveDHTNode());
         data.put("pan", getConnectionCapabilities().remostHostIsActiveDHTNode());
+        data.put("myip", getConnectionCapabilities().getHeadersRead().props().getProperty(HeaderNames.REMOTE_IP));
         return data;
     }
 
