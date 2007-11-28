@@ -145,5 +145,5 @@ public class FilterSettings extends LimeProps {
      */
     public static final IntSetting MAX_RESPONSES_PER_REPLY =
         FACTORY.createRemoteIntSetting("MAX_RESPONSES_PER_REPLY", 10, 
-                "FilterSettings.maxResponsesPerReply", 10, 20);
+                "FilterSettings.maxResponsesPerReply", 10, 256);
 }

@@ -16,6 +16,7 @@ import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -197,6 +198,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
+        FilterSettings.MAX_RESPONSES_PER_REPLY.setValue(256);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
         SSLSettings.TLS_OUTGOING.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);

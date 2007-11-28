@@ -1517,10 +1517,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     }
     
     public void testMaxResponses() throws Exception {
+        FilterSettings.MAX_RESPONSES_PER_REPLY.setValue(10);
         nResponseTest(FilterSettings.MAX_RESPONSES_PER_REPLY.getValue());
     }
     
     public void testOverMaxResponses() throws Exception {
+        FilterSettings.MAX_RESPONSES_PER_REPLY.setValue(10);
         try {
             nResponseTest(FilterSettings.MAX_RESPONSES_PER_REPLY.getValue()+1);
             fail("should not have parsed");
