@@ -15,14 +15,16 @@ public final class SWTBrowserSettings extends LimeProps {
      * Setting for whether or not to use the SWT browser.
      */ 
     public static final BooleanSetting USE_SWT_BROWSER = 
-        FACTORY.createRemoteBooleanSetting("USE_SWT_BROWSER", true, "SWTBrowserSettings.useSwtBrowser"); 
+        FACTORY.createRemoteBooleanSetting("USE_SWT_BROWSER",
+                                           true,
+                                           "SWTBrowserSettings.useSwtBrowser"); 
     
     /** 
      * Remote String for The LimeWire Store
      */ 
-    public static final StringSetting REMOTE_LIME_WIRE_STORE_URL =
-        FACTORY.createRemoteStringSetting("REMOTE_LIME_WIRE_STORE_URL", 
-                                          "http://limewire.com/store", 
+    public static final StringSetting BROWSER_HOME_URL =
+        FACTORY.createRemoteStringSetting("SWT_BROWSER_HOME_URL", 
+                                          "http://www.limewire.com/features?inclient", 
                                           "SWTBrowserSettings.remoteLimeWireStoreUrl");
     
      /**
@@ -32,4 +34,10 @@ public final class SWTBrowserSettings extends LimeProps {
         FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE", 
                                           "Browse the Web", 
                                           "SWTBrowserSettings.swtBrowserTitle");
+    
+    /** Whether or not the address bar is visible. */
+    public static final BooleanSetting BROWSER_SHOW_ADDRESS =
+        FACTORY.createRemoteBooleanSetting("SWT_BROWSER_SHOW_ADDRESS",
+                                           true,
+                                           "SWTBrowserSettings.swtBrowserShowAddress");
 }
