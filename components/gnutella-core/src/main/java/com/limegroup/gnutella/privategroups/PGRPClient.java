@@ -193,8 +193,8 @@ public class PGRPClient{
             connection.sendPacket(storagePacket);
             
             //start serverSocket
-            serverSocket = new PGRPServerSocket(connection);
-            serverSocket.start();
+//            serverSocket = new PGRPServerSocket(connection);
+//            serverSocket.start();
 
             return true;
             
@@ -427,65 +427,26 @@ public class PGRPClient{
         PGRPClient client = new PGRPClient(connectToServerNoPort(servername));
         
         //manager.loginAccount("admin", "admin", connection);
-        //System.out.println(manager.findRosterUserName(connection, "anthony@lw-intern02"));
+    
         //  Create account
-        //manager.createAccount("lulu4", "Lulu4", connection);      
-//        client.loginAccount("lulu4", "Lulu4");
-//
-//        //get remote user info
-//        client.setRemoteConnection("lulu");
-//        client.sendMessage("lulu", "hi");
+        //manager.createAccount("user1", "password1");   
+        //manager.createAccount("user2", "password2"); 
+        
+        //client.loginAccount("user1", "password1");
+
+        //get remote user info
+        //client.sendMessage("user2", "hi");
        
   
-        client.loginAccount("lulu", "Lulu");
+        //client.loginAccount("user2", "password2");
         
   
         //  Login with an account
         
         //manager.setSubscriptionMode(connection);
-  
-        //Remove user account
-        //manager.removeAccount(connection);
-                       
-        //  Add to roster group
+
         
-        //manager.addRosterGroup("dominic", "Dominic", null, connection);
-        //client.addRosterGroup("intern3", "Anthony", "Limewire-intern", connection);
-        //manager.addRosterGroup("intern2", "MikeT", "Limewire-intern", connection);
-        //manager.addRosterGroup("fulltime1", "MikeE", "Limewire-full", connection);
-        //manager.addRosterGroup("fulltime2", "Dan", "Limewire-full", connection);
-        //manager.addRosterGroup("fulltime3", "Felix", "Limewire-full", connection);
-        //manager.addRosterGroup("fulltime4", "Sam", "Limewire-full", connection);
-        //manager.addRosterGroup("fulltime5", "Zlatin", "Limewire-full", connection);
-        //manager.addRosterGroup("ex-employee", "Steffen", "Limewire-ex", connection);
-        
-        
-        // Look at roster
-//        System.out.println("************************* roster list after add **********************************");
-        //manager.viewAttributes(connection);
-        
-//        client.viewRoster(connection);
-        
-        //  Remove from roster group
-        
-       //manager.removeRosterGroup("anthony@lw-intern02", null, connection);
-        /*manager.removeRosterGroup("intern2", "Limewire-intern", connection);
-        manager.removeRosterGroup("fulltime1", "Limewire-full", connection);
-        manager.removeRosterGroup("fulltime2", "Limewire-full", connection);
-        manager.removeRosterGroup("fulltime3", "Limewire-full", connection);
-        manager.removeRosterGroup("fulltime4", "Limewire-full", connection);
-        manager.removeRosterGroup("fulltime5", "Limewire-full", connection);
-        manager.removeRosterGroup("ex-employee", "Limewire-ex", connection);*/
-        
-        // Look at roster
-//        System.out.println("************************* roster list after delete **********************************");
-        
-        //manager.getUserID()
-        //manager.viewRoster(connection);
-        
-        
-        
-        //connection.disconnect();
+        client.logoff();
     }
 
 }
