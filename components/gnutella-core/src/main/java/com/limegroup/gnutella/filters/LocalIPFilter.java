@@ -4,10 +4,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IP;
 import org.limewire.util.CommonUtils;
@@ -35,6 +40,11 @@ public final class LocalIPFilter extends AbstractIPFilter {
     private final ScheduledExecutorService ipLoader;
     /** Marker for whether or not hostiles need to be loaded. */
     private volatile boolean shouldLoadHostiles;
+    
+    /** Number of allowings */
+    private volatile long allowings;
+    /** Number of blockings */
+    private volatile long blockings;
     
     /** Constructs an IPFilter that automatically loads the content. */
     @Inject
@@ -134,8 +144,28 @@ public final class LocalIPFilter extends AbstractIPFilter {
     }
     
     protected boolean allowImpl(IP ip) {
-        return goodHosts.contains(ip) ||
+        boolean ret = goodHosts.contains(ip) ||
         (!badHosts.contains(ip) && delegate.allow(ip));
+        if (ret)
+            allowings++;
+        else
+            blockings++;
+        return ret;
+    }
+    
+    @InspectableContainer
+    @SuppressWarnings("unused")
+    private class IPFilterInspectable {
+        
+        @InspectionPoint("ip filter counts")
+        private final Inspectable counts = new Inspectable() {
+            public Object inspect() {
+                Map<String,Object> ret = new HashMap<String, Object>();
+                ret.put("allowed",allowings);
+                ret.put("blocked",blockings);
+                return ret;
+            }
+        };
     }
 }
 
