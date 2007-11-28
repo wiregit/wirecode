@@ -93,6 +93,9 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // we can download songs from The Store
         // INPUT
         //  url - to download
+        //  file - name of file (optional)
+        //  id - id of progress bar to update on the way back
+        //  length - length of the track (optional)
         // OUTPUT
         //  URN - of downloader for keeping track of progress
         //   -or-
@@ -109,13 +112,20 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 //
                 // The file name
                 //
-                Tagged<String> fileString = LWSUtil.getArg(args, "file", "downloading");
-                if (!fileString.isValid()) return fileString.getValue();                
+                Tagged<String> fileString = LWSUtil.getArg(args, "file", "downloading");               
                 //
                 // The id of the tag we want to associate with the URN we return
                 // 
                 Tagged<String> idOfTheProgressBarString = LWSUtil.getArg(args, "id", "downloading");
-                if (!idOfTheProgressBarString.isValid()) return idOfTheProgressBarString.getValue();        
+                if (!idOfTheProgressBarString.isValid()) return idOfTheProgressBarString.getValue(); 
+                //
+                // The length of the URL (optional)
+                // 
+                Tagged<String> lengthString = LWSUtil.getArg(args, "length", "downloading");
+                long length = -1;
+                if (!lengthString.isValid()) {
+                    length = Long.parseLong(lengthString.getValue());
+                } 
                 //
                 // We don't want to pass in a full URL and download it, so have
                 // the remote setting LWSSettings.LWS_DOWNLOAD_HOSTNAME specifying
@@ -135,15 +145,15 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 String baseURL = baseDir + urlString.getValue();
                 try {
                     String urlStr = URLDecoder.decode(baseURL);
-                    URL url = new URL(urlStr);
+                    URL url = new URL(urlStr); 
                     RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, 
-                            fileName, null, -1L); // this make the size looked up
+                            fileName, null, length); // this make the size looked up
                     //
                     // We'll associate the identity hash code of the downloader
                     // with this file so that the web page can keep track
                     // of this downloader w.r.t this file
                     //
-                    File saveDir = SharingSettings.getSaveLWSDirectory();
+                    File saveDir = SharingSettings.getSaveLWSDirectory();  
                     Downloader d = downloadServices.downloadFromStore(rfd, true, saveDir, fileName);
                     long idOfTheDownloader = System.identityHashCode(d);
                     return idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
