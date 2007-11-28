@@ -122,8 +122,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 // The length of the URL (optional)
                 // 
                 Tagged<String> lengthString = LWSUtil.getArg(args, "length", "downloading");
-                long length = 7 * 1000000; //-1;
-                if (!lengthString.isValid()) {
+                long length = -1;
+                if (lengthString.isValid()) {
                     try {
                         length = Long.parseLong(lengthString.getValue());
                     } catch (NumberFormatException e) { /* ignore */ }
