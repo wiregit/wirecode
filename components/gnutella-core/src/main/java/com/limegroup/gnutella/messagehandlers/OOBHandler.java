@@ -2,16 +2,21 @@ package com.limegroup.gnutella.messagehandlers;
 
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntSet;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
@@ -220,8 +225,13 @@ public class OOBHandler implements MessageHandler, Runnable {
      * Keeps track of how many results have been received for a security
      * token. 
      */
-    private class OOBSession {
-    	
+    private class OOBSession implements Inspectable {
+        // inspection-related fields
+        private final List<Long> responseTimestamps = new ArrayList<Long>(10);
+        private final List<Integer> responseCounts = new ArrayList<Integer>(10);
+        private final List<Integer> addedResponses = new ArrayList<Integer>(10);
+    	// end inspection-related fields
+        
         private final SecurityToken token;
         private final IntSet urnHashCodes;
         
@@ -230,11 +240,14 @@ public class OOBHandler implements MessageHandler, Runnable {
         private final int requestedResponseCount;
         private final GUID guid;
     	
+        private final long start;
+        
         public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
             this.token = token;
             this.requestedResponseCount = requestedResponseCount;
             this.urnHashCodes = new IntSet(requestedResponseCount);
             this.guid = guid;
+            start = System.currentTimeMillis();
     	}
         
         GUID getGUID() {
@@ -259,6 +272,13 @@ public class OOBHandler implements MessageHandler, Runnable {
                     added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
                 }
             }
+            
+            // inspection-related code
+            responseTimestamps.add(System.currentTimeMillis());
+            responseCounts.add(responses.length);
+            addedResponses.add(added);
+            // end inspection-related code
+            
             return added;
         }
         
@@ -275,6 +295,20 @@ public class OOBHandler implements MessageHandler, Runnable {
     		OOBSession other = (OOBSession) o;
     		return Arrays.equals(token.getBytes(), other.token.getBytes());
     	}
+        
+        
+        public Object inspect() {
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("start",start);
+            ret.put("urnh",urnHashCodes.size());
+            if (responseHashCodes != null)
+                ret.put("rhh",responseHashCodes.size());
+            ret.put("rrc",requestedResponseCount);
+            ret.put("timestamps",responseTimestamps);
+            ret.put("rcounts",responseCounts);
+            ret.put("added",addedResponses);
+            return ret;
+        }
 	}
 	
 	private void expire() {
@@ -289,5 +323,23 @@ public class OOBHandler implements MessageHandler, Runnable {
 	
 	public void run() {
 		expire();
+	}
+
+    @InspectableContainer
+    @SuppressWarnings("unused")
+	private class OOBInspectable  {
+
+        @InspectionPoint("oob sessions")
+        public final Inspectable oobSessions = new Inspectable(){
+            public Object inspect() {
+                List<Object> list;
+                synchronized (OOBSessions) {
+                    list = new ArrayList<Object>(OOBSessions.size());
+                    for (OOBSession o : OOBSessions.values()) 
+                        list.add(o.inspect());
+                }
+                return list;
+            }
+        };
 	}
 }
