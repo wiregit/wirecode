@@ -34,7 +34,6 @@ public final class LWSUtil {
         String res = args.get(name);
         if (res == null || res.equals("")) {
             String detail = "Invalid '" + name + "' while " + action;
-            ErrorService.error(new IllegalArgumentException(detail), detail);
             return new Tagged<String>(LWSDispatcherSupport.ErrorCodes.MISSING_PARAMETER, false);
         }
         String result = res;
