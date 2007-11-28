@@ -1096,6 +1096,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 ignoring(request).isFeatureQuery();
                 ignoring(request).desiresXMLResponses();
                 ignoring(request).isMulticast();
+                ignoring(request).getLength();
             }});
             
             messageRouter.handleMessage(request, handler);

@@ -58,6 +58,8 @@ public class MessageTestUtils {
             will(returnValue((byte)2));
             allowing(msg).getTotalLength();
             will(returnValue(32));
+            allowing(msg).getLength();
+            will(returnValue(9));
             allowing(msg).getHandlerClass();
             will(returnValue(handlerClass));
             allowing(msg).getNetwork();
