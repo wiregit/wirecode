@@ -86,7 +86,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testCountWarningNormal() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(1);
         context.checking(new Expectations() {{
-            allowing(fileManager).getNumFiles();
+            one(fileManager).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             one(notifier).showMessage(with(matcher));
         }});
