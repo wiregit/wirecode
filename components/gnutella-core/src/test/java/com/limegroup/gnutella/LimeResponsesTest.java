@@ -41,7 +41,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
     @Override
     public void setSettings() throws Exception {
         // TODO change this, by either introducing a setter or overriding FileManagerController
-        PrivilegedAccessor.setValue(FileManager.class, "QRP_DELAY", 1000);
+        PrivilegedAccessor.setValue(FileManagerImpl.class, "QRP_DELAY", 1000);
         SearchSettings.LIME_QRP_ENTRIES.setValue(new String[]{"badger"});
         SearchSettings.LIME_SEARCH_TERMS.setValue(new String[]{"badger"});
         SearchSettings.SEND_LIME_RESPONSES.setValue(1f);
