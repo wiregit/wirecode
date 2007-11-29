@@ -193,8 +193,8 @@ public class PGRPClient{
             connection.sendPacket(storagePacket);
             
             //start serverSocket
-//            serverSocket = new PGRPServerSocket(connection);
-//            serverSocket.start();
+            serverSocket = new PGRPServerSocket(connection);
+            serverSocket.start();
 
             return true;
             
@@ -219,19 +219,24 @@ public class PGRPClient{
         return true;
     }
     
-    public void sendMessage(String username, String message){
+    public boolean sendMessage(String username, String message){
         BuddySession buddySession = BuddyListManager.getInstance().getSession(username);
         if(buddySession== null){
             //need to get remote user info and establish session
-            setRemoteConnection(username);
-            buddySession = BuddyListManager.getInstance().getSession(username);
+            if(setRemoteConnection(username)){
+                buddySession = BuddyListManager.getInstance().getSession(username);
+                buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
+                return true;
+            }
         }
-        
-        buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
-
+        else{
+            buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
+            return true;
+        }
+        return false;
     }
     
-    private void setRemoteConnection(String username){
+    private boolean setRemoteConnection(String username){
         
         //use valueStorage packet to get ip address, port, and public key
         ValueStorage storagePacket = new ValueStorage();
@@ -249,16 +254,19 @@ public class PGRPClient{
         
         if (result instanceof ValueStorage) {
             ValueStorage data = (ValueStorage) result;
-            
-            //create new session and add to buddyListManager
-            try {
-                BuddyListManager.getInstance().addBuddySession(username, new Socket(data.getIPAddress(),  9999));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(data.getIPAddress()!=null){
+                //create new session and add to buddyListManager
+                try {
+                    BuddyListManager.getInstance().addBuddySession(username, new Socket(data.getIPAddress(),  9999));
+                    return true;
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }   
+        }
+        return false;
     }
     
     public boolean addToRoster(String username, String nickName, String groupName) {
@@ -432,13 +440,22 @@ public class PGRPClient{
         //manager.createAccount("user1", "password1");   
         //manager.createAccount("user2", "password2"); 
         
-        //client.loginAccount("user1", "password1");
-
-        //get remote user info
-        //client.sendMessage("user2", "hi");
-       
+//        client.loginAccount("lulu", "Lulu");
+        
+        client.loginAccountNoServerSocket("lulu4", "Lulu4");
+        for(int i = 0; i <800; i++){System.out.println(i);}
+        client.sendMessage("lulu", "hi");
+        for(int i = 0; i <800; i++){System.out.println(i);}
+        client.sendMessage("lulu", "wassup");
+        for(int i = 0; i <800; i++){System.out.println(i);}
+        client.sendMessage("lulu", "this is a test message from Anthony");
+        for(int i = 0; i <800; i++){System.out.println(i);}
+        client.sendMessage("lulu", "end of test");
+        for(int i = 0; i <800; i++){System.out.println(i);}
+        client.sendMessage("lulu", "later");
+        for(int i = 0; i <100; i++){System.out.println(i);}
   
-        //client.loginAccount("user2", "password2");
+        
         
   
         //  Login with an account
@@ -446,7 +463,6 @@ public class PGRPClient{
         //manager.setSubscriptionMode(connection);
 
         
-        client.logoff();
+        //client.logoff();
     }
-
 }

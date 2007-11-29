@@ -127,46 +127,62 @@ public class PGRPClientTest extends TestCase {
         System.out.println("testMessaging start");
         //need 2 clients
         client1 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
-        client1.createAccount("user1", "password1");
+//        client1.createAccount("user1", "password1");
         
         client2 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
-        client2.createAccount("user2", "password2");
+//        client2.createAccount("user2", "password2");
         
         client1.loginAccount("user1", "password1");
         client2.loginAccountNoServerSocket("user2", "password2");
         
-        client2.sendMessage("user1", "hello user 1");
+        //send a message to a user who exists
+        client2.sendMessage("user1", "hello");
+        for(int i = 0; i <5000; i++){System.out.println(i);}
+        //send an empty message to a user who exists
+        client2.sendMessage("user1", "Anthony");
+        for(int i = 0; i <5000; i++){System.out.println(i);}
 
-        try {
-            assertEquals(client1.removeAccount(), true);
-            assertEquals(client2.removeAccount(), true);
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
+        //send a null message to a user who exists
+        client2.sendMessage("user1", "Bow");
+        for(int i = 0; i <5000; i++){System.out.println(i);}
         
+        //send a long message to a user who exists
+//        assertTrue(client2.sendMessage("user1", "hello my name is user2.  test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test"));
+
+        //send a message to a user who doesn't exist
+//        assertFalse(client2.sendMessage("user123", "hello"));
+
+
+//        try {
+//            assertEquals(client1.removeAccount(), true);
+//            assertEquals(client2.removeAccount(), true);
+//        } catch (XMPPException e) {
+//            e.printStackTrace();
+//        }
+//        
         System.out.println("testMessaging done\n");
     }
     
-    public void testremove(){
-        String username = "user2";
-        String password = "password2";
-        
-        //create initial jabber client
-        PGRPClient client = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
-        assertEquals(client.loginAccount(username, password), true);
-        
-        client.removeFromRoster("testusername", "");
-        client.removeFromRoster("testusername2", "");
-        client.removeFromRoster("testusername3", "group");
-        
-        try {
-            assertEquals(client.removeAccount(), true);
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
-        
-        //assertTrue(client.logoff());
-    }
+//    public void testremove(){
+//        String username = "user2";
+//        String password = "password2";
+//        
+//        //create initial jabber client
+//        PGRPClient client = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+//        assertEquals(client.loginAccount(username, password), true);
+//        
+//        client.removeFromRoster("testusername", "");
+//        client.removeFromRoster("testusername2", "");
+//        client.removeFromRoster("testusername3", "group");
+//        
+//        try {
+//            assertEquals(client.removeAccount(), true);
+//        } catch (XMPPException e) {
+//            e.printStackTrace();
+//        }
+//        
+//        //assertTrue(client.logoff());
+//    }
     
    
     

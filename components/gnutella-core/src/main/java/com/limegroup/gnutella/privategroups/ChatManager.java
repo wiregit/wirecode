@@ -2,15 +2,14 @@ package com.limegroup.gnutella.privategroups;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.PacketParserUtils;
-import org.limewire.util.PrivateGroupsUtils;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -23,9 +22,9 @@ import org.xmlpull.v1.XmlPullParserException;
 public class ChatManager {
     
     private Socket socket;
-    private static StringBuffer buffer = new StringBuffer(100);
+    private static volatile StringBuffer buffer = new StringBuffer(100);
     private static BufferedReader is;
-    private static PrintWriter os;
+    private static PrintWriter os;    
     private Thread readThread;
     private Thread writeThread;
     
@@ -46,7 +45,7 @@ public class ChatManager {
     }
     
     //initialize reading and writing threads
-    public void initThreads(){
+    private void initThreads(){
         
         readThread = new Thread(new ReaderThread(socket));
         readThread.start();
@@ -73,9 +72,7 @@ public class ChatManager {
         appendBuffer(packet);
     } 
     
-    
-        
-    public static void appendBuffer(Packet packet){
+    private static void appendBuffer(Packet packet){
         if(packet instanceof Message)
             buffer.append(packet.toXML());
     }
@@ -102,10 +99,13 @@ public class ChatManager {
            
             while(writeSocket.isConnected()){
                 //if buffer is empty, do not write
-                while(buffer.length()!=0)
-                {
-                    os.println(buffer);
-                    emptyBuffer();
+                synchronized(buffer){
+                    while(buffer.length()!=0)
+                    {
+                        os.println(buffer);
+                        System.out.println(buffer);
+                        emptyBuffer();                        
+                    }
                 }
             }
         }   
@@ -128,8 +128,10 @@ public class ChatManager {
             while(readSocket.isConnected()){
                 try{      
                     MXParser parser = new MXParser();
-                    if(is.ready()){
-                        
+                    //System.out.println("buffer text is : "+ is.readLine());
+                    
+                    synchronized(is){
+                        if(is.ready()){
                         Message parsedMsg = null; 
                         
                         parser.setInput(is);
@@ -145,10 +147,13 @@ public class ChatManager {
                             System.out.println("From: " + parsedMsg.getFrom());
                             System.out.println("Body: " + parsedMsg.getBody());
                             
+                            
+                            
                             //fireMessageEvent to appropriate GUI window?
-
+                        }
                         }
                     }
+                    //}
                 }catch(IOException e){
                     //continue to loop for input
                 } catch (XmlPullParserException e) {
@@ -159,7 +164,4 @@ public class ChatManager {
             }
         }
     }
-    
-    
-    
 }
