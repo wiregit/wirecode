@@ -276,6 +276,9 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    return ret;
 	}
 	
+	/**
+	 * Returns the GUID of the client that can be reached through the pushproxies.
+	 */
     public byte [] getClientGUID() {
 		return _clientGUID;
 	}
@@ -429,11 +432,6 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     public InetAddress getInetAddress() {
         IpPort addr = getIpPort();
         return addr != null ? addr.getInetAddress() : null;
-    }
-    
-    /** Returns the GUID for this PushEndpoint. */
-    public byte[] getGuid() {
-        return _guid.bytes();
     }
     
     /**
