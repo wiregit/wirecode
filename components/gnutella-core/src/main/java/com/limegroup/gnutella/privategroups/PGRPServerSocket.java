@@ -90,9 +90,9 @@ public class PGRPServerSocket{
                     providerManager.addIQProvider("serveripquery", "jabber:iq:serveripquery", new com.limegroup.gnutella.privategroups.ServerIPQueryProvider());
                     
                     
-                    ServerIPQuery queryPacket = new ServerIPQuery();
+                    ServerIPQuery queryPacket = new ServerIPQuery(remoteIPAddress);
                     queryPacket.setTo("lw-intern02");
-                    queryPacket.setIPAddress(remoteIPAddress);
+                    //queryPacket.setIPAddress(remoteIPAddress);
                     queryPacket.setType("GET");
                     
                     PacketFilter filter = new AndFilter(new PacketIDFilter(queryPacket.getPacketID()),

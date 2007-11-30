@@ -72,7 +72,7 @@ public class ServerIPQueryProvider implements IQProvider {
     
     // Builds a users ServerIPQuery from xml file.
     public static ServerIPQuery createServerIPQueryFromXML(String xml) throws Exception {
-        ServerIPQuery serverIPQueryValue = new ServerIPQuery();
+        ServerIPQuery serverIPQueryValue = new ServerIPQuery(null);
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();

@@ -2,7 +2,9 @@ package com.limegroup.gnutella.privategroups;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,6 +24,7 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.limewire.io.NetworkUtils;
 import org.limewire.util.PrivateGroupsUtils;
 
 import com.google.inject.Inject;
@@ -47,7 +50,6 @@ public class PGRPClient{
         PGRPClient.instance = this;
     }
     
-    
     /**
      * Returns a singleton PGRPClient instance.
      *
@@ -56,7 +58,6 @@ public class PGRPClient{
     public static PGRPClient getInstance() {
         return instance;
     }
-    
     
     public static XMPPConnection connectToServerNoPort(String serverAddress){
         
@@ -177,7 +178,11 @@ public class PGRPClient{
             //privateKey = keyGen.getPrivateKey();
             //modulus= keyGen.getModulus();
             
-            ipAddress = "10.254.0.30";//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
+            try {
+                ipAddress = NetworkUtils.ip2string((InetAddress.getLocalHost()).getAddress());
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }//"10.254.0.30";//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
             port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
             
             
@@ -257,6 +262,7 @@ public class PGRPClient{
             if(data.getIPAddress()!=null){
                 //create new session and add to buddyListManager
                 try {
+                    System.out.println(data.getIPAddress());
                     BuddyListManager.getInstance().addBuddySession(username, new Socket(data.getIPAddress(),  9999));
                     return true;
                 } catch (NumberFormatException e) {
@@ -454,9 +460,6 @@ public class PGRPClient{
         for(int i = 0; i <800; i++){System.out.println(i);}
         client.sendMessage("lulu", "later");
         for(int i = 0; i <100; i++){System.out.println(i);}
-  
-        
-        
   
         //  Login with an account
         

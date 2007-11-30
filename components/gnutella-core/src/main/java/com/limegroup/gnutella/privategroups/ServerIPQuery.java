@@ -12,11 +12,12 @@ import org.jivesoftware.smack.util.StringUtils;
 public class ServerIPQuery extends IQ {
 
     private String username = null;
-    private String ipAddress = null;
+    private String remoteIPAddress = null;
 
     
     
-    public ServerIPQuery() {
+    public ServerIPQuery(String remoteIPAddress) {
+        this.remoteIPAddress = remoteIPAddress;
     }
     
     
@@ -56,17 +57,17 @@ public class ServerIPQuery extends IQ {
      * @return the ipAddress.
      */
     public String getIPAddress() {
-        return ipAddress;
+        return remoteIPAddress;
     }   
 
-    /**
-     * Sets ipAddress.
-     *
-     * @param ipAddress the ipAddress.
-     */
-    public void setIPAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
+//    /**
+//     * Sets ipAddress.
+//     *
+//     * @param ipAddress the ipAddress.
+//     */
+//    public void setIPAddress(String ipAddress) {
+//        this.remoteIPAddress = ipAddress;
+//    }
     
     
     public String getChildElementXML() {
@@ -81,12 +82,12 @@ public class ServerIPQuery extends IQ {
             }
         }
         
-        if (ipAddress != null) {
-            if (ipAddress.equals("")) {
+        if (remoteIPAddress != null) {
+            if (remoteIPAddress.equals("")) {
                 buf.append("<ipAddress/>");
             }
             else {
-                buf.append("<ipAddress>").append(StringUtils.escapeForXML(ipAddress)).append("</ipAddress>");
+                buf.append("<ipAddress>").append(StringUtils.escapeForXML(remoteIPAddress)).append("</ipAddress>");
             }
         }
      

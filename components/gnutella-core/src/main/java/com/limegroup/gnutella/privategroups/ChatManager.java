@@ -22,9 +22,9 @@ import org.xmlpull.v1.XmlPullParserException;
 public class ChatManager {
     
     private Socket socket;
-    private static volatile StringBuffer buffer = new StringBuffer(100);
-    private static BufferedReader is;
-    private static PrintWriter os;    
+    private StringBuffer buffer = new StringBuffer(100);
+    private BufferedReader is;
+    private PrintWriter os;    
     private Thread readThread;
     private Thread writeThread;
     
@@ -32,18 +32,9 @@ public class ChatManager {
     public ChatManager(Socket socket){
         this.socket = socket;
         
-        initThreads();
-        
-    }
-
-    public Socket getSocket(){
-        return socket;
-    }
-    
-    public StringBuffer getBuffer(){
-        return buffer;
-    }
-    
+        initThreads(); 
+    }    
+   
     //initialize reading and writing threads
     private void initThreads(){
         
@@ -72,12 +63,12 @@ public class ChatManager {
         appendBuffer(packet);
     } 
     
-    private static void appendBuffer(Packet packet){
+    private void appendBuffer(Packet packet){
         if(packet instanceof Message)
             buffer.append(packet.toXML());
     }
     
-    private static void emptyBuffer(){
+    private void emptyBuffer(){
         buffer.delete(0, buffer.length());
     }
     
@@ -103,7 +94,6 @@ public class ChatManager {
                     while(buffer.length()!=0)
                     {
                         os.println(buffer);
-                        System.out.println(buffer);
                         emptyBuffer();                        
                     }
                 }

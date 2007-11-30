@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,6 +17,7 @@ public class PrivateGroupsScreen extends JPanel {
     
     
     public JTextField msgField;
+    public JTextField incomingMsgField;
     public static PGRPClient client; 
     
     private PrivateGroupsScreen(){
@@ -23,15 +26,21 @@ public class PrivateGroupsScreen extends JPanel {
     
     private void initFrame(){
         
-        JFrame f = new JFrame("This is a test");
+        JFrame f = new JFrame("Private Groups Test");
+        f.addWindowListener(new FrameListener());
         f.setSize(400, 150);
         Container content = f.getContentPane();
         content.setBackground(Color.white);
         content.setLayout(new GridLayout(0,1)); 
         
         msgField = new JTextField();
+        incomingMsgField = new JTextField();
         
         content.add(msgField);
+        content.add(incomingMsgField);
+        
+        //register incomingMsgField
+        
         
         JButton sendBtn = new JButton("Send");
         sendBtn.setSize(10, 5);
@@ -40,8 +49,7 @@ public class PrivateGroupsScreen extends JPanel {
         content.add(sendBtn);
         
         f.setVisible(true);
-        
-        
+ 
     }
     
     public void printMsg(String msg){
@@ -53,7 +61,7 @@ public class PrivateGroupsScreen extends JPanel {
         
         //start PGRPClient stuff
         client = new PGRPClient(PGRPClient.connectToServerNoPort("10.254.0.30"));
-        client.loginAccount("user2", "password1");
+        client.loginAccount("user2", "password2");
         screen.printMsg("login successful");
         
     }
@@ -63,6 +71,15 @@ public class PrivateGroupsScreen extends JPanel {
         public void actionPerformed(ActionEvent e) {
             String msg = msgField.getText();
             client.sendMessage("user1", msg);
+        }
+    }
+    
+    private class FrameListener extends WindowAdapter{
+        
+        //override window closing
+        public void windowClosing(WindowEvent e) {
+            client.logoff();
+            System.exit(0);
         }
     }
     
