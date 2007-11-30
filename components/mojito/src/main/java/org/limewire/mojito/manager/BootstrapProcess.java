@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.OnewayExchanger;
+import org.limewire.concurrent.SyncWrapper;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTTask;
@@ -71,6 +72,8 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
 
     private static final Log LOG = LogFactory.getLog(BootstrapProcess.class);
     
+    private enum Status { BOOTSTRAPPING, RETRYING_BOOTSTRAP, FINISHED};
+    
     private OnewayExchanger<BootstrapResult, ExecutionException> exchanger;
     
     private final Context context;
@@ -79,11 +82,13 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     
     private final List<DHTTask<?>> tasks = new ArrayList<DHTTask<?>>();
     
-    private boolean retriedToBootstrap = false;
+    private final List<BootstrapWorker> workers = new ArrayList<BootstrapWorker>();
     
-    private boolean foundNewContacts = false;
+    private final SyncWrapper<Status> status = new SyncWrapper<Status>(null);
     
-    private int routeTableFailureCount = 0;
+    private volatile boolean foundNewContacts = false;
+    
+    private int routeTableFailureCount;
     
     private boolean cancelled = false;
     
@@ -118,6 +123,15 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
 
     public void start(OnewayExchanger<BootstrapResult, 
             ExecutionException> exchanger) {
+        
+        synchronized(status.getLock()) {
+            if (status.get() != null)
+                return;
+            status.set(Status.BOOTSTRAPPING);
+        }
+
+        if (LOG.isDebugEnabled())
+            LOG.debug("starting bootstrap "+getPercentage(context.getRouteTable())+"% alive");
         
         if (exchanger == null) {
             if (LOG.isWarnEnabled()) {
@@ -183,15 +197,19 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
 
             @Override
             public synchronized void setException(ExecutionException exception) {
-                LOG.info("ExecutionException", exception);
                 super.setException(exception);
-                exchanger.setException(exception);
+                handleExecutionException(exception);
             }
         };
 
         FindNodeResponseHandler handler = new FindNodeResponseHandler(
                 context, node, context.getLocalNodeID());
         start(handler, c);
+    }
+    
+    void handleExecutionException(ExecutionException ee) {
+        LOG.info("ExecutionException", ee);
+        exchanger.setException(ee);
     }
     
     private void handleNearestNodes(FindNodeResult result) {
@@ -289,8 +307,14 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         bucketsToRefresh = new TimeAwareIterable<KUID>(
                 BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue(),
                 bucketIds).iterator();
-        
-        refreshNextBucket();
+        //TODO: simpp this
+        for (int i = 0; i < 5; i++) {
+            BootstrapWorker worker = new BootstrapWorker(context, this);
+            synchronized(this) {
+                workers.add(worker);
+            }
+            context.getDHTExecutorService().execute(worker);
+        }
     }
     
     private Collection<KUID> getBucketsToRefresh() {
@@ -300,81 +324,32 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         return bucketIds;
     }
     
-    private void refreshNextBucket() {
-        if (bucketsToRefresh.hasNext()) {
-            refreshBucket(bucketsToRefresh.next());
-        } else {
-            bootstrapped(true);
-        }
-    }
     
-    private void refreshBucket(KUID randomId) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Begin Bucket refresh for: " + randomId);
+    KUID getNextBucket() {
+        synchronized(this) {
+            if (cancelled)
+                return null;
+            synchronized(bucketsToRefresh) {
+                if (bucketsToRefresh.hasNext()) 
+                    return bucketsToRefresh.next();
+            }
         }
         
-        OnewayExchanger<FindNodeResult, ExecutionException> c 
-                = new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
-            @Override
-            public synchronized void setValue(FindNodeResult value) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Finished Bucket refresh: " + value);
-                }
-                
-                super.setValue(value);
-                handleBucketRefresh(value);
+        boolean determinate = false;
+        synchronized(status.getLock()) {
+            if (status.get() != Status.FINISHED) {
+                status.set(Status.FINISHED);
+                determinate = true;
             }
-
-            @Override
-            public synchronized void setException(ExecutionException exception) {
-                LOG.info("ExecutionException", exception);
-                super.setException(exception);
-                exchanger.setException(exception);
-            }
-        };
-
-        FindNodeResponseHandler handler 
-            = new FindNodeResponseHandler(context, randomId);
-        start(handler, c);
-    }
-    
-    private void handleBucketRefresh(FindNodeResult result) {
-        // The number of Contacts from our RouteTable that didn't
-        // respond. Random nodes that we discovered during the
-        // lookup are not taken into account!
-        routeTableFailureCount += result.getRouteTableFailureCount();
-        
-        if (routeTableFailureCount 
-                >= BootstrapSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-            
-            // Is it the first time? If so prune the RouteTable
-            // and try again!
-            if (!retriedToBootstrap) {
-                retriedToBootstrap = true;
-                handleStaleRouteTable();
-                
-            // Did it happen again? If so give up!
-            } else {
-                determinateIfBootstrapped();
-            }
-            
-            // In any case exit here
-            return;
-        
-        } else if (!foundNewContacts 
-                && !result.getPath().isEmpty()) {
-            foundNewContacts = true;
         }
         
-        refreshNextBucket();
+        if (determinate)
+            determinateIfBootstrapped();
+        return null;
     }
     
     private void handleStaleRouteTable() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Too many failures: " + routeTableFailureCount 
-                    + ". Retrying to refresh all buckets.");
-        }
-        
+        LOG.debug("handling stale route table");
         // The RouteTable is stale! Remove all non-alive Contacts,
         // rebuild the RouteTable and start over!
         context.getRouteTable().purge(
@@ -387,10 +362,52 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         findNearestNodes();
     }
     
+    void refreshDone(int failures, boolean newContacts) {
+            
+        foundNewContacts |= newContacts;
+        boolean highFailures = false;
+        boolean retry = false;
+        boolean giveUp = false;
+        
+        synchronized(status.getLock()) {
+            switch(status.get()) {
+            case BOOTSTRAPPING :
+            case RETRYING_BOOTSTRAP :
+                routeTableFailureCount += failures;
+                if (routeTableFailureCount >= BootstrapSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("high failures: "+routeTableFailureCount);
+                    highFailures = true;
+                }
+            }
+
+            if (highFailures) {
+                switch(status.get()) {
+                case BOOTSTRAPPING :
+                    routeTableFailureCount = 0;
+                    status.set(Status.RETRYING_BOOTSTRAP);
+                    retry = true;
+                    break;
+                case RETRYING_BOOTSTRAP :
+                    giveUp = true;
+                    status.set(Status.FINISHED);
+                }
+            }
+        }
+        
+        if (retry)
+            handleStaleRouteTable();
+        if (giveUp) {
+            cancel();
+            determinateIfBootstrapped();
+        }
+    }
+    
     /**
      * Determinates whether or not we're bootstrapped.
      */
     private void determinateIfBootstrapped() {
+        
         boolean bootstrapped = false;
         float alive = purgeAndGetPercenetage();
         
@@ -415,9 +432,15 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
                             PurgeMode.PURGE_CONTACTS, 
                             PurgeMode.MERGE_BUCKETS);
             
-            return RouteTableUtils.getPercentageOfAliveContacts(routeTable);
+            return getPercentage(routeTable);
         }
     }
+    
+    private float getPercentage(RouteTable table) {
+        synchronized(table) {
+            return RouteTableUtils.getPercentageOfAliveContacts(table);
+        }
+   }
     
     private void bootstrapped(boolean bootstrapped) {
         if (LOG.isTraceEnabled()) {
@@ -437,7 +460,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     
     private <T> void start(DHTTask<T> task, OnewayExchanger<T, ExecutionException> c) {
         boolean doStart = false;
-        synchronized (tasks) {
+        synchronized (this) {
             if (!cancelled) {
                 tasks.add(task);
                 doStart = true;
@@ -450,23 +473,31 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
    
     public void cancel() {
+        status.set(Status.FINISHED);
+        
         if (LOG.isTraceEnabled()) {
             LOG.trace("Canceling BootstrapProcess");
         }
         
         List<DHTTask<?>> copy = null;
-        synchronized (tasks) {
+        List<BootstrapWorker> workerCopy = null;
+        synchronized (this) {
             if (!cancelled) {
                 copy = new ArrayList<DHTTask<?>>(tasks);
                 tasks.clear();
+                workerCopy = new ArrayList<BootstrapWorker>(workers);
+                workers.clear();
                 cancelled = true;
             }
         }
 
         if (copy != null) {
-            for (DHTTask<?> task : copy) {
+            for (DHTTask<?> task : copy) 
                 task.cancel();
-            }
+        }
+        if (workerCopy != null) {
+            for (BootstrapWorker worker : workerCopy) 
+                worker.shutdown();
         }
     }
 }
