@@ -53,7 +53,7 @@ public class PrivateGroupsScreen extends JPanel {
         
         //start PGRPClient stuff
         client = new PGRPClient(PGRPClient.connectToServerNoPort("10.254.0.30"));
-        client.loginAccount("user1", "password1");
+        client.loginAccount("user2", "password1");
         screen.printMsg("login successful");
         
     }
@@ -62,7 +62,7 @@ public class PrivateGroupsScreen extends JPanel {
 
         public void actionPerformed(ActionEvent e) {
             String msg = msgField.getText();
-            client.sendMessage("user2", msg);
+            client.sendMessage("user1", msg);
         }
         
         
