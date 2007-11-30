@@ -64,8 +64,6 @@ public class PrivateGroupsScreen extends JPanel {
             String msg = msgField.getText();
             client.sendMessage("user1", msg);
         }
-        
-        
     }
     
 }
