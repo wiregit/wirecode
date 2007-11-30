@@ -225,20 +225,29 @@ public class PGRPClient{
     }
     
     public boolean sendMessage(String username, String message){
-        BuddySession buddySession = BuddyListManager.getInstance().getSession(username);
-        if(buddySession== null){
-            //need to get remote user info and establish session
-            if(setRemoteConnection(username)){
-                buddySession = BuddyListManager.getInstance().getSession(username);
+        
+        //check list to see if buddy is a buddy
+        if(findRosterUserName(username)){
+        
+            BuddySession buddySession = BuddyListManager.getInstance().getSession(username);
+            if(buddySession== null){
+                //need to get remote user info and establish session
+                if(setRemoteConnection(username)){
+                    buddySession = BuddyListManager.getInstance().getSession(username);
+                    buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
+                    return true;
+                }
+            }
+            else{
                 buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
                 return true;
             }
+            return false;
         }
         else{
-            buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
-            return true;
+            System.out.println("you cannot send a message to somebody not on your buddy list!");
+            return false;
         }
-        return false;
     }
     
     private boolean setRemoteConnection(String username){
@@ -262,7 +271,6 @@ public class PGRPClient{
             if(data.getIPAddress()!=null){
                 //create new session and add to buddyListManager
                 try {
-                    System.out.println(data.getIPAddress());
                     BuddyListManager.getInstance().addBuddySession(username, new Socket(data.getIPAddress(),  9999));
                     return true;
                 } catch (NumberFormatException e) {
@@ -378,7 +386,7 @@ public class PGRPClient{
         Collection <RosterEntry> usernames = roster.getEntries();
         for(Iterator i = usernames.iterator(); i.hasNext();){
             String user = ((RosterEntry)i.next()).getUser();
-             if(user.equals(username))
+             if(user.equals(username + "@" + servername))
                  return true;
         }
         return false;
@@ -446,20 +454,21 @@ public class PGRPClient{
         //manager.createAccount("user1", "password1");   
         //manager.createAccount("user2", "password2"); 
         
-//        client.loginAccount("lulu", "Lulu");
+          client.loginAccount("user2", "password2");
+          client.viewRoster();
         
-        client.loginAccountNoServerSocket("lulu4", "Lulu4");
-        for(int i = 0; i <800; i++){System.out.println(i);}
-        client.sendMessage("lulu", "hi");
-        for(int i = 0; i <800; i++){System.out.println(i);}
-        client.sendMessage("lulu", "wassup");
-        for(int i = 0; i <800; i++){System.out.println(i);}
-        client.sendMessage("lulu", "this is a test message from Anthony");
-        for(int i = 0; i <800; i++){System.out.println(i);}
-        client.sendMessage("lulu", "end of test");
-        for(int i = 0; i <800; i++){System.out.println(i);}
-        client.sendMessage("lulu", "later");
-        for(int i = 0; i <100; i++){System.out.println(i);}
+//        client.loginAccountNoServerSocket("lulu4", "Lulu4");
+//        for(int i = 0; i <800; i++){System.out.println(i);}
+//        client.sendMessage("lulu", "hi");
+//        for(int i = 0; i <800; i++){System.out.println(i);}
+//        client.sendMessage("lulu", "wassup");
+//        for(int i = 0; i <800; i++){System.out.println(i);}
+//        client.sendMessage("lulu", "this is a test message from Anthony");
+//        for(int i = 0; i <800; i++){System.out.println(i);}
+//        client.sendMessage("lulu", "end of test");
+//        for(int i = 0; i <800; i++){System.out.println(i);}
+//        client.sendMessage("lulu", "later");
+//        for(int i = 0; i <100; i++){System.out.println(i);}
   
         //  Login with an account
         
