@@ -21,7 +21,6 @@ import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class BypassedResultsCacheTest extends BaseTestCase {

@@ -4,18 +4,12 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.util.Tagged;
 import com.limegroup.gnutella.util.URLDecoder;
 
 public final class LWSUtil {
     
-    private static LWSUtil instance;
-    public static LWSUtil instance() {
-        if (instance == null) instance = new LWSUtil();
-        return instance;
-    }
     private LWSUtil() {}
     
     /**

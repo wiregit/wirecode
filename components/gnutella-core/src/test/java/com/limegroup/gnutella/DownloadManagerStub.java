@@ -16,7 +16,6 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
-import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
