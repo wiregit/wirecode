@@ -71,6 +71,8 @@ public class PrivateGroupsScreen extends JPanel {
         public void actionPerformed(ActionEvent e) {
             String msg = msgField.getText();
             client.sendMessage("user1", msg);
+            
+            //client.addToRoster("user1", "", "");
         }
     }
     
