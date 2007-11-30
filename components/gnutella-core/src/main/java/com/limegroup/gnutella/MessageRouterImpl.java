@@ -340,6 +340,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private final Provider<InspectionRequestHandler> inspectionRequestHandlerFactory;
     private final Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory;
     private final Provider<AdvancedToggleHandler> advancedToggleHandlerFactory;
+    private final Provider<OOBHandler> oobHandlerFactory;
 
     private final PingRequestFactory pingRequestFactory;
 
@@ -389,7 +390,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
             Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
-            PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder) {
+            PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
+            Provider<OOBHandler> oobHandlerFactory) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -426,6 +428,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.multicastGuidMap = guidMapManager.getMap();
         this.udpReplyHandlerCache = udpReplyHandlerCache;
         this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
+        this.oobHandlerFactory = oobHandlerFactory;
 
         _clientGUID = applicationServices.getMyGUID();
     }
@@ -557,7 +560,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         backgroundExecutor.scheduleWithFixedDelay(new UDPReplyCleaner(), UDP_REPLY_CACHE_TIME, UDP_REPLY_CACHE_TIME, TimeUnit.MILLISECONDS);
         
         // runner to clean up OOB sessions
-        OOBHandler oobHandler = new OOBHandler(this);
+        OOBHandler oobHandler = oobHandlerFactory.get();
         backgroundExecutor.scheduleWithFixedDelay(oobHandler, CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         
         // handler for inspection requests

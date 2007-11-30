@@ -21,6 +21,8 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.BypassedResultsCache;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
@@ -41,6 +43,7 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
  * out-of-band search results and manages a cache of session objects 
  * to keep track of the results that have alreay been received.
  */
+@Singleton
 public class OOBHandler implements MessageHandler, Runnable {
     
     private static final Log LOG = LogFactory.getLog(OOBHandler.class);
@@ -50,6 +53,7 @@ public class OOBHandler implements MessageHandler, Runnable {
     private final Map<Integer,OOBSession> OOBSessions =
         Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
     
+    @Inject
 	public OOBHandler(MessageRouter router) {
 		this.router = router;
 	}
