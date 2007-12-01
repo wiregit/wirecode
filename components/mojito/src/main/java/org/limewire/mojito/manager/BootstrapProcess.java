@@ -307,8 +307,8 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         bucketsToRefresh = new TimeAwareIterable<KUID>(
                 BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue(),
                 bucketIds).iterator();
-        //TODO: simpp this
-        for (int i = 0; i < 5; i++) {
+        
+        for (int i = 0; i < BootstrapSettings.BOOTSTRAP_WORKERS.getValue(); i++) {
             BootstrapWorker worker = new BootstrapWorker(context, this);
             synchronized(this) {
                 workers.add(worker);

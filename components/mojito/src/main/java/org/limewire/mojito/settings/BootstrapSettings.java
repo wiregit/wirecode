@@ -55,6 +55,13 @@ public class BootstrapSettings extends MojitoProps {
                 0.5f, "Mojito.IsBootstrappedRatio", 0f, 1.0f);
     
     /**
+     * Number of bootstrap workers to spawn.
+     */
+    public static final IntSetting BOOTSTRAP_WORKERS =
+        FACTORY.createRemoteIntSetting("BOOSTRAP_WORKERS", 1, 
+                "Mojito.BooststrapWorkers", 1, 5);
+    
+    /**
      * Enabled or disables the second part of the bootstrapping process that
      * does a full Bucket refresh to fill up the RouteTable.
      */
