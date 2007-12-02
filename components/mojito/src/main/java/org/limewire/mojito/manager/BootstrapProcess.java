@@ -80,8 +80,10 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     
     private final BootstrapManager manager;
     
+    /** Serial tasks such as sending collision ping and finding nearest node */
     private final List<DHTTask<?>> tasks = new ArrayList<DHTTask<?>>();
     
+    /** List of parallel workers executing paralellizable tasks */
     private final List<BootstrapWorker> workers = new ArrayList<BootstrapWorker>();
     
     private final SyncWrapper<Status> status = new SyncWrapper<Status>(null);
@@ -362,14 +364,23 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         findNearestNodes();
     }
     
+    /**
+     * Notification that a refresh operation has completed.
+     * @param failures how many of the pinged nodes failed to respond.
+     * @param newContacts true if new contacts were discovered.
+     */
     void refreshDone(int failures, boolean newContacts) {
             
         foundNewContacts |= newContacts;
-        boolean highFailures = false;
+        
+        /*
+         * at this point we can either retry bootstrapping or terminate it.
+         */
         boolean retry = false;
-        boolean giveUp = false;
+        boolean terminate = false;
         
         synchronized(status.getLock()) {
+            boolean highFailures = false;
             switch(status.get()) {
             case BOOTSTRAPPING :
             case RETRYING_BOOTSTRAP :
@@ -389,7 +400,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
                     retry = true;
                     break;
                 case RETRYING_BOOTSTRAP :
-                    giveUp = true;
+                    terminate = true;
                     status.set(Status.FINISHED);
                 }
             }
@@ -397,7 +408,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         
         if (retry)
             handleStaleRouteTable();
-        if (giveUp) {
+        if (terminate) {
             cancel();
             determinateIfBootstrapped();
         }
