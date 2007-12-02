@@ -4,6 +4,7 @@ package org.limewire.collection;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -353,7 +354,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     public Iterator<Range> iterator() {
         return intervals.iterator();
     }
-
+    
     public List<Range> getAllIntervalsAsList() {
         return new ArrayList<Range>(intervals);
     }
@@ -374,6 +375,27 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         intervals.clear();
     }
 
+    /**
+     * encodes the current interval set as defined in
+     * http://www.limewire.org/wiki/index.php?title=HashTreeRangeEncoding
+     */
+    public Collection<Integer> encode(long maxSize) {
+        long numLeafs = maxSize >> 10;
+        if (maxSize % 1024 != 0)
+            numLeafs++;
+        assert numLeafs <= Integer.MAX_VALUE;
+        TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
+        for (Range r : intervals) {
+            assert r.getLow() % 1024 == 0;
+            for (long i = r.getLow(); i <= r.getHigh(); i+= 1024) {
+                int chunk = ts.fileToNodeId((int)(i >> 10));
+                ts.add(chunk, null);
+                ts.used(chunk);
+            }
+        }
+        return ts.getUsedNodes();
+    }
+    
     /**
      * Creates an <code>IntervalSet</code> that is the negative to this 
      * <code>IntervalSet</code>.

@@ -5,4 +5,10 @@ package org.limewire.collection;
  */
 public interface NodeGenerator {
     byte [] generate(byte [] left, byte [] right);
+    
+    static class NullGenerator implements NodeGenerator {
+        public byte [] generate(byte [] left, byte [] right) {
+            return null;
+        }
+    }
 }

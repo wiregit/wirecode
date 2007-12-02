@@ -55,6 +55,26 @@ public class TreeStorageTest extends BaseTestCase {
         return tree;
     }
     
+    public void testFileToNodeId() throws Exception {
+        TreeStorage storage = new TreeStorage(null, new NodeGenerator.NullGenerator(), 8);
+        assertEquals(8, storage.fileToNodeId(0));
+        assertEquals(15, storage.fileToNodeId(7));
+        try {
+            storage.fileToNodeId(8);
+            fail("id out of range");
+        } catch (IllegalArgumentException expected){}
+        
+        storage = new TreeStorage(null, new NodeGenerator.NullGenerator(), 11);
+        assertEquals(16, storage.fileToNodeId(0));
+        assertEquals(23, storage.fileToNodeId(7));
+        try {
+            storage.fileToNodeId(11);
+            fail("id out of range");
+        } catch (IllegalArgumentException expected){}
+        
+        storage = new TreeStorage(null, new NodeGenerator.NullGenerator(), 1);
+    }
+    
     /**
      * Test basic functionality
      */

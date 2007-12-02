@@ -1,6 +1,7 @@
 package org.limewire.collection;
 
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -41,6 +42,51 @@ public class IntervalSetTest extends BaseTestCase {
     
     public void setUp() {
         iSet = new IntervalSet();
+    }
+    
+    public void testEncode() throws Exception {
+        
+        // file is [0,1023], all verified
+        iSet.add(new Interval(0,1023));
+        Collection<Integer> encoded = iSet.encode(1024);
+        assertEquals(1, encoded.size());
+        assertTrue(encoded.contains(1));
+        
+        // file is [0,1024], verified only [0,1023]
+        encoded = iSet.encode(1025);
+        assertEquals(1, encoded.size());
+        assertTrue(encoded.contains(2));
+        
+        // file is [0,1024] all verified
+        iSet.add(new Interval(1024));
+        encoded = iSet.encode(1025);
+        assertEquals(1, encoded.size());
+        assertTrue(encoded.toString(),encoded.contains(1));
+        
+        
+        // empty file will be empty regardless of size
+        iSet.clear();
+        encoded = iSet.encode(1000);
+        assertEquals(0, encoded.size());
+        encoded = iSet.encode(2025);
+        assertEquals(0, encoded.size());
+        
+        // examples from the wiki page 
+        // http://www.limewire.org/wiki/index.php?title=HashTreeRangeEncoding
+        
+        // file is [0, 10 * 1024 -1], verified is [0, 4 * 1024 -1]
+        iSet.add(new Interval(0, 4 * 1024 -1));
+        encoded = iSet.encode(11*1024);
+        assertEquals(encoded.toString(),1, encoded.size());
+        assertTrue(encoded.toString(),encoded.contains(4));
+        
+        // same file, range [4 * 1024, 10 * 1024 - 1]
+        iSet.clear();
+        iSet.add(new Interval(4 * 1024, 10 * 1024 -1));
+        encoded = iSet.encode(11*1024);
+        assertEquals(encoded.toString(),2, encoded.size());
+        assertTrue(encoded.toString(),encoded.contains(5));
+        assertTrue(encoded.toString(),encoded.contains(12));
     }
 	
     // getNumberOfIntervals is used in pretty much every

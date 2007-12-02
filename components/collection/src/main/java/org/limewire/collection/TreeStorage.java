@@ -32,6 +32,7 @@ public class TreeStorage {
     TreeStorage(byte [] rootHash, NodeGenerator generator, int numLeafs) {
         this.generator = generator;
         this.maxId = (0x1 << log2Ceil(numLeafs))+ numLeafs - 1;
+        assert  this.maxId == fileToNodeId(numLeafs-1) : "max Id: "+this.maxId+" vs "+fileToNodeId(numLeafs - 1);
         TreeNode root = new TreeNode(1, rootHash);
         // root is trusted
         root.verified = true;
@@ -240,5 +241,17 @@ public class TreeStorage {
             n++;
         }
         return n;
+    }
+    
+    /**
+     * @param fileId id of a chunk in a file starting from 0
+     * @return id of a node on the bottom row of the tree
+     */
+    public int fileToNodeId(int fileId) {
+        int power = log2Ceil(maxId);
+        int ret = (0x1 << Math.max(0,(power - 1)))+fileId;
+        if (ret > maxId)
+            throw new IllegalArgumentException("fileId "+fileId+" maxId "+maxId+" ret "+ret);
+        return ret ;
     }
 }
