@@ -1283,6 +1283,72 @@ public final class QueryRequestTest extends LimeTestCase {
         assertFalse(fromNetwork.isSecurityTokenRequired());
         
     }
+
+    public void testDesiresPartialResults() throws Exception {
+        QueryRequest request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        assertTrue(request.desiresPartialResults());
+        
+        QueryRequest fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertTrue(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
+        assertTrue(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertTrue(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        assertTrue(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertTrue(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        assertTrue(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertTrue(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        assertTrue(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertTrue(fromNetwork.desiresPartialResults());
+        
+        
+        // disable partial
+        SearchSettings.PARTIAL_RESULTS.setValue(false);
+        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        assertFalse(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertFalse(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
+        assertFalse(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertFalse(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        assertFalse(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertFalse(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        assertFalse(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertFalse(fromNetwork.desiresPartialResults());
+        
+        request = queryRequestFactory.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        assertFalse(request.desiresPartialResults());
+        
+        fromNetwork = queryRequestFactory.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Network.UDP);
+        assertFalse(fromNetwork.desiresPartialResults());
+        
+    }
     
     public void testUnmarkOOBQuery() throws Exception {
         QueryRequest query = queryRequestFactory.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 5555);

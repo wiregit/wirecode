@@ -184,6 +184,11 @@ public interface QueryRequest extends Message {
      * this implies the sender requests OOB replies, protocol version 3.
      */
     public boolean isSecurityTokenRequired();
+    
+    /**
+     * @return true if the query desires results for partial files
+     */
+    public boolean desiresPartialResults();
 
     /** Returns the address to send a out-of-band reply to.  Only useful
      *  when desiresOutOfBandReplies() == true.

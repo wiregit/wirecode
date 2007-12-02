@@ -102,6 +102,8 @@ public class GGEP {
     public static final String GGEP_HEADER_SIGNATURE = "SIG";
     /** The extention header (key) indicating the size of the file is 64 bit */
     public static final String GGEP_HEADER_LARGE_FILE = "LF";
+    /** The prefix of the extention header (key) indicating support for partial results */
+    public static final String GGEP_HEADER_PARTIAL_RESULT_PREFIX = "PR";
     
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;

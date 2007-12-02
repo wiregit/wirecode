@@ -78,6 +78,9 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     
     private boolean _isSecurityTokenRequired;
     
+    /** If the query desires partial results */
+    private boolean _partialResultsDesired;
+    
     /**
      * Whether or not the GGEP header for Do Not Proxy was found and its
      * field is empty.
@@ -301,6 +304,11 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                 ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
             }
             
+            if (SearchSettings.PARTIAL_RESULTS.getValue()) {
+                _partialResultsDesired = true;
+                ggepBlock.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
+            }
+            
             // if there are GGEP headers, write them out...
             if (!ggepBlock.isEmpty()) {
                 ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
@@ -371,6 +379,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         _metaMask = parser.metaMask;
         
         _isSecurityTokenRequired = parser.hasSecurityTokenRequest;
+        
+        _partialResultsDesired = parser.partialResultsDesired;
         
 		if(parser.queryUrns == null) {
 			QUERY_URNS =Collections.emptySet(); 
@@ -609,6 +619,10 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         return _isSecurityTokenRequired;
     }
 
+    public boolean desiresPartialResults() {
+        return _partialResultsDesired;
+    }
+    
     /** Returns the address to send a out-of-band reply to.  Only useful
      *  when desiresOutOfBandReplies() == true.
      */
@@ -957,6 +971,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         
         boolean hasSecurityTokenRequest;
         
+        boolean partialResultsDesired;
+        
         int hugeStart;
         
         int hugeEnd;
@@ -995,6 +1011,10 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                         if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
                             hasSecurityTokenRequest = true;
                         }
+                        
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX))
+                            partialResultsDesired = true;
+                        
                     } catch (BadGGEPPropertyException ignored) {}
                 }
 
