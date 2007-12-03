@@ -158,7 +158,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 engine.setNeedClientAuth(needClientAuth);
             }
             SSLSession session = engine.getSession();
-            readIncoming = byteBufferCache.getHeap(session.getApplicationBufferSize());
+            readIncoming = byteBufferCache.getHeap(session.getPacketBufferSize());
             writeOutgoing = byteBufferCache.getHeap(session.getPacketBufferSize());
             if(LOG.isTraceEnabled())
                 LOG.trace("Initialized engine: " + engine + ", session: " + session);
@@ -224,7 +224,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 if(readOutgoing == null) {
                     synchronized(initLock) {
                         if(!shutdown)
-                            readOutgoing = byteBufferCache.getHeap(engine.getSession().getPacketBufferSize());
+                            readOutgoing = byteBufferCache.getHeap(engine.getSession().getApplicationBufferSize());
                     }
                 }
                 result = engine.unwrap(readIncoming, readOutgoing);
@@ -232,7 +232,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 readConsumed += result.bytesConsumed();
                 status = result.getStatus();
                 if(status == Status.BUFFER_OVERFLOW)
-                    throw new IllegalStateException("not enough room in fallback TLS buffer!  readOutgoing: " + readOutgoing + ", readIncoming: " + readIncoming);
+                    throw new IllegalStateException("not enough room in fallback TLS buffer!  readOutgoing: " + readOutgoing + ", readIncoming: " + readIncoming + ", packet size: " + engine.getSession().getPacketBufferSize() + ", appl size: " + engine.getSession().getApplicationBufferSize());
                 transferred += BufferUtils.transfer(readOutgoing, dst);
             }
             
