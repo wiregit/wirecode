@@ -330,12 +330,18 @@ public final class UrnCache {
     }
     
     private Map<UrnSetKey, Set<URN>> getUrnMap() {
+        boolean interrupted = Thread.interrupted();
         try {
-            return deserializer.get();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            while(true) {
+                try {
+                    return deserializer.get();
+                }catch (InterruptedException tryAgain) {}
+            }
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (interrupted)
+                Thread.currentThread().interrupt();
         }
     }
     
