@@ -95,25 +95,31 @@ public final class CreationTimeCache {
      * Package private for testing.
      */
     Map<URN, Long> getUrnToTime() {
-        try {
-            return deserializer.get().getUrnToTime();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        return getMaps().getUrnToTime();
     }
     
     /**
      * Package private for testing.
      */
     SortedMap<Long, Set<URN>> getTimeToUrn() {
+        return getMaps().getTimeToUrn();
+    }
+    
+    private Maps getMaps() {
+        boolean interrupted = false;
         try {
-            return deserializer.get().getTimeToUrn();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            while(true) {
+                try {
+                    return deserializer.get();
+                } catch (InterruptedException tryAgain) {
+                    interrupted = true;
+                }
+            }
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (interrupted)
+                Thread.currentThread().interrupt();
         }
     }
     
