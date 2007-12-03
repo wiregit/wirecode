@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -833,25 +834,24 @@ public class UDPService implements ReadWriteObserver {
     }
 
 
-    private class SentMessageCounter implements Inspectable {
-        private Map<Class, Map<String,Long>> counts = 
-            new HashMap<Class, Map<String,Long>>();
+    private static class SentMessageCounter implements Inspectable {
+        private Map<Class, MessageRouterImpl.MessageTypeCounter> counts = 
+            new HashMap<Class, MessageRouterImpl.MessageTypeCounter>();
         
         synchronized void countMessage(Message msg) {
-            Map<String,Long> m = counts.get(msg.getClass());
+            MessageRouterImpl.MessageTypeCounter m = counts.get(msg.getClass());
             if (m == null) {
-                m = new HashMap<String,Long>();
-                m.put("num", 0L);
-                m.put("size", 0L);
+                m = new MessageRouterImpl.MessageTypeCounter(msg.getClass(), Network.UDP);
                 counts.put(msg.getClass(),m);
             }
-            m.put("num", m.get("num")+1);
-            m.put("size", m.get("size")+msg.getLength());
+            m.countMessage(msg);
         }
         
-        public Object inspect() {
-            return counts;
+        public synchronized Object inspect() {
+            List<Map<String,Object>> ret = new ArrayList<Map<String,Object>>(counts.size());
+            for (MessageRouterImpl.MessageTypeCounter mtc : counts.values())
+                ret.add(mtc.inspect());
+            return ret;
         }
     }
-
 }

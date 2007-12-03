@@ -3287,7 +3287,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
         
         public synchronized Object inspect() {
-            List<Map<String,Object>> ret = new ArrayList<Map<String,Object>>();
+            List<Map<String,Object>> ret = new ArrayList<Map<String,Object>>(counts.size());
             for (EnumMap<Message.Network, MessageTypeCounter> e : counts.values()) {
                 for (MessageTypeCounter mtc : e.values())
                     ret.add(mtc.inspect());
@@ -3299,14 +3299,14 @@ public abstract class MessageRouterImpl implements MessageRouter {
     /** 
      * Keeps track of traffic information about a specific type of message
      */
-    private static class MessageTypeCounter {
+    static class MessageTypeCounter {
         private final Class clazz;
         private final Message.Network net;
         private long num, size;
         private Buffer<Long> timestamps;
         private Buffer<Integer> sizes;
         
-        public MessageTypeCounter(Class clazz, Message.Network net) {
+        public MessageTypeCounter(Class<? extends Message> clazz, Message.Network net) {
             this.clazz = clazz;
             this.net = net;
             timestamps = new Buffer<Long>(50); // 50 * 6 = 300 bytes
