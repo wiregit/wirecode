@@ -206,7 +206,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
 
     
-    private BypassedResultsCache _bypassedResultsCache;
+    private volatile BypassedResultsCache _bypassedResultsCache;
     
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
