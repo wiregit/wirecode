@@ -1305,7 +1305,7 @@ public class RouterService {
         
         FileFilter filter = new FileFilter() {
             public boolean accept(File f) {
-                return FileUtils.getFileExtension(f).equals("torrent");
+                return "torrent".equals(FileUtils.getFileExtension(f));
             }
         };
         
