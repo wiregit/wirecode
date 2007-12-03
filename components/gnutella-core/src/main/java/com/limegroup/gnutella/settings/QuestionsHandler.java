@@ -217,11 +217,18 @@ public class QuestionsHandler extends LimeWireSettings {
 
 
     /**
-     * Stores whether the user wants to overwrite or append to songs in the
-     * playlist
+     * Stores whether the user wants to be warned about large numbers
+     *  of files being shared
      */
-    public static final BooleanSetting DONT_WARN_SHARING =
-        FACTORY.createBooleanSetting("DONT_WARN_SHARING", false);
+    public static final BooleanSetting DONT_WARN_SHARING_NUMBER =
+        FACTORY.createBooleanSetting("DONT_WARN_SHARING_NUMBER", false);
+    
+    /**
+     * Stores whether the user wants to be warned about folders being shared
+     *  to an excessive depth
+     */
+    public static final BooleanSetting DONT_WARN_SHARING_DEPTH =
+        FACTORY.createBooleanSetting("DONT_WARN_SHARING_DEPTH", false);
     
 
 }

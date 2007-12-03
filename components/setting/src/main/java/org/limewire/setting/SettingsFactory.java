@@ -361,8 +361,8 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
     public synchronized BooleanSetting createBooleanSetting(String key, 
                                                         boolean defaultValue) {
         BooleanSetting result =
-          new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
+          new BooleanSettingImpl(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal((AbstractSetting)result, null);
         return result;
     }
 
@@ -371,8 +371,8 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
      */
     public synchronized BooleanSetting createRemoteBooleanSetting(String key, 
               boolean defaultValue, String remoteKey) {
-        BooleanSetting result = new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, remoteKey);
+        BooleanSetting result = new BooleanSettingImpl(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal((AbstractSetting)result, remoteKey);
         return result;
     }
 

@@ -12,6 +12,12 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+
+/**
+ * Provides operations to add and remove
+ * individual files, directory, or sets of directories.  Provides a method to
+ * efficiently query for files whose names contain certain keywords.<p>
+ */
 public interface FileManager {
 
     /** The string used by Clip2 reflectors to index hosts. */

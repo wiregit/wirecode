@@ -7,14 +7,13 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.setting.BooleanSetting;
 
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.gui.notify.Notification;
 import com.limegroup.gnutella.gui.notify.NotifyUser;
-import com.limegroup.gnutella.settings.QuestionsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
-
 
 public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     
@@ -28,6 +27,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     private FileManagerEvent removeEvent;
     private FileManagerEvent loadedEvent;
     private FileManagerEvent randomEvent;
+
+    private BooleanSetting numberSwitch;
+    private BooleanSetting depthSwitch;
     
     public FileManagerWarningManagerTest(String name) {
         super(name);
@@ -35,11 +37,14 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     
     @Override
     public void setUp() {
-        context     = new Mockery();
-        notifier    = context.mock(NotifyUser.class);
-        fileManager = context.mock(FileManager.class);
+        context      = new Mockery();
+        notifier     = context.mock(NotifyUser.class);
+        fileManager  = context.mock(FileManager.class);
         
-        fileManagerWarningManager = new FileManagerWarningManager(notifier);
+        numberSwitch = context.mock(BooleanSetting.class);
+        depthSwitch  = context.mock(BooleanSetting.class);
+        
+        fileManagerWarningManager = new FileManagerWarningManager(notifier, numberSwitch, depthSwitch);
         
         addEvent = new FileManagerEvent(fileManager, FileManagerEvent.Type.ADD_FILE);
         removeEvent = new FileManagerEvent(fileManager, FileManagerEvent.Type.REMOVE_FILE);
@@ -50,6 +55,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     
     public void testNoWarning() {
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             never(notifier);
             exactly(4).of(fileManager).getNumFiles();
             will(returnValue(5));
@@ -86,6 +95,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testCountWarningNormal() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(1);
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             one(fileManager).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             one(notifier).showMessage(with(matcher));
@@ -101,6 +114,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testCountWarningInterrupted() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(1);
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             one(fileManager).getNumFiles();
             will(returnValue(5));
             one(fileManager).getNumFiles();
@@ -121,6 +138,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testCountWarningExtra() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(2);
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             exactly(2).of(fileManager).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
@@ -135,12 +156,11 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     }
     
     public void testCountWarningIgnored() {
-        
-        boolean original = QuestionsHandler.DONT_WARN_SHARING.getValue();
-        
-        QuestionsHandler.DONT_WARN_SHARING.setValue(true);
-        
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(true));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             exactly(2).of(fileManager).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             never(notifier);
@@ -148,8 +168,6 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         
         fileManagerWarningManager.handleFileEvent(addEvent);
         fileManagerWarningManager.handleFileEvent(addEvent);
-        
-        QuestionsHandler.DONT_WARN_SHARING.setValue(original);
         
         context.assertIsSatisfied();
     }
@@ -167,6 +185,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testDepthWarningNormal() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(1);
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             never(fileManager);
             one(notifier).showMessage(with(matcher));
         }});
@@ -182,6 +204,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testDepthWarningInterrupted() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(1);
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             never(fileManager);
             exactly(1).of(notifier).showMessage(with(matcher));
         }});
@@ -203,6 +229,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testDepthWarningExtra() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(1);
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             never(fileManager);
             exactly(1).of(notifier).showMessage(with(matcher));
         }});
@@ -219,12 +249,11 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     }
     
     public void testDepthWarningIgnored() {
-        
-        boolean original = QuestionsHandler.DONT_WARN_SHARING.getValue();
-        
-        QuestionsHandler.DONT_WARN_SHARING.setValue(true);
-        
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(true));
             never(fileManager);
             never(notifier);
         }});
@@ -233,8 +262,6 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         fileManagerWarningManager.handleFileEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
-        
-        QuestionsHandler.DONT_WARN_SHARING.setValue(original);
         
         context.assertIsSatisfied();
     }
@@ -250,6 +277,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     public void testDepthAndCountWarning() throws Exception {
         final NotificationMatcher matcher = new NotificationMatcher(2);
         context.checking(new Expectations() {{
+            allowing(numberSwitch).getValue();
+            will(returnValue(false));
+            allowing(depthSwitch).getValue();
+            will(returnValue(false));
             one(fileManager).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
