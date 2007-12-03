@@ -335,7 +335,9 @@ public final class UrnCache {
             while(true) {
                 try {
                     return deserializer.get();
-                }catch (InterruptedException tryAgain) {}
+                }catch (InterruptedException tryAgain) {
+                    interrupted = true;
+                }
             }
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
