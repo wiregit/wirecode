@@ -17,7 +17,7 @@
         <property name="limewire.gui.src"  location="${limewire.home}/gui"/>
         
         <path id="build.limewire.code.classpath">
-            <fileset dir="${limewire.lib.jars}" includes="**/*.jar"/>
+            <fileset dir="${limewire.lib.jars}" includes="**/*.jar" excludes="tests/**"/>
             <path refid="build.limewire.components.classes.core"/>
 			<path refid="build.limewire.components.classes.ui"/>
         </path>
@@ -27,8 +27,7 @@
         
         <do.setup-properties component="tests">
             <src-classpath>
-                <fileset dir="${limewire.components.tests.home}/lib" includes="*.jar"/>
-            	<fileset dir="${limewire.components.tests.home}/lib/jmock" includes="*.jar"/>
+            	<fileset dir="${limewire.lib.jars}" includes="tests/**/*.jar"/>
                 <path refid="build.limewire.code.classpath"/>
             </src-classpath>
                 

@@ -10,7 +10,7 @@
         <property name="limewire.core.src"  		  location="${limewire.core.home}"/>
         <property name="build.limewire.core.classes"  location="${limewire.core.home}"/>
         <path id="build.limewire.core.classpath">
-            <fileset dir="${limewire.lib.jars}" includes="**/*.jar"/>
+            <fileset dir="${limewire.lib.jars}" includes="**/*.jar" excludes="tests/**"/>
             <path refid="build.limewire.components.classes.core"/>
         </path>
     </target>

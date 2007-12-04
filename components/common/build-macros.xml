@@ -13,7 +13,7 @@
 	<property name="limewire.lib.jars"
 			  location="${limewire.lib}/jars"/>
 	<property name="limewire.tests.jars"
-			  location="${limewire.home}/tests/lib"/>
+			  location="${limewire.lib.jars}/tests"/>
 	<property name="limewire.lib.jars.ant"
 			  location="${limewire.lib}/jars/ant"/>
 	<property name="limewire.lib.native"
