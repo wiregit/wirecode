@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-08-23 13:53+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -71,9 +71,6 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "ਅਪਨੇ ਟੈਬਾਂ ਨੂੰ ਦਿਖਾਓ ਯਾਂ ਛੁਪਾਓ"
 
-#~ msgid "G"
-#~ msgstr "G"
-
 #~ msgid "&Statistics"
 #~ msgstr "ਆਂਕੜੇ(&S)"
 
@@ -85,6 +82,9 @@ msgstr ""
 
 #~ msgid "E"
 #~ msgstr "E"
+
+#~ msgid "G"
+#~ msgstr "G"
 
 #~ msgid "Results"
 #~ msgstr "ਨਤੀੱਜੇ"
@@ -311,7 +311,7 @@ msgid "You have already downloaded {0}"
 msgstr ""
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "{0} ’ਚ ਇਹ ਹੀ ਫ਼ਾਇਲ ਪਹਲਾਂ ਹੀ ਸੇਵ ਕਿੱਤੀ ਹੋਈ ਹੈ"
 
@@ -3666,7 +3666,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:186
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1025
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to \"{0}\"."
 msgstr "{0} ’ਚ ਇਹ ਹੀ ਫ਼ਾਇਲ ਪਹਲਾਂ ਹੀ ਸੇਵ ਕਿੱਤੀ ਹੋਈ ਹੈ"
 
@@ -6671,7 +6671,7 @@ msgid "Awaiting Requests"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "{0} ਬਾਰੇ ਲੱਭੋ"
 

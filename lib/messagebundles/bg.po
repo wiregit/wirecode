@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
@@ -231,7 +231,7 @@ msgstr "Изображения"
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:190
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
-#, fuzzy
+#, fuzzy, java-format
 msgid "Could not process bad MAGNET link {0}"
 msgstr "Не може да продължи лош MAGNET линк {0}"
 

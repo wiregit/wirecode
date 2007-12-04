@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-22 19:29+0000\n"
+"PO-Revision-Date: 2007-11-26 20:00+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,19 +16,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:14+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Ładowanie magnet Management..."
-
-#~ msgid ""
-#~ "LimeWire is unable to find a license for this file. Download anyway?\n"
-#~ "\n"
-#~ "Please note: LimeWire cannot monitor or control the content of the Gnutella "
-#~ "network. Please respect your local copyright laws."
-#~ msgstr ""
-#~ "LimeWire nie może znaleźć licencji dla tego pliku.  Czy ściągnąć mimo tego?"
 
 #, fuzzy
 #~ msgid "English"
@@ -71,23 +60,14 @@ msgstr ""
 #~ msgid "I"
 #~ msgstr "R"
 
+#~ msgid "P"
+#~ msgstr "L"
+
 #~ msgid "N"
 #~ msgstr "N"
 
 #~ msgid "V"
 #~ msgstr "W"
-
-#~ msgid "D"
-#~ msgstr "D"
-
-#~ msgid "R"
-#~ msgstr "Z"
-
-#~ msgid "P"
-#~ msgstr "L"
-
-#~ msgid "T"
-#~ msgstr "A"
 
 #~ msgid "&Statistics"
 #~ msgstr "&Statystyki"
@@ -95,17 +75,20 @@ msgstr ""
 #~ msgid "Display the Statistics Screen"
 #~ msgstr "Poka? panel statystyk."
 
-#~ msgid "H"
-#~ msgstr "O"
-
 #~ msgid "U"
 #~ msgstr "K"
+
+#~ msgid "D"
+#~ msgstr "D"
+
+#~ msgid "E"
+#~ msgstr "E"
 
 #~ msgid "A"
 #~ msgstr "O"
 
-#~ msgid "E"
-#~ msgstr "E"
+#~ msgid "R"
+#~ msgstr "Z"
 
 #~ msgid "Files"
 #~ msgstr "plik�"
@@ -113,26 +96,29 @@ msgstr ""
 #~ msgid "Querying Network"
 #~ msgstr "Ponawianie zapytania do sieci"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
 #~ msgid "Files with this name"
 #~ msgstr "Plik�w o tej nazwie"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Wyszukuje plik�w o tej samej nazwie."
 
-#~ msgid "Orginal query"
-#~ msgstr "Orginalne zapytanie"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr "Wykonuje to samo zapytanie, kt�re wcze?niej odnalaz?o ten plik."
+
+#~ msgid "T"
+#~ msgstr "A"
+
+#~ msgid "H"
+#~ msgstr "O"
 
 #~ msgid "End Chat"
 #~ msgstr "Zako?cz czat"
 
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Zamykanie czata z wybranym hostem"
-
-#~ msgid "Loading Settings..."
-#~ msgstr "?adowanie ustawie? u?ytkownika..."
 
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "?adowanie panela statystyk..."
@@ -143,30 +129,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Prosimy poda? numer portu, kt�ry pos?u?y do komunikacji z sieci?.\n"
 #~ "S?u?y do tego jedno z p�l w oknie konfiguracyjnym."
-
-#~ msgid "Network"
-#~ msgstr "Sie?"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "All received queries in kilobytes, by hops."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "All received queries in kilobytes, by time to live (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "All received query hits in kilobytes, by hops."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "All received query hits in kilobytes, by time to live (TTL)."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "The average size in kilobytes of received Gnutella messages."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "The average size in kilobytes of received messages from LimeWires."
 
 #~ msgid "QRP"
 #~ msgstr "QRP"
@@ -179,9 +141,6 @@ msgstr ""
 
 #~ msgid "Max"
 #~ msgstr "Maks."
-
-#~ msgid "Current"
-#~ msgstr "Aktuel"
 
 #~ msgid "Total Upstream"
 #~ msgstr "Wychodz?ce"
@@ -285,8 +244,37 @@ msgstr ""
 #~ msgid "Push Errors"
 #~ msgstr "Problemy z Push"
 
+#~ msgid "Orginal query"
+#~ msgstr "Orginalne zapytanie"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "?adowanie ustawie? u?ytkownika..."
+
+#~ msgid "Network"
+#~ msgstr "Sie?"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "All received queries in kilobytes, by hops."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "All received queries in kilobytes, by time to live (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "All received query hits in kilobytes, by hops."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "All received query hits in kilobytes, by time to live (TTL)."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "The average size in kilobytes of received Gnutella messages."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "The average size in kilobytes of received messages from LimeWires."
+
+#~ msgid "Current"
+#~ msgstr "Aktuel"
+
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
-#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
@@ -370,7 +358,6 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
-#, fuzzy
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
@@ -819,6 +806,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Możesz wybrać czy chcesz aby LimeWire zarządzał twoimi ustawieniami "
+"protokołu Bittorrent. Zaleca się aby to właśnie LimeWire zarządzał tymi "
+"ustawieniami. Błędne parametry mogą doprowadzić do uciążliwych problemów z "
+"wydajnością i/lub pamięcią."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -836,15 +827,15 @@ msgstr "Pozwól LimeWire zarządzać ustawieniami BitTorrent."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Maksimum wysyłań na torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Minimum wysłań na torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Bezpieczna weryfikacja części"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
@@ -890,7 +881,7 @@ msgstr "Podgl?d"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:417
 msgid "Discard"
-msgstr ""
+msgstr "Porzuć"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:434
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
@@ -901,12 +892,12 @@ msgstr "Zamknij natychmiast"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:435
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
-msgstr ""
+msgstr "Zawsze pytaj o opinię"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:436
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
-msgstr ""
+msgstr "Zawsze odrzucaj wszystkie błędy"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:510
 #, fuzzy
@@ -986,6 +977,8 @@ msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
 msgstr ""
+"LimeWire jest oczywiście także rezultatem niezliczonych godzin pracy przez "
+"deweloperów LimeWire'a:"
 
 #. business developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:197
@@ -1476,7 +1469,7 @@ msgid "More Information"
 msgstr "Więcej informacji"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
-#, fuzzy
+#, fuzzy, java-format
 msgid "Visit {0}"
 msgstr "Wizyt {0}"
 

@@ -15,53 +15,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#~ msgid "Loading magnet Management..."
-#~ msgstr "加载磁铁管理"
-
-#, fuzzy
-#~ msgid "&Download .torrent"
-#~ msgstr "下载"
-
-#~ msgid "Waiting"
-#~ msgstr "等待"
-
-#~ msgid ""
-#~ "Please choose a folder where you would like your files to be downloaded. "
-#~ "This folder will also be shared with other gnutella users by default."
-#~ msgstr "请 选择 你 希望 保存 下载 文件的 文件夹. 此 文件夹 缺省的 与其他 Gnutella 用户 同享."
-
-#~ msgid "Save Folder:"
-#~ msgstr "保存文件夹:"
-
-#~ msgid ""
-#~ "The selected folder cannot be shared.  Please select another folder to share."
-#~ msgstr "错误的 共享 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置."
-
-#~ msgid "&MagnetMix"
-#~ msgstr "&MagnetMix"
-
-#, fuzzy
-#~ msgid "test1"
-#~ msgstr "恢复"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "恢复"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "Ethernet"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "共享"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
 
 #, fuzzy
 #~ msgid "English"
@@ -75,11 +30,30 @@ msgstr ""
 #~ msgid "false"
 #~ msgstr "停留"
 
+#, fuzzy
+#~ msgid "&Download .torrent"
+#~ msgstr "下载"
+
+#~ msgid ""
+#~ "Please choose a folder where you would like your files to be downloaded. "
+#~ "This folder will also be shared with other gnutella users by default."
+#~ msgstr "请 选择 你 希望 保存 下载 文件的 文件夹. 此 文件夹 缺省的 与其他 Gnutella 用户 同享."
+
+#~ msgid ""
+#~ "The selected folder cannot be shared.  Please select another folder to share."
+#~ msgstr "错误的 共享 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置."
+
+#~ msgid "&MagnetMix"
+#~ msgstr "&MagnetMix"
+
 #~ msgid "Close the Window"
 #~ msgstr "关闭 窗口."
 
 #~ msgid "I"
 #~ msgstr "I"
+
+#~ msgid "P"
+#~ msgstr "P"
 
 #~ msgid "N"
 #~ msgstr "N"
@@ -90,12 +64,6 @@ msgstr ""
 #~ msgid "W"
 #~ msgstr "W"
 
-#~ msgid "G"
-#~ msgstr "G"
-
-#~ msgid "P"
-#~ msgstr "P"
-
 #~ msgid "&Statistics"
 #~ msgstr "统计 (&S)"
 
@@ -105,11 +73,17 @@ msgstr ""
 #~ msgid "U"
 #~ msgstr "U"
 
+#~ msgid "G"
+#~ msgstr "G"
+
 #~ msgid "Files"
 #~ msgstr "文件"
 
 #~ msgid "Querying Network"
 #~ msgstr "正在 请求 网络"
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
 
 #~ msgid "End Chat"
 #~ msgstr "结束聊天"
@@ -127,9 +101,6 @@ msgstr ""
 #~ "不能 找到 一个 端口 为进来的 连接 使用.\n"
 #~ "请 从 结构 窗口 指定 一个 端口."
 
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
 #~ msgid "QRP"
 #~ msgstr "QRP"
 
@@ -141,9 +112,6 @@ msgstr ""
 
 #~ msgid "Ping Replies"
 #~ msgstr "Pong 结果"
-
-#~ msgid "Routing Errors"
-#~ msgstr "路由 错误"
 
 #~ msgid "Hit Routing Errors"
 #~ msgstr "搜索 结果 路由 错误"
@@ -238,9 +206,6 @@ msgstr ""
 #~ msgid "TTL 9"
 #~ msgstr "TTL 9"
 
-#~ msgid "Incoming Attempts"
-#~ msgstr "传入 邻居"
-
 #~ msgid "All Requests"
 #~ msgstr "全部 请求"
 
@@ -261,6 +226,32 @@ msgstr ""
 
 #~ msgid "THEX Request"
 #~ msgstr "THEX 请求"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "传入 邻居"
+
+#, fuzzy
+#~ msgid "test1"
+#~ msgstr "恢复"
+
+#, fuzzy
+#~ msgid "test2"
+#~ msgstr "恢复"
+
+#, fuzzy
+#~ msgid "other"
+#~ msgstr "Ethernet"
+
+#, fuzzy
+#~ msgid "string"
+#~ msgstr "共享"
+
+#, fuzzy
+#~ msgid "1"
+#~ msgstr "T1"
+
+#~ msgid "Routing Errors"
+#~ msgstr "路由 错误"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""

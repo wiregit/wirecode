@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 1 : (n>=2 && n<=4) ? 2 : 0;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -153,9 +153,6 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "Zatvoriť okno"
 
-#~ msgid "Statistics"
-#~ msgstr "Štatistiky"
-
 #~ msgid "N"
 #~ msgstr "N"
 
@@ -168,9 +165,6 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Zobraziť alebo Skryť jednotlivé karty"
 
-#~ msgid "G"
-#~ msgstr "t"
-
 #~ msgid "&Statistics"
 #~ msgstr "Š&tatistiky"
 
@@ -180,23 +174,17 @@ msgstr ""
 #~ msgid "U"
 #~ msgstr "L"
 
-#~ msgid "M"
-#~ msgstr "r"
-
 #~ msgid "E"
 #~ msgstr "c"
+
+#~ msgid "G"
+#~ msgstr "t"
 
 #~ msgid "Results"
 #~ msgstr "Výsledky"
 
 #~ msgid "Files"
 #~ msgstr "Súbory"
-
-#~ msgid "files"
-#~ msgstr "súbory"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "súbory (načítavam...)"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Obnova zlyhala"
@@ -207,29 +195,23 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s na zdroje"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "files"
+#~ msgstr "súbory"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "súbory (načítavam...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Súbory s takýmto názvom"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Vyhľadávanie súborov s rovnakým názvom."
 
-#~ msgid "Orginal query"
-#~ msgstr "Pôvodná požiadavka"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr "Vykoná také isté vyhľadávanie ako to, ktoré našlo tento súbor."
-
-#~ msgid "Validation Required"
-#~ msgstr "Požadované overenie"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Nenašla sa časť na prehratie."
-
-#~ msgid "Height:"
-#~ msgstr "Výška:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Prosím, stlačte OK pre trvalé odstránenie licencie."
 
 #~ msgid "End Chat"
 #~ msgstr "Ukončiť chat"
@@ -237,25 +219,8 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Zastaviť chat so serverom"
 
-#~ msgid "Loading Settings..."
-#~ msgstr "Načítavam nastavenia"
-
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "Načítavam okno Štatistika..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "Podporte LimeWire a nezávislý obsah médií. Zakúpte si PRO."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Zdá sa, že váš počítač nemá aktívne pripojenie k internet alebo váš firewall "
-#~ "blokuje LimeWire prístup k internetu. Skontrolujte prosím pripojenie alebo "
-#~ "nastavenie firewallu a potom zvoľte \"Pripojiť\" z menu Súbor pre pripojenie "
-#~ "LimeWire k sieti."
 
 #~ msgid ""
 #~ "Could not find a port to use for incoming connections.\n"
@@ -264,193 +229,8 @@ msgstr ""
 #~ "Nemôžem nájsť port používaný pre prichádzajúce pripojenia.\n"
 #~ "Špecifikujte prosím port v okne nastavení."
 
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr "Zadajte prosím nadpis súboru, ktorý chcete publikovať."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr "Zadajte prosím rok súboru, ktorý chcete publikovať."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Zadajte prosím platnú overovaciu URL adresu pre licenciu."
-
-#~ msgid "Display:"
-#~ msgstr "Zobraziť:"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Bandwidth štatistika zahŕňa kompletné informácie zo všetkých odoslaných a "
-#~ "prijatých dát. Pre zobrazenie požadovanej štatistiky kliknite na jednu z "
-#~ "kategórií."
-
-#~ msgid "Network"
-#~ msgstr "Sieť"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Štatistiky o súčasnom stave siete. Tieto informácie sú mierne skreslené "
-#~ "kvôli dynamickej, distribuovanej povahe siete Gnutella a nemusia byť príliš "
-#~ "presné. Tieto informácie môžu poskytnúť všeobecnýprehľad o súčasnom stave "
-#~ "pripojenia."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Rozšírené štatistiky zahŕňajú detailné informácie správ Gnutella a HTTP "
-#~ "prenosu. Tieto informácie sú určené skôr pre pokročilých používateľov na "
-#~ "preskúmanie siete Gnutella. Rozšírené štatistiky nie sú bežne zobrazované a "
-#~ "nie sú potrebné pre väčšinu použivateľ."
-
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Zobraziť rozšírenú štatistiku:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "Upstream"
-#~ msgstr "Upstream"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Celkový bandwidth použitý pre odchádzajúce dáta vrátane uploadov alebo správ "
-#~ "Gnutella."
-
-#~ msgid "Downstream"
-#~ msgstr "Downstream"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Celkový bandwidth použitý pre prichádzajúce dáta vrátane sťahovaných súborov "
-#~ "alebo správ Gnutella."
-
-#~ msgid "Received"
-#~ msgstr "Došlé správy"
-
-#~ msgid "LimeWire Messages"
-#~ msgstr "Správy LimeWire"
-
-#~ msgid "All Gnutella messages received by this client."
-#~ msgstr "Všetky Gnutella správy obdržané týmto počítačom."
-
-#~ msgid "All Gnutella messages received over TCP, by message type."
-#~ msgstr "Všetky Gnutella správy obdržané cez TCP podľa typu správy."
-
-#~ msgid "All Gnutella messages received over UDP, by message type."
-#~ msgstr "Všetky Gnutella správy obdržané cez UDP podľa typu správy."
-
-#~ msgid "All Gnutella messages received over Multicast, by message type."
-#~ msgstr "Všetky Gnutella správy obdržané cez Multicast podľa typu správy."
-
-#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr "Všetky Gnutella správy obdržané cez TCP, UDP alebo Multicast."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over TCP versus the total number of "
-#~ "queries."
-#~ msgstr ""
-#~ "Počet duplikovaných požiadaviek obdržaných cez TCP verzus všetky požiadavky."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Počet duplikovaných požiadaviek obdržaných cez Multicast verzus všetky "
-#~ "požiadavky."
-
-#~ msgid "Total kilobytes for all Gnutella messages received by this client."
-#~ msgstr "Všetky kilobyty pre všetky Gnutella správy obdržané týmto klientom."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
-#~ msgstr ""
-#~ "Všetky kilobyty pre Gnutella správy obdržané cez TCP podľa typu správy."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
-#~ msgstr ""
-#~ "Všetky kilobyty pre Gnutella správy obdržané cez UDP podľa typu správy."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Všetky kilobyty pre Gnutella správy obdržané cez Multicast podľa typu správy."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Všetky kilobyty pre Gnutella správy obdržané cez TCP, UDP alebo Multicast."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over TCP versus the total "
-#~ "number of queries."
-#~ msgstr ""
-#~ "Všetky kilobyty v duplikovaných požiadavkách obdržané cez TCP verzus všetky "
-#~ "požiadavky."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Všetky kilobyty v duplikovaných požiadavkách obdržané cez Multicast verzus "
-#~ "všetky požiadavky."
-
 #~ msgid "Total number of messages received from other LimeWires."
 #~ msgstr "Všetky správy obdržané z iných LimeWire"
-
-#~ msgid "Pings"
-#~ msgstr "Pings"
-
-#~ msgid "TCP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr "TCP pings obdržané cez klientov Gnutella verzus iné LimeWire"
-
-#~ msgid "Pongs"
-#~ msgstr "Pongs"
-
-#~ msgid "TCP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "TCP pongs obrdžané cez všetkých klientov Gnutella verzus iné LimeWire"
-
-#~ msgid ""
-#~ "TCP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "TCP požiadavky obdržané zo všetkých klientov Gnutella verzus iné LimeWire"
-
-#~ msgid ""
-#~ "TCP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "TCP zaznamenané požiadavky zo všetkých Gnutella klientov verzus iné LimeWire"
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Všetky filtrované správy"
-
-#~ msgid ""
-#~ "Total number of Gnutella connection attempts, either initiated internally or "
-#~ "externally."
-#~ msgstr "Všetky pokusy Gnutella pripojenia, iniciované interne alebo externe."
-
-#~ msgid "Incoming Requests"
-#~ msgstr "Prichádzajúce požiadavky"
-
-#~ msgid ""
-#~ "Total incoming requests received over time. This includes all connection "
-#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
-#~ msgstr ""
-#~ "Všetky prichádzajúce požiadavky obdržané za čas. Zahŕňa všetky pokusy "
-#~ "pripojenia (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, atď.)."
 
 #~ msgid "seconds"
 #~ msgstr "sekundy"
@@ -464,11 +244,59 @@ msgstr ""
 #~ msgid "Max"
 #~ msgstr "Maximálne"
 
-#~ msgid "Color"
-#~ msgstr "Farba"
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "No Route"
+#~ msgstr "Žiadna dráha"
+
+#~ msgid "Orginal query"
+#~ msgstr "Pôvodná požiadavka"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Načítavam nastavenia"
+
+#~ msgid "Network"
+#~ msgstr "Sieť"
 
 #~ msgid "Current"
 #~ msgstr "Súčasné"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Nenašla sa časť na prehratie."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Všetky filtrované správy"
+
+#~ msgid "Color"
+#~ msgstr "Farba"
 
 #~ msgid "Write statistics for this graph to files."
 #~ msgstr "Zapísať štatistiku tohto grafu do súborov."
@@ -521,36 +349,6 @@ msgstr ""
 #~ msgid "What's New?"
 #~ msgstr "Čo je nové?"
 
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
 #~ msgid "Hard Limit"
 #~ msgstr "Hard Limit"
 
@@ -572,14 +370,216 @@ msgstr ""
 #~ msgid "Hard Limit (TTL 5 or above)"
 #~ msgstr "Hard Limit (TTL 5 alebo vyššie)"
 
-#~ msgid "No Route"
-#~ msgstr "Žiadna dráha"
-
 #~ msgid "OOB Success Rate"
 #~ msgstr "Hodnotenie úspešných OOB"
 
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "Podporte LimeWire a nezávislý obsah médií. Zakúpte si PRO."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Zdá sa, že váš počítač nemá aktívne pripojenie k internet alebo váš firewall "
+#~ "blokuje LimeWire prístup k internetu. Skontrolujte prosím pripojenie alebo "
+#~ "nastavenie firewallu a potom zvoľte \"Pripojiť\" z menu Súbor pre pripojenie "
+#~ "LimeWire k sieti."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Zobraziť rozšírenú štatistiku:"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Celkový bandwidth použitý pre odchádzajúce dáta vrátane uploadov alebo správ "
+#~ "Gnutella."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Celkový bandwidth použitý pre prichádzajúce dáta vrátane sťahovaných súborov "
+#~ "alebo správ Gnutella."
+
+#~ msgid "Received"
+#~ msgstr "Došlé správy"
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Počet duplikovaných požiadaviek obdržaných cez Multicast verzus všetky "
+#~ "požiadavky."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Všetky kilobyty v duplikovaných požiadavkách obdržané cez Multicast verzus "
+#~ "všetky požiadavky."
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Bandwidth štatistika zahŕňa kompletné informácie zo všetkých odoslaných a "
+#~ "prijatých dát. Pre zobrazenie požadovanej štatistiky kliknite na jednu z "
+#~ "kategórií."
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Štatistiky o súčasnom stave siete. Tieto informácie sú mierne skreslené "
+#~ "kvôli dynamickej, distribuovanej povahe siete Gnutella a nemusia byť príliš "
+#~ "presné. Tieto informácie môžu poskytnúť všeobecnýprehľad o súčasnom stave "
+#~ "pripojenia."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Rozšírené štatistiky zahŕňajú detailné informácie správ Gnutella a HTTP "
+#~ "prenosu. Tieto informácie sú určené skôr pre pokročilých používateľov na "
+#~ "preskúmanie siete Gnutella. Rozšírené štatistiky nie sú bežne zobrazované a "
+#~ "nie sú potrebné pre väčšinu použivateľ."
+
+#~ msgid "Upstream"
+#~ msgstr "Upstream"
+
+#~ msgid "Downstream"
+#~ msgstr "Downstream"
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr "Všetky Gnutella správy obdržané týmto počítačom."
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr "Všetky Gnutella správy obdržané cez TCP podľa typu správy."
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "Všetky Gnutella správy obdržané cez UDP podľa typu správy."
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr "Všetky Gnutella správy obdržané cez Multicast podľa typu správy."
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Všetky Gnutella správy obdržané cez TCP, UDP alebo Multicast."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr ""
+#~ "Počet duplikovaných požiadaviek obdržaných cez TCP verzus všetky požiadavky."
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr "Všetky kilobyty pre všetky Gnutella správy obdržané týmto klientom."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr ""
+#~ "Všetky kilobyty pre Gnutella správy obdržané cez TCP podľa typu správy."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr ""
+#~ "Všetky kilobyty pre Gnutella správy obdržané cez UDP podľa typu správy."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr ""
+#~ "Všetky kilobyty pre Gnutella správy obdržané cez Multicast podľa typu správy."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Všetky kilobyty pre Gnutella správy obdržané cez TCP, UDP alebo Multicast."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr ""
+#~ "Všetky kilobyty v duplikovaných požiadavkách obdržané cez TCP verzus všetky "
+#~ "požiadavky."
+
+#~ msgid ""
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
+#~ msgstr "Všetky pokusy Gnutella pripojenia, iniciované interne alebo externe."
+
+#~ msgid ""
+#~ "Total incoming requests received over time. This includes all connection "
+#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
+#~ msgstr ""
+#~ "Všetky prichádzajúce požiadavky obdržané za čas. Zahŕňa všetky pokusy "
+#~ "pripojenia (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, atď.)."
+
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr "Počet odpovedaných požiadaviek a obdržaných cez OOB protokol"
+
+#~ msgid "LimeWire Messages"
+#~ msgstr "Správy LimeWire"
+
+#~ msgid "Statistics"
+#~ msgstr "Štatistiky"
+
+#~ msgid "Validation Required"
+#~ msgstr "Požadované overenie"
+
+#~ msgid "Height:"
+#~ msgstr "Výška:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Prosím, stlačte OK pre trvalé odstránenie licencie."
+
+#~ msgid "Display:"
+#~ msgstr "Zobraziť:"
+
+#~ msgid "M"
+#~ msgstr "r"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "Zadajte prosím nadpis súboru, ktorý chcete publikovať."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "Zadajte prosím rok súboru, ktorý chcete publikovať."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Zadajte prosím platnú overovaciu URL adresu pre licenciu."
+
+#~ msgid "Pings"
+#~ msgstr "Pings"
+
+#~ msgid "TCP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr "TCP pings obdržané cez klientov Gnutella verzus iné LimeWire"
+
+#~ msgid "Pongs"
+#~ msgstr "Pongs"
+
+#~ msgid "TCP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "TCP pongs obrdžané cez všetkých klientov Gnutella verzus iné LimeWire"
+
+#~ msgid ""
+#~ "TCP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "TCP požiadavky obdržané zo všetkých klientov Gnutella verzus iné LimeWire"
+
+#~ msgid ""
+#~ "TCP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "TCP zaznamenané požiadavky zo všetkých Gnutella klientov verzus iné LimeWire"
+
+#~ msgid "Incoming Requests"
+#~ msgstr "Prichádzajúce požiadavky"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -819,12 +819,12 @@ msgstr ""
 "správne stiahnuť."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "Tento súbor už sťahujete do \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Tento súbor už sťahujete do \"{0}\"."
 
@@ -7309,7 +7309,7 @@ msgid "Awaiting Requests"
 msgstr "Čakanie na ďalšie zdroje"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Vyhľadávanie: {0}"
 

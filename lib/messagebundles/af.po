@@ -15,11 +15,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Laai magnet Bestuur..."
 
 #, fuzzy
 #~ msgid "Loading Languages"
@@ -38,6 +35,9 @@ msgstr ""
 #~ msgid "I"
 #~ msgstr "D"
 
+#~ msgid "P"
+#~ msgstr "P"
+
 #~ msgid "N"
 #~ msgstr "N"
 
@@ -49,9 +49,6 @@ msgstr ""
 
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Wys/Versteek Individuele Tabs"
-
-#~ msgid "P"
-#~ msgstr "P"
 
 #~ msgid "&Statistics"
 #~ msgstr "&Statistieke"
@@ -300,7 +297,7 @@ msgid "You have already downloaded {0}"
 msgstr "U het klaar Die Dokument Afgelaai {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "U is alreeds besig om die dokument aftelaai na {0}"
 

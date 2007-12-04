@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-22 21:45+0000\n"
+"PO-Revision-Date: 2007-12-01 22:02+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,11 +16,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n == 1 ? 0: (((n % 100 > 19) || ((n % 100 "
 "== 0) && (n != 0))) ? 2: 1));\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:14+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Incarcare manager magnet..."
 
 #~ msgid ""
 #~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
@@ -102,13 +99,6 @@ msgstr ""
 #~ msgstr "Astepatare"
 
 #~ msgid ""
-#~ "LimeWire was unable to load the specified torrent file, - it may be "
-#~ "malformed or LimeWire does not have permission to access this file."
-#~ msgstr ""
-#~ "LimeWire nu a putut descarca fisierul .torrent specificat, fie ca e gresit, "
-#~ "fie LimeWire nu are permisiunea sa acceseze acest fisier."
-
-#~ msgid ""
 #~ "Please choose a folder where you would like your files to be downloaded. "
 #~ "This folder will also be shared with other gnutella users by default."
 #~ msgstr ""
@@ -159,13 +149,6 @@ msgstr ""
 #~ msgstr "Ati schimbat unele setari. Doriti sa pastrati aceste modificari?"
 
 #~ msgid ""
-#~ "One or more files or protocols that LimeWire uses are no longer associated "
-#~ "with LimeWire. Would you like LimeWire to fix this?"
-#~ msgstr ""
-#~ "Unul sau mai multe fisiere sau protocoale pe care LimeWire le foloseste nu "
-#~ "mai este asociat cu LimeWire. Doriti ca LimeWire sa corecteze asta?"
-
-#~ msgid ""
 #~ "The default Internet Archive identifier for this file and username is "
 #~ "allready taken. Please modify it below or press cancel to return."
 #~ msgstr ""
@@ -176,8 +159,8 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "Inchide fereastra"
 
-#~ msgid "Statistics"
-#~ msgstr "Statistici"
+#~ msgid "P"
+#~ msgstr "P"
 
 #~ msgid "N"
 #~ msgstr "N"
@@ -191,12 +174,6 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Afiseaza sau ascunde tab-urile individuale"
 
-#~ msgid "G"
-#~ msgstr "I"
-
-#~ msgid "P"
-#~ msgstr "P"
-
 #~ msgid "&Statistics"
 #~ msgstr "&Statistici"
 
@@ -209,17 +186,14 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "E"
 
+#~ msgid "G"
+#~ msgstr "I"
+
 #~ msgid "Results"
 #~ msgstr "Rezultate"
 
 #~ msgid "Files"
 #~ msgstr "Fisiere"
-
-#~ msgid "files"
-#~ msgstr "fisiere"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "fisiere (incarcare...)"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Recuperare esuata"
@@ -230,30 +204,24 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s dupa surse"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "files"
+#~ msgstr "fisiere"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "fisiere (incarcare...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Fisiere cu acest nume"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Cautari dupa fisiere cu acelasi nume"
 
-#~ msgid "Orginal query"
-#~ msgstr "Cerere orginal"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr ""
 #~ "Efectueaza aceeasi cautare ca aceea care a gasit acest fisier inainte."
-
-#~ msgid "Validation Required"
-#~ msgstr "Validare necesara"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Nici o linie nu este disponibila pentru produs."
-
-#~ msgid "Height:"
-#~ msgstr "Inaltime:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Apasati OK pentru a indeparta definitv licenta."
 
 #~ msgid "End Chat"
 #~ msgstr "Termina discutia"
@@ -261,26 +229,8 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Termina discutia cu gazda"
 
-#~ msgid "Loading Settings..."
-#~ msgstr "Incarcare setari..."
-
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "Incarcare fereastra de statistici..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr ""
-#~ "Suport pentru LimeWire si continutul media independent. Obtineti PRO."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Computerul dumneavoastra nu pare a avea o conexiune activa la internet sau "
-#~ "un firewall blocheaza LimeWire sa acceseze internetul. Va rugam verificati "
-#~ "conexiunea sau setarile firewall-ului si apoi selectati \"Conectare\" din "
-#~ "meniul Fisier pentru a conecta LimeWire la retea."
 
 #~ msgid ""
 #~ "Could not find a port to use for incoming connections.\n"
@@ -288,240 +238,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Nu s-a gasit un port pentru conexiunile primite.\n"
 #~ "Specificati un port din fereastra de configurare."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr ""
-#~ "Va rugam sa introduceti titlul fisierului pe care doriti sa-l publicati."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr ""
-#~ "Va rugam sa introduceti anul fisierului pe care odriti sa-l publicati."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Va rugam sa introduceti un URL de verificare valid pentru fisier."
-
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
-
-#~ msgid "Display:"
-#~ msgstr "Afisare:"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Statisticile latimii de banda includ informatii complete despre toate "
-#~ "latimile de banda trimise upstresm si downstream. Facet click pe una dintre "
-#~ "categorii pentru a vedea statisticile dorite."
-
-#~ msgid "Network"
-#~ msgstr "Retea"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Statistici despre starea curenta a retelei. Aceste statistici sunt relativ "
-#~ "inexacte din cauza dinamicii, naturii distributive a Gnutella si nu trebuie "
-#~ "luata drept referinta. Puteti primi insa, astfel, o idee generala asupra "
-#~ "starii curente a conexiunii dumneavoastra."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Statisticile avansate includ informatii detaliate pentru mesajele Gnutella "
-#~ "si traficul HTTP. Aceste informatii pot fi utile utilizatorilor avansati cat "
-#~ "si pentru cercetatorii retelei Gnutella. Statisticile avansate nu sunt "
-#~ "afisate implicit si nu sunt recomandate majoritatii utilizatorilor."
-
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Afiseaza statistici avansate:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "Upstream"
-#~ msgstr "Upstream"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Latimea de banda totala folosita pentru a trimite date, prin incarcari sau "
-#~ "mesaje Gnutella."
-
-#~ msgid "Downstream"
-#~ msgstr "Downstream"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Latimea de banda totala folosita pentru a primi date, prin descarcari sau "
-#~ "mesaje Gnutella."
-
-#~ msgid "Received"
-#~ msgstr "Primite"
-
-#~ msgid "All Gnutella messages received by this client."
-#~ msgstr "Toate mesajele Gnutella primite de acest client."
-
-#~ msgid "All Gnutella messages received over TCP, by message type."
-#~ msgstr "Toate mesajele Gnutella primite prin TCP, dupa tipul mesajului."
-
-#~ msgid "All Gnutella messages received over UDP, by message type."
-#~ msgstr "Toate mesajele Gnutella primite prin UDP, dupa tipul mesajului."
-
-#~ msgid "All Gnutella messages received over Multicast, by message type."
-#~ msgstr ""
-#~ "Toate mesajele Gnutella primite prin Multicast, dupa tipul mesajului."
-
-#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr "Toate mesajele Gnutella primite prin TCP, UDP sau Multicast."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over TCP versus the total number of "
-#~ "queries."
-#~ msgstr ""
-#~ "Numar de dubii duplicate primite prin TCP versus numar total de dubii."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Numar de dubii duplicate primite prin Multicast versus numar total de dubii."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Toate cererile primite, dupa hops."
-
-#~ msgid "All received queries, by time to live (TTL)."
-#~ msgstr "Toate cererile primite, dupa TTL"
-
-#~ msgid "Special Queries"
-#~ msgstr "Cereri speciale"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Toate cererile marcate speciale."
-
-#~ msgid "All received query hits, by hops."
-#~ msgstr "Toate cererile primite, dupa hops"
-
-#~ msgid "All received query hits, by time to live (TTL)."
-#~ msgstr "Toate cererile primite, dupa TTL"
-
-#~ msgid "Total kilobytes for all Gnutella messages received by this client."
-#~ msgstr ""
-#~ "Kilobiti totali pentru toate mesajele Gnutella primite de acest client."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCp, dupa tipul "
-#~ "mesajului."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin UDP, dupa tipul "
-#~ "mesajului."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin Multicast, dupa tipul "
-#~ "mesajului."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCP, UDP sau Multicast."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over TCP versus the total "
-#~ "number of queries."
-#~ msgstr ""
-#~ "Kilobiti totali in cererile duplicate primite prin TCP versus numar total de "
-#~ "cereri."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Kilobiti totali in cererile duplicate primite prin Multicast versus numar "
-#~ "total de cereri."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
-
-#~ msgid "TCP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pinguri TCP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
-#~ "LimeWire."
-
-#~ msgid "TCP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ponguri TCP primite de la ceilalti clienti Gnutella Versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "TCP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari TCP primite de la ceilalti clienti Gnutella versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "TCP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid "TCP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Impinsaturi TCP primite de la alti clienti Gnutella versus utilizatori ai "
-#~ "LimeWire."
-
-#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pinguri UDP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
-#~ "LimeWire."
-
-#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ponguri UDP primite de la ceilalti clienti Gnutella Versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "UDP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari UDP primite de la ceilalti clienti Gnutella versus ceilalti "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid ""
-#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
-#~ "utilizatori ai LimeWire."
-
-#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Impinsaturi UDP primite de la alti clienti Gnutella versus utilizatori ai "
-#~ "LimeWire."
 
 #~ msgid ""
 #~ "Multicast pings received from all Gnutella clients versus other LimeWires."
@@ -556,15 +272,6 @@ msgstr ""
 
 #~ msgid "Total kilobytes received by other LimeWires."
 #~ msgstr "Total kilobiti primiti de la ceilalti utilizatori LimeWire."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "The average size in kilobytes of received Gnutella messages."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "The average size in kilobytes of received messages from LimeWires."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Total mesaje filtrului."
 
 #~ msgid "messages"
 #~ msgstr "mesaje"
@@ -635,11 +342,287 @@ msgstr ""
 #~ msgid "Push Errors"
 #~ msgstr "Erori Push"
 
+#~ msgid "No Route"
+#~ msgstr "No Route"
+
+#~ msgid "Orginal query"
+#~ msgstr "Cerere orginal"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Incarcare setari..."
+
+#~ msgid "Network"
+#~ msgstr "Retea"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Toate cererile primite in kilobiti, dupa hops."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "Toate cererile primite in kilobiti, dupa TTL."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "The average size in kilobytes of received Gnutella messages."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "The average size in kilobytes of received messages from LimeWires."
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Nici o linie nu este disponibila pentru produs."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Toate cererile primite, dupa hops."
+
+#~ msgid "Special Queries"
+#~ msgstr "Cereri speciale"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Toate cererile marcate speciale."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Total mesaje filtrului."
+
 #~ msgid "Hard Limit"
 #~ msgstr "Hard Limit"
 
-#~ msgid "No Route"
-#~ msgstr "No Route"
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr ""
+#~ "Suport pentru LimeWire si continutul media independent. Obtineti PRO."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Computerul dumneavoastra nu pare a avea o conexiune activa la internet sau "
+#~ "un firewall blocheaza LimeWire sa acceseze internetul. Va rugam verificati "
+#~ "conexiunea sau setarile firewall-ului si apoi selectati \"Conectare\" din "
+#~ "meniul Fisier pentru a conecta LimeWire la retea."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Afiseaza statistici avansate:"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Latimea de banda totala folosita pentru a trimite date, prin incarcari sau "
+#~ "mesaje Gnutella."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Latimea de banda totala folosita pentru a primi date, prin descarcari sau "
+#~ "mesaje Gnutella."
+
+#~ msgid "Received"
+#~ msgstr "Primite"
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Numar de dubii duplicate primite prin Multicast versus numar total de dubii."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Kilobiti totali in cererile duplicate primite prin Multicast versus numar "
+#~ "total de cereri."
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Statisticile latimii de banda includ informatii complete despre toate "
+#~ "latimile de banda trimise upstresm si downstream. Facet click pe una dintre "
+#~ "categorii pentru a vedea statisticile dorite."
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Statistici despre starea curenta a retelei. Aceste statistici sunt relativ "
+#~ "inexacte din cauza dinamicii, naturii distributive a Gnutella si nu trebuie "
+#~ "luata drept referinta. Puteti primi insa, astfel, o idee generala asupra "
+#~ "starii curente a conexiunii dumneavoastra."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Statisticile avansate includ informatii detaliate pentru mesajele Gnutella "
+#~ "si traficul HTTP. Aceste informatii pot fi utile utilizatorilor avansati cat "
+#~ "si pentru cercetatorii retelei Gnutella. Statisticile avansate nu sunt "
+#~ "afisate implicit si nu sunt recomandate majoritatii utilizatorilor."
+
+#~ msgid "Upstream"
+#~ msgstr "Upstream"
+
+#~ msgid "Downstream"
+#~ msgstr "Downstream"
+
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr "Toate mesajele Gnutella primite de acest client."
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr "Toate mesajele Gnutella primite prin TCP, dupa tipul mesajului."
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "Toate mesajele Gnutella primite prin UDP, dupa tipul mesajului."
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr ""
+#~ "Toate mesajele Gnutella primite prin Multicast, dupa tipul mesajului."
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Toate mesajele Gnutella primite prin TCP, UDP sau Multicast."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr ""
+#~ "Numar de dubii duplicate primite prin TCP versus numar total de dubii."
+
+#~ msgid "All received queries, by time to live (TTL)."
+#~ msgstr "Toate cererile primite, dupa TTL"
+
+#~ msgid "All received query hits, by hops."
+#~ msgstr "Toate cererile primite, dupa hops"
+
+#~ msgid "All received query hits, by time to live (TTL)."
+#~ msgstr "Toate cererile primite, dupa TTL"
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr ""
+#~ "Kilobiti totali pentru toate mesajele Gnutella primite de acest client."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCp, dupa tipul "
+#~ "mesajului."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin UDP, dupa tipul "
+#~ "mesajului."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin Multicast, dupa tipul "
+#~ "mesajului."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Kilobiti totali pentru mesajele Gnutella primite prin TCP, UDP sau Multicast."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr ""
+#~ "Kilobiti totali in cererile duplicate primite prin TCP versus numar total de "
+#~ "cereri."
+
+#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pinguri UDP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
+#~ "LimeWire."
+
+#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ponguri UDP primite de la ceilalti clienti Gnutella Versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "UDP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari UDP primite de la ceilalti clienti Gnutella versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Impinsaturi UDP primite de la alti clienti Gnutella versus utilizatori ai "
+#~ "LimeWire."
+
+#~ msgid "Statistics"
+#~ msgstr "Statistici"
+
+#~ msgid "Validation Required"
+#~ msgstr "Validare necesara"
+
+#~ msgid "Height:"
+#~ msgstr "Inaltime:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Apasati OK pentru a indeparta definitv licenta."
+
+#~ msgid "Display:"
+#~ msgstr "Afisare:"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr ""
+#~ "Va rugam sa introduceti titlul fisierului pe care doriti sa-l publicati."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr ""
+#~ "Va rugam sa introduceti anul fisierului pe care odriti sa-l publicati."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Va rugam sa introduceti un URL de verificare valid pentru fisier."
+
+#~ msgid "TCP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pinguri TCP de la ceilalti clienti Gnutella versus ceilali utilizatori ai "
+#~ "LimeWire."
+
+#~ msgid "TCP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ponguri TCP primite de la ceilalti clienti Gnutella Versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "TCP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari TCP primite de la ceilalti clienti Gnutella versus ceilalti "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid ""
+#~ "TCP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Intrebari neasteptate primite de la ceilalti utilizatori Gnutella versus "
+#~ "utilizatori ai LimeWire."
+
+#~ msgid "TCP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Impinsaturi TCP primite de la alti clienti Gnutella versus utilizatori ai "
+#~ "LimeWire."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -1070,13 +1053,13 @@ msgstr "Descriere"
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
 #, fuzzy
 msgid "License"
-msgstr "Licenta:"
+msgstr "Licenţă"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 #, fuzzy
 msgid "Document"
-msgstr "Documente"
+msgstr "Document"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
@@ -1090,7 +1073,7 @@ msgstr "Autor"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 #, fuzzy
 msgid "Application"
-msgstr "Actiune:"
+msgstr "Aplicaţie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:367
@@ -1131,10 +1114,13 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
+#, fuzzy
 msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Acest transfer este un torrent si nu a insamantat destul. Este recomandabil "
+"sa in lasati sa mai incarce. Sunteti sigur ca doriti sa il opriti?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 #, fuzzy
@@ -1741,7 +1727,7 @@ msgstr "LimeWire nu va porni fisierul specificat din motive de securitate."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1426
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1449
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
 "\n"
@@ -2600,7 +2586,7 @@ msgstr ""
 "daca va gasi rezultatele potrivite."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:40
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "Do you have a cool feature you'd like to see added to LimeWire? Suggest it "
 "on LimeWire's <a href=\"{0}\">message boards</a> and it may be added to "
@@ -2733,7 +2719,7 @@ msgstr ""
 "prezentarea Advanced Statistics."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "Did you know LimeWire is completely open-source? Visit <a "
 "href=\"{0}\">www.limewire.org</a> for information on how to join developer "
@@ -3195,6 +3181,10 @@ msgid ""
 "sorting behavior off by right-clicking on a column header, choosing 'More "
 "Options' and un-checking 'Sort Automatically'."
 msgstr ""
+"Puteti tria incarcarile, descarcarile, etc. apasand pe o coloana. Tabelul "
+"este mentinut triat in timp ce informatiile se schimba. Puteti opri aceasta "
+"optiune de auto-sortare facand click-dreapta pe un antetul unei coloane, "
+"alegand 'More Options' si debifand 'Sort Automatically'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:106
 msgid ""
@@ -3470,6 +3460,10 @@ msgid ""
 "sorting behavior off by control-clicking on a column header, choosing 'More "
 "Options' and un-checking 'Sort Automatically'. "
 msgstr ""
+"Puteti tria incarcarile, descarcarile, etc. apasand pe o coloana. Tabelul "
+"este mentinut triat in timp ce informatiile se schimba. Puteti opri aceasta "
+"optiune de auto-sortare facand click-dreapta pe un antetul unei coloane, "
+"alegand 'More Options' si debifand 'Sort Automatically'. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:141
 msgid ""
@@ -4945,7 +4939,7 @@ msgstr "Alegere limba:"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:59
 msgid "Save Folder and Shared Folders"
-msgstr ""
+msgstr "Dosarul Salvare si dosare partajate"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:72
 msgid ""
@@ -4953,6 +4947,9 @@ msgid ""
 "can also choose folders you would like to share with other users running "
 "LimeWire."
 msgstr ""
+"Va rugam alegeti dosarul in care ati dori sa fie salvate fisierele "
+"descarcate. Puteti de asemenea alege dosarele pe care doriti sa le partajati "
+"cu ceilalti utilizatori LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:74
 msgid ""
@@ -4960,6 +4957,10 @@ msgid ""
 "the folder where you would like your files to be downloaded. You can also "
 "choose folders you would like to share with other users running LimeWire."
 msgstr ""
+"LimeWire ca descarca de acum fisierele intr-un dosar diferit, nou. Va rugam "
+"confirmati dosarul in care doriti ca fisierele sa fie descarcate. Puteti de "
+"asemenea sa alegeti dosarele pe care ati dori sa le partajati cu ceilalti "
+"utilizatori LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
@@ -4990,12 +4991,16 @@ msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
 "already exists."
 msgstr ""
+"LimeWire nu a putut crea dosarul implicit de partajare {0}, un fisier cu "
+"acelasi nume exista deja."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:178
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
 msgstr ""
+"LimeWire nu a putut crea dosarul implicit de partajare {0}, acesta nu va fi "
+"partajat."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:192
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
@@ -5199,7 +5204,7 @@ msgstr "Configurare..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
 msgid "Songs purchased from the LimeWire Store"
-msgstr ""
+msgstr "Melodii cumparate din Magazinul LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:55
 #, fuzzy
@@ -5523,7 +5528,7 @@ msgstr "&Avansat"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:28
 msgid "Mojito &DHT Arcs View"
-msgstr ""
+msgstr "Vezi Mojito &DHT Arcs"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:29
 msgid "Display a view of the incoming and outgoing DHT messages"
@@ -6891,11 +6896,11 @@ msgstr "Publicati descarcari complete:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "Toate fisierele descarcate vor fi partajate."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads in shared folders will be shared."
-msgstr ""
+msgstr "Doar fisierele descarcate in dosarele partajate vor fi partajate."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 #, fuzzy
@@ -7051,7 +7056,7 @@ msgstr "Poti sa afisezi status-ul Magazinului LimeWire in bara de stare."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:30
 msgid "Show LimeWire Store Indicator:"
-msgstr ""
+msgstr "Arata indicatorul Magazinul LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:21
 msgid "Shared Files Indicator"
@@ -7284,6 +7289,8 @@ msgid ""
 "Warning: a file with the name {0} already exists in the directory. Overwrite "
 "this file?"
 msgstr ""
+"Atentie! Un fisier cu numele {0} exista deja in dosar. Suprascrieti acest "
+"fisier?"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:789
 msgid "Playlist Files (*.m3u)"
@@ -7728,6 +7735,10 @@ msgid ""
 "this folder because it is either not a folder or cannot be "
 "read.<br><br>Please select another folder to share.</table></html>"
 msgstr ""
+"<html><table width=400>Ati ales: <i>{0}</i><br>LimeWire nu poate partaja "
+"acest dosar deoarece fie acesta nu este un dosar, fie nu poate fi "
+"citit.<br><br>Va rugam selectati alt dosar pentru a fi "
+"partajat.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:31
 #, java-format
@@ -7736,6 +7747,9 @@ msgid ""
 "this folder for security reasons.<br><br>Please select another folder to "
 "share.</table></html>"
 msgstr ""
+"<html><table width=400>Ati ales: <i>{0}</i><br>LimeWire nu poate partaja "
+"acest dosar din motive de securitate.<br><br>Va rugam selectati alt dosar "
+"pentru a fi partajat.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:48
 #, java-format
@@ -7745,6 +7759,10 @@ msgid ""
 "NOT</b> share this folder.<br><br>Are you sure you want to share "
 "it?</table></html>"
 msgstr ""
+"<html><table width=400>Dosarul <i>{0}</i><br>este posibil sa contina "
+"informatii importante sau personale.<br><br>LimeWire va recomanda <b>SA "
+"NU</b> partajati acest dosar.<br><br>Sunteti sigur ca doriti sa partajati "
+"acest dosar?</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
@@ -7759,6 +7777,9 @@ msgid ""
 "One or more files or protocols that LimeWire uses are no longer associated "
 "with LimeWire. Would you like LimeWire to re-associate them?"
 msgstr ""
+"Unul sau mai multe tipuri de fisiere si protocoale pe care LimeWire le "
+"foloseste nu mai sunt asociate cu LimeWire. DOriti ca LimeWire sa le "
+"asocieze din nou?"
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:50
 #, fuzzy
@@ -7768,11 +7789,11 @@ msgstr "Detalii de inregistrare"
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:116
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:210
 msgid "Idle"
-msgstr ""
+msgstr "Inactiv"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:253
 msgid "Go"
-msgstr ""
+msgstr "Mergi"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:292
 msgid "Back"
@@ -7946,7 +7967,7 @@ msgid "Awaiting Requests"
 msgstr "Astepare surse"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Cautare dupa: {0}"
 
@@ -8320,6 +8341,9 @@ msgid ""
 "The default Internet Archive identifier for this file and username is "
 "already taken. Please modify it below or press cancel to return."
 msgstr ""
+"Identificatorul implicit al arhivei internet pentru acest fisier si nume de "
+"utilizator este deja luat. Va rugam modificati-l mai jos sau apasati "
+"Anuleaza pentru a reveni."
 
 #. TODO: BAD.  DO NOT CALL SWING HERE.
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:86

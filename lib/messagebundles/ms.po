@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-10-17 01:03+0000\n"
+"PO-Revision-Date: 2007-12-01 17:48+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Malay <ms@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
@@ -137,7 +137,7 @@ msgstr "Menyediakan Pengurusan Muatatas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
 msgid "Loading Connection Listener..."
-msgstr "Menyediakan Hubungan Listener..."
+msgstr "Menyediakan Hubungan Pendengar"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:345
 msgid "Loading Connection Management..."
@@ -149,7 +149,7 @@ msgstr "Menyediakan Pengurusan Muatturun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:356
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Menyediakan Ultrapeer/DHT Management..."
+msgstr "Menyediakan Ultrapeer/ Pengurusan DHT"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:361
 msgid "Locating Peers..."
@@ -193,48 +193,48 @@ msgstr "Menyediakan Files Simpanan..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:429
 msgid "Loading Spam Management..."
-msgstr ""
+msgstr "Menyediakan Pengurusan Spam..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:434
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "Menyediakan Listeners Rangkaian..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
 msgid "All Types"
-msgstr ""
+msgstr "Semua Jenis"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Documents"
-msgstr ""
+msgstr "Dokumen"
 
 #: core/com/limegroup/gnutella/MediaType.java:47
 msgid "Programs"
-msgstr ""
+msgstr "Program"
 
 #: core/com/limegroup/gnutella/MediaType.java:48
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
-msgstr ""
+msgstr "Video"
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
-msgstr ""
+msgstr "Imej"
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:190
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "Tidak dapat diproses kerana rangkaian rosak {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:196
@@ -243,61 +243,67 @@ msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
+"Satu atau lebih URLs didalam rangkaian MAGNET adalah tidak sah. File anda "
+"mungkin dimuatturun secara salah."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr ""
+msgstr "Anda telah pun memuatturun {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
 #, java-format
 msgid "You are already downloading this file to {0}"
-msgstr ""
+msgstr "Anda telah pun memuatturun file ini di {0}"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr ""
+msgstr "Untuk pencarian Turbo-Charged sila dapatkan LimeWire Pro."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
+msgstr "Sokonglah pembangunan LimeWire peer-to-peer. Dapatkan edisi PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
 msgid "Purchase LimeWire PRO to help us make downloads faster."
 msgstr ""
+"Beli LimeWire Pro untuk membantu kami jadikan muatturun lebih pantas."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr ""
+msgstr "Untuk muatturun Turbo-Charge dapatkan LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
 msgid "Support open networks. Get LimeWire PRO."
-msgstr ""
+msgstr "Sokonglah rangkaian terbuka. Dapatkan LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
 msgid "Support open source and open protocols. Get LimeWire PRO."
 msgstr ""
+"Sokonglah sumber terbuka dan protokol terbuka. Dapatkan LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr ""
+msgstr "Untuk prestasi Turbo-Charge dapatkan LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr ""
+msgstr "Buat internet terbuka. Dapatkan LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
 msgid "Developing LimeWire costs real money. Get PRO."
 msgstr ""
+"Pembangunan LimeWire memerlukan perbelanjaan yang tinggi. Dapatkan LimeWire "
+"PRO."
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -306,7 +312,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:269
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
 msgid "Title"
-msgstr ""
+msgstr "Tajuk"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
@@ -314,26 +320,26 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:57
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:42
 msgid "Artist"
-msgstr ""
+msgstr "Artis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:273
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
 msgid "Album"
-msgstr ""
+msgstr "Album"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:275
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:98
 msgid "Genre"
-msgstr ""
+msgstr "Genre"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:277
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:73
 msgid "Track"
-msgstr ""
+msgstr "Runut"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
@@ -342,48 +348,48 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:58
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:80
 msgid "Type"
-msgstr ""
+msgstr "Jenis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:281
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr ""
+msgstr "Panjang"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:279
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
 msgid "Year"
-msgstr ""
+msgstr "Tahun"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Language"
-msgstr ""
+msgstr "Bahasa"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:283
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
 msgid "Bitrate"
-msgstr ""
+msgstr "Kadar bit"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 msgid "Comments"
-msgstr ""
+msgstr "Pandangan"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
-msgstr ""
+msgstr "Aksi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 msgid "Copyright"
-msgstr ""
+msgstr "Hakcipta"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -391,48 +397,48 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
-msgstr ""
+msgstr "Jenis Lesen"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
-msgstr ""
+msgstr "Pengarah"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 msgid "Producer"
-msgstr ""
+msgstr "Pengeluar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 msgid "Studio"
-msgstr ""
+msgstr "Studio"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr ""
+msgstr "Bintang"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr ""
+msgstr "Subtajuk"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
-msgstr ""
+msgstr "Kadar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
-msgstr ""
+msgstr "Tinggi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr ""
+msgstr "Lebar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 msgid "Image"
-msgstr ""
+msgstr "Imej"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr ""
+msgstr "Keterangan"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -441,25 +447,25 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:262
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
 msgid "License"
-msgstr ""
+msgstr "Lesen"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 msgid "Document"
-msgstr ""
+msgstr "Dokumen"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr ""
+msgstr "Tajuk"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "Penulis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 msgid "Application"
-msgstr ""
+msgstr "Aplikasi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:367
@@ -468,23 +474,25 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
 msgid "Name"
-msgstr ""
+msgstr "Nama"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Penerbit"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "Platform"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:100
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "File .torrent yang dipilih mungkin mempunyai keselamatan."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:102
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
+"LimeWire tidak dapat untuk memuatturun file .torrent daripada URL yang "
+"diberikan."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -492,6 +500,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Jika anda memberhentikan muatatas ini, muatturun torrent akan berhenti. "
+"Adakah anda pasti untuk memberhentikannya ?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -499,24 +509,29 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Muatatas ini adalah torrent dan tidak mempunyai seeded yang cukup. Anda "
+"sepatutnya membiarkan ia dimuatatas lagi. Adakah anda pasti untuk "
+"memberhentikannya ?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 msgid "Automatically start torrents"
-msgstr ""
+msgstr "Memulakan torrent secara automatik"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:18
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
+"Anda boleh memilih untuk memulakan secara automatik muatturun torrent "
+"daripada Gnutella."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
 msgid "Start automatically"
-msgstr ""
+msgstr "Mula secara automatik"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Seting Bittorent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -525,6 +540,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Anda boleh memilih supaya LimeWire menguruskan protokol Bittorrent anda. "
+"Adalah sangat digalakkan supaya LimeWire menguruskan seting ini. Kesalahan "
+"dalam memasukkan nilai akan menyebabkan beberapa masalah prestasi dan/atau "
+"masalah ruang ingatan,"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -532,18 +551,22 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Kesalahan dalam memasukkan nilai sendiri akan menyebabkan beberapa masalah "
+"prestasi dan/atau masalah ruang ingatan, Tidak mengapa sekiranya anda tahu "
+"apa yang anda lakukan. Adalah sangat digalakkan supaya LimeWire menguruskan "
+"seting ini."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
-msgstr ""
+msgstr "Biat LimeWire menguruskan seting Bittorrent. (Digalakkan)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Muatatas maksimum per torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Muatatas minimum per torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
@@ -551,11 +574,11 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Experimen Akses Cakera"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:76
 msgid "Internal Error"
-msgstr ""
+msgstr "Ralat Dalaman"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:383
 msgid ""
@@ -564,6 +587,11 @@ msgid ""
 "'Send' to notify LimeWire about the problem. If desired, you can click "
 "'Review' to look at the information that will be sent. Thank you."
 msgstr ""
+"Terdapat ralat dalaman LimeWire. Adalah tidak mustahil untuk LimeWire "
+"membetulkannya dan meneruskan seperti biasa. Untuk membantu menyahpepijat, "
+"sila klik 'Hantar' untuk memberitahu LimeWire tentang masalah ini. Jika "
+"mahu, anda boleh klik 'Review' untuk melihat data yang akan dihantar. Terima "
+"kasih."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:385
 msgid ""
@@ -572,33 +600,37 @@ msgid ""
 "'Discard'. If desired, you can click 'Review' to look at the information "
 "about the error."
 msgstr ""
+"Terdapat ralat dalaman LimeWire. Adalah tidak mustahil untuk LimeWire "
+"membetulkannya dan meneruskan seperti biasa. Untuk terus menggunakan "
+"LimeWire, klik 'Discard'. Jika mahu, anda boleh klik 'Review' untuk melihat "
+"data tentang masalah yang timbul."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:396
 msgid "Send"
-msgstr ""
+msgstr "Hantar"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:404
 msgid "Review"
-msgstr ""
+msgstr "Review"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:417
 msgid "Discard"
-msgstr ""
+msgstr "Abaikan"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:434
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
-msgstr ""
+msgstr "Hantar Secepat Mungkin Setiap Kali"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:435
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
-msgstr ""
+msgstr "Tanya Untuk Review Setiap Kali"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:436
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
-msgstr ""
+msgstr "Abaikan Semua Ralat Setiap Kali"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:510
 msgid ""
@@ -606,10 +638,13 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
+"LimeWire tidah dapat meghubungi pelayang pepijat utnuk menghantar laporan "
+"pepijat dibawah. Untuk bantuan lanjut dan bantuan menyahpepijat, sila lawati "
+"www.limewire.com dan klik pada 'Support'. Terima kasih."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:539
 msgid "Copy Report"
-msgstr ""
+msgstr "Salin Laporan"
 
 #. Add an OK button out of the window.
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:547
@@ -624,21 +659,21 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:302
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
 msgid "OK"
-msgstr ""
+msgstr "Baik"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
-msgstr ""
+msgstr "Gelungsur Secara Automatik"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:64
 msgid "About LimeWire"
-msgstr ""
+msgstr "Tentang LimeWire"
 
 #. set up limewire version label
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
 msgid "LimeWire"
-msgstr ""
+msgstr "LimeWire"
 
 #. set up close button
 #. *
@@ -647,11 +682,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
 msgid "Close"
-msgstr ""
+msgstr "Tutup"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
-msgstr ""
+msgstr "Tutup Tetingkap Ini"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -665,6 +700,9 @@ msgid ""
 "collection of protocols that is constantly improving -- a testament to the "
 "power of open protocols and open standards."
 msgstr ""
+"Diilhamkan oleh tuan punya LimeWire, Mark Gorton, projek LimeWire ini adalah "
+"kerjasama <a href=\"http://www.limewire.org/\">pengusaha sumber terbuka</a> "
+"yang melibatkan pengaturcara dan penyelidik daripada seluruh dunia."
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
@@ -672,6 +710,8 @@ msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
 msgstr ""
+"LimeWire juga, sudah tentu, adalah hasil daripada masa kerja yang tidak "
+"terkira oleh pembangun-pembangun LimeWire:"
 
 #. business developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:197
@@ -679,6 +719,8 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
+"Disebalik tabir strategi perniagaan dan 'daya-to-day affair' yang "
+"dikelolakan oleh pembangunan perniagaan LimeWire:"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:207
@@ -686,12 +728,16 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
+"Laman web <a href=\"http://www.limewire.com/\">LimeWire</a> dan pereka "
+"grafik LimeWire yang telah bersusah payah dalam pembangun web LimeWire:"
 
 #. support staff
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:215
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
+"Soalan tentang LimeWire Pro adalah tanggungjawab Juruteknik LimeWire untuk "
+"menjawabnya:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:223
@@ -699,6 +745,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
+"Sebagai tambahan, individu-individu berikut telah bekerja keras untuk "
+"LimeWire tetapii telah ditukar ke projek yang lain:"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
@@ -723,6 +771,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
+"Beberapa kawan didalam komuniti Gnutella berhak untuk ucapan tahniah. Ini "
+"termasuk:"
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:310
@@ -736,7 +786,7 @@ msgstr ""
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
-msgstr ""
+msgstr "BitTorrent, Logonya, dan Torrent adalah hakcipta BitTorrent Inc."
 
 #. *
 #. * The select all action.
@@ -744,11 +794,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:571
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:74
 msgid "Select All"
-msgstr ""
+msgstr "Pilih Semua"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:573
 msgid "Marks all Items as Selected"
-msgstr ""
+msgstr "Tandakan semua sebagai Pilihan"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:591
 msgid "Deselect All"
@@ -765,32 +815,32 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/Console.java:136
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:40
 msgid "Apply"
-msgstr ""
+msgstr "Laksanakan"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:143
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:854
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:50
 msgid "Clear"
-msgstr ""
+msgstr "Kosongkan"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:150
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:116
 msgid "Save"
-msgstr ""
+msgstr "Simpan"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:545
 msgid "Save As"
-msgstr ""
+msgstr "Simpan Sebagai"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:95
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:171
 msgid "What's New"
-msgstr ""
+msgstr "Apa Yang Baru"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:122
 msgid "Creative Commons"
-msgstr ""
+msgstr "Creative Commons"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:182
 msgid ""
@@ -827,7 +877,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:416
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:426
 msgid "Yes"
-msgstr ""
+msgstr "Ya"
 
 #. *
 #. * Constant for when the user selects the no button
@@ -838,7 +888,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:419
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:429
 msgid "No"
-msgstr ""
+msgstr "Tidak"
 
 #. *
 #. * Constant for when the user selects the cancel button
@@ -864,7 +914,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:201
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:57
 msgid "Cancel"
-msgstr ""
+msgstr "Batal"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:80
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:98
@@ -874,7 +924,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:445
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:464
 msgid "Select Folder"
-msgstr ""
+msgstr "Pilih Folder"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:99
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:121
@@ -889,31 +939,33 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:486
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:508
 msgid "Select"
-msgstr ""
+msgstr "Pilih"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:812
 msgid "All Folders"
-msgstr ""
+msgstr "Semua Folder"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 msgid "Modem"
-msgstr ""
+msgstr "Modem"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Cable/DSL"
-msgstr ""
+msgstr "Cable/DSL"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
-msgstr ""
+msgstr "T1"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:42
 msgid "T3 or Higher"
 msgstr ""
+"Copy text   \t\n"
+"T3 or Higher"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:44
 msgid "Ethernet"
-msgstr ""
+msgstr "Ethernet"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:111
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1498
@@ -923,44 +975,48 @@ msgid ""
 "automatically keep trying to connect you to the network unless you select "
 "\"Disconnect\" from the File menu."
 msgstr ""
+"Komputer anda seperti tidak mempunyai hubungan internet yang aktif atau "
+"'firewall' menghalangnya daripada mengakses ke internet. LimeWire akan cuba "
+"untuk mengakses ke internet sehingga anda menekan butang \"Putus Hubungan\" "
+"daripada menu File."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 msgid "&Search"
-msgstr ""
+msgstr "&Mencari"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:121
 msgid "&Monitor"
-msgstr ""
+msgstr "&Mengawasi"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:122
 msgid "&Connections"
-msgstr ""
+msgstr "Hubungan"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:123
 msgid "&Library"
-msgstr ""
+msgstr "Perpustakaan"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:124
 msgid "C&onsole"
-msgstr ""
+msgstr "K&onsol"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
 msgid "Lo&gging"
-msgstr ""
+msgstr "Lo&gging"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 msgid "&Browser"
-msgstr ""
+msgstr "Pelayar"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "Tunjuk skrin {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:227
 msgid "LimeWire: Enabling Open Information Sharing"
-msgstr ""
+msgstr "LimeWire: Membolehkan Perkongsian Maklumat Terbuka"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:395
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:399
@@ -989,11 +1045,14 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire tidak dapat untuk mencari pelayar web untuk menunjukkan laman web "
+"berikut: {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1424
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1447
 msgid "LimeWire will not launch the specified file for security reasons."
 msgstr ""
+"LimeWire tidak akan melancarkan file yang ditetapkan kerasa keselamatan."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1426
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1449
@@ -1003,62 +1062,66 @@ msgid ""
 "\n"
 "Executed command: {0}."
 msgstr ""
+"LimeWire tidak dapat melancarkan file yang ditetapkan.\n"
+"Perintah dijalankan: {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1429
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1452
 msgid "LimeWire could not launch the specified file."
-msgstr ""
+msgstr "LimeWire tidak dapat melancarkan file yang ditetapkan."
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:135
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:232
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:137
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:139
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:141
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:143
 msgid "KB/s"
-msgstr ""
+msgstr "KB/s"
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:280
 msgid "Loading HTML Engine..."
-msgstr ""
+msgstr "Menyediakan Enjin HTML..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:319
 msgid "Loading User Interface..."
-msgstr ""
+msgstr "Menyediakan Antaramuka Pengguna..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:340
 msgid "Loading Core Components..."
-msgstr ""
+msgstr "Menyediakan Komponen Utama..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:361
 msgid ""
 "LimeWire was unable to create your settings directory and is using a "
 "temporary directory.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"LimeWire tidak dapat membuat file seting dan menggunakan file sementara. "
+"Seting anda mungkin akan dibuang setelah anda menutup LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:390
 msgid "Loading Icons..."
-msgstr ""
+msgstr "Menyediakan Ikon..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:396
 msgid "Loading Internationalization Support..."
-msgstr ""
+msgstr "Menyediakan Sokongan Antabangsa..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:418
 msgid "Loading Digital Audio Access Protocol..."
-msgstr ""
+msgstr "Menyediakan Protokol 'Digital Audio Access'..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:424
 msgid ""
@@ -1069,7 +1132,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:472
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
+msgstr "Versi Alpha ini telah tamat tempoh, Tekan Baik untuk keluar. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:478
 msgid ""
@@ -1097,11 +1160,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MessageService.java:208
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:910
 msgid "Error"
-msgstr ""
+msgstr "Ralat"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:67
 msgid "Input"
-msgstr ""
+msgstr "Input"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:44
@@ -1123,53 +1186,54 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
 msgid "Upgrade Java"
-msgstr ""
+msgstr "Memperbaharui  Java"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:168
 msgid "More Information"
-msgstr ""
+msgstr "Lebih Maklumat"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
 msgid "Visit {0}"
-msgstr ""
+msgstr "Lawat {0}"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Ingatkan Kemudian"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 msgid "Do not Show Again"
-msgstr ""
+msgstr "Jangan Tunjuk Lagi"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:173
 msgid "LimeWire must be restarted for the new language to take effect."
-msgstr ""
+msgstr "LimeWire perlu dimulakan semula untuk perubahan bahasa baru."
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "Ubah Bahasa"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
-msgstr ""
+msgstr "Bantu Terjemah LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Tunjuk Bahasa di status bar"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:383
 msgid "Verify"
-msgstr ""
+msgstr "Sahkan"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:427
 msgid "LimeWire was unable to locate the details of this license."
-msgstr ""
+msgstr "LimeWire tidak dapat untuk mencari perincian lesen ini."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:432
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:558
 msgid "You can try validating this license again by clicking 'Verify'."
 msgstr ""
+"Anda boleh mencuba untuk mengesahkan lesen ini dengan klik 'Pengesahan'."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:437
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:563
@@ -1180,13 +1244,13 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:500
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:568
 msgid "View Verification Page"
-msgstr ""
+msgstr "Tunjuk Halaman Pengesahan"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:447
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:573
 msgid "License Details:"
-msgstr ""
+msgstr "Perincian Lesen:"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:452
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:578
@@ -1196,18 +1260,18 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:457
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:583
 msgid "LimeWire is currently locating the details of this license."
-msgstr ""
+msgstr "LimeWire sedang mencari perincian lesen ini"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:462
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:588
 msgid ""
 "LimeWire has not yet verified this license.\n"
 "Click 'verify' to locate the details of this Creative Commons license."
-msgstr ""
+msgstr "LimeWire belum mengesahkan lesen ini."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:467
 msgid "Creative Commons Details"
-msgstr ""
+msgstr "Perincian Creative Commons"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:485
 msgid "LimeWire was unable to locate the details of this Weed file."
@@ -1242,18 +1306,18 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:553
 msgid "This file may require a license in order to open and view."
-msgstr ""
+msgstr "Fiile ini mungkin memerlukan lesen untuk membuka dan melihat."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:593
 msgid "License Details"
-msgstr ""
+msgstr "Perincian Lesen"
 
 #. *
 #. * The undo action.
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:29
 msgid "Undo"
-msgstr ""
+msgstr "Kembali"
 
 #. *
 #. * The cut action
@@ -1286,12 +1350,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1274
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:120
 msgid "Delete"
-msgstr ""
+msgstr "Padam"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
 msgid "Add"
-msgstr ""
+msgstr "Tambah"
 
 #. remove
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:282
@@ -1301,7 +1365,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:224
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:49
 msgid "Remove"
-msgstr ""
+msgstr "Buang"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:10
 msgid "Download Page"
@@ -1317,14 +1381,14 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:63
 msgid "Loading Messages..."
-msgstr ""
+msgstr "Memuatkan Mesej..."
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:109
 #: gui/com/limegroup/gnutella/gui/MessageService.java:124
 #: gui/com/limegroup/gnutella/gui/MessageService.java:211
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:128
 msgid "Warning"
-msgstr ""
+msgstr "Amaran"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:138
 #: gui/com/limegroup/gnutella/gui/MessageService.java:151
@@ -1343,11 +1407,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:25
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:264
 msgid "Message"
-msgstr ""
+msgstr "Mesej"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:627
 msgid "Do not display this message again"
-msgstr ""
+msgstr "Jangan tunjuk mesej ini lagi"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:644
 msgid "Always use this answer"
@@ -1383,7 +1447,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
 #, java-format
 msgid "View My {0} Shared Files"
-msgstr ""
+msgstr "Tunjuk {0} File Dikongsi Saya"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:37
 msgid ""
@@ -1402,34 +1466,34 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
-msgstr ""
+msgstr "Menutup LimeWire..."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:27
 msgid "Please wait while LimeWire shuts down..."
-msgstr ""
+msgstr "Sila tunggu sehingga LimeWire ditutup..."
 
 #: gui/com/limegroup/gnutella/gui/SplashWindow.java:102
 msgid "Loading LimeWire..."
-msgstr ""
+msgstr "Memulakan LimeWire..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:94
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:104
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:43
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:218
 msgid "Add..."
-msgstr ""
+msgstr "Tambah..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:331
 msgid "Add New List Item"
-msgstr ""
+msgstr "Tambah Senarai Item Yang Baru"
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:364
 msgid "Remove Selected Item"
-msgstr ""
+msgstr "Buang Item Dipilih"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:132
 msgid "Loading Status Window..."
-msgstr ""
+msgstr "Memulakan Tetingkap Status..."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:486
 msgid "LimeWire has not detected a firewall"
@@ -1467,46 +1531,49 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:602
 msgid "You are currently connecting to the network"
-msgstr ""
+msgstr "Anda sedang berhubung dengan rangkaian"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:605
 msgid "Poor"
-msgstr ""
+msgstr "Teruk"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:606
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
+"Anda berhubung dengan beberapa 'host' dan mempunyai hubungan ke rangkaian "
+"yang tidak kukuh"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:609
 msgid "Fair"
-msgstr ""
+msgstr "Sederhana"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:610
 msgid "Your connection to the network is getting stronger"
-msgstr ""
+msgstr "Hubungan anda ke rangkaian semakin kukuh"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:613
 msgid "Good"
-msgstr ""
+msgstr "Baik"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:614
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
 msgstr ""
+"Anda belum sepenuhnya lagi berhubung ke rangkaian, tetapi hubungan anda kukuh"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:618
 msgid "Excellent"
-msgstr ""
+msgstr "Bagus"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:619
 msgid "Your connection to the network is very strong"
-msgstr ""
+msgstr "Hubungan anda ke rangkaian sangat kukuh"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:622
 msgid "Turbo-Charged"
-msgstr ""
+msgstr "Turbo-Charged"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:623
 msgid "Your connection to the network is extremely strong"
@@ -1551,63 +1618,63 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:841
 msgid "Show Media Player"
-msgstr ""
+msgstr "Tunjuk Pemain Media"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:911
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Anda mengongsi {0} file"
+msgstr[1] "Anda mengongsi {0} file"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:914
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Anda mengongsi {0} file (Memuatkan...)"
+msgstr[1] "Anda mengongsi {0} file (Memuatkan...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:980
 msgid "Downloads:"
-msgstr ""
+msgstr "MuatTurun"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:982
 msgid "Uploads:"
-msgstr ""
+msgstr "MuatAtas"
 
 #. *
 #. * The title for the TOTD window.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:53
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Petua Hari Ini"
 
 #. *
 #. * The 'Did You Know' intro.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:58
 msgid "Did You Know..."
-msgstr ""
+msgstr "Adakah anda tahu..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:64
 msgid "Show Tips At Startup"
-msgstr ""
+msgstr "Tunjuk Tip Pada Permulaan"
 
 #. *
 #. * 'Next'.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:69
 msgid "Next Tip"
-msgstr ""
+msgstr "Tip Seterusnya"
 
 #. *
 #. * 'Previous'.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:74
 msgid "Previous Tip"
-msgstr ""
+msgstr "Tip Sebelumnya"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:331
 msgid "Loading tips..."
@@ -1688,6 +1755,8 @@ msgid ""
 "Looking for something rare? The more detailed your search is, the better "
 "your chances of getting a result you want!"
 msgstr ""
+"Memcari sesuatu yang jarang dijumpai ? Semakin terperinci data dalam carian, "
+"semakin tinggi peluang untuk mendapatkan apa yang anda cari !"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
 msgid ""
@@ -5973,43 +6042,43 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:562
 msgid "Search the Network for the Given Words"
-msgstr ""
+msgstr "Mencari Perkataan Yang Diberi Untuk Rangkaian"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:657
 msgid "The address format is incorrect, please use host:port."
-msgstr ""
+msgstr "Format alamat adalah salah, sila gunakan mengikut host:port."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
 msgid "Close Search"
-msgstr ""
+msgstr "Tutup Carian"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
 msgid "Launch Action"
-msgstr ""
+msgstr "Lancarkan Aksi"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 msgid "Chat With Host"
-msgstr ""
+msgstr "Sembang Dengan Host"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
 msgid "Repeat Search"
-msgstr ""
+msgstr "Ulang Carian"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Block Hosts"
-msgstr ""
+msgstr "Host Dihalang"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 msgid "Mark As"
-msgstr ""
+msgstr "Tandakan Sebagai"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
 msgid "Get More Results"
-msgstr ""
+msgstr "Dapatkan Lebih Keputusan"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:145
 msgid "Loading Search Window..."
-msgstr ""
+msgstr "Memulakan Tetingkap Carian"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:424
 msgid ""
@@ -6068,7 +6137,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:88
 msgid "Created"
-msgstr ""
+msgstr "Telah Dicipta"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:93
 msgid "Junk Rating"
@@ -6076,7 +6145,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:267
 msgid "Media"
-msgstr ""
+msgstr "Media"
 
 #: gui/com/limegroup/gnutella/gui/search/TableLine.java:681
 msgid ""
@@ -6085,7 +6154,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:157
 msgid "View in Browser..."
-msgstr ""
+msgstr "Tunjuk dipelayar..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:57
 msgid "Extension Sharing Settings"
@@ -6100,15 +6169,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:60
 msgid "Enter the extension pattern:"
-msgstr ""
+msgstr "Masukkan paten sambungan:"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:61
 msgid "The extension name was not valid, could not add."
-msgstr ""
+msgstr "Nama sambungan adalah tidak sah, tidak dapat menambah."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:62
+#, fuzzy
 msgid "To allow selection enable sharing of sensitive types."
-msgstr ""
+msgstr "Untuk membenar pemilihan perkongsian sensitif."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:66
 msgid "Sharing Extensions"
@@ -6138,21 +6208,23 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:564
 msgid "Do Not Share Sensitive File Types"
-msgstr ""
+msgstr "Jangan Berkongsi File Jenis Sensitif"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:565
 msgid ""
 "This stops LimeWire from sharing certain files that may contain sensitive "
 "information."
 msgstr ""
+"Ini untuk memberhentikan LimeWire daripada mengongsi file yang mungkin "
+"mempunyai maklumat sensitif."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:752
 msgid "File types you added to share."
-msgstr ""
+msgstr "Jenis file yang anda tambah untuk dikongsi."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:756
 msgid "Other types of files."
-msgstr ""
+msgstr "Jenis file yang lain."
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:25
 #, java-format
@@ -6161,6 +6233,9 @@ msgid ""
 "this folder because it is either not a folder or cannot be "
 "read.<br><br>Please select another folder to share.</table></html>"
 msgstr ""
+"<html><table width=400>Anda memilih: <i>{0}</i><br> LimeWire tidak boleh "
+"mengongsi folder ini kerana ia bukan folder ataupun tidak dapat "
+"dibaca.<br><br>Sila pilih folder yang lain untuk dikongsi.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:31
 #, java-format
@@ -6169,6 +6244,9 @@ msgid ""
 "this folder for security reasons.<br><br>Please select another folder to "
 "share.</table></html>"
 msgstr ""
+"<html><table width=400>Anda memilih: <i>{0}</i><br> LimeWire tidak dapat "
+"mengongsi fail ini kerana keselamatan. <br><br>Sila pilih folder yang lain "
+"untuk dikongsi.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:48
 #, java-format
@@ -6181,11 +6259,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
-msgstr ""
+msgstr "file \".torrent\""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:87
 msgid "\"magnet:\" links"
-msgstr ""
+msgstr "rangkaian \"magnet:\""
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:48
 msgid ""
@@ -6228,27 +6306,28 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:64
 msgid "Sort Automatically"
-msgstr ""
+msgstr "Susun Secara Automatik"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:70
+#, fuzzy
 msgid "Extended Tooltips"
-msgstr ""
+msgstr "Tip Tambahan"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:186
 msgid "You cannot turn off all columns."
-msgstr ""
+msgstr "Anda tidak boleh membuang semua lajur."
 
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:27
 msgid "Show Connections to Other Clients"
-msgstr ""
+msgstr "Tunjuk Hubungan Ke 'Client' Yang Lain"
 
 #: gui/com/limegroup/gnutella/gui/tabs/ConsoleTab.java:28
 msgid "Console"
-msgstr ""
+msgstr "Konsol"
 
 #: gui/com/limegroup/gnutella/gui/tabs/ConsoleTab.java:29
 msgid "View Console Messages"
-msgstr ""
+msgstr "Tunjuk Mesej Konsol"
 
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:39
 msgid "View Repository of Saved Files"
@@ -6260,11 +6339,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/tabs/MonitorUploadTab.java:35
 msgid "Monitor"
-msgstr ""
+msgstr "Memerhati"
 
 #: gui/com/limegroup/gnutella/gui/tabs/MonitorUploadTab.java:36
 msgid "View Searches and Uploads"
-msgstr ""
+msgstr "Tunjuk Carian dan MuatAtas"
 
 #: gui/com/limegroup/gnutella/gui/tabs/SWTBrowserSearchTab.java:19
 msgid "Shop at the LimeWire Store"
@@ -6309,23 +6388,23 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:43
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:39
 msgid "Kill Upload"
-msgstr ""
+msgstr "Hentikan MuatAtas"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:48
 msgid "Stop Selected Uploads"
-msgstr ""
+msgstr "Hentikan MuatAtas Yang Dipilih"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:50
 msgid "Remove Inactive Uploads"
-msgstr ""
+msgstr "Buang MuatAtas Yang Tidak Aktif"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:48
 msgid "Uploading"
-msgstr ""
+msgstr "Sedang Dimuatatas"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:54
 msgid "Upload Limit Reached"
-msgstr ""
+msgstr "Had Muatatas Dicapai"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:60
 msgid "Freeloader Uploading"
@@ -6333,15 +6412,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:66
 msgid "Transfer Interrupted"
-msgstr ""
+msgstr "Pemindahan Terganggu"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:78
 msgid "File Not Found"
-msgstr ""
+msgstr "Fail Tidak Dijumpai"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:84
 msgid "Queued at"
-msgstr ""
+msgstr "Beratur Pada"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:90
 msgid "Range Unavailable"
@@ -6382,43 +6461,43 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:37
 msgid "Invalid Filename"
-msgstr ""
+msgstr "Nama File Tidak Sah"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:40
 msgid "Download Already Finished"
-msgstr ""
+msgstr "Muatturun Sudah Habis"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:43
 msgid "No Write Permission"
-msgstr ""
+msgstr "Tidak Ada Kebenaran Menulis"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:46
 msgid "Folder Does Not Exist"
-msgstr ""
+msgstr "Folder Tidak Wujud"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:49
 msgid "File Already Exists"
-msgstr ""
+msgstr "Fail Telah Wujud"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:52
 msgid "Filename Taken"
-msgstr ""
+msgstr "Nama File Sudah Diambil"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:55
 msgid "Not a Folder"
-msgstr ""
+msgstr "Bukan Folder"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:58
 msgid "Not a File"
-msgstr ""
+msgstr "Bukan File"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:61
 msgid "Filesystem Error"
-msgstr ""
+msgstr "Ralat Filesystem"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:64
 msgid "Same File Already Being Downloaded"
-msgstr ""
+msgstr "File Yang Sama Sedang Dimuatturun"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:88
 #, java-format
@@ -6484,11 +6563,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/util/GUILauncher.java:67
 #, java-format
 msgid "There is nothing to preview for file {0}."
-msgstr ""
+msgstr "Tiada apa untuk ditayangkan file {0}"
 
 #: gui/com/limegroup/gnutella/gui/xml/IndentingPanel.java:131
 msgid "More Search Options"
-msgstr ""
+msgstr "Lebih Pilihan Carian"
 
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:59
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:97
@@ -6505,13 +6584,13 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:235
 msgid "Cannot remove unsaved info."
-msgstr ""
+msgstr "Tidak dapat membuang maklumat tidak disimpan."
 
 #. unable to remove or write to disk
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:248
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:225
 msgid "Unable to remove data."
-msgstr ""
+msgstr "Tidak dapat membuang data."
 
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:266
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:269
@@ -6521,14 +6600,14 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:90
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:110
 msgid "Internal Document Error. Data could not be saved."
-msgstr ""
+msgstr "Ralat Dalaman Dokumen. Data mungkin tidak disimpan."
 
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:296
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:332
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:166
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:199
 msgid "Internal Error. Data could not be saved."
-msgstr ""
+msgstr "Ralat Dalaman. Data mungkin tidak disimpan."
 
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:302
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:179
@@ -6634,7 +6713,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:534
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
 msgid "Description:"
-msgstr ""
+msgstr "Penerangan:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:555
 msgid "Please enter the copyright holder, copright year and title."
@@ -6646,7 +6725,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:583
 msgid "I want to use the Internet Archive to host the file."
-msgstr ""
+msgstr "Saya mahu menggunakan Arkib Internet untuk menyimpan file."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:586
 msgid "I want to host the verification file myself at the following URL:"
@@ -6685,19 +6764,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:149
 msgid "Copy to Clipboard"
-msgstr ""
+msgstr "Salin ke Klipbod"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:44
 msgid "Kind:"
-msgstr ""
+msgstr "Jenis:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:70
 msgid "Size:"
-msgstr ""
+msgstr "Saiz:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:74
 msgid "Date Modified:"
-msgstr ""
+msgstr "Tarikh Diubahsuai:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:80
 msgid ""
@@ -6714,147 +6793,153 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:99
 msgid "Requesting Identifier..."
-msgstr ""
+msgstr "Memohon Pengenalan..."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:51
 msgid ""
 "Please wait while LimeWire is uploading your files to the Internet Archive"
 msgstr ""
+"Sila tunggu sementara LimeWire memuatatas file anda ke Arkib Internet"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:118
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:141
 msgid "Successfully uploaded files"
-msgstr ""
+msgstr "Berjaya memuatatas file"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:122
 msgid "There was an error while connecting to the internet archive."
-msgstr ""
+msgstr "Mempunyai ralat semasa menghubungu arkib di internet."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:125
 msgid ""
 "There was an error while logging in to the Internet Archive. Please check "
 "your username and password and try again."
 msgstr ""
+"Terdapat ralat semasa memasuki Arkib Internet. Sila periksa katanama dan "
+"katalaluan anda dan cuba lagi."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:128
 msgid "There was an error while trying to access the upload directory."
-msgstr ""
+msgstr "Terdapatralat semasa cuba untuk mengakses file muatatas."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:131
 msgid ""
 "There was an error communicating with the Internet Archive. Please try again "
 "later."
 msgstr ""
+"Terdapat ralat dalam berkomunikasi dengan Arkib Internet. Sila cuba lagi "
+"kemudian."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:169
 msgid "Upload"
-msgstr ""
+msgstr "Muatatas"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:189
 msgid "Connecting to the Internet Archive..."
-msgstr ""
+msgstr "Menghubungi ke Arkib Internet..."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:213
 msgid "Connected..."
-msgstr ""
+msgstr "Berhubung..."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:249
 msgid "Uploading file"
-msgstr ""
+msgstr "Muatatas file"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:252
 msgid "of"
-msgstr ""
+msgstr "daripada"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:268
+#, fuzzy
 msgid "Checking in..."
-msgstr ""
+msgstr "Checking in..."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:312
 msgid "Uploaded"
-msgstr ""
+msgstr "Sudah Dimuatatas"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:314
 msgid "bytes of"
-msgstr ""
+msgstr "bait daripada"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:176
 msgid "Nothing to save."
-msgstr ""
+msgstr "Tiada apa untuk disimpan."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:63
 msgid "Multiple File Information"
-msgstr ""
+msgstr "Maklumat Beberapa File"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:37
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:55
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:72
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:86
 msgid "Title:"
-msgstr ""
+msgstr "Tajuk:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
 msgid "Artist:"
-msgstr ""
+msgstr "Artis:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:39
 msgid "Album:"
-msgstr ""
+msgstr "Album:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:40
 msgid "Genre:"
-msgstr ""
+msgstr "Genre:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:57
 msgid "Year:"
-msgstr ""
+msgstr "Tahun:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:42
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:56
 msgid "Type:"
-msgstr ""
+msgstr "Jenis:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
-msgstr ""
+msgstr "Trek:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
 msgid "Language:"
-msgstr ""
+msgstr "Bahasa:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr ""
+msgstr "Panjang:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"
-msgstr ""
+msgstr "Kadar bit:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:60
 msgid "Comments:"
-msgstr ""
+msgstr "Pandangan"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:48
 msgid "SHA1:"
-msgstr ""
+msgstr "SHA1"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:49
 msgid "Price:"
-msgstr ""
+msgstr "Harga:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:50
 msgid "Link:"
-msgstr ""
+msgstr "Rangkaian:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:51
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:63
 msgid "Action:"
-msgstr ""
+msgstr "Tindakan:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:52
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:61
@@ -6862,58 +6947,58 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:83
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:89
 msgid "License:"
-msgstr ""
+msgstr "Lesen:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
 msgid "Rating:"
-msgstr ""
+msgstr "Penilaian:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:82
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:90
 msgid "License Type:"
-msgstr ""
+msgstr "Jenis Lesen:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:64
 msgid "Director:"
-msgstr ""
+msgstr "Pengarah:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:65
 msgid "Studio:"
-msgstr ""
+msgstr "Studio:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:67
 msgid "Stars: (Please separate with comma)"
-msgstr ""
+msgstr "Bintang: (Sila asing menggunakan koma)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:68
 msgid "Producer: (Please separate with comma)"
-msgstr ""
+msgstr "Pengeluar: (Sila asing menggunakan koma)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:69
 msgid "Subtitles: (Please separate with comma)"
-msgstr ""
+msgstr "Sarikata: (Sila asing menggunakan koma)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "Topik:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
-msgstr ""
+msgstr "Pengarang:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "Nama:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "Penerbit:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr ""
+msgstr "Platform:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"
@@ -6929,4 +7014,4 @@ msgstr "Ogg Vorbis"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
-msgstr "Maklumat"
+msgstr "Info"

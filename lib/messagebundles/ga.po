@@ -8,50 +8,47 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-15 10:15+0000\n"
+"PO-Revision-Date: 2007-11-26 17:23+0000\n"
 "Last-Translator: Seanán Ó Coistín <seananoc@gmail.com>\n"
 "Language-Team: English (United Kingdom) <en_GB@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#~ msgid "Lime Wire Store has not been found"
-#~ msgstr "Níor aimsíodh Díolbhoth LimeWire"
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Criochnaigh"
 
-#~ msgid "Lime Wire Store has been found"
-#~ msgstr "Aimsíodh Díolbhoth LimeWire"
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Paste"
 
-#~ msgid "Save Folder:"
-#~ msgstr "Cuir an Fillteán i dTaisce:"
+#~ msgid "Close the Window"
+#~ msgstr "D�n an fhuinneog seo"
 
-#~ msgid "Lime Wire Store"
-#~ msgstr "Díolbhoth LimeWire"
+#~ msgid "F"
+#~ msgstr "F"
 
-#~ msgid "Lime Wire Store - Subfolder Template"
-#~ msgstr "Díolbhoth LimeWire - Fíoraithe do Fhofhillteán"
+#~ msgid "I"
+#~ msgstr "I"
 
-#~ msgid "Lime Wire Store - Save Folder"
-#~ msgstr "Díolbhoth LimeWire - Taisc Comhad"
+#~ msgid "N"
+#~ msgstr "N"
 
-#~ msgid ""
-#~ "You can choose the folder for saving files purchased from the Lime Wire "
-#~ "Store."
-#~ msgstr ""
-#~ "Is féidir an fillteán chun comhaid cheannaithe ó Dhíolbhoth LimeWire a chur "
-#~ "i dtaisce a roghnú."
+#~ msgid "V"
+#~ msgstr "V"
 
-#~ msgid "Warning file already exists. Overwrite this file?"
-#~ msgstr "Rabhadh: tá an comhad ann cheana. Déan forscríobh ar an comhad seo?"
+#~ msgid "W"
+#~ msgstr "W"
 
-#~ msgid ""
-#~ "One or more files or protocols that LimeWire uses are no longer associated "
-#~ "with LimeWire. Would you like LimeWire to fix this?"
-#~ msgstr ""
-#~ "Níl comhad nó comhaid agus gnásanna a bhaineann LimeWire feidhm astu "
-#~ "gaolmhar le LimeWire a thuilleadh. Ar mhaith leat go deisfidh LimeWire é seo?"
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Se�/haed tabanna f�in"
+
+#~ msgid "L"
+#~ msgstr "L"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -448,7 +445,7 @@ msgstr "Réalta"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr "Fotheideal"
+msgstr "Fotheidil"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
@@ -517,12 +514,13 @@ msgstr "Ardán"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:100
 msgid "The selected .torrent file may contain a security hazard."
-msgstr "The selected .torrent file may be hazardous to your security."
+msgstr "D'fhéadfadh guais slándala bheith sa chomhad .torrent roghnaithe."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:102
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
-"Níorbh fhéidir le LimeWire comhad .torrent a íosluchtú ón URL a soláthraíodh."
+"Níorbh fhéidir le LimeWire comhad .torrent a íosluchtú ón URL a "
+"sholáthraíodh."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -530,8 +528,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
-"If you stop this upload, the torrent download will stop. Are you sure you "
-"want to do this?"
+"Má stadann tú an t-uasluchtú seo, stadfaidh an t-íosluchtú torrent. An "
+"bhfuil tú cinnte go dteastaíonn uait é seo a dhéanamh?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -539,20 +537,20 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
-"This upload is a torrent and it hasn't seeded enough. You should let it "
-"upload some more. Are you sure you want to stop it?"
+"Is torrent é an t-uasluchtú seo agus níl sé síolaithe a dhóthain. Ba chóir "
+"duit ligeant dó uasluchtú ar feadh tamall eile. An bhfuil tú cinnte go "
+"dteastaíonn uait stad a chur leis?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 msgid "Automatically start torrents"
-msgstr "Tosaigh torrent go huathoibríodh"
+msgstr "Tosaíonn sé an torrent go huathoibríodh"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:18
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
-"You can choose whether to automatically start torrents downloaded from "
-"Gnutella."
+"Is féidir roghnú torrentí íosluchtaithe ó Gnutella a thosú astu féin."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
 msgid "Start automatically"
@@ -569,10 +567,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
-"You can choose whether or not LimeWire should manage your Bittorrent "
-"protocol settings. It is highly recommended that LimeWire manage these "
-"settings. Invalid or inappropriate values may cause severe performance "
-"and/or memory problems."
+"Is féidir roghnú ar chóir do LimeWire do shocruithe gnásanna Bittorrent a "
+"bhainistiú. Moltar go mór duit ligeant do LimeWire na socruithe seo a "
+"bhainistiú. D´fhéadfadh luachanna neamhsheasmhach nó míchuí fadhbanna dona "
+"feidhmíochta agus/nó cuimhne."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -586,23 +584,23 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
-msgstr "Let LimeWire manage my BitTorrent settings. (Recommended)"
+msgstr "Lig do LimeWire mo shocruithe BitTorrent a bhainistiú. (Molta)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr "Maximum uploads per torrent"
+msgstr "Uaslíon uasluchtaithe an torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr "Minimum uploads per torrent"
+msgstr "Íoslíon uasluchtaithe an torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr "Safe chunk verification"
+msgstr "Fíorú smutáin slán"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
-msgstr "Experimental disk access"
+msgstr "Rochtain diosca turgnamhach"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:76
 msgid "Internal Error"
@@ -657,7 +655,7 @@ msgstr "Iarr Ar Athbhreithniú I gCónaí"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:436
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
-msgstr "Cuileáil Botúin I gCónaí"
+msgstr "Cuileáil Gach Botúin I gCónaí"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:510
 msgid ""
@@ -751,8 +749,7 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
-"Behind the scenes business strategy and day-to-day affairs are handled by "
-"LimeWire's business developers:"
+"Pléann forbóirí gnó LimeWire leis an t-ollbheart gnó agus gnóthaí laethúla:"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:207
@@ -760,15 +757,15 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
-"The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
-"graphic design are the hard work of LimeWire's web team:"
+"Is iad saothar foireann gréasáin LimeWire an <a "
+"href=\"http://www.limewire.com/\">láithreán gréasáin</a> agus dearadh "
+"grafach LimeWire:"
 
 #. support staff
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:215
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
-msgstr ""
-"LimeWire PRO questions are dutifully answered by LimeWire technical support:"
+msgstr "Freagraíonn na daoine seo na ceisteanna faoi LimeWire Pro:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:223
@@ -776,8 +773,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
-"In addition, the following individuals have worked on the LimeWire team in "
-"the past but have since moved on to other projects:"
+"Comh maith leis sin, rinne na daoine seo obair ar LimeWire ach anois tá siad "
+"ag obair ar thograí eile:"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
@@ -841,7 +838,7 @@ msgstr "Roghnaigh Uile"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:573
 msgid "Marks all Items as Selected"
-msgstr "Cuireann sé comhartha ar na Nithe Uile mar Roghnaithe"
+msgstr "Cuireann sé comhartha ar na Mhíreanna Uile mar Roghnaithe"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:591
 msgid "Deselect All"
@@ -849,7 +846,7 @@ msgstr "Díroghnaigh Uile"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:593
 msgid "Deselects all Items in the List"
-msgstr "Díroghnaíonn sé na Nithe Uile sa Réim"
+msgstr "Díroghnaíonn sé na Mhíreanna Uile sa Réim"
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
@@ -1040,16 +1037,16 @@ msgstr "E&allóg"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
 msgid "Lo&gging"
-msgstr "Ag Taifead"
+msgstr "Ag Tai&fead"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 msgid "&Browser"
-msgstr ""
+msgstr "&Líonléitheoir"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
 #, java-format
 msgid "Display the {0} Screen"
-msgstr "Taispeáin an scáileán {0}"
+msgstr "Taispeáin an Scáileán {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:227
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -1295,7 +1292,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:457
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:583
 msgid "LimeWire is currently locating the details of this license."
-msgstr ""
+msgstr "Tá LimeWire ag aimsiú sonraí an ceadúnas seo faoi láthair."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:462
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:588
@@ -1306,7 +1303,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:467
 msgid "Creative Commons Details"
-msgstr ""
+msgstr "Sonraí Coiteann Cruthaíodh"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:485
 msgid "LimeWire was unable to locate the details of this Weed file."
@@ -1337,7 +1334,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:525
 msgid "Weedshare Details"
-msgstr ""
+msgstr "Sonraí Weedshare"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:553
 msgid "This file may require a license in order to open and view."
@@ -1413,6 +1410,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:18
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
 msgstr ""
+"Naisc Magnet do Íosluchtaithe Tapúla (má tá LimeWire suiteáilte agat)"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:63
 msgid "Loading Messages..."
@@ -1524,11 +1522,11 @@ msgstr "Cuir Isteach Mír don Réim Nua"
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:364
 msgid "Remove Selected Item"
-msgstr "Bain an Ní Roghnaithe"
+msgstr "Bain an Mhír Roghnaithe"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:132
 msgid "Loading Status Window..."
-msgstr ""
+msgstr "Ag Luchtú Fuinneog an Treo..."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:486
 msgid "LimeWire has not detected a firewall"
@@ -1540,15 +1538,15 @@ msgstr "Bhraith LimeWire balla dóiteáin"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:499
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Níl tú nasctha le Díolbhoth LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:502
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Tá tú nasctha le Díolbhoth LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:594
 msgid "Connection"
-msgstr "Ceangailt"
+msgstr "Nasc"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:597
 msgid "Disconnected"
@@ -1559,6 +1557,7 @@ msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
 msgstr ""
+"Tá tú dínasctha ón líonra. Chun nascadh, roghnaigh Nasc ón roghchlár Comhad."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:601
 msgid "Starting"
@@ -1587,7 +1586,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:613
 msgid "Good"
-msgstr "Maith"
+msgstr "Go Maith"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:614
 msgid ""
@@ -1681,7 +1680,7 @@ msgstr "Uasluchtaithe:"
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:53
 msgid "Tip of the Day"
-msgstr "Nod an Lae"
+msgstr "Leid an Lae"
 
 #. *
 #. * The 'Did You Know' intro.
@@ -1699,18 +1698,18 @@ msgstr "Taispeáin Lodanna Ag An Tosú"
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:69
 msgid "Next Tip"
-msgstr "An Chéad Nod Eile"
+msgstr "An Chéad Leid Eile"
 
 #. *
 #. * 'Previous'.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:74
 msgid "Previous Tip"
-msgstr "An Nod Roimhe"
+msgstr "An Leid Roimhe"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:331
 msgid "Loading tips..."
-msgstr "Ag luchtú na nodanna..."
+msgstr "Ag luchtú leideanna..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:7
 msgid ""

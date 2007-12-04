@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n == 2 ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -177,42 +177,6 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "إغلاق النافذة"
 
-#~ msgid "Statistics"
-#~ msgstr "إحصائيات"
-
-#~ msgid "&New Folder"
-#~ msgstr "مجلد جديد"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "أضف مجلد إلى مجلد المكتبة المحدد"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "أوقف مشاركة مجلد المكتبة المحدد"
-
-#~ msgid "&Rename Folder"
-#~ msgstr "إعادة تسمية المجلد"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "تنفيذ ملف(s)"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "تنفيذ الملف المحدد(s)"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "حذف ملف(s)"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "حذف الملف المحدد(s)"
-
-#~ msgid "Refre&sh"
-#~ msgstr "تحديث"
-
-#~ msgid "E&xplore"
-#~ msgstr "استكشاف"
-
-#~ msgid "X"
-#~ msgstr "X"
-
 #~ msgid "V"
 #~ msgstr "V"
 
@@ -231,23 +195,23 @@ msgstr ""
 #~ msgid "U"
 #~ msgstr "U"
 
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "أضف مجلد إلى مجلد المكتبة المحدد"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "أوقف مشاركة مجلد المكتبة المحدد"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "تنفيذ ملف(s)"
+
+#~ msgid "X"
+#~ msgstr "X"
+
 #~ msgid "Results"
 #~ msgstr "النتائج"
 
 #~ msgid "Files"
 #~ msgstr "ملفات"
-
-#~ msgid "files"
-#~ msgstr "ملفات"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "ملفات (تحميل...)"
-
-#~ msgid "You are sharing"
-#~ msgstr "عدد الملفات التي تشاركها."
-
-#~ msgid "Waiting For Tracker"
-#~ msgstr "انتظار المقتفي"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "الاستعادة فشلت"
@@ -258,29 +222,26 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s للمصادر"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Busy"
+#~ msgstr "مشغول"
+
+#~ msgid "files"
+#~ msgstr "ملفات"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "ملفات (تحميل...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "ملفات بهذا الاسم"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "البحث عن ملفات بنفس اسم الملف"
 
-#~ msgid "Orginal query"
-#~ msgstr "استعلام جديد"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr "إجراء البحث المشابه كبحث واحد الذي وجد الملف سابقاً."
-
-#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr "للآسف, ولكن LimeWire غير قادر على إعادة تشغيل التورنت القديمة."
-
-#~ msgid ". No line is available for output."
-#~ msgstr "لا يوجد خط متاح للإخراج."
-
-#~ msgid "Height:"
-#~ msgstr "الارتفاع:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "من فضلك اضغط موافق دائماً للإزالة الرخصة."
 
 #~ msgid "End Chat"
 #~ msgstr "إنهاء الدردشة"
@@ -288,14 +249,644 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "إيقاف الدردشة مع المضيف"
 
-#~ msgid "Loading Resources..."
-#~ msgstr "يتم الآن تحميل الموارد..."
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "يتم الآن تحميل نافذة الإحصائيات..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "لم يتم إيجاد منفذ لاستخدامه في الاتصالات الواردة.\n"
+#~ " من فضلك اختر منفذاً آخر من نافذة الإجراء."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast Pings المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire "
+#~ "الآخرين."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Muticast Pongs المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire "
+#~ "الآخرين."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "استعلامات Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي "
+#~ "LimeWire الآخرين."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "نتائج استعلام Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي "
+#~ "LimeWire الآخرين."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "دفعات Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire "
+#~ "الآخرين."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "كيلوبايتات ال Multicast pings المستقبلة من جميع مستخدمي Gnutella مقارنة "
+#~ "بمستخدمي LimeWire الآخرين."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "كيلوبايتات ال Multicast pongs المستقبلة من جميع مستخدمي Gnutella مقارنة "
+#~ "بمستخدمي LimeWire الآخرين."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "كيلوبايتات استعلام Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة "
+#~ "بمستخدمي LimeWire الآخرين."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "كيلوبايتات نتائج استعلام Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة "
+#~ "بمستخدمي LimeWire الآخرين."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "كيلوبايتات دفعات Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة "
+#~ "بمستخدمي LimeWire الآخرين."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "أخطاء"
+
+#~ msgid "Query Replies"
+#~ msgstr "ردود الاستعلام"
+
+#~ msgid "Ping Replies"
+#~ msgstr "ردود Ping"
+
+#~ msgid "Compression"
+#~ msgstr "الضغط"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "أخطاء تحديد مسار النتائج"
+
+#~ msgid "Requests"
+#~ msgstr "طلبات"
+
+#~ msgid "Request Methods"
+#~ msgstr "طرق الطلب"
+
+#~ msgid "seconds"
+#~ msgstr "ثوان"
+
+#~ msgid "Average"
+#~ msgstr "المتوسط"
+
+#~ msgid "Max"
+#~ msgstr "أقصى قيمة"
+
+#~ msgid "Total Upstream"
+#~ msgstr "البيانات الكلية الصادرة"
+
+#~ msgid "Total Downstream"
+#~ msgstr "البيانات الكلية الواردة"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP الكلي"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "HTTP ترويسة"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Gnutella الكلي"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Gnutella ترويسة"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "رسائل Gnutella"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "البيانات الكلية الصادرة(مقترح)"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "البيانات الكلية الصادرة(حقيقي)"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "البيانات الكلية الواردة(مقترح)"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "البيانات الكلية الواردة(حقيقي)"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (مقترح)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP (حقيقي)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (مقترح)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (حقيقي)"
+
+#~ msgid "All Clients"
+#~ msgstr "جميع المستخدمين"
+
+#~ msgid "All Messages"
+#~ msgstr "جميع الرسائل"
+
+#~ msgid "Hops 1"
+#~ msgstr "قفزات 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "قفزات 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "قفزات 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "قفزات 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "قفزات 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "قفزات 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "قفزات 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "قفزات 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "قفزات 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "أخطاء ال Pong"
+
+#~ msgid "Reply Errors"
+#~ msgstr "أخطاء الرد"
+
+#~ msgid "Push Errors"
+#~ msgstr "أخطاء الدفع"
+
+#~ msgid "No Route"
+#~ msgstr "لا يوجد مسار"
+
+#~ msgid "All Requests"
+#~ msgstr "جميع الطلبات"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "HEAD طلبات"
+
+#~ msgid "GET Requests"
+#~ msgstr "GET طلبات"
+
+#~ msgid "Push Requests"
+#~ msgstr "طلبات الدفع"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "طلبات Gnutella"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "طلبات Gnutella (LimeWire)"
+
+#~ msgid "Accepted"
+#~ msgstr "تم القبول"
+
+#~ msgid "IO Error"
+#~ msgstr "خطأ (إدخال إخراج)"
+
+#~ msgid "URN Get"
+#~ msgstr "URN GET"
+
+#~ msgid "Normal"
+#~ msgstr "عادي"
+
+#~ msgid "Get"
+#~ msgstr "GET"
+
+#~ msgid "Head"
+#~ msgstr "HEAD"
+
+#~ msgid "Pushed Head"
+#~ msgstr "دفع HEAD"
+
+#~ msgid "Orginal query"
+#~ msgstr "استعلام جديد"
 
 #~ msgid "Loading Settings..."
 #~ msgstr "يتم الآن تحميل الخصائص..."
 
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "يتم الآن تحميل نافذة الإحصائيات..."
+#~ msgid "Network"
+#~ msgstr "الشبكة"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "جميع الاستعلامات التي تم استقبالها بالكيلو بايت، حسب القفزات."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "جميع الاستعلامات التي تم استقبالها بالكيلو بايت، حسب زمن الرحيل (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "جميع نتائج الاستعلام التي تم استقبالها بالكيلو بايت، حسب القفزات."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "جميع تائج الاستعلام التي تم استقبالها بالكيلو بايت، حسب زمن الرحيل (TTL)."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "الحجم المتوسط لرسائل Gnutella المستقبلة بالكيلو بايت."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "الحجم المتوسط لرسائل مستخدمي LimeWire المستقبلة بالكيلو بايت."
+
+#~ msgid "Current"
+#~ msgstr "الحالي"
+
+#~ msgid ". No line is available for output."
+#~ msgstr "لا يوجد خط متاح للإخراج."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "جميع الاستعلامات المستقبلة، حسب القفزات."
+
+#~ msgid "Special Queries"
+#~ msgstr "استعلامات مخصصة"
+
+#~ msgid "False Positive"
+#~ msgstr "نتائج تقريبية"
+
+#~ msgid "Generic Errors"
+#~ msgstr "أخطاء متنوعة"
+
+#~ msgid "Handshaking"
+#~ msgstr "تعارف"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "إحصائيات التعارف كند فائق"
+
+#~ msgid "Flow Control"
+#~ msgstr "معدل التدفق"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "إحصائيات معدل تدفق الرسائل."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "العدد الكلى للرسائل المنقاه"
+
+#~ msgid "Transfers"
+#~ msgstr "تحويلات"
+
+#~ msgid "Color"
+#~ msgstr "اللون"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "قم بكتابة إحصائيات هذا الشكل للملفات."
+
+#~ msgid "All Errors"
+#~ msgstr "جميع الأخطاء"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "طول الحمولة غير صحيح"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "قفزات غير صالحة"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "زمن الرحيل غير صالح"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "القفزات > الحد الأدنى"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(القفزات + زمن الرحيل TTL) > الحد الأقصى"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "كود رسالة غير صحيح"
+
+#~ msgid "All Query Errors"
+#~ msgstr "جميع أخطاء الاستعلام"
+
+#~ msgid "URN Query"
+#~ msgstr "طلب URN"
+
+#~ msgid "Query Too Large"
+#~ msgstr "استعلام كبير جدا"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "استعلام XML كبير جدا"
+
+#~ msgid "Empty Query"
+#~ msgstr "استعلام خالي"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "حروف غير مسموحة في الطلب"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "جميع أخطاء رد الاستعلام"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "منفذ الرد غير صالح"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "عنوان الرد غير صالح"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "سرعة الرد غير صالحة"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "جميع أخطاء رد ال Ping"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "حمولة رد Ping غير صالحة"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "منفذ رد ال Ping غير صالح"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "عنوان رد ال Ping غير صالح"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "وحدة GGEP غير صحيحة"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "طول الموزع غير صحيح"
+
+#~ msgid "All Push Errors"
+#~ msgstr "جميع أخطاء الدفع"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "منفذ الدفع غير صالح"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "عنوان الدفع غير صالح"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "حمولة دفع غير صالحة"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "جميع أخطاء رسالة الموزع"
+
+#~ msgid "Invalid ID"
+#~ msgstr "مميز غير صالح"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "مخير غير صحيح"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "حمولة غير صالحة"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "رسالة موزع غير متعارف عليها"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "جزء من جدول تحديد المسار"
+
+#~ msgid "What's New?"
+#~ msgstr "مجتمع?"
+
+#~ msgid "Hard Limit"
+#~ msgstr "الحد الأقصى"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "الحد الأقصى (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "الحد الأقصى (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "الحد الأقصى (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "الحد الأقصى (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "الحد الأقصى (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "الحد الأقصى (TTL 5+)"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "محاولات الاتصال."
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "المحاولات الواردة"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "طلبات غير معلومة"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "مضيفون ممنوعون"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "أغلق في الحال"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "مشكلة في قراءة الترويسة"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "كود رد غير معروف"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "محتويات URN غير متوافقة"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "قيم المدى غير متوافقة"
+
+#~ msgid "Failed"
+#~ msgstr "فشل"
+
+#~ msgid "Succeeded"
+#~ msgstr "تم بنجاح"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "نجاح HTTP/1.1"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "نجاح HTTP/1.0"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "فشل HTTP/1.1"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "فشل HTTP/1.0"
+
+#~ msgid "Retried Success"
+#~ msgstr "نجاح إعادة المحاولة"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "اتصال مباشر ناجح"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "اتصال دفع ناجح"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "فشل الدفع (انقطع)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "فشل الدفع ( لم يتم استقبال GIV)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "فشل الدفع (اتصال مفقود)"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "نجاح دفع الوكيل"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "دفع الوكيل غير صالح"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "فشل دفع الوكيل"
+
+#~ msgid "Push Proxy"
+#~ msgstr "دفع الوكيل"
+
+#~ msgid "Traditional Get"
+#~ msgstr "تقليدي GET"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "غير معروف URN GET"
+
+#~ msgid "Limit Reached"
+#~ msgstr "تم الوصول للحد المسموح"
+
+#~ msgid "Banned Client"
+#~ msgstr "مستخدم ممنوع"
+
+#~ msgid "Unknown"
+#~ msgstr "غير معروف"
+
+#~ msgid "Pushed Get"
+#~ msgstr "دفع GET"
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "دفع غير معلوم"
+
+#~ msgid "Push Failed"
+#~ msgstr "فشل الدفع"
+
+#~ msgid "Completed Responses"
+#~ msgstr "الردود التامة"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "الملفات التي تم تحويلها"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "رفض صادر. (طرف)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "رفض صادر.(ند فائق قديم)"
+
+#~ msgid "Out Acc."
+#~ msgstr "قبول صادر"
+
+#~ msgid "In Rej."
+#~ msgstr "رفض"
+
+#~ msgid "In Acc."
+#~ msgstr "قبول"
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "رفض صادر (ممتلئ)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "قبول صادر (تم تتبع التوجيه)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "قبول صادر (تم تجاهل التوجيه)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "قبول صادر (لا يوجد توجيه)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "رفض. (طرف)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "قبول. (طرف)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "قبول. (موجه إلى طرف)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "قبول. (ند فائق)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "رفض وارد (تم أخذ جميع الشرائح)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "رفض. (تحتاج الشبكة إلى ند فائق)"
+
+#~ msgid "No Conclusion"
+#~ msgstr "لا يوجد استنتاج"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "أنداد LimeWire الفائقون"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "LimeWire طرفيات"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "الأنداد الفائقون الآخرون"
+
+#~ msgid "Other Leaves"
+#~ msgstr "الطرفيات الأخرى"
+
+#~ msgid "Responses Requested"
+#~ msgstr "الردود المطلوبة"
+
+#~ msgid "Responses Received"
+#~ msgstr "الردود المستقبلة"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "الردود المارة"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "معدل نجاح البحث خارج النطاق"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr "ساعد على دعم مشاركة محتويات الوسائط المستقلة"
@@ -310,61 +901,8 @@ msgstr ""
 #~ "LimeWire من الوصول للإنترنت. من فضلك تأكد من خصائص الاتصال أو الجدار الناري "
 #~ "واختر \"اتصال\" من قائمة ملف لإتصال LimeWire بالشبكة."
 
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "لم يتم إيجاد منفذ لاستخدامه في الاتصالات الواردة.\n"
-#~ " من فضلك اختر منفذاً آخر من نافذة الإجراء."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr "من فضلك ادخل عنولن الملف الذي تريد نشره."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr "من فضلك ادخل سنة الملف الذي تريد نشره."
-
-#~ msgid "Please enter the copyright holder of the file you want to publish."
-#~ msgstr "من فضلك ادخل مالك حقوق النسخ للملف الذي تريد نشره."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "من فضلك ادخل صفحة التأكيد الصالحة للرخصة."
-
-#~ msgid ""
-#~ "LimeWire was unable to download the torrent file from the specified URL:"
-#~ msgstr "LimeWire غير قادر على تنزيل ملف التورنت من الموقع المحدد:"
-
-#~ msgid "Check these associations when starting LimeWire:"
-#~ msgstr "افحص تلك الملحقات عند بدء LimeWire:"
-
-#~ msgid "Display:"
-#~ msgstr "العرض:"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "إحصائيات سرعة النقل تتضمن معلومات كاملة حول جميع سرعات النقل للبيانات "
-#~ "الصادرة والواردة. انقر فوق أحد الفئات لترى الإحصائيات المطلوبة."
-
-#~ msgid "Network"
-#~ msgstr "الشبكة"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "إحصائيات الحالة الحالية للشبكة. هذه الإحصائيات ليست دقيقة بدرجة كافية نتيجة "
-#~ "طبيعة LimeWire الديناميكية الموزعة.على الرغم من ذلك يمكن أن تعطيك فكرة عامة "
-#~ "عن الحالة الحالية لاتصالك."
-
 #~ msgid "Show Advanced Statistics:"
 #~ msgstr "عرض الإحصائيات المتقدمة:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
 
 #~ msgid ""
 #~ "Total bandwidth used to send outgoing data, either through uploads or "
@@ -379,6 +917,41 @@ msgstr ""
 #~ msgstr ""
 #~ "سرعة النقل الكلية المستخدمة لاستقبال البيانات الواردة، إما من خلال التنزيلات "
 #~ "أو رسائل Gnutella."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "عدد الاستعلامات المكررة التي تم استقبالها عبر Multicast مقارنة بعدد "
+#~ "الاستعلامات الكلي."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "عدد الكيلوبايتات الكلي في الاستعلامات المكررة والتي تم استقبالها عبر "
+#~ "Multicast مقارنة بالعدد الكلي للاستعلامات."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr "جميع رسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة."
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "إحصائيات سرعة النقل تتضمن معلومات كاملة حول جميع سرعات النقل للبيانات "
+#~ "الصادرة والواردة. انقر فوق أحد الفئات لترى الإحصائيات المطلوبة."
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "إحصائيات الحالة الحالية للشبكة. هذه الإحصائيات ليست دقيقة بدرجة كافية نتيجة "
+#~ "طبيعة LimeWire الديناميكية الموزعة.على الرغم من ذلك يمكن أن تعطيك فكرة عامة "
+#~ "عن الحالة الحالية لاتصالك."
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "جميع رسائل Gnutella التي أرسلها هذا المسخدم."
@@ -402,21 +975,8 @@ msgstr ""
 #~ "عدد الاستعلامات المكررة التي تم استقبالها عبر TCP مقارنة بعدد الاستعلامات "
 #~ "الكلي."
 
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "عدد الاستعلامات المكررة التي تم استقبالها عبر Multicast مقارنة بعدد "
-#~ "الاستعلامات الكلي."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "جميع الاستعلامات المستقبلة، حسب القفزات."
-
 #~ msgid "All received queries, by time to live (TTL)."
 #~ msgstr "جميع الاستعلامات المستقبلة، حسب زمن الرحيل (TTL)."
-
-#~ msgid "Special Queries"
-#~ msgstr "استعلامات مخصصة"
 
 #~ msgid "All received query hits, by hops."
 #~ msgstr "جميع رسائل الاستعلام التي تم استقبالها، حسب القفزات."
@@ -457,27 +1017,6 @@ msgstr ""
 #~ "عدد الكيلوبايتات الكلي في الاستعلامات المكررة والتي تم استقبالها عبر TCP "
 #~ "مقارنة بالعدد الكلي للاستعلامات."
 
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "عدد الكيلوبايتات الكلي في الاستعلامات المكررة والتي تم استقبالها عبر "
-#~ "Multicast مقارنة بالعدد الكلي للاستعلامات."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "جميع الاستعلامات التي تم استقبالها بالكيلو بايت، حسب القفزات."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr ""
-#~ "جميع الاستعلامات التي تم استقبالها بالكيلو بايت، حسب زمن الرحيل (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "جميع نتائج الاستعلام التي تم استقبالها بالكيلو بايت، حسب القفزات."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr ""
-#~ "جميع تائج الاستعلام التي تم استقبالها بالكيلو بايت، حسب زمن الرحيل (TTL)."
-
 #~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "UDP Pings المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire "
@@ -503,37 +1042,6 @@ msgstr ""
 #~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "دفعاتUDP المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast Pings المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire "
-#~ "الآخرين."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Muticast Pongs المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire "
-#~ "الآخرين."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "استعلامات Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي "
-#~ "LimeWire الآخرين."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "نتائج استعلام Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي "
-#~ "LimeWire الآخرين."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "دفعات Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire "
-#~ "الآخرين."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
@@ -571,50 +1079,6 @@ msgstr ""
 #~ "LimeWire الآخرين."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "كيلوبايتات ال Multicast pings المستقبلة من جميع مستخدمي Gnutella مقارنة "
-#~ "بمستخدمي LimeWire الآخرين."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "كيلوبايتات ال Multicast pongs المستقبلة من جميع مستخدمي Gnutella مقارنة "
-#~ "بمستخدمي LimeWire الآخرين."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "كيلوبايتات استعلام Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة "
-#~ "بمستخدمي LimeWire الآخرين."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "كيلوبايتات نتائج استعلام Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة "
-#~ "بمستخدمي LimeWire الآخرين."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "كيلوبايتات دفعات Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة "
-#~ "بمستخدمي LimeWire الآخرين."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "الحجم المتوسط لرسائل Gnutella المستقبلة بالكيلو بايت."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "الحجم المتوسط لرسائل مستخدمي LimeWire المستقبلة بالكيلو بايت."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
 #~ msgstr ""
@@ -631,38 +1095,20 @@ msgstr ""
 #~ msgid "Hit"
 #~ msgstr "نتيجة الاستعلام"
 
-#~ msgid "False Positive"
-#~ msgstr "نتائج تقريبية"
-
-#~ msgid "Errors"
-#~ msgstr "أخطاء"
-
-#~ msgid "Generic Errors"
-#~ msgstr "أخطاء متنوعة"
-
 #~ msgid "Generic errors while reading messages."
 #~ msgstr "حدثت مجموعة من الأخطاء المتنوعة أتناء قراءة الرسائل."
 
 #~ msgid "Errors while reading query messages."
 #~ msgstr "أخطاء أثناء قراءة رسائل الاستعلام."
 
-#~ msgid "Query Replies"
-#~ msgstr "ردود الاستعلام"
-
 #~ msgid "Errors while reading query reply messages."
 #~ msgstr "أخطاء أثناء قراءة رسائل ردود الاستعلام."
-
-#~ msgid "Ping Replies"
-#~ msgstr "ردود Ping"
 
 #~ msgid "Errors while reading ping replies."
 #~ msgstr "أخطاء أثناء قراءة ردود Ping."
 
 #~ msgid "Errors while reading pushes."
 #~ msgstr "أخطاء أثناء قراءة الدفعات."
-
-#~ msgid "Vendor Messages"
-#~ msgstr "رسائل الموزع"
 
 #~ msgid "Errors while reading vendor messages."
 #~ msgstr "أخطاء أثناء قراءة رسائل الموزع."
@@ -675,9 +1121,6 @@ msgstr ""
 
 #~ msgid "All Gnutella messages sent over UDP, by message type."
 #~ msgstr "جميع رسائل Gnutella المرسلة عبر UDP حسب نوع الرسالة."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr "جميع رسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة."
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr "العدد الكلي لرسائل Gnutella المرسلة عبر TCP, UDP أو Multicast."
@@ -829,14 +1272,8 @@ msgstr ""
 #~ "كيلوبايتات دفعات Multicast المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي "
 #~ "LimeWire الآخرين."
 
-#~ msgid "Handshaking"
-#~ msgstr "تعارف"
-
 #~ msgid "Statistics for handshaking as a leaf."
 #~ msgstr "إحصائيات التعارف كطرف"
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "إحصائيات التعارف كند فائق"
 
 #~ msgid "Statistics for outgoing Gnutella connection handshaking."
 #~ msgstr "إحصائيات اتصال Gnutella الصادر للتعارف"
@@ -852,20 +1289,11 @@ msgstr ""
 #~ "server."
 #~ msgstr "إحصائيات اتصال Gnutella الصادر للتعارف والتي رفضها الملقم"
 
-#~ msgid "Compression"
-#~ msgstr "الضغط"
-
 #~ msgid "Statistics for compressed upstream traffic in kilobytes."
 #~ msgstr "إحصائيات تسيير البيانات المضغوطة الصادرة بالكيلو بايت."
 
 #~ msgid "Statistics for compressed downstream traffic in kilobytes."
 #~ msgstr "إحصائيات تسيير البيانات المضغوطة الواردة بالكيلو بايت."
-
-#~ msgid "Flow Control"
-#~ msgstr "معدل التدفق"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "إحصائيات معدل تدفق الرسائل."
 
 #~ msgid "Statistics for flow controlled messages in kilobytes."
 #~ msgstr "إحصائيات معدل تدفق الرسائل بالكيلو بايت."
@@ -873,14 +1301,8 @@ msgstr ""
 #~ msgid "Total number of errors routing messages to other clients."
 #~ msgstr "العدد الكلي لأخطاء تحديد مسار الرسائل للمستخدمين الآخرين."
 
-#~ msgid "Hit Routing Errors"
-#~ msgstr "أخطاء تحديد مسار النتائج"
-
 #~ msgid "Errors routing query hits."
 #~ msgstr "أخطاء في تحديد مسار نتائج الاستعلام"
-
-#~ msgid "Total messages filtered."
-#~ msgstr "العدد الكلى للرسائل المنقاه"
 
 #~ msgid ""
 #~ "Total number of Gnutella connection attempts, either initiated internally or "
@@ -909,9 +1331,6 @@ msgstr ""
 #~ "مشغول، الملف غير موجود، غير مشارك، في قائمة الانتظار، رسائل أخطاء الإدخال "
 #~ "والإخراج المتنوعة وردود الموافقة."
 
-#~ msgid "Alt. Locations"
-#~ msgstr "المواقع البديلة"
-
 #~ msgid ""
 #~ "Total alternate locations received and removed over time. This includes "
 #~ "locations that we actively attempt to connect to, locations that we will "
@@ -922,9 +1341,6 @@ msgstr ""
 #~ "ذلك المواقع التي تتم محاولة الاتصال بها، المواقع التي تم سيتم تجاهلها، "
 #~ "المواقع التي لم يتم التمكن من إزالتها والمواقع التي تم إزالتها مؤقتا من "
 #~ "محاولة الاتصال بها."
-
-#~ msgid "Transfers"
-#~ msgstr "تحويلات"
 
 #~ msgid ""
 #~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
@@ -940,431 +1356,11 @@ msgstr ""
 #~ "يسجل الوقت بالمللي ثانية لإنشاء اتصال TCP للتنزيلات. يمكن أن يتغير ذلك، على "
 #~ "سبيل المثال، عندما يتعرض الملقم لما يفوق تحمله."
 
-#~ msgid "Requests"
-#~ msgstr "طلبات"
-
-#~ msgid "Request Methods"
-#~ msgstr "طرق الطلب"
-
 #~ msgid "General"
 #~ msgstr "عام"
 
-#~ msgid "seconds"
-#~ msgstr "ثوان"
-
-#~ msgid "Average"
-#~ msgstr "المتوسط"
-
-#~ msgid "Max"
-#~ msgstr "أقصى قيمة"
-
-#~ msgid "Color"
-#~ msgstr "اللون"
-
-#~ msgid "Current"
-#~ msgstr "الحالي"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "قم بكتابة إحصائيات هذا الشكل للملفات."
-
-#~ msgid "Total Upstream"
-#~ msgstr "البيانات الكلية الصادرة"
-
-#~ msgid "Total Downstream"
-#~ msgstr "البيانات الكلية الواردة"
-
-#~ msgid "HTTP Total"
-#~ msgstr "HTTP الكلي"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "HTTP ترويسة"
-
-#~ msgid "HTTP Content"
-#~ msgstr "HTTP محتوى"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Gnutella الكلي"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "Gnutella ترويسة"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "رسائل Gnutella"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "البيانات الكلية الصادرة(مقترح)"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "البيانات الكلية الصادرة(حقيقي)"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "البيانات الكلية الواردة(مقترح)"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "البيانات الكلية الواردة(حقيقي)"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (مقترح)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP (حقيقي)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (مقترح)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (حقيقي)"
-
-#~ msgid "All Clients"
-#~ msgstr "جميع المستخدمين"
-
-#~ msgid "All Errors"
-#~ msgstr "جميع الأخطاء"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "طول الحمولة غير صحيح"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "قفزات غير صالحة"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "زمن الرحيل غير صالح"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "القفزات > الحد الأدنى"
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(القفزات + زمن الرحيل TTL) > الحد الأقصى"
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "كود رسالة غير صحيح"
-
-#~ msgid "All Query Errors"
-#~ msgstr "جميع أخطاء الاستعلام"
-
-#~ msgid "URN Query"
-#~ msgstr "طلب URN"
-
-#~ msgid "Query Too Large"
-#~ msgstr "استعلام كبير جدا"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "استعلام XML كبير جدا"
-
-#~ msgid "Empty Query"
-#~ msgstr "استعلام خالي"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "حروف غير مسموحة في الطلب"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "جميع أخطاء رد الاستعلام"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "منفذ الرد غير صالح"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "عنوان الرد غير صالح"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "سرعة الرد غير صالحة"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "جميع أخطاء رد ال Ping"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "حمولة رد Ping غير صالحة"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "منفذ رد ال Ping غير صالح"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "عنوان رد ال Ping غير صالح"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "وحدة GGEP غير صحيحة"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "طول الموزع غير صحيح"
-
-#~ msgid "All Push Errors"
-#~ msgstr "جميع أخطاء الدفع"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "منفذ الدفع غير صالح"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "عنوان الدفع غير صالح"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "حمولة دفع غير صالحة"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "جميع أخطاء رسالة الموزع"
-
-#~ msgid "Invalid ID"
-#~ msgstr "مميز غير صالح"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "مخير غير صحيح"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "حمولة غير صالحة"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "رسالة موزع غير متعارف عليها"
-
-#~ msgid "All Messages"
-#~ msgstr "جميع الرسائل"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "جزء من جدول تحديد المسار"
-
-#~ msgid "Hops 1"
-#~ msgstr "قفزات 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "قفزات 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "قفزات 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "قفزات 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "قفزات 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "قفزات 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "قفزات 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "قفزات 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "قفزات 9"
-
-#~ msgid "What's New?"
-#~ msgstr "مجتمع?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "أخطاء ال Pong"
-
-#~ msgid "Reply Errors"
-#~ msgstr "أخطاء الرد"
-
-#~ msgid "Push Errors"
-#~ msgstr "أخطاء الدفع"
-
-#~ msgid "Hard Limit"
-#~ msgstr "الحد الأقصى"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "الحد الأقصى (TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "الحد الأقصى (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "الحد الأقصى (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "الحد الأقصى (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "الحد الأقصى (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "الحد الأقصى (TTL 5+)"
-
-#~ msgid "No Route"
-#~ msgstr "لا يوجد مسار"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "محاولات الاتصال."
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "المحاولات الواردة"
-
-#~ msgid "All Requests"
-#~ msgstr "جميع الطلبات"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "HEAD طلبات"
-
-#~ msgid "GET Requests"
-#~ msgstr "GET طلبات"
-
-#~ msgid "Push Requests"
-#~ msgstr "طلبات الدفع"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "طلبات Gnutella"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "طلبات Gnutella (LimeWire)"
-
-#~ msgid "Chat Requests"
-#~ msgstr "طلبات دردشة"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "طلبات غير معلومة"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "مضيفون ممنوعون"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "أغلق في الحال"
-
-#~ msgid "Accepted"
-#~ msgstr "تم القبول"
-
-#~ msgid "Busy"
-#~ msgstr "مشغول"
-
 #~ msgid "Not Sharing Files"
 #~ msgstr "ملفات غير مشاركة"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "مشكلة في قراءة الترويسة"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "كود رد غير معروف"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "محتويات URN غير متوافقة"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "قيم المدى غير متوافقة"
-
-#~ msgid "IO Error"
-#~ msgstr "خطأ (إدخال إخراج)"
-
-#~ msgid "Failed"
-#~ msgstr "فشل"
-
-#~ msgid "Succeeded"
-#~ msgstr "تم بنجاح"
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "نجاح HTTP/1.1"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "نجاح HTTP/1.0"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "فشل HTTP/1.1"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "فشل HTTP/1.0"
-
-#~ msgid "Retried Success"
-#~ msgstr "نجاح إعادة المحاولة"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "اتصال مباشر ناجح"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "اتصال دفع ناجح"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "فشل الدفع (انقطع)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "فشل الدفع ( لم يتم استقبال GIV)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "فشل الدفع (اتصال مفقود)"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "نجاح دفع الوكيل"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "دفع الوكيل غير صالح"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "فشل دفع الوكيل"
-
-#~ msgid "Push Proxy"
-#~ msgstr "دفع الوكيل"
-
-#~ msgid "Update File"
-#~ msgstr "تحديث الملف"
-
-#~ msgid "Traditional Get"
-#~ msgstr "تقليدي GET"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "غير معروف URN GET"
-
-#~ msgid "URN Get"
-#~ msgstr "URN GET"
-
-#~ msgid "Limit Reached"
-#~ msgstr "تم الوصول للحد المسموح"
-
-#~ msgid "Banned Client"
-#~ msgstr "مستخدم ممنوع"
-
-#~ msgid "Normal"
-#~ msgstr "عادي"
-
-#~ msgid "Get"
-#~ msgstr "GET"
-
-#~ msgid "Head"
-#~ msgstr "HEAD"
-
-#~ msgid "Unknown"
-#~ msgstr "غير معروف"
-
-#~ msgid "Pushed Get"
-#~ msgstr "دفع GET"
-
-#~ msgid "Pushed Head"
-#~ msgstr "دفع HEAD"
-
-#~ msgid "Pushed Unknown"
-#~ msgstr "دفع غير معلوم"
-
-#~ msgid "Push Failed"
-#~ msgstr "فشل الدفع"
-
-#~ msgid "Completed Responses"
-#~ msgstr "الردود التامة"
 
 #~ msgid "Interrupted"
 #~ msgstr "انقطع"
@@ -1372,83 +1368,87 @@ msgstr ""
 #~ msgid "Stalled"
 #~ msgstr "توقف"
 
-#~ msgid "Completed File Transfers"
-#~ msgstr "الملفات التي تم تحويلها"
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "رفض صادر. (طرف)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "رفض صادر.(ند فائق قديم)"
-
-#~ msgid "Out Acc."
-#~ msgstr "قبول صادر"
-
-#~ msgid "In Rej."
-#~ msgstr "رفض"
-
-#~ msgid "In Acc."
-#~ msgstr "قبول"
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "رفض صادر (ممتلئ)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "قبول صادر (تم تتبع التوجيه)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "قبول صادر (تم تجاهل التوجيه)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "قبول صادر (لا يوجد توجيه)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "رفض. (طرف)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "قبول. (طرف)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "قبول. (موجه إلى طرف)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "قبول. (ند فائق)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "رفض وارد (تم أخذ جميع الشرائح)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "رفض. (تحتاج الشبكة إلى ند فائق)"
-
-#~ msgid "No Conclusion"
-#~ msgstr "لا يوجد استنتاج"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "أنداد LimeWire الفائقون"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "LimeWire طرفيات"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "الأنداد الفائقون الآخرون"
-
-#~ msgid "Other Leaves"
-#~ msgstr "الطرفيات الأخرى"
-
-#~ msgid "Responses Requested"
-#~ msgstr "الردود المطلوبة"
-
-#~ msgid "Responses Received"
-#~ msgstr "الردود المستقبلة"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "الردود المارة"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "معدل نجاح البحث خارج النطاق"
-
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr "عدد الردود المطلوبة والمستقبلة من خلال بروتوكول خارج النطاق"
+
+#~ msgid "Update File"
+#~ msgstr "تحديث الملف"
+
+#~ msgid "Statistics"
+#~ msgstr "إحصائيات"
+
+#~ msgid "Height:"
+#~ msgstr "الارتفاع:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "من فضلك اضغط موافق دائماً للإزالة الرخصة."
+
+#~ msgid "Display:"
+#~ msgstr "العرض:"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "رسائل الموزع"
+
+#~ msgid "HTTP Content"
+#~ msgstr "HTTP محتوى"
+
+#~ msgid "&New Folder"
+#~ msgstr "مجلد جديد"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "إعادة تسمية المجلد"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "تنفيذ الملف المحدد(s)"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "حذف ملف(s)"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "حذف الملف المحدد(s)"
+
+#~ msgid "Refre&sh"
+#~ msgstr "تحديث"
+
+#~ msgid "E&xplore"
+#~ msgstr "استكشاف"
+
+#~ msgid "Waiting For Tracker"
+#~ msgstr "انتظار المقتفي"
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr "للآسف, ولكن LimeWire غير قادر على إعادة تشغيل التورنت القديمة."
+
+#~ msgid "Chat Requests"
+#~ msgstr "طلبات دردشة"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "من فضلك ادخل عنولن الملف الذي تريد نشره."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "من فضلك ادخل سنة الملف الذي تريد نشره."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "من فضلك ادخل صفحة التأكيد الصالحة للرخصة."
+
+#~ msgid "You are sharing"
+#~ msgstr "عدد الملفات التي تشاركها."
+
+#~ msgid "Loading Resources..."
+#~ msgstr "يتم الآن تحميل الموارد..."
+
+#~ msgid "Please enter the copyright holder of the file you want to publish."
+#~ msgstr "من فضلك ادخل مالك حقوق النسخ للملف الذي تريد نشره."
+
+#~ msgid ""
+#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ msgstr "LimeWire غير قادر على تنزيل ملف التورنت من الموقع المحدد:"
+
+#~ msgid "Check these associations when starting LimeWire:"
+#~ msgstr "افحص تلك الملحقات عند بدء LimeWire:"
+
+#~ msgid "Alt. Locations"
+#~ msgstr "المواقع البديلة"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -1683,12 +1683,12 @@ msgstr ""
 "صحيحة."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "أنت تقوم بالفعل بتنزيل هذا الملف إلى \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "أنت تقوم بالفعل بتنزيل هذا الملف إلى \"{0}\"."
 

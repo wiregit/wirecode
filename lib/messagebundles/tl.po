@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -34,6 +34,22 @@ msgstr ""
 #~ "pag-gamit nito. Kung itutuloy ang pag-gamit, i-click ang \"Oo\" at palitan "
 #~ "ang firewall \"LimeWire.exe\" para payagang ang mga panloob at panlabas ng "
 #~ "koneksiyon. Para hindi gamitin, i-click ang \"Hindi\"."
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Mga Update"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Tapusin"
+
+#, fuzzy
+#~ msgid "Loading Languages"
+#~ msgstr "Ibahin ang &wika"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Ipagdikit"
 
 #, java-format
 #~ msgid ""
@@ -80,36 +96,6 @@ msgstr ""
 #~ msgid "Show Magnetmix Button"
 #~ msgstr "Ipakita ang Magnetmix button."
 
-#~ msgid ""
-#~ "You have made changes to some settings. Would you like to save these changes?"
-#~ msgstr ""
-#~ "Ikaw ay nagsagawa ng mga ilang pagwawasto. Nais mo bang iimpok itong mga "
-#~ "pagwawasto?"
-
-#, fuzzy
-#~ msgid ""
-#~ "You have some songs in the playlist.  Would you like to clear them and start "
-#~ "a new playlist?"
-#~ msgstr ""
-#~ "Ikaw ay nagsagawa ng mga ilang pagwawasto. Nais mo bang iimpok itong mga "
-#~ "pagwawasto?"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Mga Update"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Tapusin"
-
-#, fuzzy
-#~ msgid "Loading Languages"
-#~ msgstr "Ibahin ang &wika"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Ipagdikit"
-
 #~ msgid ". The file type is not recognized."
 #~ msgstr ". Hindi makilala ang uri ng file nito."
 
@@ -127,11 +113,28 @@ msgstr ""
 #~ msgid ". The file cannot be parsed."
 #~ msgstr ". Hindi masuri ang file."
 
+#~ msgid ""
+#~ "You have made changes to some settings. Would you like to save these changes?"
+#~ msgstr ""
+#~ "Ikaw ay nagsagawa ng mga ilang pagwawasto. Nais mo bang iimpok itong mga "
+#~ "pagwawasto?"
+
+#, fuzzy
+#~ msgid ""
+#~ "You have some songs in the playlist.  Would you like to clear them and start "
+#~ "a new playlist?"
+#~ msgstr ""
+#~ "Ikaw ay nagsagawa ng mga ilang pagwawasto. Nais mo bang iimpok itong mga "
+#~ "pagwawasto?"
+
 #~ msgid "Close the Window"
 #~ msgstr "Isara ang bintana."
 
 #~ msgid "I"
 #~ msgstr "G"
+
+#~ msgid "P"
+#~ msgstr "P"
 
 #~ msgid "N"
 #~ msgstr "N"
@@ -145,12 +148,6 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Ipakita o itago ang mga bukod na pardilya."
 
-#~ msgid "G"
-#~ msgstr "K"
-
-#~ msgid "P"
-#~ msgstr "P"
-
 #~ msgid "&Statistics"
 #~ msgstr "Mga &bilang"
 
@@ -163,6 +160,9 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "E"
 
+#~ msgid "G"
+#~ msgstr "K"
+
 #~ msgid "Results"
 #~ msgstr "Resulta"
 
@@ -172,14 +172,42 @@ msgstr ""
 #~ msgid "Recovery Failed"
 #~ msgstr "Nabigo ang pagbabalik ng nasirang file"
 
-#~ msgid ". No line is available for output."
-#~ msgstr ". Walang linya maaaring gamiting para sa panlabas."
-
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Itigil ang usapan ugnay ang isang ostiya."
 
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "Nagkakarga ng bintanang pang-bilang..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Hindi makahanap ng port na gagamitin sa mga papasok na koneksiyon.\n"
+#~ "Pumili ng isang port na mahahanap galing sa bintanang konpigurasiyon."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "seconds"
+#~ msgstr "mga segundo"
+
+#~ msgid "messages"
+#~ msgstr "mga mensahe"
+
+#~ msgid "Average"
+#~ msgstr "Karaniwang"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Walang linya maaaring gamiting para sa panlabas."
+
+#~ msgid "What's New?"
+#~ msgstr "Ang mga bago"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "Mga LimeWire ultrapeer"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "Mga LimeWire dahon"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr "Tumulong sa pakikibahagi ng mga malayang media content."
@@ -208,34 +236,6 @@ msgstr ""
 #~ "firewall para mapagana ng LimeWire ang Gnutella network o kaya makipag-usap "
 #~ "sa system administrator or ISP para malaman kung ang Gnutella ay "
 #~ "pinagmamasdan."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Hindi makahanap ng port na gagamitin sa mga papasok na koneksiyon.\n"
-#~ "Pumili ng isang port na mahahanap galing sa bintanang konpigurasiyon."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid "seconds"
-#~ msgstr "mga segundo"
-
-#~ msgid "messages"
-#~ msgstr "mga mensahe"
-
-#~ msgid "Average"
-#~ msgstr "Karaniwang"
-
-#~ msgid "What's New?"
-#~ msgstr "Ang mga bago"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "Mga LimeWire ultrapeer"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "Mga LimeWire dahon"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -3063,7 +3063,7 @@ msgid "Search for Keywords: {0}"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:46
-#, fuzzy
+#, fuzzy, java-format
 msgid "Search for: {0}"
 msgstr "Pagkakamali: {0}"
 
@@ -6981,7 +6981,7 @@ msgid "Awaiting Requests"
 msgstr "Naghihintay para sa mga source"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Pagkakamali: {0}"
 

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-24 18:06+0000\n"
+"PO-Revision-Date: 2007-11-26 19:57+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Norwegian Bokmal <nb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
@@ -32,7 +32,7 @@ msgid ""
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
 "LimeWire kunne ikke åpne en nødvendig fil fordi et annet program har låst "
-"filen. LimeWire kan oppføre seg uforutsigbart til filen blir opplåst."
+"filen. LimeWire kan oppføre seg uforutsigbart til filen blir frigjort."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:37
 msgid ""
@@ -1165,7 +1165,7 @@ msgid "More Information"
 msgstr "Mer Informasjon"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
-#, fuzzy
+#, fuzzy, java-format
 msgid "Visit {0}"
 msgstr "Besøk {0}"
 
@@ -4648,15 +4648,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:59
 msgid "Use LimeWire for..."
-msgstr ""
+msgstr "Bruk LimeWire til..."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:22
 msgid "Audio Options"
-msgstr ""
+msgstr "Lyd alternativer"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:24
 msgid "You can choose which audio player to use."
-msgstr ""
+msgstr "Du kan velge hvilken lydavspiller du vil bruke."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -4665,55 +4665,56 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:31
 msgid "Audio Player"
-msgstr ""
+msgstr "Lyd Avspiller"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:21
 msgid "Clear Downloads"
-msgstr ""
+msgstr "Rydd Nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:23
 msgid ""
 "You can choose whether or not to automatically clear downloads that have "
 "completed."
-msgstr ""
+msgstr "Du kan velge om du vil automatisk rydde nedlastinger som er ferdige."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:30
 msgid "Clear Completed Downloads:"
-msgstr ""
+msgstr "Fjern ferdig nedlastinger"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:18
 msgid "Clear Uploads"
-msgstr ""
+msgstr "Rydd Opplastinger"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:20
 msgid ""
 "You can choose whether or not to automatically clear uploads that have "
 "completed."
-msgstr ""
+msgstr "Du kan velge om du automatisk vil rydde opplastinger som er ferdige"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoClearUploadsPaneItem.java:27
 msgid "Automatically Clear Completed Uploads:"
-msgstr ""
+msgstr "Automatisk Fjern Ferdige Opplastinger:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:19
 msgid "Text Autocompletion"
-msgstr ""
+msgstr "Autofullfør tekst"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:21
 msgid "You can enable or disable autocompletion of text fields."
-msgstr ""
+msgstr "Du kan aktivére eller deaktivere autofullfør for tekstfelt"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoCompletePaneItem.java:28
+#, fuzzy
 msgid "Enable Autocompletion of Text Fields:"
-msgstr ""
+msgstr "Aktiver autofullføring av tekst felt"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:28
 msgid "Browser Options"
-msgstr ""
+msgstr "Utforsker Alternativer"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:30
 msgid "You can choose which browser to use."
-msgstr ""
+msgstr "Du kan velge hvilken utforsker du vil bruke."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -4723,11 +4724,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:37
 #: gui/com/limegroup/gnutella/gui/tabs/SWTBrowserSearchTab.java:18
 msgid "Browser"
-msgstr ""
+msgstr "Nettleser"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:42
 msgid "View Example"
-msgstr ""
+msgstr "Vis Eksempel"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:78
 msgid ""
@@ -4741,11 +4742,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:99
 msgid "Send Errors Automatically if LimeWire is Frozen"
-msgstr ""
+msgstr "Send feilmelding automatisk hvis Limewire fryser"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:20
 msgid "Host Communication"
-msgstr ""
+msgstr "Kommunikasjon med Vert"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:22
 msgid "You can turn chat on or off."
@@ -5434,53 +5435,57 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:30
 msgid "Share Finished Downloads:"
-msgstr ""
+msgstr "Del Ferdige Nedlastinger:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "Ale nedlastninger vil bli delt"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
+#, fuzzy
 msgid "Only downloads in shared folders will be shared."
-msgstr ""
+msgstr "Bare nedlastninger i delte mapper vil bli delt"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 msgid "Torrent Sharing"
-msgstr ""
+msgstr "Torrent Deling"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:17
 msgid "You can automatically share .torrent files."
-msgstr ""
+msgstr "Du kan automatisk dele .torrent filer."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:24
 msgid "Share .torrent files"
-msgstr ""
+msgstr "Del .torrent filer"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid ""
 "You can choose the folders for sharing files. Files in these folders are "
 "displayed in the library."
 msgstr ""
+"Du kan velge mappene du vil dele filer i. Disse filene blir vist i "
+"Biblioteket."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:30
 msgid "Shutdown Behavior"
-msgstr ""
+msgstr "Avslutnings Alternativer"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:32
 msgid "You can choose the default shutdown behavior."
-msgstr ""
+msgstr "Du kan velge standard avslutnings oppførsel."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:58
 msgid "Shutdown Immediately"
-msgstr ""
+msgstr "Avslutt Umiddelbart"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:59
 msgid "Shutdown after Transfers"
-msgstr ""
+msgstr "Avslutt etter Overføringer"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:60
+#, fuzzy
 msgid "Minimize to System Tray"
-msgstr ""
+msgstr "Minimer til startlinje"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
 msgid "Start Upload Slots"
@@ -5498,29 +5503,32 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensitivity"
-msgstr ""
+msgstr "Følsomhet"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
+#, fuzzy
 msgid "Adjust the sensitivity of LimeWire's junk filter"
-msgstr ""
+msgstr "Juster sensitiviteten til Limewire's søppel filter"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:41
 msgid "Forget Training Data"
-msgstr ""
+msgstr "Glem Treningsdata"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:49
 msgid "Relaxed"
-msgstr ""
+msgstr "Avslappet"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:50
 msgid "Strict"
-msgstr ""
+msgstr "Streng"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:25
+#, fuzzy
 msgid ""
 "You can specify your connection speed so that LimeWire can optimize "
 "performance."
 msgstr ""
+"Du kan spesifisere din tilkoblingshastighet så Limewire kan optimalisere den"
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -5529,54 +5537,58 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:39
 msgid "Speed:"
-msgstr ""
+msgstr "Hastighet:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:24
+#, fuzzy
 msgid ""
 "You can choose whether or not to automatically run LimeWire when your "
 "computer starts."
 msgstr ""
+"Du kan velge om Limewire skal starte automatisk når datamaskinen din starter "
+"eller ikke"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:31
 msgid "Run on System Startup:"
-msgstr ""
+msgstr "Kjør ved Oppstart:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:21
 msgid "Bandwidth Indicator"
-msgstr ""
+msgstr "Båndbredde indikator"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:23
 msgid "You can display your bandwidth consumption in the status bar."
-msgstr ""
+msgstr "Du kan vise ditt bruk av båndbredde på status linjen."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarBandwidthPaneItem.java:30
 msgid "Show Bandwidth Indicator:"
-msgstr ""
+msgstr "Vis Båndbredde Indikator:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:21
 msgid "Connection Quality Indicator"
-msgstr ""
+msgstr "Tilkoblings Kvalitet Indikator"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:23
 msgid ""
 "You can display a measurement of your connection quality in the status bar."
-msgstr ""
+msgstr "Du kan vise målingsenhet av din tilkoblingskvalitet på status linjen"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:30
 msgid "Show Connection Quality Indicator:"
-msgstr ""
+msgstr "Tilkoblings Kvalitet Indikator:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:21
+#, fuzzy
 msgid "Firewall Indicator"
-msgstr ""
+msgstr "Brannmurindikator"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:23
 msgid "You can display your firewall status in the status bar."
-msgstr ""
+msgstr "Du kan vise din Brannmurstatus på status linjen."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarFirewallPaneItem.java:30
 msgid "Show Firewall Indicator:"
-msgstr ""
+msgstr "Vis Brannmurindikator"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:21
 msgid "LimeWire Store Indicator"
@@ -5592,15 +5604,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:21
 msgid "Shared Files Indicator"
-msgstr ""
+msgstr "Indikator på Delte Filer"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:23
+#, fuzzy
 msgid "You can display how many files you are sharing in the status bar."
-msgstr ""
+msgstr "Du kan vise hvor mange filer du deler på statuslinjen"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:30
 msgid "Show Shared Files Indicator:"
-msgstr ""
+msgstr "Vis Indikator på Delte Filer:"
 
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
@@ -5629,29 +5642,31 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
 msgid "Template"
-msgstr ""
+msgstr "Mal:"
 
 #. *
 #. * Label for a drop down with options that can be added to the template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:49
 msgid "Variables"
-msgstr ""
+msgstr "Variabler"
 
 #. *
 #. * Label for predefined templates
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
 msgid "Templates"
-msgstr ""
+msgstr "Maler"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
+#, fuzzy
 msgid "Insert a Variable"
-msgstr ""
+msgstr "Sett inn en variabel"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:156
+#, fuzzy
 msgid "Insert a template"
-msgstr ""
+msgstr "Sett inn en mal"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:160
 msgid "iTunes like"
@@ -6840,70 +6855,71 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:72
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:86
 msgid "Title:"
-msgstr ""
+msgstr "Tittel:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
 msgid "Artist:"
-msgstr ""
+msgstr "Artist:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:39
 msgid "Album:"
-msgstr ""
+msgstr "Album:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:40
 msgid "Genre:"
-msgstr ""
+msgstr "Sjanger:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:57
 msgid "Year:"
-msgstr ""
+msgstr "År"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:42
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:56
 msgid "Type:"
-msgstr ""
+msgstr "Type:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
-msgstr ""
+msgstr "Spor:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
 msgid "Language:"
-msgstr ""
+msgstr "Språk:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr ""
+msgstr "Lengde:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
+#, fuzzy
 msgid "Bitrate:"
-msgstr ""
+msgstr "Bitrate:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:60
 msgid "Comments:"
-msgstr ""
+msgstr "Kommentarer:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:48
 msgid "SHA1:"
-msgstr ""
+msgstr "SHA1:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:49
 msgid "Price:"
-msgstr ""
+msgstr "Pris:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:50
 msgid "Link:"
-msgstr ""
+msgstr "Lenke:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:51
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:63
 msgid "Action:"
-msgstr ""
+msgstr "Handling:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:52
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:61
@@ -6911,58 +6927,58 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:83
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:89
 msgid "License:"
-msgstr ""
+msgstr "Lisens:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
 msgid "Rating:"
-msgstr ""
+msgstr "Karakter:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:82
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:90
 msgid "License Type:"
-msgstr ""
+msgstr "Lisens Type:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:64
 msgid "Director:"
-msgstr ""
+msgstr "Regissør:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:65
 msgid "Studio:"
-msgstr ""
+msgstr "Studio:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:67
 msgid "Stars: (Please separate with comma)"
-msgstr ""
+msgstr "Sjerner: (Vennligst separer med komma)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:68
 msgid "Producer: (Please separate with comma)"
-msgstr ""
+msgstr "Produsent: (Vennligst separer med komma)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:69
 msgid "Subtitles: (Please separate with comma)"
-msgstr ""
+msgstr "Undertekster: (Vennligst separer med komma)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "Emne:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
-msgstr ""
+msgstr "Forfatter:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "Navn:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "Utgiver:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr ""
+msgstr "Platform:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"
@@ -6974,7 +6990,7 @@ msgstr "MPEG-4 Audio"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:120
 msgid "Ogg Vorbis"
-msgstr ""
+msgstr "Ogg Vorbis"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"

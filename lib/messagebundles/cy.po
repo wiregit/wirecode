@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 0 : n==2 ? 1 : (n != 8 || n != 11) ? "
 "2 : 3;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -149,8 +149,8 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "Cau'r Ffenest"
 
-#~ msgid "Statistics"
-#~ msgstr "Ystadegau"
+#~ msgid "P"
+#~ msgstr "P"
 
 #~ msgid "N"
 #~ msgstr "Y"
@@ -164,12 +164,6 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Dangos neu Guddio Tabiau Unigol"
 
-#~ msgid "G"
-#~ msgstr "G"
-
-#~ msgid "P"
-#~ msgstr "P"
-
 #~ msgid "&Statistics"
 #~ msgstr "Y&stadegau"
 
@@ -182,17 +176,14 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "E"
 
+#~ msgid "G"
+#~ msgstr "G"
+
 #~ msgid "Results"
 #~ msgstr "Canlyniadu"
 
 #~ msgid "Files"
 #~ msgstr "Ffeiliau"
-
-#~ msgid "files"
-#~ msgstr "ffeiliau"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "ffeiliau (yn llwytho...)"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Adfer wedi methu"
@@ -203,30 +194,27 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "am Ffynhonnell"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Busy"
+#~ msgstr "Prysur"
+
+#~ msgid "files"
+#~ msgstr "ffeiliau"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "ffeiliau (yn llwytho...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Ffeiliau gyda'r enw yma"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Chwilio am ffeiliau gyda'r un enw."
 
-#~ msgid "Orginal query"
-#~ msgstr "Ymholiad gwreiddiol"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr ""
 #~ "Yn gwneud yr un chwiliad a'r un a wnaeth ffeindio'r ffeil yma'n wreiddiol."
-
-#~ msgid "Validation Required"
-#~ msgstr "Angen Cadarnhad"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Dim llinell allan ar gael"
-
-#~ msgid "Height:"
-#~ msgstr "Uchder:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Dewis IAWNi gael gwared a'r drwydded am byth"
 
 #~ msgid "End Chat"
 #~ msgstr "Gorffen Sgwrs"
@@ -234,11 +222,663 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Stopio Sgwrsio gyda Phartner"
 
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Llwytho Ffenestr Statws..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Yn methu darganfod porth i ddefnyddio ar gyfer cysylltiadau i mewn.\n"
+#~ "Dewis porth o'r ffenest trefnu."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pingiau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn erbyn "
+#~ "LimeWires eraill."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pongiau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn erbyn "
+#~ "LimeWires eraill."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ymholiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn "
+#~ "erbyn LimeWires eriall."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Ymweliadau holi Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella "
+#~ "yn erbyn LimeWires eriall."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Gwthiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn "
+#~ "erbyn LimeWires eraill."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes am pingiau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
+#~ "Gnutella erbyn LimeWires eraill."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes am pongiau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
+#~ "Gnutella yn erbyn LimeWires eraill"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes am ymholiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
+#~ "Gnutella yn erbyn LimeWires eraill"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes am drawiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
+#~ "Gnutella yn erbyn LimeWires eraill"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes am wthiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
+#~ "Gnutella yn erbyn LimeWires eraill"
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "Gwallau"
+
+#~ msgid "Query Replies"
+#~ msgstr "Atebion i Ymholiadau"
+
+#~ msgid "Ping Replies"
+#~ msgstr "Atebion Ping"
+
+#~ msgid "Compression"
+#~ msgstr "Gwasgu"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Gwallau Cyfeirio Ymweliadau."
+
+#~ msgid "Requests"
+#~ msgstr "Ceisiadau"
+
+#~ msgid "Request Methods"
+#~ msgstr "Mathau o Geisiadau"
+
+#~ msgid "seconds"
+#~ msgstr "eiliadau"
+
+#~ msgid "messages"
+#~ msgstr "negeseuon"
+
+#~ msgid "Average"
+#~ msgstr "Cyfartaledd"
+
+#~ msgid "Max"
+#~ msgstr "Uchafswm"
+
+#~ msgid "Total Upstream"
+#~ msgstr "Cyfanswm fyny'r llif"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Cyfanswm i lawr y llif"
+
+#~ msgid "HTTP Total"
+#~ msgstr "Cyfanswm HTTP"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "Penawdau HTTP"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Cyfanswm Gnutealla"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Penawdau Gnutella"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Negeseuon Gnutella"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Cyfanswm potensial fyny'r llif"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Cyfanswm go iawn fyny'r llif"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Cyfanswm potensial i lawr y llif"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Cyfanswm go iawn i lawr y llif"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (Potensial)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "(Go iawn)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (Potensial)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (Go iawn)"
+
+#~ msgid "All Clients"
+#~ msgstr "Pob cleiant"
+
+#~ msgid "All Messages"
+#~ msgstr "Pob neges"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Gwallau Pong"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Gwallau Ateb"
+
+#~ msgid "Push Errors"
+#~ msgstr "Gwallau Gwthio"
+
+#~ msgid "No Route"
+#~ msgstr "Dim Llywbr"
+
+#~ msgid "All Requests"
+#~ msgstr "Pob Ymholiad"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "Ymholiadau HEAD"
+
+#~ msgid "GET Requests"
+#~ msgstr "Ymholiadau GET"
+
+#~ msgid "Push Requests"
+#~ msgstr "Ymholiadau Gwthio"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Ymholiadu Gnutella"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Ymholiadau Gnutealla (LimeWire)"
+
+#~ msgid "Accepted"
+#~ msgstr "Wedi Derbyn"
+
+#~ msgid "IO Error"
+#~ msgstr "Gwall IO"
+
+#~ msgid "THEX Request"
+#~ msgstr "Ceisiadau"
+
+#~ msgid "URN Get"
+#~ msgstr "URN Get"
+
+#~ msgid "Freeloader"
+#~ msgstr "Sbwnjwr"
+
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#~ msgid "Get"
+#~ msgstr "Get"
+
+#~ msgid "Head"
+#~ msgstr "Pen"
+
+#~ msgid "Pushed Head"
+#~ msgstr "Pen wedi gwethiuo"
+
+#~ msgid "Orginal query"
+#~ msgstr "Ymholiad gwreiddiol"
+
 #~ msgid "Loading Settings..."
 #~ msgstr "Llwytho Gosodiadau..."
 
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Llwytho Ffenestr Statws..."
+#~ msgid "Network"
+#~ msgstr "Rhwydwaith"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Holl ymholiadau wedi'u derbyn mewn kilobytes, yn ol y hops."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "Holl ymholiadau wedi'u derbyn mewn kilobytes, yn ol y TTL"
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Holl ymweliadau holi wedi'u derbyn mewn kilobytes, yn ol y hops"
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "Holl ymweliadau holi wedi'u derbyn mewn kilobytes, yn ol y TTL"
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr ""
+#~ "Mae maint cyfartal mewn kilobytes am negeseuon Gnutella wedi'u derbyn."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr ""
+#~ "Mae maint cyfartal mewn kilobytes am negeseuon wedi'u derbyn oddi wrth "
+#~ "LimeWires."
+
+#~ msgid "Current"
+#~ msgstr "Presennol"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Dim llinell allan ar gael"
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Pob ymholiad wedi derbyn, gyda 'hops'"
+
+#~ msgid "Special Queries"
+#~ msgstr "Ymholiadau Arbennig"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Holl ymholiadau wedi'u marcio'n arbennig"
+
+#~ msgid "False Positive"
+#~ msgstr "Ffug Positif"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Gwallau Generig"
+
+#~ msgid "Handshaking"
+#~ msgstr "Ysgwyd Llaw"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Ystadegau am ysgwyd llawn fel Uwch bartner"
+
+#~ msgid "Flow Control"
+#~ msgstr "Rheolaeth Llif"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Ystadegau am negeseuon rheolaeth llif"
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Cyfanswm y negeseuon wedi'u ffiltro."
+
+#~ msgid "Transfers"
+#~ msgstr "Trosglwyddiadau"
+
+#~ msgid "Color"
+#~ msgstr "Lliw"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Ysgrifennu ystadegau am y graff yma i ffeiliau."
+
+#~ msgid "All Errors"
+#~ msgstr "Pob Gwall"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "Hyd Llwythiad Annilys"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "Hops annilys"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "TTL annilus"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "Hops > Soft Max"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(Hops + TTL) > Hard Max"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "Cod neges annilys"
+
+#~ msgid "All Query Errors"
+#~ msgstr "Pob gwall ymholiad"
+
+#~ msgid "URN Query"
+#~ msgstr "Ymholiad"
+
+#~ msgid "Query Too Large"
+#~ msgstr "Ymholiad yn rhy fawr"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "Ymholiad XML yn rhy fawr"
+
+#~ msgid "Empty Query"
+#~ msgstr "Ymholiad Gwag"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "Llythrennau anghyfreithlon mewn ymholiad"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "Pob Gwall Ateb i Ymholiad"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "Porth Ateb Annilys"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "Cyfeiriad Ateb Annilys"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "Cyflymdra Ateb Annilys"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "Pob Gall Ateb Ping"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "Llwythdaliad Ateb Ping Annilys"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "Porth Ateb Ping Annilys"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "Cyfeiriad Ateb Ping Annilys"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "Bloc GGEP Annilys"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "Hyd Gwerthwr Annilys"
+
+#~ msgid "All Push Errors"
+#~ msgstr "Pob Gwall Gwthio"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "Porth Gwthio Annilys"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "Cyfeiriad Gwthio Annilys"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "Llwythdaliad Gwthio Annilys"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "Pob Gwall Neges Gwerthwr"
+
+#~ msgid "Invalid ID"
+#~ msgstr "ID Annilys"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "Dewiswr Annilys"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "Llwythdaliad Annilys"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "Neges gwerthwr heb ei adnabod"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "Route Table Patch"
+
+#~ msgid "What's New?"
+#~ msgstr "Beth sy Newydd?"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Terfyn Caled"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "Terfyn Caled (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "Terfyn Caled (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "Terfyn Caled (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "Terfyn Caled (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "Terfyn Caled (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "Terfyn Caled (TTL 5) neu fwy"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Ceisiadau Cysylltu"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "Ceisiadau Mewn"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "Ymholiadau Manget"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "Ymholiadau anhysbys"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "Partneriaid wedi gwahaddÃ¥"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "Wedi Cau ar Unwaith"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "Problem yn darllen penawd"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "Cod ateb anhysbys"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "Cynnwys URN dim yn gyfateb"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "Ystodau Anghydnaws"
+
+#~ msgid "Failed"
+#~ msgstr "Wedi Methu"
+
+#~ msgid "Succeeded"
+#~ msgstr "Llwyddiannus"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "HTTP 1.1 Llwyddiannus"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "HTTP 1.0 Llwyddiannus"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "HTTP 1.1 wedi methu"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "HY=HTTP 1.0 wedi methu"
+
+#~ msgid "Retried Success"
+#~ msgstr "Llwyddiant ail-geisio"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "Cysylltiadau Uniongyrchol Llwyddiannus"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "Cysylltiadau Gwthio Llwyddiannus"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "Gwthio wedi methu (ymyrryd)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "Gwthio wedi methu (Heb dderbyn GIV)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "Gwthio wedi methu (Colli Cysylltiad)"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "Procsi Gwthio Llwyddiannus"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "Procsi Gwthio Heb ei Ffurfio"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "Procsi Gwthio wedi Methu"
+
+#~ msgid "Push Proxy"
+#~ msgstr "Procsi Gwthio"
+
+#~ msgid "Traditional Get"
+#~ msgstr "Get Traddodiadol"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "URN Get anhysbys"
+
+#~ msgid "Limit Reached"
+#~ msgstr "Cyrraedd Terfyn"
+
+#~ msgid "Banned Client"
+#~ msgstr "Cleiant wedi gwahadd"
+
+#~ msgid "Unknown"
+#~ msgstr "Anhysbys"
+
+#~ msgid "Pushed Get"
+#~ msgstr "Get wedi gwethio"
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "Gwthio Anhysbys"
+
+#~ msgid "Push Failed"
+#~ msgstr "Gwthio wedi methu"
+
+#~ msgid "Completed Responses"
+#~ msgstr "Atebion Cyflawn"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "Trosglwyddiadau Ffeil Gyflawn"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "Gwrthod Allan  (Deilen)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "Gwrthod Allan (Hen Uwch Bartner)"
+
+#~ msgid "Out Acc."
+#~ msgstr "Derbyn Allan"
+
+#~ msgid "In Rej."
+#~ msgstr "Gwrthod Mewn"
+
+#~ msgid "In Acc."
+#~ msgstr "Derbyn Mewn"
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "Gwrthod Allan (Llawn)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "Derbyn Allan (Derbyn Cyngor)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "Derbyn Allan (Anwybyddu Cyngor)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "Derbyn Alan (Dim Cyngor)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "Gwrthod Mewn (Deilen)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "Derbyn Mewn (Deilen)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "Derbyn Mewn (arwain i ddeilen)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "Derbyn Mewn (Uwch Bartner)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "Gwrthod Mewn (Pob Slot yn llawn)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "Gwrthod Mewn (Rhwydwaith Angen U. Bartner)"
+
+#~ msgid "Server Reject"
+#~ msgstr "Gwrthod Cyfrifiadur Canolog"
+
+#~ msgid "No Conclusion"
+#~ msgstr "Dim Diwedd"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "Uwch Bartneriaid LimeWire"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "Dail LimeWire"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "Uwch Bartneriaid Eraill"
+
+#~ msgid "Other Leaves"
+#~ msgstr "Dail Eraill"
+
+#~ msgid "Responses Requested"
+#~ msgstr "Atebion wedi gofyn"
+
+#~ msgid "Responses Received"
+#~ msgstr "Atebion wedi derbyn"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "Atebion wedi osgoi"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "Graddfa Llwyddiant OOB"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr "I gefnogi LimeWire a lleisiau annibynnol. Pryna PRO!"
@@ -253,27 +893,40 @@ msgstr ""
 #~ "dy gysylltiad neu osodiadau wal tan a wedyn dewis \"Cysylltu\" o'r opsiynau "
 #~ "Ffeil i gysylltu a'r rhwydwaith."
 
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Dangos Ystadegau Uwch:"
+
 #~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
 #~ msgstr ""
-#~ "Yn methu darganfod porth i ddefnyddio ar gyfer cysylltiadau i mewn.\n"
-#~ "Dewis porth o'r ffenest trefnu."
+#~ "Cyfanswm y Llan band i ddanfon gwybodaeth allan, naillai trwy lwytho i fyny "
+#~ "neu negeseuon Gnutella"
 
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr "Rho deitl y ffeil rwyt eisiau ei chyoeddu."
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Cyfanswm y Llan band i dderbyn gwybodaeth i mewn, naillai trwy lwytho i lawr "
+#~ "neu negeseuon Gnutella"
 
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr "Rho flwyddyn y ffeil rwyt eisiau ei chyhoeddu."
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Nifer yr ymholiadau dwbl wedi'u derbyn dros Multicast yn erbyn gyfanswm "
+#~ "ymholiadau"
 
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Rho Rho URL gwirio dilys i'r drwydded."
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Cyfanswm kilobytes yn negeseuon dwbl wedi'u derbyn dros Multicast yn erbyn "
+#~ "cyfanswm yr ymholiadau."
 
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
-
-#~ msgid "Display:"
-#~ msgstr "Dangos:"
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Holl negeseuon Gnutella wedi'u gyrru dros Multicast, yn ol math o neges."
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
@@ -282,9 +935,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Mae ffigyrau Lled Band yn cynnwys gwybodaeth cyflawn am bob lled band wedi "
 #~ "anfon i fyny ac i lawr. Clicia ar un o'r dewisiadau i weld y canlyniadau"
-
-#~ msgid "Network"
-#~ msgstr "Rhwydwaith"
 
 #~ msgid ""
 #~ "Statistics on the current state of the network. These statistics are quite "
@@ -309,25 +959,8 @@ msgstr ""
 #~ "cael eu dangos yn awtomatig a dim yn addas ar gyfer y rhan mwya o "
 #~ "ddefnyddwyr."
 
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Dangos Ystadegau Uwch:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Cyfanswm y Llan band i ddanfon gwybodaeth allan, naillai trwy lwytho i fyny "
-#~ "neu negeseuon Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Cyfanswm y Llan band i dderbyn gwybodaeth i mewn, naillai trwy lwytho i lawr "
-#~ "neu negeseuon Gnutella"
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "Holl negeseuon Gnutella wedi'u derbyn gan y cleiant yma."
@@ -352,24 +985,8 @@ msgstr ""
 #~ "Nifer yr ymholiadau dwbl wedi'u derbyn dros TCP yn erbyn gyfanswm yr "
 #~ "ymhoiliadau"
 
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Nifer yr ymholiadau dwbl wedi'u derbyn dros Multicast yn erbyn gyfanswm "
-#~ "ymholiadau"
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Pob ymholiad wedi derbyn, gyda 'hops'"
-
 #~ msgid "All received queries, by time to live (TTL)."
 #~ msgstr "Pob ymholiad wedi derbyn, gyda TTL."
-
-#~ msgid "Special Queries"
-#~ msgstr "Ymholiadau Arbennig"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Holl ymholiadau wedi'u marcio'n arbennig"
 
 #~ msgid "All received query hits, by hops."
 #~ msgstr "Holl ymweliadau holi wedi'u derbyn, gyda hops"
@@ -413,25 +1030,6 @@ msgstr ""
 #~ "Cyfanswm kilobytes am negeseuon Gnutella wedi'u derbyn dros TCP yn erbyn "
 #~ "cyfanswm yr ymholiadau."
 
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Cyfanswm kilobytes yn negeseuon dwbl wedi'u derbyn dros Multicast yn erbyn "
-#~ "cyfanswm yr ymholiadau."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Holl ymholiadau wedi'u derbyn mewn kilobytes, yn ol y hops."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "Holl ymholiadau wedi'u derbyn mewn kilobytes, yn ol y TTL"
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Holl ymweliadau holi wedi'u derbyn mewn kilobytes, yn ol y hops"
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "Holl ymweliadau holi wedi'u derbyn mewn kilobytes, yn ol y TTL"
-
 #~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Pingiau UDP wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn erbyn "
@@ -456,37 +1054,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Gwthiadau UDP wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn erbyn "
 #~ "LimeWires Eraill."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pingiau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn erbyn "
-#~ "LimeWires eraill."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pongiau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn erbyn "
-#~ "LimeWires eraill."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ymholiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn "
-#~ "erbyn LimeWires eriall."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Ymweliadau holi Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella "
-#~ "yn erbyn LimeWires eriall."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Gwthiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid Gnutella yn "
-#~ "erbyn LimeWires eraill."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
@@ -524,53 +1091,6 @@ msgstr ""
 #~ "yn erbyn LimeWires eraill"
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes am pingiau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
-#~ "Gnutella erbyn LimeWires eraill."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes am pongiau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
-#~ "Gnutella yn erbyn LimeWires eraill"
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes am ymholiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
-#~ "Gnutella yn erbyn LimeWires eraill"
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes am drawiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
-#~ "Gnutella yn erbyn LimeWires eraill"
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes am wthiadau Multicast wedi'u derbyn oddi wrth holl gleientiaid "
-#~ "Gnutella yn erbyn LimeWires eraill"
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr ""
-#~ "Mae maint cyfartal mewn kilobytes am negeseuon Gnutella wedi'u derbyn."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr ""
-#~ "Mae maint cyfartal mewn kilobytes am negeseuon wedi'u derbyn oddi wrth "
-#~ "LimeWires."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
 #~ msgstr ""
@@ -588,38 +1108,20 @@ msgstr ""
 #~ msgid "Hit"
 #~ msgstr "Ymweliad"
 
-#~ msgid "False Positive"
-#~ msgstr "Ffug Positif"
-
-#~ msgid "Errors"
-#~ msgstr "Gwallau"
-
-#~ msgid "Generic Errors"
-#~ msgstr "Gwallau Generig"
-
 #~ msgid "Generic errors while reading messages."
 #~ msgstr "Gwallau generig wrth ddarllen negeseuon."
 
 #~ msgid "Errors while reading query messages."
 #~ msgstr "Gwallau tra'n darllen negeseuon holi."
 
-#~ msgid "Query Replies"
-#~ msgstr "Atebion i Ymholiadau"
-
 #~ msgid "Errors while reading query reply messages."
 #~ msgstr "Gwallau tra'n darllen negeseuon ateb ymholiadau"
-
-#~ msgid "Ping Replies"
-#~ msgstr "Atebion Ping"
 
 #~ msgid "Errors while reading ping replies."
 #~ msgstr "Gwallau tra'n darllen ymholiadau ping"
 
 #~ msgid "Errors while reading pushes."
 #~ msgstr "Gwallau tra'n darllen gwthiadau"
-
-#~ msgid "Vendor Messages"
-#~ msgstr "Negeseuon y Gwerthwr"
 
 #~ msgid "Errors while reading vendor messages."
 #~ msgstr "Gwallau tra'n darllen negeseuon y gwerthwr"
@@ -632,10 +1134,6 @@ msgstr ""
 
 #~ msgid "All Gnutella messages sent over UDP, by message type."
 #~ msgstr "Holl negeseuon Gnutella wedi'u gyrru dros UDP, yn ol math o neges."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Holl negeseuon Gnutella wedi'u gyrru dros Multicast, yn ol math o neges."
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr "Holl negeseuon Gnutella wedi'u gyrru dros TCP, UDP neu Multicast."
@@ -795,14 +1293,8 @@ msgstr ""
 #~ "Kilobytes am wthiadau Multicast wedi'u gyrru oddi wrth holl gleientiaid "
 #~ "Gnutella yn erbyn LimeWires eraill."
 
-#~ msgid "Handshaking"
-#~ msgstr "Ysgwyd Llaw"
-
 #~ msgid "Statistics for handshaking as a leaf."
 #~ msgstr "Ystadegau am ysgwyd llaw fel deilen"
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "Ystadegau am ysgwyd llawn fel Uwch bartner"
 
 #~ msgid "Statistics for outgoing Gnutella connection handshaking."
 #~ msgstr "Ystadegau am gysylltiadau ysgwyd llaw Gnutella yn mynd allan"
@@ -820,20 +1312,11 @@ msgstr ""
 #~ "Ystadegau am gysylltiadau ysgwyd llaw Gnutella yn cael eu gwthod gan y "
 #~ "cyfrifiadur canolog."
 
-#~ msgid "Compression"
-#~ msgstr "Gwasgu"
-
 #~ msgid "Statistics for compressed upstream traffic in kilobytes."
 #~ msgstr "Ystadegau am draffig wedi gwasgu, fyny'r llif mewn kilobytes"
 
 #~ msgid "Statistics for compressed downstream traffic in kilobytes."
 #~ msgstr "Ystadegau am draffig wedi gwasgu, i lawr y llif mewn kilobytes"
-
-#~ msgid "Flow Control"
-#~ msgstr "Rheolaeth Llif"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "Ystadegau am negeseuon rheolaeth llif"
 
 #~ msgid "Statistics for flow controlled messages in kilobytes."
 #~ msgstr "Ystadegau am negeseuon rheolaeth llif mewn kilobytes."
@@ -841,14 +1324,8 @@ msgstr ""
 #~ msgid "Total number of errors routing messages to other clients."
 #~ msgstr "Cyfanswm nifer y gwallau cyfeirio i gleientiaid eraill."
 
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Gwallau Cyfeirio Ymweliadau."
-
 #~ msgid "Errors routing query hits."
 #~ msgstr "Gwallau Cyferio ymweliadau holi."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Cyfanswm y negeseuon wedi'u ffiltro."
 
 #~ msgid ""
 #~ "Total number of Gnutella connection attempts, either initiated internally or "
@@ -890,9 +1367,6 @@ msgstr ""
 #~ "rydan ni am eu hanwybyddu, lleoliadau doedd dim modd i'w deileu, a "
 #~ "lleoliadau rydan ni wedi dileu'n barhaol rhag geisio cysylltu."
 
-#~ msgid "Transfers"
-#~ msgstr "Trosglwyddiadau"
-
 #~ msgid ""
 #~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
 #~ "For HTTP1.1, values are per chunk."
@@ -907,9 +1381,6 @@ msgstr ""
 #~ "Yn recordio'r amser mewn mili-eiliadau i sefydlu cysylltiadau TCP ar gyfer "
 #~ "llwytho i lawr. Gall amrywio, er engraifft, pan mae cyfrifiaduron canolog yn "
 #~ "deilio gyda llwythiadau mawrion"
-
-#~ msgid "Requests"
-#~ msgstr "Ceisiadau"
 
 #~ msgid ""
 #~ "Total incoming upload requests. These numbers are incremented on every "
@@ -930,9 +1401,6 @@ msgstr ""
 #~ "barsio cais, a felly'n cynnwys pob darn a r gyfer trosglwyddiadau HTTP/1.1. "
 #~ "'Normal' ydi nifer y ceisiadau rydan ni wedi ceisio trosglwyddo rhan o'r "
 #~ "ffeil."
-
-#~ msgid "Request Methods"
-#~ msgstr "Mathau o Geisiadau"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
@@ -956,431 +1424,8 @@ msgstr ""
 #~ "yma'n cynynddrannedig yn ol cysylltiad, dim yn ol darn. (Llwythiadau i fyny "
 #~ "wedi'u oedi hefyd i'w cyfrif fel llwythiadau i fyny heb eu hymyrryd.)"
 
-#~ msgid "seconds"
-#~ msgstr "eiliadau"
-
-#~ msgid "messages"
-#~ msgstr "negeseuon"
-
-#~ msgid "Average"
-#~ msgstr "Cyfartaledd"
-
-#~ msgid "Max"
-#~ msgstr "Uchafswm"
-
-#~ msgid "Color"
-#~ msgstr "Lliw"
-
-#~ msgid "Current"
-#~ msgstr "Presennol"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "Ysgrifennu ystadegau am y graff yma i ffeiliau."
-
-#~ msgid "Total Upstream"
-#~ msgstr "Cyfanswm fyny'r llif"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Cyfanswm i lawr y llif"
-
-#~ msgid "HTTP Total"
-#~ msgstr "Cyfanswm HTTP"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "Penawdau HTTP"
-
-#~ msgid "HTTP Content"
-#~ msgstr "Cynnwys HTTP"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Cyfanswm Gnutealla"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "Penawdau Gnutella"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Negeseuon Gnutella"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Cyfanswm potensial fyny'r llif"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Cyfanswm go iawn fyny'r llif"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Cyfanswm potensial i lawr y llif"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Cyfanswm go iawn i lawr y llif"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (Potensial)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "(Go iawn)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (Potensial)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (Go iawn)"
-
-#~ msgid "All Clients"
-#~ msgstr "Pob cleiant"
-
-#~ msgid "All Errors"
-#~ msgstr "Pob Gwall"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "Hyd Llwythiad Annilys"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "Hops annilys"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "TTL annilus"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "Hops > Soft Max"
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(Hops + TTL) > Hard Max"
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "Cod neges annilys"
-
-#~ msgid "All Query Errors"
-#~ msgstr "Pob gwall ymholiad"
-
-#~ msgid "URN Query"
-#~ msgstr "Ymholiad"
-
-#~ msgid "Query Too Large"
-#~ msgstr "Ymholiad yn rhy fawr"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "Ymholiad XML yn rhy fawr"
-
-#~ msgid "Empty Query"
-#~ msgstr "Ymholiad Gwag"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "Llythrennau anghyfreithlon mewn ymholiad"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "Pob Gwall Ateb i Ymholiad"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "Porth Ateb Annilys"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "Cyfeiriad Ateb Annilys"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "Cyflymdra Ateb Annilys"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "Pob Gall Ateb Ping"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "Llwythdaliad Ateb Ping Annilys"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "Porth Ateb Ping Annilys"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "Cyfeiriad Ateb Ping Annilys"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "Bloc GGEP Annilys"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "Hyd Gwerthwr Annilys"
-
-#~ msgid "All Push Errors"
-#~ msgstr "Pob Gwall Gwthio"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "Porth Gwthio Annilys"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "Cyfeiriad Gwthio Annilys"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "Llwythdaliad Gwthio Annilys"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "Pob Gwall Neges Gwerthwr"
-
-#~ msgid "Invalid ID"
-#~ msgstr "ID Annilys"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "Dewiswr Annilys"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "Llwythdaliad Annilys"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "Neges gwerthwr heb ei adnabod"
-
-#~ msgid "All Messages"
-#~ msgstr "Pob neges"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "Route Table Patch"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "What's New?"
-#~ msgstr "Beth sy Newydd?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Gwallau Pong"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Gwallau Ateb"
-
-#~ msgid "Push Errors"
-#~ msgstr "Gwallau Gwthio"
-
-#~ msgid "Hard Limit"
-#~ msgstr "Terfyn Caled"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "Terfyn Caled (TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "Terfyn Caled (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "Terfyn Caled (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "Terfyn Caled (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "Terfyn Caled (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "Terfyn Caled (TTL 5) neu fwy"
-
-#~ msgid "No Route"
-#~ msgstr "Dim Llywbr"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "Ceisiadau Cysylltu"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "Ceisiadau Mewn"
-
-#~ msgid "All Requests"
-#~ msgstr "Pob Ymholiad"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "Ymholiadau HEAD"
-
-#~ msgid "GET Requests"
-#~ msgstr "Ymholiadau GET"
-
-#~ msgid "Push Requests"
-#~ msgstr "Ymholiadau Gwthio"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Ymholiadu Gnutella"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Ymholiadau Gnutealla (LimeWire)"
-
-#~ msgid "Magnet Requests"
-#~ msgstr "Ymholiadau Manget"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "Ymholiadau anhysbys"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "Partneriaid wedi gwahaddÃ¥"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "Wedi Cau ar Unwaith"
-
-#~ msgid "Accepted"
-#~ msgstr "Wedi Derbyn"
-
-#~ msgid "Busy"
-#~ msgstr "Prysur"
-
 #~ msgid "Not Sharing Files"
 #~ msgstr "Nid ffeiliau rhannu"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "Problem yn darllen penawd"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "Cod ateb anhysbys"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "Cynnwys URN dim yn gyfateb"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "Ystodau Anghydnaws"
-
-#~ msgid "IO Error"
-#~ msgstr "Gwall IO"
-
-#~ msgid "Failed"
-#~ msgstr "Wedi Methu"
-
-#~ msgid "Succeeded"
-#~ msgstr "Llwyddiannus"
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "HTTP 1.1 Llwyddiannus"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "HTTP 1.0 Llwyddiannus"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "HTTP 1.1 wedi methu"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "HY=HTTP 1.0 wedi methu"
-
-#~ msgid "Retried Success"
-#~ msgstr "Llwyddiant ail-geisio"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "Cysylltiadau Uniongyrchol Llwyddiannus"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "Cysylltiadau Gwthio Llwyddiannus"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "Gwthio wedi methu (ymyrryd)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "Gwthio wedi methu (Heb dderbyn GIV)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "Gwthio wedi methu (Colli Cysylltiad)"
-
-#~ msgid "THEX Request"
-#~ msgstr "Ceisiadau"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "Procsi Gwthio Llwyddiannus"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "Procsi Gwthio Heb ei Ffurfio"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "Procsi Gwthio wedi Methu"
-
-#~ msgid "Push Proxy"
-#~ msgstr "Procsi Gwthio"
-
-#~ msgid "Update File"
-#~ msgstr "Ffeil Diwedaru"
-
-#~ msgid "Traditional Get"
-#~ msgstr "Get Traddodiadol"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "URN Get anhysbys"
-
-#~ msgid "URN Get"
-#~ msgstr "URN Get"
-
-#~ msgid "Limit Reached"
-#~ msgstr "Cyrraedd Terfyn"
-
-#~ msgid "Banned Client"
-#~ msgstr "Cleiant wedi gwahadd"
-
-#~ msgid "Freeloader"
-#~ msgstr "Sbwnjwr"
-
-#~ msgid "Normal"
-#~ msgstr "Normal"
-
-#~ msgid "Get"
-#~ msgstr "Get"
-
-#~ msgid "Head"
-#~ msgstr "Pen"
-
-#~ msgid "Unknown"
-#~ msgstr "Anhysbys"
-
-#~ msgid "Pushed Get"
-#~ msgstr "Get wedi gwethio"
-
-#~ msgid "Pushed Head"
-#~ msgstr "Pen wedi gwethiuo"
-
-#~ msgid "Pushed Unknown"
-#~ msgstr "Gwthio Anhysbys"
-
-#~ msgid "Push Failed"
-#~ msgstr "Gwthio wedi methu"
-
-#~ msgid "Completed Responses"
-#~ msgstr "Atebion Cyflawn"
 
 #~ msgid "Interrupted"
 #~ msgstr "Wedi Ymyrryd"
@@ -1388,86 +1433,41 @@ msgstr ""
 #~ msgid "Stalled"
 #~ msgstr "Wedi Atal"
 
-#~ msgid "Completed File Transfers"
-#~ msgstr "Trosglwyddiadau Ffeil Gyflawn"
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "Gwrthod Allan  (Deilen)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "Gwrthod Allan (Hen Uwch Bartner)"
-
-#~ msgid "Out Acc."
-#~ msgstr "Derbyn Allan"
-
-#~ msgid "In Rej."
-#~ msgstr "Gwrthod Mewn"
-
-#~ msgid "In Acc."
-#~ msgstr "Derbyn Mewn"
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "Gwrthod Allan (Llawn)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "Derbyn Allan (Derbyn Cyngor)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "Derbyn Allan (Anwybyddu Cyngor)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "Derbyn Alan (Dim Cyngor)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "Gwrthod Mewn (Deilen)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "Derbyn Mewn (Deilen)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "Derbyn Mewn (arwain i ddeilen)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Derbyn Mewn (Uwch Bartner)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "Gwrthod Mewn (Pob Slot yn llawn)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "Gwrthod Mewn (Rhwydwaith Angen U. Bartner)"
-
-#~ msgid "Server Reject"
-#~ msgstr "Gwrthod Cyfrifiadur Canolog"
-
-#~ msgid "No Conclusion"
-#~ msgstr "Dim Diwedd"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "Uwch Bartneriaid LimeWire"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "Dail LimeWire"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Uwch Bartneriaid Eraill"
-
-#~ msgid "Other Leaves"
-#~ msgstr "Dail Eraill"
-
-#~ msgid "Responses Requested"
-#~ msgstr "Atebion wedi gofyn"
-
-#~ msgid "Responses Received"
-#~ msgstr "Atebion wedi derbyn"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "Atebion wedi osgoi"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "Graddfa Llwyddiant OOB"
-
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr "Nifer yr atebion wedi gofyn a derbyn trwy brotocol OOB"
+
+#~ msgid "Update File"
+#~ msgstr "Ffeil Diwedaru"
+
+#~ msgid "Statistics"
+#~ msgstr "Ystadegau"
+
+#~ msgid "Validation Required"
+#~ msgstr "Angen Cadarnhad"
+
+#~ msgid "Height:"
+#~ msgstr "Uchder:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Dewis IAWNi gael gwared a'r drwydded am byth"
+
+#~ msgid "Display:"
+#~ msgstr "Dangos:"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "Negeseuon y Gwerthwr"
+
+#~ msgid "HTTP Content"
+#~ msgstr "Cynnwys HTTP"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "Rho deitl y ffeil rwyt eisiau ei chyoeddu."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "Rho flwyddyn y ffeil rwyt eisiau ei chyhoeddu."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Rho Rho URL gwirio dilys i'r drwydded."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -1704,7 +1704,7 @@ msgid "You have already downloaded {0}"
 msgstr "Rwyt ti wedi llwythio i lawr yn barod  \"{0}\""
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Rwyt ti'n llwythio i lawr y ffeil yma'n barod i \"{0}\"."
 
@@ -8345,7 +8345,7 @@ msgid "Awaiting Requests"
 msgstr "Ymholiadau Sgwrsio"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Chwilio am: {0}"
 

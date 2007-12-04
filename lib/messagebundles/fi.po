@@ -17,36 +17,31 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Ladataan yhteyksien hallintaa..."
+#~ msgid "United States"
+#~ msgstr "Päivitykset"
 
-#~ msgid ""
-#~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
-#~ "files in iTunes) because a firewall is blocking access. To continue using "
-#~ "this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full "
-#~ "access to incoming and outgoing connections. To disable this feature, click "
-#~ "'No'."
-#~ msgstr ""
-#~ "LimeWire ei kyennyt käynnistämään Digital Audio Access -protokollaa (iTunes "
-#~ "tiedostonjakoa varten) koska palomuuri estää pääsyn. Jatkaaksesi tämän "
-#~ "ominaisuuden käyttöä, paina 'Kyllä' ja salli sovellukselle  'LimeWire.exe' "
-#~ "täydet verkkoyhteydet. Poistaaksesi tämän ominaisuuden, paina 'Ei'."
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Lopeta"
 
-#~ msgid ""
-#~ "LimeWire is unable to find a license for this file. Download anyway?\n"
-#~ "\n"
-#~ "Please note: LimeWire cannot monitor or control the content of the Gnutella "
-#~ "network. Please respect your local copyright laws."
-#~ msgstr ""
-#~ "LimeWire on ei löydä tälle tiedostolle lisenssiä. Ladataanko tästä "
-#~ "huolimatta?\n"
-#~ "\n"
-#~ "Huomaa, että LimeWire ei voi valvoa tai kontrolloida Gnutella-verkon "
-#~ "sisältöä. Noudata maasi tekijänoikeuslakeja!"
+#~ msgid "Loading Languages"
+#~ msgstr "Ladataan kieliä"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Liitä"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Jaettujen tiedostojen lkm {0} Tiedostoa (lataan...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Jaettujen tiedostojen lkm {0} tiedostoa"
 
 #, java-format
 #~ msgid ""
@@ -66,86 +61,32 @@ msgstr ""
 #~ msgid "Open .&torrent"
 #~ msgstr "Avaa .&torrent"
 
-#~ msgid "Opens a .torrent file from your hard drive"
-#~ msgstr "Avaa .torrent-tiedoston kovalevyltäsi"
-
 #~ msgid "&Download .torrent"
 #~ msgstr "Lataa .torrent"
-
-#~ msgid "Downloads a .torrent file from the WWW"
-#~ msgstr "Lataa .torrent-tiedosto www:stä"
-
-#~ msgid "Download .torrent file from the web"
-#~ msgstr "Lataa .torrent-tiedosto webistä"
 
 #~ msgid "URL"
 #~ msgstr "URL"
 
-#~ msgid "Paste from Clipboard"
-#~ msgstr "Kopioi leikepäydälle"
-
-#~ msgid "The specified URL is not valid. Please check your input."
-#~ msgstr "Annettu verkko-osoite ei ole kelvollinen. Tarkista antamasi osoite."
-
-#~ msgid "Waiting"
-#~ msgstr "Odotetaan"
-
-#~ msgid ""
-#~ "LimeWire was unable to load the specified torrent file, - it may be "
-#~ "malformed or LimeWire does not have permission to access this file."
-#~ msgstr ""
-#~ "LimeWire ei voinut ladata kyseistätorrent-tiedostoa - se voi olla viallinen "
-#~ "tai LimeWire:llä ei ole lupaa päästä tähän tiedostoon."
-
-#~ msgid ""
-#~ "Please choose a folder where you would like your files to be downloaded. "
-#~ "This folder will also be shared with other gnutella users by default."
-#~ msgstr ""
-#~ "Ole hyvä ja valitse hakemisto ladatuille tiedostoille. Vakioasetuksin tämä "
-#~ "hakemisto jaetaan myös muille Gnutellan käyttäjille."
-
 #~ msgid "Save Folder:"
 #~ msgstr "Hakemisto:"
-
-#~ msgid "Limewire Setup Dialog"
-#~ msgstr "LimeWiren asennusdialogi"
-
-#~ msgid ""
-#~ "The selected folder cannot be shared.  Please select another folder to share."
-#~ msgstr ""
-#~ "Valittua hakemistoa ei voida jakaa. Ole hyvä ja valitse toinen hakemisto."
 
 #~ msgid "&MagnetMix"
 #~ msgstr "&MagnetMix"
 
-#~ msgid "Show Magnetmix Button"
-#~ msgstr "Näytä Magnetmix-painike"
+#~ msgid ". The file type is not recognized."
+#~ msgstr "Tiedostotyyppi ei ole tunnettu"
 
-#~ msgid "The file type is not recognized."
-#~ msgstr "Tiedostotyyppiä ei tunnisteta"
+#~ msgid ". The file cannot be found."
+#~ msgstr "Tiedostoa ei löydy"
 
-#~ msgid "The file cannot be found."
-#~ msgstr "Tiedostoa ei löydetä"
-
-#~ msgid "The file is corrupt."
+#~ msgid ". The file is corrupt."
 #~ msgstr "Tiedosto on viallinen"
 
-#~ msgid "There is an unknown error with the audio file."
+#~ msgid ". There is an unknown error with the audio file."
 #~ msgstr "Äänitiedostossa on tuntematon virhe"
 
-#~ msgid "The file cannot be parsed."
-#~ msgstr "Tiedostoa ei voida tulkita"
-
-#, java-format
-#~ msgid "LimeWire cannot play the file {0}: {1}"
-#~ msgstr "LimeWire ei voi soittaa tiedostoa {0}:{1}"
-
-#~ msgid ""
-#~ "You have made changes to some settings. Would you like to save these changes?"
-#~ msgstr "Olet muuttanut asetuksia. Haluatko tallettaa nämä muutokset?"
-
-#~ msgid "Sensivity"
-#~ msgstr "Herkkyys"
+#~ msgid ". The file cannot be parsed."
+#~ msgstr "Tiedostoa ei voi parsia"
 
 #, fuzzy
 #~ msgid ""
@@ -153,19 +94,917 @@ msgstr ""
 #~ "a new playlist?"
 #~ msgstr "Olet tehnyt asetusmuutoksia. Haluatko tallettaa nämä muutokset?"
 
-#~ msgid ""
-#~ "One or more files or protocols that LimeWire uses are no longer associated "
-#~ "with LimeWire. Would you like LimeWire to fix this?"
-#~ msgstr ""
-#~ "Yksi tai useampi tiedosto tai protokolla, jota LimeWire käytää, ei ole enää "
-#~ "liitetty LimeWireen. Korjataanko tämä?"
+#~ msgid "Close the Window"
+#~ msgstr "Sulje ikkuna."
+
+#~ msgid "V"
+#~ msgstr "N"
+
+#~ msgid "W"
+#~ msgstr "N"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "Näytä tai piilota yksittäiset välilehdet."
+
+#~ msgid "&Statistics"
+#~ msgstr "&Statistiikka"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "Näytä statistiikka."
+
+#~ msgid "U"
+#~ msgstr "L"
+
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "Lisää kansio valittuun kirjasto kansioon"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "Lopeta valitun kirjasto kansion jakaminen"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "Avaa tiedosto(t)"
+
+#~ msgid "X"
+#~ msgstr "X"
+
+#~ msgid "G"
+#~ msgstr "L"
+
+#~ msgid "Results"
+#~ msgstr "Tulokset"
+
+#~ msgid "Files"
+#~ msgstr "Tiedostoa"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "Korjaus epäonnistui"
+
+#~ msgid "Querying Network"
+#~ msgstr "Kysyn verkkoa"
+
+#~ msgid "s for Sources"
+#~ msgstr "s tuloksia"
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "files"
+#~ msgstr "tiedostoa"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "Tiedostoa (lataan...)"
+
+#~ msgid "Files with this name"
+#~ msgstr "Tiedostot tällä nimellä"
+
+#~ msgid "Searches for files with the same file name."
+#~ msgstr "Etsinnät tiedostoista samalla tiedosto nimellä."
+
+#~ msgid "Performs the same search as the one which found this file previously."
+#~ msgstr "Esitä saman etsintä kuin se joka löysi tämän tiedoston viimeksi."
+
+#~ msgid "End Chat"
+#~ msgstr "Lopeta Chat"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "Lopeta chat palvelimen kanssa."
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Lataan statistiikka ikkunaa..."
 
 #~ msgid ""
-#~ "The default Internet Archive identifier for this file and username is "
-#~ "allready taken. Please modify it below or press cancel to return."
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
 #~ msgstr ""
-#~ "Oletusarkiston tunniste tälle tiedostolle ja käyttäjänimelle on jo varattu. "
-#~ "Ole hyvä ja muokkaa sitä, tai paina 'peruuta'  palataksesi takaisin."
+#~ "Ei löydetty porttia sisääntulevalle liikenteelle. Ole hyvä ja varmista "
+#~ "portti asetuksista."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast pingit kaikilta Gnutella clienteilta verrattunan "
+#~ "Limewire clietteihin."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast pongit kaikilta Gnutella clienteilta verrattunan "
+#~ "Limewire clietteihin."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast kyselyt kaikilta Gnutella clienteilta verrattunan "
+#~ "Limewire clietteihin."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast kysely osumat kaikilta Gnutella clienteilta "
+#~ "verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast työntöjä kaikilta Gnutella clienteilta verrattunan "
+#~ "Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast pingit kilotavuina yhteensä kaikilta Gnutella "
+#~ "clienteilta verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast pongit kilotavuina yhteensä kaikilta Gnutella "
+#~ "clienteilta verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast kyselyt kilotavuina yhteensä kaikilta Gnutella "
+#~ "clienteilta verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast kysely osumat kilotavuina yhteensä kaikilta Gnutella "
+#~ "clienteilta verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut Multicast työntöjä osumat kilotavuina yhteensä kaikilta "
+#~ "Gnutella clienteilta verrattunan Limewire clietteihin."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "Virheet"
+
+#~ msgid "Query Replies"
+#~ msgstr "Kysely vastauksia"
+
+#~ msgid "Ping Replies"
+#~ msgstr "Ping vastaukset"
+
+#~ msgid "Compression"
+#~ msgstr "Pakkaus"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Osuma rietitys virheitä."
+
+#~ msgid "Requests"
+#~ msgstr "Kyselyjä"
+
+#~ msgid "Request Methods"
+#~ msgstr "Kysely tapa"
+
+#~ msgid "seconds"
+#~ msgstr "sekunttia"
+
+#~ msgid "messages"
+#~ msgstr "viestejä"
+
+#~ msgid "Average"
+#~ msgstr "Keskimäärin"
+
+#~ msgid "Max"
+#~ msgstr "Maks."
+
+#~ msgid "Total Upstream"
+#~ msgstr "Ulos"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Sisään"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP kaikki"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "HTTP otsikot"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Gnutella kaikki"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Gnutella otsikkoja"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Gnutella viestejä"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Kaikki ulos (potentiaalinen)"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Kaikki ulos (todellinen)"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Kaikki sisään (potentiaalinen)"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Kaikki sisään (todellinen)"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (potentiaalinen)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP todellinen"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (Potentiaalinen)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (todellinen)"
+
+#~ msgid "All Clients"
+#~ msgstr "Kaikki clientit"
+
+#~ msgid "All Messages"
+#~ msgstr "Kaikki viestejä"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hopit:1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hopit:2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hopit:3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hopit:4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hopit:5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hopit:6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hopit:7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hopit:8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hopit:9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL:0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL:1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL:2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL:3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL:4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL:5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL:6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL:7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL:8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL:9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Pong virheitä"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Vastaus virheitä"
+
+#~ msgid "Push Errors"
+#~ msgstr "Työntöjä virheitä"
+
+#~ msgid "No Route"
+#~ msgstr "Ei reittiä"
+
+#~ msgid "All Requests"
+#~ msgstr "Kaikki pyynnöt"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "HEAD pyynnöt"
+
+#~ msgid "GET Requests"
+#~ msgstr "GET pyynnöt"
+
+#~ msgid "Push Requests"
+#~ msgstr "Työntö pyynnöt"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Gnutella pyynnöt"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Gnutella (LimeWire) pyynnöt"
+
+#~ msgid "Orginal query"
+#~ msgstr "tavallinen tiedustelu"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Lataa asetuksia..."
+
+#~ msgid "Network"
+#~ msgstr "Verkko"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Kaikki vastaanotetut kyselyt kilotavuina, hoppien mukaan."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "Kaikki vastaanotetut kyselyt kilotavuina, TTL:n (Timo to live) mukaan."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Kaikki vastaanotetut kysely osumat kilotavuina, hoppien mukaan."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "Kaikki vastaanotetut kysely osumat kilotavuina, TTL:n (Time to live) mukaan."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "Gnutella viestien keskikoko kilotavuina."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "LimeWireiltä vastaanottujen viestien keskikoko."
+
+#~ msgid "Current"
+#~ msgstr "Tämänhetkinen"
+
+#~ msgid ". No line is available for output."
+#~ msgstr "Ei linjaa toistolle"
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Kaikki vastaanotetut kyselyt, hoppien mukaan."
+
+#~ msgid "Special Queries"
+#~ msgstr "Erikois hakuja"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Kaikki erikoishauiksi merkityt."
+
+#~ msgid "False Positive"
+#~ msgstr "Väärä positiivinen"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Yleisiä virheitä"
+
+#~ msgid "Flow Control"
+#~ msgstr "Flow seuranta"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Flow seurannan alaisten viestien statistiikka."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Filtteröityjen viestien kokonaismäärä."
+
+#~ msgid "Transfers"
+#~ msgstr "Siirtoja"
+
+#~ msgid "Color"
+#~ msgstr "Väri"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Kirjoita statistiikka tiedostoon."
+
+#~ msgid "All Errors"
+#~ msgstr "Kaikki virheet"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "Väärä payload pituus"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "Väärät Hopit"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "Väärä TTL"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "Hopit > Pehmeät hopit"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(Hopit + TTL) > Kovat maksimi"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "Väärä viesti koodi"
+
+#~ msgid "All Query Errors"
+#~ msgstr "Kaikki kysely virheet"
+
+#~ msgid "URN Query"
+#~ msgstr "URN kysely"
+
+#~ msgid "Query Too Large"
+#~ msgstr "Kysely liian iso"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "XML kysely liian iso"
+
+#~ msgid "Empty Query"
+#~ msgstr "Tyhjä kysely"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "Ei sallituja merkkejä kyselyssä"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "Kaikki kyselyihin vastaus virheet"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "Väärä vastaus portti"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "Väärä vastaus osoite"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "Väärä vastaus nopeus"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "Kaikki Ping vastaus virheet"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "Väärä Ping vastaus Payload"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "Väärä Ping vastaus portti"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "Väärä GGEP Block"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "Väärä valmistaja pituus"
+
+#~ msgid "All Push Errors"
+#~ msgstr "Kaikki työntö virheet"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "Väär työntö portti"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "Väärä työntö osoite"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "Väär työntö payload"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "Kaikki valmistaja viesti virheet"
+
+#~ msgid "Invalid ID"
+#~ msgstr "Väärä ID"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "Väärä valitsija"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "Väärä payload"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "Tuntematon valmistaja viesti"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "Reititys taulu täyttö"
+
+#~ msgid "What's New?"
+#~ msgstr "Mitä uutta?"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Rajoite"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "Rajoite (TTL:0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "Rajoite (TTL:1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "Rajoite (TTL:2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "Rajoite (TTL:3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "Rajoite (TTL:4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "Rajoite (TTL:5+)"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Yhteys yrityksiä"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "Sisääntulevia yrityksiä"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "Magnet pyynnöt"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "Tuntemattomat pyynnöt"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "Suljetut palvelimet"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "Suljettu välittömästi"
+
+#~ msgid "Responses Requested"
+#~ msgstr "Vastauksia pyydetty"
+
+#~ msgid "Responses Received"
+#~ msgstr "Vastauksia vastaanotettu"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "Vastauksia välitetty"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "OOB onnistumis aste"
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "Auta vapaan mediasisällön jakoa."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Koneellasi ei näytä olevan Internet yhteyttä tai palomuuri ohjelmisto sulkee "
+#~ "LimeWiren pääsyn internettiin. Ole hyvä ja tarkista yhteytesi ja palomuurisi "
+#~ "asetukset ja valitse sitten \"Yhdistä\" Tiedosto -valikosta saadaksesi "
+#~ "yhteyden verkkoon."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Näytä lisätieto statistiikka:"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Tiedostonsiirto kapsiteetti ulospäin, joko jakoja tai Gnutella viestejä."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Tiedostonsiirto kapsiteetti ulospäin, joko latauksia tai Gnutella viestejä."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Multicastin kautta tulleiden duplikaatti kyselyjen suhde kaikkiin Multicast "
+#~ "kyselyihin."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Vastaanotetut viestit kilotavuina yhteensä käyttäen Multicastia verrattunan "
+#~ "kaikkiin vastaanottuihin viesteihin."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Kaikki Gnutella viestit lähetetään Multicast:ina, viesti tyypin mukaan."
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Tiedostonsiirto statistiikka kertoo täydellisen tiedon niin lähetetystä- "
+#~ "kuin vastaanotetustaliikenteestä. Klikkaa alikategoriaa nähdäksesi halutun "
+#~ "statistiikan."
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Kertoo statistiikkaa verkon tämänhetkisestä tilasta. Nämä tiedot eivät ole "
+#~ "täydellisen tarkkoja, johtuen Gnutella verkon dynamiikasta ja tavasta jakaa "
+#~ "tietoa ja kaistaa, eikä niitä sen takia tulisi ottaa kirjaimellisesti. "
+#~ "Tiedot antavat kuitenkin kohtuullisen kuvan verkkosi tilasta."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Lisätiedot statistiikka sisältää yksityiskohtaista tietoa Gnutella "
+#~ "viesteistä ja HTTP-liikenteestä. Tämä informaatio voi olla hyödyllistä "
+#~ "edistyneemmille käyttäjille ja tutkijoille jotka työskentelevät Gnutella "
+#~ "verkossa. Esimerkiksi tutkijat voivat kirjoittaa kaiken statistiikan "
+#~ "tiedostoon. Tämä tiedosto nimetään automaattisesti ja tallennetaan "
+#~ "työkansioon. Tieto tallenetaan pilkkuerotelluksi tiedostoksi, joka on helppo "
+#~ "avata missä tahansa taulukonlaskentaohjelmassa. Edistyneempiä statistiikkoja "
+#~ "ei näytetä oletuksena eikä niitä suositella peruskäyttäjille."
+
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr "Kaikki tämän clientin vastaanottamat Gnutella viestit."
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr "Kaikki Gnutella viestit TCP:tä käyttäen, viesti tyypin mukaan."
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "Kaikki Gnutella viestit UDP:tä käyttäen, viesti tyypin mukaan."
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr "Kaikki Gnutella viestit Multicastia käyttäen, viesti tyypin mukaan."
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Kaikki vastaanotetut Gnutella viestit, joko TCP, UDP tai Multicast."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr ""
+#~ "TCP:n kautta tulleiden duplikaatti kyselyjen suhde kaikkiin TCP kyselyihin."
+
+#~ msgid "All received queries, by time to live (TTL)."
+#~ msgstr "Kaikki vastaanotetut kyselyt, TTL:n (time to live) mukaan."
+
+#~ msgid "All received query hits, by hops."
+#~ msgstr "Kaikki vastaanotetut kysely osumat, hoppien mukaan."
+
+#~ msgid "All received query hits, by time to live (TTL)."
+#~ msgstr "Kaikki vastaanotetut kysely osumat, TTL:n (time to live) mukaan."
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr "Vastaanotettujen Gnutella viestien kokonais kilotavu määrä."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr ""
+#~ "Vastaanotettujen Gnutella viestien kokonais kilotavu määrä käyttäen TCP:tä, "
+#~ "viesti tyypin mukaan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr ""
+#~ "Vastaanotettujen Gnutella viestien kokonais kilotavu määrä käyttäen UCP:tä, "
+#~ "viesti tyypin mukaan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr ""
+#~ "Vastaanotettujen Gnutella viestien kokonais kilotavu määrä käyttäen "
+#~ "Multicastia, viesti tyypin mukaan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Vastaanotetut viestit kilotavuina yhteensä, käyttäen TCP:tä ja UCP:tä."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr ""
+#~ "Vastaanotetut viestit kilotavuina yhteensä käyttäen TCP:tä verrattunan "
+#~ "kaikkiin vastaanottuihin viesteihin."
+
+#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP pingit kaikilta Gnutella clienteilta verrattunan Limewire "
+#~ "clietteihin."
+
+#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP pongit kaikilta Gnutella clienteilta verrattunan Limewire "
+#~ "clietteihin."
+
+#~ msgid ""
+#~ "UDP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP kyselyt kaikilta Gnutella clienteilta verrattunan Limewire "
+#~ "clietteihin."
+
+#~ msgid ""
+#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP kysely osumat kaikilta Gnutella clienteilta verrattunan "
+#~ "Limewire clietteihin."
+
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP työntöjä kaikilta Gnutella clienteilta verrattunan "
+#~ "Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP pingit kilotavuina yhteensä kaikilta Gnutella clienteilta "
+#~ "verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP pongit kilotavuina yhteensä kaikilta Gnutella clienteilta "
+#~ "verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP kyselyt kilotavuina yhteensä kaikilta Gnutella clienteilta "
+#~ "verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP kysely osumat kilotavuina yhteensä kaikilta Gnutella "
+#~ "clienteilta verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Vastaanotetut UDP työntöjä osumat kilotavuina yhteensä kaikilta Gnutella "
+#~ "clienteilta verrattunan Limewire clietteihin."
+
+#~ msgid ""
+#~ "All queries that were routed to other Ultrapeers for the last hop, using "
+#~ "query routing tables."
+#~ msgstr ""
+#~ "Kaikki kyselyt mitkä ohjattiin toisille Ultrapeereille viimeiseltä hopilta, "
+#~ "käyttäen reititystauluja."
+
+#~ msgid "All queries that were routed to leaves, using query routing tables."
+#~ msgstr "Kaikki kyselyt jotka ohjattiin oksille, käyttäen reititystauluja."
+
+#~ msgid "All queries that were received from routed connections."
+#~ msgstr "Kaikki kyselyt jotka vastaanotettiin reititetyiltä yhteyksiltä."
+
+#~ msgid "Hit"
+#~ msgstr "Osuma"
+
+#~ msgid "Generic errors while reading messages."
+#~ msgstr "Yleisiä virheitä viestejä luettaessa."
+
+#~ msgid "Errors while reading query messages."
+#~ msgstr "Virheitä luettaessa kyselyjä."
+
+#~ msgid "Errors while reading query reply messages."
+#~ msgstr "Virheitä luettaessa kysely vastauksia."
+
+#~ msgid "Errors while reading ping replies."
+#~ msgstr "Virheitä luettaessa ping vastauksia."
+
+#~ msgid "Errors while reading pushes."
+#~ msgstr "Virheitä luettaessa työntöjä."
+
+#~ msgid "Errors while reading vendor messages."
+#~ msgstr "virhe luettaessa vendor viestiä."
+
+#~ msgid "All Gnutella messages sent out from this client."
+#~ msgstr "Kaikki tämän client-ohjelman lähettämät Gnutella viestit."
+
+#~ msgid "All Gnutella messages sent over TCP, by message type."
+#~ msgstr "Kaikki Gnutella viestit lähetetään TCP:na, viesti tyypin mukaan."
+
+#~ msgid "All Gnutella messages sent over UDP, by message type."
+#~ msgstr "Kaikki Gnutella viestit lähetetään UDP:na,viesti tyypin mukaan."
+
+#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "totaaliset Gnutella viestit lähetetään TCP:nä, UDP:nä tai Multicast:ina."
+
+#~ msgid "Statistics for flow controlled messages in kilobytes."
+#~ msgstr "Flow seurannan alaisten viestien kokonais kilotavumäärä."
+
+#~ msgid "Total number of errors routing messages to other clients."
+#~ msgstr "Reititysvirheiden kokonaismäärä."
+
+#~ msgid "Errors routing query hits."
+#~ msgstr "Virheitä haku osumien reitityksessä."
+
+#~ msgid ""
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
+#~ msgstr ""
+#~ "Gnutella yhteydenotto yritysten kokonaismäärä, sisältäen niin sisäiset kuin "
+#~ "ulkoisetkin yritykset."
+
+#~ msgid ""
+#~ "Total incoming requests received over time. This includes all connection "
+#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
+#~ msgstr ""
+#~ "Aikajakson aikana sisääntulleiden HTTP kyselyn kokonaismäärä. Tämä sisältää "
+#~ "sekä HEAD ja GET kyselyt."
+
+#~ msgid "General"
+#~ msgstr "Yleinen"
+
+#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
+#~ msgstr "OOB protokollalla pyydettyjen ja lähetettyjen vastauksien määrä."
+
+#~ msgid "Statistics"
+#~ msgstr "Statistiikka"
+
+#~ msgid "Validation Required"
+#~ msgstr "Tarvitaan kelpuutus"
+
+#~ msgid "Height:"
+#~ msgstr "Korkeus:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "kiitos paina OK Poistaaksesi pysyvästi lisenssin."
+
+#~ msgid "Display:"
+#~ msgstr "näytä:"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "Valmistaja viestejä"
+
+#~ msgid "HTTP Content"
+#~ msgstr "HTTP sisältö"
+
+#~ msgid "TCP Connect Time"
+#~ msgstr "TCP yhteys aika"
+
+#~ msgid "&New Folder"
+#~ msgstr "Uusi ka&nsio"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "Nimeä kansio uudelleen"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "Avaa valittu tietosto(t)"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "Poista ti&edosto(t)"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "Poista valittu tiedosto(t)"
+
+#~ msgid "Refre&sh"
+#~ msgstr "Päivitä"
+
+#~ msgid "E&xplore"
+#~ msgstr "Tutki"
+
+#~ msgid "Waiting For Tracker"
+#~ msgstr "Odottaa jäljittäjiä"
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr ""
+#~ "Valitettavasti LimeWire ei pystynyt käynnistämään vanhoja .torrent latauksia"
+
+#~ msgid "Chat Requests"
+#~ msgstr "Chat pyynnöt"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "ole hyvä ja merkitse tiedoston jonka haluat julkaista nimike."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "ole hyvä ja merkitse tiedoston jonka haluat julkaista vuosi."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "ole hyvä ja ilmoita kelpaava varmennus URL lisenssiä varten."
+
+#~ msgid "You are sharing"
+#~ msgstr "Jaettujen tiedostojen lkm"
+
+#~ msgid "Please enter the copyright holder of the file you want to publish."
+#~ msgstr ""
+#~ "ole hyvä ja ilmoita tiedoston jonka haluat jakaa tekijänoikeuksien omistaja."
+
+#~ msgid ""
+#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ msgstr ""
+#~ "LimeWire oli kykenemätön latamaan torrent tiedostoa tietystä URL:ista:"
+
+#~ msgid "Check these associations when starting LimeWire:"
+#~ msgstr "tarkista nämä yhtymät kun käynnistät LimeWiren:"
+
+#~ msgid "Alt. Locations"
+#~ msgstr "Vaihtoehtoisia sijainteja"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -394,12 +1233,12 @@ msgstr ""
 "eivät välttämättä lataudu oikein."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "Lataat jo tätä tiedostoa kohteeseen \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Lataat jo tätä tiedostoa kohteeseen \"{0}\"."
 

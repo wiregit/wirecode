@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -157,39 +157,6 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "창 닫기"
 
-#~ msgid "&New Folder"
-#~ msgstr "새 폴더"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "선택된 라이브리 폴더에 폴더추가"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "선택된 라이브러리 폴더 공유정지"
-
-#~ msgid "&Rename Folder"
-#~ msgstr "폴더 이름변경"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "파일 실행"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "선택된 파일 실행"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "파일 삭제"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "선택된 파일 삭제"
-
-#~ msgid "Refre&sh"
-#~ msgstr "다시고침"
-
-#~ msgid "E&xplore"
-#~ msgstr "찾아보기기"
-
-#~ msgid "X"
-#~ msgstr "X"
-
 #~ msgid "V"
 #~ msgstr "V"
 
@@ -198,9 +165,6 @@ msgstr ""
 
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "개별의 탭을 보임/숨김"
-
-#~ msgid "G"
-#~ msgstr "G"
 
 #~ msgid "&Statistics"
 #~ msgstr "누계"
@@ -211,20 +175,26 @@ msgstr ""
 #~ msgid "U"
 #~ msgstr "U"
 
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "선택된 라이브리 폴더에 폴더추가"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "선택된 라이브러리 폴더 공유정지"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "파일 실행"
+
+#~ msgid "X"
+#~ msgstr "X"
+
+#~ msgid "G"
+#~ msgstr "G"
+
 #~ msgid "Results"
 #~ msgstr "결과"
 
 #~ msgid "Files"
 #~ msgstr "파일"
-
-#~ msgid "files"
-#~ msgstr "파일"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "파일(불러오는 중...)"
-
-#~ msgid "Waiting For Tracker"
-#~ msgstr "트래커 기다리는 중"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "찾는데 실패함"
@@ -235,20 +205,17 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "소스 개수"
 
-#~ msgid "Orginal query"
-#~ msgstr "원래 쿼리"
+#~ msgid "Gnutella"
+#~ msgstr "그누테라"
 
-#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr "죄송합니다만, LimeWire는 당신의 오래된 torrents를 재시작 할 수 없습니다."
+#~ msgid "Busy"
+#~ msgstr "바쁨"
 
-#~ msgid "Validation Required"
-#~ msgstr "확인 요구"
+#~ msgid "files"
+#~ msgstr "파일"
 
-#~ msgid ". No line is available for output."
-#~ msgstr "출력하는 행이 없다"
-
-#~ msgid "Height:"
-#~ msgstr "높이 :"
+#~ msgid "files (Loading...)"
+#~ msgstr "파일(불러오는 중...)"
 
 #~ msgid "End Chat"
 #~ msgstr "채팅 종료"
@@ -256,14 +223,8 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "호스트와의 채팅 종료"
 
-#~ msgid "Loading Settings..."
-#~ msgstr "유저 설정을 불러오는 중..."
-
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "누계 윈도우를 불러오는 중..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "독립한 미디어 컨텐츠의 공유를 도움 지원"
 
 #~ msgid ""
 #~ "Could not find a port to use for incoming connections.\n"
@@ -272,8 +233,659 @@ msgstr ""
 #~ "내향의 접속에 사용하는 포트가 눈에 띄지 않기 때문에, \n"
 #~ "설정 윈도우로부터 포트를 지정하는 것."
 
-#~ msgid "Weedshare"
-#~ msgstr "도움이 되지 않는 공유"
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 핑의 수"
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 퐁의 수"
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 요청"
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 요청수"
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 푸쉬"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 핑의 킬로바이트 총수"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 퐁의 킬로바이트 총수"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 요청의 킬로바이트 총수"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 요청의 킬로바이트 총수"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 푸쉬의 킬로바이트 총수"
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "에러"
+
+#~ msgid "Query Replies"
+#~ msgstr "요청에 대한 대답"
+
+#~ msgid "Ping Replies"
+#~ msgstr "핑 회답"
+
+#~ msgid "Compression"
+#~ msgstr "압축"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "루트 에러 일어난다"
+
+#~ msgid "Requests"
+#~ msgstr "요청"
+
+#~ msgid "Request Methods"
+#~ msgstr "요청 방법"
+
+#~ msgid "seconds"
+#~ msgstr "초"
+
+#~ msgid "messages"
+#~ msgstr "메시지"
+
+#~ msgid "Average"
+#~ msgstr "평균"
+
+#~ msgid "Max"
+#~ msgstr "최고치"
+
+#~ msgid "Total Upstream"
+#~ msgstr "상류 총계"
+
+#~ msgid "Total Downstream"
+#~ msgstr "하류 총계"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP 총계"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "HTTP 표제"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "그누테라 총수"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "그누테라 표제"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "그누테라 메시지"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "상류 전망 총계"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "상류 실적 총계"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "하류 전망 총계"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "하류 실적 총계"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP(전망)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP(실적)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "그누테라(전망)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "그누테라(실적)"
+
+#~ msgid "All Clients"
+#~ msgstr "모든 클라이언트"
+
+#~ msgid "All Messages"
+#~ msgstr "모든 메시지"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "퐁 에러"
+
+#~ msgid "Reply Errors"
+#~ msgstr "회답 에러"
+
+#~ msgid "Push Errors"
+#~ msgstr "푸쉬 에러"
+
+#~ msgid "No Route"
+#~ msgstr "루트 없음"
+
+#~ msgid "All Requests"
+#~ msgstr "모든 요청"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "HEAD 요청"
+
+#~ msgid "GET Requests"
+#~ msgstr "GET 요청"
+
+#~ msgid "Push Requests"
+#~ msgstr "푸쉬 요청"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "그누테라 요청"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "그누테라 (LimeWire) 요청"
+
+#~ msgid "Accepted"
+#~ msgstr "수용"
+
+#~ msgid "IO Error"
+#~ msgstr "IO 에러"
+
+#~ msgid "THEX Request"
+#~ msgstr "THEX 요청"
+
+#~ msgid "URN Get"
+#~ msgstr "URN Get"
+
+#~ msgid "Freeloader"
+#~ msgstr "프리로더"
+
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#~ msgid "Get"
+#~ msgstr "Get"
+
+#~ msgid "Head"
+#~ msgstr "HEAD"
+
+#~ msgid "Pushed Head"
+#~ msgstr "Head를 푸쉬했습니다."
+
+#~ msgid "Orginal query"
+#~ msgstr "원래 쿼리"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "유저 설정을 불러오는 중..."
+
+#~ msgid "Network"
+#~ msgstr "네트워크"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "홉스로 부터 요청된 모든 쿼리 킬로바이트 총수"
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "동작중(TTL) 수신된 모든 요청 쿼리 총킬로바이트 총수"
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "홉스로 부터 요청된 모든 쿼리 킬로바이트 총수"
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "모든 요청된 킬로바이트 총수"
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "수신된 그누테라 메시지에 있어서의 평균적 사이즈의 킬로바이트수"
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "LimeWires로부터 수신한 메시지에 있어서의 평균적 사이즈의 킬로바이트수"
+
+#~ msgid "Current"
+#~ msgstr "현행"
+
+#~ msgid ". No line is available for output."
+#~ msgstr "출력하는 행이 없다"
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "홉스에 의해 수신된 모든 요청"
+
+#~ msgid "Special Queries"
+#~ msgstr "특별한 요청"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "모든 특별히 표시된 요청"
+
+#~ msgid "False Positive"
+#~ msgstr "정오"
+
+#~ msgid "Generic Errors"
+#~ msgstr "일반적 에러"
+
+#~ msgid "Handshaking"
+#~ msgstr "악수"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "울트라 유저로서의 악수의 누계"
+
+#~ msgid "Flow Control"
+#~ msgstr "플로우 관리"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "플로우 관리된 메시지의 누계"
+
+#~ msgid "Total messages filtered."
+#~ msgstr "필터화 된 메시지 총수"
+
+#~ msgid "Transfers"
+#~ msgstr "전송"
+
+#~ msgid "Color"
+#~ msgstr "칼라"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "파일의 그래프에 대해 누계를 기입"
+
+#~ msgid "All Errors"
+#~ msgstr "모든에러"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "쓸모없는 최대 적재 질량의 길이"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "쓸모없는 호프"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "쓸모없는 TTL"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "호프＞소프트 막스"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(홉스＋TTL)>하드 막스"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "쓸모없는 메시지 코드"
+
+#~ msgid "All Query Errors"
+#~ msgstr "모든 요청 에러"
+
+#~ msgid "URN Query"
+#~ msgstr "URN 요청"
+
+#~ msgid "Query Too Large"
+#~ msgstr "너무 큰 요청"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "너무 큰 XML 요청"
+
+#~ msgid "Empty Query"
+#~ msgstr "빈 요청"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "요청에 불법인 문자"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "모든 요청 회답 에러"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "무효한 회답 포트"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "무효한 회답 주소"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "쓸모없는 회답 속도"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "모든 핑 회답 에러"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "무효한 핑 회답의 최대 적재 질량"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "무효한 핑 회답 포트"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "무효한 핑 회답 주소"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "무효한 GGEP 차단"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "무효한 벤더의 길이"
+
+#~ msgid "All Push Errors"
+#~ msgstr "모든 푸쉬 에러"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "무효한 푸쉬 포트"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "무효한 푸쉬 주소"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "무효한 푸쉬 최대 적재 질량"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "모든 벤더 메시지 에러"
+
+#~ msgid "Invalid ID"
+#~ msgstr "무효한 ID"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "무효한 선별"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "무효한 최대 적재 질량"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "인식되지 않은 공유자 메시지"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "루트표 패치"
+
+#~ msgid "What's New?"
+#~ msgstr "새로운 정보"
+
+#~ msgid "Hard Limit"
+#~ msgstr "강력한 제한"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "강한 제한 (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "강한 제한 (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "강한 제한 (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "강한 제한 (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "강한 제한 (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "강한 제한 (TTL 5또는 그 이상)"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "접속 시행"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "내향 시행"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "마그넷 요청"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "알수없는 요청"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "금지된 호스트"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "즉시에 닫기"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "헤더를 읽어오는데 문제발생"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "알수없는 회답 코드"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "내용 URN 불일치"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "호환성이 없는 치역"
+
+#~ msgid "Failed"
+#~ msgstr "실패했습니다."
+
+#~ msgid "Succeeded"
+#~ msgstr "성공했습니다."
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "HTTP 1.1 성공"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "HTTP 1.0 성공"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "HTTP 1.1 실패"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "HTTP 1.0 실패"
+
+#~ msgid "Retried Success"
+#~ msgstr "재시행 성공"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "다이렉트 접속 성공"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "푸쉬 접속 성공"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "푸쉬 실패(중단)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "푸쉬 실패(GIV 수신 없음)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "푸쉬 실패(접속 불량)"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "성공한 Push Proxy"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "잘못된 Push Proxy"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "실패한 Push Proxy"
+
+#~ msgid "Push Proxy"
+#~ msgstr "Push Proxy"
+
+#~ msgid "Traditional Get"
+#~ msgstr "종래의 Get"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "알수없는 URN Get"
+
+#~ msgid "Limit Reached"
+#~ msgstr "한계 도달"
+
+#~ msgid "Banned Client"
+#~ msgstr "금지된 클라이언트"
+
+#~ msgid "Unknown"
+#~ msgstr "알수없는"
+
+#~ msgid "Pushed Get"
+#~ msgstr "Get을 푸쉬했습니다."
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "알수없는를 푸쉬했습니다."
+
+#~ msgid "Push Failed"
+#~ msgstr "푸쉬가 실패했습니다."
+
+#~ msgid "Completed Responses"
+#~ msgstr "응답 완료하였습니다."
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "파일 전송이 완료되었습니다."
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "외향 거부(Leaf)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "외향 거부(오래된 울트라 유저)"
+
+#~ msgid "Out Acc."
+#~ msgstr "외향 수용"
+
+#~ msgid "In Rej."
+#~ msgstr "내향 거부"
+
+#~ msgid "In Acc."
+#~ msgstr "내향 수용"
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "외향 거부(가득참)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "외향 받아들임(가이던스에 따랐다)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "외향 받아들임(가이던스를 무시했습니다.)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "밖으로 향한 받아들임(가이던스 없음)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "내향 거부(Leaf)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "내향 받아들임(Leaf)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "내향 받아들임(Leaf를 가이드)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "내향 받아들임(울트라 유저)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "내향 거부(모든 슬롯을 놓쳤습니다)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "내향 거부(네트워크에 울트라 유저가 필요)"
+
+#~ msgid "Server Reject"
+#~ msgstr "서버 거부"
+
+#~ msgid "No Conclusion"
+#~ msgstr "결론 없음"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "LimeWire 울트라 유저"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "LimeWire Leaves"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "그 외 울트라 유저"
+
+#~ msgid "Other Leaves"
+#~ msgstr "그 외 Leaves"
+
+#~ msgid "Responses Requested"
+#~ msgstr "요청 응답"
+
+#~ msgid "Responses Received"
+#~ msgstr "수신 응답"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "우회로 응답"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "OOB 성공율"
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "독립한 미디어 컨텐츠의 공유를 도움 지원"
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "고급 누계 표시"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr "송신 또는 그누테라 메시지를 통해 밖으로 향한 데이터를 송신하는데 사용하는 모든 정보처리량"
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr "하부 또는 그누테라 메시지를 통해 내향 데이터를 수신하는데 사용하는 모든 정보처리량"
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr "멀티 캐스트로 수신한 사본의 요청수에 대한 모든 요청수"
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr "멀티 캐스트로 수신한 요청의 사본에 해당되는 킬로바이트 총수에 대한 모든요청수"
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr "멀티 캐스트를 개입시켜 송신된 그누테라의 모든종류별 메시지"
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
@@ -282,9 +894,6 @@ msgstr ""
 #~ msgstr ""
 #~ "처리 능력의 누계에는, 윗방향과 아래방향에 보내지는 모든 처리 능력 언제 있던 정보가 있습니다. 카테고리의 1개를 클릭해, 소망의 누계를 "
 #~ "보는 것."
-
-#~ msgid "Network"
-#~ msgstr "네트워크"
 
 #~ msgid ""
 #~ "Statistics on the current state of the network. These statistics are quite "
@@ -304,21 +913,8 @@ msgstr ""
 #~ "고급 누계에는, 그누테라 메시지와 HTTP 트래픽에 대한 상세한 정보가 있습니다. 이 정보는 그누테라 네트워크로 작업하는 연구자 뿐만이 "
 #~ "아니라 고급 유저에게도 도움이 됩니다.. 고급 누계는 초기설정으로 표시되지 않고, 일반 유저에게 추천하지 않습니다."
 
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "고급 누계 표시"
-
-#~ msgid "Gnutella"
-#~ msgstr "그누테라"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr "송신 또는 그누테라 메시지를 통해 밖으로 향한 데이터를 송신하는데 사용하는 모든 정보처리량"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr "하부 또는 그누테라 메시지를 통해 내향 데이터를 수신하는데 사용하는 모든 정보처리량"
+#~ msgid "Weedshare"
+#~ msgstr "도움이 되지 않는 공유"
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "이 클라이언트로 부터 모든 그누테라 메시지가 수신되었습니다."
@@ -340,22 +936,8 @@ msgstr ""
 #~ "queries."
 #~ msgstr "TCP로 수신한 사본의 요청수에 대한 모든 요청수"
 
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr "멀티 캐스트로 수신한 사본의 요청수에 대한 모든 요청수"
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "홉스에 의해 수신된 모든 요청"
-
 #~ msgid "All received queries, by time to live (TTL)."
 #~ msgstr "동작중(TTL) 수신한 모든 요청"
-
-#~ msgid "Special Queries"
-#~ msgstr "특별한 요청"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "모든 특별히 표시된 요청"
 
 #~ msgid "All received query hits, by hops."
 #~ msgstr "모든 수신된 홉스에 의한 요청의 종"
@@ -388,23 +970,6 @@ msgstr ""
 #~ "number of queries."
 #~ msgstr "TCP로 수신한 사본의 요청에 해당되는 킬로바이트 총수에 대한 모든요청수"
 
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr "멀티 캐스트로 수신한 요청의 사본에 해당되는 킬로바이트 총수에 대한 모든요청수"
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "홉스로 부터 요청된 모든 쿼리 킬로바이트 총수"
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "동작중(TTL) 수신된 모든 요청 쿼리 총킬로바이트 총수"
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "홉스로 부터 요청된 모든 쿼리 킬로바이트 총수"
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "모든 요청된 킬로바이트 총수"
-
 #~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr "모든 LimeWires의 클라이언트로부터 수신한 UDP의 핑"
 
@@ -421,27 +986,6 @@ msgstr ""
 
 #~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr "그 외 LimeWires에 대한 그누테라의 클라이언트 전원으로부터 수신한 UDP의 푸쉬"
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 핑의 수"
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 퐁의 수"
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 요청"
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 요청수"
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트의 푸쉬"
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
@@ -469,40 +1013,6 @@ msgstr ""
 #~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 UDP의 킬로바이트 총수"
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 핑의 킬로바이트 총수"
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 퐁의 킬로바이트 총수"
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 요청의 킬로바이트 총수"
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 요청의 킬로바이트 총수"
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr "그 외 LimeWires에 대해 그누테라의 클라이언트 전원으로부터 수신한 멀티 캐스트 푸쉬의 킬로바이트 총수"
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "수신된 그누테라 메시지에 있어서의 평균적 사이즈의 킬로바이트수"
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "LimeWires로부터 수신한 메시지에 있어서의 평균적 사이즈의 킬로바이트수"
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
 #~ msgstr "요청 루트표를 이용해, 마지막 호프에 대해, 그 외 UI트랍파에 루트 된 모든 요청"
@@ -516,38 +1026,20 @@ msgstr ""
 #~ msgid "Hit"
 #~ msgstr "히트수"
 
-#~ msgid "False Positive"
-#~ msgstr "정오"
-
-#~ msgid "Errors"
-#~ msgstr "에러"
-
-#~ msgid "Generic Errors"
-#~ msgstr "일반적 에러"
-
 #~ msgid "Generic errors while reading messages."
 #~ msgstr "메시지 독해중의 일반적 에러"
 
 #~ msgid "Errors while reading query messages."
 #~ msgstr "요청의 메시지를 읽어내 안에 일어나는 에러"
 
-#~ msgid "Query Replies"
-#~ msgstr "요청에 대한 대답"
-
 #~ msgid "Errors while reading query reply messages."
 #~ msgstr "요청에 대한 대답의 메시지를 읽어내 안에 일어나는 에러"
-
-#~ msgid "Ping Replies"
-#~ msgstr "핑 회답"
 
 #~ msgid "Errors while reading ping replies."
 #~ msgstr "핑 회답을 읽어내 안의 에러"
 
 #~ msgid "Errors while reading pushes."
 #~ msgstr "푸쉬를 읽어내 안의 에러"
-
-#~ msgid "Vendor Messages"
-#~ msgstr "공유자메시지"
 
 #~ msgid "Errors while reading vendor messages."
 #~ msgstr "공유자메시지를 읽어내 안에 일어나는 에러"
@@ -560,9 +1052,6 @@ msgstr ""
 
 #~ msgid "All Gnutella messages sent over UDP, by message type."
 #~ msgstr "UDP를 개입시켜 송신된 그누테라의 모든종류별 메시지"
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr "멀티 캐스트를 개입시켜 송신된 그누테라의 모든종류별 메시지"
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr "TCP, UDP 또는 멀티 캐스트를 개입시켜 송신된 그누테라로부터의 모든메시지"
@@ -672,14 +1161,8 @@ msgstr ""
 #~ "LimeWires."
 #~ msgstr "그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 푸쉬의 킬로바이트 총수"
 
-#~ msgid "Handshaking"
-#~ msgstr "악수"
-
 #~ msgid "Statistics for handshaking as a leaf."
 #~ msgstr "리프로서의 악수의 누계"
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "울트라 유저로서의 악수의 누계"
 
 #~ msgid "Statistics for outgoing Gnutella connection handshaking."
 #~ msgstr "밖으로 향한 그누테라 접속 악수의 누계"
@@ -695,20 +1178,11 @@ msgstr ""
 #~ "server."
 #~ msgstr "밖으로 향한 그누테라 접속 악수의 서버로부터의 거부에 관한 누계"
 
-#~ msgid "Compression"
-#~ msgstr "압축"
-
 #~ msgid "Statistics for compressed upstream traffic in kilobytes."
 #~ msgstr "압축된 상류 트래픽에 있어서의 킬로바이트수의 누계"
 
 #~ msgid "Statistics for compressed downstream traffic in kilobytes."
 #~ msgstr "압축된 하류 트래픽에 있어서의 킬로바이트수의 누계"
-
-#~ msgid "Flow Control"
-#~ msgstr "플로우 관리"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "플로우 관리된 메시지의 누계"
 
 #~ msgid "Statistics for flow controlled messages in kilobytes."
 #~ msgstr "플로우 관리된 메시지에 있어서의 킬로바이트수의 누계"
@@ -716,14 +1190,8 @@ msgstr ""
 #~ msgid "Total number of errors routing messages to other clients."
 #~ msgstr "그 외 클라이언트에의 루트 에러 메시지의 총수"
 
-#~ msgid "Hit Routing Errors"
-#~ msgstr "루트 에러 일어난다"
-
 #~ msgid "Errors routing query hits."
 #~ msgstr "루트 에러에의 요청수"
-
-#~ msgid "Total messages filtered."
-#~ msgstr "필터화 된 메시지 총수"
 
 #~ msgid ""
 #~ "Total number of Gnutella connection attempts, either initiated internally or "
@@ -758,9 +1226,6 @@ msgstr ""
 #~ "장기에 걸쳐 수신과 제거된 대체 위치의 총수. 여기에는 유저가 적극적으로 접속하려고 하는 위치, 유저가 무시하는 위치, 제거할 수 없는 "
 #~ "위치, 접속의 시도를 영구적으로 제거한 위치가 있습니다."
 
-#~ msgid "Transfers"
-#~ msgstr "전송"
-
 #~ msgid ""
 #~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
 #~ "For HTTP1.1, values are per chunk."
@@ -771,9 +1236,6 @@ msgstr ""
 #~ "This can vary, for example, when servers are experiencing high loads."
 #~ msgstr ""
 #~ "TCP 접속의 다운로드를 달성하기 위해서, 1,000분의 1초 단위로 시간을 기록. 예를 들면 서버가 높은 로드일 때는, 이 시간은 변화."
-
-#~ msgid "Requests"
-#~ msgstr "요청"
 
 #~ msgid ""
 #~ "Total incoming upload requests. These numbers are incremented on every "
@@ -790,9 +1252,6 @@ msgstr ""
 #~ msgstr ""
 #~ "밖으로 향한 회답의 총수. 각 대답을 송신하기 전에 이 수치는 구문 분석 되어 HHTP/1. 1의 전송에 대해 정리가 됩니다.. "
 #~ "[노멀]이란, 파일의 일부분을 전송 하려고 하는 요청수."
-
-#~ msgid "Request Methods"
-#~ msgstr "요청 방법"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
@@ -813,431 +1272,8 @@ msgstr ""
 #~ "시행, 완료, 중단, 또는 한계 상태에 있는 업로드의 총수. 이러한 수치는 정리는 아니고, 각 접속에 대해 구문 분석 됩니다.. (한계의 "
 #~ "업로드는, 중단된 업로드로서 센다. )"
 
-#~ msgid "seconds"
-#~ msgstr "초"
-
-#~ msgid "messages"
-#~ msgstr "메시지"
-
-#~ msgid "Average"
-#~ msgstr "평균"
-
-#~ msgid "Max"
-#~ msgstr "최고치"
-
-#~ msgid "Color"
-#~ msgstr "칼라"
-
-#~ msgid "Current"
-#~ msgstr "현행"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "파일의 그래프에 대해 누계를 기입"
-
-#~ msgid "Total Upstream"
-#~ msgstr "상류 총계"
-
-#~ msgid "Total Downstream"
-#~ msgstr "하류 총계"
-
-#~ msgid "HTTP Total"
-#~ msgstr "HTTP 총계"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "HTTP 표제"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "그누테라 총수"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "그누테라 표제"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "그누테라 메시지"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "상류 전망 총계"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "상류 실적 총계"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "하류 전망 총계"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "하류 실적 총계"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP(전망)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP(실적)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "그누테라(전망)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "그누테라(실적)"
-
-#~ msgid "All Clients"
-#~ msgstr "모든 클라이언트"
-
-#~ msgid "All Errors"
-#~ msgstr "모든에러"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "쓸모없는 최대 적재 질량의 길이"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "쓸모없는 호프"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "쓸모없는 TTL"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "호프＞소프트 막스"
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(홉스＋TTL)>하드 막스"
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "쓸모없는 메시지 코드"
-
-#~ msgid "All Query Errors"
-#~ msgstr "모든 요청 에러"
-
-#~ msgid "URN Query"
-#~ msgstr "URN 요청"
-
-#~ msgid "Query Too Large"
-#~ msgstr "너무 큰 요청"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "너무 큰 XML 요청"
-
-#~ msgid "Empty Query"
-#~ msgstr "빈 요청"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "요청에 불법인 문자"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "모든 요청 회답 에러"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "무효한 회답 포트"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "무효한 회답 주소"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "쓸모없는 회답 속도"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "모든 핑 회답 에러"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "무효한 핑 회답의 최대 적재 질량"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "무효한 핑 회답 포트"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "무효한 핑 회답 주소"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "무효한 GGEP 차단"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "무효한 벤더의 길이"
-
-#~ msgid "All Push Errors"
-#~ msgstr "모든 푸쉬 에러"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "무효한 푸쉬 포트"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "무효한 푸쉬 주소"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "무효한 푸쉬 최대 적재 질량"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "모든 벤더 메시지 에러"
-
-#~ msgid "Invalid ID"
-#~ msgstr "무효한 ID"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "무효한 선별"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "무효한 최대 적재 질량"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "인식되지 않은 공유자 메시지"
-
-#~ msgid "All Messages"
-#~ msgstr "모든 메시지"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "루트표 패치"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "What's New?"
-#~ msgstr "새로운 정보"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "퐁 에러"
-
-#~ msgid "Reply Errors"
-#~ msgstr "회답 에러"
-
-#~ msgid "Push Errors"
-#~ msgstr "푸쉬 에러"
-
-#~ msgid "Hard Limit"
-#~ msgstr "강력한 제한"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "강한 제한 (TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "강한 제한 (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "강한 제한 (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "강한 제한 (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "강한 제한 (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "강한 제한 (TTL 5또는 그 이상)"
-
-#~ msgid "No Route"
-#~ msgstr "루트 없음"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "접속 시행"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "내향 시행"
-
-#~ msgid "All Requests"
-#~ msgstr "모든 요청"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "HEAD 요청"
-
-#~ msgid "GET Requests"
-#~ msgstr "GET 요청"
-
-#~ msgid "Push Requests"
-#~ msgstr "푸쉬 요청"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "그누테라 요청"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "그누테라 (LimeWire) 요청"
-
-#~ msgid "Chat Requests"
-#~ msgstr "채팅 요청"
-
-#~ msgid "Magnet Requests"
-#~ msgstr "마그넷 요청"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "알수없는 요청"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "금지된 호스트"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "즉시에 닫기"
-
-#~ msgid "Accepted"
-#~ msgstr "수용"
-
-#~ msgid "Busy"
-#~ msgstr "바쁨"
-
 #~ msgid "Not Sharing Files"
 #~ msgstr "파일 공유 없음"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "헤더를 읽어오는데 문제발생"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "알수없는 회답 코드"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "내용 URN 불일치"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "호환성이 없는 치역"
-
-#~ msgid "IO Error"
-#~ msgstr "IO 에러"
-
-#~ msgid "Failed"
-#~ msgstr "실패했습니다."
-
-#~ msgid "Succeeded"
-#~ msgstr "성공했습니다."
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "HTTP 1.1 성공"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "HTTP 1.0 성공"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "HTTP 1.1 실패"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "HTTP 1.0 실패"
-
-#~ msgid "Retried Success"
-#~ msgstr "재시행 성공"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "다이렉트 접속 성공"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "푸쉬 접속 성공"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "푸쉬 실패(중단)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "푸쉬 실패(GIV 수신 없음)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "푸쉬 실패(접속 불량)"
-
-#~ msgid "THEX Request"
-#~ msgstr "THEX 요청"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "성공한 Push Proxy"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "잘못된 Push Proxy"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "실패한 Push Proxy"
-
-#~ msgid "Push Proxy"
-#~ msgstr "Push Proxy"
-
-#~ msgid "Update File"
-#~ msgstr "파일 업데이트"
-
-#~ msgid "Traditional Get"
-#~ msgstr "종래의 Get"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "알수없는 URN Get"
-
-#~ msgid "URN Get"
-#~ msgstr "URN Get"
-
-#~ msgid "Limit Reached"
-#~ msgstr "한계 도달"
-
-#~ msgid "Banned Client"
-#~ msgstr "금지된 클라이언트"
-
-#~ msgid "Freeloader"
-#~ msgstr "프리로더"
-
-#~ msgid "Normal"
-#~ msgstr "Normal"
-
-#~ msgid "Get"
-#~ msgstr "Get"
-
-#~ msgid "Head"
-#~ msgstr "HEAD"
-
-#~ msgid "Unknown"
-#~ msgstr "알수없는"
-
-#~ msgid "Pushed Get"
-#~ msgstr "Get을 푸쉬했습니다."
-
-#~ msgid "Pushed Head"
-#~ msgstr "Head를 푸쉬했습니다."
-
-#~ msgid "Pushed Unknown"
-#~ msgstr "알수없는를 푸쉬했습니다."
-
-#~ msgid "Push Failed"
-#~ msgstr "푸쉬가 실패했습니다."
-
-#~ msgid "Completed Responses"
-#~ msgstr "응답 완료하였습니다."
 
 #~ msgid "Interrupted"
 #~ msgstr "중단되었습니다."
@@ -1245,86 +1281,50 @@ msgstr ""
 #~ msgid "Stalled"
 #~ msgstr "지연되었습니다."
 
-#~ msgid "Completed File Transfers"
-#~ msgstr "파일 전송이 완료되었습니다."
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "외향 거부(Leaf)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "외향 거부(오래된 울트라 유저)"
-
-#~ msgid "Out Acc."
-#~ msgstr "외향 수용"
-
-#~ msgid "In Rej."
-#~ msgstr "내향 거부"
-
-#~ msgid "In Acc."
-#~ msgstr "내향 수용"
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "외향 거부(가득참)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "외향 받아들임(가이던스에 따랐다)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "외향 받아들임(가이던스를 무시했습니다.)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "밖으로 향한 받아들임(가이던스 없음)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "내향 거부(Leaf)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "내향 받아들임(Leaf)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "내향 받아들임(Leaf를 가이드)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "내향 받아들임(울트라 유저)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "내향 거부(모든 슬롯을 놓쳤습니다)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "내향 거부(네트워크에 울트라 유저가 필요)"
-
-#~ msgid "Server Reject"
-#~ msgstr "서버 거부"
-
-#~ msgid "No Conclusion"
-#~ msgstr "결론 없음"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "LimeWire 울트라 유저"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "LimeWire Leaves"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "그 외 울트라 유저"
-
-#~ msgid "Other Leaves"
-#~ msgstr "그 외 Leaves"
-
-#~ msgid "Responses Requested"
-#~ msgstr "요청 응답"
-
-#~ msgid "Responses Received"
-#~ msgstr "수신 응답"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "우회로 응답"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "OOB 성공율"
-
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr "요청되어 OOB 프로토콜을 통하여 수신된 응답수"
+
+#~ msgid "Update File"
+#~ msgstr "파일 업데이트"
+
+#~ msgid "Validation Required"
+#~ msgstr "확인 요구"
+
+#~ msgid "Height:"
+#~ msgstr "높이 :"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "공유자메시지"
+
+#~ msgid "&New Folder"
+#~ msgstr "새 폴더"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "폴더 이름변경"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "선택된 파일 실행"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "파일 삭제"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "선택된 파일 삭제"
+
+#~ msgid "Refre&sh"
+#~ msgstr "다시고침"
+
+#~ msgid "E&xplore"
+#~ msgstr "찾아보기기"
+
+#~ msgid "Waiting For Tracker"
+#~ msgstr "트래커 기다리는 중"
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr "죄송합니다만, LimeWire는 당신의 오래된 torrents를 재시작 할 수 없습니다."
+
+#~ msgid "Chat Requests"
+#~ msgstr "채팅 요청"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -1546,12 +1546,12 @@ msgid ""
 msgstr "마그넷 링크에 사용되고 있는 URL가 무효. 파일이 올바르게 다운로드할 수 없을 가능성 있어."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "이 파일을 \"{0}\"에 이미 다운로드하고 있습니다."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "이 파일을 \"{0}\"에 이미 다운로드하고 있습니다."
 

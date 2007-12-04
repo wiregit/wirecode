@@ -8,18 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-08 22:42+0000\n"
+"PO-Revision-Date: 2007-12-01 21:49+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Γίνεται φόρτωση των ρυθμίσεων διαχείρησης magnet..."
 
 #~ msgid ""
 #~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
@@ -202,42 +199,6 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "Κλείσιμο παραθύρου."
 
-#~ msgid "Statistics"
-#~ msgstr "Στατιστικές"
-
-#~ msgid "&New Folder"
-#~ msgstr "&Νέος Φάκελος"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "Προσθέστε ένα φάκελο στον επιλεγμένο φάκελο της βιβλιοθήκης"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "Σταματήστε να μοιράζεστε τον επιλεγμένο φάκελο της βιβλιοθήκης."
-
-#~ msgid "&Rename Folder"
-#~ msgstr "&Μετονομασία Φακέλου"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "Άνοιαμα Αρχείου(ων)"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "Άνοιγμα Επελεγμένου(ων) αρχείου(ων)"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "Διαγραφή Αρχ&είου(ων)"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "Διαγράψε το(α) επελεγμένο(να) αρχείο(α)"
-
-#~ msgid "Refre&sh"
-#~ msgstr "Ανανέωση"
-
-#~ msgid "E&xplore"
-#~ msgstr "Εξερεύνησε"
-
-#~ msgid "X"
-#~ msgstr "Χ"
-
 #~ msgid "V"
 #~ msgstr "E"
 
@@ -256,24 +217,23 @@ msgstr ""
 #~ msgid "U"
 #~ msgstr "X"
 
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "Προσθέστε ένα φάκελο στον επιλεγμένο φάκελο της βιβλιοθήκης"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "Σταματήστε να μοιράζεστε τον επιλεγμένο φάκελο της βιβλιοθήκης."
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "Άνοιαμα Αρχείου(ων)"
+
+#~ msgid "X"
+#~ msgstr "Χ"
+
 #~ msgid "Results"
 #~ msgstr "Αποτελέσματα"
 
-#~ msgid "Only search results with a {0} are official LimeWire communications."
-#~ msgstr ""
-#~ "Μόνο αποτελέσματα με ένα {0} είναι αναγωνρισμένες πληροφορίες του LimeWire."
-
 #~ msgid "Files"
 #~ msgstr "αρχεία"
-
-#~ msgid "files"
-#~ msgstr "αρχεία"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "αρχεία (Φόρτωμα...)"
-
-#~ msgid "You are sharing"
-#~ msgstr "Ο αριθμός των αρχείων που μοιράζεστε."
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Η ανάκτηση απέτυχε"
@@ -284,33 +244,26 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "για τις πηγές"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Busy"
+#~ msgstr "Απασχολημένο"
+
+#~ msgid "files"
+#~ msgstr "αρχεία"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "αρχεία (Φόρτωμα...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Αρχεία με αυτό το όνομα"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Ψάξε για αρχεία με το ίδιο όνομα"
 
-#~ msgid "Orginal query"
-#~ msgstr "Αρχικό ερώτημα"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr "Κάνε την ίδια έρευνα σαν αυτή που βρήκες το προηγούμενο αρχείο."
-
-#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr ""
-#~ "Συγγνώμη, αλλά το LimeWire δεν μπόρεσε να επανεκκινήσει τα παλιά σας torrent."
-
-#~ msgid "Validation Required"
-#~ msgstr "Επικύρωση Αναγκαία"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Δεν υπάρχει διαθέσιμη γραμμή για έξοδο."
-
-#~ msgid "Height:"
-#~ msgstr "Ύψος:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Παρακαλώ πατήστε ΟΚ για να διαγράψετε για πάντα την άδεια."
 
 #~ msgid "End Chat"
 #~ msgstr "Τέλος συνομιλίας"
@@ -318,14 +271,649 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Διακοπή συνομιλίας με έναν πάροχο."
 
-#~ msgid "Loading Resources..."
-#~ msgstr "Φόρτωση πηγών..."
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Φόρτωση παραθύρου στατιστικών στοχείων..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Δεν μπόρεσε να βρεί μία θύρα που να χρησιμοποιείται για εισερχόμενες "
+#~ "συνδέσεις.\n"
+#~ "Παρακαλώ προσδιορίστε μία θύρα από το παράθυρο διαμόρφωσης."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Αιτήσεις ping Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Απαντήσεις σε ping Multicast που στάληκαν από όλους τους πελάτες του "
+#~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Αιτήσεις αναζήτησης Multicast που στάληκαν από όλους τους πελάτες του "
+#~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Χτύποι αναζήτησης Multicast που στάληκαν από όλους τους πελάτες του "
+#~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Αιτήσεις push Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
+#~ "αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για αιτήσεις ping Multicast που στάληκαν από όλους τους "
+#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για απαντήσεις σε ping Multicast που στάληκαν από όλους "
+#~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για αιτήσεις αναζήτησης Multicast που στάληκαν από όλους "
+#~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για χτύποι αναζήτησης Multicast που στάληκαν από όλους τους "
+#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για αιτήσεις push Multicast που στάληκαν από όλους τους "
+#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "Σφάλματα"
+
+#~ msgid "Query Replies"
+#~ msgstr "Χτύποι αναζήτησης"
+
+#~ msgid "Ping Replies"
+#~ msgstr "Απαντήσεις σε ping"
+
+#~ msgid "Compression"
+#~ msgstr "Συμπίεση"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Σφάλματα χτύποι αναζήτησης δρομολόγησης."
+
+#~ msgid "Requests"
+#~ msgstr "Αιτήσεις"
+
+#~ msgid "Request Methods"
+#~ msgstr "Μέθοδοι αιτήσεων"
+
+#~ msgid "seconds"
+#~ msgstr "δευτερόλεπτα"
+
+#~ msgid "Average"
+#~ msgstr "Μέσος"
+
+#~ msgid "Max"
+#~ msgstr "Μέγιστος"
+
+#~ msgid "Total Upstream"
+#~ msgstr "Σύνολο ανερχόμενου"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Σύνολο κατερχόμενου"
+
+#~ msgid "HTTP Total"
+#~ msgstr "Σύνολο HTTP"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "Επικεφαλίδες HTTP"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Σύνολο Gnutella"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Κεγαλίδες Gnutella"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Μηνύματα Gnutella"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Σύνολο ανερχόμενου (ενδεχόμενου)"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Σύνολο ανερχόμενου (πραγματικού)"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Σύνολο κατερχόμενου (ενδεχόμενου)"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Σύνολο κατερχόμενου (πραγματικού)"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (ενδεχόμενο)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP (πραγματικό)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (ενδεχόμενο)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (πραγματικό)"
+
+#~ msgid "All Clients"
+#~ msgstr "Όλοι οι πελάτες"
+
+#~ msgid "All Messages"
+#~ msgstr "Όλα τα μηνύματα"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Σφάλματα απαντήσεις σε ping"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Σφάλματα χτύποι αναζήτησης"
+
+#~ msgid "Push Errors"
+#~ msgstr "Σφάλματα αιτήσεις push"
+
+#~ msgid "No Route"
+#~ msgstr "Μη δρομολόγηση"
+
+#~ msgid "All Requests"
+#~ msgstr "Όλες οι αιτήσεις"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "Αιτήσεις αποστολή επικεφαλίδες (HEAD)"
+
+#~ msgid "GET Requests"
+#~ msgstr "Αιτήσεις αποστολή αρχείων (GET)"
+
+#~ msgid "Push Requests"
+#~ msgstr "Αιτήσεις push"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Αιτήσεις Gnutella"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Αιτήσεις Gnutella (LimeWire)"
+
+#~ msgid "Accepted"
+#~ msgstr "Δεκτό"
+
+#~ msgid "IO Error"
+#~ msgstr "Σφάλμα Εισ/Εξ"
+
+#~ msgid "THEX Request"
+#~ msgstr "Αίτηση THEX"
+
+#~ msgid "URN Get"
+#~ msgstr "Αποστολή αρχείων URN"
+
+#~ msgid "Freeloader"
+#~ msgstr "Χρήστες-παράσιτα"
+
+#~ msgid "Normal"
+#~ msgstr "Κανονικό"
+
+#~ msgid "Get"
+#~ msgstr "Αποστολή αρχείων (GET)"
+
+#~ msgid "Head"
+#~ msgstr "Αποστολή επικεφαλίδες (HEAD)"
+
+#~ msgid "Orginal query"
+#~ msgstr "Αρχικό ερώτημα"
 
 #~ msgid "Loading Settings..."
 #~ msgstr "Φόρτωση ρυθμίσεων χρήστη..."
 
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Φόρτωση παραθύρου στατιστικών στοχείων..."
+#~ msgid "Network"
+#~ msgstr "Δίκτυο"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "hops."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "time to live (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "hops."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με τον "
+#~ "time to live (TTL)."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "Μέσο μέγεθος ληφθέντων μηνυμάτων Gnutella σε kilobytes."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "Μέσο μέγεθος ληφθέντων μηνυμάτων σε kilobytes από τα LimeWires."
+
+#~ msgid "Current"
+#~ msgstr "Τρέχων"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Δεν υπάρχει διαθέσιμη γραμμή για έξοδο."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον hops."
+
+#~ msgid "Special Queries"
+#~ msgstr "Ειδικά ερωτήματα"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Όλα τα ειδικά επελεγμένα ερωτήματα."
+
+#~ msgid "False Positive"
+#~ msgstr "Λάθος Θετικό"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Γενικά σφάλματα"
+
+#~ msgid "Handshaking"
+#~ msgstr "Χειραψία"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Στατιστηκά χειραψίας σαν ανώτερος."
+
+#~ msgid "Flow Control"
+#~ msgstr "Έλεγχος ροής"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Στατιστικά στοιχεία για μηνύματα ελεγχόμενης ροής."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Σύνολο φιλτραρισμένων μηνυμάτων."
+
+#~ msgid "Transfers"
+#~ msgstr "Μεταφορές αρχείων"
+
+#~ msgid "Color"
+#~ msgstr "Χρώμα"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr ""
+#~ "Να γραφούν στατιστικά στοιχεία γι’ αυτή τη γραφική παράσταση στα αρχεία."
+
+#~ msgid "All Errors"
+#~ msgstr "Όλα τα σφάλματα"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "Άκυρη έκταση ωφέλιμου φορτίου"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "Άκυρο Hops"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "Άκυρο TTL"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "Hops > soft μέγιστος"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(Hops + TTL) > hard μέγιστος"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "Άκυρος κωδικός μηνύματος"
+
+#~ msgid "All Query Errors"
+#~ msgstr "Όλα τα σφάλματα ερωτημάτων"
+
+#~ msgid "URN Query"
+#~ msgstr "Αιτήσεις αναζήτησης URN"
+
+#~ msgid "Query Too Large"
+#~ msgstr "Υπερμεγέθη αναζήτησης"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "Υπερμεγέθη αναζήτησης XML"
+
+#~ msgid "Empty Query"
+#~ msgstr "Κενά αναζήτησης"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "Παράτυποι χαρακτήρες στα αναζήτησης"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "Όλα τα σφάλματα απαντήσεων σε αναζήτησης"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "Άκυρη θύρα απαντήσεων"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "Άκυρη διεύθυνση απαντήσεων"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "Άκυρη ταχύτητα απαντήσεων"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "Όλα τα σφάλματα απαντήσεις σε ping"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "Άκυρο ωφέλιμο φορτίο απαντήσεις σε ping"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "Άκυρη θύρα απαντήσεις σε ping"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "Άκυρη διεύθυνση απαντήσεις σε ping"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "Άκυρη GGEP block"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "Άκυρη έκταση πωλητή"
+
+#~ msgid "All Push Errors"
+#~ msgstr "Όλα τα σφάλματα αιτήσεις push"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "Άκυρη θύρα αιτήσεις push"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "Άκυρο διεύθυνση αιτήσεις push"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "Άκυρο ωφέλιμο φορτίο αιτήσεις push"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "Όλα τα σφάλματα μηνυμάτων πωλητή"
+
+#~ msgid "Invalid ID"
+#~ msgstr "Άκυρη ταυτότητα"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "Άκυρος επιλογέας"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "Άκυρο ωφέλιμο φορτίο"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "Άγνωστο μήνυμα πωλητή"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "Προσθήκη προσθήκης στον πίνακα διανομών"
+
+#~ msgid "What's New?"
+#~ msgstr "Τι νέο υπάρχει;"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Ανώτατο όριο"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "Ανώτατο όριο(TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "Ανώτατο όριο (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "Ανώτατο όριο (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "Ανώτατο όριο (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "Ανώτατο όριο (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "Ανώτατο όριο (TTL 5 ή παραπάνω)"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Προσπάθειες σύνδεσης"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "Εισερχόμενες προσπάθειες"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "Αιτήσεις Magnet"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "Άγνωστες αιτήσεις"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "Απαγορευμένοι πάροχοι"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "Άμεσο κλείσιμο"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "Προβληματική ανάγνωση επικεφαλίδας"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "Άγνωστος κωδικός απάντησης"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "Κακός συνδυασμός περιεχομένου URN"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "Ασυμβίβαστες σειρές"
+
+#~ msgid "Failed"
+#~ msgstr "Απέτυχε"
+
+#~ msgid "Succeeded"
+#~ msgstr "Πέτυχε"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "Επιτυχημένο HTTP 1.1"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "Επιτυχημένο HTTP 1.0"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "Αποτυχημένο HTTP 1.1"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "Αποτυχημένο HTTP 1.0"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "Επιτυχημένη άμεση σύνδεση"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "Επιτυχημένη σύνδεση push"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "Αποτυχημένη push (διακόπηκαν)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "Αποτυχημένη push (Χωρίς GIV ληφθέντα)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "Αποτυχημένη push (αποσυνδεδεμένος)"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "Επιτυχημένη push proxy"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "Δύσμορφη push proxy"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "Αποτυχημένη push proxy"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "Αποστολή άγνωστος αρχείου URN"
+
+#~ msgid "Limit Reached"
+#~ msgstr "Όριο έφθασε"
+
+#~ msgid "Banned Client"
+#~ msgstr "Απαγορευμένος πελάτης"
+
+#~ msgid "Unknown"
+#~ msgstr "Άγνωστες αιτήσεις"
+
+#~ msgid "Push Failed"
+#~ msgstr "Αποτυχημένη push"
+
+#~ msgid "Completed Responses"
+#~ msgstr "Συμπληρωμένες απαντήσεις"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "Επιτυχημένες μεταφορές αρχείων"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "Απορριψη εξ. (φύλλα)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "Απορριψη εξ. (παλιό ultrapeer)"
+
+#~ msgid "Out Acc."
+#~ msgstr "Δεκτό εξ."
+
+#~ msgid "In Rej."
+#~ msgstr "Απορριψη εισ."
+
+#~ msgid "In Acc."
+#~ msgstr "Δεκτό εισ."
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "Απορριψη εξ. (γεμάτος)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "Δεκτό εξ. (με τον guidance)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "Δεκτό εξ. (παράβλεψη guidance)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "Δεκτό εξ. (δεν guidance)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "Απορριψη εισ. (φύλλα)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "Δεκτό εισ. (φύλλα)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "Δεκτό εισ. (guiding to φύλλα)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "Δεκτό εισ. (ultrapeer)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "Απορριψη εισ. (all slots taken)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "Απορριψη εισ. (δίκτυο πρέπει ultrapeer)"
+
+#~ msgid "Server Reject"
+#~ msgstr "Απορριψη διακομιστή"
+
+#~ msgid "No Conclusion"
+#~ msgstr "Χωρίς λήξη"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "Ultrapeers LimeWire"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "Φύλλα LimeWire"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "Άλλοι ultrapeers"
+
+#~ msgid "Other Leaves"
+#~ msgstr "Άλλα Φύλλα"
+
+#~ msgid "Responses Requested"
+#~ msgstr "Αιτηθείσες απαντήσεις"
+
+#~ msgid "Responses Received"
+#~ msgstr "Ληφθείσες απαντήσεις"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "Απαντήσεις που παρακάμφθηκαν"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "Δείκτης επιτυχίας OOB"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr ""
@@ -343,43 +931,41 @@ msgstr ""
 #~ "«Σύνδεση» από το μενού του «Αρχείου», για να συνδεθείτε στο δίκτυο του "
 #~ "LimeWire."
 
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Δεν μπόρεσε να βρεί μία θύρα που να χρησιμοποιείται για εισερχόμενες "
-#~ "συνδέσεις.\n"
-#~ "Παρακαλώ προσδιορίστε μία θύρα από το παράθυρο διαμόρφωσης."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr "Παρακαλώ εισάγετε τον τίτλο του αρχείου που θέλετε να δημοσιεύσετε."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr "Παρακαλώ εισάγετε το έτος του αρχείου που θέλετε να δημοσιεύσετε."
-
-#~ msgid "Please enter the copyright holder of the file you want to publish."
-#~ msgstr ""
-#~ "Παρακαλώ εισάγετε τον κάτοχο του copyright του αρχείου που θέλετε να "
-#~ "δημοσιεύσετε."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr ""
-#~ "Παρακαλώ είσάγετε μια έγκυρη ιστοσελίδα(URL) πιστοποίησης για την άδεια."
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Εμφάνιση προχωρημένων στατιστικών στοιχείων:"
 
 #~ msgid ""
-#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
 #~ msgstr ""
-#~ "Το LimeWire ήταν ανίκανο να κατεβάσει το αρχείο με επέκταση torrent από τη "
-#~ "συγκεκριμένη ιστοσελίδα(URL):"
+#~ "Σύνολο εύρους ζώνης που χρησιμοποιήθηκε για την αποστολή εξερχόμενων "
+#~ "δεδομένων είτε μέσω αποστολών είτε μέσω μηνυμάτων Gnutella."
 
-#~ msgid "Weedshare"
-#~ msgstr "Δημόσιο μοίρασμα"
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Σύνολο εύρους ζώνης που χρησιμοποιήθηκε για την λήψη εισερχόμενων δεδομένων "
+#~ "είτε μέσω λήψεων είτε μέσω μηνυμάτων Gnutella."
 
-#~ msgid "Check these associations when starting LimeWire:"
-#~ msgstr "Τσεκάρετε αυτές τις σχέσεις όταν αρχίζετε το LimeWire:"
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Αριθμός αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω Multicast, σε "
+#~ "αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
 
-#~ msgid "Display:"
-#~ msgstr "Εμφάνιση:"
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Σύνολο kilobytes για όλα τα αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω "
+#~ "Multicast, σε αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Σύνολο μηνυμάτων Gnutella που στάληκαν μέσω Multicast, ανάλογα με τον τύπο "
+#~ "του μηνύματος."
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
@@ -389,9 +975,6 @@ msgstr ""
 #~ "Τα στατιστικά στοιχεία εύρους ζώνης περιλαμβάνουν πλήρεις πληροφορίες για "
 #~ "όλο το εύρους ζώνης που στάληκε είτε προς τα πάνω είτε προς τα κάτω. Πατήστε "
 #~ "σε μια κατηγορία για να δείτε τα επιθυμητά στατιστικά στοιχεία."
-
-#~ msgid "Network"
-#~ msgstr "Δίκτυο"
 
 #~ msgid ""
 #~ "Statistics on the current state of the network. These statistics are quite "
@@ -417,25 +1000,8 @@ msgstr ""
 #~ "εργάζονται στο δίκτυο Gnutella. Τα προχωρημένα αυτά στατιστικά στοιχεία δεν "
 #~ "εμφαίνονται εξ ορισμού και δεν συνιστώνται για τους περισσότερους χρήστες."
 
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Εμφάνιση προχωρημένων στατιστικών στοιχείων:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Σύνολο εύρους ζώνης που χρησιμοποιήθηκε για την αποστολή εξερχόμενων "
-#~ "δεδομένων είτε μέσω αποστολών είτε μέσω μηνυμάτων Gnutella."
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Σύνολο εύρους ζώνης που χρησιμοποιήθηκε για την λήψη εισερχόμενων δεδομένων "
-#~ "είτε μέσω λήψεων είτε μέσω μηνυμάτων Gnutella."
+#~ msgid "Weedshare"
+#~ msgstr "Δημόσιο μοίρασμα"
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "Όλα τα μηνύματα Gnutella που λήφθηκαν μέσω αυτόν τον πελάτη."
@@ -465,25 +1031,9 @@ msgstr ""
 #~ "Αριθμός αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω TCP, σε αντιδιαστολή "
 #~ "με συνολικός αριθμός αιτήσεις αναζήτησης."
 
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Αριθμός αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω Multicast, σε "
-#~ "αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον hops."
-
 #~ msgid "All received queries, by time to live (TTL)."
 #~ msgstr ""
 #~ "Όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον time to live (TTL)."
-
-#~ msgid "Special Queries"
-#~ msgstr "Ειδικά ερωτήματα"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Όλα τα ειδικά επελεγμένα ερωτήματα."
 
 #~ msgid "All received query hits, by hops."
 #~ msgstr "Όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με τον hops."
@@ -529,33 +1079,6 @@ msgstr ""
 #~ "Σύνολο kilobytes για όλα τα αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω "
 #~ "TCP, σε αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
 
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα αντίτυπα αιτήσεις αναζήτησης που λήφθηκαν μέσω "
-#~ "Multicast, σε αντιδιαστολή με συνολικός αριθμός αιτήσεις αναζήτησης."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον "
-#~ "hops."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα αιτήσεις αναζήτησης που λήφθηκαν, ανάλογα με τον "
-#~ "time to live (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με τον "
-#~ "hops."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για όλα τα χτύποι αναζήτησης που λήφθηκαν, ανάλογα με τον "
-#~ "time to live (TTL)."
-
 #~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Αιτήσεις ping UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
@@ -581,37 +1104,6 @@ msgstr ""
 #~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Αιτήσεις push UDP που στάληκαν από όλους τους πελάτες του Gnutella, σε "
-#~ "αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Αιτήσεις ping Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
-#~ "αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Απαντήσεις σε ping Multicast που στάληκαν από όλους τους πελάτες του "
-#~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Αιτήσεις αναζήτησης Multicast που στάληκαν από όλους τους πελάτες του "
-#~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Χτύποι αναζήτησης Multicast που στάληκαν από όλους τους πελάτες του "
-#~ "Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Αιτήσεις push Multicast που στάληκαν από όλους τους πελάτες του Gnutella, σε "
 #~ "αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
@@ -650,50 +1142,6 @@ msgstr ""
 #~ "του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για αιτήσεις ping Multicast που στάληκαν από όλους τους "
-#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για απαντήσεις σε ping Multicast που στάληκαν από όλους "
-#~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για αιτήσεις αναζήτησης Multicast που στάληκαν από όλους "
-#~ "τους πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για χτύποι αναζήτησης Multicast που στάληκαν από όλους τους "
-#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Σύνολο kilobytes για αιτήσεις push Multicast που στάληκαν από όλους τους "
-#~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "Μέσο μέγεθος ληφθέντων μηνυμάτων Gnutella σε kilobytes."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "Μέσο μέγεθος ληφθέντων μηνυμάτων σε kilobytes από τα LimeWires."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
 #~ msgstr ""
@@ -711,38 +1159,20 @@ msgstr ""
 #~ msgid "Hit"
 #~ msgstr "Χτύποι"
 
-#~ msgid "False Positive"
-#~ msgstr "Λάθος Θετικό"
-
-#~ msgid "Errors"
-#~ msgstr "Σφάλματα"
-
-#~ msgid "Generic Errors"
-#~ msgstr "Γενικά σφάλματα"
-
 #~ msgid "Generic errors while reading messages."
 #~ msgstr "Γενικά σφάλματα κατά την ανάγνωση μηνυμάτων."
 
 #~ msgid "Errors while reading query messages."
 #~ msgstr "Σφάλματα κατά την ανάγνωση ερωτημάτων."
 
-#~ msgid "Query Replies"
-#~ msgstr "Χτύποι αναζήτησης"
-
 #~ msgid "Errors while reading query reply messages."
 #~ msgstr "Σφάλματα κατά την ανάγνωση χτύποι αναζήτησης."
-
-#~ msgid "Ping Replies"
-#~ msgstr "Απαντήσεις σε ping"
 
 #~ msgid "Errors while reading ping replies."
 #~ msgstr "Σφάλματα κατά την ανάγνωση απαντήσεις σε ping."
 
 #~ msgid "Errors while reading pushes."
 #~ msgstr "Σφάλματα κατά την ανάγνωση αιτήσεις push."
-
-#~ msgid "Vendor Messages"
-#~ msgstr "Μηνύματα πωλητή"
 
 #~ msgid "Errors while reading vendor messages."
 #~ msgstr "Σφάλματα κατά την ανάγνωση μηνυμάτων πωλητή."
@@ -759,11 +1189,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Σύνολο μηνυμάτων Gnutella που στάληκαν μέσω UDP, ανάλογα με τον τύπο του "
 #~ "μηνύματος."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Σύνολο μηνυμάτων Gnutella που στάληκαν μέσω Multicast, ανάλογα με τον τύπο "
-#~ "του μηνύματος."
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr "Σύνολο μηνυμάτων Gnutella που στάληκαν μέσω TCP, UDP ή Multicast."
@@ -922,14 +1347,8 @@ msgstr ""
 #~ "Αριθμός kilobyte για αιτήσεις push Multicast, που στάληκαν από όλους τους "
 #~ "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
-#~ msgid "Handshaking"
-#~ msgstr "Χειραψία"
-
 #~ msgid "Statistics for handshaking as a leaf."
 #~ msgstr "Στατιστικά χειραψίας σαν φύλλο."
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "Στατιστηκά χειραψίας σαν ανώτερος."
 
 #~ msgid "Statistics for outgoing Gnutella connection handshaking."
 #~ msgstr "Στατιστικά για εξερχόμενες συνδέσεις Gnutella χειραψίας."
@@ -947,21 +1366,12 @@ msgstr ""
 #~ "Στατιστικά για εξερχόμενες συνδέσεις Gnutella χειραψίας οι οποίες "
 #~ "απορρίφθηκαν από τον διακομιστή."
 
-#~ msgid "Compression"
-#~ msgstr "Συμπίεση"
-
 #~ msgid "Statistics for compressed upstream traffic in kilobytes."
 #~ msgstr "Στατιστικά στοιχεία για την κίνηση ανερχόμενων αρχείων σε kilobytes."
 
 #~ msgid "Statistics for compressed downstream traffic in kilobytes."
 #~ msgstr ""
 #~ "Στατιστικά στοιχεία για την κίνηση κατερχόμενων αρχείων σε kilobytes."
-
-#~ msgid "Flow Control"
-#~ msgstr "Έλεγχος ροής"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "Στατιστικά στοιχεία για μηνύματα ελεγχόμενης ροής."
 
 #~ msgid "Statistics for flow controlled messages in kilobytes."
 #~ msgstr "Στατιστικά στοιχεία για μηνύματα ελεγχόμενης ροής σε kilobytes."
@@ -970,14 +1380,8 @@ msgstr ""
 #~ msgstr ""
 #~ "Συνολικός αριθμός σφαλμάτων μηνυμάτων δρομολόγησης προς άλλους πελάτες."
 
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Σφάλματα χτύποι αναζήτησης δρομολόγησης."
-
 #~ msgid "Errors routing query hits."
 #~ msgstr "Σφάλματα χτύποι αναζήτησης δρομολόγησης προς άλλους πελάτες."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Σύνολο φιλτραρισμένων μηνυμάτων."
 
 #~ msgid ""
 #~ "Total number of Gnutella connection attempts, either initiated internally or "
@@ -1001,9 +1405,6 @@ msgstr ""
 #~ "τα «Απασχολημένο», «Το αρχείο δεν βρέθηκε», «Όχι μοίρασμα», «Στην ουρά», "
 #~ "«Ποικίλα», «Εισ/Εξ σφάλματα», και «Απαντήσεις ΟΚ»."
 
-#~ msgid "Alt. Locations"
-#~ msgstr "Εναλλακτικές τοποθεσίες"
-
 #~ msgid ""
 #~ "Total alternate locations received and removed over time. This includes "
 #~ "locations that we actively attempt to connect to, locations that we will "
@@ -1014,9 +1415,6 @@ msgstr ""
 #~ "Αυτό περιλαμβάνει τοποθεσίες με τις οποίες προσπαθήσαμε ενεργά να "
 #~ "συνδεθούμε, τοποθεσίες που θα αγνοήσουμε, τοποθεσίες που δεν μπορούσαν να "
 #~ "απορριφθούν και τοποθεσίες που απορρίφθηκαν μόνιμα."
-
-#~ msgid "Transfers"
-#~ msgstr "Μεταφορές αρχείων"
 
 #~ msgid ""
 #~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
@@ -1032,9 +1430,6 @@ msgstr ""
 #~ "Καταγραφή χρόνου σε χιλιοστά του δευτερολέπτου, που απαιτήθηκε για την "
 #~ "εγκαθίδρυση συνδέσεων TCP για κατέβασμα αρχείων. Αυτό μπορεί να ποικίλλει, "
 #~ "για παράδειγμα, στην περίπτωση υπερφόρτωσης των διακομιστών."
-
-#~ msgid "Requests"
-#~ msgstr "Αιτήσεις"
 
 #~ msgid ""
 #~ "Total incoming upload requests. These numbers are incremented on every "
@@ -1055,9 +1450,6 @@ msgstr ""
 #~ "αποστολή κάθε απάντησης, και γι’ αυτό περιλαμβάνουν κάθε τμήμα για μεταφορές "
 #~ "HTTP/1.1. «Κανονικό» είναι το σύνολο των αιτήσεων για τις οποίες "
 #~ "προσπαθήσαμε να μεταφέρουμε ένα μέρος από κάποιο αρχείο."
-
-#~ msgid "Request Methods"
-#~ msgstr "Μέθοδοι αιτήσεων"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
@@ -1080,414 +1472,8 @@ msgstr ""
 #~ "στάσιμες. Οι αριθμοί αυτοί αυξάνονται ανά σύνδεση και όχι ανά τμήμα. (Οι "
 #~ "στάσιμες αποστολές θα καταχωρηθούν ως αποστολές που διακόπηκαν.)"
 
-#~ msgid "seconds"
-#~ msgstr "δευτερόλεπτα"
-
-#~ msgid "Average"
-#~ msgstr "Μέσος"
-
-#~ msgid "Max"
-#~ msgstr "Μέγιστος"
-
-#~ msgid "Color"
-#~ msgstr "Χρώμα"
-
-#~ msgid "Current"
-#~ msgstr "Τρέχων"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr ""
-#~ "Να γραφούν στατιστικά στοιχεία γι’ αυτή τη γραφική παράσταση στα αρχεία."
-
-#~ msgid "Total Upstream"
-#~ msgstr "Σύνολο ανερχόμενου"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Σύνολο κατερχόμενου"
-
-#~ msgid "HTTP Total"
-#~ msgstr "Σύνολο HTTP"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "Επικεφαλίδες HTTP"
-
-#~ msgid "HTTP Content"
-#~ msgstr "Περιεχόμενο HTTP"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Σύνολο Gnutella"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "Κεγαλίδες Gnutella"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Μηνύματα Gnutella"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Σύνολο ανερχόμενου (ενδεχόμενου)"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Σύνολο ανερχόμενου (πραγματικού)"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Σύνολο κατερχόμενου (ενδεχόμενου)"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Σύνολο κατερχόμενου (πραγματικού)"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (ενδεχόμενο)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP (πραγματικό)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (ενδεχόμενο)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (πραγματικό)"
-
-#~ msgid "All Clients"
-#~ msgstr "Όλοι οι πελάτες"
-
-#~ msgid "All Errors"
-#~ msgstr "Όλα τα σφάλματα"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "Άκυρη έκταση ωφέλιμου φορτίου"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "Άκυρο Hops"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "Άκυρο TTL"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "Hops > soft μέγιστος"
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(Hops + TTL) > hard μέγιστος"
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "Άκυρος κωδικός μηνύματος"
-
-#~ msgid "All Query Errors"
-#~ msgstr "Όλα τα σφάλματα ερωτημάτων"
-
-#~ msgid "URN Query"
-#~ msgstr "Αιτήσεις αναζήτησης URN"
-
-#~ msgid "Query Too Large"
-#~ msgstr "Υπερμεγέθη αναζήτησης"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "Υπερμεγέθη αναζήτησης XML"
-
-#~ msgid "Empty Query"
-#~ msgstr "Κενά αναζήτησης"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "Παράτυποι χαρακτήρες στα αναζήτησης"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "Όλα τα σφάλματα απαντήσεων σε αναζήτησης"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "Άκυρη θύρα απαντήσεων"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "Άκυρη διεύθυνση απαντήσεων"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "Άκυρη ταχύτητα απαντήσεων"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "Όλα τα σφάλματα απαντήσεις σε ping"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "Άκυρο ωφέλιμο φορτίο απαντήσεις σε ping"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "Άκυρη θύρα απαντήσεις σε ping"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "Άκυρη διεύθυνση απαντήσεις σε ping"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "Άκυρη GGEP block"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "Άκυρη έκταση πωλητή"
-
-#~ msgid "All Push Errors"
-#~ msgstr "Όλα τα σφάλματα αιτήσεις push"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "Άκυρη θύρα αιτήσεις push"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "Άκυρο διεύθυνση αιτήσεις push"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "Άκυρο ωφέλιμο φορτίο αιτήσεις push"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "Όλα τα σφάλματα μηνυμάτων πωλητή"
-
-#~ msgid "Invalid ID"
-#~ msgstr "Άκυρη ταυτότητα"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "Άκυρος επιλογέας"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "Άκυρο ωφέλιμο φορτίο"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "Άγνωστο μήνυμα πωλητή"
-
-#~ msgid "All Messages"
-#~ msgstr "Όλα τα μηνύματα"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "Προσθήκη προσθήκης στον πίνακα διανομών"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "What's New?"
-#~ msgstr "Τι νέο υπάρχει;"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Σφάλματα απαντήσεις σε ping"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Σφάλματα χτύποι αναζήτησης"
-
-#~ msgid "Push Errors"
-#~ msgstr "Σφάλματα αιτήσεις push"
-
-#~ msgid "Hard Limit"
-#~ msgstr "Ανώτατο όριο"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "Ανώτατο όριο(TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "Ανώτατο όριο (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "Ανώτατο όριο (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "Ανώτατο όριο (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "Ανώτατο όριο (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "Ανώτατο όριο (TTL 5 ή παραπάνω)"
-
-#~ msgid "No Route"
-#~ msgstr "Μη δρομολόγηση"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "Προσπάθειες σύνδεσης"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "Εισερχόμενες προσπάθειες"
-
-#~ msgid "All Requests"
-#~ msgstr "Όλες οι αιτήσεις"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "Αιτήσεις αποστολή επικεφαλίδες (HEAD)"
-
-#~ msgid "GET Requests"
-#~ msgstr "Αιτήσεις αποστολή αρχείων (GET)"
-
-#~ msgid "Push Requests"
-#~ msgstr "Αιτήσεις push"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Αιτήσεις Gnutella"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Αιτήσεις Gnutella (LimeWire)"
-
-#~ msgid "Chat Requests"
-#~ msgstr "Αιτήσεις συνομιλίας (CHAT)"
-
-#~ msgid "Magnet Requests"
-#~ msgstr "Αιτήσεις Magnet"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "Άγνωστες αιτήσεις"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "Απαγορευμένοι πάροχοι"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "Άμεσο κλείσιμο"
-
-#~ msgid "Accepted"
-#~ msgstr "Δεκτό"
-
-#~ msgid "Busy"
-#~ msgstr "Απασχολημένο"
-
 #~ msgid "Not Sharing Files"
 #~ msgstr "Μη μοιραζόμενα αρχεία"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "Προβληματική ανάγνωση επικεφαλίδας"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "Άγνωστος κωδικός απάντησης"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "Κακός συνδυασμός περιεχομένου URN"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "Ασυμβίβαστες σειρές"
-
-#~ msgid "IO Error"
-#~ msgstr "Σφάλμα Εισ/Εξ"
-
-#~ msgid "Failed"
-#~ msgstr "Απέτυχε"
-
-#~ msgid "Succeeded"
-#~ msgstr "Πέτυχε"
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "Επιτυχημένο HTTP 1.1"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "Επιτυχημένο HTTP 1.0"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "Αποτυχημένο HTTP 1.1"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "Αποτυχημένο HTTP 1.0"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "Επιτυχημένη άμεση σύνδεση"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "Επιτυχημένη σύνδεση push"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "Αποτυχημένη push (διακόπηκαν)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "Αποτυχημένη push (Χωρίς GIV ληφθέντα)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "Αποτυχημένη push (αποσυνδεδεμένος)"
-
-#~ msgid "THEX Request"
-#~ msgstr "Αίτηση THEX"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "Επιτυχημένη push proxy"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "Δύσμορφη push proxy"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "Αποτυχημένη push proxy"
-
-#~ msgid "Update File"
-#~ msgstr "Αναβάθμιση αρχείου"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "Αποστολή άγνωστος αρχείου URN"
-
-#~ msgid "URN Get"
-#~ msgstr "Αποστολή αρχείων URN"
-
-#~ msgid "Limit Reached"
-#~ msgstr "Όριο έφθασε"
-
-#~ msgid "Banned Client"
-#~ msgstr "Απαγορευμένος πελάτης"
-
-#~ msgid "Freeloader"
-#~ msgstr "Χρήστες-παράσιτα"
-
-#~ msgid "Normal"
-#~ msgstr "Κανονικό"
-
-#~ msgid "Get"
-#~ msgstr "Αποστολή αρχείων (GET)"
-
-#~ msgid "Head"
-#~ msgstr "Αποστολή επικεφαλίδες (HEAD)"
-
-#~ msgid "Unknown"
-#~ msgstr "Άγνωστες αιτήσεις"
-
-#~ msgid "Push Failed"
-#~ msgstr "Αποτυχημένη push"
-
-#~ msgid "Completed Responses"
-#~ msgstr "Συμπληρωμένες απαντήσεις"
 
 #~ msgid "Interrupted"
 #~ msgstr "Διακοπείσες"
@@ -1495,87 +1481,98 @@ msgstr ""
 #~ msgid "Stalled"
 #~ msgstr "Στάσιμες"
 
-#~ msgid "Completed File Transfers"
-#~ msgstr "Επιτυχημένες μεταφορές αρχείων"
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "Απορριψη εξ. (φύλλα)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "Απορριψη εξ. (παλιό ultrapeer)"
-
-#~ msgid "Out Acc."
-#~ msgstr "Δεκτό εξ."
-
-#~ msgid "In Rej."
-#~ msgstr "Απορριψη εισ."
-
-#~ msgid "In Acc."
-#~ msgstr "Δεκτό εισ."
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "Απορριψη εξ. (γεμάτος)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "Δεκτό εξ. (με τον guidance)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "Δεκτό εξ. (παράβλεψη guidance)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "Δεκτό εξ. (δεν guidance)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "Απορριψη εισ. (φύλλα)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "Δεκτό εισ. (φύλλα)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "Δεκτό εισ. (guiding to φύλλα)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Δεκτό εισ. (ultrapeer)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "Απορριψη εισ. (all slots taken)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "Απορριψη εισ. (δίκτυο πρέπει ultrapeer)"
-
-#~ msgid "Server Reject"
-#~ msgstr "Απορριψη διακομιστή"
-
-#~ msgid "No Conclusion"
-#~ msgstr "Χωρίς λήξη"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "Ultrapeers LimeWire"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "Φύλλα LimeWire"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Άλλοι ultrapeers"
-
-#~ msgid "Other Leaves"
-#~ msgstr "Άλλα Φύλλα"
-
-#~ msgid "Responses Requested"
-#~ msgstr "Αιτηθείσες απαντήσεις"
-
-#~ msgid "Responses Received"
-#~ msgstr "Ληφθείσες απαντήσεις"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "Απαντήσεις που παρακάμφθηκαν"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "Δείκτης επιτυχίας OOB"
-
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr ""
 #~ "Αριθμός απαντήσεων που ζητήθηκαν και λήφθηκαν μέσω του πρωτοκόλλου OOB."
+
+#~ msgid "Update File"
+#~ msgstr "Αναβάθμιση αρχείου"
+
+#~ msgid "Statistics"
+#~ msgstr "Στατιστικές"
+
+#~ msgid "Validation Required"
+#~ msgstr "Επικύρωση Αναγκαία"
+
+#~ msgid "Height:"
+#~ msgstr "Ύψος:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Παρακαλώ πατήστε ΟΚ για να διαγράψετε για πάντα την άδεια."
+
+#~ msgid "Display:"
+#~ msgstr "Εμφάνιση:"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "Μηνύματα πωλητή"
+
+#~ msgid "HTTP Content"
+#~ msgstr "Περιεχόμενο HTTP"
+
+#~ msgid "&New Folder"
+#~ msgstr "&Νέος Φάκελος"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "&Μετονομασία Φακέλου"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "Άνοιγμα Επελεγμένου(ων) αρχείου(ων)"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "Διαγραφή Αρχ&είου(ων)"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "Διαγράψε το(α) επελεγμένο(να) αρχείο(α)"
+
+#~ msgid "Refre&sh"
+#~ msgstr "Ανανέωση"
+
+#~ msgid "E&xplore"
+#~ msgstr "Εξερεύνησε"
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr ""
+#~ "Συγγνώμη, αλλά το LimeWire δεν μπόρεσε να επανεκκινήσει τα παλιά σας torrent."
+
+#~ msgid "Chat Requests"
+#~ msgstr "Αιτήσεις συνομιλίας (CHAT)"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "Παρακαλώ εισάγετε τον τίτλο του αρχείου που θέλετε να δημοσιεύσετε."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "Παρακαλώ εισάγετε το έτος του αρχείου που θέλετε να δημοσιεύσετε."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr ""
+#~ "Παρακαλώ είσάγετε μια έγκυρη ιστοσελίδα(URL) πιστοποίησης για την άδεια."
+
+#~ msgid "You are sharing"
+#~ msgstr "Ο αριθμός των αρχείων που μοιράζεστε."
+
+#~ msgid "Loading Resources..."
+#~ msgstr "Φόρτωση πηγών..."
+
+#~ msgid "Please enter the copyright holder of the file you want to publish."
+#~ msgstr ""
+#~ "Παρακαλώ εισάγετε τον κάτοχο του copyright του αρχείου που θέλετε να "
+#~ "δημοσιεύσετε."
+
+#~ msgid ""
+#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ msgstr ""
+#~ "Το LimeWire ήταν ανίκανο να κατεβάσει το αρχείο με επέκταση torrent από τη "
+#~ "συγκεκριμένη ιστοσελίδα(URL):"
+
+#~ msgid "Check these associations when starting LimeWire:"
+#~ msgstr "Τσεκάρετε αυτές τις σχέσεις όταν αρχίζετε το LimeWire:"
+
+#~ msgid "Alt. Locations"
+#~ msgstr "Εναλλακτικές τοποθεσίες"
+
+#~ msgid "Only search results with a {0} are official LimeWire communications."
+#~ msgstr ""
+#~ "Μόνο αποτελέσματα με ένα {0} είναι αναγωνρισμένες πληροφορίες του LimeWire."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -2648,6 +2645,11 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"To LimeWire αδυνατεί να βρεί άδεια για αυτό το αρχείο. Θέλετε να το "
+"κατεβάσετε παρολαυτά?\n"
+"Να σημειωθεί οτι το LimeWire δεν μπορεί να παρακολουθεί η να ελέγχει το "
+"περιεχόμενο του δικτύου Grutella. Παρακαλούμε όπως σεβαστείτε τους τοπικούς "
+"σας νόμους πέρι πνευματικών δικαιωμάτων"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1405
 #, java-format
@@ -2774,6 +2776,11 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"Το LimeWire δεν μπόρεσε να δημιουργήσει ένα προσωρινό αρχείο επιλογών. "
+"Παρακαλούμε να βεβαιωθείτε ότι το LimeWire (και εσείς ) έχει πρόσβαση για να "
+"δημιουργήσει αρχεία/φακέλους στον υπολογιστή σας. Αν συνεχιστεί το πρόβλημα "
+"παρακαλούμε να πάτε στην σελίδα www.limewire.com και κάντε κλικ στο επιλογη "
+"Υποστήριξη (Support)"
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:494
 #: gui/com/limegroup/gnutella/gui/MessageService.java:76
@@ -2841,7 +2848,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "Επιλογή γλώσσας"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
@@ -3088,12 +3095,12 @@ msgstr "αναζητήσεις"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:23
 msgid "My Shared Files"
-msgstr ""
+msgstr "Τα Μοιρασμένα μου Αρχεία"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
 #, java-format
 msgid "View My {0} Shared Files"
-msgstr ""
+msgstr "Προβολή των {0} Μοιρασμένων μου Αρχείων"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:37
 msgid ""
@@ -3158,11 +3165,11 @@ msgstr "Το LimeWire έχει εντοπίσε ένα τοίχος προστα
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:499
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Δεν έχετε  συνδεθεί με το κατάστημα της LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:502
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Δεν έχετε  συνδεθεί με το κατάστημα της LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:594
 msgid "Connection"
@@ -3281,8 +3288,8 @@ msgstr "Δείξε τον Media Player"
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Μοιράζεσαι (0) αρχείο"
+msgstr[1] "Μοιράζεστε (0) αρχεία"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:914
@@ -3513,6 +3520,10 @@ msgid ""
 "You can chat with other people who are running LimeWire. Choose any download "
 "or search result that has a smiley in the Chat column and then click 'Chat'."
 msgstr ""
+"Μπορείτε να επικοινωνείτε και με άλλα άτομα τα οποία χρησιμοποιούν το "
+"LimeWire. Επιλέξτε κάτω απο τα αρχεία που κατεβάζετε η ψάξτε για αρχεία τα "
+"οποία έχουν ενα χαμόγελο στην στήλη των συνομιλιών (Chat) και μετα κάντε "
+"κλικ στο \"Chat\""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:46
 #, java-format
@@ -3593,6 +3604,8 @@ msgid ""
 "Did you know? LimeWire supports two different peer-to-peer file sharing "
 "protocols: Gnutella and BitTorrent."
 msgstr ""
+"Το ξέρατε? Το LimeWire υποστηρίζει δύο διαφορετικά πρωτόκολλα για την "
+"διακίνηση αρχείων μέσω χρηστών. Το Grutella και το BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:57
 msgid ""
@@ -8445,7 +8458,7 @@ msgid "Awaiting Requests"
 msgstr "Περιμένει Απαιτήσεις"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Ψάξε για: {0}"
 

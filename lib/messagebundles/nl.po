@@ -8,31 +8,15 @@ msgstr ""
 "Project-Id-Version: 4.14.10\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-24 19:01+0000\n"
+"PO-Revision-Date: 2007-11-28 23:43+0000\n"
 "Last-Translator: \n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:14+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Magnet-beheer wordt geladen..."
-
-#~ msgid ""
-#~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
-#~ "files in iTunes) because a firewall is blocking access. To continue using "
-#~ "this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full "
-#~ "access to incoming and outgoing connections. To disable this feature, click "
-#~ "'No'."
-#~ msgstr ""
-#~ "LimeWire kon het Digital Audio Access Protocol niet starten (voor het delen "
-#~ "in iTunes) omdat een firewall de toegang blokkeert. Als u deze functie wilt "
-#~ "blijven gebruiken, klik dan op 'Ja' en zorg dat u 'LimeWire.exe' toestaat "
-#~ "voor in- en uitgaande verbindingen. Om deze functie uit te schakelen klikt u "
-#~ "op 'Nee'."
 
 #~ msgid ""
 #~ "LimeWire is unable to find a license for this file. Download anyway?\n"
@@ -45,6 +29,29 @@ msgstr ""
 #~ "Vergeet niet: LimeWire kan de inhoud van inhoud van het Gnutella-netwerk "
 #~ "niet overzien of beheren. Houd rekening met de plaatselijk geldende "
 #~ "wetgeving."
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Updates"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Afronden"
+
+#~ msgid "Loading Languages"
+#~ msgstr "Talen laden..."
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Plakken"
+
+#, java-format
+#~ msgid "You are sharing {0} files (Loading...)"
+#~ msgstr "Je deelt  {0} bestanden (Bezig met laden...)"
+
+#, java-format
+#~ msgid "You are sharing {0} files"
+#~ msgstr "Je deelt  {0} bestanden"
 
 #, java-format
 #~ msgid ""
@@ -61,21 +68,6 @@ msgstr ""
 #~ "\n"
 #~ "Wilt u deze map delen?"
 
-#~ msgid "Open .&torrent"
-#~ msgstr ".&Torrent-bestand openen"
-
-#~ msgid "Opens a .torrent file from your hard drive"
-#~ msgstr "Opent een .torrent-bestand van uw harde schijf"
-
-#~ msgid "&Download .torrent"
-#~ msgstr ".Torrent-bestan&d downloaden"
-
-#~ msgid "Downloads a .torrent file from the WWW"
-#~ msgstr "Downloadt een .torrent-bestand van het WWW"
-
-#~ msgid "Download .torrent file from the web"
-#~ msgstr "Downloadt een .torrent-bestand van het web"
-
 #~ msgid "URL"
 #~ msgstr "URL"
 
@@ -84,6 +76,10 @@ msgstr ""
 
 #~ msgid "The specified URL is not valid. Please check your input."
 #~ msgstr "De opgegeven URL is ongeldig. Controleer uw invoer a.u.b."
+
+#, java-format
+#~ msgid "Search \"What''s New\" for: {0}"
+#~ msgstr "Zoeken in \"Wat is nieuw\": {0}"
 
 #~ msgid "Waiting"
 #~ msgstr "Wachten"
@@ -114,110 +110,11 @@ msgstr ""
 #~ "Ongeldige map voor het delen van bestanden. Gebruik a.u.b. een andere map of "
 #~ "kies voor de standaardwaarde."
 
-#~ msgid "Songs purchased from the Lime Wire Store"
-#~ msgstr "Gekochte nummers van de LimeWire Store"
-
 #~ msgid "&MagnetMix"
 #~ msgstr "&MagnetMix"
 
 #~ msgid "Show Magnetmix Button"
 #~ msgstr "Toon de MagnetMix-knop"
-
-#~ msgid "The file type is not recognized."
-#~ msgstr "Het bestandstype is niet herkend."
-
-#~ msgid "The file cannot be found."
-#~ msgstr "Het bestand kan niet gevonden worden."
-
-#~ msgid "The file is corrupt."
-#~ msgstr "Het bestand is corrupt."
-
-#~ msgid "There is an unknown error with the audio file."
-#~ msgstr "Er is een onbekende fout opgetreden met het audiobestand."
-
-#~ msgid "The file cannot be parsed."
-#~ msgstr "Het bestand kan niet ontleed worden."
-
-#, java-format
-#~ msgid "LimeWire cannot play the file {0}: {1}"
-#~ msgstr "LimeWire kan het bestand {0} niet afspelen: {1}"
-
-#~ msgid ""
-#~ "You have made changes to some settings. Would you like to save these changes?"
-#~ msgstr ""
-#~ "U hebt wijzigingen aangebracht in enkele instellingen. Wilt u deze "
-#~ "veranderingen opslaan?"
-
-#~ msgid "Lime Wire Store"
-#~ msgstr "LimeWire Store"
-
-#~ msgid "Sensivity"
-#~ msgstr "Gevoeligheid"
-
-#~ msgid "Lime Wire Store - Subfolder Template"
-#~ msgstr "LimeWire Store - Submaptemplate"
-
-#~ msgid "Lime Wire Store - Save Folder"
-#~ msgstr "LimeWire Store - Opslagmap"
-
-#~ msgid ""
-#~ "You can choose the folder for saving files purchased from the Lime Wire "
-#~ "Store."
-#~ msgstr ""
-#~ "U kunt de map kiezen die gebruikt wordt om bestanden op te slaan die u "
-#~ "gekocht heeft via de LimeWire Store."
-
-#~ msgid ""
-#~ "You have some songs in the playlist.  Would you like to clear them and start "
-#~ "a new playlist?"
-#~ msgstr ""
-#~ "U heeft enkele nummers in de afspeellijst. Wilt u deze wissen en een nieuwe "
-#~ "afspeellijst starten?"
-
-#~ msgid "Warning file already exists. Overwrite this file?"
-#~ msgstr "Het waarschuwingsbestand bestaat al. Wilt u deze overschrijven?"
-
-#~ msgid ""
-#~ "One or more files or protocols that LimeWire uses are no longer associated "
-#~ "with LimeWire. Would you like LimeWire to fix this?"
-#~ msgstr ""
-#~ "Eén of meer bestanden of protocollen die LimeWire gebruikt zijn niet langer "
-#~ "toegewezen aan LimeWire. Wilt u dat LimeWire dit voor u repareert?"
-
-#~ msgid ""
-#~ "The default Internet Archive identifier for this file and username is "
-#~ "allready taken. Please modify it below or press cancel to return."
-#~ msgstr ""
-#~ "De standaard Internet Archive-identiteit voor dit bestand en gebruikersnaam "
-#~ "is al in gebruik. Verander het hieronder of klik op 'Annuleren' om terug te "
-#~ "keren."
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Updates"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Afronden"
-
-#~ msgid "Loading Languages"
-#~ msgstr "Talen laden..."
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Plakken"
-
-#, java-format
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "Je deelt  {0} bestanden (Bezig met laden...)"
-
-#, java-format
-#~ msgid "You are sharing {0} files"
-#~ msgstr "Je deelt  {0} bestanden"
-
-#, java-format
-#~ msgid "Search \"What''s New\" for: {0}"
-#~ msgstr "Zoeken in \"Wat is nieuw\": {0}"
 
 #~ msgid ". The file type is not recognized."
 #~ msgstr ". Het bestandstype wordt niet herkend."
@@ -234,41 +131,32 @@ msgstr ""
 #~ msgid ". The file cannot be parsed."
 #~ msgstr ". Het probleem kan niet verholpen worden."
 
+#~ msgid ""
+#~ "You have made changes to some settings. Would you like to save these changes?"
+#~ msgstr ""
+#~ "U hebt wijzigingen aangebracht in enkele instellingen. Wilt u deze "
+#~ "veranderingen opslaan?"
+
+#~ msgid "Sensivity"
+#~ msgstr "Gevoeligheid"
+
+#~ msgid ""
+#~ "One or more files or protocols that LimeWire uses are no longer associated "
+#~ "with LimeWire. Would you like LimeWire to fix this?"
+#~ msgstr ""
+#~ "Eén of meer bestanden of protocollen die LimeWire gebruikt zijn niet langer "
+#~ "toegewezen aan LimeWire. Wilt u dat LimeWire dit voor u repareert?"
+
+#~ msgid ""
+#~ "The default Internet Archive identifier for this file and username is "
+#~ "allready taken. Please modify it below or press cancel to return."
+#~ msgstr ""
+#~ "De standaard Internet Archive-identiteit voor dit bestand en gebruikersnaam "
+#~ "is al in gebruik. Verander het hieronder of klik op 'Annuleren' om terug te "
+#~ "keren."
+
 #~ msgid "Close the Window"
 #~ msgstr "Scherm afsluiten"
-
-#~ msgid "Statistics"
-#~ msgstr "Statistieken"
-
-#~ msgid "&New Folder"
-#~ msgstr "&Nieuwe map"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "Voeg een map toe aan de geselecteerde bibliotheekmap"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "Stop het delen van de geselecteerde bibliotheekmap"
-
-#~ msgid "&Rename Folder"
-#~ msgstr "Map he&rnoemen"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "Bestand(en) uitvoeren"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "Voer de geselecteerde bestand(en) uit"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "B&estand(en) verwijderen"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "Verwijder de geselecteerde bestand(en)"
-
-#~ msgid "E&xplore"
-#~ msgstr "Verkennen"
-
-#~ msgid "X"
-#~ msgstr "X"
 
 #~ msgid "V"
 #~ msgstr "I"
@@ -279,9 +167,6 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Toon/verberg individuele tabs"
 
-#~ msgid "G"
-#~ msgstr "M"
-
 #~ msgid "&Statistics"
 #~ msgstr "&Statistieken"
 
@@ -291,23 +176,26 @@ msgstr ""
 #~ msgid "U"
 #~ msgstr "H"
 
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "Voeg een map toe aan de geselecteerde bibliotheekmap"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "Stop het delen van de geselecteerde bibliotheekmap"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "Bestand(en) uitvoeren"
+
+#~ msgid "X"
+#~ msgstr "X"
+
+#~ msgid "G"
+#~ msgstr "M"
+
 #~ msgid "Results"
 #~ msgstr "Resultaten"
 
 #~ msgid "Files"
 #~ msgstr "Bestanden"
-
-#~ msgid "files"
-#~ msgstr "bestanden"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "bestanden (Bezig met laden...)"
-
-#~ msgid "You are sharing"
-#~ msgstr "Je deelt"
-
-#~ msgid "Waiting For Tracker"
-#~ msgstr "Wachten op tracker"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Repareren is niet gelukt"
@@ -318,33 +206,27 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s op bronvermeldingen"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Busy"
+#~ msgstr "Bezig"
+
+#~ msgid "files"
+#~ msgstr "bestanden"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "bestanden (Bezig met laden...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Bestanden met deze naam"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Zoeken naar bestanden met dezelfde bestandsnaam."
 
-#~ msgid "Orginal query"
-#~ msgstr "Originele zoekactie"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr ""
 #~ "Voert dezelfde zoekactie uit als waarin dit bestand eerder is gevonden."
-
-#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr "Sorrt, maar LimeWire kon uw oude torrents niet herstarten."
-
-#~ msgid "Validation Required"
-#~ msgstr "Validatie benodigd"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Er is geen lijn naar buiten beschikbaar."
-
-#~ msgid "Height:"
-#~ msgstr "Hoogte:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Klik op OK om de licentie permanent te verwijderen."
 
 #~ msgid "End Chat"
 #~ msgstr "Chat beëindigen"
@@ -352,14 +234,657 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Beëindig het chatten met een host"
 
-#~ msgid "Loading Resources..."
-#~ msgstr "Bronnen worden geladen..."
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Statistiekenscherm wordt geladen..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Er kan geen poort worden gevonden voor inkomende verbindingen.\n"
+#~ "Geef een poort op in het configuratiescherm."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast-pings ontvangen van alle Gnutella-cliënten tegenover andere "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast-pongs ontvangen van alle Gnutella-cliënten tegenover andere "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast-aanvragen ontvangen van alle Gnutella-cliënten tegenover andere "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Multicast-treffers ontvangen van alle Gnutella-cliënten tegenover andere "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Multicast-pushes ontvangen van alle Gnutella-cliënten tegenover andere "
+#~ "LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes voor Multicast-pings ontvangen van alle Gnutella-cliënten "
+#~ "tegenover andere LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes voor Multicast-pongs ontvangen van alle Gnutella-cliënten "
+#~ "tegenover andere LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes voor Multicast-aanvragen ontvangen van alle Gnutella-cliënten "
+#~ "tegenover andere LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes voor Multicast-treffers ontvangen van alle Gnutella-cliënten "
+#~ "tegenover andere LimeWires."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobytes voor Multicast-pushes ontvangen van alle Gnutella-cliënten "
+#~ "tegenover andere LimeWires."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "Fouten"
+
+#~ msgid "Query Replies"
+#~ msgstr "Aanvraagantwoorden"
+
+#~ msgid "Ping Replies"
+#~ msgstr "Pingantwoorden"
+
+#~ msgid "Compression"
+#~ msgstr "Compressie"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Trefferroutingsfouten"
+
+#~ msgid "Requests"
+#~ msgstr "Verzoeken"
+
+#~ msgid "Request Methods"
+#~ msgstr "Verzoekmethodes"
+
+#~ msgid "seconds"
+#~ msgstr "seconden"
+
+#~ msgid "Average"
+#~ msgstr "Gemiddeld"
+
+#~ msgid "Max"
+#~ msgstr "Max"
+
+#~ msgid "Total Upstream"
+#~ msgstr "Totale upstream"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Totale downstream"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP Totaal"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "HTTP-headers"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Gnutella-totaal"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Gnutella-headers"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Gnutella-berichten"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Totale potentiële upstream"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Totale daadwerkelijke upstream"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Totale potentiële downstream"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Totale daadwerkelijke upstream"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (potentieel)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP (daadwerkelijk)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (potentieel)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (daadwerkelijk)"
+
+#~ msgid "All Clients"
+#~ msgstr "Alle cliënten"
+
+#~ msgid "All Messages"
+#~ msgstr "Alle berichten"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hops 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hops 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hops 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hops 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hops 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hops 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hops 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hops 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hops 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Pongfouten"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Antwoordfouten"
+
+#~ msgid "Push Errors"
+#~ msgstr "Pushfouten"
+
+#~ msgid "No Route"
+#~ msgstr "Geen route"
+
+#~ msgid "All Requests"
+#~ msgstr "Alle verzoeken"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "HEAD-verzoeken"
+
+#~ msgid "GET Requests"
+#~ msgstr "GET-verzoeken"
+
+#~ msgid "Push Requests"
+#~ msgstr "Pushverzoeken"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Gnutella-verzoeken"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Gnutella-verzoeken (LimeWire)"
+
+#~ msgid "Accepted"
+#~ msgstr "Geaccepteerd"
+
+#~ msgid "IO Error"
+#~ msgstr "IO-fout"
+
+#~ msgid "THEX Request"
+#~ msgstr "THEX-verzoek"
+
+#~ msgid "URN Get"
+#~ msgstr "URN Get"
+
+#~ msgid "Freeloader"
+#~ msgstr "Freeloader"
+
+#~ msgid "Normal"
+#~ msgstr "Normaal"
+
+#~ msgid "Get"
+#~ msgstr "Get"
+
+#~ msgid "Head"
+#~ msgstr "Head"
+
+#~ msgid "Pushed Head"
+#~ msgstr "Pushde Head"
+
+#~ msgid "Orginal query"
+#~ msgstr "Originele zoekactie"
 
 #~ msgid "Loading Settings..."
 #~ msgstr "Instellingen worden geladen..."
 
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Statistiekenscherm wordt geladen..."
+#~ msgid "Network"
+#~ msgstr "Netwerk"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Alle ontvangen aanvragen in kilobytes, door hops."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "Alle ontvangen aanvragen in kilobytes, door Time to Live (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Alle ontvangen treffers in kilobytes, door hops."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "Alle ontvangen treffers in kilobytes, door Time to Live (TTL)."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "De gemiddelde grootte in kilobytes van ontvangen Gnutella-berichten."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "De gemiddelde grootte in kilobytes van ontvangen LimeWire-berichten."
+
+#~ msgid "Current"
+#~ msgstr "Huidig"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Er is geen lijn naar buiten beschikbaar."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Alle ontvangen aanvragen, door hops."
+
+#~ msgid "Special Queries"
+#~ msgstr "Speciale aanvragen"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Alle speciaal gemarkeerde aanvragen."
+
+#~ msgid "False Positive"
+#~ msgstr "Incorrecte waarde"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Generische fouten"
+
+#~ msgid "Handshaking"
+#~ msgstr "Handschudden"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Statistieken voor handschudden als een ultrapeer."
+
+#~ msgid "Flow Control"
+#~ msgstr "Flowbesturing"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Statistieken voor flowbestuurde berichten."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Totaal aantal gefiltreerde berichten."
+
+#~ msgid "Transfers"
+#~ msgstr "Overdrachten"
+
+#~ msgid "Color"
+#~ msgstr "Kleur"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Statistieken van deze grafiek naar bestanden schrijven."
+
+#~ msgid "All Errors"
+#~ msgstr "Alle fouten"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "Ongeldig payloadlengte"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "Ongeldige hops"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "Ongeldige TTL"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "Hops > Soft max"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(Hops + TTL) > Hard max"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "Ongeldige berichtcode"
+
+#~ msgid "All Query Errors"
+#~ msgstr "Alle aanvraagfouten"
+
+#~ msgid "URN Query"
+#~ msgstr "URN-aanvraag"
+
+#~ msgid "Query Too Large"
+#~ msgstr "Aanvraag te lang"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "XML-aanvraag te lang"
+
+#~ msgid "Empty Query"
+#~ msgstr "Lege aanvraag"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "Ongeldige karakters in aanvraag"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "Alle aanvraagantwoordfouten"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "Ongeldige antwoordpoort"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "Ongeldig antwoordadres"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "Ongeldige antwoordsnelheid"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "Alle pingantwoordfouten"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "Ongeldige pingantwoordpayload"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "Ongeldige pingantwoordpoort"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "Ongeldig pingantwoordadres"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "Ongeldige GGEP-blokkade"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "Ongeldige leverancierslengte"
+
+#~ msgid "All Push Errors"
+#~ msgstr "Alle pushfouten"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "Ongeldige pushpoort"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "Ongeldig pushadres"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "Ongeldige pushpayload"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "Alle leveranciersberichtfouten"
+
+#~ msgid "Invalid ID"
+#~ msgstr "Ongeldige ID"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "Ongeldige selector"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "Ongeldige payload"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "Onherkenbaar leveranciersbericht"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "Routetabel patchen"
+
+#~ msgid "What's New?"
+#~ msgstr "Wat is er nieuw?"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Hard limiet"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "Hard limiet (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "Hard limiet (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "Hard limiet (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "Hard limiet (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "Hard limiet (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "Hard limiet (TTL 5 of hoger)"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Verbindingspogingen"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "Inkomende pogingen"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "Magnet-verzoeken"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "Onbekende verzoeken"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "Verbannen hosts"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "Onmiddellijk gesloten"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "Leesprobleem met header"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "Onbekende antwoordcode"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "Vergelijkingsfout met inhoud-URN"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "Incompatibele bereiken"
+
+#~ msgid "Failed"
+#~ msgstr "Mislukt"
+
+#~ msgid "Succeeded"
+#~ msgstr "Voltooid"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "Succesvol HTTP 1.1"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "Succesvol HTTP 1.0"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "Mislukt HTTP 1.1"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "Mislukt HTTP 1.0"
+
+#~ msgid "Retried Success"
+#~ msgstr "Nieuwe succesvolle poging"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "Succesvolle directe verbinding"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "Succesvolle pushverbinding"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "Mislukte push (onderbroken)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "Mislukte push (geen GIV ontvangen)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "Mislukte push (verloren verbinding)"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "Succesvolle pushproxy"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "Misvormde pushproxy"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "Mislukte pushproxy"
+
+#~ msgid "Push Proxy"
+#~ msgstr "Pushproxy"
+
+#~ msgid "Traditional Get"
+#~ msgstr "Traditionele Get"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "Onbekende URN Get"
+
+#~ msgid "Limit Reached"
+#~ msgstr "Limiet bereikt"
+
+#~ msgid "Banned Client"
+#~ msgstr "Verbannen cliënt"
+
+#~ msgid "Unknown"
+#~ msgstr "Onbekend"
+
+#~ msgid "Pushed Get"
+#~ msgstr "Pushde Get"
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "Pushde onbekend"
+
+#~ msgid "Push Failed"
+#~ msgstr "Push mislukt"
+
+#~ msgid "Completed Responses"
+#~ msgstr "Voltooide antwoorden"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "Voltooide bestandsoverdrachten"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "Uitg. weig. (Leaf)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "Uitg. weig. (oude ultrapeer)"
+
+#~ msgid "Out Acc."
+#~ msgstr "Uitg. geacc."
+
+#~ msgid "In Rej."
+#~ msgstr "Inkom. weig."
+
+#~ msgid "In Acc."
+#~ msgstr "Inkom. geacc."
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "Uitg. weig. (volledig)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "Uitg. geacc. (onder begeleiding)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "Uitg. geacc. (begeleiding genegeerd)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "Uitg. geacc. (geen begeleiding)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "Inkom. weig.  (Leaf)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "Inkom. geacc. (Leaf)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "Inkom. geacc. (begeleiding naar Leaf)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "Inkom. geacc. (Ultrapeer)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "Inkom. weig. (alle slots bezet)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "Inkom. weig. (netwerk heeft ultrapeer nodig)"
+
+#~ msgid "Server Reject"
+#~ msgstr "Serverweigering"
+
+#~ msgid "No Conclusion"
+#~ msgstr "Geen conclusie"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "LimeWire-ultrapeers"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "LimeWire-leaves"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "Andere ultrapeers"
+
+#~ msgid "Other Leaves"
+#~ msgstr "Andere leaves"
+
+#~ msgid "Responses Requested"
+#~ msgstr "Aangevraagde antwoorden"
+
+#~ msgid "Responses Received"
+#~ msgstr "Ontvangen antwoorden"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "Gemeden antwoorden"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "OOB-succeswaarde"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr "Steun LimeWire en de onafhankelijke mediainhoud. Koop PRO."
@@ -375,40 +900,39 @@ msgstr ""
 #~ "uw verbinding- of firewall-instellingen en kies dan \"Verbinden\" in het "
 #~ "\"Bestand\"-menu om LimeWire met het netwerk te laten verbinden."
 
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Er kan geen poort worden gevonden voor inkomende verbindingen.\n"
-#~ "Geef een poort op in het configuratiescherm."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr "Voer a.u.b. de titel in van het bestand dat u wilt publiceren."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr "Voer a.u.b. het jaar in van het bestand dat u wilt publiceren."
-
-#~ msgid "Please enter the copyright holder of the file you want to publish."
-#~ msgstr ""
-#~ "Voer de naam van de eigenaar van het copyright in van het bestand dat u wilt "
-#~ "publiceren."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Voer a.u.b. een geldige verificatie-URL van de licentie in."
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Geavanceerde statistieken tonen:"
 
 #~ msgid ""
-#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
 #~ msgstr ""
-#~ "LimeWire kon het torrentbestand niet downloaden vanaf de opgegeven URL:"
+#~ "Totale bandbreedte welke wordt gebruikt om uitgaande data te verzenden, óf "
+#~ "door uploads óf door Gnutella-berichten."
 
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Totale bandbreedte welke wordt gebruikt om inkomende data te ontvangen, óf "
+#~ "door downloads óf door Gnutella-berichten."
 
-#~ msgid "Check these associations when starting LimeWire:"
-#~ msgstr "Controleer deze associaties bij het opstarten van LimeWire:"
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Aantal dubbele aanvragen welke over Multicast zijn ontvangen, tegenover het "
+#~ "totaal aantal aanvragen."
 
-#~ msgid "Display:"
-#~ msgstr "Weergave:"
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Totaal aantal kilobytes in gedupliceerde aanvragen ontvangen over Multicast "
+#~ "tegenover het totaal aantal aanvragen."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr "Alle Gnutella-berichten verzonden over Multicast, door berichttype."
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
@@ -418,9 +942,6 @@ msgstr ""
 #~ "Bandbreedtestatistieken bevatten volledige informatie over bandbreedte welke "
 #~ "upstream en downstream verzonden is. Klik op één van de categorieën om de "
 #~ "gewenste statistieken te zien."
-
-#~ msgid "Network"
-#~ msgstr "Netwerk"
 
 #~ msgid ""
 #~ "Statistics on the current state of the network. These statistics are quite "
@@ -445,25 +966,8 @@ msgstr ""
 #~ "werken. De geavanceerde statistieken worden niet standaard weergegeven en "
 #~ "zijn voor de meeste gebruikers niet aangeraden."
 
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Geavanceerde statistieken tonen:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Totale bandbreedte welke wordt gebruikt om uitgaande data te verzenden, óf "
-#~ "door uploads óf door Gnutella-berichten."
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Totale bandbreedte welke wordt gebruikt om inkomende data te ontvangen, óf "
-#~ "door downloads óf door Gnutella-berichten."
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "Alle Gnutella-berichten ontvangen door deze cliënt."
@@ -488,24 +992,8 @@ msgstr ""
 #~ "Aantal dubbele aanvragen welke over TCP zijn ontvangen, tegenover het totaal "
 #~ "aantal aanvragen."
 
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Aantal dubbele aanvragen welke over Multicast zijn ontvangen, tegenover het "
-#~ "totaal aantal aanvragen."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Alle ontvangen aanvragen, door hops."
-
 #~ msgid "All received queries, by time to live (TTL)."
 #~ msgstr "Alle ontvangen aanvragen, door Time to Live (TTL)."
-
-#~ msgid "Special Queries"
-#~ msgstr "Speciale aanvragen"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Alle speciaal gemarkeerde aanvragen."
 
 #~ msgid "All received query hits, by hops."
 #~ msgstr "Alle ontvangen treffers, door hops."
@@ -550,25 +1038,6 @@ msgstr ""
 #~ "Totaal aantal kilobytes in gedupliceerde aanvragen ontvangen over TCP "
 #~ "tegenover het totaal aantal aanvragen."
 
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Totaal aantal kilobytes in gedupliceerde aanvragen ontvangen over Multicast "
-#~ "tegenover het totaal aantal aanvragen."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Alle ontvangen aanvragen in kilobytes, door hops."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "Alle ontvangen aanvragen in kilobytes, door Time to Live (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Alle ontvangen treffers in kilobytes, door hops."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "Alle ontvangen treffers in kilobytes, door Time to Live (TTL)."
-
 #~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "UDP-pings ontvangen van alle Gnutella-cliënten tegenover andere LimeWires."
@@ -591,37 +1060,6 @@ msgstr ""
 #~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "UDP-pushes ontvangen van alle Gnutella-cliënten tegenover andere LimeWires."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast-pings ontvangen van alle Gnutella-cliënten tegenover andere "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast-pongs ontvangen van alle Gnutella-cliënten tegenover andere "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast-aanvragen ontvangen van alle Gnutella-cliënten tegenover andere "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Multicast-treffers ontvangen van alle Gnutella-cliënten tegenover andere "
-#~ "LimeWires."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Multicast-pushes ontvangen van alle Gnutella-cliënten tegenover andere "
-#~ "LimeWires."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
@@ -659,50 +1097,6 @@ msgstr ""
 #~ "andere LimeWires."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes voor Multicast-pings ontvangen van alle Gnutella-cliënten "
-#~ "tegenover andere LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes voor Multicast-pongs ontvangen van alle Gnutella-cliënten "
-#~ "tegenover andere LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes voor Multicast-aanvragen ontvangen van alle Gnutella-cliënten "
-#~ "tegenover andere LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes voor Multicast-treffers ontvangen van alle Gnutella-cliënten "
-#~ "tegenover andere LimeWires."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobytes voor Multicast-pushes ontvangen van alle Gnutella-cliënten "
-#~ "tegenover andere LimeWires."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "De gemiddelde grootte in kilobytes van ontvangen Gnutella-berichten."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "De gemiddelde grootte in kilobytes van ontvangen LimeWire-berichten."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
 #~ msgstr ""
@@ -720,38 +1114,20 @@ msgstr ""
 #~ msgid "Hit"
 #~ msgstr "Treffer"
 
-#~ msgid "False Positive"
-#~ msgstr "Incorrecte waarde"
-
-#~ msgid "Errors"
-#~ msgstr "Fouten"
-
-#~ msgid "Generic Errors"
-#~ msgstr "Generische fouten"
-
 #~ msgid "Generic errors while reading messages."
 #~ msgstr "Generische fouten tijdens het lezen van berichten."
 
 #~ msgid "Errors while reading query messages."
 #~ msgstr "Fouten tijdens het lezen van aanvraagberichten."
 
-#~ msgid "Query Replies"
-#~ msgstr "Aanvraagantwoorden"
-
 #~ msgid "Errors while reading query reply messages."
 #~ msgstr "Fouten tijdens het lezen van aanvraagantwoordberichten."
-
-#~ msgid "Ping Replies"
-#~ msgstr "Pingantwoorden"
 
 #~ msgid "Errors while reading ping replies."
 #~ msgstr "Fouten tijdens het lezen van pingantwoorden."
 
 #~ msgid "Errors while reading pushes."
 #~ msgstr "Fouten tijdens het lezen van pushes."
-
-#~ msgid "Vendor Messages"
-#~ msgstr "Leverancierberichten"
 
 #~ msgid "Errors while reading vendor messages."
 #~ msgstr "Fouten tijdens het lezen van leveranciersberichten."
@@ -764,9 +1140,6 @@ msgstr ""
 
 #~ msgid "All Gnutella messages sent over UDP, by message type."
 #~ msgstr "Alle Gnutella-berichten verzonden over UDP, door berichttype."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr "Alle Gnutella-berichten verzonden over Multicast, door berichttype."
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr ""
@@ -924,14 +1297,8 @@ msgstr ""
 #~ "Kilobytes voor Multicast-pushes verzonden vanaf alle Gnutella-cliënten "
 #~ "tegenover andere LimeWires."
 
-#~ msgid "Handshaking"
-#~ msgstr "Handschudden"
-
 #~ msgid "Statistics for handshaking as a leaf."
 #~ msgstr "Statistieken voor handschudden als een leaf."
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "Statistieken voor handschudden als een ultrapeer."
 
 #~ msgid "Statistics for outgoing Gnutella connection handshaking."
 #~ msgstr "Statistieken voor uitgaande Gnutella-verbindingshandschudding."
@@ -949,20 +1316,11 @@ msgstr ""
 #~ "Statistieken voor weigeringen van uitgaande Gnutella-"
 #~ "verbindingshandschuddingen van de server."
 
-#~ msgid "Compression"
-#~ msgstr "Compressie"
-
 #~ msgid "Statistics for compressed upstream traffic in kilobytes."
 #~ msgstr "Statistieken voor gecomprimeerd upstreamverkeer in kilobytes."
 
 #~ msgid "Statistics for compressed downstream traffic in kilobytes."
 #~ msgstr "Statistieken voor gecomprimeerd downstreamverkeer in kilobytes"
-
-#~ msgid "Flow Control"
-#~ msgstr "Flowbesturing"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "Statistieken voor flowbestuurde berichten."
 
 #~ msgid "Statistics for flow controlled messages in kilobytes."
 #~ msgstr "Statistieken voor flowbestuurde berichten in kilobytes."
@@ -970,14 +1328,8 @@ msgstr ""
 #~ msgid "Total number of errors routing messages to other clients."
 #~ msgstr "Totaal aantal fouten die berichten naar andere cliënten leiden."
 
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Trefferroutingsfouten"
-
 #~ msgid "Errors routing query hits."
 #~ msgstr "Fouten tijdens het leiden van treffers."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Totaal aantal gefiltreerde berichten."
 
 #~ msgid ""
 #~ "Total number of Gnutella connection attempts, either initiated internally or "
@@ -1007,9 +1359,6 @@ msgstr ""
 #~ "tijdsperiode. Dit omvat Bezig, Bestand niet gevonden, Bestand niet deelbaar, "
 #~ "In wachtrij geplaatst, diverse IO-fouten en OK-antwoorden."
 
-#~ msgid "Alt. Locations"
-#~ msgstr "Alt. locaties"
-
 #~ msgid ""
 #~ "Total alternate locations received and removed over time. This includes "
 #~ "locations that we actively attempt to connect to, locations that we will "
@@ -1020,9 +1369,6 @@ msgstr ""
 #~ "tijdsperiode. Dit omvat locaties waarmee we proberen te verbinden, locaties "
 #~ "die we negeren, locaties die niet verwijderd konden worden en locaties die "
 #~ "wij permanent verwijderden zodat we er niet meer mee kunnen verbinden."
-
-#~ msgid "Transfers"
-#~ msgstr "Overdrachten"
 
 #~ msgid ""
 #~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
@@ -1038,9 +1384,6 @@ msgstr ""
 #~ "Registreert de tijd in milliseconden om TCP-verbindingen voor downloads te "
 #~ "bewerkstelligen. Dit kan variëren, bijvoorbeeld als de servers overbezet "
 #~ "zijn."
-
-#~ msgid "Requests"
-#~ msgstr "Verzoeken"
 
 #~ msgid ""
 #~ "Total incoming upload requests. These numbers are incremented on every "
@@ -1061,9 +1404,6 @@ msgstr ""
 #~ "verzenden van elk antwoord verhoogd, en dus om elk deel voor HTTP/1.1-"
 #~ "overdrachten te laten omvatten 'Normaal' is het aantal verzoeken voor welke "
 #~ "we hebben geprobeerd om gedeeltelijk over te brengen."
-
-#~ msgid "Request Methods"
-#~ msgstr "Verzoekmethodes"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
@@ -1086,431 +1426,8 @@ msgstr ""
 #~ "aantallen worden verhoogd per verbinding, niet per deel (geblokkeerde "
 #~ "uploads zullen ook geteld worden als onderbroken uploads)."
 
-#~ msgid "seconds"
-#~ msgstr "seconden"
-
-#~ msgid "Average"
-#~ msgstr "Gemiddeld"
-
-#~ msgid "Max"
-#~ msgstr "Max"
-
-#~ msgid "Color"
-#~ msgstr "Kleur"
-
-#~ msgid "Current"
-#~ msgstr "Huidig"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "Statistieken van deze grafiek naar bestanden schrijven."
-
-#~ msgid "Total Upstream"
-#~ msgstr "Totale upstream"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Totale downstream"
-
-#~ msgid "HTTP Total"
-#~ msgstr "HTTP Totaal"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "HTTP-headers"
-
-#~ msgid "HTTP Content"
-#~ msgstr "HTTP-inhoud"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Gnutella-totaal"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "Gnutella-headers"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Gnutella-berichten"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Totale potentiële upstream"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Totale daadwerkelijke upstream"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Totale potentiële downstream"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Totale daadwerkelijke upstream"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (potentieel)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP (daadwerkelijk)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (potentieel)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (daadwerkelijk)"
-
-#~ msgid "All Clients"
-#~ msgstr "Alle cliënten"
-
-#~ msgid "All Errors"
-#~ msgstr "Alle fouten"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "Ongeldig payloadlengte"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "Ongeldige hops"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "Ongeldige TTL"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "Hops > Soft max"
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(Hops + TTL) > Hard max"
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "Ongeldige berichtcode"
-
-#~ msgid "All Query Errors"
-#~ msgstr "Alle aanvraagfouten"
-
-#~ msgid "URN Query"
-#~ msgstr "URN-aanvraag"
-
-#~ msgid "Query Too Large"
-#~ msgstr "Aanvraag te lang"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "XML-aanvraag te lang"
-
-#~ msgid "Empty Query"
-#~ msgstr "Lege aanvraag"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "Ongeldige karakters in aanvraag"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "Alle aanvraagantwoordfouten"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "Ongeldige antwoordpoort"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "Ongeldig antwoordadres"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "Ongeldige antwoordsnelheid"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "Alle pingantwoordfouten"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "Ongeldige pingantwoordpayload"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "Ongeldige pingantwoordpoort"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "Ongeldig pingantwoordadres"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "Ongeldige GGEP-blokkade"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "Ongeldige leverancierslengte"
-
-#~ msgid "All Push Errors"
-#~ msgstr "Alle pushfouten"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "Ongeldige pushpoort"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "Ongeldig pushadres"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "Ongeldige pushpayload"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "Alle leveranciersberichtfouten"
-
-#~ msgid "Invalid ID"
-#~ msgstr "Ongeldige ID"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "Ongeldige selector"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "Ongeldige payload"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "Onherkenbaar leveranciersbericht"
-
-#~ msgid "All Messages"
-#~ msgstr "Alle berichten"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "Routetabel patchen"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "What's New?"
-#~ msgstr "Wat is er nieuw?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Pongfouten"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Antwoordfouten"
-
-#~ msgid "Push Errors"
-#~ msgstr "Pushfouten"
-
-#~ msgid "Hard Limit"
-#~ msgstr "Hard limiet"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "Hard limiet (TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "Hard limiet (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "Hard limiet (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "Hard limiet (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "Hard limiet (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "Hard limiet (TTL 5 of hoger)"
-
-#~ msgid "No Route"
-#~ msgstr "Geen route"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "Verbindingspogingen"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "Inkomende pogingen"
-
-#~ msgid "All Requests"
-#~ msgstr "Alle verzoeken"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "HEAD-verzoeken"
-
-#~ msgid "GET Requests"
-#~ msgstr "GET-verzoeken"
-
-#~ msgid "Push Requests"
-#~ msgstr "Pushverzoeken"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Gnutella-verzoeken"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Gnutella-verzoeken (LimeWire)"
-
-#~ msgid "Chat Requests"
-#~ msgstr "Chatverzoeken"
-
-#~ msgid "Magnet Requests"
-#~ msgstr "Magnet-verzoeken"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "Onbekende verzoeken"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "Verbannen hosts"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "Onmiddellijk gesloten"
-
-#~ msgid "Accepted"
-#~ msgstr "Geaccepteerd"
-
-#~ msgid "Busy"
-#~ msgstr "Bezig"
-
 #~ msgid "Not Sharing Files"
 #~ msgstr "Deelt geen bestanden"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "Leesprobleem met header"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "Onbekende antwoordcode"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "Vergelijkingsfout met inhoud-URN"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "Incompatibele bereiken"
-
-#~ msgid "IO Error"
-#~ msgstr "IO-fout"
-
-#~ msgid "Failed"
-#~ msgstr "Mislukt"
-
-#~ msgid "Succeeded"
-#~ msgstr "Voltooid"
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "Succesvol HTTP 1.1"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "Succesvol HTTP 1.0"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "Mislukt HTTP 1.1"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "Mislukt HTTP 1.0"
-
-#~ msgid "Retried Success"
-#~ msgstr "Nieuwe succesvolle poging"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "Succesvolle directe verbinding"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "Succesvolle pushverbinding"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "Mislukte push (onderbroken)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "Mislukte push (geen GIV ontvangen)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "Mislukte push (verloren verbinding)"
-
-#~ msgid "THEX Request"
-#~ msgstr "THEX-verzoek"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "Succesvolle pushproxy"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "Misvormde pushproxy"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "Mislukte pushproxy"
-
-#~ msgid "Push Proxy"
-#~ msgstr "Pushproxy"
-
-#~ msgid "Update File"
-#~ msgstr "Bestand updaten"
-
-#~ msgid "Traditional Get"
-#~ msgstr "Traditionele Get"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "Onbekende URN Get"
-
-#~ msgid "URN Get"
-#~ msgstr "URN Get"
-
-#~ msgid "Limit Reached"
-#~ msgstr "Limiet bereikt"
-
-#~ msgid "Banned Client"
-#~ msgstr "Verbannen cliënt"
-
-#~ msgid "Freeloader"
-#~ msgstr "Freeloader"
-
-#~ msgid "Normal"
-#~ msgstr "Normaal"
-
-#~ msgid "Get"
-#~ msgstr "Get"
-
-#~ msgid "Head"
-#~ msgstr "Head"
-
-#~ msgid "Unknown"
-#~ msgstr "Onbekend"
-
-#~ msgid "Pushed Get"
-#~ msgstr "Pushde Get"
-
-#~ msgid "Pushed Head"
-#~ msgstr "Pushde Head"
-
-#~ msgid "Pushed Unknown"
-#~ msgstr "Pushde onbekend"
-
-#~ msgid "Push Failed"
-#~ msgstr "Push mislukt"
-
-#~ msgid "Completed Responses"
-#~ msgstr "Voltooide antwoorden"
 
 #~ msgid "Interrupted"
 #~ msgstr "Onderbroken"
@@ -1518,86 +1435,90 @@ msgstr ""
 #~ msgid "Stalled"
 #~ msgstr "Geblokkeerd"
 
-#~ msgid "Completed File Transfers"
-#~ msgstr "Voltooide bestandsoverdrachten"
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "Uitg. weig. (Leaf)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "Uitg. weig. (oude ultrapeer)"
-
-#~ msgid "Out Acc."
-#~ msgstr "Uitg. geacc."
-
-#~ msgid "In Rej."
-#~ msgstr "Inkom. weig."
-
-#~ msgid "In Acc."
-#~ msgstr "Inkom. geacc."
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "Uitg. weig. (volledig)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "Uitg. geacc. (onder begeleiding)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "Uitg. geacc. (begeleiding genegeerd)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "Uitg. geacc. (geen begeleiding)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "Inkom. weig.  (Leaf)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "Inkom. geacc. (Leaf)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "Inkom. geacc. (begeleiding naar Leaf)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Inkom. geacc. (Ultrapeer)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "Inkom. weig. (alle slots bezet)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "Inkom. weig. (netwerk heeft ultrapeer nodig)"
-
-#~ msgid "Server Reject"
-#~ msgstr "Serverweigering"
-
-#~ msgid "No Conclusion"
-#~ msgstr "Geen conclusie"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "LimeWire-ultrapeers"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "LimeWire-leaves"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Andere ultrapeers"
-
-#~ msgid "Other Leaves"
-#~ msgstr "Andere leaves"
-
-#~ msgid "Responses Requested"
-#~ msgstr "Aangevraagde antwoorden"
-
-#~ msgid "Responses Received"
-#~ msgstr "Ontvangen antwoorden"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "Gemeden antwoorden"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "OOB-succeswaarde"
-
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr "Aantal aangevraagde en ontvangen antwoorden via het OOB-protocol"
+
+#~ msgid "Update File"
+#~ msgstr "Bestand updaten"
+
+#~ msgid "Statistics"
+#~ msgstr "Statistieken"
+
+#~ msgid "Validation Required"
+#~ msgstr "Validatie benodigd"
+
+#~ msgid "Height:"
+#~ msgstr "Hoogte:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Klik op OK om de licentie permanent te verwijderen."
+
+#~ msgid "Display:"
+#~ msgstr "Weergave:"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "Leverancierberichten"
+
+#~ msgid "HTTP Content"
+#~ msgstr "HTTP-inhoud"
+
+#~ msgid "&New Folder"
+#~ msgstr "&Nieuwe map"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "Map he&rnoemen"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "Voer de geselecteerde bestand(en) uit"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "B&estand(en) verwijderen"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "Verwijder de geselecteerde bestand(en)"
+
+#~ msgid "E&xplore"
+#~ msgstr "Verkennen"
+
+#~ msgid "Waiting For Tracker"
+#~ msgstr "Wachten op tracker"
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr "Sorrt, maar LimeWire kon uw oude torrents niet herstarten."
+
+#~ msgid "Chat Requests"
+#~ msgstr "Chatverzoeken"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "Voer a.u.b. de titel in van het bestand dat u wilt publiceren."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "Voer a.u.b. het jaar in van het bestand dat u wilt publiceren."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Voer a.u.b. een geldige verificatie-URL van de licentie in."
+
+#~ msgid "You are sharing"
+#~ msgstr "Je deelt"
+
+#~ msgid "Loading Resources..."
+#~ msgstr "Bronnen worden geladen..."
+
+#~ msgid "Please enter the copyright holder of the file you want to publish."
+#~ msgstr ""
+#~ "Voer de naam van de eigenaar van het copyright in van het bestand dat u wilt "
+#~ "publiceren."
+
+#~ msgid ""
+#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ msgstr ""
+#~ "LimeWire kon het torrentbestand niet downloaden vanaf de opgegeven URL:"
+
+#~ msgid "Check these associations when starting LimeWire:"
+#~ msgstr "Controleer deze associaties bij het opstarten van LimeWire:"
+
+#~ msgid "Alt. Locations"
+#~ msgstr "Alt. locaties"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -1716,9 +1637,8 @@ msgid "Loading Upload Management..."
 msgstr "Uploadbeheer wordt geladen..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
-#, fuzzy
 msgid "Loading Connection Listener..."
-msgstr "Verbindingsluisteraar wordt geladen..."
+msgstr "Connectie-overzicht wordt geladen..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:345
 msgid "Loading Connection Management..."
@@ -6350,7 +6270,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:255
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:293
 msgid "Legend"
-msgstr "Geschiedenis"
+msgstr "Legenda"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:302
 msgid "Folder is fully shared including all subfolders."

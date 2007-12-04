@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-08-24 19:22+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -32,6 +32,17 @@ msgstr ""
 #~ "\n"
 #~ "יש לשים לב: LimeWire לא יכולה לשלוט או לבקר על התכנים שברשת ה-Gnutella. אנא "
 #~ "כבד את החוקים המקומיים בנוגע לזכויות יוצרים."
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "סיום"
+
+#~ msgid "Loading Languages"
+#~ msgstr "טוען שפות"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "הדבק"
 
 #, java-format
 #~ msgid "You are sharing {0} files (Loading...)"
@@ -91,26 +102,6 @@ msgstr ""
 #~ msgstr "הצג את כפתור Magnetmix."
 
 #, fuzzy
-#~ msgid "The file type is not recognized."
-#~ msgstr ". סוג הקובץ לא מזוהה."
-
-#, fuzzy
-#~ msgid "The file cannot be found."
-#~ msgstr ". הקובץ אינו נמצא."
-
-#, fuzzy
-#~ msgid "The file is corrupt."
-#~ msgstr ". הקובץ מעוות."
-
-#, fuzzy
-#~ msgid "There is an unknown error with the audio file."
-#~ msgstr ". יש שגיאה בלתי ידועה עם הקובץ."
-
-#, fuzzy
-#~ msgid "The file cannot be parsed."
-#~ msgstr ". הקובץ לא יכול להיות מעובד."
-
-#, fuzzy
 #~ msgid ""
 #~ "You have made changes to some settings. Would you like to save these changes?"
 #~ msgstr "הורדת עיצוב חדש בשם \"{0}\". האם ברצונך להשתמש בעיצוב החדש?"
@@ -127,6 +118,165 @@ msgstr ""
 #~ msgstr ""
 #~ "אחד או יותר מהקבצים או פרוטוקולים ש-LimeWire משתמשת בהם אינם משוייכים ל-"
 #~ "LimeWire. האם ברצונך ש-LimeWire תתקן זאת?"
+
+#~ msgid "Close the Window"
+#~ msgstr "סגירת החלון"
+
+#~ msgid "V"
+#~ msgstr "V"
+
+#~ msgid "W"
+#~ msgstr "W"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "הצג או הסתר תוים אישים"
+
+#~ msgid "&Statistics"
+#~ msgstr "סטטיסטיקה... (&S)"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "הצג את מסך תוצאות סטטיסטיות"
+
+#~ msgid "U"
+#~ msgstr "U"
+
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "הוסף תיקיה לספריה הנבחרת"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "הפסק שיתוף ספריה נבחרת"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "הרץ קובץ (או קבצים) (&L)"
+
+#~ msgid "X"
+#~ msgstr "X"
+
+#~ msgid "Results"
+#~ msgstr "תוצאות"
+
+#~ msgid "Files"
+#~ msgstr "קבצים"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "שחזור נכשל"
+
+#~ msgid "Querying Network"
+#~ msgstr "חוקר הרשת"
+
+#~ msgid "s for Sources"
+#~ msgstr "עבור מקורות"
+
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "files"
+#~ msgstr "קבצים"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "קבצים (טוען...)"
+
+#~ msgid "Files with this name"
+#~ msgstr "קבצים עם השם הזה"
+
+#~ msgid "Searches for files with the same file name."
+#~ msgstr "מחפש קבצים עם אותו שם קובץ."
+
+#~ msgid "Performs the same search as the one which found this file previously."
+#~ msgstr "מבצע את אותו חיפוש שמצא את הקובץ הזה בעבר."
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "סיים שיחה עם המארח"
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "טוען את חלון הסטטיסטיקה..."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Compression"
+#~ msgstr "?#### STATS_COMPRESSABLE_UPSTREAM_TITLE=Upstream"
+
+#~ msgid "Orginal query"
+#~ msgstr "חיפוש מקורי"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "טוען הגדרות..."
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". אין קו המתאים לפלט."
+
+#~ msgid "What's New?"
+#~ msgstr "מה חדש?"
+
+#~ msgid "Unknown"
+#~ msgstr "לא ידוע"
+
+#~ msgid "Responses Requested"
+#~ msgstr "היענות נדרשת"
+
+#~ msgid "Responses Received"
+#~ msgstr "היענות שהתקבלה"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "היענות נעקפה"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "שיעור הצלחת ה OOB"
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "תמוך ב-LimeWire ובתוכן עצמאי. השג את PRO."
+
+#~ msgid "Interrupted"
+#~ msgstr "מנותק"
+
+#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
+#~ msgstr "מספר היענות שנדרשו והתקבלו דרך פרוטוקול OOB"
+
+#~ msgid "Statistics"
+#~ msgstr "סטטיסטיקה"
+
+#~ msgid "Validation Required"
+#~ msgstr "בדיקת התוקף מתבקשת"
+
+#~ msgid "Height:"
+#~ msgstr "גובה:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "אנא לחץ אישור על מנת להסיר לחלוטין את הרישיון."
+
+#~ msgid "&New Folder"
+#~ msgstr "תיקיה חדשה (&N)"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "שנה את שם התיקיה (&R)"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "הרץ קובץ נבחר (או קבצים)"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "מחק קובץ (או קבצים) (&E)"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "מחק את הקובץ הנבחר (או קבצים)"
+
+#~ msgid "Refre&sh"
+#~ msgstr "רענן (&S)"
+
+#~ msgid "E&xplore"
+#~ msgstr "סייר (&X)"
+
+#~ msgid "Waiting For Tracker"
+#~ msgstr "מחכה לגשש"
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr "מצטערים, אבל LimeWire לא הצליחה לאתחל את הורדות ה-Torrents הישנות."
+
+#~ msgid "Loading Resources..."
+#~ msgstr "טוען מקורות..."
+
+#~ msgid "Only search results with a {0} are official LimeWire communications."
+#~ msgstr "רק תוצאות חיפוש עם {0} הם תוצאות רשמיות של LimeWire."
 
 #, fuzzy
 #~ msgid "test1"
@@ -149,179 +299,29 @@ msgstr ""
 #~ msgstr "T1"
 
 #, fuzzy
-#~ msgid "English"
-#~ msgstr "סיום"
-
-#~ msgid "Loading Languages"
-#~ msgstr "טוען שפות"
+#~ msgid "The file type is not recognized."
+#~ msgstr ". סוג הקובץ לא מזוהה."
 
 #, fuzzy
-#~ msgid "false"
-#~ msgstr "הדבק"
+#~ msgid "The file cannot be found."
+#~ msgstr ". הקובץ אינו נמצא."
 
-#~ msgid "Close the Window"
-#~ msgstr "סגירת החלון"
+#, fuzzy
+#~ msgid "The file is corrupt."
+#~ msgstr ". הקובץ מעוות."
 
-#~ msgid "Statistics"
-#~ msgstr "סטטיסטיקה"
+#, fuzzy
+#~ msgid "There is an unknown error with the audio file."
+#~ msgstr ". יש שגיאה בלתי ידועה עם הקובץ."
 
-#~ msgid "&New Folder"
-#~ msgstr "תיקיה חדשה (&N)"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "הוסף תיקיה לספריה הנבחרת"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "הפסק שיתוף ספריה נבחרת"
-
-#~ msgid "&Rename Folder"
-#~ msgstr "שנה את שם התיקיה (&R)"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "הרץ קובץ (או קבצים) (&L)"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "הרץ קובץ נבחר (או קבצים)"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "מחק קובץ (או קבצים) (&E)"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "מחק את הקובץ הנבחר (או קבצים)"
-
-#~ msgid "Refre&sh"
-#~ msgstr "רענן (&S)"
-
-#~ msgid "E&xplore"
-#~ msgstr "סייר (&X)"
-
-#~ msgid "X"
-#~ msgstr "X"
-
-#~ msgid "V"
-#~ msgstr "V"
-
-#~ msgid "W"
-#~ msgstr "W"
-
-#~ msgid "Show or Hide individual tabs"
-#~ msgstr "הצג או הסתר תוים אישים"
-
-#~ msgid "&Statistics"
-#~ msgstr "סטטיסטיקה... (&S)"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "הצג את מסך תוצאות סטטיסטיות"
-
-#~ msgid "U"
-#~ msgstr "U"
-
-#~ msgid "Results"
-#~ msgstr "תוצאות"
-
-#~ msgid "Only search results with a {0} are official LimeWire communications."
-#~ msgstr "רק תוצאות חיפוש עם {0} הם תוצאות רשמיות של LimeWire."
-
-#~ msgid "Files"
-#~ msgstr "קבצים"
-
-#~ msgid "files"
-#~ msgstr "קבצים"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "קבצים (טוען...)"
-
-#~ msgid "Waiting For Tracker"
-#~ msgstr "מחכה לגשש"
-
-#~ msgid "Recovery Failed"
-#~ msgstr "שחזור נכשל"
-
-#~ msgid "Querying Network"
-#~ msgstr "חוקר הרשת"
-
-#~ msgid "s for Sources"
-#~ msgstr "עבור מקורות"
-
-#~ msgid "Files with this name"
-#~ msgstr "קבצים עם השם הזה"
-
-#~ msgid "Searches for files with the same file name."
-#~ msgstr "מחפש קבצים עם אותו שם קובץ."
-
-#~ msgid "Orginal query"
-#~ msgstr "חיפוש מקורי"
-
-#~ msgid "Performs the same search as the one which found this file previously."
-#~ msgstr "מבצע את אותו חיפוש שמצא את הקובץ הזה בעבר."
-
-#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr "מצטערים, אבל LimeWire לא הצליחה לאתחל את הורדות ה-Torrents הישנות."
-
-#~ msgid "Validation Required"
-#~ msgstr "בדיקת התוקף מתבקשת"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". אין קו המתאים לפלט."
-
-#~ msgid "Height:"
-#~ msgstr "גובה:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "אנא לחץ אישור על מנת להסיר לחלוטין את הרישיון."
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "סיים שיחה עם המארח"
-
-#~ msgid "Loading Resources..."
-#~ msgstr "טוען מקורות..."
-
-#~ msgid "Loading Settings..."
-#~ msgstr "טוען הגדרות..."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "טוען את חלון הסטטיסטיקה..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "תמוך ב-LimeWire ובתוכן עצמאי. השג את PRO."
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
+#, fuzzy
+#~ msgid "The file cannot be parsed."
+#~ msgstr ". הקובץ לא יכול להיות מעובד."
 
 #~ msgid "Query Hits"
 #~ msgstr ""
 #~ "?#### STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query "
 #~ "hits sent from all Gnutella clients versus other LimeWires."
-
-#~ msgid "Compression"
-#~ msgstr "?#### STATS_COMPRESSABLE_UPSTREAM_TITLE=Upstream"
-
-#~ msgid "What's New?"
-#~ msgstr "מה חדש?"
-
-#~ msgid "Unknown"
-#~ msgstr "לא ידוע"
-
-#~ msgid "Interrupted"
-#~ msgstr "מנותק"
-
-#~ msgid "Responses Requested"
-#~ msgstr "היענות נדרשת"
-
-#~ msgid "Responses Received"
-#~ msgstr "היענות שהתקבלה"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "היענות נעקפה"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "שיעור הצלחת ה OOB"
-
-#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
-#~ msgstr "מספר היענות שנדרשו והתקבלו דרך פרוטוקול OOB"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -537,7 +537,7 @@ msgid "You have already downloaded {0}"
 msgstr ""
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "כבר יש לך את אותו הקובץ במדויק בנתיב {0}"
 
@@ -3908,7 +3908,7 @@ msgstr "LimeWire עלולה לא להצליח את ההורדה שבחרת במ�
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:186
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1025
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to \"{0}\"."
 msgstr "כבר יש לך את אותו הקובץ במדויק בנתיב {0}"
 

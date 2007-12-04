@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-08-23 14:26+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -115,6 +115,9 @@ msgstr ""
 #~ msgid "I"
 #~ msgstr "I"
 
+#~ msgid "P"
+#~ msgstr "P"
+
 #~ msgid "N"
 #~ msgstr "N"
 
@@ -126,12 +129,6 @@ msgstr ""
 
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "अलग टैबों को दिखायें या छुपायें."
-
-#~ msgid "G"
-#~ msgstr "G"
-
-#~ msgid "P"
-#~ msgstr "P"
 
 #~ msgid "&Statistics"
 #~ msgstr "आँकड़े (&S)"
@@ -145,6 +142,9 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "E"
 
+#~ msgid "G"
+#~ msgstr "G"
+
 #~ msgid "Results"
 #~ msgstr "नतीजा"
 
@@ -157,8 +157,11 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s स्रोत के लिये"
 
-#~ msgid ". No line is available for output."
-#~ msgstr "कोई रेखा आउटपुट के लिये उपलब्ध नहीं है।"
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Busy"
+#~ msgstr "कार्य में निरत"
 
 #~ msgid "End Chat"
 #~ msgstr "बातचीत समाप्त"
@@ -169,38 +172,11 @@ msgstr ""
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "आकड़े की विन्डो लोड हो रही है..."
 
-#~ msgid "Network"
-#~ msgstr "नेटवर्क"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "सभी प्राप्त हुई पूँछताछ, छलाँग से।"
-
-#~ msgid "Special Queries"
-#~ msgstr "विशेष पूँछताछ"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "सभी विशेष चिह्नित पूँछताछ।"
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "सभी पूँछताछ किलोबाइट मे है."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "सभी प्राप्त हुई पूँछताछ किलोबाइट मे है."
-
 #~ msgid "QRP"
 #~ msgstr "QRP"
 
-#~ msgid "False Positive"
-#~ msgstr "झूठा धनात्मक"
-
 #~ msgid "Errors"
 #~ msgstr "त्रुटियॉ"
-
-#~ msgid "Generic Errors"
-#~ msgstr "वर्गीय गलतियॉ"
 
 #~ msgid "Query Replies"
 #~ msgstr "पूँछताछ के जबाब"
@@ -208,29 +184,11 @@ msgstr ""
 #~ msgid "Ping Replies"
 #~ msgstr "पिंग के जबाब"
 
-#~ msgid "Handshaking"
-#~ msgstr "हस्तांतर"
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "एक ultrapeer जैसे हस्तांतरण के लिये आकड़े।"
-
 #~ msgid "Compression"
 #~ msgstr "दबाव"
 
-#~ msgid "Flow Control"
-#~ msgstr "बहाव में नियंत्रण"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "बहाव नियंत्रण संदेश के लिये आकड़े।"
-
 #~ msgid "Hit Routing Errors"
 #~ msgstr "राउटिंग त्रुटियॉ मे हिट"
-
-#~ msgid "Total messages filtered."
-#~ msgstr "कुल संदेश फिल्टर हुए।"
-
-#~ msgid "Transfers"
-#~ msgstr "हस्तांतरण"
 
 #~ msgid "Requests"
 #~ msgstr "निवेदन"
@@ -249,15 +207,6 @@ msgstr ""
 
 #~ msgid "Max"
 #~ msgstr "अधिकतम"
-
-#~ msgid "Color"
-#~ msgstr "रंग"
-
-#~ msgid "Current"
-#~ msgstr "वर्तमान"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "Write statistics for this graph to files."
 
 #~ msgid "Total Upstream"
 #~ msgstr "कुल अपस्ट्रीम"
@@ -300,6 +249,177 @@ msgstr ""
 
 #~ msgid "All Clients"
 #~ msgstr "सब क्लाइंट"
+
+#~ msgid "All Messages"
+#~ msgstr "सब संदेश"
+
+#~ msgid "Hops 1"
+#~ msgstr "छलाँग 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "छलाँग 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "छलाँग 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "छलाँग 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "छलाँग 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "छलाँग 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "छलाँग 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "छलाँग 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "छलाँग 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "पोंग त्रुटियॉ"
+
+#~ msgid "Reply Errors"
+#~ msgstr "गलतियों का जबाब"
+
+#~ msgid "Push Errors"
+#~ msgstr "गलतियों को धकेलो"
+
+#~ msgid "No Route"
+#~ msgstr "कोई रास्ता नहीं"
+
+#~ msgid "All Requests"
+#~ msgstr "सभी निवेदन"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "HEAD निवेदन"
+
+#~ msgid "GET Requests"
+#~ msgstr "निवेदन लो"
+
+#~ msgid "Push Requests"
+#~ msgstr "निवेदन धकेलो"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Gnutella निवेदन"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Gnutella (लैमवैर) निवेदन"
+
+#~ msgid "Accepted"
+#~ msgstr "स्वीकृत"
+
+#~ msgid "IO Error"
+#~ msgstr "I/O गलती"
+
+#~ msgid "THEX Request"
+#~ msgstr "THEX निवेदन"
+
+#~ msgid "URN Get"
+#~ msgstr "URN लाऐं"
+
+#~ msgid "Freeloader"
+#~ msgstr "फ्रीलोडर"
+
+#~ msgid "Normal"
+#~ msgstr "सामान्य"
+
+#~ msgid "Get"
+#~ msgstr "प्राप्त करना"
+
+#~ msgid "Head"
+#~ msgstr "सिर"
+
+#~ msgid "Pushed Head"
+#~ msgstr "सिर को धकेला"
+
+#~ msgid "Network"
+#~ msgstr "नेटवर्क"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "सभी पूँछताछ किलोबाइट मे है."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "सभी प्राप्त हुई पूँछताछ किलोबाइट मे है."
+
+#~ msgid "Current"
+#~ msgstr "वर्तमान"
+
+#~ msgid ". No line is available for output."
+#~ msgstr "कोई रेखा आउटपुट के लिये उपलब्ध नहीं है।"
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "सभी प्राप्त हुई पूँछताछ, छलाँग से।"
+
+#~ msgid "Special Queries"
+#~ msgstr "विशेष पूँछताछ"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "सभी विशेष चिह्नित पूँछताछ।"
+
+#~ msgid "False Positive"
+#~ msgstr "झूठा धनात्मक"
+
+#~ msgid "Generic Errors"
+#~ msgstr "वर्गीय गलतियॉ"
+
+#~ msgid "Handshaking"
+#~ msgstr "हस्तांतर"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "एक ultrapeer जैसे हस्तांतरण के लिये आकड़े।"
+
+#~ msgid "Flow Control"
+#~ msgstr "बहाव में नियंत्रण"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "बहाव नियंत्रण संदेश के लिये आकड़े।"
+
+#~ msgid "Total messages filtered."
+#~ msgstr "कुल संदेश फिल्टर हुए।"
+
+#~ msgid "Transfers"
+#~ msgstr "हस्तांतरण"
+
+#~ msgid "Color"
+#~ msgstr "रंग"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Write statistics for this graph to files."
 
 #~ msgid "All Errors"
 #~ msgstr "सभी त्रुटियॉ"
@@ -397,80 +517,11 @@ msgstr ""
 #~ msgid "Unrecognized Vendor Message"
 #~ msgstr "विक्रेता संदेश पहचाना नहीं गया"
 
-#~ msgid "All Messages"
-#~ msgstr "सब संदेश"
-
 #~ msgid "Route Table Patch"
 #~ msgstr "राउट सारणी पैच"
 
-#~ msgid "Hops 1"
-#~ msgstr "छलाँग 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "छलाँग 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "छलाँग 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "छलाँग 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "छलाँग 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "छलाँग 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "छलाँग 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "छलाँग 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "छलाँग 9"
-
 #~ msgid "What's New?"
 #~ msgstr "नया क्या?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "पोंग त्रुटियॉ"
-
-#~ msgid "Reply Errors"
-#~ msgstr "गलतियों का जबाब"
-
-#~ msgid "Push Errors"
-#~ msgstr "गलतियों को धकेलो"
 
 #~ msgid "Hard Limit"
 #~ msgstr "कठोर सीमा"
@@ -493,32 +544,11 @@ msgstr ""
 #~ msgid "Hard Limit (TTL 5 or above)"
 #~ msgstr "Hard Limit (TTL 5 or above)"
 
-#~ msgid "No Route"
-#~ msgstr "कोई रास्ता नहीं"
-
 #~ msgid "Connection Attempts"
 #~ msgstr "कनेक्शन प्रयास"
 
 #~ msgid "Incoming Attempts"
 #~ msgstr "अंदर की ओर आनेवाले प्रयास"
-
-#~ msgid "All Requests"
-#~ msgstr "सभी निवेदन"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "HEAD निवेदन"
-
-#~ msgid "GET Requests"
-#~ msgstr "निवेदन लो"
-
-#~ msgid "Push Requests"
-#~ msgstr "निवेदन धकेलो"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Gnutella निवेदन"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Gnutella (लैमवैर) निवेदन"
 
 #~ msgid "Magnet Requests"
 #~ msgstr "चुम्बकीय निवेदन"
@@ -532,12 +562,6 @@ msgstr ""
 #~ msgid "Closed Immediately"
 #~ msgstr "तुरन्त बन्द हुआ"
 
-#~ msgid "Accepted"
-#~ msgstr "स्वीकृत"
-
-#~ msgid "Busy"
-#~ msgstr "कार्य में निरत"
-
 #~ msgid "Problem Reading Header"
 #~ msgstr "हेडर पढ़ने मे परेशानी"
 
@@ -549,9 +573,6 @@ msgstr ""
 
 #~ msgid "Incompatible Ranges"
 #~ msgstr "फैलाव अनुकूल नही"
-
-#~ msgid "IO Error"
-#~ msgstr "I/O गलती"
 
 #~ msgid "Failed"
 #~ msgstr "असफल"
@@ -589,9 +610,6 @@ msgstr ""
 #~ msgid "Failed Push (Lost Connection)"
 #~ msgstr "धकेलने में असफल (कनैक्शन खोया)"
 
-#~ msgid "THEX Request"
-#~ msgstr "THEX निवेदन"
-
 #~ msgid "Successful Push Proxy"
 #~ msgstr "प्राक्सी धकेलना सफल"
 
@@ -610,9 +628,6 @@ msgstr ""
 #~ msgid "Unknown URN Get"
 #~ msgstr "अज्ञात URN प्राप्त"
 
-#~ msgid "URN Get"
-#~ msgstr "URN लाऐं"
-
 #~ msgid "Limit Reached"
 #~ msgstr "सीमा पार"
 
@@ -622,26 +637,11 @@ msgstr ""
 #~ msgid "Banned Client"
 #~ msgstr "क्लाइंट अस्वीकार"
 
-#~ msgid "Freeloader"
-#~ msgstr "फ्रीलोडर"
-
-#~ msgid "Normal"
-#~ msgstr "सामान्य"
-
-#~ msgid "Get"
-#~ msgstr "प्राप्त करना"
-
-#~ msgid "Head"
-#~ msgstr "सिर"
-
 #~ msgid "Unknown"
 #~ msgstr "अज्ञात"
 
 #~ msgid "Pushed Get"
 #~ msgstr "धकेला गया प्राप्त"
-
-#~ msgid "Pushed Head"
-#~ msgstr "सिर को धकेला"
 
 #~ msgid "Pushed Unknown"
 #~ msgstr "अज्ञात को धकेला"

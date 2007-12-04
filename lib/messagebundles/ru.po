@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -34,14 +34,6 @@ msgstr ""
 #~ "iTunes): a firewall is blocking access. To continue using this feature, "
 #~ "click 'Yes' and change your firewall allow 'LimeWire.exe' full access to "
 #~ "incoming and outgoing connections. To disable this feature, click 'No'."
-
-#, fuzzy
-#~ msgid ""
-#~ "LimeWire is unable to find a license for this file. Download anyway?\n"
-#~ "\n"
-#~ "Please note: LimeWire cannot monitor or control the content of the Gnutella "
-#~ "network. Please respect your local copyright laws."
-#~ msgstr "Limewire не может найти лицензию этого файла. Все равно загрузить?"
 
 #, fuzzy
 #~ msgid "United States"
@@ -86,9 +78,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "&Download .torrent"
 #~ msgstr "Страница загрузки"
-
-#~ msgid "Download .torrent file from the web"
-#~ msgstr "Загрузить файл .torrent через интернета."
 
 #, java-format
 #~ msgid "Search \"What''s New\" for: {0}"
@@ -139,9 +128,6 @@ msgstr ""
 #~ "You have made changes to some settings. Would you like to save these changes?"
 #~ msgstr "Вы изменили некоторые настройки. Сохранить изменения?"
 
-#~ msgid "Sensivity"
-#~ msgstr "Реактивность"
-
 #, fuzzy
 #~ msgid ""
 #~ "You have some songs in the playlist.  Would you like to clear them and start "
@@ -153,6 +139,9 @@ msgstr ""
 
 #~ msgid "I"
 #~ msgstr "I"
+
+#~ msgid "P"
+#~ msgstr "P"
 
 #~ msgid "N"
 #~ msgstr "N"
@@ -166,20 +155,11 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Показать или скрыть отдельные закладки"
 
-#~ msgid "G"
-#~ msgstr "G"
-
-#~ msgid "P"
-#~ msgstr "P"
-
 #~ msgid "&Statistics"
 #~ msgstr "Статистика... (&S)"
 
 #~ msgid "Display the Statistics Screen"
 #~ msgstr "Показать экран статистики"
-
-#~ msgid "H"
-#~ msgstr "H"
 
 #~ msgid "U"
 #~ msgstr "U"
@@ -187,17 +167,14 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "E"
 
+#~ msgid "G"
+#~ msgstr "G"
+
 #~ msgid "Results"
 #~ msgstr "Результаты"
 
 #~ msgid "Files"
 #~ msgstr "Файлов"
-
-#~ msgid "files"
-#~ msgstr "файлов"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "файлов (инициализация...)"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Исправить не удалось"
@@ -208,8 +185,17 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "сек."
 
-#~ msgid ". No line is available for output."
-#~ msgstr ". Нет доступных устройств вывода."
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "files"
+#~ msgstr "файлов"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "файлов (инициализация...)"
+
+#~ msgid "H"
+#~ msgstr "H"
 
 #~ msgid "End Chat"
 #~ msgstr "Завершить чат"
@@ -219,6 +205,19 @@ msgstr ""
 
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "Инициализация окна статистики..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Не могу назначить порт для обработки входящих соединений.\n"
+#~ "Пожалуйста, укажите порт в окне конфигурации."
+
+#~ msgid "Network"
+#~ msgstr "Сеть"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Нет доступных устройств вывода."
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr "Поддержите файлообменные сети."
@@ -235,11 +234,17 @@ msgstr ""
 #~ "сети выберите пункт \"Соединиться\" из меню \"Файл\"."
 
 #~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
 #~ msgstr ""
-#~ "Не могу назначить порт для обработки входящих соединений.\n"
-#~ "Пожалуйста, укажите порт в окне конфигурации."
+#~ "Информация об исходящем потоке, включает в себя выгрузку и исходящие "
+#~ "сообщения."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Информация об входящем потоке, включает в себя загрузку и входящие сообщения."
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
@@ -248,9 +253,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Статистика по потокам включает полную информацию по входящим и исходящим "
 #~ "данным. Щёлкните на раздел, чтобы увидеть статистику."
-
-#~ msgid "Network"
-#~ msgstr "Сеть"
 
 #~ msgid ""
 #~ "Statistics on the current state of the network. These statistics are quite "
@@ -275,27 +277,11 @@ msgstr ""
 #~ "Gnutella. Так как для большинства пользователей расширенная статистика не "
 #~ "нужна, то по умолчанию она не показывается."
 
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
 #~ msgid "Upstream"
 #~ msgstr "Исходящий"
 
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Информация об исходящем потоке, включает в себя выгрузку и исходящие "
-#~ "сообщения."
-
 #~ msgid "Downstream"
 #~ msgstr "Входящий"
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Информация об входящем потоке, включает в себя загрузку и входящие сообщения."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -529,12 +515,12 @@ msgstr ""
 "загрузиться."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "Этот файл уже загружен в \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Вы уже загружаете этот файл в \"{0}\"."
 
@@ -2178,7 +2164,7 @@ msgstr ""
 "этом проекте. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:48
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "Sport the LimeWire look! Visit our <a href=\"{0}\">LimeWire gear</a> page "
 "and purchase a t-shirt or hat!"
@@ -7038,7 +7024,7 @@ msgid "Awaiting Requests"
 msgstr "Ожидание источников"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Искать: {0}"
 

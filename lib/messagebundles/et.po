@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -141,6 +141,9 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "Sulge aken."
 
+#~ msgid "P"
+#~ msgstr "P"
+
 #~ msgid "N"
 #~ msgstr "N"
 
@@ -152,12 +155,6 @@ msgstr ""
 
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Näita või peida isiklike lipikuid."
-
-#~ msgid "G"
-#~ msgstr "U"
-
-#~ msgid "P"
-#~ msgstr "P"
 
 #~ msgid "&Statistics"
 #~ msgstr "&Statistika"
@@ -171,17 +168,14 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "G"
 
+#~ msgid "G"
+#~ msgstr "U"
+
 #~ msgid "Results"
 #~ msgstr "Tulemused"
 
 #~ msgid "Files"
 #~ msgstr "Failid"
-
-#~ msgid "files"
-#~ msgstr "failid"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "Failid (Laen...)"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Taastamine ebaõnnestus"
@@ -192,14 +186,17 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s allikat"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "files"
+#~ msgstr "failid"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "Failid (Laen...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Selle nimega failid"
-
-#~ msgid "Orginal query"
-#~ msgstr "Originaalpäring"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Ühtegi edastusviisi pole kättesaadaval."
 
 #~ msgid "End Chat"
 #~ msgstr "Lõpeta suhtlemine"
@@ -207,11 +204,36 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Lõpeta võõrutajaga suhtlemine."
 
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Laen statistika akent..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Ei suutnud leida porti sissetulevate ühenduste jaoks.\n"
+#~ "Palun täpsusta porti konfigureerimis aknast."
+
+#~ msgid "Orginal query"
+#~ msgstr "Originaalpäring"
+
 #~ msgid "Loading Settings..."
 #~ msgstr "Laen kasutaja sätteid..."
 
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Laen statistika akent..."
+#~ msgid "Network"
+#~ msgstr "Võrk"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Ühtegi edastusviisi pole kättesaadaval."
+
+#~ msgid "All Errors"
+#~ msgstr "Kõik vead"
+
+#~ msgid "URN Query"
+#~ msgstr "URN päring"
+
+#~ msgid "Empty Query"
+#~ msgstr "Tühi päring"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr "Aita toetada jagada iseseisva meedia sisu. Muretse PRO."
@@ -227,15 +249,22 @@ msgstr ""
 #~ "ühendust või tulemüüri sätteid ja siis vali \"Ühenda\" Faili menüüst "
 #~ "ühendamaks LimeWiret võrku."
 
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Ei suutnud leida porti sissetulevate ühenduste jaoks.\n"
-#~ "Palun täpsusta porti konfigureerimis aknast."
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Näita täpsemat statistikat:"
 
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Kogu ribavahelaius mida kasutataksse väljaminevate andmete saatmiseks, kas "
+#~ "üleslaadimiste või Gnutella teadete näol."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Kogu ribavahelaius mida kasutatakse sissetulevate andmete vastuvõtmiseks, "
+#~ "kas allalaadimiste või Gnutella teadete näol."
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
@@ -245,9 +274,6 @@ msgstr ""
 #~ "Ribavahelaiuse statistika sisaldab täieliku informatsiooni kogu "
 #~ "ribavahelaiuse kohta mis on kas alla või üles laetud. Kliki ühel kategoorial "
 #~ "nägemaks soovitud statistikat."
-
-#~ msgid "Network"
-#~ msgstr "Võrk"
 
 #~ msgid ""
 #~ "Statistics on the current state of the network. These statistics are quite "
@@ -271,31 +297,14 @@ msgstr ""
 #~ "kasutajatele õppimak kuidas Gnutella võrk toimib. Määratuna vaiksettetes ei "
 #~ "edastata täpsemat statistikat ja ei ole suuremale osale inimestele vajalik."
 
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Näita täpsemat statistikat:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
 #~ msgid "Upstream"
 #~ msgstr "Väljavool"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Kogu ribavahelaius mida kasutataksse väljaminevate andmete saatmiseks, kas "
-#~ "üleslaadimiste või Gnutella teadete näol."
 
 #~ msgid "Downstream"
 #~ msgstr "Sissevool"
 
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Kogu ribavahelaius mida kasutatakse sissetulevate andmete vastuvõtmiseks, "
-#~ "kas allalaadimiste või Gnutella teadete näol."
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
 
 #~ msgid "Number"
 #~ msgstr "Number"
@@ -305,15 +314,6 @@ msgstr ""
 
 #~ msgid "LimeWire Messages"
 #~ msgstr "LimeWire’I teated"
-
-#~ msgid "All Errors"
-#~ msgstr "Kõik vead"
-
-#~ msgid "URN Query"
-#~ msgstr "URN päring"
-
-#~ msgid "Empty Query"
-#~ msgstr "Tühi päring"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -549,12 +549,12 @@ msgstr ""
 "võimalik tirida õigesti."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "Sa juba tirid seda faili \"{0}\" asukohta."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Sa juba tirid seda faili \"{0}\" asukohta."
 
@@ -7006,7 +7006,7 @@ msgid "Awaiting Requests"
 msgstr "Ootan allikaid"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Otsides: {0}"
 

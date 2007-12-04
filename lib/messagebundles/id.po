@@ -15,12 +15,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#, fuzzy
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Memanggil pengatur magnet ..."
 
 #~ msgid ""
 #~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
@@ -43,6 +39,21 @@ msgstr ""
 #~ "\n"
 #~ "Harap diketahui: LimeWire tidak mengawasi isi dari jaringan gnutella. "
 #~ "Patuhilah hukum hak cipta di daerah anda."
+
+#, fuzzy
+#~ msgid "United States"
+#~ msgstr "Perbaruan"
+
+#, fuzzy
+#~ msgid "English"
+#~ msgstr "Selesai"
+
+#~ msgid "Loading Languages"
+#~ msgstr "Memuat bahasa-bahasa"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "Rekatkan"
 
 #, java-format
 #~ msgid "You are sharing {0} files (Loading...)"
@@ -105,26 +116,6 @@ msgstr ""
 #~ msgid "Show Magnetmix Button"
 #~ msgstr "Perlihatkan tombol MagnetMix."
 
-#, fuzzy
-#~ msgid "The file type is not recognized."
-#~ msgstr ". Tipe berkas tidak dikenali."
-
-#, fuzzy
-#~ msgid "The file cannot be found."
-#~ msgstr ". Berkas tidak ditemukan."
-
-#, fuzzy
-#~ msgid "The file is corrupt."
-#~ msgstr ". Berkas rusak."
-
-#, fuzzy
-#~ msgid "There is an unknown error with the audio file."
-#~ msgstr ". Ada kesalahan yg tidak diketahui pada berkas audio."
-
-#, fuzzy
-#~ msgid "The file cannot be parsed."
-#~ msgstr ". Berkas tidak dapat dipilah."
-
 #~ msgid ""
 #~ "You have made changes to some settings. Would you like to save these changes?"
 #~ msgstr "Anda telah merubah beberapa ketentuan. Apakah akan disimpan?"
@@ -142,46 +133,11 @@ msgstr ""
 #~ "Internet Archive standar mengidentifikasi berkas ini dan nama pengguna telah "
 #~ "digunakan. Rubah data dibawah ini atau tekan batal untuk kembali."
 
-#, fuzzy
-#~ msgid "test1"
-#~ msgstr "Simpan kembali"
-
-#, fuzzy
-#~ msgid "test2"
-#~ msgstr "Simpan kembali"
-
-#, fuzzy
-#~ msgid "other"
-#~ msgstr "Ethernet"
-
-#, fuzzy
-#~ msgid "string"
-#~ msgstr "Memulai"
-
-#, fuzzy
-#~ msgid "1"
-#~ msgstr "T1"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Selesai"
-
-#, fuzzy
-#~ msgid "United States"
-#~ msgstr "Perbaruan"
-
-#~ msgid "Loading Languages"
-#~ msgstr "Memuat bahasa-bahasa"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Rekatkan"
-
 #~ msgid "Close the Window"
 #~ msgstr "Tutup jendela ini."
 
-#~ msgid "Statistics"
-#~ msgstr "Statistik"
+#~ msgid "P"
+#~ msgstr "P"
 
 #~ msgid "N"
 #~ msgstr "N"
@@ -195,12 +151,6 @@ msgstr ""
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Perlihatkan atau sembunyikan masing-masing tab"
 
-#~ msgid "G"
-#~ msgstr "D"
-
-#~ msgid "P"
-#~ msgstr "P"
-
 #~ msgid "&Statistics"
 #~ msgstr "&Statistik"
 
@@ -213,17 +163,14 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "B"
 
+#~ msgid "G"
+#~ msgstr "D"
+
 #~ msgid "Results"
 #~ msgstr "Hasil"
 
 #~ msgid "Files"
 #~ msgstr "Berkas"
-
-#~ msgid "files"
-#~ msgstr "Berkas-berkas"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "berkas (dimuat...)"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Perbaikan gagal"
@@ -234,29 +181,26 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s untuk sumber"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Busy"
+#~ msgstr "Sibuk"
+
+#~ msgid "files"
+#~ msgstr "Berkas-berkas"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "berkas (dimuat...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Berkas dengan nama"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Mencari berkas dengan nama yg sama."
 
-#~ msgid "Orginal query"
-#~ msgstr "Permintaan asli"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr "Lakukan pencarian sama dengan yg menemukan berkas sebelumnya."
-
-#~ msgid "Validation Required"
-#~ msgstr "Diperlukan validasi"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Tidak ada jalur tersedia untuk output."
-
-#~ msgid "Height:"
-#~ msgstr "Tinggi:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Tekan Oke untuk menghilangkan lisensi secara permanen."
 
 #~ msgid "End Chat"
 #~ msgstr "Akhiri chat"
@@ -264,25 +208,8 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Hentikan chat dengan salahsatu host"
 
-#~ msgid "Loading Settings..."
-#~ msgstr "Memuat pengaturan..."
-
 #~ msgid "Loading Statistics Window..."
 #~ msgstr "Memuat jendela statistik..."
-
-#~ msgid "Support LimeWire and independent media content. Get PRO."
-#~ msgstr "Dukung LimeWire dan konten media independen. Gunakan yg PRO."
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
-#~ "connection or firewall settings and then select \"Connect\" from the File "
-#~ "menu to connect LimeWire to the network."
-#~ msgstr ""
-#~ "Mesin anda sepertinya tidak memiliki koneksi internet aktif atau firewall "
-#~ "memblokir akses LimeWire ke internet. Periksa koneksi internet atau "
-#~ "pengaturan firewall dan kemudian pilih \"Sambungkan\" dari menu Berkas untuk "
-#~ "menghubungkan LimeWire ke jaringan."
 
 #~ msgid ""
 #~ "Could not find a port to use for incoming connections.\n"
@@ -290,198 +217,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Tidak dapat menemukan port untuk digunakan koneksi masuk.\n"
 #~ "Tentukan port pada jendela konfigurasi."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr "Masukkan judul dari berkas yg ingin anda terbitkan."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr "Masukkan tahun dari berkas yg ingin anda terbitkan."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Masukkan URL verifikasi lisensi yg berlaku"
-
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
-
-#~ msgid "Display:"
-#~ msgstr "Tampilkan:"
-
-#~ msgid ""
-#~ "Bandwidth statistics include complete information on all bandwidth sent "
-#~ "upstream and downstream. Click on one of the categories to see the desired "
-#~ "statistics."
-#~ msgstr ""
-#~ "Statistik lebar pita berisi informasi lengkap semua lebar pita upstream dan "
-#~ "downstream. Klik pada salahsatu kategori tersebut untuk melihat statistiknya."
-
-#~ msgid "Network"
-#~ msgstr "Jaringan"
-
-#~ msgid ""
-#~ "Statistics on the current state of the network. These statistics are quite "
-#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
-#~ "be taken too literally. They can, however, give you a general idea regarding "
-#~ "the current state of your connection."
-#~ msgstr ""
-#~ "Statistik status jaringan. Statistik ini tidak begitu akurat karena dinamis, "
-#~ "sifat dasar distribusi Gnutella dan bukan sebagai acuan pasti. Namun dapat "
-#~ "memberikan gambaran umum tentang keadaan koneksi anda saat itu."
-
-#~ msgid ""
-#~ "Advanced statistics include detailed information for Gnutella messages and "
-#~ "HTTP traffic. This information can be useful for advanced users as well as "
-#~ "for researchers working on the Gnutella network. Advanced statistics are not "
-#~ "displayed by default and are not recommended for most users."
-#~ msgstr ""
-#~ "Statistik lanjutan berisi informasi detail tentang pesan-pesan Gnutella dan "
-#~ "lalulintas HTTP. Informasi ini akan berguna bagi pengguna lanjutan dan juga "
-#~ "riset pada jaringan Gnutella. Statistik lanjutan tidak ditampilkan pada "
-#~ "pengaturan standar dan tidak direkomendasikan untuk pengguna umum."
-
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Perlihatkan Statistik Lanjutan:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Total lebar pita yg digunakan untuk mengirim data keluar, baik upload maupun "
-#~ "pesan Gnutella."
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Total lebar pita yg digunakan untuk menerima data masuk, baik pengunduhan "
-#~ "maupun pesan Gnutella."
-
-#~ msgid "All Gnutella messages received by this client."
-#~ msgstr "Semua pesan Gnutella diterima oleh klien ini."
-
-#~ msgid "All Gnutella messages received over TCP, by message type."
-#~ msgstr "Semua pesan Gnutella diterima melalui TCP, berdasarkan tipe pesan."
-
-#~ msgid "All Gnutella messages received over UDP, by message type."
-#~ msgstr "Semua pesan Gnutella diterima melalui UDP, berdasarkan tipe pesan."
-
-#~ msgid "All Gnutella messages received over Multicast, by message type."
-#~ msgstr ""
-#~ "Semua pesan Gnutella diterima melalui Multicast, berdasarkan tipe pesan."
-
-#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr "Semua pesan Gnutella diterima melalui TCP, UDP atau Multicast."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over TCP versus the total number of "
-#~ "queries."
-#~ msgstr ""
-#~ "Jumlah query duplikat yg diterima melalui TCP dibanding jumlah total query."
-
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Jumlah query duplikat yg diterima melalui Multicast dibanding jumlah total "
-#~ "query."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Semua query yg diterima, berdasarkan lompatan."
-
-#~ msgid "All received queries, by time to live (TTL)."
-#~ msgstr "Semua query yg diterima, berdasarkan time to live (TTL)."
-
-#~ msgid "Special Queries"
-#~ msgstr "Query Spesial"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Semua query yg ditandai spesial."
-
-#~ msgid "All received query hits, by hops."
-#~ msgstr "Semua hits query yg diterima, berdasarkan lompatan."
-
-#~ msgid "All received query hits, by time to live (TTL)."
-#~ msgstr "Semua hits query yg diterima, berdasarkan time to live (TTL)."
-
-#~ msgid "Total kilobytes for all Gnutella messages received by this client."
-#~ msgstr "Total kilobyte semua pesan Gnutella yg diterima klien ini."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
-#~ msgstr ""
-#~ "Total kilobyte pesan Gnutella yg diterima melalui TCP, berdasarkan tipe "
-#~ "pesan."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
-#~ msgstr ""
-#~ "Total kilobyte pesan Gnutella yg diterima melalui UDP, berdasarkan tipe "
-#~ "pesan."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
-#~ "type."
-#~ msgstr ""
-#~ "Total kilobyte semua pesan Gnutella yg diterima melalui Multicast, "
-#~ "berdasarkan tipe pesan."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Total kilobyte pesan Gnutella yg diterima melalui TCP, UDP atau Multicast."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over TCP versus the total "
-#~ "number of queries."
-#~ msgstr ""
-#~ "Total kilobyte query duplikat yg diterima melalui TCP, dibanding jumlah "
-#~ "total query."
-
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Total kilobyte query duplikat yg diterima melalui Multicast, dibanding "
-#~ "jumlah total query."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Semua query yg diterima dalam kilobyte, berdasarkan lompatan."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr ""
-#~ "Semua query yg diterima dalam kilobyte, berdasarkan time to live (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Semua hits query yg diterima dalam kilobyte, berdasarkan lompatan."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr ""
-#~ "Semua hits query yg diterima dalam kilobyte, berdasarkan time to live (TTL)."
-
-#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ping UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
-
-#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pong UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
-
-#~ msgid ""
-#~ "UDP queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Query UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
-
-#~ msgid ""
-#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Query mengena UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
-#~ "lain."
-
-#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Dorongan UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
 
 #~ msgid ""
 #~ "Multicast pings received from all Gnutella clients versus other LimeWires."
@@ -511,41 +246,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Dorongan multicast yg diterima dari semua klien Gnutella dibanding LimeWire "
 #~ "lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte ping UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
-#~ "lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte pong UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
-#~ "lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte query UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
-#~ "lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte hits query UDP yg diterima dari semua klien Gnutella dibanding "
-#~ "LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte dorongan UDP yg diterima dari semua klien Gnutella dibanding "
-#~ "LimeWire lain."
 
 #~ msgid ""
 #~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
@@ -582,337 +282,29 @@ msgstr ""
 #~ "Kilobyte dorongan Multicast yg diterima dari semua klien Gnutella dibanding "
 #~ "LimeWire lain."
 
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "Ukuran rata-rata pesan Gnutella yg diterima dalam kilobyte."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "Ukuran rata-rata pesan yg diterima dari LimeWire dalam kilobyte."
-
 #~ msgid "QRP"
 #~ msgstr "QRP"
-
-#~ msgid ""
-#~ "All queries that were routed to other Ultrapeers for the last hop, using "
-#~ "query routing tables."
-#~ msgstr ""
-#~ "Semua query yg ditujukan ke ultrapeer lain untuk lompatan terakhir, "
-#~ "menggunakan tabel routing query."
-
-#~ msgid "All queries that were routed to leaves, using query routing tables."
-#~ msgstr "Semua query yg ditujukan ke leaves, menggunakan tabel routing query."
-
-#~ msgid "All queries that were received from routed connections."
-#~ msgstr "Semua query yg diterima dari koneksi yg telah ditujukan."
-
-#~ msgid "Hit"
-#~ msgstr "Kena"
-
-#~ msgid "False Positive"
-#~ msgstr "Meleset"
 
 #~ msgid "Errors"
 #~ msgstr "Kesalahan"
 
-#~ msgid "Generic Errors"
-#~ msgstr "Kesalahan Umum"
-
-#~ msgid "Generic errors while reading messages."
-#~ msgstr "Kesalahan umum saat membaca pesan."
-
-#~ msgid "Errors while reading query messages."
-#~ msgstr "Kesalahan saat membaca pesan query."
-
 #~ msgid "Query Replies"
 #~ msgstr "Query Dibalas"
-
-#~ msgid "Errors while reading query reply messages."
-#~ msgstr "Kesalahan saat membaca balasan pesan query."
 
 #~ msgid "Ping Replies"
 #~ msgstr "Balasan Ping"
 
-#~ msgid "Errors while reading ping replies."
-#~ msgstr "Kesalahan saat membaca balasan ping."
-
-#~ msgid "Errors while reading pushes."
-#~ msgstr "Kesalahan saat membaca dorongan."
-
-#~ msgid "Vendor Messages"
-#~ msgstr "Pesan Penjual"
-
-#~ msgid "Errors while reading vendor messages."
-#~ msgstr "Kesalahan saat membaca pesan penjual."
-
-#~ msgid "All Gnutella messages sent out from this client."
-#~ msgstr "Semua pesan Gnutella yg terkirim dari klien ini."
-
-#~ msgid "All Gnutella messages sent over TCP, by message type."
-#~ msgstr ""
-#~ "Semua pesan Gnutella yg terkirim melalui TCP, berdasarkan tipe pesan."
-
-#~ msgid "All Gnutella messages sent over UDP, by message type."
-#~ msgstr ""
-#~ "Semua pesan Gnutella yg terkirim melalui UDP, berdasarkan tipe pesan."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Semua pesan Gnutella yg terkirim melalui Multicast, berdasarkan tipe pesan."
-
-#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr "Total pesan Gnutella yg terkirim melalui TCP, UDP atau Multicast."
-
-#~ msgid "Total kilobytes for Gnutella messages sent out from this client."
-#~ msgstr "Total kilobyte pesan Gnutella yg terkirim dari klien ini."
-
-#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
-#~ msgstr ""
-#~ "Total kilobyte pesan Gnutella yg terkirim melalui TCP, berdasarkan tipe "
-#~ "pesan."
-
-#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
-#~ msgstr ""
-#~ "Total kilobyte pesan Gnutella yg terkirim melalui UDP, berdasarkan tipe "
-#~ "pesan."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Total kilobyte pesan Gnutella yg terkirim melalui Multicast, berdasarkan "
-#~ "tipe pesan."
-
-#~ msgid ""
-#~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
-#~ msgstr ""
-#~ "Total kilobyte pesan Gnutella yg terkirim melalui TCP, UDP atau Multicast."
-
-#~ msgid "Total number of messages sent by other LimeWires."
-#~ msgstr "Jumlah total pesan terkirim oleh LimeWire lain."
-
-#~ msgid "Total kilobytes sent by other LimeWires."
-#~ msgstr "Total kilobyte dikirim LimeWire lain"
-
-#~ msgid ""
-#~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Ping UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Pong UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Query UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Query mengena UDP yg dikirim dari semua klien Gnutella dibanding LimeWire "
-#~ "lain."
-
-#~ msgid ""
-#~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Dorongan UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte ping Multicast yg dikirim dari semua klien Gnutella dibanding "
-#~ "LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte pong Multicast yg dikirim dari semua klien Gnutella dibanding "
-#~ "LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte query Multicast yg dikirim dari semua klien Gnutella dibanding "
-#~ "LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobyte hits query Multicast yg dikirim dari semua klien Gnutella dibanding "
-#~ "LimeWire lain."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Kilobyte dorongan Multicast yg dikirim dari semua klien Gnutella dibanding "
-#~ "LimeWire lain."
-
-#~ msgid "Handshaking"
-#~ msgstr "Jabat tangan"
-
-#~ msgid "Statistics for handshaking as a leaf."
-#~ msgstr "Statistik jabat tangan sebagai leaf."
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "Statistik jabat tangan sebagai ultrapeer."
-
-#~ msgid "Statistics for outgoing Gnutella connection handshaking."
-#~ msgstr "Statistik jabat tangan koneksi Gnutella keluar."
-
-#~ msgid "Statistics for incoming Gnutella connection handshaking."
-#~ msgstr "Statistik jabat tangan koneksi Gnutella masuk."
-
-#~ msgid "Outgoing Server Reject"
-#~ msgstr "Penolakan Keluar Server"
-
-#~ msgid ""
-#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
-#~ "server."
-#~ msgstr ""
-#~ "Statistik penolakan jabat tangan koneksi Gnutella keluar dari server."
-
 #~ msgid "Compression"
 #~ msgstr "Pemadatan"
-
-#~ msgid "Statistics for compressed upstream traffic in kilobytes."
-#~ msgstr "Statistik lalulintas upstream yg dipadatkan dalam kilobyte."
-
-#~ msgid "Statistics for compressed downstream traffic in kilobytes."
-#~ msgstr "Statistik lalulintas downstream yg dipadatkan dalam kilobyte."
-
-#~ msgid "Flow Control"
-#~ msgstr "Kontrol Aliran"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "Statistik aliran pesan yg dikontrol."
-
-#~ msgid "Statistics for flow controlled messages in kilobytes."
-#~ msgstr "Statistik aliran pesan yg dikontrol dalam kilobyte."
-
-#~ msgid "Total number of errors routing messages to other clients."
-#~ msgstr "Jumlah total kesalahan routing pesan ke klien lain."
 
 #~ msgid "Hit Routing Errors"
 #~ msgstr "Kesalahan Routing Mengena"
 
-#~ msgid "Errors routing query hits."
-#~ msgstr "Jumlah total kesalahan routing hits query."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Total pesan yg disaring"
-
-#~ msgid ""
-#~ "Total number of Gnutella connection attempts, either initiated internally or "
-#~ "externally."
-#~ msgstr ""
-#~ "Jumlah total usaha koneksi Gnutella, baik dimulai secara internal atau "
-#~ "eksternal."
-
-#~ msgid ""
-#~ "Total incoming requests received over time. This includes all connection "
-#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
-#~ msgstr ""
-#~ "Total permintaan masuk yg diterima melebihi waktu. Termasuk semua usaha "
-#~ "koneksi (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, dll...)."
-
-#~ msgid ""
-#~ "Total outgoing download connections attempts over time. This includes both "
-#~ "direct connections and pushed requests."
-#~ msgstr ""
-#~ "Total usaha koneksi pengunduhan keluar melebihi waktu. Termasuk koneksi "
-#~ "langsung dan permintaan dorongan."
-
-#~ msgid ""
-#~ "Total responses received from downloaders over time. This includes Busy, "
-#~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
-#~ msgstr ""
-#~ "Total respon yg diterima dari pengunduh melebihi waktu. Termasuk sibuk, "
-#~ "berkas tidak ditemukan, tidak dibagikan, mengantri, kesalahan IO lain, dan "
-#~ "respon oke."
-
-#~ msgid ""
-#~ "Total alternate locations received and removed over time. This includes "
-#~ "locations that we actively attempt to connect to, locations that we will "
-#~ "ignore, locations that couldn't be removed, and locations that we removed "
-#~ "permanently from attempting to connect to."
-#~ msgstr ""
-#~ "Total lokasi alternatif yg diterima dan dihilangkan melebihi waktu. Termasuk "
-#~ "lokasi yg aktif disambungkan, lokasi yg akan diabaikan, lokasi yg tidak "
-#~ "dapat dihilangkan, dan lokasi yg dihilangkan permanen dari penyambungan yg "
-#~ "sedang terjadi."
-
-#~ msgid "Transfers"
-#~ msgstr "Transfer"
-
-#~ msgid ""
-#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
-#~ "For HTTP1.1, values are per chunk."
-#~ msgstr ""
-#~ "Total transfer melebihi waktu. Termasuk transfer HTTP1.1 dan HTTP1.0. Untuk "
-#~ "HTTP1.1, nilainya per potongan."
-
-#~ msgid ""
-#~ "Records the time in milliseconds to establish TCP connections for downloads. "
-#~ "This can vary, for example, when servers are experiencing high loads."
-#~ msgstr ""
-#~ "Merekam waktu dalam millisecond ketika melakukan koneksi TCP untuk "
-#~ "pengunduhan. Hal ini bisa bervariasi, contohnya, ketika server mengalami "
-#~ "beban tinggi."
-
 #~ msgid "Requests"
 #~ msgstr "Permintaan"
 
-#~ msgid ""
-#~ "Total incoming upload requests. These numbers are incremented on every "
-#~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
-#~ "transfers."
-#~ msgstr ""
-#~ "Total permintaan upload yg masuk. Jumlah ini ditambahkan setiap berusaha "
-#~ "mengurai request, termasuk juga setiap potongan transfer HTTP/1.1."
-
-#~ msgid ""
-#~ "Total outgoing responses. These numbers are incremented before sending each "
-#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
-#~ "the number of requests for which we have attempted to transfer a portion of "
-#~ "a file."
-#~ msgstr ""
-#~ "Total respon keluar. Jumlah ini ditambahkan sebelum mengirim setiap respon, "
-#~ "termasuk juga setiap potongan transfer HTTP/1.1. 'Normal' adalah jumlah "
-#~ "permintaan yang kita transfer sebagian berkasnya."
-
 #~ msgid "Request Methods"
 #~ msgstr "Metoda Permintaan"
-
-#~ msgid ""
-#~ "Total incoming request methods. These numbers are incremented either for "
-#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
-#~ "requests, after we have sent the initial GIV."
-#~ msgstr ""
-#~ "Total metoda permintaan yg masuk. Jumlah ini bertambah untuk salahsatu "
-#~ "transfer HTTP/1.1 setelah permintaan koneksi masuk atau permintaan push "
-#~ "awal, setelah kita mengirim GIV awal."
-
-#~ msgid "General"
-#~ msgstr "Umum"
-
-#~ msgid ""
-#~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
-#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
-#~ "counted as an interrupted upload.)"
-#~ msgstr ""
-#~ "Total upload diusahakan, selesai, terganggu atau terhalangi. Jumlah ini "
-#~ "bertambah tiap koneksi, bukan per potongan. (Upload terhalangi akan dihitung "
-#~ "sebagai upload terganggu)."
 
 #~ msgid "seconds"
 #~ msgstr "detik"
@@ -926,15 +318,6 @@ msgstr ""
 #~ msgid "Max"
 #~ msgstr "Maks"
 
-#~ msgid "Color"
-#~ msgstr "Warna"
-
-#~ msgid "Current"
-#~ msgstr "Yg Bersangkutan"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "Tuliskan statistik grafik ini ke berkas."
-
 #~ msgid "Total Upstream"
 #~ msgstr "Total Upstream"
 
@@ -946,9 +329,6 @@ msgstr ""
 
 #~ msgid "HTTP Headers"
 #~ msgstr "Header HTTP"
-
-#~ msgid "HTTP Content"
-#~ msgstr "Isi HTTP"
 
 #~ msgid "Gnutella Total"
 #~ msgstr "Total Gnutella"
@@ -985,6 +365,197 @@ msgstr ""
 
 #~ msgid "All Clients"
 #~ msgstr "Semua Klien"
+
+#~ msgid "All Messages"
+#~ msgstr "Semua Pesan"
+
+#~ msgid "Hops 1"
+#~ msgstr "Lompatan 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Lompatan 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Lompatan 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Lompatan 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Lompatan 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Lompatan 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Lompatan 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Lompatan 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Lompatan 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Kesalahan Pong"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Kesalahan Balasan"
+
+#~ msgid "Push Errors"
+#~ msgstr "Kesalahan Push"
+
+#~ msgid "No Route"
+#~ msgstr "Tidak Ada Rute"
+
+#~ msgid "All Requests"
+#~ msgstr "Semua Permintaan"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "Permintaan HEAD"
+
+#~ msgid "GET Requests"
+#~ msgstr "Permintaan GET"
+
+#~ msgid "Push Requests"
+#~ msgstr "Permintaan Push"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Permintaan Gnutella"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Permintaan Gnutella (LimeWire)"
+
+#~ msgid "Accepted"
+#~ msgstr "Diterima"
+
+#~ msgid "IO Error"
+#~ msgstr "Kesalahan IO"
+
+#~ msgid "THEX Request"
+#~ msgstr "Permintaan THEX"
+
+#~ msgid "URN Get"
+#~ msgstr "URN Get"
+
+#~ msgid "Freeloader"
+#~ msgstr "Freeloader"
+
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#~ msgid "Get"
+#~ msgstr "Get"
+
+#~ msgid "Head"
+#~ msgstr "Head"
+
+#~ msgid "Pushed Head"
+#~ msgstr "Head Didorong"
+
+#~ msgid "Orginal query"
+#~ msgstr "Permintaan asli"
+
+#~ msgid "Loading Settings..."
+#~ msgstr "Memuat pengaturan..."
+
+#~ msgid "Network"
+#~ msgstr "Jaringan"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Semua query yg diterima dalam kilobyte, berdasarkan lompatan."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "Semua query yg diterima dalam kilobyte, berdasarkan time to live (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Semua hits query yg diterima dalam kilobyte, berdasarkan lompatan."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr ""
+#~ "Semua hits query yg diterima dalam kilobyte, berdasarkan time to live (TTL)."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "Ukuran rata-rata pesan Gnutella yg diterima dalam kilobyte."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "Ukuran rata-rata pesan yg diterima dari LimeWire dalam kilobyte."
+
+#~ msgid "Current"
+#~ msgstr "Yg Bersangkutan"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Tidak ada jalur tersedia untuk output."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Semua query yg diterima, berdasarkan lompatan."
+
+#~ msgid "Special Queries"
+#~ msgstr "Query Spesial"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Semua query yg ditandai spesial."
+
+#~ msgid "False Positive"
+#~ msgstr "Meleset"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Kesalahan Umum"
+
+#~ msgid "Handshaking"
+#~ msgstr "Jabat tangan"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Statistik jabat tangan sebagai ultrapeer."
+
+#~ msgid "Flow Control"
+#~ msgstr "Kontrol Aliran"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Statistik aliran pesan yg dikontrol."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Total pesan yg disaring"
+
+#~ msgid "Transfers"
+#~ msgstr "Transfer"
+
+#~ msgid "Color"
+#~ msgstr "Warna"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Tuliskan statistik grafik ini ke berkas."
 
 #~ msgid "All Errors"
 #~ msgstr "Semua Kesalahan"
@@ -1082,80 +653,11 @@ msgstr ""
 #~ msgid "Unrecognized Vendor Message"
 #~ msgstr "Pesan Penjual Tidak Dikenal"
 
-#~ msgid "All Messages"
-#~ msgstr "Semua Pesan"
-
 #~ msgid "Route Table Patch"
 #~ msgstr "Patch Tabel Rute"
 
-#~ msgid "Hops 1"
-#~ msgstr "Lompatan 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Lompatan 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Lompatan 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Lompatan 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Lompatan 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Lompatan 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Lompatan 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Lompatan 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Lompatan 9"
-
 #~ msgid "What's New?"
 #~ msgstr "Apa yg Baru?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Kesalahan Pong"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Kesalahan Balasan"
-
-#~ msgid "Push Errors"
-#~ msgstr "Kesalahan Push"
 
 #~ msgid "Hard Limit"
 #~ msgstr "Batas Keras"
@@ -1178,32 +680,11 @@ msgstr ""
 #~ msgid "Hard Limit (TTL 5 or above)"
 #~ msgstr "Batas Keras (TTL 5 atau lebih)"
 
-#~ msgid "No Route"
-#~ msgstr "Tidak Ada Rute"
-
 #~ msgid "Connection Attempts"
 #~ msgstr "Usaha Koneksi"
 
 #~ msgid "Incoming Attempts"
 #~ msgstr "Usaha Masuk"
-
-#~ msgid "All Requests"
-#~ msgstr "Semua Permintaan"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "Permintaan HEAD"
-
-#~ msgid "GET Requests"
-#~ msgstr "Permintaan GET"
-
-#~ msgid "Push Requests"
-#~ msgstr "Permintaan Push"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Permintaan Gnutella"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Permintaan Gnutella (LimeWire)"
 
 #~ msgid "Magnet Requests"
 #~ msgstr "Permintaan Magnet"
@@ -1217,15 +698,6 @@ msgstr ""
 #~ msgid "Closed Immediately"
 #~ msgstr "Tutup Segera"
 
-#~ msgid "Accepted"
-#~ msgstr "Diterima"
-
-#~ msgid "Busy"
-#~ msgstr "Sibuk"
-
-#~ msgid "Not Sharing Files"
-#~ msgstr "Bukan Berkas Dibagikan"
-
 #~ msgid "Problem Reading Header"
 #~ msgstr "Masalah Membaca Header"
 
@@ -1237,9 +709,6 @@ msgstr ""
 
 #~ msgid "Incompatible Ranges"
 #~ msgstr "Kisaran Tidak Kompatibel"
-
-#~ msgid "IO Error"
-#~ msgstr "Kesalahan IO"
 
 #~ msgid "Failed"
 #~ msgstr "Gagal"
@@ -1277,9 +746,6 @@ msgstr ""
 #~ msgid "Failed Push (Lost Connection)"
 #~ msgstr "Push Gagal (Kehilangan Koneksi)"
 
-#~ msgid "THEX Request"
-#~ msgstr "Permintaan THEX"
-
 #~ msgid "Successful Push Proxy"
 #~ msgstr "Push Proxy Berhasil"
 
@@ -1292,17 +758,11 @@ msgstr ""
 #~ msgid "Push Proxy"
 #~ msgstr "Push Proxy"
 
-#~ msgid "Update File"
-#~ msgstr "Perbaharui Berkas"
-
 #~ msgid "Traditional Get"
 #~ msgstr "Get Tradisional"
 
 #~ msgid "Unknown URN Get"
 #~ msgstr "URN Get Tidak Diketahui"
-
-#~ msgid "URN Get"
-#~ msgstr "URN Get"
 
 #~ msgid "Limit Reached"
 #~ msgstr "Mencapai Batas"
@@ -1310,26 +770,11 @@ msgstr ""
 #~ msgid "Banned Client"
 #~ msgstr "Klien Terlarang"
 
-#~ msgid "Freeloader"
-#~ msgstr "Freeloader"
-
-#~ msgid "Normal"
-#~ msgstr "Normal"
-
-#~ msgid "Get"
-#~ msgstr "Get"
-
-#~ msgid "Head"
-#~ msgstr "Head"
-
 #~ msgid "Unknown"
 #~ msgstr "Tidak Diketahui"
 
 #~ msgid "Pushed Get"
 #~ msgstr "Get Didorong"
-
-#~ msgid "Pushed Head"
-#~ msgstr "Head Didorong"
 
 #~ msgid "Pushed Unknown"
 #~ msgstr "Tidak Diketahui Didorong"
@@ -1339,12 +784,6 @@ msgstr ""
 
 #~ msgid "Completed Responses"
 #~ msgstr "Respon Lengkap"
-
-#~ msgid "Interrupted"
-#~ msgstr "Terganggu"
-
-#~ msgid "Stalled"
-#~ msgstr "Dihalangi"
 
 #~ msgid "Completed File Transfers"
 #~ msgstr "Transfer Berkas Selesai"
@@ -1424,8 +863,565 @@ msgstr ""
 #~ msgid "OOB Success Rate"
 #~ msgstr "Rasio Kesuksesan OOB"
 
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "Dukung LimeWire dan konten media independen. Gunakan yg PRO."
+
+#~ msgid ""
+#~ "Your machine does not appear to have an active Internet connection or a "
+#~ "firewall is blocking LimeWire from accessing the internet. Please check your "
+#~ "connection or firewall settings and then select \"Connect\" from the File "
+#~ "menu to connect LimeWire to the network."
+#~ msgstr ""
+#~ "Mesin anda sepertinya tidak memiliki koneksi internet aktif atau firewall "
+#~ "memblokir akses LimeWire ke internet. Periksa koneksi internet atau "
+#~ "pengaturan firewall dan kemudian pilih \"Sambungkan\" dari menu Berkas untuk "
+#~ "menghubungkan LimeWire ke jaringan."
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Perlihatkan Statistik Lanjutan:"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Total lebar pita yg digunakan untuk mengirim data keluar, baik upload maupun "
+#~ "pesan Gnutella."
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Total lebar pita yg digunakan untuk menerima data masuk, baik pengunduhan "
+#~ "maupun pesan Gnutella."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Jumlah query duplikat yg diterima melalui Multicast dibanding jumlah total "
+#~ "query."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Total kilobyte query duplikat yg diterima melalui Multicast, dibanding "
+#~ "jumlah total query."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Semua pesan Gnutella yg terkirim melalui Multicast, berdasarkan tipe pesan."
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr ""
+#~ "Statistik lebar pita berisi informasi lengkap semua lebar pita upstream dan "
+#~ "downstream. Klik pada salahsatu kategori tersebut untuk melihat statistiknya."
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "Statistik status jaringan. Statistik ini tidak begitu akurat karena dinamis, "
+#~ "sifat dasar distribusi Gnutella dan bukan sebagai acuan pasti. Namun dapat "
+#~ "memberikan gambaran umum tentang keadaan koneksi anda saat itu."
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "Statistik lanjutan berisi informasi detail tentang pesan-pesan Gnutella dan "
+#~ "lalulintas HTTP. Informasi ini akan berguna bagi pengguna lanjutan dan juga "
+#~ "riset pada jaringan Gnutella. Statistik lanjutan tidak ditampilkan pada "
+#~ "pengaturan standar dan tidak direkomendasikan untuk pengguna umum."
+
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr "Semua pesan Gnutella diterima oleh klien ini."
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr "Semua pesan Gnutella diterima melalui TCP, berdasarkan tipe pesan."
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "Semua pesan Gnutella diterima melalui UDP, berdasarkan tipe pesan."
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr ""
+#~ "Semua pesan Gnutella diterima melalui Multicast, berdasarkan tipe pesan."
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "Semua pesan Gnutella diterima melalui TCP, UDP atau Multicast."
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr ""
+#~ "Jumlah query duplikat yg diterima melalui TCP dibanding jumlah total query."
+
+#~ msgid "All received queries, by time to live (TTL)."
+#~ msgstr "Semua query yg diterima, berdasarkan time to live (TTL)."
+
+#~ msgid "All received query hits, by hops."
+#~ msgstr "Semua hits query yg diterima, berdasarkan lompatan."
+
+#~ msgid "All received query hits, by time to live (TTL)."
+#~ msgstr "Semua hits query yg diterima, berdasarkan time to live (TTL)."
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr "Total kilobyte semua pesan Gnutella yg diterima klien ini."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr ""
+#~ "Total kilobyte pesan Gnutella yg diterima melalui TCP, berdasarkan tipe "
+#~ "pesan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr ""
+#~ "Total kilobyte pesan Gnutella yg diterima melalui UDP, berdasarkan tipe "
+#~ "pesan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr ""
+#~ "Total kilobyte semua pesan Gnutella yg diterima melalui Multicast, "
+#~ "berdasarkan tipe pesan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Total kilobyte pesan Gnutella yg diterima melalui TCP, UDP atau Multicast."
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr ""
+#~ "Total kilobyte query duplikat yg diterima melalui TCP, dibanding jumlah "
+#~ "total query."
+
+#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ping UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pong UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid ""
+#~ "UDP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Query UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid ""
+#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Query mengena UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
+#~ "lain."
+
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Dorongan UDP yg diterima dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte ping UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
+#~ "lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte pong UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
+#~ "lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte query UDP yg diterima dari semua klien Gnutella dibanding LimeWire "
+#~ "lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte hits query UDP yg diterima dari semua klien Gnutella dibanding "
+#~ "LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte dorongan UDP yg diterima dari semua klien Gnutella dibanding "
+#~ "LimeWire lain."
+
+#~ msgid ""
+#~ "All queries that were routed to other Ultrapeers for the last hop, using "
+#~ "query routing tables."
+#~ msgstr ""
+#~ "Semua query yg ditujukan ke ultrapeer lain untuk lompatan terakhir, "
+#~ "menggunakan tabel routing query."
+
+#~ msgid "All queries that were routed to leaves, using query routing tables."
+#~ msgstr "Semua query yg ditujukan ke leaves, menggunakan tabel routing query."
+
+#~ msgid "All queries that were received from routed connections."
+#~ msgstr "Semua query yg diterima dari koneksi yg telah ditujukan."
+
+#~ msgid "Hit"
+#~ msgstr "Kena"
+
+#~ msgid "Generic errors while reading messages."
+#~ msgstr "Kesalahan umum saat membaca pesan."
+
+#~ msgid "Errors while reading query messages."
+#~ msgstr "Kesalahan saat membaca pesan query."
+
+#~ msgid "Errors while reading query reply messages."
+#~ msgstr "Kesalahan saat membaca balasan pesan query."
+
+#~ msgid "Errors while reading ping replies."
+#~ msgstr "Kesalahan saat membaca balasan ping."
+
+#~ msgid "Errors while reading pushes."
+#~ msgstr "Kesalahan saat membaca dorongan."
+
+#~ msgid "Errors while reading vendor messages."
+#~ msgstr "Kesalahan saat membaca pesan penjual."
+
+#~ msgid "All Gnutella messages sent out from this client."
+#~ msgstr "Semua pesan Gnutella yg terkirim dari klien ini."
+
+#~ msgid "All Gnutella messages sent over TCP, by message type."
+#~ msgstr ""
+#~ "Semua pesan Gnutella yg terkirim melalui TCP, berdasarkan tipe pesan."
+
+#~ msgid "All Gnutella messages sent over UDP, by message type."
+#~ msgstr ""
+#~ "Semua pesan Gnutella yg terkirim melalui UDP, berdasarkan tipe pesan."
+
+#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr "Total pesan Gnutella yg terkirim melalui TCP, UDP atau Multicast."
+
+#~ msgid "Total kilobytes for Gnutella messages sent out from this client."
+#~ msgstr "Total kilobyte pesan Gnutella yg terkirim dari klien ini."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgstr ""
+#~ "Total kilobyte pesan Gnutella yg terkirim melalui TCP, berdasarkan tipe "
+#~ "pesan."
+
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgstr ""
+#~ "Total kilobyte pesan Gnutella yg terkirim melalui UDP, berdasarkan tipe "
+#~ "pesan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Total kilobyte pesan Gnutella yg terkirim melalui Multicast, berdasarkan "
+#~ "tipe pesan."
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr ""
+#~ "Total kilobyte pesan Gnutella yg terkirim melalui TCP, UDP atau Multicast."
+
+#~ msgid "Total kilobytes sent by other LimeWires."
+#~ msgstr "Total kilobyte dikirim LimeWire lain"
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Ping UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Pong UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Query UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Query mengena UDP yg dikirim dari semua klien Gnutella dibanding LimeWire "
+#~ "lain."
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Dorongan UDP yg dikirim dari semua klien Gnutella dibanding LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte ping Multicast yg dikirim dari semua klien Gnutella dibanding "
+#~ "LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte pong Multicast yg dikirim dari semua klien Gnutella dibanding "
+#~ "LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte query Multicast yg dikirim dari semua klien Gnutella dibanding "
+#~ "LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobyte hits query Multicast yg dikirim dari semua klien Gnutella dibanding "
+#~ "LimeWire lain."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Kilobyte dorongan Multicast yg dikirim dari semua klien Gnutella dibanding "
+#~ "LimeWire lain."
+
+#~ msgid "Statistics for handshaking as a leaf."
+#~ msgstr "Statistik jabat tangan sebagai leaf."
+
+#~ msgid "Statistics for outgoing Gnutella connection handshaking."
+#~ msgstr "Statistik jabat tangan koneksi Gnutella keluar."
+
+#~ msgid "Statistics for incoming Gnutella connection handshaking."
+#~ msgstr "Statistik jabat tangan koneksi Gnutella masuk."
+
+#~ msgid "Outgoing Server Reject"
+#~ msgstr "Penolakan Keluar Server"
+
+#~ msgid ""
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
+#~ msgstr ""
+#~ "Statistik penolakan jabat tangan koneksi Gnutella keluar dari server."
+
+#~ msgid "Statistics for compressed upstream traffic in kilobytes."
+#~ msgstr "Statistik lalulintas upstream yg dipadatkan dalam kilobyte."
+
+#~ msgid "Statistics for compressed downstream traffic in kilobytes."
+#~ msgstr "Statistik lalulintas downstream yg dipadatkan dalam kilobyte."
+
+#~ msgid "Statistics for flow controlled messages in kilobytes."
+#~ msgstr "Statistik aliran pesan yg dikontrol dalam kilobyte."
+
+#~ msgid "Total number of errors routing messages to other clients."
+#~ msgstr "Jumlah total kesalahan routing pesan ke klien lain."
+
+#~ msgid "Errors routing query hits."
+#~ msgstr "Jumlah total kesalahan routing hits query."
+
+#~ msgid ""
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
+#~ msgstr ""
+#~ "Jumlah total usaha koneksi Gnutella, baik dimulai secara internal atau "
+#~ "eksternal."
+
+#~ msgid ""
+#~ "Total incoming requests received over time. This includes all connection "
+#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
+#~ msgstr ""
+#~ "Total permintaan masuk yg diterima melebihi waktu. Termasuk semua usaha "
+#~ "koneksi (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, dll...)."
+
+#~ msgid ""
+#~ "Total outgoing download connections attempts over time. This includes both "
+#~ "direct connections and pushed requests."
+#~ msgstr ""
+#~ "Total usaha koneksi pengunduhan keluar melebihi waktu. Termasuk koneksi "
+#~ "langsung dan permintaan dorongan."
+
+#~ msgid ""
+#~ "Total responses received from downloaders over time. This includes Busy, "
+#~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
+#~ msgstr ""
+#~ "Total respon yg diterima dari pengunduh melebihi waktu. Termasuk sibuk, "
+#~ "berkas tidak ditemukan, tidak dibagikan, mengantri, kesalahan IO lain, dan "
+#~ "respon oke."
+
+#~ msgid ""
+#~ "Total alternate locations received and removed over time. This includes "
+#~ "locations that we actively attempt to connect to, locations that we will "
+#~ "ignore, locations that couldn't be removed, and locations that we removed "
+#~ "permanently from attempting to connect to."
+#~ msgstr ""
+#~ "Total lokasi alternatif yg diterima dan dihilangkan melebihi waktu. Termasuk "
+#~ "lokasi yg aktif disambungkan, lokasi yg akan diabaikan, lokasi yg tidak "
+#~ "dapat dihilangkan, dan lokasi yg dihilangkan permanen dari penyambungan yg "
+#~ "sedang terjadi."
+
+#~ msgid ""
+#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
+#~ "For HTTP1.1, values are per chunk."
+#~ msgstr ""
+#~ "Total transfer melebihi waktu. Termasuk transfer HTTP1.1 dan HTTP1.0. Untuk "
+#~ "HTTP1.1, nilainya per potongan."
+
+#~ msgid ""
+#~ "Records the time in milliseconds to establish TCP connections for downloads. "
+#~ "This can vary, for example, when servers are experiencing high loads."
+#~ msgstr ""
+#~ "Merekam waktu dalam millisecond ketika melakukan koneksi TCP untuk "
+#~ "pengunduhan. Hal ini bisa bervariasi, contohnya, ketika server mengalami "
+#~ "beban tinggi."
+
+#~ msgid ""
+#~ "Total incoming upload requests. These numbers are incremented on every "
+#~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
+#~ "transfers."
+#~ msgstr ""
+#~ "Total permintaan upload yg masuk. Jumlah ini ditambahkan setiap berusaha "
+#~ "mengurai request, termasuk juga setiap potongan transfer HTTP/1.1."
+
+#~ msgid ""
+#~ "Total outgoing responses. These numbers are incremented before sending each "
+#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
+#~ "the number of requests for which we have attempted to transfer a portion of "
+#~ "a file."
+#~ msgstr ""
+#~ "Total respon keluar. Jumlah ini ditambahkan sebelum mengirim setiap respon, "
+#~ "termasuk juga setiap potongan transfer HTTP/1.1. 'Normal' adalah jumlah "
+#~ "permintaan yang kita transfer sebagian berkasnya."
+
+#~ msgid ""
+#~ "Total incoming request methods. These numbers are incremented either for "
+#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
+#~ "requests, after we have sent the initial GIV."
+#~ msgstr ""
+#~ "Total metoda permintaan yg masuk. Jumlah ini bertambah untuk salahsatu "
+#~ "transfer HTTP/1.1 setelah permintaan koneksi masuk atau permintaan push "
+#~ "awal, setelah kita mengirim GIV awal."
+
+#~ msgid "General"
+#~ msgstr "Umum"
+
+#~ msgid ""
+#~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
+#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
+#~ "counted as an interrupted upload.)"
+#~ msgstr ""
+#~ "Total upload diusahakan, selesai, terganggu atau terhalangi. Jumlah ini "
+#~ "bertambah tiap koneksi, bukan per potongan. (Upload terhalangi akan dihitung "
+#~ "sebagai upload terganggu)."
+
+#~ msgid "Not Sharing Files"
+#~ msgstr "Bukan Berkas Dibagikan"
+
+#~ msgid "Interrupted"
+#~ msgstr "Terganggu"
+
+#~ msgid "Stalled"
+#~ msgstr "Dihalangi"
+
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr "Jumlah Respon Diminta dan Diterima via Protokol OOB"
+
+#~ msgid "Update File"
+#~ msgstr "Perbaharui Berkas"
+
+#~ msgid "Statistics"
+#~ msgstr "Statistik"
+
+#~ msgid "Validation Required"
+#~ msgstr "Diperlukan validasi"
+
+#~ msgid "Height:"
+#~ msgstr "Tinggi:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Tekan Oke untuk menghilangkan lisensi secara permanen."
+
+#~ msgid "Display:"
+#~ msgstr "Tampilkan:"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "Pesan Penjual"
+
+#~ msgid "HTTP Content"
+#~ msgstr "Isi HTTP"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "Masukkan judul dari berkas yg ingin anda terbitkan."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "Masukkan tahun dari berkas yg ingin anda terbitkan."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Masukkan URL verifikasi lisensi yg berlaku"
+
+#, fuzzy
+#~ msgid "test1"
+#~ msgstr "Simpan kembali"
+
+#, fuzzy
+#~ msgid "test2"
+#~ msgstr "Simpan kembali"
+
+#, fuzzy
+#~ msgid "other"
+#~ msgstr "Ethernet"
+
+#, fuzzy
+#~ msgid "string"
+#~ msgstr "Memulai"
+
+#, fuzzy
+#~ msgid "1"
+#~ msgstr "T1"
+
+#, fuzzy
+#~ msgid "The file type is not recognized."
+#~ msgstr ". Tipe berkas tidak dikenali."
+
+#, fuzzy
+#~ msgid "The file cannot be found."
+#~ msgstr ". Berkas tidak ditemukan."
+
+#, fuzzy
+#~ msgid "The file is corrupt."
+#~ msgstr ". Berkas rusak."
+
+#, fuzzy
+#~ msgid "There is an unknown error with the audio file."
+#~ msgstr ". Ada kesalahan yg tidak diketahui pada berkas audio."
+
+#, fuzzy
+#~ msgid "The file cannot be parsed."
+#~ msgstr ". Berkas tidak dapat dipilah."
+
+#~ msgid "Total number of messages sent by other LimeWires."
+#~ msgstr "Jumlah total pesan terkirim oleh LimeWire lain."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -1647,7 +1643,7 @@ msgstr "Citra"
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:190
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
-#, fuzzy
+#, java-format
 msgid "Could not process bad MAGNET link {0}"
 msgstr ""
 
@@ -1662,12 +1658,12 @@ msgstr ""
 "tidak dapat diunduh dengan benar."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "Anda sudah mengunduh berkas ini ke \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Anda sudah mengunduh berkas ini ke \"{0}\"."
 
@@ -2677,7 +2673,7 @@ msgid "More Information"
 msgstr "Informasi beberapa berkas"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
-#, fuzzy
+#, fuzzy, java-format
 msgid "Visit {0}"
 msgstr "Kunjungi {0}"
 
@@ -3304,7 +3300,7 @@ msgstr ""
 "permohonan Anda dilanjutkan dalam antrian dan sedang dilayani"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:36
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "Need more help? Visit <a href=\"{0}\">our message boards</a> and see if "
 "others have already answered your question! You can also review the <a "
@@ -3331,7 +3327,7 @@ msgstr ""
 "berkas tersebut dan mulai mengunduhnya lagi"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "Do you have a tip for effectively using LimeWire? Add it to <a "
 "href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
@@ -8245,7 +8241,7 @@ msgid "Awaiting Requests"
 msgstr "Permintaan Chat"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Mencari: {0}"
 

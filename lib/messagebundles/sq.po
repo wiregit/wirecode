@@ -15,11 +15,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#~ msgid "Loading magnet Management..."
-#~ msgstr "Po Ngarkohet Menaxhimi i magnet..."
 
 #~ msgid ""
 #~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
@@ -197,45 +194,6 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "Mbyll dritaren"
 
-#~ msgid "Statistics"
-#~ msgstr "Statistika"
-
-#~ msgid "&New Folder"
-#~ msgstr "Dosje e Re"
-
-#~ msgid "Add a Folder to the Selected Library Folder"
-#~ msgstr "Shto një Dosje tek Dosja e Zgjedhur e Librarisë"
-
-#~ msgid "Stop Sharing the Selected Library Folder"
-#~ msgstr "Ndal Shpërndarjen për Dosjen e Zgjedhur të Librarisë"
-
-#~ msgid "&Rename Folder"
-#~ msgstr "&Riemërtoje Dosjen"
-
-#~ msgid "&Launch File(s)"
-#~ msgstr "&Lëshoji Skedat"
-
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "Lëshon Skedat e Zgjedhura"
-
-#~ msgid "D&elete File(s)"
-#~ msgstr "Fshiji Sk&edat"
-
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "Fshin Skedat e Zgjedhura"
-
-#~ msgid "Refre&sh"
-#~ msgstr "Rifre&sko"
-
-#~ msgid "Reload the Library"
-#~ msgstr "Ringarkon Librarinë"
-
-#~ msgid "E&xplore"
-#~ msgstr "Eksploro"
-
-#~ msgid "X"
-#~ msgstr "X"
-
 #~ msgid "V"
 #~ msgstr "V"
 
@@ -251,36 +209,26 @@ msgstr ""
 #~ msgid "Display the Statistics Screen"
 #~ msgstr "Shfaq Dritaren e Statistikave"
 
-#~ msgid "News &Reader"
-#~ msgstr "Lexues i Lajmeve"
-
-#~ msgid "Display the News Reader"
-#~ msgstr "Shfaq Lexuesin e Lajmeve"
-
 #~ msgid "U"
 #~ msgstr "U"
+
+#~ msgid "Add a Folder to the Selected Library Folder"
+#~ msgstr "Shto një Dosje tek Dosja e Zgjedhur e Librarisë"
+
+#~ msgid "Stop Sharing the Selected Library Folder"
+#~ msgstr "Ndal Shpërndarjen për Dosjen e Zgjedhur të Librarisë"
+
+#~ msgid "&Launch File(s)"
+#~ msgstr "&Lëshoji Skedat"
+
+#~ msgid "X"
+#~ msgstr "X"
 
 #~ msgid "Results"
 #~ msgstr "Rezultate"
 
-#~ msgid "Only search results with a {0} are official LimeWire communications."
-#~ msgstr ""
-#~ "Kërko vetëm rezultate me një {0} janë komunikime zyrtare të LimeWire."
-
 #~ msgid "Files"
 #~ msgstr "Skeda"
-
-#~ msgid "files"
-#~ msgstr "skeda"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "skeda (Po ngarkoj...)"
-
-#~ msgid "You are sharing"
-#~ msgstr "Ju po shpërndani"
-
-#~ msgid "Waiting For Tracker"
-#~ msgstr "Po Pres Gjurmuesin"
 
 #~ msgid "Recovery Failed"
 #~ msgstr "Rikthimi dështoi"
@@ -291,32 +239,26 @@ msgstr ""
 #~ msgid "s for Sources"
 #~ msgstr "s për Burime"
 
+#~ msgid "Gnutella"
+#~ msgstr "Gnutella"
+
+#~ msgid "Busy"
+#~ msgstr "Të Zënë"
+
+#~ msgid "files"
+#~ msgstr "skeda"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "skeda (Po ngarkoj...)"
+
 #~ msgid "Files with this name"
 #~ msgstr "Skeda me këtë emër"
 
 #~ msgid "Searches for files with the same file name."
 #~ msgstr "Kërkon për skeda me të njëjtin emër."
 
-#~ msgid "Orginal query"
-#~ msgstr "Pyetja origjinale"
-
 #~ msgid "Performs the same search as the one which found this file previously."
 #~ msgstr "Kryen të njëjtin kërkim si për gjetjen e mëparshme të skedës."
-
-#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
-#~ msgstr "Na vjen keq, por LimeWire nuk mundi të rinisë torrentet e vjetra."
-
-#~ msgid "Validation Required"
-#~ msgstr "Kërkohet certifikimi"
-
-#~ msgid ". No line is available for output."
-#~ msgstr ". Për outputin nuk vlen asnjë rresht."
-
-#~ msgid "Height:"
-#~ msgstr "Lartësia:"
-
-#~ msgid "Please press OK to permanently remove license."
-#~ msgstr "Ju lutemi shtypni OK për ta fshirë licensën përkohësisht."
 
 #~ msgid "End Chat"
 #~ msgstr "Mbylle Bisedën"
@@ -324,14 +266,657 @@ msgstr ""
 #~ msgid "Stop Chatting with a Host"
 #~ msgstr "Ndal Bisedën me Hostin"
 
-#~ msgid "Loading Resources..."
-#~ msgstr "Po Ngarkoj Burimet..."
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "Po Ngarkoj Dritaren e Statistikave..."
+
+#~ msgid ""
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
+#~ msgstr ""
+#~ "Nuk arrita të gjej një port për lidhjet hyrëse.\n"
+#~ "Ju lutemi përcaktoni një port në dritaren konfiguruese."
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pinget e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
+#~ "LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Ponget e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
+#~ "LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Pyetjet e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
+#~ "LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr ""
+#~ "Hitet e pyetjeve të Multicast-it marrë nga gjithë klientët e Gnutella-s "
+#~ "përballë LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr ""
+#~ "Shtytjet e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
+#~ "LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajte për pinget e Multicast-it marrë nga gjithë klientët e Gnutella-s "
+#~ "përballë LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajte për ponget e Multicast-it marrë nga gjithë klientët e Gnutella-s "
+#~ "përballë LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajte për pyetjet e Multicast-it marrë nga gjithë klientët e Gnutella-s "
+#~ "përballë LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajte për hitet e pyetjeve të Multicast-it marrë nga gjithë klientët e "
+#~ "Gnutella-s përballë LimeWire-ve të tjerë."
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr ""
+#~ "Kilobajte për shtytjet e Multicast-it marrë nga gjithë klientët e Gnutella-s "
+#~ "përballë LimeWire-ve të tjerë."
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "Gabime"
+
+#~ msgid "Query Replies"
+#~ msgstr "Përgjigjet e Pyetjeve"
+
+#~ msgid "Ping Replies"
+#~ msgstr "Përgjigjet e Pingeve"
+
+#~ msgid "Compression"
+#~ msgstr "Ngjeshja"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "Gabimet e Hiteve të Dëbimit"
+
+#~ msgid "Requests"
+#~ msgstr "Kërkesa"
+
+#~ msgid "Request Methods"
+#~ msgstr "Metoda Kërkuese"
+
+#~ msgid "seconds"
+#~ msgstr "sekonda"
+
+#~ msgid "Average"
+#~ msgstr "Mes."
+
+#~ msgid "Max"
+#~ msgstr "Maks."
+
+#~ msgid "Total Upstream"
+#~ msgstr "Mbirryma Totale"
+
+#~ msgid "Total Downstream"
+#~ msgstr "Nënrryma Totale"
+
+#~ msgid "HTTP Total"
+#~ msgstr "Totali HTTP"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "Koka HTTP"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "Totali Gnutella"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "Koka Gnutella"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "Mesazhe Gnutella"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "Mbirryma Totale Potenciale"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "Mbirryma Totale Aktuale"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "Nënrryma Totale Potenciale"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "Nënrryma Totale Aktuale"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP (Potenciali)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP (Aktuale)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "Gnutella (Potenciali)"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "Gnutella (Aktuale)"
+
+#~ msgid "All Clients"
+#~ msgstr "Gjithë Klientët"
+
+#~ msgid "All Messages"
+#~ msgstr "Gjithë Mesazhet"
+
+#~ msgid "Hops 1"
+#~ msgstr "Hove 1"
+
+#~ msgid "Hops 2"
+#~ msgstr "Hove 2"
+
+#~ msgid "Hops 3"
+#~ msgstr "Hove 3"
+
+#~ msgid "Hops 4"
+#~ msgstr "Hove 4"
+
+#~ msgid "Hops 5"
+#~ msgstr "Hove 5"
+
+#~ msgid "Hops 6"
+#~ msgstr "Hove 6"
+
+#~ msgid "Hops 7"
+#~ msgstr "Hove 7"
+
+#~ msgid "Hops 8"
+#~ msgstr "Hove 8"
+
+#~ msgid "Hops 9"
+#~ msgstr "Hove 9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "Gabime Pongesh"
+
+#~ msgid "Reply Errors"
+#~ msgstr "Gabime Përgjigjesh"
+
+#~ msgid "Push Errors"
+#~ msgstr "Gabime Shtytjesh"
+
+#~ msgid "No Route"
+#~ msgstr "Asnjë Dëbues"
+
+#~ msgid "All Requests"
+#~ msgstr "Gjithë Kërkesat"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "Kërkesa KOKE"
+
+#~ msgid "GET Requests"
+#~ msgstr "Kërkesa të MARRA"
+
+#~ msgid "Push Requests"
+#~ msgstr "Kërkesa Shtytjeje"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "Kërkesa Gnutella"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "Kërkesa Gnutella (LimeWire)"
+
+#~ msgid "Accepted"
+#~ msgstr "Të Pranuar"
+
+#~ msgid "IO Error"
+#~ msgstr "Gabime IO"
+
+#~ msgid "THEX Request"
+#~ msgstr "Kërkesa THEX"
+
+#~ msgid "URN Get"
+#~ msgstr "Marrje URN"
+
+#~ msgid "Freeloader"
+#~ msgstr "Freeloader"
+
+#~ msgid "Normal"
+#~ msgstr "Normal"
+
+#~ msgid "Get"
+#~ msgstr "Marrje"
+
+#~ msgid "Head"
+#~ msgstr "Koka"
+
+#~ msgid "Pushed Head"
+#~ msgstr "Koka të Shtyra"
+
+#~ msgid "Orginal query"
+#~ msgstr "Pyetja origjinale"
 
 #~ msgid "Loading Settings..."
 #~ msgstr "Po Ngarkoj Kuadrot..."
 
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "Po Ngarkoj Dritaren e Statistikave..."
+#~ msgid "Network"
+#~ msgstr "Rrjeti"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "Gjithë pyetjet e marra në kilobajte, me hove."
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "Gjithë pyetjet e marra në kilobajte, në kohë reale (TTL)."
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "Gjithë hitet e pyetjeve të marra në kilobajte, me hove."
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "Gjithë hitet e pyetjeve të marra në kilobajte, në kohë reale (TTL)."
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "Përmasa mesatare në kilobajte e mesazheve të marra nga Gnutella."
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "Përmasa mesatare në kilobajte e mesazheve të marra nga LimeWire."
+
+#~ msgid "Current"
+#~ msgstr "Aktualisht"
+
+#~ msgid ". No line is available for output."
+#~ msgstr ". Për outputin nuk vlen asnjë rresht."
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "Gjithë pyetjet e marra me hove."
+
+#~ msgid "Special Queries"
+#~ msgstr "Pyetje të Veçanta"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "Gjithë mesazhet e shenjuara si të veçanta."
+
+#~ msgid "False Positive"
+#~ msgstr "Pozitive False"
+
+#~ msgid "Generic Errors"
+#~ msgstr "Gabime Gjenerike"
+
+#~ msgid "Handshaking"
+#~ msgstr "Takim dore"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Statistikat e takimit të dorës si ultrapikë."
+
+#~ msgid "Flow Control"
+#~ msgstr "Kontrolli i Rjedhës"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "Statistikat e mesazheve me rrjedhje të kontrolluar."
+
+#~ msgid "Total messages filtered."
+#~ msgstr "Mesazhet totale të filtruara."
+
+#~ msgid "Transfers"
+#~ msgstr "Transferta"
+
+#~ msgid "Color"
+#~ msgstr "Ngjyra"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "Shkruaji statistikat e këtij grafiku në skedë."
+
+#~ msgid "All Errors"
+#~ msgstr "Gjithë Gabimet"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "Gjatësi Invalide të Ngarkesës"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "Hove Invalide"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "TTL Invalid"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "Hove > Butësi Maks."
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "(Hove + TTL) > Fortësi Maks."
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "Kode Mesazhi Invalide"
+
+#~ msgid "All Query Errors"
+#~ msgstr "Gabime Pyetjesh"
+
+#~ msgid "URN Query"
+#~ msgstr "Pyetje URN"
+
+#~ msgid "Query Too Large"
+#~ msgstr "Pyetje Tepër të Mëdha"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "Pyetje XML Tepër të Mëdha"
+
+#~ msgid "Empty Query"
+#~ msgstr "Pyetje Boshe"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "Shkronja Ilegale në Pyetje"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "Gabime për Përgjigjet e Pyetjeve"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "Porte Përgjigjeje Invalide"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "Adresa Përgjigjeje Invalide"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "Shpejtësi Përgjigjeje Invalide"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "Gabime për Përgjigjet e Pingut"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "Përgjigje Invalide të Pingut"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "Porte Invalide të Përgjigjes së Pingut"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "Adresa Invalide të Përgjigjes së Pingut"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "Blloqe Invalide GGEP"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "Gjatësi Invalide të Shitësit"
+
+#~ msgid "All Push Errors"
+#~ msgstr "Gjithë Gabimet e Shtytjes"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "Porte Invalide të Shtytjes"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "Adresa Invalide të Shtytjes"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "Ngarkesa Invalide të Shtytjes"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "Gjithë Gabimet e Shitësit"
+
+#~ msgid "Invalid ID"
+#~ msgstr "ID Invalid"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "Zgjedhësa Invalidë"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "Ngarkesa me Fitim Invalide"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "Mesazhe të Pakuptueshme"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "Arnimi i Tabelës Dëbuese"
+
+#~ msgid "What's New?"
+#~ msgstr "Risi?"
+
+#~ msgid "Hard Limit"
+#~ msgstr "Kufij të Rëndë"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "Kufi i Rëndë (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "Kufi i Rëndë (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "Kufi i Rëndë (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "Kufi i Rëndë (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "Kufi i Rëndë (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "Kufi i Rëndë (TTL a më sipër)"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "Përpjekje për Lidhje"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "Përpjekje Hyrëse"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "Kërkesa Magnet-i"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "Kërkesa të Panjohura"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "Hoste të Dëbuara"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "Të Mbyllur Menjëherë"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "Probleme Gjatë Leximit të Kokës"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "Kode Përgjigjeje të Panjohura"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "Mosqasje të Përmbajtjes URN"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "Caqe të Papajtueshme"
+
+#~ msgid "Failed"
+#~ msgstr "Dështime"
+
+#~ msgid "Succeeded"
+#~ msgstr "Suksese"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "HTTP 1.1 me Sukses"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "HTTP 1.0 me Sukses"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "HTTP 1.1 të Dështuar"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "HTTP 1.0 të Dështuar"
+
+#~ msgid "Retried Success"
+#~ msgstr "Suksese të Riprovuara"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "Lidhje Direkte me Sukses"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "Lidhje të Shtyra me Sukses"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "Shtytje të Dështuara (të Ndërprera)"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "Shtytje të Dështuara (Pa asnjë GIV)"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "Shtytje të Dështuara (të Humbura)"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "Proxy të Shtyrë me Sukses"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "Proxy të Shtyrë të Keqformuar"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "Proxy të Shtyrë të Dështuar"
+
+#~ msgid "Push Proxy"
+#~ msgstr "Shtytje Proxy"
+
+#~ msgid "Traditional Get"
+#~ msgstr "Marrje Tradicionale"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "Marrje URN të Panjohura"
+
+#~ msgid "Limit Reached"
+#~ msgstr "Kufij të Arritur"
+
+#~ msgid "Banned Client"
+#~ msgstr "Klientë të Dëbuar"
+
+#~ msgid "Unknown"
+#~ msgstr "Të Panjohura"
+
+#~ msgid "Pushed Get"
+#~ msgstr "Marrje të Shtyra"
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "Mosnjohje të Shtyra"
+
+#~ msgid "Push Failed"
+#~ msgstr "Shtytje të Dështuara"
+
+#~ msgid "Completed Responses"
+#~ msgstr "Përgjigje të Përfunduara"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "Transferta të Përfunduara"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "Refuz. Dalëse (Pikë)"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "Refuz. Dalëse (Ultrapikë i Vjetër)"
+
+#~ msgid "Out Acc."
+#~ msgstr "Pran. Dalëse"
+
+#~ msgid "In Rej."
+#~ msgstr "Refuz. Hyrëse"
+
+#~ msgid "In Acc."
+#~ msgstr "Pran. Hyrëse"
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "Refuz. Dalëse (Plot)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "Pran. Dalëse (Prirje e Ndjekur)"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "Pran. Dalëse (Prirje e Përbuzur)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "Pran. Dalëse (Asnjë Prirje)"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "Refuz. Hyrëse (Pikë)"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "Pran. Hyrëse (Pikë)"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "Pran. Hyrëse (Prirje në Pikë)"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "Pran. Hyrëse (Ultrapikë)"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "Refuz. Hyrëse (Tragat e Marra)"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "Refuz. Hyrëse (Rrjet me Ultrapika)"
+
+#~ msgid "Server Reject"
+#~ msgstr "Refuzime Serveri"
+
+#~ msgid "No Conclusion"
+#~ msgstr "Pa rezultate"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "Ultrapika LimeWire"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "Pika LimeWire"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "Ultrapika të Tjera"
+
+#~ msgid "Other Leaves"
+#~ msgstr "Pika të Tjera"
+
+#~ msgid "Responses Requested"
+#~ msgstr "Përgjigje të Kërkuara"
+
+#~ msgid "Responses Received"
+#~ msgstr "Përgjigje të Marra"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "Përgjigje të Kapërcyera"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "Raporti i Suksesit OOB"
 
 #~ msgid "Support LimeWire and independent media content. Get PRO."
 #~ msgstr ""
@@ -348,39 +933,41 @@ msgstr ""
 #~ "kuadrot e fajruollit dhe pastaj zgjidhni \"Lidhu\", nga menyja 'Skedë', që "
 #~ "LimeWire të lidhet në Rrjet."
 
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "Nuk arrita të gjej një port për lidhjet hyrëse.\n"
-#~ "Ju lutemi përcaktoni një port në dritaren konfiguruese."
-
-#~ msgid "Please enter the title of the file you want to publish."
-#~ msgstr "Ju lutemi shkruani titullin e skedës që doni të publikoni."
-
-#~ msgid "Please enter the year of the file you want to publish."
-#~ msgstr "Ju lutemi shkruani vitin e skedës që doni të publikoni."
-
-#~ msgid "Please enter the copyright holder of the file you want to publish."
-#~ msgstr ""
-#~ "Ju lutemi shkruani zotëruesin e të drejtave të skedës që doni të publikoni."
-
-#~ msgid "Please enter a valid verification URL for the license."
-#~ msgstr "Ju lutemi shkruani një URL verifikimi të vlefshëm për licensën."
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "Shfaqi Statisikat e Avancuara:"
 
 #~ msgid ""
-#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
 #~ msgstr ""
-#~ "LimeWire nuk arriti të shkarkojë skedën torrent nga URLi i përcaktuar:"
+#~ "Shtrirja totale e bandës që përdoret për dërgimin e të dhënave dalëse, "
+#~ "përmes ngarkesave ose mesazheve nga Gnutella."
 
-#~ msgid "Weedshare"
-#~ msgstr "Weedshare"
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr ""
+#~ "Shtrirja totale e bandës që përdoret për marrjen e të dhënave hyrëse, përmes "
+#~ "shkarkesave ose mesazheve nga Gnutella."
 
-#~ msgid "Check these associations when starting LimeWire:"
-#~ msgstr "Verifikoji këto shoqërime kur LimeWire nis:"
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr ""
+#~ "Numri i pyetjeve dyfishe marrë përmes Multicast-it përballë numrit total të "
+#~ "pyetjeve."
 
-#~ msgid "Display:"
-#~ msgstr "Shfaqi Mbeturinat:"
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr ""
+#~ "Kilobajtet totale në pyetjet dyfishe marrë përmes Multicast-it përballë "
+#~ "numrit total të pyetjeve."
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr ""
+#~ "Gjithë mesazhet e Gnutella-s dërguar përmes Multicast-it, sipas llojit të "
+#~ "mesazhit."
 
 #~ msgid ""
 #~ "Bandwidth statistics include complete information on all bandwidth sent "
@@ -390,9 +977,6 @@ msgstr ""
 #~ "Statistikat e shtrirjes së bandës japin informacione të plota mbi dërgimin e "
 #~ "gjithë mbirrymave dhe nënrrymave të shtrirjes së bandës. Për statistikat e "
 #~ "dëshiruara, klikoni një kategori."
-
-#~ msgid "Network"
-#~ msgstr "Rrjeti"
 
 #~ msgid ""
 #~ "Statistics on the current state of the network. These statistics are quite "
@@ -417,25 +1001,8 @@ msgstr ""
 #~ "Gnutella. Statistikat e avancuara nuk shfaqen normalisht dhe nuk "
 #~ "rekomandohen për shumicën e përdoruesve."
 
-#~ msgid "Show Advanced Statistics:"
-#~ msgstr "Shfaqi Statisikat e Avancuara:"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid ""
-#~ "Total bandwidth used to send outgoing data, either through uploads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Shtrirja totale e bandës që përdoret për dërgimin e të dhënave dalëse, "
-#~ "përmes ngarkesave ose mesazheve nga Gnutella."
-
-#~ msgid ""
-#~ "Total bandwidth used to receive incoming data, either through downloads or "
-#~ "Gnutella messages."
-#~ msgstr ""
-#~ "Shtrirja totale e bandës që përdoret për marrjen e të dhënave hyrëse, përmes "
-#~ "shkarkesave ose mesazheve nga Gnutella."
+#~ msgid "Weedshare"
+#~ msgstr "Weedshare"
 
 #~ msgid "All Gnutella messages received by this client."
 #~ msgstr "Gjithë mesazhet e Gnutella-s marrë nga ky klient."
@@ -463,24 +1030,8 @@ msgstr ""
 #~ "Numri i pyetjeve dyfishe marrë përmes TCP-së përballë numrit total të "
 #~ "pyetjeve."
 
-#~ msgid ""
-#~ "Number of duplicate queries received over Multicast versus the total number "
-#~ "of queries."
-#~ msgstr ""
-#~ "Numri i pyetjeve dyfishe marrë përmes Multicast-it përballë numrit total të "
-#~ "pyetjeve."
-
-#~ msgid "All received queries, by hops."
-#~ msgstr "Gjithë pyetjet e marra me hove."
-
 #~ msgid "All received queries, by time to live (TTL)."
 #~ msgstr "Gjithë pyetjet e marra në kohë reale (TTL)."
-
-#~ msgid "Special Queries"
-#~ msgstr "Pyetje të Veçanta"
-
-#~ msgid "All of the special marked queries."
-#~ msgstr "Gjithë mesazhet e shenjuara si të veçanta."
 
 #~ msgid "All received query hits, by hops."
 #~ msgstr "Gjithë hitet e pyetjeve të marra, me hove."
@@ -524,25 +1075,6 @@ msgstr ""
 #~ "Kilobajtet totale në pyetjet dyfishe marrë përmes TCP-së përballë numrit "
 #~ "total të pyetjeve."
 
-#~ msgid ""
-#~ "Total kilobytes in duplicate queries received over Multicast versus the "
-#~ "total number of queries."
-#~ msgstr ""
-#~ "Kilobajtet totale në pyetjet dyfishe marrë përmes Multicast-it përballë "
-#~ "numrit total të pyetjeve."
-
-#~ msgid "All received queries in kilobytes, by hops."
-#~ msgstr "Gjithë pyetjet e marra në kilobajte, me hove."
-
-#~ msgid "All received queries in kilobytes, by time to live (TTL)."
-#~ msgstr "Gjithë pyetjet e marra në kilobajte, në kohë reale (TTL)."
-
-#~ msgid "All received query hits in kilobytes, by hops."
-#~ msgstr "Gjithë hitet e pyetjeve të marra në kilobajte, me hove."
-
-#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
-#~ msgstr "Gjithë hitet e pyetjeve të marra në kilobajte, në kohë reale (TTL)."
-
 #~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
 #~ msgstr ""
 #~ "Pinget e UDP-së marrë nga gjithë klientët e Gnutella-s përballë LimeWire-ve "
@@ -569,37 +1101,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Shtytjet e UDP-së marrë nga gjithë klientët e Gnutella-s përballë LimeWire-"
 #~ "ve të tjerë."
-
-#~ msgid ""
-#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pinget e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
-#~ "LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Ponget e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
-#~ "LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Pyetjet e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
-#~ "LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Multicast query hits received from all Gnutella clients versus other "
-#~ "LimeWires."
-#~ msgstr ""
-#~ "Hitet e pyetjeve të Multicast-it marrë nga gjithë klientët e Gnutella-s "
-#~ "përballë LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
-#~ msgstr ""
-#~ "Shtytjet e Multicast-it marrë nga gjithë klientët e Gnutella-s përballë "
-#~ "LimeWire-ve të tjerë."
 
 #~ msgid ""
 #~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
@@ -637,50 +1138,6 @@ msgstr ""
 #~ "përballë LimeWire-ve të tjerë."
 
 #~ msgid ""
-#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajte për pinget e Multicast-it marrë nga gjithë klientët e Gnutella-s "
-#~ "përballë LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajte për ponget e Multicast-it marrë nga gjithë klientët e Gnutella-s "
-#~ "përballë LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajte për pyetjet e Multicast-it marrë nga gjithë klientët e Gnutella-s "
-#~ "përballë LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajte për hitet e pyetjeve të Multicast-it marrë nga gjithë klientët e "
-#~ "Gnutella-s përballë LimeWire-ve të tjerë."
-
-#~ msgid ""
-#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
-#~ "other LimeWires."
-#~ msgstr ""
-#~ "Kilobajte për shtytjet e Multicast-it marrë nga gjithë klientët e Gnutella-s "
-#~ "përballë LimeWire-ve të tjerë."
-
-#~ msgid "The average size in kilobytes of received Gnutella messages."
-#~ msgstr "Përmasa mesatare në kilobajte e mesazheve të marra nga Gnutella."
-
-#~ msgid "The average size in kilobytes of received messages from LimeWires."
-#~ msgstr "Përmasa mesatare në kilobajte e mesazheve të marra nga LimeWire."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid ""
 #~ "All queries that were routed to other Ultrapeers for the last hop, using "
 #~ "query routing tables."
 #~ msgstr ""
@@ -697,38 +1154,20 @@ msgstr ""
 #~ msgid "Hit"
 #~ msgstr "Hite"
 
-#~ msgid "False Positive"
-#~ msgstr "Pozitive False"
-
-#~ msgid "Errors"
-#~ msgstr "Gabime"
-
-#~ msgid "Generic Errors"
-#~ msgstr "Gabime Gjenerike"
-
 #~ msgid "Generic errors while reading messages."
 #~ msgstr "Gabime gjenerike gjatë leximit të mesazheve."
 
 #~ msgid "Errors while reading query messages."
 #~ msgstr "Gabime gjatë leximit të mesazheve për pyetje."
 
-#~ msgid "Query Replies"
-#~ msgstr "Përgjigjet e Pyetjeve"
-
 #~ msgid "Errors while reading query reply messages."
 #~ msgstr "Gabime gjatë leximit të mesazheve mbi përgjigjen e pyetjeve."
-
-#~ msgid "Ping Replies"
-#~ msgstr "Përgjigjet e Pingeve"
 
 #~ msgid "Errors while reading ping replies."
 #~ msgstr "Gabime gjatë leximit të përgjigjeve të pingeve."
 
 #~ msgid "Errors while reading pushes."
 #~ msgstr "Gabime gjatë leximit të shtytjeve."
-
-#~ msgid "Vendor Messages"
-#~ msgstr "Mesazhet e Shitësit"
 
 #~ msgid "Errors while reading vendor messages."
 #~ msgstr "Gabime gjatë leximit të mesazheve të shitësit."
@@ -743,11 +1182,6 @@ msgstr ""
 #~ msgid "All Gnutella messages sent over UDP, by message type."
 #~ msgstr ""
 #~ "Gjithë mesazhet e Gnutella-s dërguar përmes UDP-së, sipas llojit të mesazhit."
-
-#~ msgid "All Gnutella messages sent over Multicast, by message type."
-#~ msgstr ""
-#~ "Gjithë mesazhet e Gnutella-s dërguar përmes Multicast-it, sipas llojit të "
-#~ "mesazhit."
 
 #~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
 #~ msgstr ""
@@ -906,14 +1340,8 @@ msgstr ""
 #~ "Kilobajte për shtytjet e Multicast-it dërguar nga gjithë klientët e Gnutella-"
 #~ "s përball LimeWire-ve të tjera."
 
-#~ msgid "Handshaking"
-#~ msgstr "Takim dore"
-
 #~ msgid "Statistics for handshaking as a leaf."
 #~ msgstr "Statistikat e takimit të dorës si pikë."
-
-#~ msgid "Statistics for handshaking as an ultrapeer."
-#~ msgstr "Statistikat e takimit të dorës si ultrapikë."
 
 #~ msgid "Statistics for outgoing Gnutella connection handshaking."
 #~ msgstr "Statistikat e takimit të dorës në lidhjet dalëse të Gnutella-s."
@@ -931,20 +1359,11 @@ msgstr ""
 #~ "Statistikat e refuzimit për takimin e dorës në lidhjet dalëse të Gnutella-s "
 #~ "nga serveri."
 
-#~ msgid "Compression"
-#~ msgstr "Ngjeshja"
-
 #~ msgid "Statistics for compressed upstream traffic in kilobytes."
 #~ msgstr "Statistikat e trafikut të ngjeshur të mbirrymës në kilobajte."
 
 #~ msgid "Statistics for compressed downstream traffic in kilobytes."
 #~ msgstr "Statistikat e trafikut të ngjeshur të nënrrymës në kilobajte."
-
-#~ msgid "Flow Control"
-#~ msgstr "Kontrolli i Rjedhës"
-
-#~ msgid "Statistics for flow controlled messages."
-#~ msgstr "Statistikat e mesazheve me rrjedhje të kontrolluar."
 
 #~ msgid "Statistics for flow controlled messages in kilobytes."
 #~ msgstr "Statistikat e mesazheve me rrjedhje të kontrolluar në kilobajte."
@@ -952,14 +1371,8 @@ msgstr ""
 #~ msgid "Total number of errors routing messages to other clients."
 #~ msgstr "Numri total i gabimeve në mesazhet dëbuese tek klientët e tjerë."
 
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Gabimet e Hiteve të Dëbimit"
-
 #~ msgid "Errors routing query hits."
 #~ msgstr "Gabime gjatë vënies përpara të hiteve të dëbimit."
-
-#~ msgid "Total messages filtered."
-#~ msgstr "Mesazhet totale të filtruara."
 
 #~ msgid ""
 #~ "Total number of Gnutella connection attempts, either initiated internally or "
@@ -990,9 +1403,6 @@ msgstr ""
 #~ "skedat e Zëna, të Pagjendura, të Pashpërndara, në Pritje, Gabime IO të "
 #~ "përziera dhe OK."
 
-#~ msgid "Alt. Locations"
-#~ msgstr "Vende Alt."
-
 #~ msgid ""
 #~ "Total alternate locations received and removed over time. This includes "
 #~ "locations that we actively attempt to connect to, locations that we will "
@@ -1002,9 +1412,6 @@ msgstr ""
 #~ "Vendet totale alternative që janë marrë dhe hequr në kohë. Këtu përfshihen "
 #~ "vende ku aktivisht orvatemi të lidhemi, vende që përbuzen, vende që nuk mund "
 #~ "të fshihen dhe vende që fshihen përkohësisht nga orvatja për lidhje."
-
-#~ msgid "Transfers"
-#~ msgstr "Transferta"
 
 #~ msgid ""
 #~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
@@ -1019,9 +1426,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Regjistron kohën në milisekonda për themelimin e lidhjeve TCP për shkarkime. "
 #~ "Kjo varet, për shembull, kur serverat hasin pesha të rënda."
-
-#~ msgid "Requests"
-#~ msgstr "Kërkesa"
 
 #~ msgid ""
 #~ "Total incoming upload requests. These numbers are incremented on every "
@@ -1042,9 +1446,6 @@ msgstr ""
 #~ "përgjigjeje, ndaj përfshijnë çdo thelë për transfertat HTTP/1.1. 'Normal' "
 #~ "është numri i kërkesave për të cilat ne përpiqemi të transferojmë një "
 #~ "porcion skede."
-
-#~ msgid "Request Methods"
-#~ msgstr "Metoda Kërkuese"
 
 #~ msgid ""
 #~ "Total incoming request methods. These numbers are incremented either for "
@@ -1067,431 +1468,8 @@ msgstr ""
 #~ "Këta numra rriten për lidhje, jo për thelë. (Edhe ngarkesat e ngecura do të "
 #~ "numërohen si ngarkesa të ndërprera.)"
 
-#~ msgid "seconds"
-#~ msgstr "sekonda"
-
-#~ msgid "Average"
-#~ msgstr "Mes."
-
-#~ msgid "Max"
-#~ msgstr "Maks."
-
-#~ msgid "Color"
-#~ msgstr "Ngjyra"
-
-#~ msgid "Current"
-#~ msgstr "Aktualisht"
-
-#~ msgid "Write statistics for this graph to files."
-#~ msgstr "Shkruaji statistikat e këtij grafiku në skedë."
-
-#~ msgid "Total Upstream"
-#~ msgstr "Mbirryma Totale"
-
-#~ msgid "Total Downstream"
-#~ msgstr "Nënrryma Totale"
-
-#~ msgid "HTTP Total"
-#~ msgstr "Totali HTTP"
-
-#~ msgid "HTTP Headers"
-#~ msgstr "Koka HTTP"
-
-#~ msgid "HTTP Content"
-#~ msgstr "Përmbajtja HTTP"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Totali Gnutella"
-
-#~ msgid "Gnutella Headers"
-#~ msgstr "Koka Gnutella"
-
-#~ msgid "Gnutella Messages"
-#~ msgstr "Mesazhe Gnutella"
-
-#~ msgid "Total Potential Upstream"
-#~ msgstr "Mbirryma Totale Potenciale"
-
-#~ msgid "Total Actual Upstream"
-#~ msgstr "Mbirryma Totale Aktuale"
-
-#~ msgid "Total Potential Downstream"
-#~ msgstr "Nënrryma Totale Potenciale"
-
-#~ msgid "Total Actual Downstream"
-#~ msgstr "Nënrryma Totale Aktuale"
-
-#~ msgid "HTTP (Potential)"
-#~ msgstr "HTTP (Potenciali)"
-
-#~ msgid "HTTP (Actual)"
-#~ msgstr "HTTP (Aktuale)"
-
-#~ msgid "Gnutella (Potential)"
-#~ msgstr "Gnutella (Potenciali)"
-
-#~ msgid "Gnutella (Actual)"
-#~ msgstr "Gnutella (Aktuale)"
-
-#~ msgid "All Clients"
-#~ msgstr "Gjithë Klientët"
-
-#~ msgid "All Errors"
-#~ msgstr "Gjithë Gabimet"
-
-#~ msgid "Invalid Payload Length"
-#~ msgstr "Gjatësi Invalide të Ngarkesës"
-
-#~ msgid "Invalid Hops"
-#~ msgstr "Hove Invalide"
-
-#~ msgid "Invalid TTL"
-#~ msgstr "TTL Invalid"
-
-#~ msgid "Hops > Soft Max"
-#~ msgstr "Hove > Butësi Maks."
-
-#~ msgid "(Hops + TTL) > Hard Max"
-#~ msgstr "(Hove + TTL) > Fortësi Maks."
-
-#~ msgid "Invalid Message Code"
-#~ msgstr "Kode Mesazhi Invalide"
-
-#~ msgid "All Query Errors"
-#~ msgstr "Gabime Pyetjesh"
-
-#~ msgid "URN Query"
-#~ msgstr "Pyetje URN"
-
-#~ msgid "Query Too Large"
-#~ msgstr "Pyetje Tepër të Mëdha"
-
-#~ msgid "XML Query Too Large"
-#~ msgstr "Pyetje XML Tepër të Mëdha"
-
-#~ msgid "Empty Query"
-#~ msgstr "Pyetje Boshe"
-
-#~ msgid "Illegal Characters in Query"
-#~ msgstr "Shkronja Ilegale në Pyetje"
-
-#~ msgid "All Query Reply Errors"
-#~ msgstr "Gabime për Përgjigjet e Pyetjeve"
-
-#~ msgid "Invalid Reply Port"
-#~ msgstr "Porte Përgjigjeje Invalide"
-
-#~ msgid "Invalid Reply Address"
-#~ msgstr "Adresa Përgjigjeje Invalide"
-
-#~ msgid "Invalid Reply Speed"
-#~ msgstr "Shpejtësi Përgjigjeje Invalide"
-
-#~ msgid "All Ping Reply Errors"
-#~ msgstr "Gabime për Përgjigjet e Pingut"
-
-#~ msgid "Invalid Ping Reply Payload"
-#~ msgstr "Përgjigje Invalide të Pingut"
-
-#~ msgid "Invalid Ping Reply Port"
-#~ msgstr "Porte Invalide të Përgjigjes së Pingut"
-
-#~ msgid "Invalid Ping Reply Address"
-#~ msgstr "Adresa Invalide të Përgjigjes së Pingut"
-
-#~ msgid "Invalid GGEP Block"
-#~ msgstr "Blloqe Invalide GGEP"
-
-#~ msgid "Invalid Vendor Length"
-#~ msgstr "Gjatësi Invalide të Shitësit"
-
-#~ msgid "All Push Errors"
-#~ msgstr "Gjithë Gabimet e Shtytjes"
-
-#~ msgid "Invalid Push Port"
-#~ msgstr "Porte Invalide të Shtytjes"
-
-#~ msgid "Invalid Push Address"
-#~ msgstr "Adresa Invalide të Shtytjes"
-
-#~ msgid "Invalid Push Payload"
-#~ msgstr "Ngarkesa Invalide të Shtytjes"
-
-#~ msgid "All Vendor Message Errors"
-#~ msgstr "Gjithë Gabimet e Shitësit"
-
-#~ msgid "Invalid ID"
-#~ msgstr "ID Invalid"
-
-#~ msgid "Invalid Selector"
-#~ msgstr "Zgjedhësa Invalidë"
-
-#~ msgid "Invalid Payload"
-#~ msgstr "Ngarkesa me Fitim Invalide"
-
-#~ msgid "Unrecognized Vendor Message"
-#~ msgstr "Mesazhe të Pakuptueshme"
-
-#~ msgid "All Messages"
-#~ msgstr "Gjithë Mesazhet"
-
-#~ msgid "Route Table Patch"
-#~ msgstr "Arnimi i Tabelës Dëbuese"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hove 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hove 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hove 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hove 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hove 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hove 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hove 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hove 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hove 9"
-
-#~ msgid "What's New?"
-#~ msgstr "Risi?"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "Pong Errors"
-#~ msgstr "Gabime Pongesh"
-
-#~ msgid "Reply Errors"
-#~ msgstr "Gabime Përgjigjesh"
-
-#~ msgid "Push Errors"
-#~ msgstr "Gabime Shtytjesh"
-
-#~ msgid "Hard Limit"
-#~ msgstr "Kufij të Rëndë"
-
-#~ msgid "Hard Limit (TTL 0)"
-#~ msgstr "Kufi i Rëndë (TTL 0)"
-
-#~ msgid "Hard Limit (TTL 1)"
-#~ msgstr "Kufi i Rëndë (TTL 1)"
-
-#~ msgid "Hard Limit (TTL 2)"
-#~ msgstr "Kufi i Rëndë (TTL 2)"
-
-#~ msgid "Hard Limit (TTL 3)"
-#~ msgstr "Kufi i Rëndë (TTL 3)"
-
-#~ msgid "Hard Limit (TTL 4)"
-#~ msgstr "Kufi i Rëndë (TTL 4)"
-
-#~ msgid "Hard Limit (TTL 5 or above)"
-#~ msgstr "Kufi i Rëndë (TTL a më sipër)"
-
-#~ msgid "No Route"
-#~ msgstr "Asnjë Dëbues"
-
-#~ msgid "Connection Attempts"
-#~ msgstr "Përpjekje për Lidhje"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "Përpjekje Hyrëse"
-
-#~ msgid "All Requests"
-#~ msgstr "Gjithë Kërkesat"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "Kërkesa KOKE"
-
-#~ msgid "GET Requests"
-#~ msgstr "Kërkesa të MARRA"
-
-#~ msgid "Push Requests"
-#~ msgstr "Kërkesa Shtytjeje"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Kërkesa Gnutella"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Kërkesa Gnutella (LimeWire)"
-
-#~ msgid "Chat Requests"
-#~ msgstr "Kërkesa Bisedimi"
-
-#~ msgid "Magnet Requests"
-#~ msgstr "Kërkesa Magnet-i"
-
-#~ msgid "Unknown Requests"
-#~ msgstr "Kërkesa të Panjohura"
-
-#~ msgid "Banned Hosts"
-#~ msgstr "Hoste të Dëbuara"
-
-#~ msgid "Closed Immediately"
-#~ msgstr "Të Mbyllur Menjëherë"
-
-#~ msgid "Accepted"
-#~ msgstr "Të Pranuar"
-
-#~ msgid "Busy"
-#~ msgstr "Të Zënë"
-
 #~ msgid "Not Sharing Files"
 #~ msgstr "Skeda të Pashpërndara"
-
-#~ msgid "Problem Reading Header"
-#~ msgstr "Probleme Gjatë Leximit të Kokës"
-
-#~ msgid "Unknown Response Code"
-#~ msgstr "Kode Përgjigjeje të Panjohura"
-
-#~ msgid "Content URN mismatch"
-#~ msgstr "Mosqasje të Përmbajtjes URN"
-
-#~ msgid "Incompatible Ranges"
-#~ msgstr "Caqe të Papajtueshme"
-
-#~ msgid "IO Error"
-#~ msgstr "Gabime IO"
-
-#~ msgid "Failed"
-#~ msgstr "Dështime"
-
-#~ msgid "Succeeded"
-#~ msgstr "Suksese"
-
-#~ msgid "Successful HTTP 1.1"
-#~ msgstr "HTTP 1.1 me Sukses"
-
-#~ msgid "Successful HTTP 1.0"
-#~ msgstr "HTTP 1.0 me Sukses"
-
-#~ msgid "Failed HTTP 1.1"
-#~ msgstr "HTTP 1.1 të Dështuar"
-
-#~ msgid "Failed HTTP 1.0"
-#~ msgstr "HTTP 1.0 të Dështuar"
-
-#~ msgid "Retried Success"
-#~ msgstr "Suksese të Riprovuara"
-
-#~ msgid "Successful Direct Connection"
-#~ msgstr "Lidhje Direkte me Sukses"
-
-#~ msgid "Successful Push Connection"
-#~ msgstr "Lidhje të Shtyra me Sukses"
-
-#~ msgid "Failed Push (Interrupted)"
-#~ msgstr "Shtytje të Dështuara (të Ndërprera)"
-
-#~ msgid "Failed Push (No GIV Received)"
-#~ msgstr "Shtytje të Dështuara (Pa asnjë GIV)"
-
-#~ msgid "Failed Push (Lost Connection)"
-#~ msgstr "Shtytje të Dështuara (të Humbura)"
-
-#~ msgid "THEX Request"
-#~ msgstr "Kërkesa THEX"
-
-#~ msgid "Successful Push Proxy"
-#~ msgstr "Proxy të Shtyrë me Sukses"
-
-#~ msgid "Malformed Push Proxy"
-#~ msgstr "Proxy të Shtyrë të Keqformuar"
-
-#~ msgid "Failed Push Proxy"
-#~ msgstr "Proxy të Shtyrë të Dështuar"
-
-#~ msgid "Push Proxy"
-#~ msgstr "Shtytje Proxy"
-
-#~ msgid "Update File"
-#~ msgstr "Ridatime Skede"
-
-#~ msgid "Traditional Get"
-#~ msgstr "Marrje Tradicionale"
-
-#~ msgid "Unknown URN Get"
-#~ msgstr "Marrje URN të Panjohura"
-
-#~ msgid "URN Get"
-#~ msgstr "Marrje URN"
-
-#~ msgid "Limit Reached"
-#~ msgstr "Kufij të Arritur"
-
-#~ msgid "Banned Client"
-#~ msgstr "Klientë të Dëbuar"
-
-#~ msgid "Freeloader"
-#~ msgstr "Freeloader"
-
-#~ msgid "Normal"
-#~ msgstr "Normal"
-
-#~ msgid "Get"
-#~ msgstr "Marrje"
-
-#~ msgid "Head"
-#~ msgstr "Koka"
-
-#~ msgid "Unknown"
-#~ msgstr "Të Panjohura"
-
-#~ msgid "Pushed Get"
-#~ msgstr "Marrje të Shtyra"
-
-#~ msgid "Pushed Head"
-#~ msgstr "Koka të Shtyra"
-
-#~ msgid "Pushed Unknown"
-#~ msgstr "Mosnjohje të Shtyra"
-
-#~ msgid "Push Failed"
-#~ msgstr "Shtytje të Dështuara"
-
-#~ msgid "Completed Responses"
-#~ msgstr "Përgjigje të Përfunduara"
 
 #~ msgid "Interrupted"
 #~ msgstr "Të Ndërprera"
@@ -1499,86 +1477,105 @@ msgstr ""
 #~ msgid "Stalled"
 #~ msgstr "Të Ngecura"
 
-#~ msgid "Completed File Transfers"
-#~ msgstr "Transferta të Përfunduara"
-
-#~ msgid "Out Rej. (Leaf)"
-#~ msgstr "Refuz. Dalëse (Pikë)"
-
-#~ msgid "Out Rej. (Old Ultrapeer)"
-#~ msgstr "Refuz. Dalëse (Ultrapikë i Vjetër)"
-
-#~ msgid "Out Acc."
-#~ msgstr "Pran. Dalëse"
-
-#~ msgid "In Rej."
-#~ msgstr "Refuz. Hyrëse"
-
-#~ msgid "In Acc."
-#~ msgstr "Pran. Hyrëse"
-
-#~ msgid "Out Rej. (Full)"
-#~ msgstr "Refuz. Dalëse (Plot)"
-
-#~ msgid "Out Acc. (Followed Guidance)"
-#~ msgstr "Pran. Dalëse (Prirje e Ndjekur)"
-
-#~ msgid "Out Acc. (Ignored Guidance)"
-#~ msgstr "Pran. Dalëse (Prirje e Përbuzur)"
-
-#~ msgid "Out Acc. (No Guidance)"
-#~ msgstr "Pran. Dalëse (Asnjë Prirje)"
-
-#~ msgid "In Rej. (Leaf)"
-#~ msgstr "Refuz. Hyrëse (Pikë)"
-
-#~ msgid "In Acc. (Leaf)"
-#~ msgstr "Pran. Hyrëse (Pikë)"
-
-#~ msgid "In Acc. (Guiding To Leaf)"
-#~ msgstr "Pran. Hyrëse (Prirje në Pikë)"
-
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Pran. Hyrëse (Ultrapikë)"
-
-#~ msgid "In Rej. (All Slots Taken)"
-#~ msgstr "Refuz. Hyrëse (Tragat e Marra)"
-
-#~ msgid "In Rej. (Network Needs Ultrapeer)"
-#~ msgstr "Refuz. Hyrëse (Rrjet me Ultrapika)"
-
-#~ msgid "Server Reject"
-#~ msgstr "Refuzime Serveri"
-
-#~ msgid "No Conclusion"
-#~ msgstr "Pa rezultate"
-
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "Ultrapika LimeWire"
-
-#~ msgid "LimeWire Leaves"
-#~ msgstr "Pika LimeWire"
-
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Ultrapika të Tjera"
-
-#~ msgid "Other Leaves"
-#~ msgstr "Pika të Tjera"
-
-#~ msgid "Responses Requested"
-#~ msgstr "Përgjigje të Kërkuara"
-
-#~ msgid "Responses Received"
-#~ msgstr "Përgjigje të Marra"
-
-#~ msgid "Responses Bypassed"
-#~ msgstr "Përgjigje të Kapërcyera"
-
-#~ msgid "OOB Success Rate"
-#~ msgstr "Raporti i Suksesit OOB"
-
 #~ msgid "Number of Responses Requested and Received via the OOB Protocol"
 #~ msgstr "Numri i Përgjigjeve të Kërkuara dhe të Marra përmes Protokollit OOB"
+
+#~ msgid "Update File"
+#~ msgstr "Ridatime Skede"
+
+#~ msgid "Statistics"
+#~ msgstr "Statistika"
+
+#~ msgid "Validation Required"
+#~ msgstr "Kërkohet certifikimi"
+
+#~ msgid "Height:"
+#~ msgstr "Lartësia:"
+
+#~ msgid "Please press OK to permanently remove license."
+#~ msgstr "Ju lutemi shtypni OK për ta fshirë licensën përkohësisht."
+
+#~ msgid "Display:"
+#~ msgstr "Shfaqi Mbeturinat:"
+
+#~ msgid "Vendor Messages"
+#~ msgstr "Mesazhet e Shitësit"
+
+#~ msgid "HTTP Content"
+#~ msgstr "Përmbajtja HTTP"
+
+#~ msgid "&New Folder"
+#~ msgstr "Dosje e Re"
+
+#~ msgid "&Rename Folder"
+#~ msgstr "&Riemërtoje Dosjen"
+
+#~ msgid "Launch the Selected File(s)"
+#~ msgstr "Lëshon Skedat e Zgjedhura"
+
+#~ msgid "D&elete File(s)"
+#~ msgstr "Fshiji Sk&edat"
+
+#~ msgid "Delete the Selected File(s)"
+#~ msgstr "Fshin Skedat e Zgjedhura"
+
+#~ msgid "Refre&sh"
+#~ msgstr "Rifre&sko"
+
+#~ msgid "E&xplore"
+#~ msgstr "Eksploro"
+
+#~ msgid "Waiting For Tracker"
+#~ msgstr "Po Pres Gjurmuesin"
+
+#~ msgid "Sorry, but LimeWire was unable to restart your old torrents."
+#~ msgstr "Na vjen keq, por LimeWire nuk mundi të rinisë torrentet e vjetra."
+
+#~ msgid "Chat Requests"
+#~ msgstr "Kërkesa Bisedimi"
+
+#~ msgid "Please enter the title of the file you want to publish."
+#~ msgstr "Ju lutemi shkruani titullin e skedës që doni të publikoni."
+
+#~ msgid "Please enter the year of the file you want to publish."
+#~ msgstr "Ju lutemi shkruani vitin e skedës që doni të publikoni."
+
+#~ msgid "Please enter a valid verification URL for the license."
+#~ msgstr "Ju lutemi shkruani një URL verifikimi të vlefshëm për licensën."
+
+#~ msgid "You are sharing"
+#~ msgstr "Ju po shpërndani"
+
+#~ msgid "Loading Resources..."
+#~ msgstr "Po Ngarkoj Burimet..."
+
+#~ msgid "Please enter the copyright holder of the file you want to publish."
+#~ msgstr ""
+#~ "Ju lutemi shkruani zotëruesin e të drejtave të skedës që doni të publikoni."
+
+#~ msgid ""
+#~ "LimeWire was unable to download the torrent file from the specified URL:"
+#~ msgstr ""
+#~ "LimeWire nuk arriti të shkarkojë skedën torrent nga URLi i përcaktuar:"
+
+#~ msgid "Check these associations when starting LimeWire:"
+#~ msgstr "Verifikoji këto shoqërime kur LimeWire nis:"
+
+#~ msgid "Alt. Locations"
+#~ msgstr "Vende Alt."
+
+#~ msgid "Only search results with a {0} are official LimeWire communications."
+#~ msgstr ""
+#~ "Kërko vetëm rezultate me një {0} janë komunikime zyrtare të LimeWire."
+
+#~ msgid "News &Reader"
+#~ msgstr "Lexues i Lajmeve"
+
+#~ msgid "Display the News Reader"
+#~ msgstr "Shfaq Lexuesin e Lajmeve"
+
+#~ msgid "Reload the Library"
+#~ msgstr "Ringarkon Librarinë"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -1810,12 +1807,12 @@ msgstr ""
 "shkarkohet në rregull."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "Kjo skedë po shkarkohet që më parë tek \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Kjo skedë po shkarkohet që më parë tek \"{0}\"."
 
@@ -8522,7 +8519,7 @@ msgid "The same file is already being downloaded."
 msgstr "E njëjta skedë po shkarkohet që më parë."
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:121
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
 "filesystem. {0} "

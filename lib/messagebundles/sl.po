@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
 "n%100==4 ? 2 : 3;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -86,6 +86,9 @@ msgstr ""
 #~ msgid "Close the Window"
 #~ msgstr "Zavriet okno"
 
+#~ msgid "P"
+#~ msgstr "P"
+
 #~ msgid "N"
 #~ msgstr "N"
 
@@ -97,12 +100,6 @@ msgstr ""
 
 #~ msgid "Show or Hide individual tabs"
 #~ msgstr "Ukaz alebo skry jednotlive plochy"
-
-#~ msgid "G"
-#~ msgstr "Z"
-
-#~ msgid "P"
-#~ msgstr "P"
 
 #~ msgid "&Statistics"
 #~ msgstr "&Statistika"
@@ -116,23 +113,26 @@ msgstr ""
 #~ msgid "E"
 #~ msgstr "V"
 
+#~ msgid "G"
+#~ msgstr "Z"
+
 #~ msgid "Results"
 #~ msgstr "Vysledky"
 
 #~ msgid "Files"
 #~ msgstr "Subory"
 
-#~ msgid "files"
-#~ msgstr "subory"
-
-#~ msgid "files (Loading...)"
-#~ msgstr "subory (nacitavanie...)"
-
 #~ msgid "Recovery Failed"
 #~ msgstr "Oprava zlyhala"
 
 #~ msgid "s for Sources"
 #~ msgstr "z ako zdroje"
+
+#~ msgid "files"
+#~ msgstr "subory"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "subory (nacitavanie...)"
 
 #~ msgid "Files with this name"
 #~ msgstr "Subory s tymto menom"
@@ -386,7 +386,7 @@ msgid "You have already downloaded {0}"
 msgstr "To datoteko že nalagaš {0}."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "To datoteko ste že naložili v {0}"
 
@@ -3750,7 +3750,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:186
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1025
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to \"{0}\"."
 msgstr "Uz mate rovnaky subor v {0}"
 
@@ -6773,7 +6773,7 @@ msgid "Awaiting Requests"
 msgstr "Cakanie na zdroje"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "Hladaj: {0}"
 
@@ -6827,7 +6827,7 @@ msgid "Same File Already Being Downloaded"
 msgstr "ROvnaky subor je stahovany"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:88
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "Could not set file location to {0}, because the filename is invalid and may "
 "corrupt your system."
@@ -6862,7 +6862,7 @@ msgid "Another download is already saving to {0}."
 msgstr "Iny donwload sa uz uklada do {0}"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:110
-#, fuzzy
+#, fuzzy, java-format
 msgid ""
 "Could not set download folder to {0}, because it represents an individual "
 "file, not a folder."

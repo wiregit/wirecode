@@ -10,42 +10,31 @@ msgstr ""
 "Project-Id-Version: ja\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-15 00:04+0000\n"
+"PO-Revision-Date: 2007-11-24 21:46+0000\n"
 "Last-Translator: Steffen Pingel <steffenp@gmx.de>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-11-24 19:15+0000\n"
+"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
-#~ msgid "Loading magnet Management..."
-#~ msgstr "マグネットマネージメントをロード中..."
+#~ msgid "United States"
+#~ msgstr "アップデート"
 
 #, fuzzy
-#~ msgid ""
-#~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
-#~ "files in iTunes) because a firewall is blocking access. To continue using "
-#~ "this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full "
-#~ "access to incoming and outgoing connections. To disable this feature, click "
-#~ "'No'."
-#~ msgstr ""
-#~ "LimeWireはファイアウォールがアクセスをブロックしていて、デジタル・オーディオ・アクセス・プロトコル（iTunesでファイル共有）を開始できません。"
-#~ " この機能を使い続けるには、｢はい｣をクリックしてファイアウォールを変更し、‘LimeWire.exe’で100％のアクセスを内向けと外向けの接続に許可。"
-#~ " この機能を使用しない場合は、｢いいえ｣をクリック。"
+#~ msgid "English"
+#~ msgstr "完了"
 
 #, fuzzy
-#~ msgid ""
-#~ "LimeWire is unable to find a license for this file. Download anyway?\n"
-#~ "\n"
-#~ "Please note: LimeWire cannot monitor or control the content of the Gnutella "
-#~ "network. Please respect your local copyright laws."
-#~ msgstr ""
-#~ "LimeWireはこのファイルのライセンスを確認できません。いずれにしてもダウンロードしますか?\n"
-#~ "\n"
-#~ "注意：LimeWireはグヌーテラ･ネットワークの内容を監視または管理していません。ユーザーは各地域の版権に関する法律を守ってください。"
+#~ msgid "Loading Languages"
+#~ msgstr "言語を変更"
+
+#, fuzzy
+#~ msgid "false"
+#~ msgstr "貼り付け"
 
 #, java-format
 #~ msgid "You are sharing {0} files (Loading...)"
@@ -70,28 +59,9 @@ msgstr ""
 #~ "\n"
 #~ "このフォルダを共有するか？"
 
-#~ msgid "Opens a .torrent file from your hard drive"
-#~ msgstr "あなたのハードディスクから.torrentファイルを開きます"
-
 #, fuzzy
 #~ msgid "&Download .torrent"
 #~ msgstr "ダウンロード共有"
-
-#~ msgid "Downloads a .torrent file from the WWW"
-#~ msgstr "WWWから.torrentファイルをダウンロードします"
-
-#~ msgid "Download .torrent file from the web"
-#~ msgstr "ウェブから.torrentファイルをダウンロードしてください"
-
-#~ msgid "URL"
-#~ msgstr "URL"
-
-#~ msgid "Paste from Clipboard"
-#~ msgstr "クリップボードから貼り付け"
-
-#, fuzzy
-#~ msgid "The specified URL is not valid. Please check your input."
-#~ msgstr "指定されたURLは、有効でありません。あなたの入力をチェックしてください。"
 
 #, java-format
 #~ msgid "Search \"What''s New\" for: {0}"
@@ -107,10 +77,6 @@ msgstr ""
 
 #~ msgid "Save Folder:"
 #~ msgstr "フォルダ："
-
-#, fuzzy
-#~ msgid "Limewire Setup Dialog"
-#~ msgstr "Limewireセットアップダイアログ"
 
 #~ msgid ""
 #~ "The selected folder cannot be shared.  Please select another folder to share."
@@ -147,12 +113,1127 @@ msgstr ""
 #~ "a new playlist?"
 #~ msgstr "特定の設定を変更。変更を保存？"
 
+#~ msgid "Close the Window"
+#~ msgstr "ウィンドウを閉じる"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "N"
+#~ msgstr "N"
+
+#~ msgid "V"
+#~ msgstr "V"
+
+#~ msgid "W"
+#~ msgstr "W"
+
+#~ msgid "Show or Hide individual tabs"
+#~ msgstr "個別のタブを表示/隠す"
+
+#~ msgid "&Statistics"
+#~ msgstr "累計"
+
+#~ msgid "Display the Statistics Screen"
+#~ msgstr "累計画面を表示する"
+
+#~ msgid "U"
+#~ msgstr "U"
+
+#~ msgid "E"
+#~ msgstr "E"
+
+#~ msgid "G"
+#~ msgstr "G"
+
+#~ msgid "Results"
+#~ msgstr "結果"
+
+#~ msgid "Files"
+#~ msgstr "ファイル"
+
+#~ msgid "Recovery Failed"
+#~ msgstr "修復に失敗した"
+
+#~ msgid "Querying Network"
+#~ msgstr "ネットワークに問い合わせている"
+
+#~ msgid "s for Sources"
+#~ msgstr "sがソース"
+
+#~ msgid "Gnutella"
+#~ msgstr "グヌーテラ"
+
+#~ msgid "Busy"
+#~ msgstr "ビジー"
+
+#~ msgid "files"
+#~ msgstr "ファイル"
+
+#~ msgid "files (Loading...)"
+#~ msgstr "ファイル（ロード中...)"
+
+#~ msgid "End Chat"
+#~ msgstr "チャットを終了"
+
+#~ msgid "Stop Chatting with a Host"
+#~ msgstr "ホストとのチャットを終了する"
+
+#~ msgid "Loading Statistics Window..."
+#~ msgstr "累計ウィンドウをロード中..."
+
 #~ msgid ""
-#~ "The default Internet Archive identifier for this file and username is "
-#~ "allready taken. Please modify it below or press cancel to return."
+#~ "Could not find a port to use for incoming connections.\n"
+#~ "Please specify a port from the configuration window."
 #~ msgstr ""
-#~ "このファイルのためのデフォルトインターネットアーカイブ識別子とユーザー名は、すでに取得済みです。それを下で修正するか、帰るために、キャンセルを押してくださ"
-#~ "い。"
+#~ "内向きの接続に使用するポートが見当たらないので、\n"
+#~ "設定ウィンドウからポートを指定すること。"
+
+#~ msgid ""
+#~ "Multicast pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャスト・ピングの数"
+
+#~ msgid ""
+#~ "Multicast pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャスト・ポングの数"
+
+#~ msgid ""
+#~ "Multicast queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャストの質問"
+
+#~ msgid ""
+#~ "Multicast query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャストの質問数"
+
+#~ msgid ""
+#~ "Multicast pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャストのプッシュ"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャスト・ピングのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャスト・ポングのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャスト質問のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャスト質問のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes received from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したマルチキャスト・プッシュのキロバイト総数"
+
+#~ msgid "QRP"
+#~ msgstr "QRP"
+
+#~ msgid "Errors"
+#~ msgstr "エラー"
+
+#~ msgid "Query Replies"
+#~ msgstr "質問に対する答え"
+
+#~ msgid "Ping Replies"
+#~ msgstr "ピング回答"
+
+#~ msgid "Compression"
+#~ msgstr "圧縮"
+
+#~ msgid "Hit Routing Errors"
+#~ msgstr "ルート・エラー起きる"
+
+#~ msgid "Requests"
+#~ msgstr "リクエスト"
+
+#~ msgid "Request Methods"
+#~ msgstr "リクエスト方法"
+
+#~ msgid "seconds"
+#~ msgstr "秒"
+
+#~ msgid "messages"
+#~ msgstr "メッセージ"
+
+#~ msgid "Average"
+#~ msgstr "平均"
+
+#~ msgid "Max"
+#~ msgstr "最高値"
+
+#~ msgid "Total Upstream"
+#~ msgstr "上流総計"
+
+#~ msgid "Total Downstream"
+#~ msgstr "下流総計"
+
+#~ msgid "HTTP Total"
+#~ msgstr "HTTP総計"
+
+#~ msgid "HTTP Headers"
+#~ msgstr "HTTP見出し"
+
+#~ msgid "Gnutella Total"
+#~ msgstr "グヌーテラ総数"
+
+#~ msgid "Gnutella Headers"
+#~ msgstr "グヌーテラ見出し"
+
+#~ msgid "Gnutella Messages"
+#~ msgstr "グヌーテラ・メッセージ"
+
+#~ msgid "Total Potential Upstream"
+#~ msgstr "上流見込み総計"
+
+#~ msgid "Total Actual Upstream"
+#~ msgstr "上流実績総計"
+
+#~ msgid "Total Potential Downstream"
+#~ msgstr "下流見込み総計"
+
+#~ msgid "Total Actual Downstream"
+#~ msgstr "下流実績総計"
+
+#~ msgid "HTTP (Potential)"
+#~ msgstr "HTTP(見込み)"
+
+#~ msgid "HTTP (Actual)"
+#~ msgstr "HTTP(実績)"
+
+#~ msgid "Gnutella (Potential)"
+#~ msgstr "グヌーテラ（見込み）"
+
+#~ msgid "Gnutella (Actual)"
+#~ msgstr "グヌーテラ（実績）"
+
+#~ msgid "All Clients"
+#~ msgstr "全クライント"
+
+#~ msgid "All Messages"
+#~ msgstr "全メッセージ"
+
+#~ msgid "Hops 1"
+#~ msgstr "ホップス1"
+
+#~ msgid "Hops 2"
+#~ msgstr "ホップス2"
+
+#~ msgid "Hops 3"
+#~ msgstr "ホップス3"
+
+#~ msgid "Hops 4"
+#~ msgstr "ホップス4"
+
+#~ msgid "Hops 5"
+#~ msgstr "ホップス5"
+
+#~ msgid "Hops 6"
+#~ msgstr "ホップス6"
+
+#~ msgid "Hops 7"
+#~ msgstr "ホップス7"
+
+#~ msgid "Hops 8"
+#~ msgstr "ホップス8"
+
+#~ msgid "Hops 9"
+#~ msgstr "ホップス9"
+
+#~ msgid "TTL 0"
+#~ msgstr "TTL 0"
+
+#~ msgid "TTL 1"
+#~ msgstr "TTL 1"
+
+#~ msgid "TTL 2"
+#~ msgstr "TTL 2"
+
+#~ msgid "TTL 3"
+#~ msgstr "TTL 3"
+
+#~ msgid "TTL 4"
+#~ msgstr "TTL 4"
+
+#~ msgid "TTL 5"
+#~ msgstr "TTL 5"
+
+#~ msgid "TTL 6"
+#~ msgstr "TTL 6"
+
+#~ msgid "TTL 7"
+#~ msgstr "TTL 7"
+
+#~ msgid "TTL 8"
+#~ msgstr "TTL 8"
+
+#~ msgid "TTL 9"
+#~ msgstr "TTL 9"
+
+#~ msgid "Pong Errors"
+#~ msgstr "ポング・エラー"
+
+#~ msgid "Reply Errors"
+#~ msgstr "回答エラー"
+
+#~ msgid "Push Errors"
+#~ msgstr "プッシュ・エラー"
+
+#~ msgid "No Route"
+#~ msgstr "ルート無し"
+
+#~ msgid "All Requests"
+#~ msgstr "全リクエスト"
+
+#~ msgid "HEAD Requests"
+#~ msgstr "HEADリクエスト"
+
+#~ msgid "GET Requests"
+#~ msgstr "GETリクエスト"
+
+#~ msgid "Push Requests"
+#~ msgstr "プッシュ・リクエスト"
+
+#~ msgid "Gnutella Requests"
+#~ msgstr "グヌーテラ・リクエスト"
+
+#~ msgid "Gnutella (LimeWire) Requests"
+#~ msgstr "グヌーテラ（LimeWire）・リクエスト"
+
+#~ msgid "Accepted"
+#~ msgstr "受入れ"
+
+#~ msgid "IO Error"
+#~ msgstr "IOエラー"
+
+#~ msgid "THEX Request"
+#~ msgstr "THEX リクエスト"
+
+#~ msgid "URN Get"
+#~ msgstr "URNゲット"
+
+#~ msgid "Freeloader"
+#~ msgstr "フリー・ローダー"
+
+#~ msgid "Normal"
+#~ msgstr "ノーマル"
+
+#~ msgid "Get"
+#~ msgstr "ゲット"
+
+#~ msgid "Head"
+#~ msgstr "HEAD"
+
+#~ msgid "Pushed Head"
+#~ msgstr "ヘッドをプッシュした"
+
+#~ msgid "Network"
+#~ msgstr "ネットワーク"
+
+#~ msgid "All received queries in kilobytes, by hops."
+#~ msgstr "ホップスで受信した全質問のキロバイト総数"
+
+#~ msgid "All received queries in kilobytes, by time to live (TTL)."
+#~ msgstr "時間による管理(TTL)で受信した全質問の総キロバイト数"
+
+#~ msgid "All received query hits in kilobytes, by hops."
+#~ msgstr "ホップスで受信した全質問数のキロバイト総数"
+
+#~ msgid "All received query hits in kilobytes, by time to live (TTL)."
+#~ msgstr "全ての質問数に対するキロバイト総数"
+
+#~ msgid "The average size in kilobytes of received Gnutella messages."
+#~ msgstr "受信されたグヌーテラ・メッセージにおける平均的サイズのキロバイト数"
+
+#~ msgid "The average size in kilobytes of received messages from LimeWires."
+#~ msgstr "LimeWiresから受信したメッセージにおける平均的サイズのキロバイト数"
+
+#~ msgid "Current"
+#~ msgstr "現行"
+
+#~ msgid ". No line is available for output."
+#~ msgstr "出力する行がない"
+
+#~ msgid "All received queries, by hops."
+#~ msgstr "ホップスにより受領された全質問"
+
+#~ msgid "Special Queries"
+#~ msgstr "特別な質問"
+
+#~ msgid "All of the special marked queries."
+#~ msgstr "全ての特に印された質問"
+
+#~ msgid "False Positive"
+#~ msgstr "正誤"
+
+#~ msgid "Generic Errors"
+#~ msgstr "一般的エラー"
+
+#~ msgid "Handshaking"
+#~ msgstr "握手"
+
+#~ msgid "Statistics for handshaking as an ultrapeer."
+#~ msgstr "Ulトラッパーとしての握手の累計"
+
+#~ msgid "Flow Control"
+#~ msgstr "フロー管理"
+
+#~ msgid "Statistics for flow controlled messages."
+#~ msgstr "フロー管理されたメッセージの累計"
+
+#~ msgid "Total messages filtered."
+#~ msgstr "フィルタ化されたメッセージ総数"
+
+#~ msgid "Transfers"
+#~ msgstr "転送"
+
+#~ msgid "Color"
+#~ msgstr "カラー"
+
+#~ msgid "Write statistics for this graph to files."
+#~ msgstr "ファイルのグラフについて累計を書き込む"
+
+#~ msgid "All Errors"
+#~ msgstr "全エラー"
+
+#~ msgid "Invalid Payload Length"
+#~ msgstr "無効な最大積載質量の長さ"
+
+#~ msgid "Invalid Hops"
+#~ msgstr "無効なホップ"
+
+#~ msgid "Invalid TTL"
+#~ msgstr "無効なTTL"
+
+#~ msgid "Hops > Soft Max"
+#~ msgstr "ホップ＞ソフト・マックス"
+
+#~ msgid "(Hops + TTL) > Hard Max"
+#~ msgstr "（ホップス＋TTL）>ハード・マックス"
+
+#~ msgid "Invalid Message Code"
+#~ msgstr "無効なメッセージ・コード"
+
+#~ msgid "All Query Errors"
+#~ msgstr "全ての質問エラー"
+
+#~ msgid "URN Query"
+#~ msgstr "URN質問"
+
+#~ msgid "Query Too Large"
+#~ msgstr "大きすぎる質問"
+
+#~ msgid "XML Query Too Large"
+#~ msgstr "大きすぎるXML質問"
+
+#~ msgid "Empty Query"
+#~ msgstr "空の質問"
+
+#~ msgid "Illegal Characters in Query"
+#~ msgstr "質問に不法な文字"
+
+#~ msgid "All Query Reply Errors"
+#~ msgstr "全ての質問・回答エラー"
+
+#~ msgid "Invalid Reply Port"
+#~ msgstr "無効な回答ポート"
+
+#~ msgid "Invalid Reply Address"
+#~ msgstr "無効な回答アドレス"
+
+#~ msgid "Invalid Reply Speed"
+#~ msgstr "無効な回答速度"
+
+#~ msgid "All Ping Reply Errors"
+#~ msgstr "全てのピング回答エラー"
+
+#~ msgid "Invalid Ping Reply Payload"
+#~ msgstr "無効なピング回答の最大積載質量"
+
+#~ msgid "Invalid Ping Reply Port"
+#~ msgstr "無効なピング回答ポート"
+
+#~ msgid "Invalid Ping Reply Address"
+#~ msgstr "無効なピング回答アドレス"
+
+#~ msgid "Invalid GGEP Block"
+#~ msgstr "無効なGGEPブロック"
+
+#~ msgid "Invalid Vendor Length"
+#~ msgstr "無効なベンダーの長さ"
+
+#~ msgid "All Push Errors"
+#~ msgstr "全プッシュ・エラー"
+
+#~ msgid "Invalid Push Port"
+#~ msgstr "無効なプッシュ・ポート"
+
+#~ msgid "Invalid Push Address"
+#~ msgstr "無効なプッシュ・アドレス"
+
+#~ msgid "Invalid Push Payload"
+#~ msgstr "無効なプッシュ最大積載質量"
+
+#~ msgid "All Vendor Message Errors"
+#~ msgstr "全てのベンダー・メッセージ・エラー"
+
+#~ msgid "Invalid ID"
+#~ msgstr "無効なID"
+
+#~ msgid "Invalid Selector"
+#~ msgstr "無効な選別"
+
+#~ msgid "Invalid Payload"
+#~ msgstr "無効な最大積載質量"
+
+#~ msgid "Unrecognized Vendor Message"
+#~ msgstr "認識されない開発元メッセージ"
+
+#~ msgid "Route Table Patch"
+#~ msgstr "ルート表パッチ"
+
+#~ msgid "What's New?"
+#~ msgstr "新しい情報"
+
+#~ msgid "Hard Limit"
+#~ msgstr "強力な制限"
+
+#~ msgid "Hard Limit (TTL 0)"
+#~ msgstr "強力な制限 (TTL 0)"
+
+#~ msgid "Hard Limit (TTL 1)"
+#~ msgstr "強力な制限 (TTL 1)"
+
+#~ msgid "Hard Limit (TTL 2)"
+#~ msgstr "強力な制限 (TTL 2)"
+
+#~ msgid "Hard Limit (TTL 3)"
+#~ msgstr "強力な制限 (TTL 3)"
+
+#~ msgid "Hard Limit (TTL 4)"
+#~ msgstr "強力な制限 (TTL 4)"
+
+#~ msgid "Hard Limit (TTL 5 or above)"
+#~ msgstr "強力な制限 (TTL 5またはそれ以上)"
+
+#~ msgid "Connection Attempts"
+#~ msgstr "接続試行"
+
+#~ msgid "Incoming Attempts"
+#~ msgstr "内向き試行"
+
+#~ msgid "Magnet Requests"
+#~ msgstr "マグネット・リクエスト"
+
+#~ msgid "Unknown Requests"
+#~ msgstr "未知のリクエスト"
+
+#~ msgid "Banned Hosts"
+#~ msgstr "禁止されたホスト"
+
+#~ msgid "Closed Immediately"
+#~ msgstr "即時に閉じる"
+
+#~ msgid "Problem Reading Header"
+#~ msgstr "ヘッダー読み込みに問題"
+
+#~ msgid "Unknown Response Code"
+#~ msgstr "未知の回答コード"
+
+#~ msgid "Content URN mismatch"
+#~ msgstr "内容URN不一致"
+
+#~ msgid "Incompatible Ranges"
+#~ msgstr "互換性がない値域"
+
+#~ msgid "Failed"
+#~ msgstr "失敗した"
+
+#~ msgid "Succeeded"
+#~ msgstr "成功した"
+
+#~ msgid "Successful HTTP 1.1"
+#~ msgstr "HTTP 1.1の成功"
+
+#~ msgid "Successful HTTP 1.0"
+#~ msgstr "HTTP 1.0の成功"
+
+#~ msgid "Failed HTTP 1.1"
+#~ msgstr "HTTP 1.1の失敗"
+
+#~ msgid "Failed HTTP 1.0"
+#~ msgstr "HTTP 1.0の失敗"
+
+#~ msgid "Retried Success"
+#~ msgstr "再試行での成功"
+
+#~ msgid "Successful Direct Connection"
+#~ msgstr "ダイレクト接続の成功"
+
+#~ msgid "Successful Push Connection"
+#~ msgstr "プッシュ接続の成功"
+
+#~ msgid "Failed Push (Interrupted)"
+#~ msgstr "プッシュの失敗（中断）"
+
+#~ msgid "Failed Push (No GIV Received)"
+#~ msgstr "プッシュの失敗（GIV受信無し）"
+
+#~ msgid "Failed Push (Lost Connection)"
+#~ msgstr "プッシュの失敗（接続不明）"
+
+#~ msgid "Successful Push Proxy"
+#~ msgstr "プッシュ・プロキシの成功"
+
+#~ msgid "Malformed Push Proxy"
+#~ msgstr "プッシュ・プロクキシの奇形"
+
+#~ msgid "Failed Push Proxy"
+#~ msgstr "プッシュ・プロキシの失敗"
+
+#~ msgid "Push Proxy"
+#~ msgstr "プッシュ・プロキシ"
+
+#~ msgid "Traditional Get"
+#~ msgstr "従来のゲット"
+
+#~ msgid "Unknown URN Get"
+#~ msgstr "未知のゲット"
+
+#~ msgid "Limit Reached"
+#~ msgstr "制限に到達"
+
+#~ msgid "Banned Client"
+#~ msgstr "禁止されているクライアント"
+
+#~ msgid "Unknown"
+#~ msgstr "未知"
+
+#~ msgid "Pushed Get"
+#~ msgstr "ゲットをプッシュした"
+
+#~ msgid "Pushed Unknown"
+#~ msgstr "未知をプッシュした"
+
+#~ msgid "Push Failed"
+#~ msgstr "プッシュが失敗した"
+
+#~ msgid "Completed Responses"
+#~ msgstr "答えが完了した"
+
+#~ msgid "Completed File Transfers"
+#~ msgstr "ファイル転送を完了した"
+
+#~ msgid "Out Rej. (Leaf)"
+#~ msgstr "外向き拒否（リーフ）"
+
+#~ msgid "Out Rej. (Old Ultrapeer)"
+#~ msgstr "外向き拒否(古いUlトラッパー)"
+
+#~ msgid "Out Acc."
+#~ msgstr "外向き受入れ"
+
+#~ msgid "In Rej."
+#~ msgstr "内向き拒否"
+
+#~ msgid "In Acc."
+#~ msgstr "内向き受入れ"
+
+#~ msgid "Out Rej. (Full)"
+#~ msgstr "外向き拒否(フル)"
+
+#~ msgid "Out Acc. (Followed Guidance)"
+#~ msgstr "外向き受入れ（ガイダンスに従った）"
+
+#~ msgid "Out Acc. (Ignored Guidance)"
+#~ msgstr "外向き受入れ(ガイダンスを無視した)"
+
+#~ msgid "Out Acc. (No Guidance)"
+#~ msgstr "外向き受入れ（ガイダンス無し）"
+
+#~ msgid "In Rej. (Leaf)"
+#~ msgstr "内向き拒否（リーフ）"
+
+#~ msgid "In Acc. (Leaf)"
+#~ msgstr "内向き受入れ（リーフ）"
+
+#~ msgid "In Acc. (Guiding To Leaf)"
+#~ msgstr "内向き受入れ（リーフへ導く）"
+
+#~ msgid "In Acc. (Ultrapeer)"
+#~ msgstr "内向き受入れ（Ulトラッパー）"
+
+#~ msgid "In Rej. (All Slots Taken)"
+#~ msgstr "内向き拒否（全スロットが取られた）"
+
+#~ msgid "In Rej. (Network Needs Ultrapeer)"
+#~ msgstr "内向き拒否（ネットワークにUlトラッパーが必要）"
+
+#~ msgid "Server Reject"
+#~ msgstr "サーバー拒否"
+
+#~ msgid "No Conclusion"
+#~ msgstr "結論無し"
+
+#~ msgid "LimeWire Ultrapeers"
+#~ msgstr "LimeWire Ulトラッパー"
+
+#~ msgid "LimeWire Leaves"
+#~ msgstr "LimeWireリーフ"
+
+#~ msgid "Other Ultrapeers"
+#~ msgstr "その他Ulトラッパー"
+
+#~ msgid "Other Leaves"
+#~ msgstr "その他リーフ"
+
+#~ msgid "Responses Requested"
+#~ msgstr "回答の依頼有り"
+
+#~ msgid "Responses Received"
+#~ msgstr "回答受信済み"
+
+#~ msgid "Responses Bypassed"
+#~ msgstr "回答バイパス"
+
+#~ msgid "OOB Success Rate"
+#~ msgstr "OOB成功率"
+
+#~ msgid "Support LimeWire and independent media content. Get PRO."
+#~ msgstr "独立したメディア・コンテンツの共有を助け支援"
+
+#~ msgid "Show Advanced Statistics:"
+#~ msgstr "上級の累計を表示"
+
+#~ msgid ""
+#~ "Total bandwidth used to send outgoing data, either through uploads or "
+#~ "Gnutella messages."
+#~ msgstr "上方またはグヌーテラ・メッセージによる、外向きデータを送信するのに使用する全情報処理量"
+
+#~ msgid ""
+#~ "Total bandwidth used to receive incoming data, either through downloads or "
+#~ "Gnutella messages."
+#~ msgstr "下方またはグヌーテラ・メッセージによる、内向きデータを受信するのに使用する全情報処理量"
+
+#~ msgid ""
+#~ "Number of duplicate queries received over Multicast versus the total number "
+#~ "of queries."
+#~ msgstr "マルチキャストで受信した写しの質問数に対する全質問数"
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over Multicast versus the "
+#~ "total number of queries."
+#~ msgstr "マルチキャストで受信した質問の写しに当るキロバイト総数に対する全質問数"
+
+#~ msgid "All Gnutella messages sent over Multicast, by message type."
+#~ msgstr "マルチキャストを介して送信されたグヌーテラの全種類別メッセージ"
+
+#~ msgid ""
+#~ "Bandwidth statistics include complete information on all bandwidth sent "
+#~ "upstream and downstream. Click on one of the categories to see the desired "
+#~ "statistics."
+#~ msgstr "処理能力の累計には、上方向と下方向に送られる全処理能力いついての情報がある。カテゴリーの一つをクリックし、お望みの累計を見ること。"
+
+#~ msgid ""
+#~ "Statistics on the current state of the network. These statistics are quite "
+#~ "inaccurate due to the dynamic, distributed nature of Gnutella and should not "
+#~ "be taken too literally. They can, however, give you a general idea regarding "
+#~ "the current state of your connection."
+#~ msgstr ""
+#~ "ネットワークの現状での累計である。これらの累計はグヌーテラの動的な配置により非常に不確実で、そのままの数値で受け入れられないものである。しかしユーザーには"
+#~ "、接続の現状に関する一般的な見方が分かる。"
+
+#~ msgid ""
+#~ "Advanced statistics include detailed information for Gnutella messages and "
+#~ "HTTP traffic. This information can be useful for advanced users as well as "
+#~ "for researchers working on the Gnutella network. Advanced statistics are not "
+#~ "displayed by default and are not recommended for most users."
+#~ msgstr ""
+#~ "上級の累計には、グヌーテラ・メッセージとHTTPトラフィックについての詳細な情報がある。この情報はグヌーテラ・ネットワークで作業する研究者だけでなく上級ユ"
+#~ "ーザーにも役立つ。上級の累計は初期設定で表示されず、大半のユーザーからは薦められていない。"
+
+#~ msgid "Weedshare"
+#~ msgstr "役に立たない共有"
+
+#~ msgid "All Gnutella messages received by this client."
+#~ msgstr "全グヌーテラ・メッセージがこのクライオアントに受領された"
+
+#~ msgid "All Gnutella messages received over TCP, by message type."
+#~ msgstr "全グヌーテラのメッセージはTCPメッセージのラベルを介して受領された"
+
+#~ msgid "All Gnutella messages received over UDP, by message type."
+#~ msgstr "全てのグヌーテラ・メッセージがUDPを介して、メッセージの種類別に受信された"
+
+#~ msgid "All Gnutella messages received over Multicast, by message type."
+#~ msgstr "全てのグヌーテラ・メッセージがマルチキャストを介して、メッセージの種類別に受信された"
+
+#~ msgid "Total Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "全グヌーテラ・メッセージがTCP、UDPまたはマルチキャストを介して受信された"
+
+#~ msgid ""
+#~ "Number of duplicate queries received over TCP versus the total number of "
+#~ "queries."
+#~ msgstr "TCPで受信した写しの質問数に対する全質問数"
+
+#~ msgid "All received queries, by time to live (TTL)."
+#~ msgstr "全ての受信した質問、時間による管理（TTL）"
+
+#~ msgid "All received query hits, by hops."
+#~ msgstr "全ての受信されたホップスによる質問の種"
+
+#~ msgid "All received query hits, by time to live (TTL)."
+#~ msgstr "全ての受信された質問の的は、時間による管理(TTL)"
+
+#~ msgid "Total kilobytes for all Gnutella messages received by this client."
+#~ msgstr "このクライアントが受信した全てのグヌーテラ・メッセージに関する、キロバイト総数"
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, by message type."
+#~ msgstr "メッセージの種類により、TCPで受信されたグヌーテラ・メッセージのキロバイト総数"
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over UDP, by message type."
+#~ msgstr "メッセージの種類により、UDPで受信されたグヌーテラ・メッセージのキロバイト総数"
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over Multicast, by message "
+#~ "type."
+#~ msgstr "メッセージの種類により、マルチキャストで受信されたグヌーテラ・メッセージのキロバイト総数"
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages received over TCP, UDP or Multicast."
+#~ msgstr "TCP、UDPまたはマルチキャストにより受信された、グヌーテラ・メッセージのキロバイト総数"
+
+#~ msgid ""
+#~ "Total kilobytes in duplicate queries received over TCP versus the total "
+#~ "number of queries."
+#~ msgstr "TCPで受信した写しの質問に当たるキロバイト総数に対する全質問数"
+
+#~ msgid "UDP pings received from all Gnutella clients versus other LimeWires."
+#~ msgstr "全LimeWiresのクライアントから受信したUDPのピング"
+
+#~ msgid "UDP pongs received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対するグヌーテラのクライアント全員から受信したポング"
+
+#~ msgid ""
+#~ "UDP queries received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対するグヌーテラのクライアント全員から受信したUDPの質問"
+
+#~ msgid ""
+#~ "UDP query hits received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対するグヌーテラのクライアント全員から受信したUDPの質問数"
+
+#~ msgid "UDP pushes received from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWiresに対するグヌーテラのクライアント全員から受信したUDPのプッシュ"
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したUDPピングのキロバイト数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したUDPポングのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したUDP質問のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したUDP質問のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes received from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対しグヌーテラのクライアント全員から受信したUDPのキロバイト総数"
+
+#~ msgid ""
+#~ "All queries that were routed to other Ultrapeers for the last hop, using "
+#~ "query routing tables."
+#~ msgstr "質問ルート表を用いて、最後のホップについて、その他UIトラッパーにルートされた全質問"
+
+#~ msgid "All queries that were routed to leaves, using query routing tables."
+#~ msgstr "質問ルート表を用いて、ルートされた全質問"
+
+#~ msgid "All queries that were received from routed connections."
+#~ msgstr "ルートされた接続から受信される全質問"
+
+#~ msgid "Hit"
+#~ msgstr "ヒット"
+
+#~ msgid "Generic errors while reading messages."
+#~ msgstr "メッセージ読み取り中の一般的エラー"
+
+#~ msgid "Errors while reading query messages."
+#~ msgstr "質問のメッセージを読み取り中に起きるエラー"
+
+#~ msgid "Errors while reading query reply messages."
+#~ msgstr "質問に対する答えのメッセージを読み取り中におきるエラー"
+
+#~ msgid "Errors while reading ping replies."
+#~ msgstr "ピング回答を読み取り中のエラー"
+
+#~ msgid "Errors while reading pushes."
+#~ msgstr "プッシュを読み取り中のエラー"
+
+#~ msgid "Errors while reading vendor messages."
+#~ msgstr "開発元メッセージを読み取り中に起きるエラー"
+
+#~ msgid "All Gnutella messages sent out from this client."
+#~ msgstr "このクライアントから送信されたグヌーテラの全メッセージ"
+
+#~ msgid "All Gnutella messages sent over TCP, by message type."
+#~ msgstr "TCPを介して送信されたグヌーテラの全種類別メッセージ"
+
+#~ msgid "All Gnutella messages sent over UDP, by message type."
+#~ msgstr "UDPを介して送信されたグヌーテラの全種類別メッセージ"
+
+#~ msgid "Total Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr "TCP、UDPまたはマルチキャストを介して送信されたグヌーテラからの全メッセージ"
+
+#~ msgid "Total kilobytes for Gnutella messages sent out from this client."
+#~ msgstr "このクライアントから送信されたグヌーテラ・メッセージのキロバイト総数"
+
+#~ msgid "Total kilobytes for Gnutella messages sent over TCP, by message type."
+#~ msgstr "TCPを介して送信されたグヌーテラ・メッセージの種類別キロバイト総数"
+
+#~ msgid "Total kilobytes for Gnutella messages sent over UDP, by message type."
+#~ msgstr "UDPを介して送信されたグヌーテラ・メッセージの種類別キロバイト総数"
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over Multicast, by message type."
+#~ msgstr "マルチキャストを介して送信されたグヌーテラ・メッセージの種類別キロバイト総数"
+
+#~ msgid ""
+#~ "Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast."
+#~ msgstr "TCP、UDPまたはマルチキャストを介して送信されたグヌーテラ・メッセージのキロバイト総数"
+
+#~ msgid "UDP pings sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたUDPピング"
+
+#~ msgid "UDP pongs sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたUDPポング"
+
+#~ msgid "UDP queries sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたUDP質問"
+
+#~ msgid "UDP query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたUDP質問数"
+
+#~ msgid "UDP pushes sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたUDPプッシュ"
+
+#~ msgid ""
+#~ "Multicast pings sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたマルチキャスト"
+
+#~ msgid ""
+#~ "Multicast pongs sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたマルチキャスト・ポング"
+
+#~ msgid ""
+#~ "Multicast queries sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたマルチキャスト質問"
+
+#~ msgid ""
+#~ "Multicast query hits sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたマルチキャスト質問"
+
+#~ msgid ""
+#~ "Multicast pushes sent from all Gnutella clients versus other LimeWires."
+#~ msgstr "その他LimeWireに対する、全グヌーテラのクライアントから送信されたマルチキャスト・プッシュ"
+
+#~ msgid "Total kilobytes sent by other LimeWires."
+#~ msgstr "その他LimeWireにより送信されたキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたUDPピングのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたUDPポングのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたUDP質問のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP query hits sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたUDP質問数のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for UDP pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたUDPプッシュのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pings sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたマルチキャスト・ピングのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pongs sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたマルチキャスト・ポングのキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast queries sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたマルチキャスト質問のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast query hits sent from all Gnutella clients versus "
+#~ "other LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたマルチキャスト質問のキロバイト総数"
+
+#~ msgid ""
+#~ "Kilobytes for Multicast pushes sent from all Gnutella clients versus other "
+#~ "LimeWires."
+#~ msgstr "その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたマルチキャスト・プッシュのキロバイト総数"
+
+#~ msgid "Statistics for handshaking as a leaf."
+#~ msgstr "リーフとしての握手の累計"
+
+#~ msgid "Statistics for outgoing Gnutella connection handshaking."
+#~ msgstr "外向きグヌーテラ接続握手の累計"
+
+#~ msgid "Statistics for incoming Gnutella connection handshaking."
+#~ msgstr "内向きグヌーテラ接続握手の累計"
+
+#~ msgid "Outgoing Server Reject"
+#~ msgstr "外向きサーバー拒否"
+
+#~ msgid ""
+#~ "Statistics for outgoing Gnutella connection handshaking rejections from the "
+#~ "server."
+#~ msgstr "外向きグヌーテラ接続握手のサーバーからの拒否に関する累計"
+
+#~ msgid "Statistics for compressed upstream traffic in kilobytes."
+#~ msgstr "圧縮された上流トラフィックにおけるキロバイト数の累計"
+
+#~ msgid "Statistics for compressed downstream traffic in kilobytes."
+#~ msgstr "圧縮された下流トラフィックにおけるキロバイト数の累計"
+
+#~ msgid "Statistics for flow controlled messages in kilobytes."
+#~ msgstr "フロー管理されたメッセージにおけるキロバイト数の累計"
+
+#~ msgid "Total number of errors routing messages to other clients."
+#~ msgstr "その他クライアントへのルート・エラー・メッセージの総数"
+
+#~ msgid "Errors routing query hits."
+#~ msgstr "ルート・エラーへの質問数"
+
+#~ msgid ""
+#~ "Total number of Gnutella connection attempts, either initiated internally or "
+#~ "externally."
+#~ msgstr "内部または外部で開始されたグヌーテラ接続試行の総数"
+
+#~ msgid ""
+#~ "Total incoming requests received over time. This includes all connection "
+#~ "attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...)."
+#~ msgstr ""
+#~ "長期に渡り受信された内向きリクエストの総数。ここには全接続試行がある(GET、HEAD、GIV、CHAT、GNUTELLA、MAGNET、その他)。"
+
+#~ msgid ""
+#~ "Total outgoing download connections attempts over time. This includes both "
+#~ "direct connections and pushed requests."
+#~ msgstr "長期に渡り受信された外向きリクエストの総数。ここにはダイレクト接続とプッシュ・リクエストの双方がある。"
+
+#~ msgid ""
+#~ "Total responses received from downloaders over time. This includes Busy, "
+#~ "File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses."
+#~ msgstr ""
+#~ "長期に渡りダウンロードで受信された答えの総数。ここには、ビジー、ファイル無し、共有無し、キューされた、その他、IOエラー、OKの答えがある。"
+
+#~ msgid ""
+#~ "Total alternate locations received and removed over time. This includes "
+#~ "locations that we actively attempt to connect to, locations that we will "
+#~ "ignore, locations that couldn't be removed, and locations that we removed "
+#~ "permanently from attempting to connect to."
+#~ msgstr ""
+#~ "長期に渡り受信と除去された代替位置の総数。ここにはユーザーが積極的に接続しようとする位置、ユーザーが無視する位置、除去できない位置、接続の試みを永久的に除"
+#~ "去した位置がある。"
+
+#~ msgid ""
+#~ "Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. "
+#~ "For HTTP1.1, values are per chunk."
+#~ msgstr "長期に渡り転送された総数"
+
+#~ msgid ""
+#~ "Records the time in milliseconds to establish TCP connections for downloads. "
+#~ "This can vary, for example, when servers are experiencing high loads."
+#~ msgstr "TCP接続のダウンロードを達成するために、1,000分の1秒単位で時間を記録。例えばサーバーが高いロードである時は、この時間は変化する。"
+
+#~ msgid ""
+#~ "Total incoming upload requests. These numbers are incremented on every "
+#~ "attempt to parse a request, and thus include every chunk for HTTP/1.1 "
+#~ "transfers."
+#~ msgstr ""
+#~ "内向きアップロード・リクエストの総数。この数値はリクエストを構文解析する試みのたびに区分され、HHTP/1.1の転送につき一まとまりとなる。"
+
+#~ msgid ""
+#~ "Total outgoing responses. These numbers are incremented before sending each "
+#~ "response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is "
+#~ "the number of requests for which we have attempted to transfer a portion of "
+#~ "a file."
+#~ msgstr ""
+#~ "外向き回答の総数。各答えを送信する前にこの数値は構文解析され、HHTP/1.1の転送につき一まとまりとなる。[ノーマル]とは、ファイルの一部分を転送しよう"
+#~ "とするリクエスト数。"
+
+#~ msgid ""
+#~ "Total incoming request methods. These numbers are incremented either for "
+#~ "HTTP/1.1 transfer AFTER the initial incoming connection request or for push "
+#~ "requests, after we have sent the initial GIV."
+#~ msgstr ""
+#~ "内向きリクエスト方法の総数。ユーザーが初回のGIVを送信した後に、初回の内向き接続リクエストまたはプッシュ・リクエストに関し、この数値にHHTP/1.1の"
+#~ "構文解析がされる。"
+
+#~ msgid "General"
+#~ msgstr "一般"
+
+#~ msgid ""
+#~ "Total attempted, completed, interrupted or stalled uploads. These numbers "
+#~ "are incremented per connection, not per chunk. (Stalled uploads will also be "
+#~ "counted as an interrupted upload.)"
+#~ msgstr ""
+#~ "試行、完了、中断、または行き詰まりの状態にあるアップロードの総数。これらの数値は一まとまりではなく、各接続について構文解析される。（行き詰まりのアップロー"
+#~ "ドは、中断されたアップロードとして数える。）"
+
+#~ msgid "Not Sharing Files"
+#~ msgstr "ファイル共有無し"
+
+#~ msgid "Interrupted"
+#~ msgstr "中断された"
+
+#~ msgid "Stalled"
+#~ msgstr "区切った"
+
+#~ msgid "Crawler"
+#~ msgstr "クローラー"
+
+#~ msgid "Number of Responses Requested and Received via the OOB Protocol"
+#~ msgstr "リクエストされOOBプロトコルを介して受信された回答数"
+
+#~ msgid "Update File"
+#~ msgstr "ファイルのアップデート"
 
 #, fuzzy
 #~ msgid "test1"
@@ -173,10 +1254,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "1"
 #~ msgstr "T1"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "完了"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
 msgid ""
@@ -302,9 +1379,8 @@ msgid "Locating Peers..."
 msgstr "共有者を探しています…"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:377
-#, fuzzy
 msgid "Loading Shared Files..."
-msgstr "共有ファイルを読み込み中…"
+msgstr "共有ファイルを読み込み中です"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:382
 #, fuzzy
@@ -318,7 +1394,7 @@ msgstr "以前のダウンロードを読み込み中…"
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 #, fuzzy
 msgid "Checking for Updates..."
-msgstr "最新版の有無を確認しています…"
+msgstr "最新版の有無を確認しています"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Loading Directed Querier..."
@@ -365,7 +1441,6 @@ msgstr "プログラム"
 #: core/com/limegroup/gnutella/MediaType.java:48
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
-#, fuzzy
 msgid "Audio"
 msgstr "オーディオ"
 
@@ -384,7 +1459,7 @@ msgstr "イメージ"
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:190
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
-#, fuzzy
+#, java-format
 msgid "Could not process bad MAGNET link {0}"
 msgstr ""
 
@@ -397,12 +1472,12 @@ msgid ""
 msgstr "マグネット・リンクに使われているURLが無効。ファイルが正しくダウンロードできない可能性があります。"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
-#, fuzzy
+#, fuzzy, java-format
 msgid "You have already downloaded {0}"
 msgstr "このファイルは、\"{0}\"へ既にダウンロードを開始しています。"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "このファイルは、\"{0}\"へ既にダウンロード開始しています"
 
@@ -1225,7 +2300,7 @@ msgstr "セキュリティ上の理由から、LimeWireは選択したファイ�
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1426
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1449
-#, fuzzy
+#, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
 "\n"
@@ -1822,7 +2897,7 @@ msgstr "メディア・プレイヤーの表示"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:911
-#, fuzzy
+#, fuzzy, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] "あなたは、｛0｝ファイルを共有しています"
@@ -6956,7 +8031,7 @@ msgid "Awaiting Requests"
 msgstr "チャット・リクエスト"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy
+#, fuzzy, java-format
 msgid "Swarm for {0}"
 msgstr "{0}を検索"
 
@@ -7158,7 +8233,7 @@ msgid ""
 msgstr "選択したファイルを本当に削除するか？"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:210
-#, fuzzy
+#, java-format
 msgid ""
 "The description for this file is too short. Please enter at least {0} words."
 msgstr ""
