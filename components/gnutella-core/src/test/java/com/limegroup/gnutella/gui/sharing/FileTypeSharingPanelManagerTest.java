@@ -9,7 +9,6 @@ import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GuiCoreMediator;
-import com.limegroup.gnutella.gui.search.NamedMediaType;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
@@ -41,9 +40,6 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
             }
         
         });
-        
-        // TODO: Remove... workaround for GUI-178 
-        NamedMediaType.getAllNamedMediaTypes();
     }
     
     @Override

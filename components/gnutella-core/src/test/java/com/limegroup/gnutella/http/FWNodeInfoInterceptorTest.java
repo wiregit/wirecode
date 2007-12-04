@@ -18,9 +18,9 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
-public class FWTNodeInterceptorTest extends BaseTestCase {
+public class FWNodeInfoInterceptorTest extends BaseTestCase {
 
-    public FWTNodeInterceptorTest(String name) {
+    public FWNodeInfoInterceptorTest(String name) {
         super(name);
     }
 
@@ -37,7 +37,7 @@ public class FWTNodeInterceptorTest extends BaseTestCase {
         
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session); 
-        FWTNodeInterceptor interceptor = new FWTNodeInterceptor(uploader, pushEndpointFactory);
+        FWNodeInfoInterceptor interceptor = new FWNodeInfoInterceptor(uploader, pushEndpointFactory);
         
         final PushEndpoint pe = new PushEndpoint(GUID.makeGuid(), Collections.singleton(new IpPortImpl("192.168.0.1:5555")), PushEndpoint.PLAIN, UDPConnection.VERSION, null, pushEndpointCache);
         
@@ -58,7 +58,7 @@ public class FWTNodeInterceptorTest extends BaseTestCase {
             will(returnValue(pe));
         }});
         
-        interceptor.process(HTTPHeaderName.FWT_NODE.create(pe.httpStringValue()), null);
+        interceptor.process(HTTPHeaderName.FW_NODE_INFO.create(pe.httpStringValue()), null);
         context.assertIsSatisfied();
         assertSame(pe, uploader.getPushEndpoint());
         
@@ -69,7 +69,7 @@ public class FWTNodeInterceptorTest extends BaseTestCase {
         }});
         uploader.setPushEndpoint(null);
         
-        interceptor.process(HTTPHeaderName.FWT_NODE.create(pe.httpStringValue()), null);
+        interceptor.process(HTTPHeaderName.FW_NODE_INFO.create(pe.httpStringValue()), null);
         context.assertIsSatisfied();
         assertNull(uploader.getPushEndpoint());
     }

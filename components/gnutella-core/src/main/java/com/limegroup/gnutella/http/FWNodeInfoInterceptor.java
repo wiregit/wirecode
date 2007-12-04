@@ -15,12 +15,12 @@ import com.limegroup.gnutella.uploader.HTTPUploader;
  * Collects the push endpoint information from an FWT-Node header and sets it on
  * an {@link HTTPUploader}.
  */
-public class FWTNodeInterceptor implements HeaderInterceptor {
+public class FWNodeInfoInterceptor implements HeaderInterceptor {
 
     private final HTTPUploader uploader;
     private final PushEndpointFactory pushEndpointFactory;
 
-    public FWTNodeInterceptor(HTTPUploader uploader, PushEndpointFactory pushEndpointFactory) {
+    public FWNodeInfoInterceptor(HTTPUploader uploader, PushEndpointFactory pushEndpointFactory) {
         this.uploader = uploader;
         this.pushEndpointFactory = pushEndpointFactory;
     }
@@ -30,7 +30,7 @@ public class FWTNodeInterceptor implements HeaderInterceptor {
     }
 
     void readPushEndPoint(Header header) {
-        if (HTTPHeaderName.FWT_NODE.matches(header)) {
+        if (HTTPHeaderName.FW_NODE_INFO.matches(header)) {
            try {
                PushEndpoint pushEndpoint = pushEndpointFactory.createPushEndpoint(header.getValue());
                uploader.setPushEndpoint(pushEndpoint);

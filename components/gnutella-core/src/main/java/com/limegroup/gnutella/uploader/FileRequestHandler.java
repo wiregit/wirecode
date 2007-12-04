@@ -31,7 +31,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
-import com.limegroup.gnutella.http.FWTNodeInterceptor;
+import com.limegroup.gnutella.http.FWNodeInfoInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -175,7 +175,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         processor.addInterceptor(rangeHeaderInterceptor);
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
         processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager, alternateLocationFactory));
-        processor.addInterceptor(new FWTNodeInterceptor(uploader, pushEndpointFactory));
+        processor.addInterceptor(new FWNodeInfoInterceptor(uploader, pushEndpointFactory));
         if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }

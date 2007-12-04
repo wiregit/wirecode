@@ -164,7 +164,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         
         String pushEndpoint = "FF9EEA9E8B2E1D737828EFD1B7DAC500;129.168.0.1:5555";
         
-        request.addHeader(HTTPHeaderName.FWT_NODE.create(pushEndpoint));
+        request.addHeader(HTTPHeaderName.FW_NODE_INFO.create(pushEndpoint));
         fileRequestHandler.handle(request, response, new BasicHttpContext(null));
         
         assertTrue(uploader.isBrowseHostEnabled());

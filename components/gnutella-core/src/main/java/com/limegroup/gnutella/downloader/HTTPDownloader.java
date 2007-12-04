@@ -544,10 +544,10 @@ public class HTTPDownloader implements BandwidthTracker {
             }
         }	
 		
-		// if this node is firewalled but supports fwts, send its push proxy info and guid so
+		// if this node is firewalled, send its push proxy info and guid so
 		// the uploader can connect back for browses and such
-		if (!networkManager.acceptedIncomingConnection() && networkManager.canDoFWT()) {
-		    headers.add(HTTPHeaderName.FWT_NODE.create(pushEndpointFactory.createForSelf()));
+		if (!networkManager.acceptedIncomingConnection()) {
+		    headers.add(HTTPHeaderName.FW_NODE_INFO.create(pushEndpointFactory.createForSelf()));
 		    features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
 		}
 		

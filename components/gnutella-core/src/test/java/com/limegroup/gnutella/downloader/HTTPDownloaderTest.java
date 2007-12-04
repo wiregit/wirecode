@@ -155,7 +155,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
             }
         });
 
-        assertEquals(selfEndPpoint.httpStringValue(), headers.get(HTTPHeaderName.FWT_NODE
+        assertEquals(selfEndPpoint.httpStringValue(), headers.get(HTTPHeaderName.FW_NODE_INFO
                 .httpStringValue()));
         assertTrue(headers.get(HTTPHeaderName.FEATURES.httpStringValue()).contains(HTTPConstants.BROWSE_PROTOCOL));
         // should be not set since node is firewalled
@@ -185,7 +185,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
             }
         });
 
-        assertNull(headers.get(HTTPHeaderName.FWT_NODE.httpStringValue()));
+        assertNull(headers.get(HTTPHeaderName.FW_NODE_INFO.httpStringValue()));
         // should be there, since not firewalled and address not private
         assertNotNull(headers.get(HTTPHeaderName.NODE.httpStringValue()));
     }
