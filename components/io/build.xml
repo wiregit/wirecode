@@ -36,11 +36,11 @@
 	    <do.clean-src component="io"/>
 	</target>
 	
-	<target name="compile-tests">
+	<target name="compile-tests" depends="compile-src">
 	    <do.compile-tests component="io"/>
 	</target>
 	
-	<target name="clean-tests">
+	<target name="clean-tests" depends="initialize">
 	    <do.clean-tests component="io"/>
 	</target>
 	

@@ -12,6 +12,8 @@
 			  location="${limewire.home}/lib"/>
 	<property name="limewire.lib.jars"
 			  location="${limewire.lib}/jars"/>
+	<property name="limewire.tests.jars"
+			  location="${limewire.home}/tests/lib"/>
 	<property name="limewire.lib.jars.ant"
 			  location="${limewire.lib}/jars/ant"/>
 	<property name="limewire.lib.native"
@@ -106,6 +108,7 @@
     	    <path id="build.limewire.components.@{component}.tests.classpath">
 	        	<path refid="build.limewire.components.@{component}.buildpath"/>
     	        <path refid="build.limewire.components.test-util.buildpath"/>
+    	    	<fileset dir="${limewire.tests.jars}" includes="jmock/*.jar"/>
     	        <pathelement location="@{junit}"/>
     	        <build-tests-classpath/>
     	    </path>
