@@ -38,13 +38,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     }
     
     @Override
-    public void setUp() {
+    public void setUp() throws Exception{
         // Force start the swing thread
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() { public void run() {} });
-        }
-        catch (Exception e) {
-        }
+        SwingUtilities.invokeAndWait(new Runnable() { public void run() {} });
         
         context      = new Mockery();
         notifier     = context.mock(NotifyUser.class);
