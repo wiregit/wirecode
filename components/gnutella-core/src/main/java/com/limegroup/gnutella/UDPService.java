@@ -9,17 +9,13 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.IpPort;
@@ -175,7 +171,7 @@ public class UDPService implements ReadWriteObserver {
     private final PingRequestFactory pingRequestFactory;
     
     @InspectionPoint("udp sent messages")
-    private final SentMessageCounter sentMessageCounter = new SentMessageCounter();
+    private final Message.MessageCounter sentMessageCounter = new Message.MessageCounter(50);
 
 	@Inject
     public UDPService(NetworkManager networkManager,
@@ -830,28 +826,6 @@ public class UDPService implements ReadWriteObserver {
             
             pr.addIPRequest();
             send(pr, ep.getInetAddress(), ep.getPort());
-        }
-    }
-
-
-    private static class SentMessageCounter implements Inspectable {
-        private Map<Class, Message.MessageTypeCounter> counts = 
-            new HashMap<Class, Message.MessageTypeCounter>();
-        
-        synchronized void countMessage(Message msg) {
-            Message.MessageTypeCounter m = counts.get(msg.getClass());
-            if (m == null) {
-                m = new Message.MessageTypeCounter(msg.getClass(), Network.UDP, 50 );
-                counts.put(msg.getClass(),m);
-            }
-            m.countMessage(msg);
-        }
-        
-        public synchronized Object inspect() {
-            List<Map<String,Object>> ret = new ArrayList<Map<String,Object>>(counts.size());
-            for (Message.MessageTypeCounter mtc : counts.values())
-                ret.add(mtc.inspect());
-            return ret;
         }
     }
 }
