@@ -16,6 +16,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 public class ServerIPQueryProviderTest extends TestCase {
 
+    private String username = "ServerIPQueryParseIQTestUser";
 
     public ServerIPQueryProviderTest(){
     }
@@ -51,7 +52,7 @@ public class ServerIPQueryProviderTest extends TestCase {
                 e.printStackTrace();
             }
        }
-       assertEquals("ServerIPQueryParseIQTestUser", result.getUsername());
+       assertEquals(username, result.getUsername());
     }
 
     private class ServerSocketHandler implements Runnable{
@@ -68,7 +69,7 @@ public class ServerIPQueryProviderTest extends TestCase {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            pw.println("<serveripquery xmlns=\"jabber:iq:serveripquery\"><username>ServerIPQueryParseIQTestUser</username></serveripquery>");
+            pw.println("<serveripquery xmlns=\"jabber:iq:serveripquery\"><username>"+ username+"</username></serveripquery>");
         }
     }
 }
