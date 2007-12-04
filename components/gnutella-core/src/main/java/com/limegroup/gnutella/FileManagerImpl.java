@@ -2278,7 +2278,7 @@ public abstract class FileManagerImpl implements FileManager {
         //an already case-changed string.  Both search & urnSearch
         //do this kind of match, so we canonicalize the case for them.
         str = _keywordTrie.canonicalCase(str);        
-        IntSet matches = search(str, null);
+        IntSet matches = search(str, null, request.desiresPartialResults());
         if(request.getQueryUrns().size() > 0)
             matches = urnSearch(request.getQueryUrns(),matches);
         
@@ -2406,7 +2406,7 @@ public abstract class FileManagerImpl implements FileManager {
      * matching.  The caller of this method must not mutate the returned
      * value.
      */
-    protected IntSet search(String query, IntSet priors) {
+    protected IntSet search(String query, IntSet priors, boolean partial) {
         //As an optimization, we lazily allocate all sets in case there are no
         //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
         //returns an iterator of one element and there is only one keyword.
@@ -2427,7 +2427,7 @@ public abstract class FileManagerImpl implements FileManager {
 
             //Search for keyword, i.e., keywords[i...j-1].  
             Iterator<IntSet> iter= _keywordTrie.getPrefixedBy(query, i, j);
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && partial)
                 iter = new MultiIterator<IntSet>(iter,_incompleteKeywordTrie.getPrefixedBy(query, i, j));
             
             if (iter.hasNext()) {
