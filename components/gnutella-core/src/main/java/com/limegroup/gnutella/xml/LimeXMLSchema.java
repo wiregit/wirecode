@@ -317,4 +317,9 @@ public class LimeXMLSchema {
     public int hashCode() {
         return _schemaURI.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "LimeXMLSchema[description=" + _description + ", rootXMLName=" + _rootXMLName + ", schemaURI=" + _schemaURI + "]";
+    }
 }

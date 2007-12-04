@@ -48,7 +48,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * Increment this number as features are added which require
      * reparsing documents on disk.
      */
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 4;
 
 	/**
 	 * Cached hash code for this instance.
@@ -189,8 +189,9 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         // scan for action/id/etc..
         scanFields();
         
-        if(!isValid())
-            throw new IllegalArgumentException("Invalid Doc!");
+        if(!isValid()) {
+            throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaObj: " + (schemaURI != null ? getSchema() : "n/a"));
+        }
     }
     
     /**
@@ -594,12 +595,14 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         // CC licenses require that the 'license' field has the CC_URI_PREFIX & CC_URL_INDICATOR
         // somewhere.  Weed licenses require that the 'license type' field has WeedInfo.LINFO,
         // a content id & a version id.
-        licenseType = LicenseType.determineLicenseType(license, type);
-        if (licenseType == LicenseType.CC_LICENSE)
+        licenseType = LicenseType.determineLicenseType(license, type);        
+        if (licenseType == LicenseType.CC_LICENSE) {
             fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
-        if( licenseType == LicenseType.LIMEWIRE_STORE_PURCHASE )
-            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, 
-            LicenseType.LIMEWIRE_STORE_PURCHASE.toString());
+        }        
+        if (licenseType == LicenseType.LIMEWIRE_STORE_PURCHASE) {
+            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE,
+                    LicenseType.LIMEWIRE_STORE_PURCHASE.toString());
+        }
 
         if(LOG.isDebugEnabled())
             LOG.debug("Fields after setting: " + fieldToValue);

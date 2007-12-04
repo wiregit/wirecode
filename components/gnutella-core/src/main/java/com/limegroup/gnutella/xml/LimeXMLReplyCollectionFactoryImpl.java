@@ -29,13 +29,8 @@ public class LimeXMLReplyCollectionFactoryImpl implements
 
     }
 
-    public LimeXMLReplyCollection createLimeXMLReplyCollection(String URI,
-            String path) {
-        return new LimeXMLReplyCollection(URI, path, fileManager, limeXMLDocumentFactory, metaDataReader);
-    }
-
     public LimeXMLReplyCollection createLimeXMLReplyCollection(String URI) {
-        return createLimeXMLReplyCollection(URI, limeXMLProperties.get().getXMLDocsDir());
+        return new LimeXMLReplyCollection(URI, limeXMLProperties.get().getXMLDocsDir(), fileManager, limeXMLDocumentFactory, metaDataReader);
     }
 
 }

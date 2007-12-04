@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.limewire.collection.NameValue;
+import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,7 +46,14 @@ public class MetaDataReader {
         if (limeXMLSchemaRepository.getSchema(uri) == null)
             throw new IOException("schema: " + uri + " doesn't exist");
 
-        return limeXMLDocumentFactory.createLimeXMLDocument(nameValList, uri);
+        try {
+            return limeXMLDocumentFactory.createLimeXMLDocument(nameValList, uri);
+        } catch(IllegalArgumentException iae) {
+            // Wrap this into an IOException since calling classes will
+            // know to ignore, but for now we still want to debug this
+            ErrorService.error(iae); // remove if not harmful
+            throw (IOException)new IOException().initCause(iae);
+        }
     }
 
 }
