@@ -94,7 +94,7 @@ public class IncompleteFileManager implements Serializable {
     private Map<File, VerifyingFile> blocks=
         new TreeMap<File, VerifyingFile>(Comparators.fileComparator());
     /**
-     * Bijection between SHA1 hashes (URN) and incomplete files (File).  This is
+     * Bijection between hashes (URN) and incomplete files (File).  This is
      * used to ensure that any two RemoteFileDesc with the same hash get the
      * same incomplete file, regardless of name.  The inverse of this map is
      * used to get the hash of an incomplete file for query-by-hash and
@@ -349,6 +349,17 @@ public class IncompleteFileManager implements Serializable {
     }
     
     /**
+     * @param sha1 the existing sha1 we know about
+     * @param ttroot the ttroot for the same file
+     */
+    synchronized void updateTTROOT(URN sha1, URN ttroot) {
+        File f = hashes.get(sha1);
+        if (f == null)
+            return;
+        hashes.put(ttroot,f);
+    }
+    
+    /**
      * Returns the file associated with the specified URN.  If no file matches,
      * returns null.
      *
@@ -537,7 +548,6 @@ public class IncompleteFileManager implements Serializable {
         for (Iterator<Map.Entry<URN, File>> iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
             Map.Entry<URN, File> entry = iter.next();
             if (incompleteFile.equals(entry.getValue()))
-                //Could also break here as a small optimization.
                 iter.remove();
         }
         
@@ -713,7 +723,7 @@ public class IncompleteFileManager implements Serializable {
     public synchronized URN getCompletedHash(File incompleteFile) {
         //Return a key k s.t., hashes.get(k)==incompleteFile...
         for(Map.Entry<URN, File> entry : hashes.entrySet()) {
-            if (incompleteFile.equals(entry.getValue()))
+            if (incompleteFile.equals(entry.getValue()) && entry.getKey().isSHA1())
                 return entry.getKey();
         }
         return null; //...or null if no such k.

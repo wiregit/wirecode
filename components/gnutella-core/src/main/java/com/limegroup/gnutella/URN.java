@@ -274,7 +274,15 @@ public final class URN implements HTTPHeaderValue, Serializable {
         else
             throw new IOException("unsupported or malformed URN");
 	}
-	
+
+    /**
+     * @param ttroot a base32 encoded root of a hash tree
+     * @return an URN object for that root
+     */
+    public static URN createTTRootUrn(String ttroot) {
+        return new URN(Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+ttroot, Type.TTROOT);
+    }
+    
 	/**
 	 * Retrieves the TigerTree Root hash from a bitprint string.
 	 */
@@ -773,7 +781,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// insensitive)
         UrnSet ret = new UrnSet();
         URN sha1 = new URN(Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(md.digest()), Type.SHA1);
-        URN ttroot = new URN(Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+Base32.encode(tt.digest()), Type.TTROOT);
+        URN ttroot = createTTRootUrn(Base32.encode(tt.digest()));
         ret.add(sha1);
         ret.add(ttroot);
         return ret;

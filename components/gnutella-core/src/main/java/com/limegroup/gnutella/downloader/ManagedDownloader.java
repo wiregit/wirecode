@@ -3014,6 +3014,27 @@ public class ManagedDownloader extends AbstractDownloader
                 
     }
     
+    void hashTreeRead(HashTree tree) {
+        boolean set = false;
+        synchronized (commonOutFile) {
+            commonOutFile.setHashTreeRequested(false);
+            if (LOG.isDebugEnabled())
+                LOG.debug("Downloaded tree: " + tree);
+            if (tree != null) {
+                HashTree oldTree = commonOutFile.getHashTree();
+                if (tree.isBetterTree(oldTree)) {
+                    commonOutFile.setHashTree(tree);
+                    set = true;
+                }
+            }
+        }
+        
+        if (set && tree != null) { // warning?
+            URN ttroot = URN.createTTRootUrn(tree.getRootHash());
+            incompleteFileManager.updateTTROOT(getSHA1Urn(), ttroot);
+        }
+    }
+    
     public synchronized String getVendor() {
         List<DownloadWorker> active = getActiveWorkers();
         if ( active.size() > 0 ) {

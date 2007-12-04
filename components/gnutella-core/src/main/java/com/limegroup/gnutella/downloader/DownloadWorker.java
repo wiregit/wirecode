@@ -556,17 +556,8 @@ public class DownloadWorker {
             _manager.removeQueuedWorker(this);
             _downloader.downloadThexBody(_manager.getSHA1Urn(), new State() {
                 protected void handleState(boolean success) {
-                    synchronized (_commonOutFile) {
-                        _commonOutFile.setHashTreeRequested(false);
-                        HashTree newTree = _downloader.getHashTree();
-                        if (LOG.isDebugEnabled())
-                            LOG.debug("Downloaded tree: " + newTree);
-                        if (newTree != null) {
-                            HashTree oldTree = _commonOutFile.getHashTree();
-                            if (newTree.isBetterTree(oldTree))
-                                _commonOutFile.setHashTree(newTree);
-                        }
-                    }
+                    HashTree newTree = _downloader.getHashTree();
+                    _manager.hashTreeRead(newTree);
                 }
             });
         }
