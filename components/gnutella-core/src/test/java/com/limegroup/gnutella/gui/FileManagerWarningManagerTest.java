@@ -3,6 +3,8 @@ package com.limegroup.gnutella.gui;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.SwingUtilities;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jmock.Expectations;
@@ -37,6 +39,13 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     
     @Override
     public void setUp() {
+        // Force start the swing thread
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() { public void run() {} });
+        }
+        catch (Exception e) {
+        }
+        
         context      = new Mockery();
         notifier     = context.mock(NotifyUser.class);
         fileManager  = context.mock(FileManager.class);
@@ -106,7 +115,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             
         fileManagerWarningManager.handleFileEvent(addEvent);  
         
-        matcher.latch.await(1, TimeUnit.SECONDS);
+        assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
         context.assertIsSatisfied();
     }
@@ -130,7 +139,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         fileManagerWarningManager.handleFileEvent(removeEvent);
         fileManagerWarningManager.handleFileEvent(addEvent);
         
-        matcher.latch.await(1, TimeUnit.SECONDS);
+        assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
         context.assertIsSatisfied();
     }
@@ -150,7 +159,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         fileManagerWarningManager.handleFileEvent(addEvent);
         fileManagerWarningManager.handleFileEvent(addEvent);
         
-        matcher.latch.await(1, TimeUnit.SECONDS);
+        assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
         context.assertIsSatisfied();
     }
@@ -196,7 +205,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         fileManagerWarningManager.handleFileEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue()));  
         
-        matcher.latch.await(1, TimeUnit.SECONDS);
+        assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
         context.assertIsSatisfied();
     }
@@ -220,7 +229,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         fileManagerWarningManager.handleFileEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         
-        matcher.latch.await(1, TimeUnit.SECONDS);
+        assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
         context.assertIsSatisfied();
     }
@@ -243,7 +252,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         fileManagerWarningManager.handleFileEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         
-        matcher.latch.await(1, TimeUnit.SECONDS);
+        assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
         context.assertIsSatisfied();
     }
@@ -290,7 +299,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         fileManagerWarningManager.handleFileEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         
-        matcher.latch.await(1, TimeUnit.SECONDS);
+        assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
         context.assertIsSatisfied();
     }
