@@ -99,6 +99,10 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return ret.toString();
     }
     
+    public boolean shouldBeShared() {
+        return _verifyingFile.getVerifiedBlockSize() >= MIN_CHUNK_SIZE;
+    }
+    
     /**
      * Determines whether or not the given range is satisfied by this
      * incomplete file.

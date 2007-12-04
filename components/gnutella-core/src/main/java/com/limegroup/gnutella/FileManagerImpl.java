@@ -30,6 +30,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.collection.Function;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiCollection;
+import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
@@ -175,6 +176,13 @@ public abstract class FileManagerImpl implements FileManager {
      */
     @InspectableForSize("size of keyword trie")
     private StringTrie<IntSet> _keywordTrie;
+    
+    /**
+     * A trie mapping keywords in complete filenames to the indices in _files.
+     * Contains ONLY incomplete keywords.
+     */
+    @InspectableForSize("size of incomplete keyword trie")
+    private StringTrie<IntSet> _incompleteKeywordTrie;
     
     /**
      * A map of appropriately case-normalized URN strings to the
@@ -427,6 +435,7 @@ public abstract class FileManagerImpl implements FileManager {
         _numForcedFiles = 0;
         _files = new ArrayList<FileDesc>();
         _keywordTrie = new StringTrie<IntSet>(true);  //ignore case
+        _incompleteKeywordTrie = new StringTrie<IntSet>(true);
         _urnMap = new HashMap<URN, IntSet>();
         _extensions = new HashSet<String>();
         _sharedDirectories = new HashMap<File, IntSet>();
@@ -1487,20 +1496,7 @@ public abstract class FileManagerImpl implements FileManager {
         if(SharingUtils.isForcedShareDirectory(parent))
             _numForcedFiles++;
 	
-        //Index the filename.  For each keyword...
-        String[] keywords = extractKeywords(fileDesc);
-        
-        for (int i = 0; i < keywords.length; i++) {
-            String keyword = keywords[i];
-            //Ensure the _keywordTrie has a set of indices associated with keyword.
-            IntSet indices = _keywordTrie.get(keyword);
-            if (indices == null) {
-                indices = new IntSet();
-                _keywordTrie.add(keyword, indices);
-            }
-            //Add fileIndex to the set.
-            indices.add(fileDesc.getIndex());
-        }
+       loadKeywords(_keywordTrie, fileDesc);
 	
         // Commit the time in the CreactionTimeCache, but don't share
         // the installer.  We populate free LimeWire's with free installers
@@ -1518,6 +1514,27 @@ public abstract class FileManagerImpl implements FileManager {
         if(notify) // sometimes notify the GUI
             dispatchFileEvent(evt);
         callback.handleFileEvent(evt); // always notify the individual callback.
+    }
+    
+    /**
+     * @param trie to update
+     * @param fd to load keywords from
+     */
+    private void loadKeywords(StringTrie<IntSet> trie, FileDesc fd) {
+        // Index the filename.  For each keyword...
+        String[] keywords = extractKeywords(fd);
+        
+        for (int i = 0; i < keywords.length; i++) {
+            String keyword = keywords[i];
+            //Ensure the _keywordTrie has a set of indices associated with keyword.
+            IntSet indices = trie.get(keyword);
+            if (indices == null) {
+                indices = new IntSet();
+                trie.add(keyword, indices);
+            }
+            //Add fileIndex to the set.
+            indices.add(fd.getIndex());
+        }
     }
     
     /**
@@ -1598,6 +1615,7 @@ public abstract class FileManagerImpl implements FileManager {
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
             removeUrnIndex(fd, false);
+            removeKeywords(_incompleteKeywordTrie, fd);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
             assert removed : "File "+i+" not found in " + _incompletesShared;
@@ -1627,17 +1645,8 @@ public abstract class FileManagerImpl implements FileManager {
             _numForcedFiles--;
         }
 
-        //Remove references to this from index.
-        String[] keywords = extractKeywords(fd);
-        for (int j = 0; j < keywords.length; j++) {
-            String keyword = keywords[j];
-            IntSet indices = _keywordTrie.get(keyword);
-            if (indices != null) {
-                indices.remove(i);
-                if (indices.size() == 0)
-                	_keywordTrie.remove(keyword);
-            }
-        }
+
+        removeKeywords(_keywordTrie, fd);
 
         //Remove hash information.
         removeUrnIndex(fd, true);
@@ -1650,6 +1659,20 @@ public abstract class FileManagerImpl implements FileManager {
         }
         
         return fd;
+    }
+    
+    private void removeKeywords(StringTrie<IntSet> trie, FileDesc fd) {
+        //Remove references to this from index.
+        String[] keywords = extractKeywords(fd);
+        for (int j = 0; j < keywords.length; j++) {
+            String keyword = keywords[j];
+            IntSet indices = trie.get(keyword);
+            if (indices != null) {
+                indices.remove(fd.getIndex());
+                if (indices.size() == 0)
+                    trie.remove(keyword);
+            }
+        }        
     }
     
     protected synchronized FileDesc removeStoreFile(File f, boolean notify){
@@ -1728,6 +1751,8 @@ public abstract class FileManagerImpl implements FileManager {
         _fileToFileDescMap.put(incompleteFile, ifd);
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
+        if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.shouldBeShared())
+            loadKeywords(_incompleteKeywordTrie, ifd);
         _needRebuild = true;
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
     }
@@ -2206,10 +2231,16 @@ public abstract class FileManagerImpl implements FileManager {
         }
         FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
-            if (fds[i] instanceof IncompleteFileDesc)
-                continue;
-            
-            _queryRouteTable.add(fds[i].getPath());
+            if (fds[i] instanceof IncompleteFileDesc) {
+                if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
+                    continue;
+                IncompleteFileDesc ifd = (IncompleteFileDesc)fds[i];
+                if (!ifd.shouldBeShared())
+                    continue;
+                
+                _queryRouteTable.add(ifd.getFileName());
+            } else
+                _queryRouteTable.add(fds[i].getPath());
         }
     }
 
@@ -2396,6 +2427,9 @@ public abstract class FileManagerImpl implements FileManager {
 
             //Search for keyword, i.e., keywords[i...j-1].  
             Iterator<IntSet> iter= _keywordTrie.getPrefixedBy(query, i, j);
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
+                iter = new MultiIterator<IntSet>(iter,_incompleteKeywordTrie.getPrefixedBy(query, i, j));
+            
             if (iter.hasNext()) {
                 //Got match.  Union contents of the iterator and store in
                 //matches.  As an optimization, if this is the only keyword and

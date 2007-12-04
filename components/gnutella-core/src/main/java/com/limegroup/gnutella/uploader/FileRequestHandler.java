@@ -35,7 +35,7 @@ import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.library.SharingUtils;
-import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -481,7 +481,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // special handling for incomplete files
         if (fd instanceof IncompleteFileDesc) {
             // Check to see if we're allowing PFSP.
-            if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
+            if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue()) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Sharing of partial files is diabled: " + uploader);
                 }

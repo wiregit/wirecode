@@ -519,4 +519,10 @@ public class SharingSettings extends LimeProps {
 	public static final StringSetting CREATIVE_COMMONS_VERIFICATION_URL = 
 		FACTORY.createRemoteStringSetting
 		("CREATIVE_COMMONS_VERIFICATION_URL","http://creativecommons.org/technology/embedding#2","creativeCommonsVerificationURL");
+    
+    /**
+     * Setting for whether or not to allow partial files to be shared.
+     */
+    public static final BooleanSetting ALLOW_PARTIAL_SHARING =
+        FACTORY.createBooleanSetting("ALLOW_PARTIAL_SHARING", true);
 }

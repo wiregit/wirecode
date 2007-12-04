@@ -38,12 +38,6 @@ public final class UploadSettings extends LimeProps {
         FACTORY.createIntSetting("UPLOADS_PER_PERSON", 3);
         
     /**
-     * Setting for whether or not to allow partial files to be shared.
-     */
-    public static final BooleanSetting ALLOW_PARTIAL_SHARING =
-        FACTORY.createBooleanSetting("ALLOW_PARTIAL_SHARING", true);
-        
-    /**
 	 * The maximum number of upstream bytes per second ever passed by
 	 * this node.
 	 */
