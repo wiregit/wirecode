@@ -54,7 +54,7 @@ public class FileDesc implements StringLookup {
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
 	 * is immutable.
 	 */
-    private final Set<URN> URNS; 
+    private volatile Set<URN> URNS; 
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -212,6 +212,16 @@ public class FileDesc implements StringLookup {
         return SHA1_URN;
     }
 
+    /**
+     * updates this FD as carrying a ttroot.
+     */
+    public void updateTTROOT(URN ttroot) {
+        UrnSet s = new UrnSet();
+        s.add(SHA1_URN);
+        s.add(ttroot);
+        URNS = Collections.unmodifiableSet(s);
+    }
+    
 	/**
 	 * Returns a new <tt>Set</tt> instance containing the <tt>URN</tt>s
 	 * for the this <tt>FileDesc</tt>.  The <tt>Set</tt> instance

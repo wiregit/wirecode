@@ -27,6 +27,7 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
@@ -352,11 +353,17 @@ public class IncompleteFileManager implements Serializable {
      * @param sha1 the existing sha1 we know about
      * @param ttroot the ttroot for the same file
      */
-    synchronized void updateTTROOT(URN sha1, URN ttroot) {
-        File f = hashes.get(sha1);
-        if (f == null)
-            return;
-        hashes.put(ttroot,f);
+    void updateTTROOT(URN sha1, URN ttroot) {
+        File f;
+        synchronized(this) {
+            f = hashes.get(sha1);
+            if (f == null)
+                return;
+            hashes.put(ttroot,f);
+        }
+        
+        FileDesc fd = fileManager.getFileDescForUrn(sha1);
+        fd.updateTTROOT(ttroot);
     }
     
     /**

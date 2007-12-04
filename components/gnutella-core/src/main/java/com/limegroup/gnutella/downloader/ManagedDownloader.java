@@ -2274,21 +2274,23 @@ public class ManagedDownloader extends AbstractDownloader
      *  be hashed again when added to the library -- reduces
      *  the time of the 'Saving File' state.
      */
-    protected void addFileHash(URN fileHash, File saveFile){
+    private void addFileHash(URN fileHash, File saveFile){
         if(fileHash != null) {
-            Set<URN> urns = new UrnSet(fileHash);
+            UrnSet urns = new UrnSet(fileHash);
             File file = saveFile;
             try {
                 file = FileUtils.getCanonicalFile(saveFile);
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
+            URN ttroot = saveTreeHash(fileHash);
+            if (ttroot != null)
+                urns.add(ttroot);
             urnCache.addUrns(file, urns);
             // Notify the SavedFileManager that there is a new saved
             // file.
             savedFileManager.addSavedFile(file, urns);
             
-            saveTreeHash(fileHash);
         }
     }
     
@@ -2297,13 +2299,16 @@ public class ManagedDownloader extends AbstractDownloader
      * be saved in order to speed up sharing the file across gnutella
      * 
      * @param fileHash - urn to save the tree of
+     * @return the root fo the tree
      */
-    protected void saveTreeHash(URN fileHash) {
+    private URN saveTreeHash(URN fileHash) {
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
                 tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
+                return URN.createTTRootUrn(commonOutFile.getHashTree().getRootHash());
             }
+            return null;
         }
 
     /**
