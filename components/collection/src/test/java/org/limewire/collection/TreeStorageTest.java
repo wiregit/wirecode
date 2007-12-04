@@ -240,5 +240,27 @@ public class TreeStorageTest extends BaseTestCase {
         assertTrue(storage.getVerifiedNodes().contains(1));
     }
     
+    public void testNodeToFileId() throws Exception {
+        TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), 10);
+        int [] full = ts.nodeToFileId(1);
+        assertEquals(0,full[0]);
+        assertEquals(9,full[1]);
+        
+        int [] half = ts.nodeToFileId(2);
+        assertEquals(0,half[0]);
+        assertEquals(7,half[1]);
+        
+        int [] last2 = ts.nodeToFileId(3);
+        assertEquals(8,last2[0]);
+        assertEquals(9,last2[1]);
+        
+        int [] just1 = ts.nodeToFileId(17);
+        assertEquals(1,just1[0]);
+        assertEquals(1,just1[1]);
+        
+        just1 = ts.nodeToFileId(25);
+        assertEquals(9,just1[0]);
+        assertEquals(9,just1[1]);
+    }
 }
 

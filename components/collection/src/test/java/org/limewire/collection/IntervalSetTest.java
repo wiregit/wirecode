@@ -44,6 +44,66 @@ public class IntervalSetTest extends BaseTestCase {
         iSet = new IntervalSet();
     }
     
+    public void testDecode() throws Exception {
+        // file is [0,1023], all verified
+        iSet.decode(1024, 1);
+        assertEquals(1, iSet.getNumberOfIntervals());
+        assertEquals(0, iSet.getFirst().getLow());
+        assertEquals(1023, iSet.getFirst().getHigh());
+        
+        // file is [0,1024], all verified
+        iSet.clear();
+        iSet.decode(1025, 1);
+        assertEquals(1, iSet.getNumberOfIntervals());
+        assertEquals(0, iSet.getFirst().getLow());
+        assertEquals(1024, iSet.getFirst().getHigh());
+        
+        // file is [0,1024], verified only [0-1023]
+        iSet.clear();
+        iSet.decode(1025, 2);
+        assertEquals(1, iSet.getNumberOfIntervals());
+        assertEquals(0, iSet.getFirst().getLow());
+        assertEquals(1023, iSet.getFirst().getHigh());
+
+        // examples from the wiki page 
+        // http://www.limewire.org/wiki/index.php?title=HashTreeRangeEncoding
+        
+        // file is [0, 10 * 1024 -1], verified is [0, 4 * 1024 -1]
+        iSet.clear();
+        iSet.decode(10 * 1024, 4);
+        assertEquals(1, iSet.getNumberOfIntervals());
+        assertEquals(0, iSet.getFirst().getLow());
+        assertEquals(4 * 1024 - 1, iSet.getFirst().getHigh());
+
+        // same file, range [4 * 1024, 10 * 1024 - 1]
+        iSet.clear();
+        iSet.decode(10 * 1024,5,12);
+        
+        assertEquals(1, iSet.getNumberOfIntervals());
+        assertEquals(4 * 1024, iSet.getFirst().getLow());
+        assertEquals(10 * 1024 - 1, iSet.getFirst().getHigh());
+        
+        // 20k file, ranges [0,16k] and [19k,20k]
+        iSet.clear();
+        iSet.decode(20 * 1024, 2);
+        assertEquals(1, iSet.getNumberOfIntervals());
+        assertEquals(0 * 1024, iSet.getFirst().getLow());
+        assertEquals(16 * 1024 - 1, iSet.getFirst().getHigh());
+        
+        iSet.decode(20 * 1024, 51);
+        assertEquals(2, iSet.getNumberOfIntervals());
+        assertEquals(0 * 1024, iSet.getFirst().getLow());
+        assertEquals(16 * 1024 - 1, iSet.getFirst().getHigh());
+        assertEquals(19 * 1024, iSet.getLast().getLow());
+        assertEquals(20 * 1024 - 1, iSet.getLast().getHigh());
+        
+        // add node 12 and we have the full file
+        iSet.decode(20 * 1024, 12);
+        assertEquals(1, iSet.getNumberOfIntervals());
+        assertEquals(0 * 1024, iSet.getFirst().getLow());
+        assertEquals(20 * 1024 - 1, iSet.getFirst().getHigh());
+    }
+    
     public void testEncode() throws Exception {
         
         // file is [0,1023], all verified
@@ -87,6 +147,15 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(encoded.toString(),2, encoded.size());
         assertTrue(encoded.toString(),encoded.contains(5));
         assertTrue(encoded.toString(),encoded.contains(12));
+        
+        // 20k file, ranges [0,16k] and [19k,20k]
+        iSet.clear();
+        iSet.add(new Interval(0, 16 * 1024 - 1));
+        iSet.add(new Interval(19 * 1024, 20 * 1024 - 1));
+        encoded = iSet.encode(20 * 1024);
+        assertEquals(encoded.toString(),2, encoded.size());
+        assertTrue(encoded.toString(),encoded.contains(2));
+        assertTrue(encoded.toString(),encoded.contains(51));
     }
 	
     // getNumberOfIntervals is used in pretty much every

@@ -254,4 +254,29 @@ public class TreeStorage {
             throw new IllegalArgumentException("fileId "+fileId+" maxId "+maxId+" ret "+ret);
         return ret ;
     }
+    
+    /**
+     * @param nodeId node from the tree
+     * @return the start and end index of the chunks from the file
+     * the node maps to
+     */
+    public int[] nodeToFileId(int nodeId) {
+        if (nodeId > maxId || nodeId < 1)
+            throw new IllegalArgumentException();
+        
+        int power = Math.max(1,0x1 << (log2Ceil(maxId) - 1));
+        
+        if (nodeId == 1)
+            return new int[]{0,maxId - power};
+            
+        int [] ret = new int[2];
+        int times = 0;
+        while(nodeId < power ) {
+            times++;
+            nodeId <<= 1;
+        }
+        ret[0] = nodeId - power;
+        ret[1] = Math.min(maxId - power, ret[0] + (0x1 << times) -  1);
+        return ret;
+    }
 }

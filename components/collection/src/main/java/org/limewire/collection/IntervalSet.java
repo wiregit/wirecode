@@ -380,10 +380,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
      * http://www.limewire.org/wiki/index.php?title=HashTreeRangeEncoding
      */
     public Collection<Integer> encode(long maxSize) {
-        long numLeafs = maxSize >> 10;
-        if (maxSize % 1024 != 0)
-            numLeafs++;
-        assert numLeafs <= Integer.MAX_VALUE;
+        long numLeafs = getNumLeafs(maxSize);
         TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
         for (Range r : intervals) {
             assert r.getLow() % 1024 == 0;
@@ -394,6 +391,31 @@ public class IntervalSet implements Iterable<Range>, Serializable{
             }
         }
         return ts.getUsedNodes();
+    }
+    
+    /**
+     * decodes an interval set encoded with:
+     * http://www.limewire.org/wiki/index.php?title=HashTreeRangeEncoding
+     * 
+     * @param maxSize the size of the file
+     * @param id integers from the encoding
+     */
+    public void decode(long maxSize, Integer... id) {
+        long numLeafs = getNumLeafs(maxSize);
+        TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
+        for (int i : id) {
+            int [] nodes = ts.nodeToFileId(i);
+            Range r = Range.createRange(nodes[0] * 1024, Math.min((nodes[1]+1) * 1024 - 1, maxSize-1));
+            add(r);
+        }
+    }
+    
+    private static int getNumLeafs(long size) {
+        long numLeafs = size >> 10;
+        if (size % 1024 != 0)
+            numLeafs++;
+        assert numLeafs <= Integer.MAX_VALUE;
+        return (int)numLeafs;
     }
     
     /**
