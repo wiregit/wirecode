@@ -48,7 +48,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * Increment this number as features are added which require
      * reparsing documents on disk.
      */
-    private static final int CURRENT_VERSION = 4;
+    private static final int CURRENT_VERSION = 2;
 
 	/**
 	 * Cached hash code for this instance.
