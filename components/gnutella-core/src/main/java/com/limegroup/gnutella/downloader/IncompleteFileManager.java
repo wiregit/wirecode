@@ -362,8 +362,11 @@ public class IncompleteFileManager implements Serializable {
             hashes.put(ttroot,f);
         }
         
-        FileDesc fd = fileManager.getFileDescForUrn(sha1);
-        fd.updateTTROOT(ttroot);
+        synchronized(fileManager) {
+            FileDesc fd = fileManager.getFileDescForUrn(sha1);
+            if (fd.updateTTROOT(ttroot))
+                fileManager.fileURNSUpdated(fd); // refresh as the partial file may now be shared
+        }
     }
     
     /**

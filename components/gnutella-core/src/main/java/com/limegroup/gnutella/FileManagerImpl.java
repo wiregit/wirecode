@@ -1749,10 +1749,8 @@ public abstract class FileManagerImpl implements FileManager {
             incompleteFile, urns, fileIndex, name, size, vf);            
         _files.add(ifd);
         _fileToFileDescMap.put(incompleteFile, ifd);
-        this.updateUrnIndex(ifd);
+        fileURNSUpdated(ifd);
         _numIncompleteFiles++;
-        if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.shouldBeShared())
-            loadKeywords(_incompleteKeywordTrie, ifd);
         _needRebuild = true;
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
     }
@@ -1780,7 +1778,17 @@ public abstract class FileManagerImpl implements FileManager {
     ///////////////////////////////////////////////////////////////////////////
     //  Search, utility, etc...
     ///////////////////////////////////////////////////////////////////////////
-		
+	
+    public synchronized void fileURNSUpdated(FileDesc fd) {
+        updateUrnIndex(fd);
+        if (fd instanceof IncompleteFileDesc) {
+            IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.shouldBeShared())
+                loadKeywords(_incompleteKeywordTrie, fd);
+        }
+        _needRebuild = true;
+    }
+    
     /**
      * @modifies this
      * @effects enters the given FileDesc into the _urnMap under all its 

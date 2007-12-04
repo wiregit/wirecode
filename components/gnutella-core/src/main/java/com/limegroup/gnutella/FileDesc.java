@@ -214,12 +214,15 @@ public class FileDesc implements StringLookup {
 
     /**
      * updates this FD as carrying a ttroot.
+     * @return true if we didn't already know about that root
      */
-    public void updateTTROOT(URN ttroot) {
+    public boolean updateTTROOT(URN ttroot) {
+        boolean ret = getUrns().contains(ttroot);
         UrnSet s = new UrnSet();
         s.add(SHA1_URN);
         s.add(ttroot);
         URNS = Collections.unmodifiableSet(s);
+        return ret;
     }
     
 	/**
