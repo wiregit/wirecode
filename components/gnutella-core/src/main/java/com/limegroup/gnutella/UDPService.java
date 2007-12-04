@@ -835,13 +835,13 @@ public class UDPService implements ReadWriteObserver {
 
 
     private static class SentMessageCounter implements Inspectable {
-        private Map<Class, MessageRouterImpl.MessageTypeCounter> counts = 
-            new HashMap<Class, MessageRouterImpl.MessageTypeCounter>();
+        private Map<Class, Message.MessageTypeCounter> counts = 
+            new HashMap<Class, Message.MessageTypeCounter>();
         
         synchronized void countMessage(Message msg) {
-            MessageRouterImpl.MessageTypeCounter m = counts.get(msg.getClass());
+            Message.MessageTypeCounter m = counts.get(msg.getClass());
             if (m == null) {
-                m = new MessageRouterImpl.MessageTypeCounter(msg.getClass(), Network.UDP);
+                m = new Message.MessageTypeCounter(msg.getClass(), Network.UDP, 50 );
                 counts.put(msg.getClass(),m);
             }
             m.countMessage(msg);
@@ -849,7 +849,7 @@ public class UDPService implements ReadWriteObserver {
         
         public synchronized Object inspect() {
             List<Map<String,Object>> ret = new ArrayList<Map<String,Object>>(counts.size());
-            for (MessageRouterImpl.MessageTypeCounter mtc : counts.values())
+            for (Message.MessageTypeCounter mtc : counts.values())
                 ret.add(mtc.inspect());
             return ret;
         }

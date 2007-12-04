@@ -2,6 +2,11 @@ package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.limewire.collection.Buffer;
+import org.limewire.util.ByteOrder;
 
 public interface Message extends Comparable<Message> {
 
@@ -115,4 +120,63 @@ public interface Message extends Comparable<Message> {
      * the interface class that it implements. 
      */
     public Class<? extends Message> getHandlerClass();
+    
+    /// Inspection related
+    
+    /** 
+     * Keeps track of traffic information about a specific type of message
+     */
+    public static class MessageTypeCounter {
+        private final Class clazz;
+        private final Network net;
+        private long num, size;
+        private Buffer<Long> timestamps;
+        private Buffer<Integer> sizes;
+        
+        /**
+         * @param clazz the message class this is counting
+         * @param net the network this message travels on
+         * @param history how many messages to record history for
+         */
+        public MessageTypeCounter(Class<? extends Message> clazz, Network net, int history) {
+            this.clazz = clazz;
+            this.net = net;
+            timestamps = new Buffer<Long>(history); // each entry 6 bytes on network
+            sizes = new Buffer<Integer>(history); // each entry 2 bytes on network
+        }
+        
+        public void countMessage(Message m) {
+            num++;
+            size += m.getLength();
+            timestamps.add(System.currentTimeMillis());
+            sizes.add(m.getLength());
+        }
+        
+        public Map<String,Object> inspect() {
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("class",clazz.toString());
+            ret.put("net",net.toString());
+            ret.put("num",num);
+            ret.put("size",size);
+            byte [] timesByte = new byte[timestamps.getSize() * 6]; // 6 bytes per timestamp
+            byte [] sizesByte = new byte[sizes.getSize() * 2]; // 2 bytes per size
+            
+            for (int i = 0; i < timestamps.getSize(); i++) {
+                long timestamp = timestamps.get(i);
+                timesByte[i * 6] = (byte)((timestamp >> 40) & 0xFF);
+                timesByte[i * 6 + 1] = (byte)((timestamp >> 32) & 0xFF);
+                ByteOrder.int2beb((int)timestamp, timesByte, i * 6 + 2);
+            }
+            
+            for (int i = 0; i < sizes.getSize(); i++) {
+                short size = (short) Math.min(0xFFFF,sizes.get(i));
+                ByteOrder.short2beb(size, sizesByte, i * 2);
+            }
+            
+            ret.put("times",timesByte);
+            ret.put("sizes",sizesByte);
+            return ret;
+        }
+    }
+
 }

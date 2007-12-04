@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeHashMap;
 import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -3269,18 +3268,18 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private static class MessageCounter implements Inspectable {
         
-        private Map<Class, EnumMap<Message.Network, MessageTypeCounter>> counts = 
-            new HashMap<Class, EnumMap<Message.Network,MessageTypeCounter>>();
+        private Map<Class, EnumMap<Message.Network, Message.MessageTypeCounter>> counts = 
+            new HashMap<Class, EnumMap<Message.Network,Message.MessageTypeCounter>>();
         
         public synchronized void countMessage(Message msg) {
-            EnumMap<Message.Network, MessageTypeCounter> m = counts.get(msg.getClass());
+            EnumMap<Message.Network, Message.MessageTypeCounter> m = counts.get(msg.getClass());
             if (m == null) {
-                m = new EnumMap<Message.Network, MessageTypeCounter>(Message.Network.class);
+                m = new EnumMap<Message.Network, Message.MessageTypeCounter>(Message.Network.class);
                 counts.put(msg.getClass(),m);
             }
-            MessageTypeCounter count = m.get(msg.getNetwork());
+            Message.MessageTypeCounter count = m.get(msg.getNetwork());
             if (count == null) {
-                count = new MessageTypeCounter(msg.getClass(), msg.getNetwork());
+                count = new Message.MessageTypeCounter(msg.getClass(), msg.getNetwork(), 30);
                 m.put(msg.getNetwork(),count);
             }
             count.countMessage(msg);
@@ -3288,61 +3287,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
         
         public synchronized Object inspect() {
             List<Map<String,Object>> ret = new ArrayList<Map<String,Object>>(counts.size());
-            for (EnumMap<Message.Network, MessageTypeCounter> e : counts.values()) {
-                for (MessageTypeCounter mtc : e.values())
+            for (EnumMap<Message.Network, Message.MessageTypeCounter> e : counts.values()) {
+                for (Message.MessageTypeCounter mtc : e.values())
                     ret.add(mtc.inspect());
             }
-            return ret;
-        }
-    }
-    
-    /** 
-     * Keeps track of traffic information about a specific type of message
-     */
-    static class MessageTypeCounter {
-        private final Class clazz;
-        private final Message.Network net;
-        private long num, size;
-        private Buffer<Long> timestamps;
-        private Buffer<Integer> sizes;
-        
-        public MessageTypeCounter(Class<? extends Message> clazz, Message.Network net) {
-            this.clazz = clazz;
-            this.net = net;
-            timestamps = new Buffer<Long>(50); // 50 * 6 = 300 bytes
-            sizes = new Buffer<Integer>(50); // 50 * 2 = 100 bytes
-        }
-        
-        public void countMessage(Message m) {
-            num++;
-            size += m.getLength();
-            timestamps.add(System.currentTimeMillis());
-            sizes.add(m.getLength());
-        }
-        
-        public Map<String,Object> inspect() {
-            Map<String,Object> ret = new HashMap<String,Object>();
-            ret.put("class",clazz.toString());
-            ret.put("net",net.toString());
-            ret.put("num",num);
-            ret.put("size",size);
-            byte [] timesByte = new byte[timestamps.getSize() * 6]; // 6 bytes per timestamp
-            byte [] sizesByte = new byte[sizes.getSize() * 2]; // 2 bytes per size
-            
-            for (int i = 0; i < timestamps.getSize(); i++) {
-                long timestamp = timestamps.get(i);
-                timesByte[i * 6] = (byte)((timestamp >> 40) & 0xFF);
-                timesByte[i * 6 + 1] = (byte)((timestamp >> 32) & 0xFF);
-                ByteOrder.int2beb((int)timestamp, timesByte, i * 6 + 2);
-            }
-            
-            for (int i = 0; i < sizes.getSize(); i++) {
-                short size = (short) Math.min(0xFFFF,sizes.get(i));
-                ByteOrder.short2beb(size, sizesByte, i * 2);
-            }
-            
-            ret.put("times",timesByte);
-            ret.put("sizes",sizesByte);
             return ret;
         }
     }
