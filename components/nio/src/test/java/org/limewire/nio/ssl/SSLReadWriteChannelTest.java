@@ -310,7 +310,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {public void run() {}}).get();
         assertNotEquals(0, cache.getHeapCacheSize());
         // A little stricter than necessary: check the correct size was taken.
-        assertEquals(session2.getApplicationBufferSize() + session2.getPacketBufferSize(), cache.getHeapCacheSize());
+        assertEquals(session2.getPacketBufferSize() + session2.getPacketBufferSize(), cache.getHeapCacheSize());
     }
     
     public void testParentInterestOffDoesntKillHandshake() throws Exception {
