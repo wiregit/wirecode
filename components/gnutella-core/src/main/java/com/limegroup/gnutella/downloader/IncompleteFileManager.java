@@ -411,6 +411,15 @@ public class IncompleteFileManager implements Serializable {
         GetField gets = stream.readFields();
         blocks = transform(gets.get("blocks", null));
         hashes = verifyHashes(gets.get("hashes", null));
+        
+        // if we had roots, we should expect them.
+        for (URN urn : hashes.keySet()) {
+            if (!urn.isTTRoot())
+                continue;
+            File f = hashes.get(urn);
+            blocks.get(f).setExpectedHashTreeRoot(urn.httpStringValue().substring(11));
+        }
+        
         //Notify FileManager about the new incomplete files.
         registerAllIncompleteFiles();
     }
@@ -437,6 +446,7 @@ public class IncompleteFileManager implements Serializable {
         }
         
         Map<URN, File> retMap = new HashMap<URN, File>();
+        Map<File, URN> fMap = new HashMap<File,URN>();
         Map map = (Map)read;
         for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
@@ -447,9 +457,16 @@ public class IncompleteFileManager implements Serializable {
                     f = canonicalize(f);
                     // We must purge old entries that had mapped
                     // multiple URNs to uncanonicalized files.
-                    // This is done by ensuring that we only add
-                    // this entry to the map if no other URN points to it.
-                    if(!retMap.values().contains(f))
+                    URN existing = fMap.get(f);
+                    boolean add = true;
+                    if (existing != null) {
+                        // a second urn can be added for a file only if its
+                        // type is different than the existing one
+                        add = existing.getUrnType() != urn.getUrnType();
+                    } else
+                        fMap.put(f,urn);
+
+                    if(add)
                         retMap.put(urn, f);
                 } catch(IOException ioe) {}
             }
