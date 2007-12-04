@@ -16,6 +16,14 @@ public class SearchMediatorTest extends GUIBaseTestCase {
 
     public SearchMediatorTest(String name) {
         super(name);
+     }
+
+    public static Test suite() { 
+        return buildTestSuite(SearchMediatorTest.class); 
+    } 
+    
+    @Override
+    protected void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -24,10 +32,6 @@ public class SearchMediatorTest extends GUIBaseTestCase {
         });
         pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
     }
-
-    public static Test suite() { 
-        return buildTestSuite(SearchMediatorTest.class); 
-    } 
     
     public void testDoBrowseHostPushEndpointNoAddress() throws Exception {
         String httpValue = "FFB3EC3B9D93A8F9CE42AED28F674900;222.222.222.222:2222";
