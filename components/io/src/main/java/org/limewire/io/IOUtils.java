@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.EnumMap;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
@@ -30,18 +31,48 @@ import org.limewire.util.StringUtils;
  */
 public class IOUtils {
     
-    // mark message strings for translation
-    static {
-        I18nMarker.marktr("LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.");
-		I18nMarker.marktr("LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.");
-		I18nMarker.marktr("LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.");
-		I18nMarker.marktr("LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.");
-
-        I18nMarker.marktr("LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.");
-		I18nMarker.marktr("LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.");
-		I18nMarker.marktr("LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder.");
-		I18nMarker.marktr("LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.");
+    public static enum ErrorType {
+        GENERIC, DOWNLOAD;
     }
+    
+    private static enum DetailErrorType {
+        DISK_FULL, FILE_LOCKED, NO_PRIVS, BAD_CHARS;
+    }
+    
+    private static final EnumMap<ErrorType, EnumMap<DetailErrorType, String>> errorDescs;
+    
+    static {
+        errorDescs = new EnumMap<ErrorType, EnumMap<DetailErrorType,String>>(ErrorType.class);
+        for(ErrorType type : ErrorType.values())
+            errorDescs.put(type, new EnumMap<DetailErrorType, String>(DetailErrorType.class));
+        
+        errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.DISK_FULL, 
+            I18nMarker.marktr("LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive."));
+        errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.FILE_LOCKED,
+            I18nMarker.marktr("LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released."));
+        errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.NO_PRIVS,
+            I18nMarker.marktr("LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways."));
+        errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.BAD_CHARS,
+            I18nMarker.marktr("LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways."));        
+
+
+        errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.DISK_FULL,
+            I18nMarker.marktr("LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive."));
+        errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.FILE_LOCKED,
+            I18nMarker.marktr("LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download."));
+        errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.NO_PRIVS,
+            I18nMarker.marktr("LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder."));
+        errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.BAD_CHARS,
+            I18nMarker.marktr("LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system."));
+        
+        // just verify it was all setup right.
+        for(ErrorType type : ErrorType.values()) {
+            assert errorDescs.get(type) != null;
+            assert errorDescs.get(type).size() == DetailErrorType.values().length;
+        }
+     
+    }
+
     
     /**
      * Attempts to handle an IOException. If we know expect the problem,
@@ -49,48 +80,39 @@ public class IOUtils {
      * true, for handled) or expect the outer-world to handle it (and
      * return false).
      *
-     * If friendly is null, a generic error related to the bug is displayed.
-     *
      * @return true if we could handle the error.
      */
-    public static boolean handleException(IOException ioe, String friendly) {
-        if(friendly == null)
-            friendly = "GENERIC";
+    public static boolean handleException(IOException ioe, ErrorType errorType) {
+        Throwable e = ioe;
         
-        return handle(ioe, friendly);
-    }
-    
-    /**
-     * Looks through every cause of an Exception to see if we know how 
-     * to handle it.
-     */
-    private static boolean handle(Throwable e, String friendly) {
         while(e != null) {
             String msg = e.getMessage();
             
             if(msg != null) {
                 msg = msg.toLowerCase();
+                DetailErrorType detailType = null;
                 // If the user's disk is full, let them know.
                 if(StringUtils.contains(msg, "no space left") || 
                    StringUtils.contains(msg, "not enough space")) {
-                    MessageService.showError("ERROR_DISK_FULL_" + friendly);
-                    return true;
+                    detailType = DetailErrorType.DISK_FULL;
                 }
                 // If the file is locked, let them know.
-                if(StringUtils.contains(msg, "being used by another process") ||
+                else if(StringUtils.contains(msg, "being used by another process") ||
                    StringUtils.contains(msg, "with a user-mapped section open")) {
-                    MessageService.showError("ERROR_LOCKED_BY_PROCESS_" + friendly);
-                    return true;
+                    detailType = DetailErrorType.FILE_LOCKED;
                 }
                 // If we don't have permissions to write, let them know.
-                if(StringUtils.contains(msg, "access is denied") || 
+                else if(StringUtils.contains(msg, "access is denied") || 
                    StringUtils.contains(msg, "permission denied") ) {
-                    MessageService.showError("ERROR_ACCESS_DENIED_" + friendly);
-                    return true;
+                    detailType = DetailErrorType.NO_PRIVS;
+                }
+                // If characterset is faulty...
+                else if(StringUtils.contains(msg, "invalid argument")) {
+                    detailType = DetailErrorType.BAD_CHARS;
                 }
                 
-                if(StringUtils.contains(msg, "invalid argument")) {
-                    MessageService.showError("ERROR_INVALID_NAME_" + friendly);
+                if(detailType != null) {
+                    MessageService.showError(errorDescs.get(errorType).get(detailType));
                     return true;
                 }
             }

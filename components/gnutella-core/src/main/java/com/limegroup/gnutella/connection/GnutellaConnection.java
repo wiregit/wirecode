@@ -459,7 +459,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      *            connection, e.g., the server responded with HTTP, closed the
      *            the connection during handshaking, etc.
      */
-    public void initialize(Properties requestHeaders, HandshakeResponder responder, int timeout,
+    void initialize(Properties requestHeaders, HandshakeResponder responder, int timeout,
             GnetConnectObserver observer) throws IOException {
         responder.setLocalePreferencing(_useLocalPreference);
 

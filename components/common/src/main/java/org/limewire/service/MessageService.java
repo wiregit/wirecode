@@ -28,6 +28,10 @@ public class MessageService {
         _callback = callback;
     }
     
+    public static MessageCallback getCallback() {
+        return _callback;
+    }
+    
     /**
      * Shows a locale-specific message to the user using the specified key to
      * look up the message in the resource bundles.

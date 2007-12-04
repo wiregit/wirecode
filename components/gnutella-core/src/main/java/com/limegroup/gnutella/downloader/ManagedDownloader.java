@@ -2350,7 +2350,7 @@ public class ManagedDownloader extends AbstractDownloader
         try {
             commonOutFile.open(incompleteFile);
         } catch(IOException e) {
-            if(!IOUtils.handleException(e, "DOWNLOAD"))
+            if(!IOUtils.handleException(e, IOUtils.ErrorType.DOWNLOAD))
                 ErrorService.error(e);
             throw e;
         }
