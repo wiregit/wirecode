@@ -1066,13 +1066,13 @@ public class AltLocUploadTest extends LimeTestCase {
                 will(returnValue(false));
                 allowing(handler).isGoodUltrapeer();
                 will(returnValue(false));
+                allowing(request).getNetwork();
+                will(returnValue(Network.TCP));
                 
                 // some request-specific conditions
                 one(request).hop();
                 atLeast(1).of(request).getQueryUrns();
                 will(returnValue(urns));
-                atLeast(1).of(request).getNetwork();
-                will(returnValue(Network.TCP));
                 atLeast(1).of(request).getHandlerClass();
                 will(returnValue(QueryRequest.class));
                 atLeast(1).of(request).getQuery();
