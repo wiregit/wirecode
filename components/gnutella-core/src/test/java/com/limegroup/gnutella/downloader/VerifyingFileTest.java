@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -7,6 +8,7 @@ import java.io.RandomAccessFile;
 
 import junit.framework.Test;
 
+import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -250,6 +252,55 @@ public class VerifyingFileTest extends LimeTestCase {
         }
     }
 
+    /**
+     * tests that if enough data has been verified with an existing tree,
+     * a different tree gets discarded.
+     */
+    public void testDifferentRootsDiscard() throws Exception {
+        IntervalSet iSet = new IntervalSet();
+        iSet.add(Range.createRange(0, 4 * VerifyingFile.DEFAULT_CHUNK_SIZE));
+        vf.setHashTree(defaultHashTree);
+        Range r = vf.leaseWhite(4 * VerifyingFile.DEFAULT_CHUNK_SIZE);
+        byte [] chunk = new byte[4 * VerifyingFile.DEFAULT_CHUNK_SIZE];
+        raf.seek(r.getLow());
+        raf.readFully(chunk);
+        writeImpl((int)r.getLow(), chunk);
+        vf.waitForPending(1000);
+        assertEquals(4 * VerifyingFile.DEFAULT_CHUNK_SIZE, vf.getVerifiedBlockSize());
+        HashTree other = HashTree.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
+        String currentRoot = vf.getHashTree().getRootHash();
+        vf.setHashTree(other);
+        assertEquals(currentRoot,vf.getHashTree().getRootHash());
+    }
+    
+    /**
+     * tests that if not enough data has been verified with an existing tree,
+     * a different tree is accepted and all data re-verified.
+     */
+    public void testDifferentRootsReverify() throws Exception {
+        IntervalSet iSet = new IntervalSet();
+        iSet.add(Range.createRange(0, 2 * VerifyingFile.DEFAULT_CHUNK_SIZE));
+        vf.setHashTree(defaultHashTree);
+        assertEquals(2 * VerifyingFile.DEFAULT_CHUNK_SIZE, defaultHashTree.getNodeSize());
+        Range r = vf.leaseWhite(2 * VerifyingFile.DEFAULT_CHUNK_SIZE);
+        byte [] chunk = new byte[2 * VerifyingFile.DEFAULT_CHUNK_SIZE];
+        raf.seek(r.getLow());
+        raf.readFully(chunk);
+        writeImpl((int)r.getLow(), chunk);
+        vf.waitForPending(1000);
+        assertEquals(2 * VerifyingFile.DEFAULT_CHUNK_SIZE, vf.getVerifiedBlockSize());
+        HashTree other = HashTree.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
+        String currentRoot = vf.getHashTree().getRootHash();
+        
+        // everything verified becomes partial
+        synchronized(vf) {
+            vf.setHashTree(other);
+            assertNotEquals(currentRoot,vf.getHashTree().getRootHash());
+            assertEquals(0, vf.getVerifiedBlockSize());
+            assertEquals(2 * VerifyingFile.DEFAULT_CHUNK_SIZE, vf.getBlockSize());
+        }
+    }
+    
     /**
      * test that writing partial chunks gets them assembled and verified when
      * possible
@@ -605,5 +656,4 @@ public class VerifyingFileTest extends LimeTestCase {
         // verifyiable chunk
         assertEquals(chunk.length * 3 - 1, vf.getOffsetForPreview());
     }
-
 }

@@ -683,13 +683,31 @@ public class VerifyingFile {
         if (tree != null && tree.getFileSize() != completedSize)
             return;
 
+        HashTree previous = hashTree;
+        
+        // if the roots are different
+        if (previous != null && tree != null &&
+                !previous.getRootHash().equals(tree.getRootHash())){
+            
+            // and we have verified at least two default chunks, don't change
+            if (verifiedBlocks.getSize() > 2 * DEFAULT_CHUNK_SIZE)
+                return;
+            
+            // else trigger verification
+            if (verifiedBlocks.getSize() > 0) {
+                partialBlocks.add(verifiedBlocks);
+                verifiedBlocks.clear();
+                diskController.addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
+            }
+        }
+        
+        hashTree = tree;
+        
         // if we did not have a tree previously
         // and we do have a hash tree now
         // and either we want to scan the whole file once
         // or we don't have pending blocks but do have partial blocks,
         // trigger verification.
-        HashTree previous = hashTree;
-        hashTree = tree;
         if (previous == null && tree != null && (existingFileSize != -1 ||
                 (pendingBlocks.getSize() == 0 && partialBlocks.getSize() > 0))
            ) {
