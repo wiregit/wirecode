@@ -11,15 +11,17 @@ import java.net.Socket;
 import junit.framework.TestCase;
 
 import org.jivesoftware.smack.XMPPException;
+import org.limewire.util.BaseTestCase;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-public class ServerIPQueryProviderTest extends TestCase {
+public class ServerIPQueryProviderTest extends BaseTestCase {
+
+    public ServerIPQueryProviderTest(String name) {
+        super(name);
+    }
 
     private String username = "ServerIPQueryParseIQTestUser";
-
-    public ServerIPQueryProviderTest(){
-    }
     
     //test to make sure the Parsing method works for ServerIPQueryProvider. In a nutshell, the parsing method
     //parses the XML and creates a new ServerIPQuery object by extracting the username
@@ -58,6 +60,7 @@ public class ServerIPQueryProviderTest extends TestCase {
     private class ServerSocketHandler implements Runnable{
 
         private Socket connection;
+        private String serveripqueryTestString = "<serveripquery xmlns=\"jabber:iq:serveripquery\"><username>"+ username+"</username></serveripquery>";
         
         public ServerSocketHandler(Socket connection){
             this.connection = connection;
@@ -69,7 +72,7 @@ public class ServerIPQueryProviderTest extends TestCase {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            pw.println("<serveripquery xmlns=\"jabber:iq:serveripquery\"><username>"+ username+"</username></serveripquery>");
+            pw.println(serveripqueryTestString);
         }
     }
 }

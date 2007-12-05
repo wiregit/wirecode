@@ -164,7 +164,7 @@ public class ChatManager{
                                     parsedMsg = (Message) PacketParserUtils.parseMessage(parser);
                                 }
                                 
-                                //broadcast event
+                                //open private groups screen and broadcast event to listeners
                                 openDialogScreen(parsedMsg.getFrom());
                                 
                                 handleEvent(new MessageEvent(parsedMsg, null));

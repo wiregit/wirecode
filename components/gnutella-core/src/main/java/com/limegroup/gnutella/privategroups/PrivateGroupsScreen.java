@@ -15,17 +15,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 import org.jivesoftware.smack.packet.Message;
 import org.limewire.listener.Event;
 import org.limewire.listener.EventListener;
 import org.limewire.util.PrivateGroupsUtils;
 
+import com.limegroup.gnutella.gui.GuiCoreMediator;
+
 public class PrivateGroupsScreen extends JPanel implements EventListener {
     
     
-    private JTextField msgField;
+    private JTextArea msgField;
     private JTextArea incomingMsgArea;
     private JScrollPane areaScrollPane;
     private ChatManager chatManager; 
@@ -48,7 +49,8 @@ public class PrivateGroupsScreen extends JPanel implements EventListener {
         content.setBackground(Color.white);
         content.setLayout(new GridLayout(0,1)); 
         
-        msgField = new JTextField();
+        msgField = new JTextArea();
+        msgField.setLineWrap(true);
         
         msgField.addKeyListener(new KeyAdapter(){
 
@@ -61,11 +63,14 @@ public class PrivateGroupsScreen extends JPanel implements EventListener {
         });
         
         incomingMsgArea = new JTextArea();
+        incomingMsgArea.setLineWrap(true);
         
         JScrollPane areaScrollPane = new JScrollPane(incomingMsgArea);
         areaScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        //areaScrollPane.setPreferredSize(new Dimension(250, 250));
+        areaScrollPane.setAutoscrolls(true);
+
+        
         
         
         content.add(msgField);
@@ -84,16 +89,23 @@ public class PrivateGroupsScreen extends JPanel implements EventListener {
     public void printMessage(String username, String msg){
         incomingMsgArea.append(username + " said: " + msg + "\n");
     }
+   
     
-//    private void printMsg(String msg){
-//        msgField.setText(msg);
-//    }
-    
+    /**
+     * currently, the method does not locate the remote user again after he/she has logged off.  A way of fixing this
+     * is to get the PGRPClient instance and call that sendmessage() method instead.  This is not done now because the
+     * gui portion hasn't been figured out entirely yet.
+     */
     private void sendMessage(){
         String msg = msgField.getText();
-
+        
         chatManager.send(PrivateGroupsUtils.createMessage(localUserName, remoteUserName, msg));
         msgField.setText("");
+        
+//        PGRPClient myClient = GuiCoreMediator.getPGRPClient();
+//        
+//        //send msg
+//        myClient.sendMessage(remoteUserName, msg);
     }
     
     private class SendButtonListener implements ActionListener{

@@ -18,7 +18,6 @@ public class ServerIPQuery extends IQ {
     
     public ServerIPQuery(String remoteIPAddress) {
         this.remoteIPAddress = remoteIPAddress;
-        this.remoteUsername = null;
     }
 
     /**

@@ -163,6 +163,8 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
+import com.limegroup.gnutella.privategroups.PGRPClient;
+import com.limegroup.gnutella.privategroups.PGRPClientImpl;
 import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.LimeRUDPSettings;
 import com.limegroup.gnutella.rudp.LimeUDPService;
@@ -318,6 +320,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Inspector.class).to(InspectorImpl.class);
         bind(PrivateGroupsValueFactory.class).to(PrivateGroupsValueFactoryImpl.class);
         bind(PrivateGroupsManagerFactory.class).to(PrivateGroupsManagerFactoryImpl.class);
+        bind(PGRPClient.class).to(PGRPClientImpl.class);
         
         
         

@@ -17,7 +17,6 @@ public class BuddyListManager {
 
     //map to store user and ChatManager info
     private HashMap<String, ChatManager> buddyMap = new HashMap<String, ChatManager>();
-    private static BuddyListManager buddyListManager;
             
     public void addChatManager(String remoteUsername, String localUsername, Socket socket){
         ChatManager manager = new ChatManager(localUsername, socket);
