@@ -85,8 +85,27 @@
          	description="Tests a single package in limewire/tests.  (Useful for testing outside of the normal directory.)  Requires: -Dpackage="
          	depends="compile, lw-tests.test-package"/>
     
-    <!-- TODO: implement -->
-	<target name="jar" />
+	<target name="jar" depends="compile-src, lw-components.jar">
+		<!-- get the list of jars in a space separated list without dirnames -->
+		<fileset dir="${limewire.lib.jars}" includes="**/*.jar" id="alljars"/>
+		<pathconvert property="classpath" refid="alljars" pathsep=" ">
+			<mapper type = "flatten" />
+		</pathconvert>
+		
+		<mkdir dir="${limewire.home}/dist"/>		
+	   
+	   	<!-- build limewire's main jar -->
+		<delete file="${limewire.home}/dist/LimeWire.jar"/>
+	   	<jar jarfile="${limewire.home}/dist/LimeWire.jar" compress="false">
+	   		<fileset dir="${build.limewire.gui.classes}" includes="com/limegroup/**/*.class"/>
+	   		<fileset dir="${build.limewire.core.classes}" includes="com/limegroup/**/*.class"/>
+	   		<zipfileset src="${dist.limewire.components.all.jar}"/>  
+	     	<manifest>
+		   		<attribute name="Main-Class" value="com.limegroup.gnutella.gui.Main" />
+		   		<attribute name="Class-Path" value=". ${classpath}"/>
+		 	</manifest>
+	   	</jar>
+	</target> 
     
     <!-- TODO: implement -->
     <target name="clean-dist"/>
@@ -125,64 +144,72 @@
     <property name="translation.cutoff" value="60"/>
 
     <target name="lw-gettext-extract"
-     description="Extracts message keys from the source code"
-     depends="init.gettext">
-    <gettext-extract keysFile="limewire.pot" poDirectory="lib/messagebundles" keywords="-kgetStringResource -kgetFormattedStringResource -ktrc -ktr -kmarktr -ktrn:1,2 -ktrl">
-      <fileset dir="components" includes="**/*.java"/>
-      <fileset dir="core" includes="**/*.java"/>
-      <fileset dir="gui" includes="**/*.java"/>
-    </gettext-extract>
+     		description="Extracts message keys from the source code"
+     		depends="init.gettext">
+	    <gettext-extract keysFile="limewire.pot" poDirectory="lib/messagebundles" keywords="-kgetStringResource -kgetFormattedStringResource -ktrc -ktr -kmarktr -ktrn:1,2 -ktrl">
+			<fileset dir="components" includes="**/*.java"/>
+			<fileset dir="core" includes="**/*.java"/>
+			<fileset dir="gui" includes="**/*.java"/>
+	    </gettext-extract>
     </target>
 
     <target name="lw-gettext-merge"
-     description="Merge message keys with translations"
-     depends="init.gettext">
-    <gettext-merge keysFile="limewire.pot" poDirectory="lib/messagebundles"/>
+     		description="Merge message keys with translations"
+     		depends="init.gettext">
+		<gettext-merge keysFile="limewire.pot" poDirectory="lib/messagebundles"/>
     </target>
 
-    <!-- generate two jars, one with almost complete translations, and a
-    remaining one -->
-    <target name="lw-bundle-messages" description="Rebuilds messages and
-    bundles them" depends="init.gettext">
+    <!-- generate two jars, one with almost complete translations, and a remaining one -->
+    <target name="lw-bundle-messages"
+    		description="Rebuilds messages and bundles them"
+    		depends="init.gettext">
 
-    <!-- clean up -->
-    <delete dir="lib/messagebundles/org"/>
-
-    <!-- generate default bundle for complete messages -->
-    <gettext-generate-default targetBundle="org.limewire.i18n.Messages"
-     outputDirectory="lib/messagebundles" 
-     potfile="lib/messagebundles/limewire.pot"/>
-
-    <!-- generate complete bundles -->
-    <gettext-dist targetBundle="org.limewire.i18n.Messages"
-     poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"
-    percentage="${translation.cutoff}"/>
-
-    <!-- generate the empty en.po file without percentage  -->
-    <gettext-dist targetBundle="org.limewire.i18n.Messages"
-	outputDirectory="lib/messagebundles">
-	 <fileset dir="lib/messagebundles" includes="en.po"/>
-    </gettext-dist>
-    
-    <!-- jar them -->
-    <jar destfile="lib/jars/messages.jar" basedir="lib/messagebundles"
-    includes="org/**"/>
-    <!-- clean up -->
-    <delete dir="lib/messagebundles/org"/>
-    <!-- generate incomplete ones -->
-    <gettext-dist targetBundle="org.limewire.i18n.Messages"
-     poDirectory="lib/messagebundles" outputDirectory="lib/messagebundles"
-    percentage="${translation.cutoff}" moreOrLess="less"/>
-
-    <delete>
-    <fileset dir="lib/messagebundles/org/limewire/i18n/" includes="**/Messages_en*"/>
-    </delete>
-
-    <!-- jar them -->
-    <jar destfile="lib/jars/compile/messages.jar" basedir="lib/messagebundles"
-    includes="org/**"/>
-   <!-- clean up -->
-    <delete dir="lib/messagebundles/org"/>
+	    <!-- clean up -->
+	    <delete dir="lib/messagebundles/org"/>
+	
+	    <!-- generate default bundle for complete messages -->
+	    <gettext-generate-default targetBundle="org.limewire.i18n.Messages"
+	    						  outputDirectory="lib/messagebundles" 
+	    						  potfile="lib/messagebundles/limewire.pot"/>
+	
+	    <!-- generate complete bundles -->
+	    <gettext-dist targetBundle="org.limewire.i18n.Messages"
+	   				  poDirectory="lib/messagebundles"
+	    			  outputDirectory="lib/messagebundles"
+	   				  percentage="${translation.cutoff}"/>
+	
+	    <!-- generate the empty en.po file without percentage  -->
+	    <gettext-dist targetBundle="org.limewire.i18n.Messages"
+				      outputDirectory="lib/messagebundles">
+			<fileset dir="lib/messagebundles" includes="en.po"/>
+	    </gettext-dist>
+	    
+	    <!-- jar them -->
+	    <jar destfile="lib/jars/messages.jar" 
+	    	 basedir="lib/messagebundles"
+	    	 includes="org/**"/>
+	    	
+	    <!-- clean up -->
+	    <delete dir="lib/messagebundles/org"/>
+	    	
+	    <!-- generate incomplete ones -->
+	    <gettext-dist targetBundle="org.limewire.i18n.Messages"
+	     			  poDirectory="lib/messagebundles"
+	    		      outputDirectory="lib/messagebundles"
+	    			  percentage="${translation.cutoff}"
+	    			  moreOrLess="less"/>
+	
+	    <delete>
+	    	<fileset dir="lib/messagebundles/org/limewire/i18n/" includes="**/Messages_en*"/>
+	    </delete>
+	
+	    <!-- jar them -->
+	    <jar destfile="lib/jars/compile/messages.jar"
+	         basedir="lib/messagebundles"
+	    	 includes="org/**"/>
+    	
+	   	<!-- clean up -->
+	    <delete dir="lib/messagebundles/org"/>
     </target>
 
     <!-- mask imported targets -->
