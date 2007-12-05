@@ -522,6 +522,15 @@ public class FileManagerTest extends LimeTestCase {
         assertGreaterThan(0,fman.query(qrDesiring).length);
         assertEquals(0,fman.query(notDesiring).length);
         assertTrue(fman.getQRT().contains(qrDesiring));
+        double qrpFull = fman.getQRT().getPercentFull();
+        assertGreaterThan(0,qrpFull);
+        
+        // now remove the file and qrt should get updated
+        fman.removeFileIfShared(f);
+        assertEquals(0,fman.query(qrDesiring).length);
+        assertEquals(0,fman.query(notDesiring).length);
+        assertFalse(fman.getQRT().contains(qrDesiring));
+        assertLessThan(qrpFull,fman.getQRT().getPercentFull());
         
         // e) two urns, enough data written, sharing disabled -> not shared
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(false);
