@@ -2301,7 +2301,7 @@ public class ManagedDownloader extends AbstractDownloader
      * @param fileHash - urn to save the tree of
      * @return the root fo the tree
      */
-    private URN saveTreeHash(URN fileHash) {
+    protected URN saveTreeHash(URN fileHash) {
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
                 tigerTreeCache.get(); // instantiate it. 
