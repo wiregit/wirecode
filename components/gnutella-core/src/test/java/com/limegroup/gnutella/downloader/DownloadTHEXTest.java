@@ -11,6 +11,9 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -116,7 +119,6 @@ public class DownloadTHEXTest extends DownloadTestCase {
         testUploaders[0].setHTTPListener(grayVerifier);
         testUploaders[0].setSendThexTreeHeader(true);
         testUploaders[0].setSendThexTree(true);
-        
         tigerTreeCache.purgeTree(rfd.getSHA1Urn());
         downloadServices.download(rfds, RemoteFileDesc.EMPTY_LIST, null, false);
         
@@ -155,7 +157,55 @@ public class DownloadTHEXTest extends DownloadTestCase {
         assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
         
         assertTrue(testUploaders[0].thexWasRequested());
-        assertEquals(1, testUploaders[0].getConnections());        
+        assertEquals(1, testUploaders[0].getConnections());     
+
+        // there should be an entry for the sha1 and ttroot urns.
+        URN ttroot = URN.createTTRootUrn(tree.getRootHash());
+        FileManager fm = injector.getInstance(FileManager.class);
+        assertNotNull(fm.getFileDescForUrn(TestFile.hash()));
+        assertSame(fm.getFileDescForUrn(TestFile.hash()),fm.getFileDescForUrn(ttroot));
+        
+        // and the filedesc should have both
+        FileDesc fd = fm.getFileDescForUrn(TestFile.hash());
+        assertTrue(fd.getUrns().contains(TestFile.hash()));
+        assertTrue(fd.getUrns().contains(ttroot));
+    }
+    
+    public void testIncompleteDescsUpdated() throws Exception {
+        LOG.info("test that the incomplete file desc is updated with the root once we have it");
+        testUploaders[0].setRate(500);
+        testUploaders[0].setSendThexTreeHeader(true);
+        testUploaders[0].setSendThexTree(true);
+        RemoteFileDesc rfd1=newRFDWithURN(PORTS[0], false);
+        tigerTreeCache.purgeTree(TestFile.hash());
+        
+        downloadServices.download(new RemoteFileDesc[]{rfd1}, true, null);
+        Thread.sleep(1000);
+        IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
+        File incompleteFile = ifm.getFileForUrn(TestFile.hash());
+        assertNotNull(incompleteFile);
+        VerifyingFile vf = ifm.getEntry(incompleteFile);
+        
+        // wait till we get the hash tree
+        int sleeps = 0;
+        while(vf.getHashTree() == null && sleeps++ < 20) 
+            Thread.sleep(500);
+        assertNotNull(vf.getHashTree());
+        URN ttroot = URN.createTTRootUrn(vf.getHashTree().getRootHash());
+        assertSame(incompleteFile, ifm.getFileForUrn(ttroot));
+        
+        // both urns should point to the same filedesc 
+        FileManager fm = injector.getInstance(FileManager.class);
+        assertNotNull(fm.getFileDescForUrn(TestFile.hash()));
+        assertSame(fm.getFileDescForUrn(TestFile.hash()),fm.getFileDescForUrn(ttroot));
+        
+        // and the filedesc should have both
+        FileDesc fd = fm.getFileDescForUrn(TestFile.hash());
+        assertInstanceof(IncompleteFileDesc.class, fd);
+        assertTrue(fd.getUrns().contains(TestFile.hash()));
+        assertTrue(fd.getUrns().contains(ttroot));
+        
+        waitForComplete();
     }
     
     public void testQueuedOnThexContinues() throws Exception {

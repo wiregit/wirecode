@@ -1783,10 +1783,11 @@ public abstract class FileManagerImpl implements FileManager {
         updateUrnIndex(fd);
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.shouldBeShared())
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.shouldBeShared()) {
                 loadKeywords(_incompleteKeywordTrie, fd);
+                _needRebuild = true;
+            }
         }
-        _needRebuild = true;
     }
     
     /**
@@ -1828,6 +1829,10 @@ public abstract class FileManagerImpl implements FileManager {
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
             IntSet indices=_urnMap.get(urn);
+            if (indices == null) {
+                assert fileDesc instanceof IncompleteFileDesc;
+                return;
+            }
             assert indices!=null : "Invariant broken";
 
             //Delete index from set.  Remove set if empty.
