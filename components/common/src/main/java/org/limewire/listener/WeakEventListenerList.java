@@ -23,9 +23,11 @@ public class WeakEventListenerList<E extends Event> implements WeakEventListener
     /** Adds the listener. */
     public void addListener(Object strongRef, EventListener<E> listener) {
         List<EventListener<E>> listeners = listenerMap.get(strongRef);
-        if(listeners == null)
+        if(listeners == null){
             listeners = new ArrayList<EventListener<E>>();
-        listeners.add(listener);
+            listeners.add(listener);
+            listenerMap.put(strongRef, listeners);
+        }
     }
     
     /** Returns true if the listener was removed. */

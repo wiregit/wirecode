@@ -15,41 +15,25 @@ import com.google.inject.Singleton;
 @Singleton
 public class BuddyListManager {
 
-    //map to store user and buddysession info
-    private HashMap<String, BuddySession> buddySessionMap = new HashMap<String, BuddySession>();;
-    private static BuddyListManager instance = new BuddyListManager();
+    //map to store user and ChatManager info
+    private HashMap<String, ChatManager> buddyMap = new HashMap<String, ChatManager>();
     private static BuddyListManager buddyListManager;
-       
-    public BuddyListManager(){
-    }
-        
-    
-    public static BuddyListManager getInstance(){
-        return instance;
+            
+    public void addChatManager(String remoteUsername, String localUsername, Socket socket){
+        ChatManager manager = new ChatManager(localUsername, socket);
+        buddyMap.put(remoteUsername, manager);
     }
     
-    @Inject
-    public BuddyListManager(BuddyListManager buddyListmanager) {
-     this.buddyListManager = buddyListManager;
+    public ChatManager getManager(String name){
+        return buddyMap.get(name);
     }
     
-    // register listener on new buddy session and add to the manager
-    public void addBuddySession(String name, Socket socket){
-        BuddySession session = new BuddySession(socket);
-        buddySessionMap.put(name, session);
-    }
-    
-    public BuddySession getSession(String name){
-        return buddySessionMap.get(name);
-    }
-    
-    public boolean removeBuddySession(String name){
+    public boolean removeChatManager(String name){
         //remove session from the list
-        BuddySession buddySession = buddySessionMap.remove(name);
+        ChatManager manager = buddyMap.remove(name);
         
         //close sockets and chatmanagers
-        return buddySession.closeSession();
-
+        return manager.closeChatManager();
     }
     
     

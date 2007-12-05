@@ -52,7 +52,6 @@ public class ServerIPQueryProvider implements IQProvider {
                         break;
                     default:
                 }
-
                 if (event == XmlPullParser.END_TAG && "serveripquery".equals(parser.getName())) break;
 
                 event = parser.next();
@@ -97,8 +96,6 @@ public class ServerIPQueryProvider implements IQProvider {
             
             serverIPQueryValue.setUsername(getTagContents("username"));
         }
-
-  
 
         private String getTagContents(String tag) {
             NodeList nodes = document.getElementsByTagName(tag);

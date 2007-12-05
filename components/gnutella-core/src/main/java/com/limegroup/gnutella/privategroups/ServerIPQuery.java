@@ -11,74 +11,43 @@ import org.jivesoftware.smack.util.StringUtils;
  */
 public class ServerIPQuery extends IQ {
 
-    private String username = null;
-    private String remoteIPAddress = null;
+    private String remoteUsername;
+    private String remoteIPAddress;
 
     
     
     public ServerIPQuery(String remoteIPAddress) {
         this.remoteIPAddress = remoteIPAddress;
-    }
-    
-    
-    public void setType(String type) {
-        if(type.equals("GET"))
-            setType(IQ.Type.GET);
-        else if (type.equals("SET"))
-            setType(IQ.Type.SET);
-        else{
-            //neither get or set
-        }
+        this.remoteUsername = null;
     }
 
     /**
-     * Returns the username, or <tt>null</tt> if the username hasn't been sent.
+     * Returns the remote username, or <tt>null</tt> if the username hasn't been sent.
      *
-     * @return the username.
+     * @return the remote username.
      */
     public String getUsername() {
-        return username;
+        return remoteUsername;
     }
     
     /**
-     * Sets the username.
+     * Sets the remote username.
      *
-     * @param username the username.
+     * @param username the remote username.
      */
     public void setUsername(String username) {
-        this.username = username;
+        this.remoteUsername = username;
     }
-    
-    
-    /**
-     * Returns the ipAddress or <tt>null</tt> if the ipAddress hasn't
-     * been set.
-     *
-     * @return the ipAddress.
-     */
-    public String getIPAddress() {
-        return remoteIPAddress;
-    }   
 
-//    /**
-//     * Sets ipAddress.
-//     *
-//     * @param ipAddress the ipAddress.
-//     */
-//    public void setIPAddress(String ipAddress) {
-//        this.remoteIPAddress = ipAddress;
-//    }
-    
-    
     public String getChildElementXML() {
         StringBuilder buf = new StringBuilder();
         buf.append("<serverIPQuery xmlns=\"jabber:iq:serveripquery\">");
-        if (username != null) {
-            if (username.equals("")) {
+        if (remoteUsername != null) {
+            if (remoteUsername.equals("")) {
                 buf.append("<username/>");
             }
             else {
-                buf.append("<username>").append(username).append("</username>");
+                buf.append("<username>").append(remoteUsername).append("</username>");
             }
         }
         
@@ -90,7 +59,6 @@ public class ServerIPQuery extends IQ {
                 buf.append("<ipAddress>").append(StringUtils.escapeForXML(remoteIPAddress)).append("</ipAddress>");
             }
         }
-     
 
         buf.append("</serverIPQuery>");
         return buf.toString();

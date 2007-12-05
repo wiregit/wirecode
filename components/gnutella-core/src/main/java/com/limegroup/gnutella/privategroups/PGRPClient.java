@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.privategroups;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,49 +37,41 @@ import com.google.inject.Singleton;
 @Singleton
 public class PGRPClient{
 
-    private BigInteger publicKey;
-    private BigInteger privateKey;
-    private BigInteger modulus;
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
     private String ipAddress;
     private String port;
     private String localUsername;
-    private static PGRPClient instance;
     private PGRPServerSocket serverSocket;
     private static String servername = "lw-intern02";
     private XMPPConnection connection;
+    private BuddyListManager buddyListManager;
     
     @Inject
-    public PGRPClient(XMPPConnection connection){
-        this.connection = connection;
-        PGRPClient.instance = this;
+    public PGRPClient(BuddyListManager buddyListManager) {
+        this.buddyListManager = buddyListManager;
     }
     
-    /**
-     * Returns a singleton PGRPClient instance.
-     *
-     * @return a PGRPClient instance.
-     */
-    public static PGRPClient getInstance() {
-        return instance;
-    }
-    
-    public static XMPPConnection connectToServerNoPort(String serverAddress){
+    public void connectToServerNoPort(String serverAddress){
         
         // Create a connection to the jabber.org server.
-        XMPPConnection conn1 = new XMPPConnection(serverAddress);
+        connection = new XMPPConnection(serverAddress);
  
         try {
-            conn1.connect();
+            connection.connect();
             System.out.println("connection successful");
             
         } catch (XMPPException e) {
             System.out.println("could not connect to the server: " + serverAddress);
             e.printStackTrace();
         }
-        return conn1;
     }
     
-    public XMPPConnection connectToServerPort(String serverAddress, int portAddress){
+    public BuddyListManager getBuddyListManager(){
+        return buddyListManager;
+    }
+    
+    public void connectToServerPort(String serverAddress, int portAddress){
         
      // Create a connection to the jabber.org server on a specific port.
         ConnectionConfiguration config = new ConnectionConfiguration(serverAddress, portAddress);
@@ -86,7 +82,6 @@ public class PGRPClient{
             System.out.println("could not connect to the server: " + serverAddress + ", on port: " + portAddress);
             e.printStackTrace();
         }
-        return conn2;
     }
     
     /**
@@ -169,26 +164,25 @@ public class PGRPClient{
             //register IQ provider
             ProviderManager providerManager = ProviderManager.getInstance();
             providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
-            
-            //generate keys
-            
-            //RSA keyGen = new RSA(32);
-            
-            publicKey = new BigInteger("19");//keyGen.getPublicKey();
-            //privateKey = keyGen.getPrivateKey();
-            //modulus= keyGen.getModulus();
-            
+                       
             try {
-                ipAddress = NetworkUtils.ip2string((InetAddress.getLocalHost()).getAddress());
+                ipAddress = NetworkUtils.ip2string((InetAddress.getLocalHost()).getAddress());//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
             } catch (UnknownHostException e) {
                 e.printStackTrace();
-            }//"10.254.0.30";//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
+            }
+            
             port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
             
+            //generate public and private keys
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance( "DSA" );
+            keyGen.initialize( 1024 );
+            KeyPair pair = keyGen.generateKeyPair();
+            this.privateKey = pair.getPrivate();
+            this.publicKey = pair.getPublic();
             
             //store ip address, port, and public key in the server
             ValueStorage storagePacket = new ValueStorage();
-            storagePacket.setType("SET");
+            storagePacket.setType(IQ.Type.SET);
             storagePacket.setUsername(username);
             storagePacket.setTo(servername);
             storagePacket.setIPAddress(ipAddress);
@@ -198,15 +192,18 @@ public class PGRPClient{
             connection.sendPacket(storagePacket);
             
             //start serverSocket
-            serverSocket = new PGRPServerSocket(connection);
+            serverSocket = new PGRPServerSocket(localUsername, connection, buddyListManager);
             serverSocket.start();
 
             return true;
             
         } catch (XMPPException e) {
             System.out.println("Could not login to the server");
-            return false;
-        }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } 
+        
+        return false;
     }
     
     public boolean logoff(){
@@ -215,6 +212,7 @@ public class PGRPClient{
             if(serverSocket!=null)
                 serverSocket.closeSocket();
             connection.disconnect();
+            
             System.out.println("logged off");
         
         }catch(Exception e){
@@ -228,18 +226,17 @@ public class PGRPClient{
         
         //check list to see if buddy is a buddy
         if(findRosterUserName(username)){
-        
-            BuddySession buddySession = BuddyListManager.getInstance().getSession(username);
-            if(buddySession== null){
+            ChatManager chatManager = buddyListManager.getManager(username);
+            if(chatManager== null){
                 //need to get remote user info and establish session
-                if(setRemoteConnection(username)){
-                    buddySession = BuddyListManager.getInstance().getSession(username);
-                    buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
+                if(setRemoteConnection(username, localUsername)){
+                    chatManager = buddyListManager.getManager(username);
+                    chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
                     return true;
                 }
             }
             else{
-                buddySession.send(PrivateGroupsUtils.createMessage(localUsername, message));
+                chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
                 return true;
             }
             return false;
@@ -250,13 +247,13 @@ public class PGRPClient{
         }
     }
     
-    private boolean setRemoteConnection(String username){
+    private boolean setRemoteConnection(String remoteUserName, String localUsername){
         
         //use valueStorage packet to get ip address, port, and public key
         ValueStorage storagePacket = new ValueStorage();
         storagePacket.setTo(servername);
-        storagePacket.setUsername(username);
-        storagePacket.setType("GET");
+        storagePacket.setUsername(remoteUserName);
+        storagePacket.setType(IQ.Type.GET);
         
         PacketFilter filter = new AndFilter(new PacketIDFilter(storagePacket.getPacketID()),
                 new PacketTypeFilter(IQ.class));
@@ -271,7 +268,7 @@ public class PGRPClient{
             if(data.getIPAddress()!=null){
                 //create new session and add to buddyListManager
                 try {
-                    BuddyListManager.getInstance().addBuddySession(username, new Socket(data.getIPAddress(),  9999));
+                    buddyListManager.addChatManager(remoteUserName, localUsername, new Socket(data.getIPAddress(),  9999));
                     return true;
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
@@ -409,22 +406,25 @@ public class PGRPClient{
             //register IQ provider
             ProviderManager providerManager = ProviderManager.getInstance();
             providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
+                       
+            try {
+                ipAddress = NetworkUtils.ip2string((InetAddress.getLocalHost()).getAddress());//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
             
-            //generate keys
-            
-            //RSA keyGen = new RSA(32);
-            
-            publicKey = new BigInteger("19");//keyGen.getPublicKey();
-            //privateKey = keyGen.getPrivateKey();
-            //modulus= keyGen.getModulus();
-            
-            ipAddress = "10.254.0.30";//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
             port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
             
+            //generate public and private keys
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance( "DSA" );
+            keyGen.initialize( 1024 );
+            KeyPair pair = keyGen.generateKeyPair();
+            this.privateKey = pair.getPrivate();
+            this.publicKey = pair.getPublic();
             
             //store ip address, port, and public key in the server
             ValueStorage storagePacket = new ValueStorage();
-            storagePacket.setType("SET");
+            storagePacket.setType(IQ.Type.SET);
             storagePacket.setUsername(username);
             storagePacket.setTo(servername);
             storagePacket.setIPAddress(ipAddress);
@@ -437,8 +437,11 @@ public class PGRPClient{
             
         } catch (XMPPException e) {
             System.out.println("Could not login to the server");
-            return false;
-        }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } 
+        
+        return false;
     }
     
 
@@ -446,29 +449,33 @@ public class PGRPClient{
         
         XMPPConnection.DEBUG_ENABLED = true;
         
-        PGRPClient client = new PGRPClient(connectToServerNoPort(servername));
+        PGRPClient client = new PGRPClient(new BuddyListManager());
+        client.connectToServerNoPort(servername);
         
-        //manager.loginAccount("admin", "admin", connection);
-    
+//        client.loginAccount("admin", "admin");
+//        client.createAccount("MikeT", "1234");
+
         //  Create account
-        //manager.createAccount("user1", "password1");   
-        //manager.createAccount("user2", "password2"); 
+//        client.createAccount("Dan", "1234");   
+//        client.createAccount("Anthony", "1234"); 
         
-          client.loginAccount("user2", "password2");
-          client.viewRoster();
-        
-//        client.loginAccountNoServerSocket("lulu4", "Lulu4");
-//        for(int i = 0; i <800; i++){System.out.println(i);}
-//        client.sendMessage("lulu", "hi");
-//        for(int i = 0; i <800; i++){System.out.println(i);}
+//          client.loginAccount("Dan", "1234");
+//          client.removeFromRoster("Anthony", "");
+//          client.viewRoster();
+//        client.addToRoster("lulu", "", "");
+        client.loginAccount("Dan", "1234");
+//        client.addToRoster("anthony","","");
+//        client.loginAccountNoServerSocket("anthony", "1234");
+//        client.sendMessage("miket", "hi");
+
 //        client.sendMessage("lulu", "wassup");
-//        for(int i = 0; i <800; i++){System.out.println(i);}
+
 //        client.sendMessage("lulu", "this is a test message from Anthony");
-//        for(int i = 0; i <800; i++){System.out.println(i);}
+
 //        client.sendMessage("lulu", "end of test");
-//        for(int i = 0; i <800; i++){System.out.println(i);}
+
 //        client.sendMessage("lulu", "later");
-//        for(int i = 0; i <100; i++){System.out.println(i);}
+
   
         //  Login with an account
         

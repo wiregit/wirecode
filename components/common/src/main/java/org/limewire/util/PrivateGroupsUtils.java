@@ -12,9 +12,10 @@ public class PrivateGroupsUtils {
     }
 
     // a method to automatically create a message object given a username, and the message body
-    public static Message createMessage(String username, String body){
+    public static Message createMessage(String localUsername, String remoteuser, String body){
         Message msg = new Message();
-        msg.setFrom(username);
+        msg.setFrom(localUsername);
+        msg.setTo(remoteuser);
         msg.setLanguage("English");
         msg.setSubject("message");
         msg.setType(Type.normal);

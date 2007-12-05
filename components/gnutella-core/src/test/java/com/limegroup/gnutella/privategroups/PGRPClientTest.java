@@ -29,7 +29,8 @@ public class PGRPClientTest extends TestCase {
         String username = "user";
         String password = "password";
 
-        client1 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        client1 = new PGRPClient(new BuddyListManager());
+        client1.connectToServerNoPort(servername);
         
         //try to login with a user that does not exist       
         assertFalse(client1.loginAccount(username, password));
@@ -41,13 +42,15 @@ public class PGRPClientTest extends TestCase {
         assertTrue(client1.logoff());
         
         //try to login again.  this time the user should exist
-        client1 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        client1 = new PGRPClient(new BuddyListManager());
+        client1.connectToServerNoPort(servername);
         assertTrue(client1.loginAccount(username, password));
         
         assertTrue(client1.logoff());
         
         //now remove account
-        client1 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        client1 = new PGRPClient(new BuddyListManager());
+        client1.connectToServerNoPort(servername);
         
         assertTrue(client1.loginAccount(username, password));
         //remove account and try to login again
@@ -57,7 +60,8 @@ public class PGRPClientTest extends TestCase {
             e.printStackTrace();
         }
 
-        client1 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        client1 = new PGRPClient(new BuddyListManager());
+        client1.connectToServerNoPort(servername);
 
         //try to see if account still exists
 
@@ -79,14 +83,16 @@ public class PGRPClientTest extends TestCase {
         String password = "password";
         
         //create initial jabber client
-        PGRPClient client = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        PGRPClient client = new PGRPClient(new BuddyListManager());
+        client.connectToServerNoPort(servername);
         
         //create account
         assertTrue(client.createAccount(username, password));
         
         assertTrue(client.logoff());
         
-        client = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        client = new PGRPClient(new BuddyListManager());
+        client.connectToServerNoPort(servername);
         
         assertTrue(client.loginAccount(username, password));
         
@@ -96,9 +102,9 @@ public class PGRPClientTest extends TestCase {
         client.addToRoster("testusername2", "nickName2", "friend");
         client.addToRoster("testusername3", "nickName3", "friend");
         
-        assertTrue(client.findRosterUserName("testusername@"+servername));
-        assertTrue(client.findRosterUserName("testusername2@"+servername));
-        assertTrue(client.findRosterUserName("testusername3@"+servername));
+        assertTrue(client.findRosterUserName("testusername"));
+        assertTrue(client.findRosterUserName("testusername2"));
+        assertTrue(client.findRosterUserName("testusername3"));
         
         client.viewRoster();
         
@@ -126,25 +132,28 @@ public class PGRPClientTest extends TestCase {
         
         System.out.println("testMessaging start");
         //need 2 clients
-        client1 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        client1 = new PGRPClient(new BuddyListManager());
+        client1.connectToServerNoPort(servername);
 //        client1.createAccount("user1", "password1");
         
-        client2 = new PGRPClient(PGRPClient.connectToServerNoPort(servername));
+        client2 = new PGRPClient(new BuddyListManager());
+        client2.connectToServerNoPort(servername);
 //        client2.createAccount("user2", "password2");
         
         client1.loginAccount("user1", "password1");
+       // client1.addToRoster("user2@lw-intern02", "nickname", "");
         client2.loginAccountNoServerSocket("user2", "password2");
         
         //send a message to a user who exists
         client2.sendMessage("user1", "hello");
-        for(int i = 0; i <5000; i++){System.out.println(i);}
+        //for(int i = 0; i <5000; i++){System.out.println(i);}
         //send an empty message to a user who exists
-        client2.sendMessage("user1", "Anthony");
-        for(int i = 0; i <5000; i++){System.out.println(i);}
+        //client2.sendMessage("user1", "Anthony");
+        //for(int i = 0; i <5000; i++){System.out.println(i);}
 
         //send a null message to a user who exists
-        client2.sendMessage("user1", "Bow");
-        for(int i = 0; i <5000; i++){System.out.println(i);}
+        //client2.sendMessage("user1", "Bow");
+        //for(int i = 0; i <5000; i++){System.out.println(i);}
         
         //send a long message to a user who exists
 //        assertTrue(client2.sendMessage("user1", "hello my name is user2.  test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test"));
@@ -159,7 +168,7 @@ public class PGRPClientTest extends TestCase {
 //        } catch (XMPPException e) {
 //            e.printStackTrace();
 //        }
-//        
+        
         System.out.println("testMessaging done\n");
     }
     

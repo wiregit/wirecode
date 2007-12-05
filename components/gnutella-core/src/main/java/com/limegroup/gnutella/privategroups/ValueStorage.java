@@ -12,25 +12,15 @@ import org.jivesoftware.smack.util.StringUtils;
  */
 public class ValueStorage extends IQ {
 
-    private String username = null;
-    private String ipAddress = null;
-    private String port = null;
-    private String publicKey = null;
+    private String username;
+    private String ipAddress;
+    private String port;
+    private String publicKey;
     
     
     public ValueStorage() {
     }
-    
-    
-    public void setType(String type) {
-        if(type.equals("GET"))
-            setType(IQ.Type.GET);
-        else if (type.equals("SET"))
-            setType(IQ.Type.SET);
-        else{
-            //neither get or set
-        }
-    }
+   
 
     /**
      * Returns the username, or <tt>null</tt> if the username hasn't been sent.

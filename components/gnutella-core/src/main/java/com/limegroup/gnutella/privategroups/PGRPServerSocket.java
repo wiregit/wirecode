@@ -14,23 +14,38 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
 
 
+/**
+ * The PGRPServerSocket handles an incoming socket connection.  Once the handler accepts the incoming client
+ * socket connection, the handler extracts the ip address and queries the server to get the corresponding username.
+ * The username and socket are stored in the singleton BuddyListManager.
+ *
+ */
 public class PGRPServerSocket{
     
-        private static ServerSocket MyService = null;
-        private static StringBuffer buffer = new StringBuffer(100);
+        private ServerSocket MyService = null;
+        private StringBuffer buffer = new StringBuffer(100);
         private int port = 9999;
         private XMPPConnection connection;
         private boolean passCheck = true;
+        private BuddyListManager buddyListManager;
+        private String servername = "lw-intern02";
+        private String localUsername;
         
-        public PGRPServerSocket(XMPPConnection connection){           
+        public PGRPServerSocket(String localUsername, XMPPConnection connection, BuddyListManager buddyListManager){           
             try {
                 this.connection = connection;
                 this.MyService = new ServerSocket(port);
+                this.buddyListManager = buddyListManager;
+                this.localUsername = localUsername;
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("could not start server socket");
             }
             System.out.println("server socket started successfully");
+        }
+        
+        public void setServerName(String name){
+            servername = name;
         }
         
         public StringBuffer getBuffer(){
@@ -76,12 +91,11 @@ public class PGRPServerSocket{
                 this.conn = conn;
             }
             
+            //need a way to get username
+            //1) get remote ip address
+            //2) query database for username
+            //3) store buddySession with username and socket
             private void handleSocket(){
-
-                //need a way to get username
-                //1) get remote ip address
-                //2) query database for username
-                //3) store buddySession with username and socket
                 if (mySocket!=null){
                     String remoteIPAddress = mySocket.getInetAddress().getHostAddress();
                     
@@ -91,9 +105,8 @@ public class PGRPServerSocket{
                     
                     
                     ServerIPQuery queryPacket = new ServerIPQuery(remoteIPAddress);
-                    queryPacket.setTo("lw-intern02");
-                    //queryPacket.setIPAddress(remoteIPAddress);
-                    queryPacket.setType("GET");
+                    queryPacket.setTo(servername);
+                    queryPacket.setType(IQ.Type.GET);
                     
                     PacketFilter filter = new AndFilter(new PacketIDFilter(queryPacket.getPacketID()),
                             new PacketTypeFilter(IQ.class));
@@ -105,16 +118,10 @@ public class PGRPServerSocket{
                     
                     if (result instanceof ServerIPQuery) {
                         ServerIPQuery data = (ServerIPQuery) result;
-                        BuddyListManager.getInstance().addBuddySession(data.getUsername(), mySocket);
+                        buddyListManager.addChatManager(data.getUsername(), localUsername, mySocket);
                     }
                 }                
-            }
-            
-        }
-        
-        public static void main(String[] args) {
-            PGRPServerSocket socket = new PGRPServerSocket(new XMPPConnection("lw-intern02"));
-            socket.start();
+            } 
         }
 }
 
