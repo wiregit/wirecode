@@ -99,6 +99,10 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return ret.toString();
     }
     
+    public IntervalSet getVerifiedRanges() {
+        return _verifyingFile.getVerifiedIntervalSet();
+    }
+    
     /**
      * @return true if responses should be returned for this IFD.
      */

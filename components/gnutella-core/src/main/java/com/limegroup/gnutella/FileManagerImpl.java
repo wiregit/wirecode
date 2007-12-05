@@ -1833,8 +1833,7 @@ public abstract class FileManagerImpl implements FileManager {
                 assert fileDesc instanceof IncompleteFileDesc;
                 return;
             }
-            assert indices!=null : "Invariant broken";
-
+            
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0 && purgeState) {

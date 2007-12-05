@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
@@ -11,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -22,9 +25,12 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.XMLDocFilterTest;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -45,7 +51,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
     private AlternateLocationFactory alternateLocationFactory;
     private LimeXMLDocumentHelper limeXMLDocumentHelper;
-
+    private Injector injector;
+    
     /**
 	 * Constructs a new test instance for responses.
 	 */
@@ -66,7 +73,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	
 	@Override
 	protected void setUp() throws Exception {
-	    Injector injector = LimeTestUtils.createInjector();
+	    injector = LimeTestUtils.createInjector();
 	    queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
 	    responseFactoryImpl = (ResponseFactoryImpl) injector.getInstance(ResponseFactory.class);
 	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
@@ -662,8 +669,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0);
-        addGGEP(baos, gc);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null);
+        addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.
         baos.flush();
@@ -704,8 +711,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0);
-        addGGEP(baos, gc);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null);
+        addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.
         baos.flush();
@@ -742,20 +749,20 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         data = new byte[20]; // not % 6.
         ggep.put("ALT", data);
-        locs = responseFactoryImpl.getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep, 0).locations;
         assertNotNull("should never be null", locs);
         assertEquals("shouldn't have locs", 0, locs.size());
         
         data = new byte[18]; // multiple of 6, but all blank (invalid)
         ggep.put("ALT", data);
-        locs = responseFactoryImpl.getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep, 0).locations;
         assertNotNull("should never be null", locs);
         assertEquals("shouldn't have locs", 0, locs.size());
 
         // multiple of 6, but same        
         byte[] d1 = {1, 2, 3, 4, 1, 0, 1, 2, 3, 4, 1, 0};
         ggep.put("ALT", d1);
-        locs = responseFactoryImpl.getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep, 0).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 1, locs.size());
         assertEquals("wrong endpoint", 0,
@@ -764,7 +771,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // multiple of 6, diff            
         byte[] d2 = {1, 2, 3, 4, 1, 0, 1, 2, 3, 4, 2, 0};
         ggep.put("ALT", d2);
-        locs = responseFactoryImpl.getGGEP(ggep).locations;
+        locs = responseFactoryImpl.getGGEP(ggep, 0).locations;
         assertNotNull("should never be null", locs);
         assertEquals("wrong number of locs", 2, locs.size());
         Set eps = new IpPortSet();
@@ -775,13 +782,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // ctime.
         ggep = new GGEP(true);
         ggep.put("CT", 5341L);
-        ctime = responseFactoryImpl.getGGEP(ggep).createTime;
+        ctime = responseFactoryImpl.getGGEP(ggep, 0).createTime;
         assertEquals(5341000, ctime);
         
         // alt & ctime.
         ggep.put("CT", 1243L);
         ggep.put("ALT", d2);
-        container = responseFactoryImpl.getGGEP(ggep);
+        container = responseFactoryImpl.getGGEP(ggep, 0);
         assertNotNull(container);
         assertNotNull(container.locations);
         assertEquals(2, container.locations.size());
@@ -791,7 +798,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // invalid alt, valid ctime
         ggep.put("ALT", new byte[0]);
         ggep.put("CT", 3214);
-        container = responseFactoryImpl.getGGEP(ggep);
+        container = responseFactoryImpl.getGGEP(ggep, 0);
         assertEquals(0, container.locations.size());
         assertEquals(3214000, container.createTime);
         
@@ -799,7 +806,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         ggep.put("ALT", d2);
         // use 9 bytes (1 byte over the max for a long)
         ggep.put("CT", new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 } );
-        container = responseFactoryImpl.getGGEP(ggep);
+        container = responseFactoryImpl.getGGEP(ggep, 0);
         assertEquals(2, container.locations.size());
         assertEquals(eps, container.locations);
         assertEquals(-1, container.createTime);
@@ -874,6 +881,41 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         } catch (IOException expected){}
     }
     
+    public void testIntervals() throws Exception {
+        // response with two urns
+        UrnSet set = new UrnSet();
+        set.add(UrnHelper.SHA1);
+        set.add(UrnHelper.TTROOT);
+        
+        // a verifying file with some stuff verified
+        VerifyingFileFactory vfactory = injector.getInstance(VerifyingFileFactory.class);
+        VerifyingFile vf = vfactory.createVerifyingFile(1024*1024);
+        Range r = Range.createRange(0,1024 * 10 - 1);
+        IntervalSet verified = new IntervalSet();
+        verified.add(r);
+        PrivilegedAccessor.setValue(vf,"verifiedBlocks",verified);
+        
+        
+        IncompleteFileDesc ifd = new IncompleteFileDesc(new File("a"),set,11,"a",1024 * 1024,vf);
+        Response resp = responseFactoryImpl.createResponse(ifd);
+        assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
+        assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
+        IntervalSet s = resp.getRanges();
+        assertEquals(1,s.getNumberOfIntervals());
+        assertEquals(10240, s.getSize());
+        assertTrue(s.contains(r));
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resp.writeToStream(baos);
+        byte [] data = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        Response read = responseFactoryImpl.createFromStream(bais);
+        s = read.getRanges();
+        assertEquals(1,s.getNumberOfIntervals());
+        assertEquals(10240, s.getSize());
+        assertTrue(s.contains(r));
+    }
+    
     private void assertResponseParsingFails(Response r) throws Exception {
         QueryReply qr = XMLDocFilterTest.createReply(r, 5555, new byte[] { 127, 0, 0, 1 }, queryReplyFactory, limeXMLDocumentHelper);
         try {
@@ -890,9 +932,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
             "getAsIpPorts", new Object[] { col } );
     }
     
-    private void addGGEP(OutputStream os, ResponseFactoryImpl.GGEPContainer gc) throws Exception {
+    private void addGGEP(OutputStream os, ResponseFactoryImpl.GGEPContainer gc, long size) throws Exception {
         PrivilegedAccessor.invokeMethod(responseFactoryImpl, "addGGEP",
-            new Object[] { os, gc },
-            new Class[] { OutputStream.class, ResponseFactoryImpl.GGEPContainer.class } );
+            new Object[] { os, gc, size },
+            new Class[] { OutputStream.class, ResponseFactoryImpl.GGEPContainer.class, long.class } );
     }
 }

@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.collection.IntervalSet;
 import org.limewire.collection.NameValue;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -37,6 +38,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
+import com.limegroup.gnutella.messages.IntervalEncoder;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -95,9 +97,15 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @see com.limegroup.gnutella.ResponseFactory#createResponse(com.limegroup.gnutella.FileDesc)
      */
     public Response createResponse(FileDesc fd) {
+        IntervalSet ranges = null;
+        if (fd instanceof IncompleteFileDesc) {
+            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+            ranges = ifd.getVerifiedRanges();
+        }
+        
         GGEPContainer container = new GGEPContainer(getAsIpPorts(altLocManager
                 .getDirect(fd.getSHA1Urn())), creationTimeCache.get()
-                .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize());
+                .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize(), ranges);
 
         return createResponse(fd.getIndex(), fd.getFileSize(),
                 fd.getFileName(), -1, fd.getUrns(), null, container, null);
@@ -168,7 +176,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
                     break;
             }
 
-            GGEPContainer ggep = getGGEP(huge.getGGEP());
+            GGEPContainer ggep = getGGEP(huge.getGGEP(), size);
             if (ggep.size64 > MAX_FILE_SIZE)
                 throw new IOException(" file too large " + ggep.size64);
             if (ggep.size64 > Integer.MAX_VALUE)
@@ -210,15 +218,15 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (size <= Integer.MAX_VALUE)
                 ggepData = GGEPContainer.EMPTY;
             else // large filesizes require GGEP now
-                ggepData = new GGEPContainer(null, -1L, size);
+                ggepData = new GGEPContainer(null, -1L, size, null);
         }
 
         // build up extensions if it wasn't already!
         if (extensions == null)
-            extensions = createExtBytes(urns, ggepData);
+            extensions = createExtBytes(urns, ggepData, size);
 
         return new Response(index, size, name, incomingNameByteArraySize, urns, doc,
-                ggepData.locations, ggepData.createTime, extensions);
+                ggepData.locations, ggepData.createTime, extensions, ggepData.ranges);
     }
     
     private void checkFilename(String name) throws IOException {
@@ -312,7 +320,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
      *        constructing the byte array
      */
-    private byte[] createExtBytes(Set<? extends URN> urns, GGEPContainer ggep) {
+    private byte[] createExtBytes(Set<? extends URN> urns, GGEPContainer ggep, long size) {
         try {
             if (isEmpty(urns) && ggep.isEmpty())
                 return DataUtils.EMPTY_BYTE_ARRAY;
@@ -341,7 +349,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             // within it, which would cause parsing problems
             // otherwise.
             if (!ggep.isEmpty())
-                addGGEP(baos, ggep);
+                addGGEP(baos, ggep, size);
 
             return baos.toByteArray();
         } catch (IOException impossible) {
@@ -397,10 +405,13 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * Adds a GGEP block with the specified alternate locations to the output
      * stream.
      */
-    private void addGGEP(OutputStream out, GGEPContainer ggep)
+    private void addGGEP(OutputStream out, GGEPContainer ggep, long size)
             throws IOException {
         if (ggep == null
-                || (ggep.locations.size() == 0 && ggep.createTime <= 0 && ggep.size64 <= Integer.MAX_VALUE))
+                || (ggep.locations.size() == 0 && 
+                        ggep.createTime <= 0 && 
+                        ggep.size64 <= Integer.MAX_VALUE &&
+                        ggep.ranges == null))
             throw new IllegalArgumentException(
                     "null or empty locations and small size");
 
@@ -426,6 +437,9 @@ public class ResponseFactoryImpl implements ResponseFactory {
 
         if (ggep.size64 > Integer.MAX_VALUE && ggep.size64 <= MAX_FILE_SIZE)
             info.put(GGEP.GGEP_HEADER_LARGE_FILE, ggep.size64);
+        
+        if (ggep.ranges != null)
+            IntervalEncoder.encode(size, info, ggep.ranges);
 
         info.write(out);
     }
@@ -436,13 +450,13 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * 
      * Default access for testing.
      */
-    GGEPContainer getGGEP(GGEP ggep) {
+    GGEPContainer getGGEP(GGEP ggep, long size) {
         if (ggep == null)
             return GGEPContainer.EMPTY;
 
         Set<? extends IpPort> locations = null;
         long createTime = -1;
-        long size64 = 0;
+        long size64 = size;
 
         // if the block has a ALTS value, get it, parse it,
         // and move to the next.
@@ -475,9 +489,16 @@ public class ResponseFactoryImpl implements ResponseFactory {
             } catch (BadGGEPPropertyException bad) {
             }
         }
-
-        return (locations == null && createTime == -1 && size64 <= Integer.MAX_VALUE) ? GGEPContainer.EMPTY
-                : new GGEPContainer(locations, createTime, size64);
+        
+        IntervalSet ranges = null;
+        try {
+            ranges = IntervalEncoder.decode(size64,ggep);
+        } catch (BadGGEPPropertyException ignore){}
+        
+        if (locations == null && createTime == -1 && size64 <= Integer.MAX_VALUE && ranges == null)
+            return GGEPContainer.EMPTY;
+        
+        return new GGEPContainer(locations, createTime, size64, ranges);
     }
 
     /**
@@ -530,23 +551,25 @@ public class ResponseFactoryImpl implements ResponseFactory {
         final long createTime;
         final long size64;
         static final GGEPContainer EMPTY = new GGEPContainer();
+        final IntervalSet ranges;
 
         private GGEPContainer() {
-            this(null, -1, 0);
+            this(null, -1, 0, null);
         }
 
-        GGEPContainer(Set<? extends IpPort> locs, long create, long size64) {
+        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges) {
             if (locs == null)
                 locations = Collections.emptySet();
             else
                 locations = Collections.unmodifiableSet(locs);
             createTime = create;
             this.size64 = size64;
+            this.ranges = ranges;
         }
 
         boolean isEmpty() {
             return locations.isEmpty() && createTime <= 0
-                    && size64 <= Integer.MAX_VALUE;
+                    && size64 <= Integer.MAX_VALUE && ranges == null;
         }
     }
 }

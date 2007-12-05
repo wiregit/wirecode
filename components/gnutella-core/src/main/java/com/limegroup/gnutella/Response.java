@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Set;
 
+import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -81,6 +82,9 @@ public class Response {
     
     /** The creation time for this Response. */
     private final long creationTime;
+    
+    /** Ranges carried in this response, null if none */
+    private final IntervalSet ranges;
 
 
     /**
@@ -108,7 +112,7 @@ public class Response {
 					 int incomingNameByteArraySize, Set<? extends URN> urns, 
 					 LimeXMLDocument doc,
 					 Set<? extends IpPort> alternateLocations,
-					 long creationTime, byte[] extensions) {
+					 long creationTime, byte[] extensions, IntervalSet ranges) {
         
                 
         if( (index & 0xFFFFFFFF00000000L)!=0 )
@@ -149,6 +153,7 @@ public class Response {
 		this.incomingNameByteArraySize = incomingNameByteArraySize;
 
 		this.document = doc;
+        this.ranges = ranges;
     }
   
     /**
@@ -271,6 +276,10 @@ public class Response {
     
     byte[] getExtBytes() {
         return extBytes;
+    }
+    
+    public IntervalSet getRanges() {
+        return ranges;
     }
     
     /**

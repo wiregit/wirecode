@@ -409,6 +409,13 @@ public class VerifyingFile {
     }
     
     /**
+     * @return a clone of the verified IntervalSet.
+     */
+    public synchronized IntervalSet getVerifiedIntervalSet() {
+        return verifiedBlocks.clone();
+    }
+    
+    /**
      * @return byte-packed representation of the verified blocks.
      */
     public synchronized IntervalSet.ByteIntervals toBytes() {
