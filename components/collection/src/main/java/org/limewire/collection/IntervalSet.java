@@ -405,7 +405,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
         for (int i : id) {
             int [] nodes = ts.nodeToFileId(i);
-            Range r = Range.createRange(nodes[0] * 1024, Math.min((nodes[1]+1) * 1024 - 1, maxSize-1));
+            Range r = Range.createRange(nodes[0] * 1024L, Math.min((nodes[1]+1) * 1024L - 1, maxSize-1));
             add(r);
         }
     }
