@@ -56,6 +56,26 @@ public class UrnHelper {
     	"urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPSD",
     	"urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
     };
+    
+    public static final String[] VALID_TTROOT_STRINGS = {
+        "urn:ttroot:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "urn:ttroot:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFBAAAA",
+        "Urn:ttroot:ALSTHIPQGSSZTS5FJUPAKUZWUGZQYPFBAAAA",
+        "uRn:tTroot:QLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "urn:ttroot:WLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "urn:Ttroot:ELSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "UrN:ttroot:RLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "urn:ttroot:ILSTIIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "urn:ttroot:FLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPFBAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPZBAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPZCAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPZDAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPZEAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPRCAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPSDAAAA",
+        "urn:ttroot:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTEAAAA",
+    };
     /**
      * Array of URNs for use by tests.
      */
@@ -77,10 +97,13 @@ public class UrnHelper {
 
     public static final URN SHA1;
     
+    public static final URN TTROOT;
+    
     static {        
         try {
             UNIQUE_SHA1 = URN.createSHA1Urn("urn:sha1:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFB");
             SHA1 = URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[3]);
+            TTROOT= URN.createTTRootUrn(VALID_TTROOT_STRINGS[3]);
         
             for(int i=0; i<UrnHelper.VALID_URN_STRINGS.length; i++) {
                 URN urn = URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[i]);

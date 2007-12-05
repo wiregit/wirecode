@@ -17,6 +17,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.collection.Range;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -31,6 +32,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
+import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.LibraryData;
@@ -44,6 +46,7 @@ import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
+import com.limegroup.gnutella.stubs.QueryRequestStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -422,6 +425,153 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("unexected shared files", 0, fman.getNumFiles());
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
+    }
+    
+    public void testShareIncompleteFile() throws Exception {
+        VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
+        
+        assertEquals("unexected shared files", 0, fman.getNumFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
+
+        File f;
+        VerifyingFile vf;
+        UrnSet urns;
+        IncompleteFileDesc ifd;
+        QueryRequest qrDesiring = new QueryRequestStub() {
+            @Override
+            public String getQuery() {
+                return "asdf";
+            }
+            @Override
+            public boolean desiresPartialResults() {
+                return true;
+            }
+        };
+        
+        QueryRequest notDesiring = new QueryRequestStub() {
+            @Override
+            public String getQuery() {
+                return "asdf";
+            }
+            @Override
+            public boolean desiresPartialResults() {
+                return false;
+            }
+        };
+        
+        // a) single urn, not enough data written -> not shared
+        vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
+        vf.addInterval(Range.createRange(0,100));
+        assertEquals(101,vf.getBlockSize());
+        urns = new UrnSet();
+        urns.add(UrnHelper.URNS[0]);
+        f = new File("asdf");
+        
+        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
+        assertFalse(ifd.shouldBeShared());
+        assertEquals(0,fman.query(qrDesiring).length);
+        assertFalse(fman.getQRT().contains(qrDesiring));
+        
+        // b) single urn, enough data written -> not shared
+        fman.removeFileIfShared(f);
+        vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
+        vf.addInterval(Range.createRange(0,1024 * 512));
+        assertGreaterThan(102400,vf.getBlockSize());
+        urns = new UrnSet();
+        urns.add(UrnHelper.URNS[0]);
+        f = new File("asdf");
+        
+        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
+        assertFalse(ifd.shouldBeShared());
+        assertEquals(0,fman.query(qrDesiring).length);
+        assertFalse(fman.getQRT().contains(qrDesiring));
+        
+        // c) two urns, not enough data written -> not shared
+        fman.removeFileIfShared(f);
+        vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
+        vf.addInterval(Range.createRange(0,1024 ));
+        assertLessThan(102400,vf.getBlockSize());
+        urns = new UrnSet();
+        urns.add(UrnHelper.URNS[0]);
+        urns.add(UrnHelper.TTROOT);
+        f = new File("asdf");
+        
+        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
+        assertFalse(ifd.shouldBeShared());
+        assertEquals(0,fman.query(qrDesiring).length);
+        assertFalse(fman.getQRT().contains(qrDesiring));
+
+        // d) two urns, enough data written -> shared
+        fman.removeFileIfShared(f);
+        vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
+        vf.addInterval(Range.createRange(0,1024 * 512));
+        assertGreaterThan(102400,vf.getBlockSize());
+        urns = new UrnSet();
+        urns.add(UrnHelper.URNS[0]);
+        urns.add(UrnHelper.TTROOT);
+        assertGreaterThan(1, urns.size());
+        f = new File("asdf");
+        
+        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
+        assertTrue(ifd.shouldBeShared());
+        assertGreaterThan(0,fman.query(qrDesiring).length);
+        assertEquals(0,fman.query(notDesiring).length);
+        assertTrue(fman.getQRT().contains(qrDesiring));
+        
+        // e) two urns, enough data written, sharing disabled -> not shared
+        SharingSettings.ALLOW_PARTIAL_SHARING.setValue(false);
+        fman.removeFileIfShared(f);
+        vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
+        vf.addInterval(Range.createRange(0,1024 * 512));
+        assertGreaterThan(102400,vf.getBlockSize());
+        urns = new UrnSet();
+        urns.add(UrnHelper.URNS[0]);
+        urns.add(UrnHelper.TTROOT);
+        assertGreaterThan(1, urns.size());
+        f = new File("asdf");
+        
+        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
+        assertTrue(ifd.shouldBeShared());
+        assertEquals(0,fman.query(qrDesiring).length);
+        assertEquals(0,fman.query(notDesiring).length);
+        assertFalse(fman.getQRT().contains(qrDesiring));
+        SharingSettings.ALLOW_PARTIAL_SHARING.setValue(true);
+        
+        // f) start with one urn, add a second one -> becomes shared
+        fman.removeFileIfShared(f);
+        vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
+        vf.addInterval(Range.createRange(0,1024 * 512));
+        assertGreaterThan(102400,vf.getBlockSize());
+        urns = new UrnSet();
+        urns.add(UrnHelper.URNS[0]);
+        f = new File("asdf");
+        
+        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
+        assertFalse(ifd.shouldBeShared());
+        assertEquals(0,fman.query(qrDesiring).length);
+        assertFalse(fman.getQRT().contains(qrDesiring));
+        
+        ifd.updateTTROOT(UrnHelper.TTROOT);
+        assertTrue(ifd.shouldBeShared());
+        fman.fileURNSUpdated(ifd);
+        assertGreaterThan(0,fman.query(qrDesiring).length);
+        assertEquals(0,fman.query(notDesiring).length);
+        assertTrue(fman.getQRT().contains(qrDesiring));
+        
+        // g) start with two urns, add data -> becomes shared
+        // actually this is on the one scenario that won't work
+        // because we do not have a callback mechanism for file
+        // verification.  However, given that the default chunks size
+        // we request is 128kb, we're bound to have more data downloaded
+        // by the time we get the tree root.
+        // This will change once we start using roots from replies.
     }
     
     /**

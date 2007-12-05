@@ -205,6 +205,14 @@ public class DownloadTHEXTest extends DownloadTestCase {
         assertTrue(fd.getUrns().contains(TestFile.hash()));
         assertTrue(fd.getUrns().contains(ttroot));
         
+        IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+        
+        // eventually we should become shareable
+        sleeps = 0;
+        while(!ifd.shouldBeShared() && sleeps++ < 20)
+            Thread.sleep(500);
+        assertTrue(ifd.shouldBeShared());
+        
         waitForComplete();
     }
     
