@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message.Network;
 
 @Singleton
 public class ReplyNumberVendorMessageFactoryImpl implements ReplyNumberVendorMessageFactory {
@@ -17,9 +18,9 @@ public class ReplyNumberVendorMessageFactoryImpl implements ReplyNumberVendorMes
     }
 
     public ReplyNumberVendorMessage createFromNetwork(
-            byte[] guid, byte ttl, byte hops, int version, byte[] payload)
+            byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network)
             throws BadPacketException {
-        return new ReplyNumberVendorMessage(guid, ttl, hops, version, payload);
+        return new ReplyNumberVendorMessage(guid, ttl, hops, version, payload, network);
     }
 
     public ReplyNumberVendorMessage create(GUID replyGUID, int numResults) {

@@ -41,8 +41,8 @@ public class OOBProxyControlVendorMessage extends VendorMessage {
     
     
     public OOBProxyControlVendorMessage(byte[] guid, byte ttl, byte hops, 
-            int version, byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL, version, payload);
+            int version, byte[] payload, Network network) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL, version, payload, network);
         if (getVersion() != VERSION) {
             throw new BadPacketException("Unsupported version or payload length");
         }

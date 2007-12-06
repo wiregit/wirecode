@@ -35,8 +35,8 @@ public class DHTContactsMessage extends VendorMessage {
     }
     
     public DHTContactsMessage(byte[] guid, byte ttl, byte hops, 
-            int version, byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_DHT_CONTACTS, version, payload);
+            int version, byte[] payload, Network network) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_DHT_CONTACTS, version, payload, network);
         
         ByteArrayInputStream bais = new ByteArrayInputStream(payload);
         MessageInputStream in = new MessageInputStream(bais);

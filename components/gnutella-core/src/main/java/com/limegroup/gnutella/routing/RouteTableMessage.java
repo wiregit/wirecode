@@ -55,15 +55,13 @@ public abstract class RouteTableMessage extends AbstractMessage {
      * The returned value is a subclass of RouteTableMessage depending on
      * the variant in the payload.  (That's why there is no corresponding
      * constructor in this.)
+     * @param network TODO
      * 
      * @throws BadPacketException the payload is not well-formatted
      */
-    public static RouteTableMessage read(byte[] guid,
-                                         byte ttl,
-                                         byte hops,
-                                         byte[] payload) 
-                                    throws BadPacketException {
-        //Parse the common bytes of the payload...
+    public static RouteTableMessage read(byte[] guid, byte ttl, byte hops, byte[] payload,
+            Network network) throws BadPacketException {
+        // Parse the common bytes of the payload...
         if (payload.length<2)
             throw new BadPacketException("Payload too small");
         byte variant=payload[0];
@@ -72,9 +70,9 @@ public abstract class RouteTableMessage extends AbstractMessage {
         //call this constructor.
         switch (variant) {
         case RESET_VARIANT:
-            return new ResetTableMessage(guid, ttl, hops, payload);
+            return new ResetTableMessage(guid, ttl, hops, payload, network);
         case PATCH_VARIANT:
-            return new PatchTableMessage(guid, ttl, hops, payload);
+            return new PatchTableMessage(guid, ttl, hops, payload, network);
         default:
             throw new BadPacketException("Unknown table variant");
         }
@@ -90,22 +88,18 @@ public abstract class RouteTableMessage extends AbstractMessage {
      *
      * @see com.limegroup.gnutella.Message
      */
-    protected RouteTableMessage(byte[] guid,
-                                byte ttl,
-                                byte hops,
-                                int  length,
-                                byte variant) {
-        super(guid, Message.F_ROUTE_TABLE_UPDATE, ttl, hops, length);
-        this.variant=variant;
+    protected RouteTableMessage(byte[] guid, byte ttl, byte hops, int length, byte variant,
+            Network network) {
+        super(guid, Message.F_ROUTE_TABLE_UPDATE, ttl, hops, length, network);
+        this.variant = variant;
     }
 
 
 
-    ///////////////////////////// Accessors //////////////////////////////
+    // /////////////////////////// Accessors //////////////////////////////
 
     /**
-     * Returns the variant of this, i.e. one of RESET_VARIANT,
-     * or PATCH_VARIANT.
+     * Returns the variant of this, i.e. one of RESET_VARIANT, or PATCH_VARIANT.
      */
     public byte getVariant() {
         return variant;

@@ -27,10 +27,11 @@ public class ContentResponse extends VendorMessage {
 
     /**
      * Constructs a new ContentRequest with data from the network.
+     * @param network TODO
      */
-    public ContentResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload) 
+    public ContentResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network) 
       throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_CONTENT_RESP, version, payload);
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_CONTENT_RESP, version, payload, network);
         if (getPayload().length < 1)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " + getPayload().length);
         

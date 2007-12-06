@@ -19,9 +19,9 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
     private Properties _headers;
     
     HeaderUpdateVendorMessage(byte[] guid, byte ttl, byte hops,
-			 int version, byte[] payload)
+			 int version, byte[] payload, Network network)
 			throws BadPacketException {
-		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_HEADER_UPDATE, version, payload);
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_HEADER_UPDATE, version, payload, network);
 		
 		//see if the payload is valid
 		if (getVersion() == VERSION && (payload == null || payload.length == 0))

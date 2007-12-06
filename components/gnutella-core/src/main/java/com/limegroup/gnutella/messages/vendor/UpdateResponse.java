@@ -20,10 +20,11 @@ public final class UpdateResponse extends VendorMessage {
     
     /**
      * Constructs a new UpdateResponse message from the network.
+     * @param network TODO
      */
-    UpdateResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload) 
+    UpdateResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network) 
                                                      throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_RESP, version, payload);
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_RESP, version, payload, network);
         
         if (version == NON_GGEP_VERSION)
             update = payload;

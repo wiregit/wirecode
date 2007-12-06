@@ -146,19 +146,6 @@ public abstract class VendorMessage extends AbstractMessage {
     /**
      * Constructs a new VendorMessage with data from the network.
      * Primarily built for the convenience of the class Message.
-     * Subclasses must extend this (or the below constructor that takes a 
-     * network parameter) and use getPayload() to parse the payload and do
-     * anything else they need to.
-     */
-    protected VendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID,
-                            int selector, int version, byte[] payload) 
-        throws BadPacketException {
-        this(guid,ttl,hops,vendorID,selector,version,payload, Network.UNKNOWN);
-    }
-
-    /**
-     * Constructs a new VendorMessage with data from the network.
-     * Primarily built for the convenience of the class Message.
      * Subclasses must extend this (or the above constructor that doesn't 
      * takes a network parameter) and use getPayload() to parse the payload
      * and do anything else they need to.

@@ -25,12 +25,13 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
 
     /**
      * Constructs a new TCPConnectBackVendorMessage with data from the network.
+     * @param network TODO
      */
     TCPConnectBackVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                                byte[] payload) 
+                                byte[] payload, Network network) 
         throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK, version,
-              payload);
+              payload, network);
 
         if (getVersion() > VERSION)
             throw new BadPacketException("UNSUPPORTED VERSION");

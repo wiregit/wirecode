@@ -109,11 +109,12 @@ public class UDPCrawlerPing extends VendorMessage {
 	 * 
 	 * note this does not have upper limit to the number of requested results 
 	 * (other than the 255 byte limit).  One day we may have many more connections..
+	 * @param network TODO
 	 */
 	protected UDPCrawlerPing(byte[] guid, byte ttl, byte hops,
-			 int version, byte[] payload)
+			 int version, byte[] payload, Network network)
 			throws BadPacketException {
-		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_CRAWLER_PING, version, payload);
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_CRAWLER_PING, version, payload, network);
 		
 		//see if the payload is valid
 		if (getVersion() == VERSION && (payload == null || payload.length != 3))

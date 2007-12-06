@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 
@@ -33,18 +34,10 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.messages.PingRequestFactory#createPingRequest(byte[], byte, byte, byte)
-     */
-    public PingRequest createPingRequest(byte[] guid, byte ttl,
-            byte hops, byte length) {
-        return new PingRequestImpl(guid, ttl, hops, length);
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.PingRequestFactory#createPingRequest(byte[], byte, byte, byte[])
      */
-    public PingRequest createPingRequest(byte[] guid, byte ttl,
-            byte hops, byte[] payload) {
+    public PingRequest createFromNetwork(byte[] guid, byte ttl,
+            byte hops, byte[] payload, Network network) {
         return new PingRequestImpl(guid, ttl, hops, payload);
     }
 

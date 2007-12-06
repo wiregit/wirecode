@@ -19,11 +19,12 @@ public final class QueryStatusRequest extends VendorMessage {
 
     /**
      * Constructs a new QueryStatusRequest with data from the network.
+     * @param network TODO
      */
     QueryStatusRequest(byte[] guid, byte ttl, byte hops, int version, 
-                       byte[] payload) throws BadPacketException {
+                       byte[] payload, Network network) throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_LIME_ACK, 
-              version, payload);
+              version, payload, network);
 
         if (getVersion() > VERSION) // we don't support it!!
             throw new BadPacketException("UNSUPPORTED VERSION");

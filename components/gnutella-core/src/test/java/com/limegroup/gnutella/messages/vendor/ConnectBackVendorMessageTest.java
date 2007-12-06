@@ -4,6 +4,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message.Network;
 
 /** Tests TCP/UDP ConnectBackVendorMessage
  */
@@ -36,7 +37,7 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Li
         try {
             // try a VERSION we don't support, with the now 2-byte payload
             udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION+1, bytes(2));
+                                                UDP_VERSION+1, bytes(2), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
@@ -44,7 +45,7 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Li
         try {
             // try a VERSION we don't support, with the old 18-byte payload
             udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION+1, bytes(18));
+                                                UDP_VERSION+1, bytes(18), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
@@ -52,25 +53,25 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Li
         try {
             // in the next few tests, try bad sizes of the payload....
             udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION, bytes(0));
+                                                UDP_VERSION, bytes(0), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION, bytes(17));
+                                                UDP_VERSION, bytes(17), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION, bytes(19));
+                                                UDP_VERSION, bytes(19), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // Test version 1 constructor -- 18 bytes in payload
-        udp = new UDPConnectBackVendorMessage(guid, ttl, hops, 1, bytes(18));
+        udp = new UDPConnectBackVendorMessage(guid, ttl, hops, 1, bytes(18), Network.UNKNOWN);
         // no bpe ...
         
         // make sure we encode things just fine....
@@ -81,7 +82,7 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Li
         UDPConnectBackVendorMessage VendorMessage2 = 
             new UDPConnectBackVendorMessage(VendorMessage1.getGUID(), ttl, hops,
                                             VendorMessage1.getVersion(),
-                                            VendorMessage1.getPayload());
+                                            VendorMessage1.getPayload(), Network.UNKNOWN);
         assertEquals(1, VendorMessage1.getVersion());
         assertEquals(VendorMessage2, VendorMessage1);
         assertEquals(VendorMessage1.getConnectBackPort(),
@@ -91,7 +92,7 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Li
 
         //Test version 2 constructor -- 2 bytes in payload.
         udp = new UDPConnectBackVendorMessage(guid, ttl, hops, UDP_VERSION, 
-                                              bytes(2));
+                                              bytes(2), Network.UNKNOWN);
         assertEquals(2, udp.getVersion());
         assertEquals(udp.getConnectBackGUID(), new GUID(guid));
         assertEquals(1, udp.getConnectBackPort());
@@ -113,33 +114,33 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Li
         try {
             // try a VERSION we don't support
             new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION+1, bytes(2));
+                                                TCP_VERSION+1, bytes(2), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             // in the next few tests, try bad sizes of the payload....
             new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION, bytes(0));
+                                                TCP_VERSION, bytes(0), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION, bytes(1));
+                                                TCP_VERSION, bytes(1), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION, bytes(3));
+                                                TCP_VERSION, bytes(3), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // this is the correct size of the payload
         new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                            TCP_VERSION, bytes(2));
+                                            TCP_VERSION, bytes(2), Network.UNKNOWN);
 
 
         // make sure we encode things just fine....
@@ -148,7 +149,7 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Li
         TCPConnectBackVendorMessage VendorMessage2 = 
             new TCPConnectBackVendorMessage(VendorMessage1.getGUID(),
                                             ttl, hops, TCP_VERSION, 
-                                            VendorMessage1.getPayload());
+                                            VendorMessage1.getPayload(), Network.UNKNOWN);
         assertEquals(VendorMessage1, VendorMessage2);
         assertEquals(VendorMessage1.getConnectBackPort(),
                      VendorMessage2.getConnectBackPort());

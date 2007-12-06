@@ -38,7 +38,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
     
     public void testSecurityTokenBytesFromNetWork() throws BadPacketException {
         LimeACKVendorMessage in = new LimeACKVendorMessage(new GUID(), 10, token);
-        LimeACKVendorMessage msg = new LimeACKVendorMessage(GUID.makeGuid(), (byte)1, (byte)1, 3, in.getPayload());
+        LimeACKVendorMessage msg = new LimeACKVendorMessage(GUID.makeGuid(), (byte)1, (byte)1, 3, in.getPayload(), Network.UNKNOWN);
         assertEquals(token.getBytes(), msg.getSecurityToken().getBytes());
         assertEquals(10, msg.getNumResults());
     }
@@ -60,7 +60,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
     public void testInvalidPayloadLengths() {
         for (int i = 0; i < 7; i++) {
             try {
-                new LimeACKVendorMessage(GUID.makeGuid(), (byte)1, (byte)1, 3, new byte[i]);
+                new LimeACKVendorMessage(GUID.makeGuid(), (byte)1, (byte)1, 3, new byte[i], Network.UNKNOWN);
                 fail("payload is too short but no exception thrown");
             } catch (BadPacketException e) {
             }
@@ -105,7 +105,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
         payload = new byte[0];
         try {
             vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 0, payload);
+                                              (byte) 0, 0, payload, Network.UNKNOWN);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
@@ -114,7 +114,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
         payload = new byte[1];
         try {
             vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 1, payload);
+                                              (byte) 0, 1, payload, Network.UNKNOWN);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
@@ -123,7 +123,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
         payload = new byte[2];
         try {
             vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 2, payload);
+                                              (byte) 0, 2, payload, Network.UNKNOWN);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
@@ -132,7 +132,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
         payload = new byte[7];
         try {
             vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 3, payload);
+                                              (byte) 0, 3, payload, Network.UNKNOWN);
             assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
         }
         catch (BadPacketException expected) {

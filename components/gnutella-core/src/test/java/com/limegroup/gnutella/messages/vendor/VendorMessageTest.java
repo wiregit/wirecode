@@ -92,7 +92,7 @@ public class VendorMessageTest extends BaseTestCase {
         // -----------------------------
         // test network constructor....
         VendorMessage vm = new HopsFlowVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                                     (byte) 0, 1, new byte[1]);
+                                                     (byte) 0, 1, new byte[1], Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new HopsFlowVendorMessage((byte)6);
@@ -102,7 +102,7 @@ public class VendorMessageTest extends BaseTestCase {
         // -----------------------------
         // test network constructor....
         vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, (byte) 0, 
-                                      2, new byte[1]);
+                                      2, new byte[1], Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new LimeACKVendorMessage(new GUID(GUID.makeGuid()), 5, token);
@@ -115,21 +115,21 @@ public class VendorMessageTest extends BaseTestCase {
         // test old versions are no longer accepted 
         try {
             vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                    (byte) 1, (byte) 0, 1, new byte[1]);
+                    (byte) 1, (byte) 0, 1, new byte[1], Network.UNKNOWN);
             fail("should have thrown bad packed exception, protocol version 1 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         try {
             vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                    (byte) 1, (byte) 0, 2, new byte[1]);
+                    (byte) 1, (byte) 0, 2, new byte[1], Network.UNKNOWN);
             fail("should have thrown bad packed exception, protocol version 2 is no longer supported");
         }
         catch (BadPacketException bpe) {
         }
         
         vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                (byte) 1, (byte) 0, 3, new byte[2]);
+                (byte) 1, (byte) 0, 3, new byte[2], Network.UNKNOWN);
         
         testWrite(vm);
         // test other constructor....
@@ -140,7 +140,7 @@ public class VendorMessageTest extends BaseTestCase {
         // -----------------------------
         // test network constructor....
         vm = new PushProxyRequest(GUID.makeGuid(), (byte) 1, 
-                                  (byte) 0, 1, new byte[0]);
+                                  (byte) 0, 1, new byte[0], Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new PushProxyRequest(new GUID(GUID.makeGuid()));
@@ -156,13 +156,13 @@ public class VendorMessageTest extends BaseTestCase {
         // make sure deprecation is working....
         try {
             vm = new PushProxyAcknowledgement(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 1, bytes);
+                                              (byte) 0, 1, bytes, Network.UNKNOWN);
             assertTrue(false);
         }
         catch (BadPacketException expected) {}
 
         vm = new PushProxyAcknowledgement(GUID.makeGuid(), (byte) 1, 
-                                          (byte) 0, 2, bytes);
+                                          (byte) 0, 2, bytes, Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new PushProxyAcknowledgement(InetAddress.getLocalHost(), 5);
@@ -172,7 +172,7 @@ public class VendorMessageTest extends BaseTestCase {
         // -----------------------------
         // test network constructor....
         vm = new QueryStatusRequest(GUID.makeGuid(), (byte) 1, 
-                                    (byte) 0, 1, new byte[0]);
+                                    (byte) 0, 1, new byte[0], Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new QueryStatusRequest(new GUID(GUID.makeGuid()));
@@ -182,7 +182,7 @@ public class VendorMessageTest extends BaseTestCase {
         // -----------------------------
         // test network constructor....
         vm = new QueryStatusResponse(GUID.makeGuid(), (byte) 1, 
-                                     (byte) 0, 1, new byte[2]);
+                                     (byte) 0, 1, new byte[2], Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new QueryStatusResponse(new GUID(GUID.makeGuid()), 65535);
@@ -192,7 +192,7 @@ public class VendorMessageTest extends BaseTestCase {
         // -----------------------------
         // test network constructor....
         vm = new TCPConnectBackRedirect(GUID.makeGuid(), (byte) 1, 
-                                        (byte) 0, 1, bytes);
+                                        (byte) 0, 1, bytes, Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new TCPConnectBackRedirect(InetAddress.getLocalHost(), 65535);
@@ -202,7 +202,7 @@ public class VendorMessageTest extends BaseTestCase {
         // -----------------------------
         // test network constructor....
         vm = new UDPConnectBackRedirect(GUID.makeGuid(), (byte) 1, 
-                                        (byte) 0, 1, bytes);
+                                        (byte) 0, 1, bytes, Network.UNKNOWN);
         testWrite(vm);
         // test other constructor....
         vm = new UDPConnectBackRedirect(new GUID(GUID.makeGuid()),
@@ -363,7 +363,7 @@ public class VendorMessageTest extends BaseTestCase {
         try {
             // try a VERSION we don't support with a payload that is ok
             new UDPConnectBackRedirect(guid, ttl, hops,
-                                                UDP_VERSION+1, bytes(6));
+                                                UDP_VERSION+1, bytes(6), Network.UNKNOWN);
         }
         catch (BadPacketException expected) {
             fail("should not have thrown bpe");
@@ -372,7 +372,7 @@ public class VendorMessageTest extends BaseTestCase {
         try {
             // try a VERSION we don't support, with the old 18-byte payload
             new UDPConnectBackRedirect(guid, ttl, hops,
-                                                UDP_VERSION+1, bytes(4));
+                                                UDP_VERSION+1, bytes(4), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (ArrayIndexOutOfBoundsException expected) {}
@@ -380,25 +380,25 @@ public class VendorMessageTest extends BaseTestCase {
         try {
             // in the next few tests, try bad sizes of the payload....
             new UDPConnectBackRedirect(guid, ttl, hops,
-                                                UDP_VERSION, bytes(0));
+                                                UDP_VERSION, bytes(0), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             new UDPConnectBackRedirect(guid, ttl, hops,
-                                                UDP_VERSION, bytes(5));
+                                                UDP_VERSION, bytes(5), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             new UDPConnectBackRedirect(guid, ttl, hops,
-                                                UDP_VERSION, bytes(7));
+                                                UDP_VERSION, bytes(7), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // Test version 1 constructor -- 18 bytes in payload
-        new UDPConnectBackRedirect(guid, ttl, hops, 1, bytes(6));
+        new UDPConnectBackRedirect(guid, ttl, hops, 1, bytes(6), Network.UNKNOWN);
         // no bpe ...
         
         // make sure we encode things just fine....
@@ -410,7 +410,7 @@ public class VendorMessageTest extends BaseTestCase {
         UDPConnectBackRedirect VendorMessage2 = 
             new UDPConnectBackRedirect(VendorMessage1.getGUID(), ttl, hops,
                                             VendorMessage1.getVersion(),
-                                            VendorMessage1.getPayload());
+                                            VendorMessage1.getPayload(), Network.UNKNOWN);
         assertEquals(1, VendorMessage1.getVersion());
         assertEquals(VendorMessage2, VendorMessage1);
         assertEquals(VendorMessage1.getConnectBackPort(),
@@ -440,7 +440,7 @@ public class VendorMessageTest extends BaseTestCase {
         try {
             // try a VERSION we don't support but should be ok
             new TCPConnectBackRedirect(guid, ttl, hops,
-                                                TCP_VERSION+1, bytes(6));
+                                                TCP_VERSION+1, bytes(6), Network.UNKNOWN);
         }
         catch (BadPacketException expected) {
             fail("should not have thrown bpe");
@@ -448,26 +448,26 @@ public class VendorMessageTest extends BaseTestCase {
         try {
             // in the next few tests, try bad sizes of the payload....
             new TCPConnectBackRedirect(guid, ttl, hops,
-                                                TCP_VERSION, bytes(0));
+                                                TCP_VERSION, bytes(0), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             new TCPConnectBackRedirect(guid, ttl, hops,
-                                                TCP_VERSION, bytes(5));
+                                                TCP_VERSION, bytes(5), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             new TCPConnectBackRedirect(guid, ttl, hops,
-                                                TCP_VERSION, bytes(7));
+                                                TCP_VERSION, bytes(7), Network.UNKNOWN);
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // this is the correct size of the payload
         new TCPConnectBackRedirect(guid, ttl, hops,
-                                            TCP_VERSION, bytes(6));
+                                            TCP_VERSION, bytes(6), Network.UNKNOWN);
 
 
         // make sure we encode things just fine....
@@ -476,7 +476,7 @@ public class VendorMessageTest extends BaseTestCase {
         TCPConnectBackRedirect VendorMessage2 = 
             new TCPConnectBackRedirect(VendorMessage1.getGUID(),
                                             ttl, hops, TCP_VERSION, 
-                                            VendorMessage1.getPayload());
+                                            VendorMessage1.getPayload(), Network.UNKNOWN);
         assertEquals(VendorMessage1, VendorMessage2);
         assertEquals(VendorMessage1.getConnectBackPort(),
                      VendorMessage2.getConnectBackPort());
@@ -579,9 +579,9 @@ public class VendorMessageTest extends BaseTestCase {
     
     private static class VM extends VendorMessage {
         public VM(byte[] guid, byte ttl, byte hops, byte[] vendorID, 
-                  int selector, int version, byte[] payload) 
+                  int selector, int version, byte[] payload, Network network) 
             throws BadPacketException {
-            super(guid, ttl, hops, vendorID, selector, version, payload);
+            super(guid, ttl, hops, vendorID, selector, version, payload, network);
         }
 
         public VM(byte[] vendorID, int selector, int version, byte[] payload) {

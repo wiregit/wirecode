@@ -157,8 +157,8 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
       
         //Test the new constructor for big pings read from the network
       
-        PingRequest bigPing = pingRequestFactory.createPingRequest(GUID.makeGuid(), (byte)7,
-                (byte)0, payload);
+        PingRequest bigPing = pingRequestFactory.createFromNetwork(GUID.makeGuid(), (byte)7,
+                (byte)0, payload,  Network.UNKNOWN);
         assertEquals(0, bigPing.getHops());
         assertEquals(7, bigPing.getTTL());
         assertEquals("bad length", 16, bigPing.getLength());

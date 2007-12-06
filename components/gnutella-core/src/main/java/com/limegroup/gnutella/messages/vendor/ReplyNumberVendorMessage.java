@@ -39,12 +39,13 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
 
     /**
      * Constructs a new ReplyNumberVendorMessages with data from the network.
+     * @param network TODO
      */
     ReplyNumberVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                          byte[] payload) 
+                          byte[] payload, Network network) 
         throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
-              payload);
+              payload, network);
         
         if (version < OLD_VERSION)
             throw new BadPacketException("ancient version");

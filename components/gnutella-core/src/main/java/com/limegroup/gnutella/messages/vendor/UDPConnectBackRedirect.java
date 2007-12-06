@@ -32,12 +32,13 @@ public final class UDPConnectBackRedirect extends VendorMessage {
 
     /**
      * Constructs a new UDPConnectBackRedirect with data from the network.
+     * @param network TODO
      */
     UDPConnectBackRedirect(byte[] guid, byte ttl, byte hops, int version, 
-                           byte[] payload) 
+                           byte[] payload, Network network) 
         throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_CONNECT_BACK_REDIR, 
-              version, payload);
+              version, payload, network);
 
         if ((getVersion() == 1) && (getPayload().length != 6))
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +

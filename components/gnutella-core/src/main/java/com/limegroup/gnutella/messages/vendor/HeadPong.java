@@ -139,9 +139,10 @@ public class HeadPong extends VendorMessage {
      * 
      * This will correctly set the fields of this HeadPong, as opposed
      * to the other constructor.
+	 * @param network TODO
 	 */
-	HeadPong(byte[] guid, byte ttl, byte hops, int version, byte[] payload, PushEndpointFactory pushEndpointFactory) throws BadPacketException {
-		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload);
+	HeadPong(byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network, PushEndpointFactory pushEndpointFactory) throws BadPacketException {
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload, network);
 		
         // This isn't really used later on -- it's just used deep within the setFieldsFromXXX methods.
         // Maybe this constructor should go away and should be made with all fields passed in.

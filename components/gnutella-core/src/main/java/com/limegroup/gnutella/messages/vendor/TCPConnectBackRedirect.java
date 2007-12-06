@@ -31,12 +31,13 @@ public final class TCPConnectBackRedirect extends VendorMessage {
 
     /**
      * Constructs a new TCPConnectBackRedirect with data from the network.
+     * @param network TODO
      */
     TCPConnectBackRedirect(byte[] guid, byte ttl, byte hops, int version, 
-                           byte[] payload) 
+                           byte[] payload, Network network) 
         throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK, version,
-              payload);
+              payload, network);
 
         if ((getVersion() == 1) && (getPayload().length != 6))
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +

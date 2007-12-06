@@ -1053,17 +1053,17 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     private static class V2ReplyNumberVendorMessageParser implements VendorMessageParser {
 
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, byte[] restOf, Network network) throws BadPacketException {
-            return new V2ReplyNumberVendorMessage(guid, ttl, hops, version, restOf);
+            return new V2ReplyNumberVendorMessage(guid, ttl, hops, version, restOf, network);
         }
     }
     
     private static class V2ReplyNumberVendorMessage extends VendorMessage {
         
         public V2ReplyNumberVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] payload) 
+                byte[] payload, Network network) 
                 throws BadPacketException {
             super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
-                    payload);
+                    payload, network);
         }
     }
     

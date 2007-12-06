@@ -40,11 +40,12 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
     /** The encoding of the port and the guid.
      */
    
-    /** The network constructor. */
+    /** The network constructor. 
+     * @param network TODO*/
     UDPConnectBackVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                                byte[] payload) throws BadPacketException {
+                                byte[] payload, Network network) throws BadPacketException {
         super(guid, ttl, hops, F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK, 
-              version, payload);
+              version, payload, network);
               
         try {
             payload = getPayload();

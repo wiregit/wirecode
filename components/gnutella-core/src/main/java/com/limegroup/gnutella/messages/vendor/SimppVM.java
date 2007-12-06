@@ -8,10 +8,11 @@ public final class SimppVM extends VendorMessage {
 
     /**
      * Constructs a new SimppVM message from the network.
+     * @param network TODO
      */
-    SimppVM(byte[] guid, byte ttl, byte hops, int version, byte[] payload) 
+    SimppVM(byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network) 
                                                      throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP, version, payload);
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP, version, payload, network);
         
         if(getVersion() > VERSION)
             throw new BadPacketException("UNSUPPORTED VERSION");                

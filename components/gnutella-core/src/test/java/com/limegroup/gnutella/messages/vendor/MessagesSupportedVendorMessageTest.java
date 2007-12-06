@@ -106,7 +106,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         smp3.encode(baos);
         VendorMessage vm = new MessagesSupportedVendorMessage(guid, ttl,
                                                               hops, 0,
-                                                              baos.toByteArray());
+                                                              baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = 
@@ -131,7 +131,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         
         MessagesSupportedVendorMessage vmpOther = 
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0,
-                                               baos.toByteArray());
+                                               baos.toByteArray(), Network.UNKNOWN);
 
         assertEquals(vmp, vmpOther);
 
@@ -159,7 +159,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             smp3.encode(baos);
             smp1.encode(baos);
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
-                                                   baos.toByteArray());
+                                                   baos.toByteArray(), Network.UNKNOWN);
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {
         }
@@ -172,7 +172,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             smp1.encode(baos);
             baos.write("crap".getBytes());
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
-                                                   baos.toByteArray());
+                                                   baos.toByteArray(), Network.UNKNOWN);
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {
         }
@@ -185,7 +185,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         smp1.encode(baos);
         MessagesSupportedVendorMessage vmpOther = 
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
-                                               baos.toByteArray());
+                                               baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)3, baos);
         smp2.encode(baos);
@@ -193,7 +193,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         smp1.encode(baos);
         MessagesSupportedVendorMessage vmpOneOther = 
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
-                                               baos.toByteArray());
+                                               baos.toByteArray(), Network.UNKNOWN);
         assertNotEquals(vmpOther,vmpOneOther);
 
     }

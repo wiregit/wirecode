@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class HeadPingTest extends LimeTestCase {
@@ -27,7 +28,7 @@ public class HeadPingTest extends LimeTestCase {
         out.write(0);
         out.write(UrnHelper.SHA1.httpStringValue().getBytes());
         
-        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, 1, out.toByteArray());
+        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, 1, out.toByteArray(), Network.UNKNOWN);
         assertFalse(ping.isPongGGEPCapable());
     }
     
@@ -36,7 +37,7 @@ public class HeadPingTest extends LimeTestCase {
         out.write(0);
         out.write(UrnHelper.SHA1.httpStringValue().getBytes());
         
-        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, 2, out.toByteArray());
+        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, 2, out.toByteArray(), Network.UNKNOWN);
         assertTrue(ping.isPongGGEPCapable());
     }
     
@@ -45,7 +46,7 @@ public class HeadPingTest extends LimeTestCase {
         out.write(0);
         out.write(UrnHelper.SHA1.httpStringValue().getBytes());
         
-        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION, out.toByteArray());
+        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION, out.toByteArray(), Network.UNKNOWN);
         assertTrue(ping.isPongGGEPCapable());
     }
     
@@ -54,7 +55,7 @@ public class HeadPingTest extends LimeTestCase {
         out.write(0);
         out.write(UrnHelper.SHA1.httpStringValue().getBytes());
         
-        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION+1, out.toByteArray());
+        HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION+1, out.toByteArray(), Network.UNKNOWN);
         assertTrue(ping.isPongGGEPCapable());
     }
 

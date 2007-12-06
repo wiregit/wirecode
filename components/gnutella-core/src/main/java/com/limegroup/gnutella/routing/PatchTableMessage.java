@@ -86,18 +86,16 @@ public class PatchTableMessage extends RouteTableMessage {
     /**
      * Creates a new PATCH variant with data read from the network.  
      * The first byte is guaranteed to be PATCH_VARIANT.
+     * @param network TODO
      * 
      * @exception BadPacketException the remaining values in payload are not
      *  well-formed, e.g., because it's the wrong length, the sequence size
      *  is less than the sequence number, etc.
      */
-    protected PatchTableMessage(byte[] guid, 
-                                byte ttl, 
-                                byte hops,
-                                byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, payload.length, 
-              RouteTableMessage.PATCH_VARIANT);
-        //TODO: maybe we shouldn't enforce this
+    protected PatchTableMessage(byte[] guid, byte ttl, byte hops, byte[] payload, Network network)
+            throws BadPacketException {
+        super(guid, ttl, hops, payload.length, RouteTableMessage.PATCH_VARIANT, network);
+        // TODO: maybe we shouldn't enforce this
         //if (payload.length<5)
         //    throw new BadPacketException("Extra arguments in reset message.");
         assert(payload[0]==PATCH_VARIANT);

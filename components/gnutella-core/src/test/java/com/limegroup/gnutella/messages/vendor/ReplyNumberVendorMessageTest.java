@@ -54,10 +54,10 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     
     public void testVersion3AllowsLargerMessagesFromNetwork() throws BadPacketException {
         replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                (byte)1, (byte)1, 3, new byte[11]);
+                (byte)1, (byte)1, 3, new byte[11], Network.UNKNOWN);
         try {
             replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                    (byte)1, (byte)1, 2, new byte[11]);
+                    (byte)1, (byte)1, 2, new byte[11], Network.UNKNOWN);
             fail("BadPacketException expected, message too large");
         }
         catch (BadPacketException e) {
@@ -67,7 +67,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     public void testOldVersionIsNotAcceptedFromNetwork() {
         try {
             replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                    (byte)0x01, (byte)0x01, 1, new byte[2]);
+                    (byte)0x01, (byte)0x01, 1, new byte[2], Network.UNKNOWN);
             fail("Old message versions should not be accpeted");            
         }
         catch (BadPacketException bpe) {
@@ -112,7 +112,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         payload = new byte[0];
         try {
             vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                    (byte) 1, (byte) 0, 0, payload);
+                    (byte) 1, (byte) 0, 0, payload, Network.UNKNOWN);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
@@ -121,7 +121,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         payload = new byte[2];
         try {
             vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                    (byte) 1, (byte) 0, 1, payload);
+                    (byte) 1, (byte) 0, 1, payload, Network.UNKNOWN);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
@@ -130,7 +130,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         payload = new byte[3];
         try {
             vm = replyNumberVendorMessageFactory.createFromNetwork(GUID.makeGuid(),
-                    (byte) 1, (byte) 0, 3, payload);
+                    (byte) 1, (byte) 0, 3, payload, Network.UNKNOWN);
             assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
         }
         catch (BadPacketException expected) {

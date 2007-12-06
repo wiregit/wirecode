@@ -39,13 +39,6 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
     }
 
     /**
-     * Creates an incoming group ping. Used only by boot-strap server
-     */
-    PingRequestImpl(byte[] guid, byte ttl, byte hops, byte length) {
-        super(guid, Message.F_PING, ttl, hops, length);
-    }
-
-    /**
      * Creates a big ping request from data read from the network
      * 
      * @param payload the headers etc. which the big pings contain.
@@ -87,7 +80,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
     /////////////////////////////methods///////////////////////////
 
     protected void writePayload(OutputStream out) throws IOException {
-        if(payload != null) {
+        if(payload != null && payload.length > 0 ) {
             out.write(payload);
         }
         // the ping is still written even if there's no payload
@@ -159,7 +152,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
      * get locale of this PingRequest 
      */
     public String getLocale() {
-        if(payload != null) {
+        if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
                 if(_ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
@@ -176,7 +169,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
      * marking.
      */
     public boolean supportsCachedPongs() {
-        if(payload != null) {
+        if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
                 return _ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
@@ -193,7 +186,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
     public byte[] getSupportsCachedPongData() {
         byte[] ret = null;
 
-        if(payload != null) {
+        if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
                 if(_ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
@@ -213,7 +206,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
         if (!(getTTL() == 0) || !(getHops() == 1))
             return false;
 
-        if(payload != null) {
+        if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
                 return _ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
@@ -227,7 +220,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
      * @return whether this ping wants a reply carrying IP:Port info.
      */
     public boolean requestsIP() {
-       if(payload != null) {
+       if(payload != null && payload.length > 0) {
            try {
                parseGGEP();
                return _ggep.hasKey(GGEP.GGEP_HEADER_IPPORT);
@@ -241,7 +234,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
      * @return whether this ping wants a reply carrying DHT IPP info
      */
     public boolean requestsDHTIPP() {
-       if(payload != null) {
+       if(payload != null && payload.length > 0) {
            try {
                parseGGEP();
                return _ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS);

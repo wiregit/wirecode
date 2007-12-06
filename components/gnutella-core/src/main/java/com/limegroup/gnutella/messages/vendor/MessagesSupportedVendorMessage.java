@@ -29,12 +29,13 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     /**
      * Constructs a new MSVM message with data from the network.
+     * @param network TODO
      */
     MessagesSupportedVendorMessage(byte[] guid, byte ttl, byte hops, 
-                                   int version, byte[] payload) 
+                                   int version, byte[] payload, Network network) 
         throws BadPacketException {
         super(guid, ttl, hops, F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, version,
-              payload);
+              payload, network);
 
         if (getVersion() > VERSION)
             throw new BadPacketException("UNSUPPORTED VERSION");

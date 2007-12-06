@@ -51,10 +51,10 @@ public final class LimeACKVendorMessage extends VendorMessage {
      * Constructs a new LimeACKVendorMessage with data from the network.
      */
     LimeACKVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                          byte[] payload) 
+                          byte[] payload, Network network) 
         throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_LIME_ACK, version,
-              payload);
+              payload, network);
         if (getVersion() == 1)
             throw new BadPacketException("UNSUPPORTED OLD VERSION");
         if (getPayload().length < 1)

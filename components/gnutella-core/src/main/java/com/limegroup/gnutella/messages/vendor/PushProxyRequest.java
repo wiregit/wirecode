@@ -18,11 +18,12 @@ public final class PushProxyRequest extends VendorMessage {
 
     /**
      * Constructs a new PushProxyRequest from network data.
+     * @param network TODO
      */
     PushProxyRequest(byte[] guid, byte ttl, byte hops, int version, 
-                     byte[] payload) throws BadPacketException {
+                     byte[] payload, Network network) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, 
-              version, payload);
+              version, payload, network);
 
         if (getVersion() > VERSION) // we don't support it!!
             throw new BadPacketException("UNSUPPORTED VERSION");

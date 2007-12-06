@@ -17,10 +17,11 @@ public final class UpdateRequest extends VendorMessage {
 
     /**
      * Constructs a new SimppRequest from network data.
+     * @param network TODO
      */
     UpdateRequest(byte[] guid, byte ttl, byte hops, int version, 
-                                  byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_REQ, version, payload);
+                                  byte[] payload, Network network) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_REQ, version, payload, network);
     }
     
     public UpdateRequest() {

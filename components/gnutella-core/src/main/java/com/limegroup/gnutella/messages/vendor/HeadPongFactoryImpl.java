@@ -37,6 +37,7 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 
@@ -79,8 +80,8 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
      * @see com.limegroup.gnutella.messages.vendor.HeadPongFactory#createFromNetwork(byte[], byte, byte, int, byte[])
      */
     public HeadPong createFromNetwork(byte[] guid, byte ttl, byte hops,
-            int version, byte[] payload) throws BadPacketException {
-        return new HeadPong(guid, ttl, hops, version, payload, pushEndpointFactory);
+            int version, byte[] payload, Network network) throws BadPacketException {
+        return new HeadPong(guid, ttl, hops, version, payload, network, pushEndpointFactory);
     }
 
     /* (non-Javadoc)

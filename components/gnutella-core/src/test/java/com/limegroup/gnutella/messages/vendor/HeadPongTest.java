@@ -41,6 +41,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -129,7 +130,7 @@ public class HeadPongTest extends LimeTestCase {
         out.write(new byte[] { 4, 5, 6, 7, 8, 0, 5, 6, 7, 8, 9, 0, 6, 7, 8, 9, 10, 0 } ); // alternate locations
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 1, out.toByteArray());
+                (byte)0, 1, out.toByteArray(), Network.UNKNOWN);
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
         Iterator<Range> iterator = pong.getRanges().iterator();
@@ -171,7 +172,7 @@ public class HeadPongTest extends LimeTestCase {
         // sure binary won't work if version != 1
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 2, out.toByteArray());
+                    (byte)0, 2, out.toByteArray(), Network.UNKNOWN);
             fail("expected bpe!");
         } catch(BadPacketException bpe) {
             assertInstanceof(BadGGEPBlockException.class, bpe.getCause());
@@ -217,7 +218,7 @@ public class HeadPongTest extends LimeTestCase {
         ggep.write(out);
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 2, out.toByteArray());
+                (byte)0, 2, out.toByteArray(), Network.UNKNOWN);
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
         Iterator<Range> iterator = pong.getRanges().iterator();
@@ -265,7 +266,7 @@ public class HeadPongTest extends LimeTestCase {
         // sure binary won't work if version < 2
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 1, out.toByteArray());
+                    (byte)0, 1, out.toByteArray(), Network.UNKNOWN);
             fail("expected bpe!");
         } catch(BadPacketException expected) {}
     }
@@ -309,7 +310,7 @@ public class HeadPongTest extends LimeTestCase {
         ggep.write(out);
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 3, out.toByteArray());
+                (byte)0, 3, out.toByteArray(), Network.UNKNOWN);
         assertTrue(pong.hasFile());
         assertFalse(pong.hasCompleteFile());
         Iterator<Range> iterator = pong.getRanges().iterator();
@@ -361,7 +362,7 @@ public class HeadPongTest extends LimeTestCase {
         ggep.write(out);
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 2, out.toByteArray());
+                (byte)0, 2, out.toByteArray(), Network.UNKNOWN);
         assertFalse(pong.hasFile());
         
         assertNull(pong.getRanges());
@@ -381,7 +382,7 @@ public class HeadPongTest extends LimeTestCase {
         out.write(HeadPing.GGEP_PING); // old client didn't unmask the GGEP Ping flag.
         out.write(0); // 404.
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 1, out.toByteArray());
+                (byte)0, 1, out.toByteArray(), Network.UNKNOWN);
         assertTrue(pong.isRoutingBroken());
     }
     
@@ -395,7 +396,7 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("F", (byte)0xFF); // tls capable + a lot of unknown fields
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 2, arrayof(ggep));
+                (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
         assertTrue(pong.isTLSCapable());
     }
     
@@ -409,7 +410,7 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("F", (byte)~0x1); // every feature but TLS capable
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 2, arrayof(ggep));
+                (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
         assertFalse(pong.isTLSCapable());
     }
     
@@ -421,7 +422,7 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", (byte)0);
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                (byte)0, 2, arrayof(ggep));
+                (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
         assertFalse(pong.isTLSCapable());
     }
     
@@ -433,7 +434,7 @@ public class HeadPongTest extends LimeTestCase {
         
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 2, arrayof(ggep));
+                    (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -446,7 +447,7 @@ public class HeadPongTest extends LimeTestCase {
         
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 2, arrayof(ggep));
+                    (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -459,7 +460,7 @@ public class HeadPongTest extends LimeTestCase {
         
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 2, arrayof(ggep));
+                    (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
             fail("expected exception!");
         } catch(BadPacketException bpe) {}        
     }
@@ -473,7 +474,7 @@ public class HeadPongTest extends LimeTestCase {
         
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 2, arrayof(ggep));
+                    (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -487,7 +488,7 @@ public class HeadPongTest extends LimeTestCase {
         
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 2, arrayof(ggep));
+                    (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }
@@ -501,7 +502,7 @@ public class HeadPongTest extends LimeTestCase {
         
         try {
             headPongFactory.createFromNetwork(new byte[16], (byte)0,
-                    (byte)0, 2, arrayof(ggep));
+                    (byte)0, 2, arrayof(ggep), Network.UNKNOWN);
             fail("expected exception!");
         } catch(BadPacketException bpe) {}
     }

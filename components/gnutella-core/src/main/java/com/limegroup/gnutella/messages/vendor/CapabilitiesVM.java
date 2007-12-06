@@ -57,11 +57,12 @@ public final class CapabilitiesVM extends VendorMessage {
 
     /**
      * Constructs a new CapabilitiesVM from data read off the network.
+     * @param network TODO
      */
     CapabilitiesVM(byte[] guid, byte ttl, byte hops, 
-                   int version, byte[] payload) throws BadPacketException {
+                   int version, byte[] payload, Network network) throws BadPacketException {
         super(guid, ttl, hops, F_NULL_VENDOR_ID, F_CAPABILITIES, version,
-              payload);
+              payload, network);
 
         _capabilitiesSupported = new HashSet<SupportedMessageBlock>();
         

@@ -1,15 +1,14 @@
 package com.limegroup.gnutella.messages;
 
+import com.limegroup.gnutella.messages.Message.Network;
+
 
 public interface PingRequestFactory {
 
     public PingRequest createPingRequest(byte[] guid, byte ttl, byte hops);
 
-    public PingRequest createPingRequest(byte[] guid, byte ttl, byte hops,
-            byte length);
-
-    public PingRequest createPingRequest(byte[] guid, byte ttl, byte hops,
-            byte[] payload);
+    public PingRequest createFromNetwork(byte[] guid, byte ttl, byte hops,
+            byte[] payload, Network network);
 
     public PingRequest createPingRequest(byte ttl);
 

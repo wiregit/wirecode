@@ -96,15 +96,9 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private class PingRequestParser extends GnutellaMessageParser {
-        protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, Network network) throws BadPacketException {
-            if (payload.length > 0) { // Big ping
-                return pingRequestFactory.createPingRequest(guid, ttl,
-                        hops, payload);
-            } else {
-                return pingRequestFactory.createPingRequest(guid, ttl,
-                        hops);
-            }
+        protected Message parse(byte[] guid, byte ttl, byte hops, byte[] payload, Network network)
+                throws BadPacketException {
+            return pingRequestFactory.createFromNetwork(guid, ttl, hops, payload, network);
         }
     }
     
@@ -152,7 +146,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
             // the variant stored within the payload. So leave it to the
             // static read(..) method of RouteTableMessage to actually call
             // the right constructor.
-            return RouteTableMessage.read(guid, ttl, hops, payload);
+            return RouteTableMessage.read(guid, ttl, hops, payload, network);
         }
     }
     

@@ -20,10 +20,10 @@ public final class HopsFlowVendorMessage extends VendorMessage {
      * Constructs a new HopsFlowVendorMessage with data from the network.
      */
     HopsFlowVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
-                          byte[] payload)
+                          byte[] payload, Network network)
         throws BadPacketException {
         super(guid, ttl, hops, F_BEAR_VENDOR_ID, F_HOPS_FLOW, version,
-              payload);
+              payload, network);
         if (getVersion() > VERSION)
             throw new BadPacketException("UNSUPPORTED VERSION");
         if (getPayload().length != 1)
