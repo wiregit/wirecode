@@ -51,10 +51,14 @@ public final class TigerTreeCache {
         LogFactory.getLog(TigerTreeCache.class);
 
     /**
-     * A tree that is not fully constructed yet
+     * A root tree that is not fully constructed yet
      */
-    private static final HashTree BUSH = HashTree.INVALID;
+    private static final URN BUSH = URN.INVALID;
     
+    /**
+     * SHA1 -> TTROOT mapping
+     */
+    private static Map<URN, URN> ROOT_MAP;
     /**
      * TigerTreeCache container.
      */
@@ -78,11 +82,11 @@ public final class TigerTreeCache {
         }
         
         synchronized (this) {
-            HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
-            if (tree != null && tree != BUSH)
-                return tree;
+            URN root = ROOT_MAP.get(fd.getSHA1Urn());
+            if (root != null && root != BUSH)
+                return TREE_MAP.get(root);
 
-            TREE_MAP.put(fd.getSHA1Urn(), BUSH);
+            ROOT_MAP.put(fd.getSHA1Urn(), BUSH);
         }
         
         Future<?> future = QUEUE.submit(new HashRunner(fd));
@@ -93,9 +97,9 @@ public final class TigerTreeCache {
         }
         
         synchronized (this) {
-            HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
-            if (tree != null && tree != BUSH)
-                return tree;
+            URN root = ROOT_MAP.get(fd.getSHA1Urn());
+            if (root != null && root != BUSH)
+                return TREE_MAP.get(root);
         }
         
         throw new RuntimeException("hash tree was not calculated");
@@ -110,15 +114,13 @@ public final class TigerTreeCache {
      * @return HashTree for File
      */
     public synchronized HashTree getHashTree(FileDesc fd) {
-        if (fd instanceof IncompleteFileDesc) {
-            return null;
-        }
         
-        HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
-        if (tree != null && tree == BUSH)
+        URN root = ROOT_MAP.get(fd.getSHA1Urn());
+        if (root == null || root == BUSH)
             return null;
+        HashTree tree = TREE_MAP.get(root);
         if (tree == null) {
-            TREE_MAP.put(fd.getSHA1Urn(), BUSH);
+            ROOT_MAP.put(fd.getSHA1Urn(), BUSH);
             QUEUE.execute(new HashRunner(fd));
         }
         return tree;
@@ -132,19 +134,37 @@ public final class TigerTreeCache {
      * @return HashTree for URN
      */
     public synchronized HashTree getHashTree(URN sha1) {
-        HashTree tree = TREE_MAP.get(sha1);
-        
-        if (tree != null && tree == BUSH)
+        if (!sha1.isSHA1())
+            throw new IllegalArgumentException();
+        URN root = ROOT_MAP.get(sha1);
+        if (root == null || root == BUSH)
             return null;
         
-        return tree;
+        return TREE_MAP.get(root);
+    }
+    
+    /**
+     * @return a TTROOT urn matching the sha1 urn
+     */
+    public synchronized URN getTTROOT(URN sha1) {
+        if (!sha1.isSHA1())
+            throw new IllegalArgumentException();
+        URN root = ROOT_MAP.get(sha1);
+        if (root == BUSH)
+            root = null;
+        return root;
     }
     
     /**
      * Purges the HashTree for this URN.
      */
     public synchronized void purgeTree(URN sha1) {
-        if(TREE_MAP.remove(sha1) != null)
+        if (!sha1.isSHA1())
+            throw new IllegalArgumentException();
+        URN root = ROOT_MAP.remove(sha1);
+        if (root == null)
+            return;
+        if(TREE_MAP.remove(root) != null)
             dirty = true;
     }
 
@@ -158,7 +178,9 @@ public final class TigerTreeCache {
      */
     public static synchronized void addHashTree(URN sha1, HashTree tree) {
         if (tree.isGoodDepth()) {
-            TREE_MAP.put(sha1, tree);
+            URN root = URN.createTTRootUrn(tree.getRootHash());
+            ROOT_MAP.put(sha1, root);
+            TREE_MAP.put(root, tree);
             dirty = true;
             if (LOG.isDebugEnabled())
                 LOG.debug("added hashtree for urn " +
@@ -172,7 +194,15 @@ public final class TigerTreeCache {
      */
     //DPINJ: Delay deserialization...
     private TigerTreeCache() {
-        TREE_MAP = createMap();
+        Map<URN, HashTree> m = createMap();
+        ROOT_MAP = new HashMap<URN,URN>(m.size());
+        TREE_MAP = new HashMap<URN,HashTree>(m.size());
+        for (URN urn : m.keySet()) {
+            HashTree tree = m.get(urn);
+            URN root = URN.createTTRootUrn(tree.getRootHash());
+            ROOT_MAP.put(urn, root);
+            TREE_MAP.put(root,tree);
+        }
     }
 
     /**
@@ -202,12 +232,13 @@ public final class TigerTreeCache {
      * @param map
      *            the <tt>Map</tt> to check
      */
-    private static void removeOldEntries(Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
+    private static Map<URN, HashTree> removeOldEntries(Map<URN,URN> roots, Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
+        Map<URN, HashTree> ret = new HashMap<URN, HashTree>(roots.size());
         // discard outdated info
-        Iterator<URN> iter = map.keySet().iterator();
+        Iterator<URN> iter = roots.keySet().iterator();
         while (iter.hasNext()) {
             URN sha1 = iter.next();
-            if (map.get(sha1) != BUSH) {
+            if (roots.get(sha1) != BUSH) {
                 if (fileManager.getFileDescForUrn(sha1) != null)
                     continue;
                 else if (downloadManager.getIncompleteFileManager().getFileForUrn(sha1) != null)
@@ -219,8 +250,13 @@ public final class TigerTreeCache {
                     continue;
             }
             iter.remove();
+            map.remove(roots.get(sha1));
             dirty = true;
         }
+        
+        for (URN sha1 : roots.keySet())
+            ret.put(sha1, map.get(roots.get(sha1)));
+        return ret;
     }
 
     /**
@@ -233,13 +269,13 @@ public final class TigerTreeCache {
         //It's not ideal to hold a lock while writing to disk, but I doubt
         // think
         //it's a problem in practice.
-        removeOldEntries(TREE_MAP, fileManager, downloadManager);
+        Map<URN, HashTree> write = removeOldEntries(ROOT_MAP, TREE_MAP, fileManager, downloadManager);
 
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
-            oos.writeObject(TREE_MAP);
+            oos.writeObject(write);
         } catch (IOException e) {
             ErrorService.error(e);
         } finally {
