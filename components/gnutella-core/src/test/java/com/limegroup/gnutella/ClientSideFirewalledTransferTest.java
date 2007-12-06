@@ -235,7 +235,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = messageFactory.read(in);
+            Message syn = messageFactory.read(in, Network.TCP);
             if (syn instanceof SynMessage) break;
         }
 
@@ -362,7 +362,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = messageFactory.read(in);
+            Message syn = messageFactory.read(in, Network.TCP);
             if (syn instanceof SynMessage) break;
         }
 
@@ -419,7 +419,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            messageFactory.read(in);
+            messageFactory.read(in, Network.TCP);
         }
     }
 }

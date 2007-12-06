@@ -34,6 +34,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -113,7 +114,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
         UDP_ACCESS[0].receive(pack);
         InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = messageFactory.read(in);
+        Message m = messageFactory.read(in, Network.TCP);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         PingRequest ping = (PingRequest)m;
@@ -151,7 +152,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         nodeFetcher.requestDHTHosts(addr);
         UDP_ACCESS[1].receive(pack);
         in = new ByteArrayInputStream(pack.getData());
-        m = messageFactory.read(in);
+        m = messageFactory.read(in, Network.TCP);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         ping = (PingRequest)m;
@@ -175,7 +176,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         nodeFetcher.requestDHTHosts(addr);
         UDP_ACCESS[2].receive(pack);
         InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = messageFactory.read(in);
+        Message m = messageFactory.read(in, Network.TCP);
         m.hop();
         assertInstanceof(PingRequest.class, m);
         PingRequest ping = (PingRequest)m;
@@ -234,7 +235,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
           pack = new DatagramPacket(datagramBytes, 1000);
           UDP_ACCESS[i].receive(pack);
           in = new ByteArrayInputStream(pack.getData());
-          m = messageFactory.read(in);
+          m = messageFactory.read(in, Network.TCP);
           m.hop();
           assertInstanceof(PingRequest.class, m);
           ping = (PingRequest)m;

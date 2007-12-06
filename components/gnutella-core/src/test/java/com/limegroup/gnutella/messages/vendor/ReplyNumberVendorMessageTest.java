@@ -12,6 +12,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class ReplyNumberVendorMessageTest extends BaseTestCase {
@@ -96,7 +97,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             ReplyNumberVendorMessage vmRead = 
-                (ReplyNumberVendorMessage) messageFactory.read(bais);
+                (ReplyNumberVendorMessage) messageFactory.read(bais, Network.TCP);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 
@@ -145,7 +146,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) messageFactory.read(bais);
+        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) messageFactory.read(bais, Network.TCP);
         assertFalse(vm2.canReceiveUnsolicited());
         
         networkManagerStub.setCanReceiveUnsolicited(true);
@@ -156,7 +157,7 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         baos = new ByteArrayOutputStream();
         vm.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        vm2 = (ReplyNumberVendorMessage) messageFactory.read(bais);
+        vm2 = (ReplyNumberVendorMessage) messageFactory.read(bais, Network.TCP);
         assertTrue(vm2.canReceiveUnsolicited());
         
         

@@ -10,6 +10,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -46,7 +47,7 @@ public class RouteTableMessageTest extends LimeTestCase {
         message[23+0]=(byte)0xFF;                            //bogus variant
         InputStream in=new ByteArrayInputStream(message);
         try {
-            messageFactory.read(in);
+            messageFactory.read(in, Network.TCP);
             fail("exception should have been thrown");
         } catch (BadPacketException e) {
         }

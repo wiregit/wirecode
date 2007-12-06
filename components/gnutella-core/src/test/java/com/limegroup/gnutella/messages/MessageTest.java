@@ -7,6 +7,7 @@ import junit.framework.Test;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.messages.Message.Network;
 
 public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     
@@ -54,7 +55,7 @@ public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         byte[] b = new byte[40];
         try {
-            messageFactory.read(bais,b,(byte)4);
+            messageFactory.read(bais, Network.TCP, b,(byte)4);
             fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
         }

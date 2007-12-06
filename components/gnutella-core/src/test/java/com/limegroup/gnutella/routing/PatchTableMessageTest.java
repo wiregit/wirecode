@@ -11,6 +11,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -93,6 +94,6 @@ public class PatchTableMessageTest extends LimeTestCase {
 
     private PatchTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (PatchTableMessage)messageFactory.read(in);
+        return (PatchTableMessage)messageFactory.read(in, Network.TCP);
     }
 }

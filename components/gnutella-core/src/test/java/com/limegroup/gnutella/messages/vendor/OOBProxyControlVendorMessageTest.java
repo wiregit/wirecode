@@ -9,6 +9,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage.Control;
 
 public class OOBProxyControlVendorMessageTest extends BaseTestCase {
@@ -57,7 +58,7 @@ public class OOBProxyControlVendorMessageTest extends BaseTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         msg.write(out);
         
-        Message m = messageFactory.read(new ByteArrayInputStream(out.toByteArray()));
+        Message m = messageFactory.read(new ByteArrayInputStream(out.toByteArray()), Network.TCP);
         assertTrue(m instanceof OOBProxyControlVendorMessage);
         OOBProxyControlVendorMessage read = (OOBProxyControlVendorMessage)m;
         assertEquals(msg.getMaximumDisabledVersion(), read.getMaximumDisabledVersion());

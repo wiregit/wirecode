@@ -262,7 +262,7 @@ public class VendorMessageTest extends BaseTestCase {
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    	HeadPing ping2 = (HeadPing) messageFactory.read(bais);
+    	HeadPing ping2 = (HeadPing) messageFactory.read(bais, Network.TCP);
     	
     	assertEquals(ping.getUrn(), ping2.getUrn());
     	assertEquals(ping.getFeatures(),ping2.getFeatures());
@@ -276,7 +276,7 @@ public class VendorMessageTest extends BaseTestCase {
     	baos = new ByteArrayOutputStream();
     	ping.write(baos);
     	bais = new ByteArrayInputStream(baos.toByteArray());
-    	ping2 = (HeadPing) messageFactory.read(bais);
+    	ping2 = (HeadPing) messageFactory.read(bais, Network.TCP);
     	
     	assertEquals(g,ping2.getClientGuid());
     	
@@ -286,7 +286,7 @@ public class VendorMessageTest extends BaseTestCase {
     	ping.write(baos);
     	bais = new ByteArrayInputStream(baos.toByteArray());
     	try {
-    	ping2 = (HeadPing) messageFactory.read(bais);
+    	ping2 = (HeadPing) messageFactory.read(bais, Network.TCP);
     		fail("parsed a ping which claimed to have a clientguid but didn't");
     	}catch(BadPacketException expected) {}
     }
@@ -312,7 +312,7 @@ public class VendorMessageTest extends BaseTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) messageFactory.read(bais);
+        VendorMessage vmRead = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm, vmRead);
     }
 
@@ -320,7 +320,7 @@ public class VendorMessageTest extends BaseTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) messageFactory.read(bais);
+        VendorMessage vmRead = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm,vmRead);
     }
 
@@ -512,22 +512,22 @@ public class VendorMessageTest extends BaseTestCase {
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        VendorMessage vm = (VendorMessage) messageFactory.read(bais);
+        VendorMessage vm = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm,(tcp));
 
-        vm = (VendorMessage) messageFactory.read(bais);
+        vm = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm,(udp));
 
-        vm = (VendorMessage) messageFactory.read(bais);
+        vm = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm,(tcpR));
 
-        vm = (VendorMessage) messageFactory.read(bais);
+        vm = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm,(udpR));
 
-        vm = (VendorMessage) messageFactory.read(bais);
+        vm = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm,(ms));
         
-        vm = (VendorMessage) messageFactory.read(bais);
+        vm = (VendorMessage) messageFactory.read(bais, Network.TCP);
         assertEquals(vm,(hops));
     }
 
@@ -544,7 +544,7 @@ public class VendorMessageTest extends BaseTestCase {
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        vm = (VendorMessage) messageFactory.read(bais);
+        vm = (VendorMessage) messageFactory.read(bais, Network.TCP);
         
     }
 
@@ -573,7 +573,7 @@ public class VendorMessageTest extends BaseTestCase {
         System.arraycopy(data.toByteArray(), headerLength, payload, 0, payloadLength);
 
         // see if Message.createMessage() can understand it
-        Message m2 = messageFactory.createMessage(header, payload, (byte)4, Network.TCP, null);
+        Message m2 = messageFactory.createMessage(header, payload, Network.TCP, (byte)4, null);
         assertNotNull(m2);
     }
     

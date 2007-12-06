@@ -28,6 +28,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 @SuppressWarnings("unchecked")
@@ -368,7 +369,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = messageFactory.read(in);		
+                    Message message = messageFactory.read(in, Network.TCP);		
                     if(message == null) continue;
                     if (message instanceof PingRequest) {
                         PingRequest pr = (PingRequest)message;

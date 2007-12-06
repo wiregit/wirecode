@@ -19,6 +19,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -321,7 +322,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         try {
             _udpSock.receive(dp);  // wait for the UDP ConnectBack...
             ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
-            messageFactory.read(bais);
+            messageFactory.read(bais, Network.TCP);
             fail("Did recieve UDP ConnectBack!!");
         } catch (InterruptedIOException good) {
         }

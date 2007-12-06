@@ -39,6 +39,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -889,7 +890,7 @@ public class HostCatcherTest extends LimeTestCase {
         // receive the ping
         DatagramPacket p = new DatagramPacket(new byte[1000], 1000);
         s.receive(p);
-        PingRequest ping = (PingRequest)messageFactory.read(new ByteArrayInputStream(p.getData()));
+        PingRequest ping = (PingRequest)messageFactory.read(new ByteArrayInputStream(p.getData()), Network.TCP);
         assertNotNull(ping);
 
         

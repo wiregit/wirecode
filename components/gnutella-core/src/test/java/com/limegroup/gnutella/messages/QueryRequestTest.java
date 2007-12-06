@@ -370,7 +370,7 @@ public final class QueryRequestTest extends LimeTestCase {
         qr.write(baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        QueryRequest qrRead = (QueryRequest) messageFactory.read(bais);
+        QueryRequest qrRead = (QueryRequest) messageFactory.read(bais, Network.TCP);
         assertNotNull(qrRead);
     }
 
@@ -662,7 +662,7 @@ public final class QueryRequestTest extends LimeTestCase {
 
 		QueryRequest qrTest = null;
 		try {
-			qrTest = (QueryRequest)messageFactory.read(bais);
+			qrTest = (QueryRequest)messageFactory.read(bais, Network.TCP);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("unexpected exception: "+e);
@@ -923,7 +923,7 @@ public final class QueryRequestTest extends LimeTestCase {
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
             bais = new ByteArrayInputStream(baos.toByteArray());
-            inQuery = (QueryRequest) messageFactory.read(bais);
+            inQuery = (QueryRequest) messageFactory.read(bais, Network.TCP);
             assertTrue(inQuery.isWhatIsNewRequest());
             assertEquals(inQuery, outQuery);
         }
@@ -934,7 +934,7 @@ public final class QueryRequestTest extends LimeTestCase {
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
             bais = new ByteArrayInputStream(baos.toByteArray());
-            inQuery = (QueryRequest) messageFactory.read(bais);
+            inQuery = (QueryRequest) messageFactory.read(bais, Network.TCP);
             assertTrue(inQuery.isWhatIsNewRequest());
             assertEquals(inQuery, outQuery);
         }
@@ -1034,7 +1034,7 @@ public final class QueryRequestTest extends LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         query.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        QueryRequest qr = (QueryRequest) messageFactory.read(bais);
+        QueryRequest qr = (QueryRequest) messageFactory.read(bais, Network.TCP);
         if (flag == 0) assertTrue(query.desiresAll());
         if ((flag & QueryRequest.AUDIO_MASK) > 0)
             assertTrue(qr.desiresAudio());

@@ -15,6 +15,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -60,7 +61,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         pr.write(baos);
         ByteArrayInputStream bais = 
         new ByteArrayInputStream(baos.toByteArray());
-        PingRequest prRead = (PingRequest) messageFactory.read(bais);
+        PingRequest prRead = (PingRequest) messageFactory.read(bais, Network.TCP);
         prRead.hop();
         assertTrue(prRead.isQueryKeyRequest());
     }
@@ -103,7 +104,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         //OK, ggep ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
         Message m = null;
-        m = messageFactory.read(stream);
+        m = messageFactory.read(stream, Network.TCP);
         PingRequest pr = null;
         pr = (PingRequest)m;
         assertTrue(!pr.isQueryKeyRequest());
@@ -145,7 +146,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         //OK, Big ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
         Message m = null;
-        m = messageFactory.read(stream);
+        m = messageFactory.read(stream, Network.TCP);
         PingRequest pr = null;
         pr = (PingRequest)m;
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
@@ -173,7 +174,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         noRequest.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        PingRequest fromNet = (PingRequest) messageFactory.read(bais);
+        PingRequest fromNet = (PingRequest) messageFactory.read(bais, Network.TCP);
         
         assertFalse(fromNet.requestsIP());
         
@@ -191,7 +192,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         baos = new ByteArrayOutputStream();
         noPayload.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingRequest) messageFactory.read(bais);
+        fromNet = (PingRequest) messageFactory.read(bais, Network.TCP);
         
         assertTrue(fromNet.requestsIP());
         
@@ -206,7 +207,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         baos = new ByteArrayOutputStream();
         withLocale.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingRequest) messageFactory.read(bais);
+        fromNet = (PingRequest) messageFactory.read(bais, Network.TCP);
         assertTrue(fromNet.requestsIP());
         assertEquals("zz",fromNet.getLocale());
      

@@ -25,6 +25,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
@@ -260,7 +261,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         byte[] data = datagram.getData();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = messageFactory.read(in);		
+        Message message = messageFactory.read(in, Network.TCP);		
         return message;
     }
 

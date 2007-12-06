@@ -649,7 +649,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                     pack = new DatagramPacket(new byte[1000], 1000);
                     UDP_ACCESS.receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    Message mTemp = messageFactory.read(in);
+                    Message mTemp = messageFactory.read(in, Network.TCP);
                     if (mTemp instanceof LimeACKVendorMessage)
                         fail("Should not get ACK!!!");
                 }
@@ -752,7 +752,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     			fail("Did not get ack", bad);
     		}
     		InputStream in = new ByteArrayInputStream(pack.getData());
-    		Message mTemp = messageFactory.read(in);
+    		Message mTemp = messageFactory.read(in, Network.TCP);
     		if (mTemp instanceof LimeACKVendorMessage)
     			ack = (LimeACKVendorMessage) mTemp;
     	}

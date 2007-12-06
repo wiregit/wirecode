@@ -261,7 +261,7 @@ public class BlockingConnection extends AbstractConnection {
      * Reads a message from the network and updates the appropriate statistics.
      */
     private Message readAndUpdateStatistics() throws IOException, BadPacketException {
-        Message msg = messageFactory.read(_in, HEADER_BUF, Network.TCP, getSoftMax(), null);
+        Message msg = messageFactory.read(_in, Network.TCP, HEADER_BUF, getSoftMax(), null);
         if (msg != null)
             processReadMessage(msg);
         return msg;

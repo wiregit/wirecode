@@ -41,6 +41,7 @@ import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -380,7 +381,7 @@ public class PingReplyTest extends LimeTestCase {
         byte[] bytes=baos.toByteArray(); 
 
         //Decode and check contents.
-        Message m=messageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -400,7 +401,7 @@ public class PingReplyTest extends LimeTestCase {
         baos.reset();
         pr.write(baos);
         bytes=baos.toByteArray();
-        m=messageFactory.read(new ByteArrayInputStream(bytes));
+        m=messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         pong=(PingReply)m;
         assertFalse(pong.isTLSCapable());
         // make sure it's still off if we turn our settings on.
@@ -478,7 +479,7 @@ public class PingReplyTest extends LimeTestCase {
 
 
         //Decode and check contents.
-        Message m=messageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -552,7 +553,7 @@ public class PingReplyTest extends LimeTestCase {
 
 
         //Decode and check contents.
-        Message m=messageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -619,7 +620,7 @@ public class PingReplyTest extends LimeTestCase {
 
 
         //Decode and check contents.
-        Message m=messageFactory.read(new ByteArrayInputStream(bytes));
+        Message m=messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         PingReply pong=(PingReply)m;
         assertTrue(m instanceof PingReply);
         assertEquals(6349, pong.getPort());
@@ -640,7 +641,7 @@ public class PingReplyTest extends LimeTestCase {
         bytes[19]=(byte)13;    //payload length
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         try {
-            messageFactory.read(in);
+            messageFactory.read(in, Network.TCP);
             fail("No exception thrown");
         } catch (BadPacketException pass) { 
             //Pass!
@@ -663,7 +664,7 @@ public class PingReplyTest extends LimeTestCase {
         pr.write(baos);
         ByteArrayInputStream bais = 
              new ByteArrayInputStream(baos.toByteArray());
-        PingReply prStreamed = (PingReply) messageFactory.read(bais);
+        PingReply prStreamed = (PingReply) messageFactory.read(bais, Network.TCP);
         assertTrue(prStreamed.getQueryKey().equals(qk));
             
     }
@@ -678,7 +679,7 @@ public class PingReplyTest extends LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         p.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        PingReply fromNet = (PingReply)messageFactory.read(bais);
+        PingReply fromNet = (PingReply)messageFactory.read(bais, Network.TCP);
         
         assertEquals("1.2.3.4",fromNet.getMyInetAddress().getHostAddress());
         assertEquals(5,fromNet.getMyPort());
@@ -694,7 +695,7 @@ public class PingReplyTest extends LimeTestCase {
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingReply)messageFactory.read(bais);
+        fromNet = (PingReply)messageFactory.read(bais, Network.TCP);
         
         assertNull(fromNet.getMyInetAddress());
         assertEquals(0,fromNet.getMyPort());
@@ -705,7 +706,7 @@ public class PingReplyTest extends LimeTestCase {
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingReply)messageFactory.read(bais);
+        fromNet = (PingReply)messageFactory.read(bais, Network.TCP);
         
         assertNull(fromNet.getMyInetAddress());
         assertEquals(0,fromNet.getMyPort());
@@ -715,7 +716,7 @@ public class PingReplyTest extends LimeTestCase {
         baos = new ByteArrayOutputStream();
         p.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
-        fromNet = (PingReply)messageFactory.read(bais);
+        fromNet = (PingReply)messageFactory.read(bais, Network.TCP);
         
         assertNull(fromNet.getMyInetAddress());
         assertEquals(0,fromNet.getMyPort());
@@ -735,7 +736,7 @@ public class PingReplyTest extends LimeTestCase {
         pr.write(out);
         byte[] b = out.toByteArray();
         
-        PingReply read = (PingReply)messageFactory.read(new ByteArrayInputStream(b));
+        PingReply read = (PingReply)messageFactory.read(new ByteArrayInputStream(b), Network.TCP);
         assertTrue(read.isUDPHostCache());
         assertEquals("1.1.1.1", read.getUDPCacheAddress());
         
@@ -751,7 +752,7 @@ public class PingReplyTest extends LimeTestCase {
         pr.write(out);
         b = out.toByteArray();
         
-        read = (PingReply)messageFactory.read(new ByteArrayInputStream(b));
+        read = (PingReply)messageFactory.read(new ByteArrayInputStream(b), Network.TCP);
         assertTrue(read.isUDPHostCache());
         assertEquals("www.nowhere.org", read.getUDPCacheAddress());
     }
@@ -854,7 +855,7 @@ public class PingReplyTest extends LimeTestCase {
         out = new ByteArrayOutputStream();
         pr.write(out);
         
-        pr = (PingReply)messageFactory.read(new ByteArrayInputStream(out.toByteArray()));
+        pr = (PingReply)messageFactory.read(new ByteArrayInputStream(out.toByteArray()), Network.TCP);
         assertTrue(pr.isUDPHostCache());
         l = pr.getPackedIPPorts();
         assertEquals(4, l.size());
@@ -980,7 +981,7 @@ public class PingReplyTest extends LimeTestCase {
         //  and make sure we can read from network data.
         out = new ByteArrayOutputStream();
         pr.write(out);
-        pr = (PingReply)messageFactory.read(new ByteArrayInputStream(out.toByteArray()));
+        pr = (PingReply)messageFactory.read(new ByteArrayInputStream(out.toByteArray()), Network.TCP);
         l = pr.getPackedIPPorts();
         assertEquals(4, l.size());
         ipp = (IpPort)l.get(0);

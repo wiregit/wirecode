@@ -22,7 +22,7 @@ public class LimeRUDPMessageParser implements MessageParser {
     }
     
     public Message parse(byte[] header, byte[] payload, 
-            byte softMax, Network network, SocketAddress addr) throws BadPacketException, IOException {
+            Network network, byte softMax, SocketAddress addr) throws BadPacketException, IOException {
         
         try {
             return (Message)factory.createMessage(ByteBuffer.wrap(header), ByteBuffer.wrap(payload));

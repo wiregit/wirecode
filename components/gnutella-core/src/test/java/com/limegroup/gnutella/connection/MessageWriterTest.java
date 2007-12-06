@@ -17,6 +17,7 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -225,7 +226,7 @@ public final class MessageWriterTest extends LimeTestCase {
     }
 	
 	private Message read(InputStream in) throws Exception {
-	    return messageFactory.read(in, (byte)100);
+	    return messageFactory.read(in, Network.TCP, (byte)100);
     }
     
     private Message read(ByteBuffer buffer) throws Exception {

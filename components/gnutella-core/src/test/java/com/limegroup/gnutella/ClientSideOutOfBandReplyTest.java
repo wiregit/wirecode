@@ -171,7 +171,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = messageFactory.read(in);
+            Message m = messageFactory.read(in, Network.TCP);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -257,7 +257,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = messageFactory.read(in);
+            Message m = messageFactory.read(in, Network.TCP);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -292,7 +292,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = messageFactory.read(in);
+            Message m = messageFactory.read(in, Network.TCP);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }
@@ -346,7 +346,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = messageFactory.read(in);
+            Message m = messageFactory.read(in, Network.TCP);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -392,7 +392,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = messageFactory.read(in);
+            Message m = messageFactory.read(in, Network.TCP);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }

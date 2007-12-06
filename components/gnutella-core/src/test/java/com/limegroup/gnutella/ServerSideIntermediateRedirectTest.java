@@ -12,6 +12,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
@@ -123,7 +124,7 @@ public final class ServerSideIntermediateRedirectTest
             UDP_ACCESS.setSoTimeout(TIMEOUT);
             UDP_ACCESS.receive(pack);
             ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-            messageFactory.read(bais);
+            messageFactory.read(bais, Network.TCP);
             fail("Got a message");
         } catch (InterruptedIOException expected) {}
     }

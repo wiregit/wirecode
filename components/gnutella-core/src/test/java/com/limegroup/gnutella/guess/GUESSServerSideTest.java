@@ -24,6 +24,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Tests the Server Side of GUESS....
@@ -196,7 +197,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         byte[] data = datagram.getData();
         // construct a message out of it...
         InputStream in = new ByteArrayInputStream(data);
-        Message message = messageFactory.read(in);		
+        Message message = messageFactory.read(in, Network.TCP);		
         return message;
     }
 

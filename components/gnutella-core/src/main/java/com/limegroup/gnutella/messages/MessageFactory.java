@@ -6,6 +6,21 @@ import java.net.SocketAddress;
 
 import com.limegroup.gnutella.messages.Message.Network;
 
+/**
+ * A factory for creating Gnutella messages.
+ * 
+ * MessageFactory delegates the parsing of specific messages to a MessageParser.
+ * MessageParsers can be installed using
+ * {@link #setParser(byte, com.limegroup.gnutella.messages.MessageFactory.MessageParser)}.
+ * When reading a message from a stream, various optional parameters can be
+ * provided. In all cases, a {@link Network} is required to know which Network
+ * the Message was read from. Optional parameters are <code>softMax</code>,
+ * which can be used to limit the maximum number of hops a message should
+ * travel, <code>headerBuf</code> which can be used as an optimization to
+ * reduce byte[] allocations, and <code>addr</code> which can be used to know
+ * what host this message was read from.
+ * 
+ */
 public interface MessageFactory {
 
     /**
@@ -23,21 +38,6 @@ public interface MessageFactory {
     public MessageParser getParser(byte functionId);
 
     /**
-     * Reads a Gnutella message from the specified input stream. The returned
-     * message can be any one of the recognized Gnutella message, such as
-     * queries, query hits, pings, pongs, etc.
-     * 
-     * @param in
-     *            the <tt>InputStream</tt> instance containing message data
-     * @return a new Gnutella message instance
-     * @throws <tt>BadPacketException</tt> if the message is not considered
-     *             valid for any reason
-     * @throws <tt>IOException</tt> if there is any IO problem reading the
-     *             message
-     */
-    public Message read(InputStream in) throws BadPacketException, IOException;
-
-    /**
      * @modifies in
      * @effects reads a packet from the network and returns it as an instance of
      *          a subclass of Message, unless one of the following happens:
@@ -49,8 +49,9 @@ public interface MessageFactory {
      *          packets that are ridiculously long and half-completed messages.
      *          The client is not expected to recover from this.
      *          </ul>
+     * @param network The network the message was read from.
      */
-    public Message read(InputStream in, byte softMax)
+    public Message read(InputStream in, Network network, byte softMax)
             throws BadPacketException, IOException;
 
     /**
@@ -76,15 +77,16 @@ public interface MessageFactory {
      *          repeatedly allocating 23-byte arrays. buf may be used when this
      *          returns, but the contents are not guaranteed to contain any
      *          useful data.
+     * @param network The network the message was read from.
      */
-    public Message read(InputStream in, byte[] buf, byte softMax)
+    public Message read(InputStream in, Network network, byte[] headerBuf, byte softMax)
             throws BadPacketException, IOException;
 
     /**
      * Reads a message using the specified buffer & network and the default soft
      * max.
      */
-    public Message read(InputStream in, byte[] buf, Network network, SocketAddress addr)
+    public Message read(InputStream in, Network network, byte[] headerBuf, SocketAddress addr)
             throws BadPacketException, IOException;
 
     /**
@@ -97,7 +99,7 @@ public interface MessageFactory {
      *          returns, but the contents are not guaranteed to contain any
      *          useful data.
      */
-    public Message read(InputStream in, byte[] buf, Network network,
+    public Message read(InputStream in, Network network, byte[] headerBuf,
             byte softMax, SocketAddress addr) throws BadPacketException, IOException;
 
     /**
@@ -108,8 +110,8 @@ public interface MessageFactory {
      * be a unique byte[] of that payload. Nothing can write into or change the
      * byte[].
      */
-    public Message createMessage(byte[] header, byte[] payload, byte softMax,
-            Network network, SocketAddress addr) throws BadPacketException, IOException;
+    public Message createMessage(byte[] header, byte[] payload, Network network,
+            byte softMax, SocketAddress addr) throws BadPacketException, IOException;
 
 
     /**
@@ -117,7 +119,7 @@ public interface MessageFactory {
      */
     public interface MessageParser {
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, Network network, SocketAddress addr) throws BadPacketException, IOException;
+                Network network, byte softMax, SocketAddress addr) throws BadPacketException, IOException;
     }
    
 }

@@ -10,6 +10,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -71,6 +72,6 @@ public class ResetTableMessageTest extends LimeTestCase {
 
     ResetTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (ResetTableMessage)messageFactory.read(in);
+        return (ResetTableMessage)messageFactory.read(in, Network.TCP);
     }
 }

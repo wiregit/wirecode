@@ -36,6 +36,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 
@@ -115,7 +116,7 @@ public class InspectionTest extends ServerSideTestCase {
     
     private InspectionRequest getRequest(String base32) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(base32));
-        return (InspectionRequest) messageFactory.read(bais);
+        return (InspectionRequest) messageFactory.read(bais, Network.TCP);
     }
 
     public void testInspection() throws Exception {

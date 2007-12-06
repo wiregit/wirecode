@@ -1002,7 +1002,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 DatagramPacket rcv = new DatagramPacket(recv, recv.length);
                 sock.receive(rcv);
                 ByteArrayInputStream bais = new ByteArrayInputStream(recv, 0, rcv.getLength());
-                HeadPong pong = (HeadPong) messageFactory.read(bais);
+                HeadPong pong = (HeadPong) messageFactory.read(bais, Network.TCP);
                 if (pong.getAltLocs() == null || pong.getAltLocs().isEmpty())
                     break;
             } catch (IOException iox) {
@@ -1105,7 +1105,7 @@ public class AltLocUploadTest extends LimeTestCase {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             replied.write(baos);
             ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            QueryReply reply = (QueryReply) messageFactory.read(bais);
+            QueryReply reply = (QueryReply) messageFactory.read(bais, Network.TCP);
             Response resp = reply.getResultsArray()[0];
             if (resp.getLocations().isEmpty())
                 break;

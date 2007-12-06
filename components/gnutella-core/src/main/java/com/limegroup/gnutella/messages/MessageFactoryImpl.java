@@ -33,8 +33,7 @@ public class MessageFactoryImpl implements MessageFactory {
      * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
      * the TTL is set to SOFT_MAX-hops.
      */
-    private final byte SOFT_MAX
-        = ConnectionSettings.SOFT_MAX.getValue();
+    private final byte defaultSoftMax = ConnectionSettings.SOFT_MAX.getValue();
     
     public MessageFactoryImpl() {
     }
@@ -66,33 +65,28 @@ public class MessageFactoryImpl implements MessageFactory {
     public MessageParser getParser(byte functionId) {
         return PARSERS[functionId & 0xFF];
     }
-    
-    public Message read(InputStream in) throws BadPacketException,
-            IOException {
-        return read(in, new byte[23], Network.UNKNOWN, SOFT_MAX, null);
-    }
-
-    public Message read(InputStream in, byte softMax)
-            throws BadPacketException, IOException {
-        return read(in, new byte[23], Network.UNKNOWN, softMax, null);
-    }
 
     public Message read(InputStream in, Network network)
             throws BadPacketException, IOException {
-        return read(in, new byte[23], network, SOFT_MAX, null);
+        return read(in, network, new byte[23], defaultSoftMax, null);
     }
 
-    public Message read(InputStream in, byte[] buf, byte softMax)
+    public Message read(InputStream in, Network network, byte softMax)
             throws BadPacketException, IOException {
-        return read(in, buf, Network.UNKNOWN, softMax, null);
+        return read(in, network, new byte[23], softMax, null);
     }
 
-    public Message read(InputStream in, byte[] buf, Network network, SocketAddress addr)
+    public Message read(InputStream in, Network network, byte[] buf, byte softMax)
             throws BadPacketException, IOException {
-        return read(in, buf, network, SOFT_MAX, addr);
+        return read(in, network, buf, softMax, null);
     }
 
-    public Message read(InputStream in, byte[] buf, Network network,
+    public Message read(InputStream in, Network network, byte[] buf, SocketAddress addr)
+            throws BadPacketException, IOException {
+        return read(in, network, buf, defaultSoftMax, addr);
+    }
+
+    public Message read(InputStream in, Network network, byte[] buf,
             byte softMax, SocketAddress addr) throws BadPacketException, IOException {
 
         // 1. Read header bytes from network. If we timeout before any
@@ -143,11 +137,11 @@ public class MessageFactoryImpl implements MessageFactory {
             payload = DataUtils.EMPTY_BYTE_ARRAY;
         }
 
-        return createMessage(buf, payload, softMax, network, addr);
+        return createMessage(buf, payload, network, softMax, addr);
     }
 
     public Message createMessage(byte[] header, byte[] payload,
-            byte softMax, Network network, SocketAddress addr) throws BadPacketException, IOException {
+            Network network, byte softMax, SocketAddress addr) throws BadPacketException, IOException {
         if (header.length < 19) {
             throw new IllegalArgumentException("header must be >= 19 bytes.");
         }
@@ -161,7 +155,7 @@ public class MessageFactoryImpl implements MessageFactory {
             throw new BadPacketException("Unrecognized function code: " + func);
         }
         
-        return parser.parse(header, payload, softMax, network, addr);
+        return parser.parse(header, payload, network, softMax, addr);
     }
     
 }

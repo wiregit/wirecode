@@ -40,6 +40,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -433,7 +434,7 @@ public class FWTDetectionTest extends LimeTestCase {
         ByteArrayInputStream bais = new ByteArrayInputStream(read.getData());
         
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
-        PingReply replyWith = (PingReply)messageFactory.read(bais);
+        PingReply replyWith = (PingReply)messageFactory.read(bais, Network.TCP);
         
         assertNotNull(replyWith.getMyInetAddress());
         assertEquals(networkManager.getExternalAddress(), replyWith.getMyInetAddress().getAddress());
@@ -454,7 +455,7 @@ public class FWTDetectionTest extends LimeTestCase {
         sock.receive(read);
         bais = new ByteArrayInputStream(read.getData());
         
-        PingReply replyWithout = (PingReply)messageFactory.read(bais);
+        PingReply replyWithout = (PingReply)messageFactory.read(bais, Network.TCP);
         
         assertNull(replyWithout.getMyInetAddress());
         assertEquals(0,replyWithout.getMyPort());
@@ -492,7 +493,7 @@ public class FWTDetectionTest extends LimeTestCase {
                 _lastAddress = pack.getSocketAddress();
                 
                 ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-                PingRequest ret = (PingRequest)messageFactory.read(bais);
+                PingRequest ret = (PingRequest)messageFactory.read(bais, Network.TCP);
                 lastReceived = ret.getGUID();
                 return ret;
         }

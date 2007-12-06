@@ -29,6 +29,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -323,7 +324,7 @@ public class BrowseHostHandler {
         	try {
         		m = null;
         		LOG.debug("reading message");
-        		m = messageFactory.read(in);
+        		m = messageFactory.read(in, Network.TCP);
         	} catch (BadPacketException bpe) {
                 LOG.debug("BPE while reading", bpe);
         	} catch (IOException expected){

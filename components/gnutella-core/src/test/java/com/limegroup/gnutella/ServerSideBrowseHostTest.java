@@ -154,15 +154,15 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         } while ((currLine != null) && !currLine.equals(""));
 
         // 10 in the first
-        QueryReply qr = (QueryReply) messageFactory.read(s.getInputStream());
+        QueryReply qr = (QueryReply) messageFactory.read(s.getInputStream(), Network.TCP);
         assertEquals(10, qr.getResultCount());
         
         // 10 in the second
-        qr = (QueryReply) messageFactory.read(s.getInputStream());
+        qr = (QueryReply) messageFactory.read(s.getInputStream(), Network.TCP);
         assertEquals(10, qr.getResultCount());
         
         // 2 in the 3rd.
-        qr = (QueryReply) messageFactory.read(s.getInputStream());
+        qr = (QueryReply) messageFactory.read(s.getInputStream(), Network.TCP);
         assertEquals(2, qr.getResultCount());
 
         assertNull(in.readLine());

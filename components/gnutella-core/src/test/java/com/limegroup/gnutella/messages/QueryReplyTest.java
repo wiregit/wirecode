@@ -55,6 +55,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -520,7 +521,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -569,7 +570,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -623,7 +624,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -684,7 +685,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -1053,7 +1054,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qr.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) messageFactory.read(bais);
+            QueryReply readQR = (QueryReply) messageFactory.read(bais, Network.TCP);
 
             // test read from network            
             Set retProxies = readQR.getPushProxies();
@@ -1104,7 +1105,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         
         // Make sure we can deserialize it too.
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        qr = (QueryReply)messageFactory.read(in);
+        qr = (QueryReply)messageFactory.read(in, Network.TCP);
         assertEquals(4, qr.getPushProxies().size());
         int tls = 0;
         IpPort nonTLS = null;
@@ -1172,7 +1173,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qReply.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) messageFactory.read(bais);
+            QueryReply readQR = (QueryReply) messageFactory.read(bais, Network.TCP);
             
             List readHits = readQR.getResultsAsList();
             assertEquals("wrong # of results", hits.length, readHits.size());
@@ -1233,7 +1234,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             qReply.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) messageFactory.read(bais);
+            QueryReply readQR = (QueryReply) messageFactory.read(bais, Network.TCP);
             
             List readHits = readQR.getResultsAsList();
             assertEquals("wrong # of results", hits.length, readHits.size());

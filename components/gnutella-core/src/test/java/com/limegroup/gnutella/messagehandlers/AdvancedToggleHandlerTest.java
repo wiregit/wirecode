@@ -20,6 +20,7 @@ import com.google.inject.name.Names;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -100,7 +101,7 @@ public class AdvancedToggleHandlerTest extends LimeTestCase {
     
     private AdvancedStatsToggle getToggle(String source) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(source));
-        return (AdvancedStatsToggle) messageFactory.read(bais);
+        return (AdvancedStatsToggle) messageFactory.read(bais, Network.TCP);
     }
     /**
      * Tests that if the usage stats setting is off, the message does nothing.

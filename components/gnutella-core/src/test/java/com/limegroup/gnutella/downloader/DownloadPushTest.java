@@ -36,6 +36,7 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -568,7 +569,7 @@ public class DownloadPushTest extends DownloadTestCase {
                 while (true) {
                     sock.receive(p);
                     ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());
-                    m = messageFactory.read(bais);
+                    m = messageFactory.read(bais, Network.TCP);
                     LOG.debug("received " + m.getClass() + " no file? " + noFile);
                     if (noFile) {
                         if (m instanceof HeadPing)

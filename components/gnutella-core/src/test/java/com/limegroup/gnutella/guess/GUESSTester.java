@@ -23,6 +23,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 
 /** Provides primitives for contacting GUESS nodes on the network.
  *  THIS TEST SHOULD NOT BE INCLUDED IN ALL TESTS!  It is very specifically 
@@ -97,7 +98,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = messageFactory.read(in);		
+                    Message message = messageFactory.read(in, Network.TCP);		
                     if (message == null) continue;
                     if (message instanceof QueryReply) {
                         synchronized (_qrLock) {

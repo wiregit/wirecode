@@ -26,6 +26,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
@@ -97,7 +98,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) messageFactory.read(in);
+            PingRequest ping = (PingRequest) messageFactory.read(in, Network.TCP);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PingReply pong = pingReplyFactory.create(ping.getGUID(), (byte)1);
             pong.write(baos);

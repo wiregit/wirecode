@@ -16,6 +16,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SSLSettings;
 
 public class CapabilitiesVMTest extends BaseTestCase {
@@ -56,7 +57,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vmp.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        CapabilitiesVM vmpRead = (CapabilitiesVM) messageFactory.read(bais);
+        CapabilitiesVM vmpRead = (CapabilitiesVM) messageFactory.read(bais, Network.TCP);
         assertEquals(vmp, vmpRead);
 
         assertGreaterThan(0, vmpRead.supportsFeatureQueries());
@@ -109,7 +110,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         vm.write(baos);
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-        CapabilitiesVM vmp = (CapabilitiesVM) messageFactory.read(bais);
+        CapabilitiesVM vmp = (CapabilitiesVM) messageFactory.read(bais, Network.TCP);
         // make sure it supports everything we expect....
         assertEquals(10, vmp.supportsCapability("SUSH".getBytes()));
         assertEquals(5,  vmp.supportsCapability("NEIL".getBytes()));

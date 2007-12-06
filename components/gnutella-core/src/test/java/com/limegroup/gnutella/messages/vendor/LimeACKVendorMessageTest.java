@@ -13,6 +13,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 
 public class LimeACKVendorMessageTest extends BaseTestCase {
 
@@ -89,7 +90,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             LimeACKVendorMessage vmRead = 
-                (LimeACKVendorMessage) messageFactory.read(bais);
+                (LimeACKVendorMessage) messageFactory.read(bais, Network.TCP);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 

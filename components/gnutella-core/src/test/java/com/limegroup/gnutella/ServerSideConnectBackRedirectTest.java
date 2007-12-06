@@ -20,6 +20,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
@@ -148,7 +149,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = messageFactory.read(in);
+                Message m = messageFactory.read(in, Network.TCP);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
@@ -300,7 +301,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = messageFactory.read(in);
+                Message m = messageFactory.read(in, Network.TCP);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);

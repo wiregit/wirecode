@@ -28,6 +28,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -115,7 +116,7 @@ public class BrowseTest extends LimeTestCase {
             while (true) {
                 Message m;
                 try {
-                    m = messageFactory.read(in);
+                    m = messageFactory.read(in, Network.TCP);
                 } catch (IOException e) {
                     // no other way to tell if we have received all messages
                     if (!"Connection closed.".equals(e.getMessage())) {

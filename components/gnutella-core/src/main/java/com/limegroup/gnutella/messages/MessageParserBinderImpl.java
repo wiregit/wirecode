@@ -50,7 +50,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     public static abstract class GnutellaMessageParser implements MessageParser {
         
         public Message parse(byte[] header, byte[] payload,
-                byte softMax, Network network, SocketAddress address) throws BadPacketException, IOException {
+                Network network, byte softMax, SocketAddress address) throws BadPacketException, IOException {
             
             // 4. Check values. These are based on the recommendations from the
             // GnutellaDev page. This also catches those TTLs and hops whose

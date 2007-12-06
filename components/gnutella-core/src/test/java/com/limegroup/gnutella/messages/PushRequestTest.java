@@ -64,7 +64,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[23+26+3]=(byte)7;//random big pong payload
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         //1. Test that we can read big push
-        PushRequest pr=(PushRequest)messageFactory.read(in);     
+        PushRequest pr=(PushRequest)messageFactory.read(in, Network.TCP);     
         assertEquals("unexpected push index", 3, pr.getIndex());
         assertEquals("unexpected total length", bytes.length,
             pr.getTotalLength() );
@@ -105,7 +105,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         //1. Test that we can read ggep push
-        PushRequest pr=(PushRequest)messageFactory.read(in);     
+        PushRequest pr=(PushRequest)messageFactory.read(in, Network.TCP);     
         assertEquals("unexpected push index", 3, pr.getIndex());
         assertEquals("unexpected total length", bytes.length,
             pr.getTotalLength() );
@@ -148,7 +148,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[23+16]=(byte)3;  //index
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
         try {
-            messageFactory.read(in);
+            messageFactory.read(in, Network.TCP);
             fail("No exception thrown");
         } catch (BadPacketException expected) {}
         
@@ -172,7 +172,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        PushRequest pr2 = (PushRequest)messageFactory.read(bais);
+        PushRequest pr2 = (PushRequest)messageFactory.read(bais, Network.TCP);
         assertNotNull(pr2);
         assertFalse(pr.isTLSCapable());
     }
