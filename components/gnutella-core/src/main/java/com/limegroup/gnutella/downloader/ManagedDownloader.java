@@ -3028,15 +3028,20 @@ public class ManagedDownloader extends AbstractDownloader
             if (tree != null) {
                 HashTree oldTree = commonOutFile.getHashTree();
                 if (tree.isBetterTree(oldTree)) {
-                    commonOutFile.setHashTree(tree);
-                    set = true;
+                    set = commonOutFile.setHashTree(tree);
                 }
             }
         }
         
         if (set && tree != null) { // warning?
+            URN sha1 = getSHA1Urn();
             URN ttroot = URN.createTTRootUrn(tree.getRootHash());
-            incompleteFileManager.updateTTROOT(getSHA1Urn(), ttroot);
+            tigerTreeCache.get().addRoot(sha1, ttroot);
+            synchronized(fileManager) {
+                FileDesc fd = fileManager.getFileDescForUrn(sha1);
+                if (fd.updateTTROOT(ttroot))
+                    fileManager.fileURNSUpdated(fd); // refresh as the partial file may now be shared
+            }
         }
     }
     

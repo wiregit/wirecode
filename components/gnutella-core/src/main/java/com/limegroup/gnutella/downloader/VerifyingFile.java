@@ -681,14 +681,14 @@ public class VerifyingFile {
      * sets the HashTree the current download will use.  That affects whether
      * we do overlap checking.
      */
-    public synchronized void setHashTree(HashTree tree) {
+    public synchronized boolean setHashTree(HashTree tree) {
         // doesn't match our expected tree, bail.
         if (expectedHashRoot != null && tree != null && !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
-            return;
+            return false;
 
         // if the tree is of incorrect size, ignore it
         if (tree != null && tree.getFileSize() != completedSize)
-            return;
+            return false;
 
         HashTree previous = hashTree;
         
@@ -698,7 +698,7 @@ public class VerifyingFile {
             
             // and we have verified at least two default chunks, don't change
             if (verifiedBlocks.getSize() > 2 * DEFAULT_CHUNK_SIZE)
-                return;
+                return false;
             
             // else trigger verification
             if (verifiedBlocks.getSize() > 0) {
@@ -721,6 +721,7 @@ public class VerifyingFile {
             diskController.addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
             existingFileSize = -1;
         }
+        return true;
     }
     
     /**

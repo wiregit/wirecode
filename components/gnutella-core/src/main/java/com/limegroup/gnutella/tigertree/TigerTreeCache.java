@@ -198,6 +198,12 @@ public final class TigerTreeCache {
         } else if (LOG.isDebugEnabled())
             LOG.debug("hashtree for urn " + sha1 + " had bad depth");
     }
+    
+    public synchronized void addRoot(URN sha1, URN ttroot) {
+        if (!sha1.isSHA1() || !ttroot.isTTRoot())
+            throw new IllegalArgumentException();
+        ROOT_MAP.put(sha1,ttroot);
+    }
 
     /**
      * private constructor

@@ -412,7 +412,8 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             assertFalse(ifd.shouldBeShared());
             
             // update with a ttroot
-            ifm1.updateTTROOT(sha1, UrnHelper.TTROOT);
+            ifd.updateTTROOT(UrnHelper.TTROOT);
+            IncompleteFileManager.globalTigerTreeCache.get().addRoot(sha1, UrnHelper.TTROOT);
             assertTrue(ifd.shouldBeShared());
             
             //Write to disk.

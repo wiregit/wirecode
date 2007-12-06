@@ -594,6 +594,9 @@ public abstract class FileManagerImpl implements FileManager {
      * @see com.limegroup.gnutella.FileManager#getFileDescForUrn(com.limegroup.gnutella.URN)
      */
 	public synchronized FileDesc getFileDescForUrn(final URN urn) {
+        if (!urn.isSHA1())
+            throw new IllegalArgumentException();
+        
 		IntSet indices = _urnMap.get(urn);
 		if(indices == null) return null;
 
@@ -1721,6 +1724,8 @@ public abstract class FileManagerImpl implements FileManager {
         // it already was... and if so, ignore it.
         // This is somewhat expensive, but it is called very rarely, so it's ok
         for(URN urn : urns) {
+            if (!urn.isSHA1())
+                continue;
             // if there were indices for this URN, exit.
             IntSet shared = _urnMap.get(urn);
             // nothing was shared for this URN, look at another
@@ -1797,6 +1802,8 @@ public abstract class FileManagerImpl implements FileManager {
      */
     private synchronized void updateUrnIndex(FileDesc fileDesc) {
         for(URN urn : fileDesc.getUrns()) {
+            if (!urn.isSHA1())
+                continue;
 			IntSet indices=_urnMap.get(urn);
 			if (indices==null) {
 				indices=new IntSet();
@@ -1826,6 +1833,8 @@ public abstract class FileManagerImpl implements FileManager {
      */
     private synchronized void removeUrnIndex(FileDesc fileDesc, boolean purgeState) {
         for(URN urn : fileDesc.getUrns()) {
+            if (!urn.isSHA1())
+                continue;
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
             IntSet indices=_urnMap.get(urn);

@@ -27,12 +27,12 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary
@@ -95,7 +95,7 @@ public class IncompleteFileManager implements Serializable {
     private Map<File, VerifyingFile> blocks=
         new TreeMap<File, VerifyingFile>(Comparators.fileComparator());
     /**
-     * Bijection between hashes (URN) and incomplete files (File).  This is
+     * Bijection between sha1 hashes (URN) and incomplete files (File).  This is
      * used to ensure that any two RemoteFileDesc with the same hash get the
      * same incomplete file, regardless of name.  The inverse of this map is
      * used to get the hash of an incomplete file for query-by-hash and
@@ -117,16 +117,21 @@ public class IncompleteFileManager implements Serializable {
     
     @Inject
     volatile static Provider<FileManager> globalFileManager;
+    
+    @Inject
+    volatile static Provider<TigerTreeCache> globalTigerTreeCache;
 
     @Inject
     private volatile static Provider<VerifyingFileFactory> verifyingFileFactory;
     
     private volatile transient FileManager fileManager;
+    private volatile transient TigerTreeCache ttCache;
     
     ///////////////////////////////////////////////////////////////////////////
 
     public IncompleteFileManager() {
         this.fileManager = globalFileManager.get();
+        ttCache = globalTigerTreeCache.get();
     }
     
     /**
@@ -350,26 +355,6 @@ public class IncompleteFileManager implements Serializable {
     }
     
     /**
-     * @param sha1 the existing sha1 we know about
-     * @param ttroot the ttroot for the same file
-     */
-    void updateTTROOT(URN sha1, URN ttroot) {
-        File f;
-        synchronized(this) {
-            f = hashes.get(sha1);
-            if (f == null)
-                return;
-            hashes.put(ttroot,f);
-        }
-        
-        synchronized(fileManager) {
-            FileDesc fd = fileManager.getFileDescForUrn(sha1);
-            if (fd.updateTTROOT(ttroot))
-                fileManager.fileURNSUpdated(fd); // refresh as the partial file may now be shared
-        }
-    }
-    
-    /**
      * Returns the file associated with the specified URN.  If no file matches,
      * returns null.
      *
@@ -410,6 +395,7 @@ public class IncompleteFileManager implements Serializable {
     private synchronized void readObject(ObjectInputStream stream) 
                                    throws IOException, ClassNotFoundException {
         this.fileManager = globalFileManager.get();
+        this.ttCache = globalTigerTreeCache.get();
         
         GetField gets = stream.readFields();
         blocks = transform(gets.get("blocks", null));
@@ -417,10 +403,12 @@ public class IncompleteFileManager implements Serializable {
         
         // if we had roots, we should expect them.
         for (URN urn : hashes.keySet()) {
-            if (!urn.isTTRoot())
+            if (!urn.isSHA1())
                 continue;
             File f = hashes.get(urn);
-            blocks.get(f).setExpectedHashTreeRoot(urn.httpStringValue().substring(11));
+            URN ttroot = ttCache.getTTROOT(urn);
+            if (ttroot != null)
+                blocks.get(f).setExpectedHashTreeRoot(ttroot.httpStringValue().substring(11));
         }
         
         //Notify FileManager about the new incomplete files.
@@ -767,8 +755,12 @@ public class IncompleteFileManager implements Serializable {
         Set<URN> urns = new UrnSet();
         //Return a set S s.t. for each K in S, hashes.get(k)==incpleteFile
         for(Map.Entry<URN, File> entry : hashes.entrySet()) {
-            if (incompleteFile.equals(entry.getValue()))
+            if (incompleteFile.equals(entry.getValue())) {
                 urns.add(entry.getKey());
+                URN ttroot = ttCache.getTTROOT(entry.getKey());
+                if (ttroot != null)
+                    urns.add(ttroot);
+            }
         }
         return urns;
     }    
