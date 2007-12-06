@@ -83,7 +83,7 @@ public final class TigerTreeCache {
     /**
      * Whether or not data dirtied since the last time we saved.
      */
-    private static boolean dirty = false;        
+    private volatile static boolean dirty = false;        
 
     
     public HashTree getHashTreeAndWait(FileDesc fd, long timeout) throws InterruptedException, TimeoutException {
@@ -187,8 +187,9 @@ public final class TigerTreeCache {
      *            the <tt>HashTree</tt>
      */
     public static synchronized void addHashTree(URN sha1, HashTree tree) {
+        URN root = URN.createTTRootUrn(tree.getRootHash());
+        addRoot(sha1, root);
         if (tree.isGoodDepth()) {
-            URN root = URN.createTTRootUrn(tree.getRootHash());
             ROOT_MAP.put(sha1, root);
             TREE_MAP.put(root, tree);
             dirty = true;
@@ -199,10 +200,10 @@ public final class TigerTreeCache {
             LOG.debug("hashtree for urn " + sha1 + " had bad depth");
     }
     
-    public synchronized void addRoot(URN sha1, URN ttroot) {
+    public static synchronized void addRoot(URN sha1, URN ttroot) {
         if (!sha1.isSHA1() || !ttroot.isTTRoot())
             throw new IllegalArgumentException();
-        ROOT_MAP.put(sha1,ttroot);
+        dirty |= ttroot.equals(ROOT_MAP.put(sha1,ttroot));
     }
 
     /**
@@ -214,7 +215,9 @@ public final class TigerTreeCache {
         try {
             loadCaches();
             return;
-        } catch (Throwable t) {}
+        } catch (Throwable t) {
+            LOG.info("didn't load new caches",t);
+        }
         
         // otherwise read the old format.
         Map<URN, HashTree> m = createMap();
@@ -316,7 +319,6 @@ public final class TigerTreeCache {
     public synchronized void persistCache(FileManager fileManager, DownloadManager downloadManager) {
         if(!dirty)
             return;
-        
         //It's not ideal to hold a lock while writing to disk, but I doubt
         // think
         //it's a problem in practice.
