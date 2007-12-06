@@ -1,13 +1,10 @@
 package com.limegroup.gnutella.tigertree;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,6 +21,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
+import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Singleton;
@@ -65,10 +63,22 @@ public final class TigerTreeCache {
     private static Map<URN, HashTree> TREE_MAP;
 
     /**
-     * File where the Mapping SHA1->TIGERTREE is stored
+     * File where the old Mapping SHA1->TIGERTREE is stored
      */
-    private static final File CACHE_FILE =
+    private static final File OLD_CACHE_FILE =
         new File(CommonUtils.getUserSettingsDir(), "ttree.cache");
+    
+    /**
+     * File where the Mapping SHA1->TTROOT is stored
+     */
+    private static final File ROOT_CACHE_FILE =
+        new File(CommonUtils.getUserSettingsDir(), "ttroot.cache");
+    
+    /**
+     * File where the Mapping TTROOT->TIGERTREE is stored
+     */
+    private static final File TREE_CACHE_FILE =
+        new File(CommonUtils.getUserSettingsDir(), "ttrees.cache");
         
     /**
      * Whether or not data dirtied since the last time we saved.
@@ -194,6 +204,13 @@ public final class TigerTreeCache {
      */
     //DPINJ: Delay deserialization...
     private TigerTreeCache() {
+        // try reading the new format first
+        try {
+            loadCaches();
+            return;
+        } catch (Throwable t) {}
+        
+        // otherwise read the old format.
         Map<URN, HashTree> m = createMap();
         ROOT_MAP = new HashMap<URN,URN>(m.size());
         TREE_MAP = new HashMap<URN,HashTree>(m.size());
@@ -215,7 +232,7 @@ public final class TigerTreeCache {
         try {
             ois = new ConverterObjectInputStream(
                     new BufferedInputStream(
-                        new FileInputStream(CACHE_FILE)));
+                        new FileInputStream(OLD_CACHE_FILE)));
             return GenericsUtils.scanForMap(ois.readObject(), URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
             LOG.error("Can't read tiger trees", t);
@@ -223,6 +240,39 @@ public final class TigerTreeCache {
         } finally {
             IOUtils.close(ois);
         }
+    }
+    
+    /**
+     * Loads values from the root and tree caches
+     */
+    private static void loadCaches() throws IOException, ClassNotFoundException {
+        Object roots = FileUtils.readObject(ROOT_CACHE_FILE.getAbsolutePath());
+        Object trees = FileUtils.readObject(TREE_CACHE_FILE.getAbsolutePath());
+
+        Map<URN,URN> rootsMap = GenericsUtils.scanForMap(roots, URN.class, URN.class, GenericsUtils.ScanMode.REMOVE);
+        Map<URN,HashTree> treesMap = GenericsUtils.scanForMap(trees, URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
+        
+        // remove roots that don't have a sha1 mapping for them
+        // cause we can't use them.
+        treesMap.keySet().retainAll(rootsMap.values());
+        
+        // and make sure urns are the correct type
+        for (Iterator<Map.Entry<URN, URN>> iter = rootsMap.entrySet().iterator();iter.hasNext();) {
+            Map.Entry<URN, URN> e = iter.next();
+            if (!e.getKey().isSHA1() || !e.getValue().isTTRoot())
+                iter.remove();
+        }
+        
+        for (Iterator<URN> iter = treesMap.keySet().iterator(); iter.hasNext();) {
+            URN urn = iter.next();
+            if (!urn.isTTRoot())
+                iter.remove();
+        }
+        
+        // Note: its ok to have roots without trees.
+        
+        ROOT_MAP = rootsMap;
+        TREE_MAP = treesMap;
     }
 
     /**
@@ -232,8 +282,7 @@ public final class TigerTreeCache {
      * @param map
      *            the <tt>Map</tt> to check
      */
-    private static Map<URN, HashTree> removeOldEntries(Map<URN,URN> roots, Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
-        Map<URN, HashTree> ret = new HashMap<URN, HashTree>(roots.size());
+    private static void removeOldEntries(Map<URN,URN> roots, Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
         // discard outdated info
         Iterator<URN> iter = roots.keySet().iterator();
         while (iter.hasNext()) {
@@ -253,10 +302,6 @@ public final class TigerTreeCache {
             map.remove(roots.get(sha1));
             dirty = true;
         }
-        
-        for (URN sha1 : roots.keySet())
-            ret.put(sha1, map.get(roots.get(sha1)));
-        return ret;
     }
 
     /**
@@ -269,18 +314,14 @@ public final class TigerTreeCache {
         //It's not ideal to hold a lock while writing to disk, but I doubt
         // think
         //it's a problem in practice.
-        Map<URN, HashTree> write = removeOldEntries(ROOT_MAP, TREE_MAP, fileManager, downloadManager);
+        removeOldEntries(ROOT_MAP, TREE_MAP, fileManager, downloadManager);
 
-        ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(
-                    new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
-            oos.writeObject(write);
+            FileUtils.writeObject(ROOT_CACHE_FILE.getAbsolutePath(), ROOT_MAP);
+            FileUtils.writeObject(TREE_CACHE_FILE.getAbsolutePath(), TREE_MAP);
         } catch (IOException e) {
             ErrorService.error(e);
-        } finally {
-            IOUtils.close(oos);
-        }
+        } 
         
         dirty = true;
     }
