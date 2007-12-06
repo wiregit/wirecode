@@ -525,4 +525,11 @@ public class SharingSettings extends LimeProps {
      */
     public static final BooleanSetting ALLOW_PARTIAL_SHARING =
         FACTORY.createBooleanSetting("ALLOW_PARTIAL_SHARING", true);
+    
+    /**
+     * Maximum size in bytes for the encoding of available ranges per Response object
+     */
+    public static final IntSetting MAX_PARTIAL_ENCODING_SIZE =
+        FACTORY.createRemoteIntSetting("MAX_PARTIAL_ENCODING_SIZE", 20, 
+                "SharingSettings.maxPartialEncodingSize", 10, 40);
 }

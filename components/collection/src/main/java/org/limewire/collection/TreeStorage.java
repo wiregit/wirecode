@@ -28,6 +28,9 @@ public class TreeStorage {
     
     /** id of the largest node that maps to a real chunk of the file */
     private final int maxId;
+    
+    /** Whether nodes that are not verified can be used */
+    private boolean allowUnverifiedUse;
 
     TreeStorage(byte [] rootHash, NodeGenerator generator, int numLeafs) {
         this.generator = generator;
@@ -37,6 +40,10 @@ public class TreeStorage {
         // root is trusted
         root.verified = true;
         map.put(1, root);
+    }
+    
+    public void setAllowUnverifiedUse(boolean allow) {
+        allowUnverifiedUse = allow;
     }
     
     /**
@@ -71,7 +78,8 @@ public class TreeStorage {
      */
     public void used(int id) {
         TreeNode tn = map.get(id);
-        assert tn != null && tn.verified;
+        assert tn != null;
+        assert allowUnverifiedUse || tn.verified;
         tn.used = true;
         consolidate(tn);
     }
@@ -114,7 +122,7 @@ public class TreeStorage {
         TreeNode parent;
         TreeNode existingParent = map.get(node.id / 2);
         if (existingParent != null) {
-            assert existingParent.verified;
+            assert allowUnverifiedUse || existingParent.verified;
             assert !existingParent.used;
             parent = existingParent;
         } else 
@@ -153,7 +161,7 @@ public class TreeStorage {
         if (siblings[0] == null || siblings[1] == null)
             return;
 
-        assert !siblings[0].verified && (!siblings[1].verified || siblings[1] == PADDING);
+        assert (allowUnverifiedUse || !siblings[0].verified) && (!siblings[1].verified || siblings[1] == PADDING);
         
         TreeNode parent = generateParent(siblings);
         

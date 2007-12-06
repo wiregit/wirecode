@@ -6,6 +6,8 @@ import java.util.List;
 import org.limewire.collection.IntervalSet;
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.settings.SharingSettings;
+
 
 /**
  * Contains the logic for writing and reading IntervalSets
@@ -51,14 +53,32 @@ public class IntervalEncoder {
         for (int i = 0; i < ints.size(); i++) 
             ByteOrder.int2beb(ints.get(i).intValue(), intsB, i * 4);
         
-        if (bytesB.length > 0)
-            g.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+1, bytesB);
-        if (shortsB.length > 0)
-            g.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+2, shortsB);
-        if (b24B.length > 0)
-            g.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+3, b24B);
-        if (intsB.length > 0)
-            g.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+4, intsB);
+        int availableSpace = SharingSettings.MAX_PARTIAL_ENCODING_SIZE.getValue();
+        availableSpace = addIfSpace(bytesB,g,1,availableSpace);
+        availableSpace = addIfSpace(shortsB,g,2,availableSpace);
+        availableSpace = addIfSpace(b24B,g,3,availableSpace);
+        addIfSpace(intsB,g,4,availableSpace);
+    }
+    
+    /**
+     * adds the byte array to the appropriate ggep value if there is enough space 
+     * @param dataSize the size of each entry
+     * @param available how much space we have availble
+     * @return how much space is left after adding
+     */
+    private static int addIfSpace(byte [] toAdd, GGEP ggep, int dataSize, int available) {
+        if (toAdd.length == 0 || available <= 0)
+            return available;
+        assert toAdd.length % dataSize == 0;
+        if (toAdd.length > available) {
+            byte [] tmp = new byte[available - (available % dataSize)];
+            if (tmp.length == 0)
+                return available;
+            System.arraycopy(toAdd,0,tmp,0,tmp.length);
+            toAdd = tmp;
+        }
+        ggep.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+dataSize,toAdd);
+        return available - toAdd.length;
     }
     
     public static IntervalSet decode(long size, GGEP ggep) throws BadGGEPPropertyException{

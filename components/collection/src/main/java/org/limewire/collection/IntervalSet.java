@@ -382,6 +382,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     public Collection<Integer> encode(long maxSize) {
         long numLeafs = getNumLeafs(maxSize);
         TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
+        ts.setAllowUnverifiedUse(true);
         for (Range r : intervals) {
             assert r.getLow() % 1024 == 0;
             for (long i = r.getLow(); i <= r.getHigh(); i+= 1024) {
