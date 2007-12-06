@@ -119,10 +119,10 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     }
 
     /**
-     * Tests if FTW-Node header is written. Must not have accepted an incoming
+     * Tests if X-FW-Node-Info header is written. Must not have accepted an incoming
      * connection for this to happend.
      */
-    public void testFWTNodeHeaderIsWritten() throws Exception {
+    public void testFWNodeInfoHeaderIsWritten() throws Exception {
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setCanDoFWT(true);
         final ConnectionManager connectionManager = context.mock(ConnectionManager.class);

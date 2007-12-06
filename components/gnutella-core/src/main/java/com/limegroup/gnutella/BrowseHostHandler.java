@@ -22,6 +22,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.rudp.UDPConnection;
+import org.limewire.service.ErrorService;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
@@ -107,7 +108,7 @@ public class BrowseHostHandler {
     /** 
      * Browses the files on the specified host and port.
      *
-     * @param host The IP of the host you want to browse.
+     * @param host The IP and port of the host you want to browse, can be null for firewalled endpoint
      * @param port The port of the host you want to browse.
      * @param proxies the <tt>Set</tt> of push proxies to try
      * @param canDoFWTransfer Whether or not this guy can do a firewall
@@ -115,6 +116,18 @@ public class BrowseHostHandler {
      */
     public void browseHost(Connectable host, Set<? extends IpPort> proxies,
                            boolean canDoFWTransfer) {
+        
+        if (host == null) {
+            // if host is null we can't do fwts
+            assert !canDoFWTransfer : "Can't do fwts without host";
+            try {
+                browseFirewalledHost(createInvalidHost(), proxies, canDoFWTransfer);
+            } catch (UnknownHostException e) {
+                failed();
+                ErrorService.error(e, "Can't resolve host, should not happen");
+            }
+            return;
+        }
         
         // If this wasn't initially resolved, resolve it now...
         if(host.getInetSocketAddress().isUnresolved()) {
@@ -159,6 +172,16 @@ public class BrowseHostHandler {
             }
         }
         
+        // fall back on push if possible
+        browseFirewalledHost(host, proxies, canDoFWTransfer);        
+    }
+    
+    /**
+     * Expects a non-null host, but host can be an invalid one.
+     */
+    private void browseFirewalledHost(Connectable host, Set<? extends IpPort> proxies,
+                           boolean canDoFWTransfer) {
+        
         LOG.debug("Attempting push connection");
 
         if ( _serventID == null ) {
@@ -182,6 +205,13 @@ public class BrowseHostHandler {
         	// really quickly. 
         	pushDownloadManager.get().sendPush(fakeRFD);
         }
+    }
+    
+    /**
+     * Creates an invalid host for pushes.
+     */
+    static Connectable createInvalidHost() throws UnknownHostException {
+        return new ConnectableImpl("0.0.0.0", 1, false);
     }
 
     /**

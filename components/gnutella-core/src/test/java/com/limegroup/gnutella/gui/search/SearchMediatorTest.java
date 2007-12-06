@@ -34,6 +34,8 @@ public class SearchMediatorTest extends GUIBaseTestCase {
     }
     
     public void testDoBrowseHostPushEndpointNoAddress() throws Exception {
+        // instantiate because the constructor sets some static fields in other classes
+        new SearchMediator();
         String httpValue = "FFB3EC3B9D93A8F9CE42AED28F674900;222.222.222.222:2222";
         PushEndpoint pushEndpoint = pushEndpointFactory.createPushEndpoint(httpValue);
         SearchMediator.doBrowseHost(pushEndpoint);

@@ -376,6 +376,19 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(four.getProxies().size(), set.size());
     }
     
+    /**
+     * It should not be possible to create a push endpoint with fwt support
+     * but without host. 
+     */
+    public void testHttpStringFWTPushEndpointWithoutHost() throws Exception {
+        String httpValue = "FFB3EC3B9D93A8F9CE42AED28F674900;fwt/1;222.222.222.222:2222";
+        PushEndpoint pushEndpoint = factory.createPushEndpoint(httpValue);
+        assertNull(pushEndpoint.getValidExternalAddress());
+        assertNull(pushEndpoint.getInetAddress());
+        assertNull(pushEndpoint.getInetSocketAddress());
+        assertEquals(0, pushEndpoint.supportsFWTVersion());
+    }
+    
     public void testHttpStringWithTLS() throws Exception {
         GUID g1 = new GUID();
         IpPortSet set = ippset(ppi1, tls2, ppi3, tls4);
