@@ -36,40 +36,28 @@ public final class LocalIPFilter extends AbstractIPFilter {
     /** List contained in hostiles.txt if any.  Loaded on startup only */ 
     private final IPList hostilesTXTHosts = new IPList();
     
-    private final IPFilter delegate;
+    private final IPFilter hostileNetworkFilter;
     private final ScheduledExecutorService ipLoader;
     /** Marker for whether or not hostiles need to be loaded. */
     private volatile boolean shouldLoadHostiles;
     
-    /** Number of allowings */
-    private volatile long allowings;
-    /** Number of blockings */
-    private volatile long blockings;
+    private volatile long whitelistings; // # of times we whitelisted an ip 
+    private volatile long blacklistings; // # of times we blacklisted an ip 
+    private volatile long netblockings;  // # of times net blacklisted an ip 
+    private volatile long implicitings;  // # of times an ip was implicitly allowed
     
     /** Constructs an IPFilter that automatically loads the content. */
     @Inject
-    public LocalIPFilter(@Named("hostileFilter") IPFilter delegate, 
+    public LocalIPFilter(@Named("hostileFilter") IPFilter hostileNetworkFilter, 
             @Named("backgroundExecutor") ScheduledExecutorService ipLoader) {
-        this(true, delegate, ipLoader);
-    }
-    
-    /** Constructs an IPFilter that can optionally load the content. */
-    public LocalIPFilter(boolean load, 
-            @Named("hostileFilter") IPFilter delegate, 
-            @Named("backgroundExecutor") ScheduledExecutorService ipLoader) {
-        this.delegate = delegate;
+        this.hostileNetworkFilter = hostileNetworkFilter;
         this.ipLoader = ipLoader;
         
         File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
         shouldLoadHostiles = hostiles.exists();
         
-        if(load) {
-            delegate.refreshHosts();
-            refreshHosts();
-        } else {
-            badHosts = new IPList();
-            goodHosts = new IPList();
-        }
+        hostileNetworkFilter.refreshHosts();
+        refreshHosts();
     }
     
     public void refreshHosts() {
@@ -79,7 +67,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
     public void refreshHosts(final IPFilterCallback callback) {
         Runnable load = new Runnable() {
             public void run() {
-                delegate.refreshHosts();
+                hostileNetworkFilter.refreshHosts();
                 refreshHostsImpl();
                 if (callback != null)
                     callback.ipFiltersLoaded();
@@ -135,22 +123,37 @@ public final class LocalIPFilter extends AbstractIPFilter {
     
     /** Determiens if any blacklisted hosts exist. */
     public boolean hasBlacklistedHosts() {
-        return delegate.hasBlacklistedHosts() || !badHosts.isEmpty();
+        return 
+          (FilterSettings.USE_NETWORK_FILTER.getValue() && hostileNetworkFilter.hasBlacklistedHosts())
+          || !badHosts.isEmpty();
     }
     
     /** The logmin distance to bad or hostile ips. */
     public int logMinDistanceTo(IP ip) {
-        return Math.min(badHosts.logMinDistanceTo(ip), delegate.logMinDistanceTo(ip));
+        int minDistance = badHosts.logMinDistanceTo(ip);
+        if(FilterSettings.USE_NETWORK_FILTER.getValue())
+            minDistance = Math.min(minDistance, hostileNetworkFilter.logMinDistanceTo(ip));
+        return minDistance;
     }
     
     protected boolean allowImpl(IP ip) {
-        boolean ret = goodHosts.contains(ip) ||
-        (!badHosts.contains(ip) && delegate.allow(ip));
-        if (ret)
-            allowings++;
-        else
-            blockings++;
-        return ret;
+        if (goodHosts.contains(ip)) {
+            whitelistings++;
+            return true;
+        }
+
+        if (badHosts.contains(ip)) {
+            blacklistings++;
+            return false;
+        }
+
+        if (FilterSettings.USE_NETWORK_FILTER.getValue() && !hostileNetworkFilter.allow(ip)) {
+            netblockings++;
+            return false;
+        }
+
+        implicitings++;
+        return true;
     }
     
     @InspectableContainer
@@ -161,8 +164,10 @@ public final class LocalIPFilter extends AbstractIPFilter {
         private final Inspectable counts = new Inspectable() {
             public Object inspect() {
                 Map<String,Object> ret = new HashMap<String, Object>();
-                ret.put("allowed",allowings);
-                ret.put("blocked",blockings);
+                ret.put("white",whitelistings);
+                ret.put("block",blacklistings);
+                ret.put("netblock", netblockings);
+                ret.put("implicit", implicitings);
                 return ret;
             }
         };

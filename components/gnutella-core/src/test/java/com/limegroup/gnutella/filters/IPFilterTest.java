@@ -34,12 +34,12 @@ public class IPFilterTest extends LimeTestCase {
     
     private Mockery context;
     
-    PingReply pingReply;
-    QueryReply queryReply;
-    QueryRequest queryRequest;
-    IPFilter hostileFilter;
+    private PingReply pingReply;
+    private QueryReply queryReply;
+    private QueryRequest queryRequest;
+    private IPFilter hostileFilter;
     
-    IPFilter filter;
+    private IPFilter filter;
 
     public IPFilterTest(String name) {
         super(name);
@@ -86,7 +86,7 @@ public class IPFilterTest extends LimeTestCase {
         }});
 	
         injector = LimeTestUtils.createInjector(m);
-        filter = getFilter();
+        filter = injector.getInstance(Key.get(IPFilter.class,Names.named("ipFilter")));
         final CountDownLatch loaded = new CountDownLatch(1);
         IPFilterCallback ipfc = new IPFilter.IPFilterCallback() {
             public void ipFiltersLoaded() {
@@ -97,11 +97,6 @@ public class IPFilterTest extends LimeTestCase {
         loaded.await();
         context.assertIsSatisfied();
     }
-    
-    private IPFilter getFilter() {
-        return injector.getInstance(Key.get(IPFilter.class,Names.named("ipFilter")));
-    }
-
     
     public void testFilterByAddress() {
         context.checking(new Expectations() {{
@@ -130,6 +125,16 @@ public class IPFilterTest extends LimeTestCase {
         assertTrue(filter.allow("18.239.0.144"));
         assertFalse(filter.allow("13.0.0.0"));
         assertFalse(filter.allow("13.0.0.1"));
+        context.assertIsSatisfied();
+    }
+    
+    public void testNotDelegatesToHostile() {
+        FilterSettings.USE_NETWORK_FILTER.setValue(false);
+        assertTrue(filter.allow("18.240.0.0"));
+        assertFalse(filter.allow("18.239.0.142"));
+        assertTrue(filter.allow("18.239.0.144"));
+        assertFalse(filter.allow("13.0.0.0"));
+        assertTrue(filter.allow("13.0.0.1"));
         context.assertIsSatisfied();
     }
 

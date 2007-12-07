@@ -13,6 +13,9 @@ public class FilterSettings extends LimeProps {
     
     private FilterSettings() {}
 
+    public static final BooleanSetting USE_NETWORK_FILTER =
+        FACTORY.createBooleanSetting("USE_NETWORK_FILTER", true);
+    
     /**
 	 * Sets whether or not search results including "adult content" are
 	 * banned in What's New queries.
