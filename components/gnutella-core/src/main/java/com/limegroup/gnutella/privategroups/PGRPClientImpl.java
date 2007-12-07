@@ -235,14 +235,12 @@ public class PGRPClientImpl implements PGRPClient{
         if(findRosterUserName(username)){
             ChatManager chatManager = buddyListManager.getManager(username);
             if(chatManager== null){
-                synchronized(chatManager){
                     //need to get remote user info and establish session
                     if(setRemoteConnection(username, localUsername)){
                         chatManager = buddyListManager.getManager(username);
                         chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
                         return true;
                     }
-                }
             }
             else{
                 chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
