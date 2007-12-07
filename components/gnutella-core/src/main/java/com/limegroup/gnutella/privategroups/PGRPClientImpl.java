@@ -50,9 +50,10 @@ public class PGRPClientImpl implements PGRPClient{
     @Inject
     public PGRPClientImpl(BuddyListManager buddyListManager) {
         this.buddyListManager = buddyListManager;
+        connectToServerNoPort(servername);
     }
     
-    public void connectToServerNoPort(String serverAddress){
+    private void connectToServerNoPort(String serverAddress){
         
         // Create a connection to the jabber.org server.
         connection = new XMPPConnection(serverAddress);
@@ -285,6 +286,7 @@ public class PGRPClientImpl implements PGRPClient{
 
         Collection <RosterGroup> group = roster.getGroups();
         
+        
         if (!group.isEmpty()){
             Iterator i = group.iterator();
             
@@ -293,6 +295,7 @@ public class PGRPClientImpl implements PGRPClient{
                 if (rosterGroup.getName().equals(groupName)){
                     //found group, remove user
                     try {
+                        System.out.println("found group");
                         RosterEntry entry = rosterGroup.getEntry(usernameserver);
                         roster.removeEntry(entry);
                     } catch (XMPPException e) {
@@ -304,13 +307,13 @@ public class PGRPClientImpl implements PGRPClient{
         }
         
         //no groups
-        Collection<RosterEntry> entries = roster.getEntries();
+        Collection<RosterEntry> entries = roster.getUnfiledEntries();
         Iterator i = entries.iterator();
         
         while(i.hasNext()){
             RosterEntry nextEntry = ((RosterEntry)i.next());
             //remove entries
-            if(nextEntry.getUser().equals(username))
+            if(nextEntry.getUser().equals(usernameserver))
                 try {
                     roster.removeEntry(nextEntry);
                 } catch (XMPPException e) {
@@ -328,21 +331,30 @@ public class PGRPClientImpl implements PGRPClient{
         Collection <RosterEntry> usernames = roster.getEntries();
         for(Iterator i = usernames.iterator(); i.hasNext();){
             String user = ((RosterEntry)i.next()).getUser();
-             if(user.equals(username + "@" + servername))
+             if(user.equals(username))
                  return true;
         }
         return false;
+    }
+    
+    public Roster getRoster(){
+        return connection.getRoster();
     }
   
     /**
      * queries the server to find the ip address associated with the remote username
      */
-    private boolean setRemoteConnection(String remoteUserName, String localUsername){
+    public boolean setRemoteConnection(String remoteUserNameServer, String localUsername){
+        
+        //remove the server name part of the string
+        int index = remoteUserNameServer.lastIndexOf('@');
+        String remoteUserNameOnly = remoteUserNameServer.substring(0, index);
+        System.out.println("remoteUserName is: " + remoteUserNameOnly);
         
         //use valueStorage packet to get ip address, port, and public key
         ValueStorage storagePacket = new ValueStorage();
         storagePacket.setTo(servername);
-        storagePacket.setUsername(remoteUserName);
+        storagePacket.setUsername(remoteUserNameOnly);
         storagePacket.setType(IQ.Type.GET);
         
         PacketFilter filter = new AndFilter(new PacketIDFilter(storagePacket.getPacketID()),
@@ -358,7 +370,7 @@ public class PGRPClientImpl implements PGRPClient{
             if(data.getIPAddress()!=null){
                 //create new session and add to buddyListManager
                 try {
-                    buddyListManager.addChatManager(remoteUserName, localUsername, new Socket(data.getIPAddress(),  9999));
+                    buddyListManager.addChatManager(remoteUserNameServer, localUsername, new Socket(data.getIPAddress(),  9999));
                     return true;
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
@@ -455,7 +467,7 @@ public class PGRPClientImpl implements PGRPClient{
         XMPPConnection.DEBUG_ENABLED = true;
         
         PGRPClientImpl client = new PGRPClientImpl(new BuddyListManager());
-        client.connectToServerNoPort(servername);
+//        client.connectToServerNoPort(servername);
         
 //        client.loginAccount("admin", "admin");
 //        client.createAccount("MikeT", "1234");
@@ -464,7 +476,7 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.createAccount("Dan", "1234");   
 //        client.createAccount("Anthony", "1234"); 
         
-//          client.loginAccount("Dan", "1234");
+          client.loginAccount("Dan", "1234");
 //          client.removeFromRoster("Anthony", "");
 //          client.viewRoster();
 //        client.addToRoster("lulu", "", "");
@@ -473,8 +485,19 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.loginAccountNoServerSocket("Anthony", "1234");
 //        client.sendMessage("miket", "hi");
         
-        client.loginAccountNoServerSocket("Anthony", "1234");
-        client.sendMessage("dan", "hi");
+//        client.loginAccountNoServerSocket("Anthony", "1234");
+//          client.addToRoster("miket","Mike Tiraborelli","ClientDev");
+//          client.addToRoster("mikee","Mike Everett","ClientDev");
+//          client.addToRoster("sam","Sam Berlin","ClientDev");
+//          client.addToRoster("dan","Dan Sullivan","ClientDev");
+//          client.addToRoster("zlatin","Zlatin Balvesky","ClientDev");
+//          client.addToRoster("felix","Felix Berger","ClientDev");
+//          client.addToRoster("curtis","Curtis Jones","ClientDev");
+//          client.addToRoster("tim","Tim Julien","ClientDev");
+        
+        
+      client.viewRoster();
+//        client.sendMessage("dan", "hi");
 
 //        client.sendMessage("lulu", "wassup");
 

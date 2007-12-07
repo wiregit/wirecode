@@ -12,9 +12,9 @@ import java.util.WeakHashMap;
  */
 // TODO: This isn't synchronized right now, which is bad -- listener list should really be CoW,
 //       or a ConcurrentMap.  (See Google Collection's ReferenceMap.)
-public class WeakEventListenerList<E extends Event> implements WeakEventListenerSupport<E> {
+public class  WeakEventListenerList<E extends Event> implements WeakEventListenerSupport<E> {
     
-    private final Map<Object, List<EventListener<E>>> listenerMap;
+    private  final Map<Object, List<EventListener<E>>> listenerMap;
 
     public WeakEventListenerList() {
         this.listenerMap = new WeakHashMap<Object, List<EventListener<E>>>();
@@ -25,9 +25,9 @@ public class WeakEventListenerList<E extends Event> implements WeakEventListener
         List<EventListener<E>> listeners = listenerMap.get(strongRef);
         if(listeners == null){
             listeners = new ArrayList<EventListener<E>>();
-            listeners.add(listener);
             listenerMap.put(strongRef, listeners);
         }
+        listeners.add(listener);
     }
     
     /** Returns true if the listener was removed. */
@@ -39,7 +39,6 @@ public class WeakEventListenerList<E extends Event> implements WeakEventListener
                 listenerMap.remove(strongRef);
             return true;
         }
-        
         return false;
     }
     

@@ -16,6 +16,9 @@ import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.limegroup.gnutella.gui.GuiCoreMediator;
+import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
+
 /**
  * 
  * ChatManager holds socket and threads for reading/writing
@@ -30,7 +33,6 @@ public class ChatManager{
     private Thread readThread;
     private Thread writeThread;
     private final WeakEventListenerList<Event> listeners = new WeakEventListenerList<Event>();
-    private PrivateGroupsScreen screen;
     private String localUsername;
     
   
@@ -41,7 +43,18 @@ public class ChatManager{
         initThreads(); 
     }
     
+    public void registerListener(String strongRef, EventListener listener){
+        listeners.addListener(strongRef, listener);
+    }
+    
+    public void removeListener(String strongRef, EventListener listener){
+        listeners.removeListener(strongRef, listener);
+    }
+    
+    
     private void handleEvent(Event E) {
+        //can check if window exists
+        
         listeners.broadcast(E);
     }
     
@@ -76,9 +89,8 @@ public class ChatManager{
         {
             Message msg = (Message) packet;
             
-            openDialogScreen(msg.getTo());
-            
-            screen.printMessage(localUsername, msg.getBody());
+            //this will print to the local msg window
+            handleEvent(new MessageEvent(msg, null));
         }
         
         appendBuffer(packet);
@@ -122,16 +134,6 @@ public class ChatManager{
         }   
     }
     
-    private void openDialogScreen(String dialogName){
-        if(screen == null){
-            screen = new PrivateGroupsScreen(dialogName, localUsername, this);
-            
-            //register screen for new listener
-            listeners.addListener(dialogName, screen);
-        }
-        
-    }
-    
     private class ReaderThread implements Runnable{
        
         private Socket readSocket;
@@ -163,9 +165,6 @@ public class ChatManager{
                                     //parseMessage(parser) returns a SMACK message object
                                     parsedMsg = (Message) PacketParserUtils.parseMessage(parser);
                                 }
-                                
-                                //open private groups screen and broadcast event to listeners
-                                openDialogScreen(parsedMsg.getFrom());
                                 
                                 handleEvent(new MessageEvent(parsedMsg, null));
                             }

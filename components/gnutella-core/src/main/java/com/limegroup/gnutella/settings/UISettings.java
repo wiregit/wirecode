@@ -82,6 +82,12 @@ public final class UISettings extends LimeProps {
 	 */
 	public static final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
 		FACTORY.createIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
+	
+	   /**
+     * Setting for the divider location between the login and list panels
+     */
+    public static final IntSetting UI_BUDDY_LIST_TAB_DIVIDER_LOCATION =
+        FACTORY.createIntSetting("UI_BUDDY_LIST_TAB_DIVIDER_LOCATION", 100);
     
     /** Setting for if native icons should be preloaded. */
     public static final BooleanSetting PRELOAD_NATIVE_ICONS =

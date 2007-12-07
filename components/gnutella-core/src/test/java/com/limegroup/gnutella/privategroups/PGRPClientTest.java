@@ -30,7 +30,6 @@ public class PGRPClientTest extends TestCase {
         String password = "password";
 
         client1 = new PGRPClientImpl(new BuddyListManager());
-        client1.connectToServerNoPort(servername);
         
         //try to login with a user that does not exist       
         assertFalse(client1.loginAccount(username, password));
@@ -43,14 +42,12 @@ public class PGRPClientTest extends TestCase {
         
         //try to login again.  this time the user should exist
         client1 = new PGRPClientImpl(new BuddyListManager());
-        client1.connectToServerNoPort(servername);
         assertTrue(client1.loginAccount(username, password));
         
         assertTrue(client1.logoff());
         
         //now remove account
         client1 = new PGRPClientImpl(new BuddyListManager());
-        client1.connectToServerNoPort(servername);
         
         assertTrue(client1.loginAccount(username, password));
         //remove account and try to login again
@@ -61,7 +58,6 @@ public class PGRPClientTest extends TestCase {
         }
 
         client1 = new PGRPClientImpl(new BuddyListManager());
-        client1.connectToServerNoPort(servername);
 
         //try to see if account still exists
 
@@ -84,7 +80,6 @@ public class PGRPClientTest extends TestCase {
         
         //create initial jabber client
         PGRPClientImpl client = new PGRPClientImpl(new BuddyListManager());
-        client.connectToServerNoPort(servername);
         
         //create account
         assertTrue(client.createAccount(username, password));
@@ -92,7 +87,6 @@ public class PGRPClientTest extends TestCase {
         assertTrue(client.logoff());
         
         client = new PGRPClientImpl(new BuddyListManager());
-        client.connectToServerNoPort(servername);
         
         assertTrue(client.loginAccount(username, password));
         
@@ -133,11 +127,9 @@ public class PGRPClientTest extends TestCase {
         System.out.println("testMessaging start");
         //need 2 clients
         client1 = new PGRPClientImpl(new BuddyListManager());
-        client1.connectToServerNoPort(servername);
         client1.createAccount("user1", "password1");
         
         client2 = new PGRPClientImpl(new BuddyListManager());
-        client2.connectToServerNoPort(servername);
         client2.createAccount("user2", "password2");
         
         client1.loginAccount("user1", "password1");

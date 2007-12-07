@@ -60,6 +60,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.http.FeaturesWriter;
@@ -732,6 +733,10 @@ public class LimeWireCore {
     
     public PGRPClient getPGRPClient() {
         return injector.getInstance(PGRPClient.class);
+    }
+    
+    public RosterListMediator getRosterListMediator(){
+        return injector.getInstance(RosterListMediator.class);
     }
     
 }

@@ -189,6 +189,12 @@ public class ApplicationSettings extends LimeProps {
     public static final BooleanSetting CONSOLE_VIEW_ENABLED =
         FACTORY.createBooleanSetting("CONSOLE_VIEW_ENABLED", false);
     
+    /**
+     * Sets whether or not Console Tab should be enabled.
+     */    
+    public static final BooleanSetting BUDDYLIST_VIEW_ENABLED =
+        FACTORY.createBooleanSetting("BUDDYLIST_VIEW_ENABLED", true);
+    
     /** Whether or not the logging tab is enabled / visible. */
     public static final BooleanSetting LOGGING_VIEW_ENABLED =
         FACTORY.createBooleanSetting("LOGGING_VIEW_ENABLED", false);

@@ -1,19 +1,9 @@
 package com.limegroup.gnutella.privategroups;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 
 public interface PGRPClient {
-    
-    
-    /**
-     * connects and establishes a connection to the server identified by the server address
-     */
-    public void connectToServerNoPort(String serverAddress);
-
-    /**
-     * connects and establishes a connection to the server identified by the server and port addresses
-     */
-    public void connectToServerPort(String serverAddress, int portAddress);
     
     /**
      * returns the buddy list manager associated with this client
@@ -36,6 +26,11 @@ public interface PGRPClient {
     public boolean loginAccount(String username, String password);
     
     /**
+     * test method for logging in a user with the given username and password without a server socket being started
+     */
+    public boolean loginAccountNoServerSocket(String username, String password);
+    
+    /**
      * logs off current client from the server
      */
     public boolean logoff();
@@ -44,6 +39,12 @@ public interface PGRPClient {
      * sends a message to a remote user specified with the given username and message
      */
     public boolean sendMessage(String username, String message);
+    
+    
+    /**
+     * gets ip address of remote user and establishes new chat manager
+     */
+    public boolean setRemoteConnection(String remoteUserNameServer, String localUsername);
     
     /**
      * adds a user with the specified username, nickname, and groupname to the roster
@@ -59,4 +60,9 @@ public interface PGRPClient {
      * finds a user in the roster. returns true if found and false if not.
      */
     public boolean findRosterUserName(String username);
+    
+    /**
+     * gets the current user's roster.
+     */
+    public Roster getRoster();
 }

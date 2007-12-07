@@ -13,6 +13,8 @@ import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
 
+import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
+
 
 /**
  * The PGRPServerSocket handles an incoming socket connection.  Once the handler accepts the incoming client
@@ -96,6 +98,8 @@ public class PGRPServerSocket{
             //2) query database for username
             //3) store buddySession with username and socket
             private void handleSocket(){
+                ServerIPQuery data;
+                
                 if (mySocket!=null){
                     String remoteIPAddress = mySocket.getInetAddress().getHostAddress();
                     
@@ -117,11 +121,12 @@ public class PGRPServerSocket{
                     IQ result = (IQ)collector.nextResult(SmackConfiguration.getPacketReplyTimeout());
                     
                     if (result instanceof ServerIPQuery) {
-                        ServerIPQuery data = (ServerIPQuery) result;
+                        data = (ServerIPQuery) result;
                         buddyListManager.addChatManager(data.getUsername(), localUsername, mySocket);
+                        RosterListMediator.getInstance().initMessageWindow(data.getUsername(), localUsername);
                     }
-                }                
-            } 
+                }     
+            }    
         }
 }
 
