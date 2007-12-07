@@ -227,11 +227,11 @@ public class PGRPClientImpl implements PGRPClient{
         
         //check list to see if buddy is a buddy
         if(findRosterUserName(username)){
-            ChatManager chatManager = buddyListManager.getManager(username);
+            ChatManager chatManager = buddyListManager.getManager(username + "@" + servername);
             if(chatManager== null){
                 //need to get remote user info and establish session
                 if(setRemoteConnection(username, localUsername)){
-                    chatManager = buddyListManager.getManager(username);
+                    chatManager = buddyListManager.getManager(username+ "@" + servername);
                     chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
                     return true;
                 }
@@ -477,7 +477,8 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.createAccount("Anthony", "1234"); 
         
           client.loginAccount("Dan", "1234");
-//          client.removeFromRoster("Anthony", "");
+//          client.addToRoster("anthony", "Anthony Bow", "");
+//          client.removeFromRoster("anthony", "");
 //          client.viewRoster();
 //        client.addToRoster("lulu", "", "");
 //        client.loginAccount("Dan", "1234");
@@ -494,9 +495,9 @@ public class PGRPClientImpl implements PGRPClient{
 //          client.addToRoster("felix","Felix Berger","ClientDev");
 //          client.addToRoster("curtis","Curtis Jones","ClientDev");
 //          client.addToRoster("tim","Tim Julien","ClientDev");
+//          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
         
-        
-      client.viewRoster();
+//      client.viewRoster();
 //        client.sendMessage("dan", "hi");
 
 //        client.sendMessage("lulu", "wassup");

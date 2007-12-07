@@ -19,7 +19,7 @@ public class BuddyListManager {
     private HashMap<String, ChatManager> buddyMap = new HashMap<String, ChatManager>();
             
     public void addChatManager(String remoteUsername, String localUsername, Socket socket){
-        ChatManager manager = new ChatManager(localUsername, socket);
+        ChatManager manager = new ChatManager(socket);
         buddyMap.put(remoteUsername, manager);
     }
     

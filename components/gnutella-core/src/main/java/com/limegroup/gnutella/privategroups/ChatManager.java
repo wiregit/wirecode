@@ -33,12 +33,10 @@ public class ChatManager{
     private Thread readThread;
     private Thread writeThread;
     private final WeakEventListenerList<Event> listeners = new WeakEventListenerList<Event>();
-    private String localUsername;
     
   
-    public ChatManager(String localUsername, Socket socket){
+    public ChatManager(Socket socket){
         this.socket = socket;
-        this.localUsername = localUsername;
         
         initThreads(); 
     }
