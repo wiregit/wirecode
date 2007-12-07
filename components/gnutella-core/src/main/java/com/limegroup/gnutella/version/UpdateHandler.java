@@ -573,14 +573,13 @@ public class UpdateHandler implements HttpClientListener {
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            FileDesc [] shared = fileManager.get().getSharedFileDescriptors(SharingUtils.PREFERENCE_SHARE);
-            for (int i = 0; i < shared.length; i++) {
-            	if (shared[i].getSHA1Urn() != null &&
-            			!urns.contains(shared[i].getSHA1Urn())) {
-            	    fileManager.get().removeFileIfShared(shared[i].getFile());
-            		shared[i].getFile().delete();
-            	}
-			}
+            List<FileDesc> shared = fileManager.get().getSharedFilesInDirectory(SharingUtils.PREFERENCE_SHARE);
+            for (FileDesc fd : shared) {
+                if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
+                    fileManager.get().removeFileIfShared(fd.getFile());
+                    fd.getFile().delete();
+                }
+            }
         }
     }
     

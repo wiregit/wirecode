@@ -192,28 +192,6 @@ public abstract class FileManagerImpl implements FileManager {
      */
     private static Set<String> _extensions;
     
-    /**
-     * A mapping whose keys are shared directories and any subdirectories
-     * reachable through those directories. The value for any key is the set of
-     * indices of all shared files in that directory.
-     * 
-     * INVARIANT: for any key k with value v in _sharedDirectories, for all i in
-     * v, _files[i]._path == k + _files[i]._name.
-     * 
-     * Likewise, for all j s.t. _files[j] != null and !(_files[j] instanceof
-     * IncompleteFileDesc), _sharedDirectories.get( _files[j]._path -
-     * _files[j]._name).contains(j).  Here "==" is shorthand for file path
-     * comparison and "a-b" is short for string 'a' with suffix 'b' removed.
-     * 
-     * INVARIANT: all keys in this are canonicalized files, sorted by a
-     * FileComparator.
-     * 
-     * Incomplete shared files are NOT stored in this data structure, but are
-     * instead in the _incompletesShared IntSet.
-     */
-    @InspectableForSize("number of shared directories")
-    private Map<File, IntSet> _sharedDirectories;
-    
 	/**
 	 * A Set of shared directories that are completely shared.  Files in these
 	 * directories are shared by default and will be shared unless the File is
@@ -429,7 +407,6 @@ public abstract class FileManagerImpl implements FileManager {
         _keywordTrie = new StringTrie<IntSet>(true);  //ignore case
         _urnMap = new HashMap<URN, IntSet>();
         _extensions = new HashSet<String>();
-        _sharedDirectories = new HashMap<File, IntSet>();
 		_completelySharedDirectories = new HashSet<File>();
         _incompletesShared = new IntSet();
         _fileToFileDescMap = new HashMap<File, FileDesc>();
@@ -631,10 +608,17 @@ public abstract class FileManagerImpl implements FileManager {
         return fds;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getSharedFileDescriptors(java.io.File)
-     */    
-    public synchronized FileDesc[] getSharedFileDescriptors(File directory) {
+    /**
+     * Returns a list of all shared file descriptors in the given directory,
+     * in any order.
+     * 
+     * Returns null if directory is not shared, or a zero-length array if it is
+     * shared but contains no files.  This method is not recursive; files in 
+     * any of the directory's children are not returned.
+     * 
+     * This operation is <b>not</b> efficient, and should not be done often.
+     */  
+    public synchronized List<FileDesc> getSharedFilesInDirectory(File directory) {
         if (directory == null)
             throw new NullPointerException("null directory");
         
@@ -642,23 +626,16 @@ public abstract class FileManagerImpl implements FileManager {
         try {
             directory = FileUtils.getCanonicalFile(directory);
         } catch (IOException e) { // invalid directory ?
-            return new FileDesc[0];
+            return Collections.emptyList();
         }
         
-        //Lookup indices of files in the given directory...
-        IntSet indices = _sharedDirectories.get(directory);
-        if (indices == null)  // directory not shared.
-			return new FileDesc[0];
-		
-        FileDesc[] fds = new FileDesc[indices.size()];
-        IntSet.IntSetIterator iter = indices.iterator();
-        for (int i = 0; iter.hasNext(); i++) {
-            FileDesc fd = _files.get(iter.next());
-            assert fd != null : "Directory has null entry";
-            fds[i] = fd;
+        List<FileDesc> shared = new ArrayList<FileDesc>();
+        for(FileDesc fd : _fileToFileDescMap.values()) {
+            if(directory.equals(fd.getFile().getParentFile()))
+                shared.add(fd);
         }
         
-        return fds;
+        return shared;
     }
 
 
@@ -1112,7 +1089,7 @@ public abstract class FileManagerImpl implements FileManager {
                 // Add the directory in the exclude list if it wasn't in the DIRECTORIES_NOT_TO_SHARE,
                 // or if it was *and* a parent folder of it is fully shared.
                 boolean explicitlyShared = SharingSettings.DIRECTORIES_TO_SHARE.remove(folder);
-                if(!explicitlyShared || isCompletelySharedDirectory(folder.getParentFile()))
+                if(!explicitlyShared || isFolderShared(folder.getParentFile()))
                     _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
                 
             }
@@ -1206,7 +1183,7 @@ public abstract class FileManagerImpl implements FileManager {
             return false;
         
         _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
-		if (!isCompletelySharedDirectory(folder.getParentFile()))
+		if (!isFolderShared(folder.getParentFile()))
 			SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
         _isUpdating = true;
         updateSharedDirectories(folder, null, _revision);
@@ -1469,19 +1446,7 @@ public abstract class FileManagerImpl implements FileManager {
 	
         //Register this file with its parent directory.
         File parent = file.getParentFile();
-        assert parent != null : "Null parent to \""+file+"\"";
-        
-        // Check if file is a specially shared file.  If not, ensure that
-        // it is located in a shared directory.
-		IntSet siblings = _sharedDirectories.get(parent);
-		if (siblings == null) {
-			siblings = new IntSet();
-			_sharedDirectories.put(parent, siblings);
-		}
-		
-		boolean added = siblings.add(fileDesc.getIndex());
-		assert added : "File "+fileDesc.getIndex()+" already found in "+siblings;
-        
+        assert parent != null : "Null parent to \""+file+"\"";        
         // files that are forcibly shared over the network
         // aren't counted or shown.
         if(SharingUtils.isForcedShareDirectory(parent))
@@ -1614,13 +1579,7 @@ public abstract class FileManagerImpl implements FileManager {
         _numFiles--;
         _filesSize -= fd.getFileSize();
 
-        //Remove references to this from directory listing
         File parent = f.getParentFile();
-        IntSet siblings = _sharedDirectories.get(parent);
-        assert siblings != null : "Removed file's directory \""+parent+"\" not in "+_sharedDirectories;
-        boolean removed = siblings.remove(i);
-        assert removed : "File "+i+" not found in "+siblings;
-
         // files that are forcibly shared over the network aren't counted
         if(SharingUtils.isForcedShareDirectory(parent)) {
             notify = false;
@@ -2002,13 +1961,6 @@ public abstract class FileManagerImpl implements FileManager {
             && SharingUtils.isFilePhysicallyShareable(f)
             && !SharingUtils.isApplicationSpecialShare(f);
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isFolderShared(java.io.File)
-     */
-    public boolean isFolderShared(File f) { 
-    	return _sharedDirectories.containsKey(f);
-    }
        
     /**
      * Cleans all stale entries from the Set of individual files.
@@ -2068,9 +2020,9 @@ public abstract class FileManagerImpl implements FileManager {
 	}
 	
 	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isCompletelySharedDirectory(java.io.File)
+     * @see com.limegroup.gnutella.FileManager#isSharedDirectory(java.io.File)
      */
-	public boolean isCompletelySharedDirectory(File dir) {
+	public boolean isFolderShared(File dir) {
 		if (dir == null)
 			return false;
 		

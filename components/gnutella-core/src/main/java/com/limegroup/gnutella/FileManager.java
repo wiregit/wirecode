@@ -159,7 +159,7 @@ public interface FileManager {
      * shared but contains no files.  This method is not recursive; files in 
      * any of the directory's children are not returned.
      */
-    public abstract FileDesc[] getSharedFileDescriptors(File directory);
+    public abstract List<FileDesc> getSharedFilesInDirectory(File directory);
 
     /**
      * Starts a new revision of the library, ensuring that only items present
@@ -383,11 +383,6 @@ public interface FileManager {
     public abstract boolean isIndividualShare(File f);
 
     /**
-     * Returns true if the folder is completely shared, false otherwise
-     */
-    public abstract boolean isFolderShared(File f);
-
-    /**
      * Returns true if the given file is shared by the FileManager.
      * The provided file should be in canonical form. 
      */
@@ -403,7 +398,7 @@ public interface FileManager {
     /**
      * Returns true if this dir is completely shared. 
      */
-    public abstract boolean isCompletelySharedDirectory(File dir);
+    public abstract boolean isFolderShared(File dir);
 
     /**
      * @return true if this file is a song purchased from the LWS, false otherwise

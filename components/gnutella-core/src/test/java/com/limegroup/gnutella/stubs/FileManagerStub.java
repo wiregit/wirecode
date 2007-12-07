@@ -45,12 +45,14 @@ public class FileManagerStub extends FileManagerImpl {
     
     private List removeRequests = new LinkedList();
 
+    @Override
     public FileDesc get(int i) {
     	if (i < _descs.size())
     		return (FileDesc)_descs.get(i);
         return fdStub;
     }
     
+    @Override
     public boolean isValidIndex(int i) {
         return true;
     }
@@ -61,6 +63,7 @@ public class FileManagerStub extends FileManagerImpl {
         _urns.put(urn, fd);
     }
     
+    @Override
     public FileDesc getFileDescForUrn(URN urn) {
         if(urn.toString().equals(FileDescStub.DEFAULT_URN))
             return fdStub;
@@ -72,14 +75,17 @@ public class FileManagerStub extends FileManagerImpl {
             return new FileDescStub("other.txt");
     }
     
+    @Override
     public boolean shouldIncludeXMLInResponse(QueryRequest qr) {
         return false;
     }
     
+    @Override
     public void addXMLToResponse(Response r, FileDesc fd) {
         ;
     }
     
+    @Override
     public boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
         return true;
     }
@@ -96,12 +102,14 @@ public class FileManagerStub extends FileManagerImpl {
     	_files = m;
     }
     
+    @Override
     public FileDesc getFileDescForFile(File f) {
         if (_files==null)
             return fdStub;
     	return (FileDesc)_files.get(f);
     }
     
+    @Override
     public void fileChanged(File f) {
         throw new UnsupportedOperationException();
     }
@@ -110,6 +118,7 @@ public class FileManagerStub extends FileManagerImpl {
         return removeRequests;
     }
 
+    @Override
     protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
         removeRequests.add(f);
         return super.removeFileIfShared(f, notify);

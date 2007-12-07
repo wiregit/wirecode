@@ -115,11 +115,11 @@ public class StoreFileManagerTest extends FileManagerTest {
 
 
         // no files should be shareable
-        files=fman.getSharedFileDescriptors(_storeDir);
-        assertEquals("unexpected length of shared files", 0, files.length);
-        files=fman.getSharedFileDescriptors(_storeDir.getParentFile());
+        sharedFiles=fman.getSharedFilesInDirectory(_storeDir);
+        assertEquals("unexpected length of shared files", 0, sharedFiles.size());
+        sharedFiles=fman.getSharedFilesInDirectory(_storeDir.getParentFile());
         assertEquals("file manager listed shared files in file's parent dir",
-            0, files.length);
+            0, sharedFiles.size());
     }
     
        
@@ -213,12 +213,12 @@ public class StoreFileManagerTest extends FileManagerTest {
         
 
         // no store files should be shareable in the file descriptors
-        files=fman.getSharedFileDescriptors(_sharedDir);
-        assertEquals("Unexpected length of shared files", 2, files.length);
-        assertNotEquals("Unexpected store file in share", files[0].getFile(), store1);
-        assertNotEquals("Unexpected store file in share", files[0].getFile(), store2);
-        assertNotEquals("Unexpected store file in share", files[1].getFile(), store1);
-        assertNotEquals("Unexpected store file in share", files[1].getFile(), store2);
+        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
+        assertEquals("Unexpected length of shared files", 2, sharedFiles.size());
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(0).getFile(), store1);
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(0).getFile(), store2);
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(1).getFile(), store1);
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(1).getFile(), store2);
         
         // check the list of individual store files (only the two store files should be displayed)
         //  any LWS files loaded into a shared directory will be returned here
@@ -227,9 +227,9 @@ public class StoreFileManagerTest extends FileManagerTest {
         assertTrue("Unexpected store file", storeFiles[0].equals(store2) || storeFiles[0].equals(store1) );
         assertTrue("Unexpected store file", storeFiles[1].equals(store2) || storeFiles[1].equals(store1));
 
-        files=fman.getSharedFileDescriptors(_storeDir.getParentFile());
+        sharedFiles=fman.getSharedFilesInDirectory(_storeDir.getParentFile());
         assertEquals("file manager listed shared files in file's parent dir",
-            0, files.length);
+            0, sharedFiles.size());
     }
     
     /**
