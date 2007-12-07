@@ -248,8 +248,7 @@ public class FileManagerTest extends LimeTestCase {
         }
         sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
-        assertEquals("first shared file is not f1", sharedFiles.get(0).getFile(), f1);
-        assertEquals("second shared file is not f2", sharedFiles.get(1).getFile(), f2);
+        assertSharedFiles(sharedFiles, f1, f2);
     }
     
     public void testRemovingOneSharedFile() throws Exception {
@@ -311,18 +310,10 @@ public class FileManagerTest extends LimeTestCase {
 
         sharedFiles = fman.getSharedFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
-        assertEquals("files differ", sharedFiles.get(0).getFile(), f1);
-        assertEquals("files differ", sharedFiles.get(1).getFile(), f3);
+        assertSharedFiles(sharedFiles, f1, f3);
         sharedFiles=Arrays.asList(fman.getAllSharedFileDescriptors());
         assertEquals("unexpected files length", 2, sharedFiles.size());
-        // we don't know the order the filedescs are returned ...
-        if( sharedFiles.get(0).getFile().equals(f1) ) {
-            assertEquals("files differ", sharedFiles.get(0).getFile(), f1);
-            assertEquals("files differ", sharedFiles.get(1).getFile(), f3);
-        } else {
-            assertEquals("files differ", sharedFiles.get(0).getFile(), f3);
-            assertEquals("files differ", sharedFiles.get(1).getFile(), f1);
-        }            
+        assertSharedFiles(sharedFiles, f1, f3);            
     }
     
     public void testRenameSharedFiles() throws Exception {
@@ -343,13 +334,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(f2, result.getFileDescs()[1].getFile());
         sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
-        // can't guarantee the order getSharedFiles returns...
-        if(f3.equals(sharedFiles.get(0).getFile())) {
-            assertEquals(f2, sharedFiles.get(1).getFile());
-        } else {
-            assertEquals(f2, sharedFiles.get(0).getFile());
-            assertEquals(f3, sharedFiles.get(1).getFile());
-        }
+        assertSharedFiles(sharedFiles, f2, f3);
         
         result = renameFile(f2, new File("C\\garbage.XSADF"));
         assertTrue(result.toString(), result.isRemoveEvent());
@@ -1455,6 +1440,19 @@ public class FileManagerTest extends LimeTestCase {
             fel.wait(5000);
         }
         return fel.evt;
+    }
+    
+    protected void assertSharedFiles(List<FileDesc> shared, File... expected) {
+        List<File> files = new ArrayList<File>(shared.size());
+        for(FileDesc fd: shared) {
+            files.add(fd.getFile());
+        }
+        assertEquals(files.size(), expected.length);
+        for(File file : expected) {
+            assertTrue(files.contains(file));
+            files.remove(expected);
+        }
+        assertTrue(files.isEmpty());
     }
 }
 
