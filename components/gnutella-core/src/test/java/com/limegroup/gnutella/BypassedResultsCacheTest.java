@@ -131,20 +131,19 @@ public class BypassedResultsCacheTest extends BaseTestCase {
         
         @Inject
         public GUIDActiveDownloadManager(NetworkManager networkManager,
-                DownloadReferencesFactory downloadReferencesFactory,
-                @Named("inNetwork") DownloadCallback innetworkCallback,
-                BTDownloaderFactory btDownloaderFactory,
-                Provider<DownloadCallback> downloadCallback,
-                Provider<MessageRouter> messageRouter,
-                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                Provider<TorrentManager> torrentManager,
-                Provider<PushDownloadManager> pushDownloadManager,
-                BrowseHostHandlerManager browseHostHandlerManager,
-                GnutellaDownloaderFactory gnutellaDownloaderFactory,
-                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+                 DownloadReferencesFactory downloadReferencesFactory,
+                 @Named("inNetwork")DownloadCallback innetworkCallback,
+                 BTDownloaderFactory btDownloaderFactory,
+                 Provider<DownloadCallback> downloadCallback,
+                 Provider<MessageRouter> messageRouter,
+                 @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor,
+                 Provider<TorrentManager> torrentManager,
+                 Provider<PushDownloadManager> pushDownloadManager,
+                 GnutellaDownloaderFactory gnutellaDownloaderFactory,
+                 PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
             super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory,
                     downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
-                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
+                    gnutellaDownloaderFactory, purchasedDownloaderFactory);
         }
 
 

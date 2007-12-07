@@ -438,18 +438,17 @@ public class RequeryManagerTest extends LimeTestCase {
 
         @Inject
         public MyDownloadManager(NetworkManager networkManager,
-                DownloadReferencesFactory downloadReferencesFactory,
-                DownloadCallback innetworkCallback, BTDownloaderFactory btDownloaderFactory,
-                Provider<DownloadCallback> downloadCallback, Provider<MessageRouter> messageRouter,
-                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                Provider<TorrentManager> torrentManager,
-                Provider<PushDownloadManager> pushDownloadManager,
-                BrowseHostHandlerManager browseHostHandlerManager,
-                GnutellaDownloaderFactory gnutellaDownloaderFactory,
-                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+                 DownloadReferencesFactory downloadReferencesFactory,
+                 DownloadCallback innetworkCallback, BTDownloaderFactory btDownloaderFactory,
+                 Provider<DownloadCallback> downloadCallback, Provider<MessageRouter> messageRouter,
+                 @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor,
+                 Provider<TorrentManager> torrentManager,
+                 Provider<PushDownloadManager> pushDownloadManager,
+                 GnutellaDownloaderFactory gnutellaDownloaderFactory,
+                 PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
             super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory,
                     downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
-                    browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
+                    gnutellaDownloaderFactory, purchasedDownloaderFactory);
         }
 
         private volatile ManagedDownloader requerier;
