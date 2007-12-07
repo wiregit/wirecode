@@ -123,8 +123,8 @@ public class PGRPServerSocket{
                     if (result instanceof ServerIPQuery) {
                         data = (ServerIPQuery) result;
                         buddyListManager.addChatManager(data.getUsername(), localUsername, mySocket);
-                        System.out.println(data.getUsername());
-                        RosterListMediator.getInstance().initMessageWindow(data.getUsername(), localUsername);
+                        System.out.println("got a conversation request from: " + data.getUsername() + ". let's open gui window now");
+//                        RosterListMediator.getInstance().initMessageWindow(data.getUsername(), localUsername);
                     }
                 }     
             }    

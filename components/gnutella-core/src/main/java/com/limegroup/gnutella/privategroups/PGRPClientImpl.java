@@ -2,7 +2,9 @@ package com.limegroup.gnutella.privategroups;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -382,7 +384,12 @@ public class PGRPClientImpl implements PGRPClient{
                 //create new session and add to buddyListManager
                 try {
                     System.out.println("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());
-                    buddyListManager.addChatManager(remoteUserNameServer, localUsername, new Socket(data.getIPAddress(),  9999));
+                    Socket socket = new Socket();
+                    socket.setSoTimeout(5000);
+                    
+                    socket.connect(new InetSocketAddress(data.getIPAddress(), 9999));
+                    
+                    buddyListManager.addChatManager(remoteUserNameServer, localUsername, socket);
                     return true;
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
