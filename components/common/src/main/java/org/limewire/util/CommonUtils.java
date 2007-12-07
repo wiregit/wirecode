@@ -520,6 +520,14 @@ public class CommonUtils {
         if(!dir.canRead())
             throw new IOException("settings dir not readable: " + dir);
         
+        // Validate that you can write a file into settings directory.
+        //  catches vista problem where if settings directory is
+        //  locked canRead and canWrite still return true
+        File file = File.createTempFile("test", "test", dir);
+        if(!file.exists())
+            throw new IOException("can't write test file in directory: " + dir);
+        file.delete();
+        
         return dir;
     }
     
