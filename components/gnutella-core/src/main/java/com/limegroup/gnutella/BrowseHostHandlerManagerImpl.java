@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.BrowseHostHandler.PushRequestDetails;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
+import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.messages.MessageFactory;
 
 @Singleton
@@ -56,6 +57,11 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
         backgroundExecutor.scheduleWithFixedDelay(new Expirer(), 0, 5000, TimeUnit.MILLISECONDS);
     }
 
+    @Inject
+    public void register(PushedSocketHandlerRegistry registry) {
+        registry.register(this);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -67,6 +73,8 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
                     new BrowseHostCallback() {
                         public void putInfo(GUID serventId, PushRequestDetails details) {
                             synchronized(_pushedHosts) {
+                                // TODO this can only handle one push request at a time?
+                                // TODO second request overwrites first?
                                 _pushedHosts.put(serventId, details);
                             }                
                         }
@@ -76,7 +84,8 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
     }
 
     /** @return true if the Push was handled by me. */
-    public boolean handlePush(int index, GUID serventID, final Socket socket) {
+    public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, final Socket socket) {
+        GUID serventID = new GUID(clientGUID);
         boolean retVal = false;
         LOG.trace("BHH.handlePush(): entered.");
         // if (index == SPECIAL_INDEX)

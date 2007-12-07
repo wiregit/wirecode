@@ -57,6 +57,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.AbstractDownloader.DownloaderType;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -87,7 +88,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
  */
 @Singleton
 // TODO: make a DownloadManager interface, for easier testing
-public class DownloadManager implements BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate {
+public class DownloadManager implements BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate, PushedSocketHandler {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
@@ -164,7 +165,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<TorrentManager> torrentManager;
     private final Provider<PushDownloadManager> pushDownloadManager;
-    private final BrowseHostHandlerManager browseHostHandlerManager;
     private final GnutellaDownloaderFactory gnutellaDownloaderFactory;
     private final PurchasedStoreDownloaderFactory purchasedDownloaderFactory;
     
@@ -178,7 +178,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<TorrentManager> torrentManager,
             Provider<PushDownloadManager> pushDownloadManager,
-            BrowseHostHandlerManager browseHostHandlerManager,
             GnutellaDownloaderFactory gnutellaDownloaderFactory,
             PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
         this.networkManager = networkManager;
@@ -190,9 +189,13 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
         this.backgroundExecutor = backgroundExecutor;
         this.torrentManager = torrentManager;
         this.pushDownloadManager = pushDownloadManager;
-        this.browseHostHandlerManager = browseHostHandlerManager;
         this.gnutellaDownloaderFactory = gnutellaDownloaderFactory;
         this.purchasedDownloaderFactory = purchasedDownloaderFactory;
+    }
+
+    @Inject
+    public void register(PushedSocketHandlerRegistry registry) {
+        registry.register(this);
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -326,29 +329,21 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      * @param clientGUID
      * @param socket
      */
-    private synchronized void handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
-    	 if (browseHostHandlerManager.handlePush(index, new GUID(clientGUID), socket))
-             return;
+    private synchronized boolean handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
+    	 boolean handled = false;
          for (AbstractDownloader md : activeAndWaiting) {
          	if (! (md instanceof ManagedDownloader))
          		continue; // pushes apply to gnutella downloads only
          	ManagedDownloader mmd = (ManagedDownloader)md;
          	if (mmd.acceptDownload(file, socket, index, clientGUID))
-         		return;
-         }
-         
-         // Will only get here if no matching push existed.
-         IOUtils.close(socket);
+         		handled = true;
+         }                 
+         return handled;
     }
-    
-    public PushedSocketHandler getPushedSocketHandler() {
-        return new PushedSocketHandler() {
-            public void acceptPushedSocket(String file, int index,
-                    byte[] clientGUID, Socket socket) {
-                handleIncomingPush(file, index, clientGUID, socket);
-            }
-            
-        };
+
+    public boolean acceptPushedSocket(String file, int index,
+            byte[] clientGUID, Socket socket) {
+        return handleIncomingPush(file, index, clientGUID, socket);
     }
     
     

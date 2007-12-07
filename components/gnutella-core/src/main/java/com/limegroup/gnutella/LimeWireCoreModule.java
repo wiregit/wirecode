@@ -115,7 +115,8 @@ import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesImpl;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactoryImpl;
-import com.limegroup.gnutella.downloader.PushedSocketHandler;
+import com.limegroup.gnutella.downloader.PushDownloadManager;
+import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
 import com.limegroup.gnutella.filters.HostileFilter;
@@ -286,7 +287,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPReplyHandlerCache.class).to(UDPReplyHandlerCacheImpl.class);
         bind(BTConnectionFactory.class).to(BTConnectionFactoryImpl.class);
         bind(SocketProcessor.class).to(Acceptor.class);
-        bind(PushedSocketHandler.class).toProvider(PushedSocketHandlerProvider.class);
+        bind(PushedSocketHandlerRegistry.class).to(PushDownloadManager.class);
+        bind(DownloadManager.class).asEagerSingleton();
+        bind(BrowseHostHandlerManagerImpl.class).asEagerSingleton();
         bind(ReplyNumberVendorMessageFactory.class).to(ReplyNumberVendorMessageFactoryImpl.class);
         bind(GuidMapManager.class).to(GuidMapManagerImpl.class);
         bind(BrowseHostHandlerManager.class).to(BrowseHostHandlerManagerImpl.class);
@@ -431,20 +434,6 @@ public class LimeWireCoreModule extends AbstractModule {
             return multiplexor;
         }
     }
-    
-    @Singleton
-    private static class PushedSocketHandlerProvider implements Provider<PushedSocketHandler> {
-        private final Provider<DownloadManager> downloadManager;
-        
-        @Inject
-        public PushedSocketHandlerProvider(Provider<DownloadManager> downloadManager) {
-            this.downloadManager = downloadManager;
-        }
-        
-        public PushedSocketHandler get() {
-            return downloadManager.get().getPushedSocketHandler();
-        }
-    };
     
     @Singleton
     private static class UnlimitedExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {

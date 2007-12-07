@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.Connectable;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
@@ -47,9 +49,9 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -61,7 +63,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  * Handles sending out pushes and awaiting incoming GIVs.
  */
 @Singleton
-public class PushDownloadManager implements ConnectionAcceptor {
+public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHandlerRegistry {
 
     private static final Log LOG = LogFactory.getLog(PushDownloadManager.class);
    
@@ -93,14 +95,13 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;    
     private final NetworkManager networkManager;
-    private final Provider<MessageRouter> messageRouter;
-    private final Provider<PushedSocketHandler> downloadAcceptor;
+    private final Provider<MessageRouter> messageRouter;    
     private final Provider<IPFilter> ipFilter;
     private final Provider<UDPService> udpService;
+    private final CopyOnWriteArrayList<PushedSocketHandler> pushHandlers = new CopyOnWriteArrayList<PushedSocketHandler>();
   
     @Inject
     public PushDownloadManager(
-            Provider<PushedSocketHandler> downloadAcceptor, 
             Provider<MessageRouter> router,
             Provider<HttpExecutor> executor,
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
@@ -108,7 +109,6 @@ public class PushDownloadManager implements ConnectionAcceptor {
     		NetworkManager networkManager,
     		@Named("ipFilter") Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService) {
-    	this.downloadAcceptor = downloadAcceptor;
     	this.messageRouter = router;
     	this.httpExecutor = executor;
     	this.backgroundExecutor = scheduler;
@@ -117,7 +117,11 @@ public class PushDownloadManager implements ConnectionAcceptor {
         this.ipFilter = ipFilter;
         this.udpService = udpService;
     }
-    
+
+    public void register(PushedSocketHandler handler) {
+        pushHandlers.add(handler);
+    }
+
     public boolean isBlocking() {
         return true;
     }
@@ -449,15 +453,24 @@ public class PushDownloadManager implements ConnectionAcceptor {
     }
      
     /** Accepts a socket that has had a GIV read off it already. */
-    private void handleGIV(Socket socket, GIVLine line) {
+    void handleGIV(Socket socket, GIVLine line) {
         String file = line.file;
         int index = 0;
         byte[] clientGUID = line.clientGUID;
         
         // if the push was sent through udp, make sure we cancel the failover push.
         cancelUDPFailover(clientGUID);
-        
-        downloadAcceptor.get().acceptPushedSocket(file, index, clientGUID, socket);
+
+        boolean accepted = false;
+        for(PushedSocketHandler handler : pushHandlers) {
+            if(handler.acceptPushedSocket(file, index, clientGUID, socket)) {
+                accepted = true;
+                break;
+            }
+        }
+        if(!accepted) {
+            IOUtils.close(socket);
+        }
     }
     
     /**
@@ -643,7 +656,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         }
     }
     
-    private static final class GIVLine {
+    static final class GIVLine {
         final String file;
         final int index;
         final byte[] clientGUID;
