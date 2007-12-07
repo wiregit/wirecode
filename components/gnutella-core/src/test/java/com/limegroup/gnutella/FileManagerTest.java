@@ -1450,9 +1450,9 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(files.size(), expected.length);
         for(File file : expected) {
             assertTrue(files.contains(file));
-            files.remove(expected);
+            files.remove(file);
         }
-        assertTrue(files.isEmpty());
+        assertTrue(files.toString(), files.isEmpty());
     }
 }
 
