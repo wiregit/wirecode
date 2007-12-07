@@ -224,16 +224,24 @@ public class PGRPClientImpl implements PGRPClient{
     }
     
     public boolean sendMessage(String username, String message){
+        //hack to append servername - will change later
+        if(username.indexOf('@')==-1){
+            //append servername
+            username = username + "@" + servername;
+        }
+        
         
         //check list to see if buddy is a buddy
         if(findRosterUserName(username)){
-            ChatManager chatManager = buddyListManager.getManager(username + "@" + servername);
+            ChatManager chatManager = buddyListManager.getManager(username);
             if(chatManager== null){
-                //need to get remote user info and establish session
-                if(setRemoteConnection(username, localUsername)){
-                    chatManager = buddyListManager.getManager(username+ "@" + servername);
-                    chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
-                    return true;
+                synchronized(chatManager){
+                    //need to get remote user info and establish session
+                    if(setRemoteConnection(username, localUsername)){
+                        chatManager = buddyListManager.getManager(username);
+                        chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
+                        return true;
+                    }
                 }
             }
             else{
@@ -327,6 +335,12 @@ public class PGRPClientImpl implements PGRPClient{
     
 
     public boolean findRosterUserName(String username){
+        //hack to append servername - will change later
+        if(username.indexOf('@')==-1){
+            //append servername
+            username = username + "@" + servername;
+        }
+        
         Roster roster = connection.getRoster();
         Collection <RosterEntry> usernames = roster.getEntries();
         for(Iterator i = usernames.iterator(); i.hasNext();){
@@ -349,7 +363,6 @@ public class PGRPClientImpl implements PGRPClient{
         //remove the server name part of the string
         int index = remoteUserNameServer.lastIndexOf('@');
         String remoteUserNameOnly = remoteUserNameServer.substring(0, index);
-        System.out.println("remoteUserName is: " + remoteUserNameOnly);
         
         //use valueStorage packet to get ip address, port, and public key
         ValueStorage storagePacket = new ValueStorage();
@@ -370,6 +383,7 @@ public class PGRPClientImpl implements PGRPClient{
             if(data.getIPAddress()!=null){
                 //create new session and add to buddyListManager
                 try {
+                    System.out.println("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());
                     buddyListManager.addChatManager(remoteUserNameServer, localUsername, new Socket(data.getIPAddress(),  9999));
                     return true;
                 } catch (NumberFormatException e) {
@@ -476,7 +490,13 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.createAccount("Dan", "1234");   
 //        client.createAccount("Anthony", "1234"); 
         
-          client.loginAccount("Dan", "1234");
+//          client.loginAccount("Dan", "1234");
+        
+        client.loginAccountNoServerSocket("Dan", "1234");
+        client.sendMessage("anthony@lw-intern02", "test");
+        ChatManager temp = client.getBuddyListManager().getManager("anthony@lw-intern02");
+        
+        
 //          client.addToRoster("anthony", "Anthony Bow", "");
 //          client.removeFromRoster("anthony", "");
 //          client.viewRoster();
@@ -497,7 +517,7 @@ public class PGRPClientImpl implements PGRPClient{
 //          client.addToRoster("tim","Tim Julien","ClientDev");
 //          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
         
-//      client.viewRoster();
+      client.viewRoster();
 //        client.sendMessage("dan", "hi");
 
 //        client.sendMessage("lulu", "wassup");
