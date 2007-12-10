@@ -37,18 +37,25 @@ public class FileUtils {
         new CopyOnWriteArrayList<FileLocker>();
     
 
+    public static void writeObject(String fileName, Object obj) 
+    throws IOException{
+        writeObject(new File(fileName),obj);
+    }
+    
     /**
-     * Writes the passed map to corresponding file
-     * @param filename The name of the file to which to write the passed map
-     * @param map The map to be stored
+     * Writes the passed Object to corresponding file
+     * @param file The file to which to write 
+     * @param map The Object to be stored
      */
-    public static void writeObject(String filename, Object obj)
+    public static void writeObject(File f, Object obj)
         throws IOException {
+        
+        try {
+            f = getCanonicalFile(f);
+        } catch (IOException tryAnyway){}
+        
         ObjectOutputStream out = null;
         try {
-        	File f = new File(filename);
-        	if (f.exists())
-        		f.createNewFile();
             //open the file
             out = new ObjectOutputStream(
             		new BufferedOutputStream(
@@ -61,20 +68,28 @@ public class FileUtils {
         }
     }
     
+    public static Object readObject(String fileName)
+    throws IOException, ClassNotFoundException {
+        return readObject(new File(fileName));
+    }
+    
     /**
-     * Reads the map stored, in serialized object form, 
-     * in the passed file and returns it. from the file where it is stored
-     * @param filename The file from where to read the Map
-     * @return The map that was read
+     * @param file The file from where to read the serialized Object
+     * @return The Object that was read
      */
-    public static Object readObject(String filename)
+    public static Object readObject(File file)
         throws IOException, ClassNotFoundException {
+        
+        try {
+            file = getCanonicalFile(file);
+        } catch (IOException tryAnyway){}
+        
         ObjectInputStream in = null;
         try {
             //open the file
             in = new ObjectInputStream(
             		new BufferedInputStream(
-            				new FileInputStream(filename)));
+            				new FileInputStream(file)));
             //read and return the object
             return in.readObject();	
         } finally {

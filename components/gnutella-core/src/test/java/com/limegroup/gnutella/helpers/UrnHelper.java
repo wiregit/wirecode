@@ -56,6 +56,8 @@ public class UrnHelper {
     	"urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPSD",
     	"urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
     };
+    
+
     /**
      * Array of URNs for use by tests.
      */
@@ -77,10 +79,13 @@ public class UrnHelper {
 
     public static final URN SHA1;
     
+    public static final URN TTROOT;
+    
     static {        
         try {
             UNIQUE_SHA1 = URN.createSHA1Urn("urn:sha1:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFB");
             SHA1 = URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[3]);
+            TTROOT= URN.createTTRootUrn("PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFBAAAAAAA");
         
             for(int i=0; i<UrnHelper.VALID_URN_STRINGS.length; i++) {
                 URN urn = URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[i]);

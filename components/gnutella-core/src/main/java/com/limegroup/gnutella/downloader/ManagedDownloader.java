@@ -2274,21 +2274,23 @@ public class ManagedDownloader extends AbstractDownloader
      *  be hashed again when added to the library -- reduces
      *  the time of the 'Saving File' state.
      */
-    protected void addFileHash(URN fileHash, File saveFile){
+    private void addFileHash(URN fileHash, File saveFile){
         if(fileHash != null) {
-            Set<URN> urns = new UrnSet(fileHash);
+            UrnSet urns = new UrnSet(fileHash);
             File file = saveFile;
             try {
                 file = FileUtils.getCanonicalFile(saveFile);
             } catch(IOException ignored) {}
             // Always cache the URN, so results can lookup to see
             // if the file exists.
+            URN ttroot = saveTreeHash(fileHash);
+            if (ttroot != null)
+                urns.add(ttroot);
             urnCache.addUrns(file, urns);
             // Notify the SavedFileManager that there is a new saved
             // file.
             savedFileManager.addSavedFile(file, urns);
             
-            saveTreeHash(fileHash);
         }
     }
     
@@ -2297,13 +2299,16 @@ public class ManagedDownloader extends AbstractDownloader
      * be saved in order to speed up sharing the file across gnutella
      * 
      * @param fileHash - urn to save the tree of
+     * @return the root fo the tree
      */
-    protected void saveTreeHash(URN fileHash) {
+    protected URN saveTreeHash(URN fileHash) {
             // save the trees!
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
                 tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
+                return URN.createTTRootUrn(commonOutFile.getHashTree().getRootHash());
             }
+            return null;
         }
 
     /**
@@ -3012,6 +3017,33 @@ public class ManagedDownloader extends AbstractDownloader
         
         return true;
                 
+    }
+    
+    void hashTreeRead(HashTree tree) {
+        boolean set = false;
+        synchronized (commonOutFile) {
+            commonOutFile.setHashTreeRequested(false);
+            if (LOG.isDebugEnabled())
+                LOG.debug("Downloaded tree: " + tree);
+            if (tree != null) {
+                HashTree oldTree = commonOutFile.getHashTree();
+                if (tree.isBetterTree(oldTree)) {
+                    set = commonOutFile.setHashTree(tree);
+                }
+            }
+        }
+        
+        if (set && tree != null) { // warning?
+            URN sha1 = getSHA1Urn();
+            URN ttroot = URN.createTTRootUrn(tree.getRootHash());
+            tigerTreeCache.get();
+            TigerTreeCache.addRoot(sha1, ttroot);
+            synchronized(fileManager) {
+                FileDesc fd = fileManager.getFileDescForUrn(sha1);
+                if (fd.setTTRoot(ttroot))
+                    fileManager.fileURNSUpdated(fd); // refresh as the partial file may now be shared
+            }
+        }
     }
     
     public synchronized String getVendor() {

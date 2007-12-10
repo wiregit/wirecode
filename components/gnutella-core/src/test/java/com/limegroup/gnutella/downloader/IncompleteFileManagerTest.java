@@ -24,7 +24,9 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 @SuppressWarnings( { "unchecked", "cast","null" } )
@@ -34,6 +36,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
     private RemoteFileDesc rfd1, rfd2;
     private FileManager fm;
     private VerifyingFileFactory verifyingFileFactory;
+    private Injector injector;
     
     public IncompleteFileManagerTest(String name) {
         super(name);
@@ -44,7 +47,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
     }
     
     public void setUp() {
-        Injector injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector();
         fm = injector.getInstance(FileManager.class);
         verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         
@@ -340,6 +343,81 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             vf.addInterval(Range.createRange(10, 100));  //inclusive
             ifm1.addEntry(incomplete, vf, false);
 
+            FileManager fm = injector.getInstance(FileManager.class);
+            FileDesc fd = fm.getFileDescForUrn(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
+            assertInstanceof(IncompleteFileDesc.class, fd);
+            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+            assertFalse(ifd.hasUrnsAndPartialData());
+            
+            //Write to disk.
+            tmp=File.createTempFile("IncompleteFileManagerTest", ".dat");
+            ObjectOutputStream out=new ObjectOutputStream(
+                                       new FileOutputStream(tmp));
+            out.writeObject(ifm1);
+            out.close();
+            ifm1=null;
+            
+            //Read IFM from disk.
+            ObjectInputStream in=new ObjectInputStream(
+                                       new FileInputStream(tmp));
+            IncompleteFileManager ifm2=(IncompleteFileManager)in.readObject();
+            in.close();
+            
+            //Make sure it's the same.
+            File incomp = null;
+            File inDir = null;
+            inDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+            if( inDir == null ||
+               !inDir.isDirectory() ||
+               !inDir.exists() ||
+               !inDir.canWrite() ) {
+                fail("unable to set up test-cannot find incomplete directory");
+            }
+            incomp =  new File(inDir, "T-1839-file name.txt");
+            VerifyingFile vf2=(VerifyingFile)ifm2.getEntry(incomp);
+            assertTrue(vf2!=null);
+            assertNull(vf2.getHashTree());
+            Iterator /* of Interval */ iter=vf2.getBlocks().iterator();
+            assertTrue(iter.hasNext());
+            assertEquals(Range.createRange(10, 100), iter.next());
+            assertTrue(!iter.hasNext());
+            assertEquals(new File(inDir, "T-1839-file name.txt"),
+                ifm2.getFile(newRFD("different name.txt", 1839, 
+                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
+            fd = fm.getFileDescForUrn(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
+            assertInstanceof(IncompleteFileDesc.class, fd);
+            ifd = (IncompleteFileDesc)fd;
+            assertFalse(ifd.hasUrnsAndPartialData());
+        } finally {
+            if (tmp!=null)
+                tmp.delete();
+        }
+    }
+    
+    public void testSerializeShared() throws Exception {
+        File tmp=null;
+        try {
+            //Create an IFM with one entry, with hash.
+            IncompleteFileManager ifm1=new IncompleteFileManager();
+            RemoteFileDesc rfd=newRFD("file name.txt", 1839, 
+                "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+            File incomplete=ifm1.getFile(rfd);
+            VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1024 * 1024);
+            vf.addInterval(Range.createRange(10, 500000));  //inclusive
+            ifm1.addEntry(incomplete, vf, false);
+
+            URN sha1 = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+            FileDesc fd = fm.getFileDescForUrn(sha1);
+            assertInstanceof(IncompleteFileDesc.class, fd);
+            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+            assertFalse(ifd.hasUrnsAndPartialData());
+            
+            // update with a ttroot
+            ifd.setTTRoot(UrnHelper.TTROOT);
+            IncompleteFileManager.globalTigerTreeCache.get();
+            TigerTreeCache.addRoot(sha1, UrnHelper.TTROOT);
+            assertTrue(ifd.hasUrnsAndPartialData());
+            
             //Write to disk.
             tmp=File.createTempFile("IncompleteFileManagerTest", ".dat");
             ObjectOutputStream out=new ObjectOutputStream(
@@ -369,11 +447,16 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             assertTrue(vf2!=null);
             Iterator /* of Interval */ iter=vf2.getBlocks().iterator();
             assertTrue(iter.hasNext());
-            assertEquals(Range.createRange(10, 100), iter.next());
+            assertEquals(Range.createRange(10, 500000), iter.next());
             assertTrue(!iter.hasNext());
             assertEquals(new File(inDir, "T-1839-file name.txt"),
                 ifm2.getFile(newRFD("different name.txt", 1839, 
                                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
+            
+            fd = fm.getFileDescForUrn(sha1);
+            assertInstanceof(IncompleteFileDesc.class, fd);
+            ifd = (IncompleteFileDesc)fd;
+            assertTrue(ifd.hasUrnsAndPartialData());
         } finally {
             if (tmp!=null)
                 tmp.delete();

@@ -519,4 +519,35 @@ public class SharingSettings extends LimeProps {
 	public static final StringSetting CREATIVE_COMMONS_VERIFICATION_URL = 
 		FACTORY.createRemoteStringSetting
 		("CREATIVE_COMMONS_VERIFICATION_URL","http://creativecommons.org/technology/embedding#2","creativeCommonsVerificationURL");
+    
+    /**
+     * Setting for whether or not to allow partial files to be shared.
+     */
+    public static final BooleanSetting ALLOW_PARTIAL_SHARING =
+        FACTORY.createBooleanSetting("ALLOW_PARTIAL_SHARING", true);
+    
+    /**
+     * Remote switch to turn off partial results.
+     */
+    public static final BooleanSetting ALLOW_PARTIAL_RESPONSES = 
+        FACTORY.createRemoteBooleanSetting("ALLOW_PARTIAL_RESPONSES", true, "SharingSettings.allowPartialResponses");
+    
+    /**
+     * Maximum size in bytes for the encoding of available ranges per Response object
+     */
+    public static final IntSetting MAX_PARTIAL_ENCODING_SIZE =
+        FACTORY.createRemoteIntSetting("MAX_PARTIAL_ENCODING_SIZE", 20, 
+                "SharingSettings.maxPartialEncodingSize", 10, 40);
+    
+    /**
+     * Whether to publish keywords from partial files in the qrp.
+     */
+    public static final BooleanSetting PUBLISH_PARTIAL_QRP = 
+        FACTORY.createRemoteBooleanSetting("PUBLISH_PARTIAL_QRP", true, "SharingSettings.publishPartialQRP");
+    
+    /**
+     * Whether to load keywords from incomplete files in the trie
+     */
+    public static final BooleanSetting LOAD_PARTIAL_KEYWORDS = 
+        FACTORY.createRemoteBooleanSetting("LOAD_PARTIAL_KEYWORDS", true, "SharingSettings.loadPartialKeywords");
 }

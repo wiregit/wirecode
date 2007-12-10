@@ -409,6 +409,13 @@ public class VerifyingFile {
     }
     
     /**
+     * @return a clone of the verified IntervalSet.
+     */
+    public synchronized IntervalSet getVerifiedIntervalSet() {
+        return verifiedBlocks.clone();
+    }
+    
+    /**
      * @return byte-packed representation of the verified blocks.
      */
     public synchronized IntervalSet.ByteIntervals toBytes() {
@@ -673,29 +680,49 @@ public class VerifyingFile {
     /**
      * sets the HashTree the current download will use.  That affects whether
      * we do overlap checking.
+     * @return true if the new tree was accepted.
      */
-    public synchronized void setHashTree(HashTree tree) {
+    public synchronized boolean setHashTree(HashTree tree) {
         // doesn't match our expected tree, bail.
         if (expectedHashRoot != null && tree != null && !tree.getRootHash().equalsIgnoreCase(expectedHashRoot))
-            return;
+            return false;
 
         // if the tree is of incorrect size, ignore it
         if (tree != null && tree.getFileSize() != completedSize)
-            return;
+            return false;
 
+        HashTree previous = hashTree;
+        
+        // if the roots are different
+        if (previous != null && tree != null &&
+                !previous.getRootHash().equals(tree.getRootHash())){
+            
+            // and we have verified at least two default chunks, don't change
+            if (verifiedBlocks.getSize() > 2 * DEFAULT_CHUNK_SIZE)
+                return false;
+            
+            // else trigger verification
+            if (verifiedBlocks.getSize() > 0) {
+                partialBlocks.add(verifiedBlocks);
+                verifiedBlocks.clear();
+                diskController.addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
+            }
+        }
+        
+        hashTree = tree;
+        
         // if we did not have a tree previously
         // and we do have a hash tree now
         // and either we want to scan the whole file once
         // or we don't have pending blocks but do have partial blocks,
         // trigger verification.
-        HashTree previous = hashTree;
-        hashTree = tree;
         if (previous == null && tree != null && (existingFileSize != -1 ||
                 (pendingBlocks.getSize() == 0 && partialBlocks.getSize() > 0))
            ) {
             diskController.addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
             existingFileSize = -1;
         }
+        return true;
     }
     
     /**

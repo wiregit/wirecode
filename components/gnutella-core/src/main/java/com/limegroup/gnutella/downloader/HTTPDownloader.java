@@ -73,7 +73,7 @@ import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -952,7 +952,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	private boolean isPartialFileValid() {
 	    return _rfd.getSHA1Urn() != null && 
                _incompleteFile.getVerifiedBlockSize() > MIN_PARTIAL_FILE_BYTES &&
-               UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+               SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
                NetworkUtils.isValidPort(networkManager.getPort()) &&
                NetworkUtils.isValidAddress(networkManager.getAddress()); 
     }

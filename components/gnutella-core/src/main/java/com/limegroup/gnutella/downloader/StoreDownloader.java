@@ -156,7 +156,8 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      * hash of them
      */
     @Override
-    protected void saveTreeHash(URN fileHash) {
+    protected URN saveTreeHash(URN fileHash) {
+        return null;
     }
     
     /**

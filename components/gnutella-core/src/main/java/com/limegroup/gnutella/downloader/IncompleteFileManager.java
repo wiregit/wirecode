@@ -32,6 +32,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary
@@ -94,7 +95,7 @@ public class IncompleteFileManager implements Serializable {
     private Map<File, VerifyingFile> blocks=
         new TreeMap<File, VerifyingFile>(Comparators.fileComparator());
     /**
-     * Bijection between SHA1 hashes (URN) and incomplete files (File).  This is
+     * Bijection between sha1 hashes (URN) and incomplete files (File).  This is
      * used to ensure that any two RemoteFileDesc with the same hash get the
      * same incomplete file, regardless of name.  The inverse of this map is
      * used to get the hash of an incomplete file for query-by-hash and
@@ -116,16 +117,21 @@ public class IncompleteFileManager implements Serializable {
     
     @Inject
     volatile static Provider<FileManager> globalFileManager;
+    
+    @Inject
+    volatile static Provider<TigerTreeCache> globalTigerTreeCache;
 
     @Inject
     private volatile static Provider<VerifyingFileFactory> verifyingFileFactory;
     
     private volatile transient FileManager fileManager;
+    private volatile transient TigerTreeCache ttCache;
     
     ///////////////////////////////////////////////////////////////////////////
 
     public IncompleteFileManager() {
         this.fileManager = globalFileManager.get();
+        ttCache = globalTigerTreeCache.get();
     }
     
     /**
@@ -389,10 +395,22 @@ public class IncompleteFileManager implements Serializable {
     private synchronized void readObject(ObjectInputStream stream) 
                                    throws IOException, ClassNotFoundException {
         this.fileManager = globalFileManager.get();
+        this.ttCache = globalTigerTreeCache.get();
         
         GetField gets = stream.readFields();
         blocks = transform(gets.get("blocks", null));
         hashes = verifyHashes(gets.get("hashes", null));
+        
+        // if we had roots, we should expect them.
+        for (URN urn : hashes.keySet()) {
+            if (!urn.isSHA1())
+                continue;
+            File f = hashes.get(urn);
+            URN ttroot = ttCache.getTTROOT(urn);
+            if (ttroot != null)
+                blocks.get(f).setExpectedHashTreeRoot(ttroot.httpStringValue().substring(11));
+        }
+        
         //Notify FileManager about the new incomplete files.
         registerAllIncompleteFiles();
     }
@@ -424,15 +442,16 @@ public class IncompleteFileManager implements Serializable {
             Map.Entry entry = (Map.Entry)i.next();
             if(entry.getKey() instanceof URN && entry.getValue() instanceof File) {
                 URN urn = (URN)entry.getKey();
+                if (!urn.isSHA1())
+                    i.remove(); // we don't understand anything but sha1.
                 File f = (File)entry.getValue();
                 try {
                     f = canonicalize(f);
                     // We must purge old entries that had mapped
                     // multiple URNs to uncanonicalized files.
-                    // This is done by ensuring that we only add
-                    // this entry to the map if no other URN points to it.
-                    if(!retMap.values().contains(f))
+                    if (!retMap.values().contains(f))
                         retMap.put(urn, f);
+
                 } catch(IOException ioe) {}
             }
         }
@@ -537,7 +556,6 @@ public class IncompleteFileManager implements Serializable {
         for (Iterator<Map.Entry<URN, File>> iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
             Map.Entry<URN, File> entry = iter.next();
             if (incompleteFile.equals(entry.getValue()))
-                //Could also break here as a small optimization.
                 iter.remove();
         }
         
@@ -713,7 +731,7 @@ public class IncompleteFileManager implements Serializable {
     public synchronized URN getCompletedHash(File incompleteFile) {
         //Return a key k s.t., hashes.get(k)==incompleteFile...
         for(Map.Entry<URN, File> entry : hashes.entrySet()) {
-            if (incompleteFile.equals(entry.getValue()))
+            if (incompleteFile.equals(entry.getValue()) && entry.getKey().isSHA1())
                 return entry.getKey();
         }
         return null; //...or null if no such k.
@@ -730,8 +748,12 @@ public class IncompleteFileManager implements Serializable {
         Set<URN> urns = new UrnSet();
         //Return a set S s.t. for each K in S, hashes.get(k)==incpleteFile
         for(Map.Entry<URN, File> entry : hashes.entrySet()) {
-            if (incompleteFile.equals(entry.getValue()))
+            if (incompleteFile.equals(entry.getValue())) {
                 urns.add(entry.getKey());
+                URN ttroot = ttCache.getTTROOT(entry.getKey());
+                if (ttroot != null)
+                    urns.add(ttroot);
+            }
         }
         return urns;
     }    

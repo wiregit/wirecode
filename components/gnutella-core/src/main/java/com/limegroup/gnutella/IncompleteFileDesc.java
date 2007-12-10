@@ -99,6 +99,18 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return ret.toString();
     }
     
+    public IntervalSet getVerifiedRanges() {
+        return _verifyingFile.getVerifiedIntervalSet();
+    }
+    
+    /**
+     * @return true if responses should be returned for this IFD.
+     */
+    public boolean hasUrnsAndPartialData() {
+        return getUrns().size() > 1 && // must have both ttroot & sha1 
+            _verifyingFile.getBlockSize() >= MIN_CHUNK_SIZE;
+    }
+    
     /**
      * Determines whether or not the given range is satisfied by this
      * incomplete file.

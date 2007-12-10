@@ -4,6 +4,7 @@ package org.limewire.collection;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -353,7 +354,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     public Iterator<Range> iterator() {
         return intervals.iterator();
     }
-
+    
     public List<Range> getAllIntervalsAsList() {
         return new ArrayList<Range>(intervals);
     }
@@ -374,6 +375,50 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         intervals.clear();
     }
 
+    /**
+     * encodes the current interval set as defined in
+     * http://www.limewire.org/wiki/index.php?title=HashTreeRangeEncoding
+     */
+    public Collection<Integer> encode(long maxSize) {
+        long numLeafs = getNumLeafs(maxSize);
+        TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
+        ts.setAllowUnverifiedUse(true);
+        for (Range r : intervals) {
+            assert r.getLow() % 1024 == 0;
+            for (long i = r.getLow(); i <= r.getHigh(); i+= 1024) {
+                int chunk = ts.fileToNodeId((int)(i >> 10));
+                ts.add(chunk, null);
+                ts.used(chunk);
+            }
+        }
+        return ts.getUsedNodes();
+    }
+    
+    /**
+     * decodes an interval set encoded with:
+     * http://www.limewire.org/wiki/index.php?title=HashTreeRangeEncoding
+     * 
+     * @param maxSize the size of the file
+     * @param id integers from the encoding
+     */
+    public void decode(long maxSize, Integer... id) {
+        long numLeafs = getNumLeafs(maxSize);
+        TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
+        for (int i : id) {
+            int [] nodes = ts.nodeToFileId(i);
+            Range r = Range.createRange(nodes[0] * 1024L, Math.min((nodes[1]+1) * 1024L - 1, maxSize-1));
+            add(r);
+        }
+    }
+    
+    private static int getNumLeafs(long size) {
+        long numLeafs = size >> 10;
+        if (size % 1024 != 0)
+            numLeafs++;
+        assert numLeafs <= Integer.MAX_VALUE;
+        return (int)numLeafs;
+    }
+    
     /**
      * Creates an <code>IntervalSet</code> that is the negative to this 
      * <code>IntervalSet</code>.

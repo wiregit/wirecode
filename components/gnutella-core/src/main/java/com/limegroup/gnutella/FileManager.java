@@ -478,5 +478,10 @@ public interface FileManager {
      * Returns an iterator for all shared files. 
      */
     public abstract Iterator<Response> getIndexingIterator(final boolean includeXML);
+    
+    /**
+     * Notification that an IncompleteFileDesc has been updated.
+     */
+    public void fileURNSUpdated(FileDesc ifd);
 
 }

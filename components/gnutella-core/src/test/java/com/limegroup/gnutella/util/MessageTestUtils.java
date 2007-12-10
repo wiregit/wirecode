@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import java.util.Collections;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
@@ -8,6 +10,7 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
@@ -65,6 +68,18 @@ public class MessageTestUtils {
             allowing(msg).getNetwork();
             will(returnValue(Network.TCP));
             allowing(msg).hop();
+        }};
+    }
+    
+    public static Expectations createDefaultQueryExpectations(final QueryRequest qr) {
+        return new Expectations(){{
+            allowing(qr).desiresAll();
+            will(returnValue(true));
+            allowing(qr).getQueryUrns();
+            will(returnValue(Collections.emptySet()));
+            ignoring(qr).getRichQuery();
+            ignoring(qr).hasQueryUrns();
+            ignoring(qr).isWhatIsNewRequest();
         }};
     }
     
