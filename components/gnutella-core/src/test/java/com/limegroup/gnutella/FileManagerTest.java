@@ -17,6 +17,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.collection.Range;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.util.CommonUtils;
@@ -46,9 +48,9 @@ import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.stubs.QueryRequestStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
@@ -438,27 +440,23 @@ public class FileManagerTest extends LimeTestCase {
         VerifyingFile vf;
         UrnSet urns;
         IncompleteFileDesc ifd;
-        QueryRequest qrDesiring = new QueryRequestStub() {
-            @Override
-            public String getQuery() {
-                return "asdf";
-            }
-            @Override
-            public boolean desiresPartialResults() {
-                return true;
-            }
-        };
-        
-        QueryRequest notDesiring = new QueryRequestStub() {
-            @Override
-            public String getQuery() {
-                return "asdf";
-            }
-            @Override
-            public boolean desiresPartialResults() {
-                return false;
-            }
-        };
+        Mockery mockery = new Mockery();
+        final QueryRequest qrDesiring = mockery.mock(QueryRequest.class);
+        final QueryRequest notDesiring = mockery.mock(QueryRequest.class);
+        mockery.checking(MessageTestUtils.createDefaultMessageExpectations(qrDesiring, QueryRequest.class));
+        mockery.checking(MessageTestUtils.createDefaultMessageExpectations(notDesiring, QueryRequest.class));
+        mockery.checking(MessageTestUtils.createDefaultQueryExpectations(qrDesiring));
+        mockery.checking(MessageTestUtils.createDefaultQueryExpectations(notDesiring));
+        mockery.checking(new Expectations(){{
+            atLeast(1).of(qrDesiring).getQuery();
+            will(returnValue("asdf"));
+            atLeast(1).of(notDesiring).getQuery();
+            will(returnValue("asdf"));
+            atLeast(1).of(qrDesiring).desiresPartialResults();
+            will(returnValue(true));
+            atLeast(1).of(notDesiring).desiresPartialResults();
+            will(returnValue(false));
+        }});
         
         // a) single urn, not enough data written -> not shared
         vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
