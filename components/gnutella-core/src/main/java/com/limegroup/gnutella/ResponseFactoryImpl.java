@@ -100,7 +100,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
         IntervalSet ranges = null;
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            ranges = ifd.getVerifiedRanges();
+            ranges = ifd.getResponseRanges();
         }
         
         GGEPContainer container = new GGEPContainer(getAsIpPorts(altLocManager
