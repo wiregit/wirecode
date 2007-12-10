@@ -202,7 +202,7 @@ public final class TigerTreeCache {
     public static synchronized void addRoot(URN sha1, URN ttroot) {
         if (!sha1.isSHA1() || !ttroot.isTTRoot())
             throw new IllegalArgumentException();
-        dirty |= ttroot.equals(ROOT_MAP.put(sha1,ttroot));
+        dirty |= !ttroot.equals(ROOT_MAP.put(sha1,ttroot));
     }
 
     /**
