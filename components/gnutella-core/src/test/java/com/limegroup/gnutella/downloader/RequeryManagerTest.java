@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.BrowseHostHandlerManager;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerStub;
