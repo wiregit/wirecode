@@ -56,8 +56,6 @@ public class FileUtils {
         
         ObjectOutputStream out = null;
         try {
-        	if (f.exists())
-        		f.createNewFile();
             //open the file
             out = new ObjectOutputStream(
             		new BufferedOutputStream(
