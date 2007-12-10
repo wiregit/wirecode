@@ -1285,6 +1285,7 @@ public final class QueryRequestTest extends LimeTestCase {
     }
 
     public void testDesiresPartialResults() throws Exception {
+        SearchSettings.DESIRES_PARTIAL_RESULTS.setValue(true);
         QueryRequest request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "");
         assertTrue(request.desiresPartialResults());
         
@@ -1317,7 +1318,7 @@ public final class QueryRequestTest extends LimeTestCase {
         
         
         // disable partial
-        SearchSettings.PARTIAL_RESULTS.setValue(false);
+        SearchSettings.DESIRES_PARTIAL_RESULTS.setValue(false);
         request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "");
         assertFalse(request.desiresPartialResults());
         

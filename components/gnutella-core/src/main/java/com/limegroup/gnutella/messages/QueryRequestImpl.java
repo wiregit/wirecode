@@ -304,7 +304,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                 ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
             }
             
-            if (SearchSettings.PARTIAL_RESULTS.getValue()) {
+            if (SearchSettings.DESIRES_PARTIAL_RESULTS.getValue()) {
                 _partialResultsDesired = true;
                 ggepBlock.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
             }

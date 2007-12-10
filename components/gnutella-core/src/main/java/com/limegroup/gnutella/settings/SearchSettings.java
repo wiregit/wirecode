@@ -384,6 +384,6 @@ public final class SearchSettings extends LimeProps {
     /**
      * Whether the user wishes to receive results for partial files.
      */
-    public static final BooleanSetting PARTIAL_RESULTS =
-        FACTORY.createBooleanSetting("PARTIAL_RESULTS", true);
+    public static final BooleanSetting DESIRES_PARTIAL_RESULTS =
+        FACTORY.createBooleanSetting("DESIRES_PARTIAL_RESULTS", false);
 }
