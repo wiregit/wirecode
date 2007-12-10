@@ -3,6 +3,7 @@ package com.limegroup.gnutella.privategroups;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
@@ -15,9 +16,6 @@ import org.limewire.listener.WeakEventListenerList;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import com.limegroup.gnutella.gui.GuiCoreMediator;
-import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
 
 /**
  * 
@@ -38,7 +36,8 @@ public class ChatManager{
     public ChatManager(Socket socket){
         this.socket = socket;
         
-        initThreads(); 
+        initThreads();
+
     }
     
     public void registerListener(String strongRef, EventListener listener){
@@ -108,7 +107,7 @@ public class ChatManager{
         
         private Socket writeSocket;
         
-        private WriterThread(Socket writeSocket){
+        private WriterThread(Socket writeSocket) {
             this.writeSocket = writeSocket;
             try {
                 os = new PrintWriter(writeSocket.getOutputStream(), true);
@@ -138,11 +137,12 @@ public class ChatManager{
         
         public ReaderThread(Socket readSocket){
             this.readSocket = readSocket;
-            try {
-                is = new BufferedReader(new InputStreamReader(readSocket.getInputStream()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+                try {
+                    is = new BufferedReader(new InputStreamReader(readSocket.getInputStream()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
 
         public void run() {

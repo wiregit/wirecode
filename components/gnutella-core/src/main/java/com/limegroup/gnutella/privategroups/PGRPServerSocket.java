@@ -63,7 +63,7 @@ public class PGRPServerSocket{
                             try {
                                 new SocketHandler(MyService.accept(), connection).handleSocket();
                             } catch (IOException e) {
-                                
+                                e.printStackTrace();
                             }
                             
                         }   
@@ -124,7 +124,7 @@ public class PGRPServerSocket{
                         data = (ServerIPQuery) result;
                         buddyListManager.addChatManager(data.getUsername(), localUsername, mySocket);
                         System.out.println("got a conversation request from: " + data.getUsername() + ". let's open gui window now");
-//                        RosterListMediator.getInstance().initMessageWindow(data.getUsername(), localUsername);
+                        RosterListMediator.getInstance().initMessageWindow(data.getUsername(), localUsername);
                     }
                 }     
             }    

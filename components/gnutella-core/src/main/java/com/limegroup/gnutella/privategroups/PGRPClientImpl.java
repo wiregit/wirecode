@@ -384,12 +384,12 @@ public class PGRPClientImpl implements PGRPClient{
                 //create new session and add to buddyListManager
                 try {
                     System.out.println("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());
-                    Socket socket = new Socket();
-                    socket.setSoTimeout(5000);
+//                    Socket socket = new Socket();
+//                    socket.setSoTimeout(5000);
+//                    
+//                    socket.connect(new InetSocketAddress(data.getIPAddress(), 9999));
                     
-                    socket.connect(new InetSocketAddress(data.getIPAddress(), 9999));
-                    
-                    buddyListManager.addChatManager(remoteUserNameServer, localUsername, socket);
+                    buddyListManager.addChatManager(remoteUserNameServer, localUsername, new Socket(data.getIPAddress(), 9999));
                     return true;
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
@@ -495,22 +495,24 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.createAccount("Dan", "1234");   
 //        client.createAccount("Anthony", "1234"); 
         
-//          client.loginAccount("Dan", "1234");
+//          client.loginAccountNoServerSocket("Dan", "1234");
         
         client.loginAccountNoServerSocket("Dan", "1234");
-        client.sendMessage("anthony@lw-intern02", "test");
-        ChatManager temp = client.getBuddyListManager().getManager("anthony@lw-intern02");
+        
+//        client.setRemoteConnection("anthony@lw-intern02", "dan");
+          client.sendMessage("anthony@lw-intern02", "test");
+//        ChatManager temp = client.getBuddyListManager().getManager("anthony@lw-intern02");
         
         
 //          client.addToRoster("anthony", "Anthony Bow", "");
 //          client.removeFromRoster("anthony", "");
 //          client.viewRoster();
 //        client.addToRoster("lulu", "", "");
-//        client.loginAccount("Dan", "1234");
+
 //        client.addToRoster("anthony","","");
 //        client.loginAccountNoServerSocket("Anthony", "1234");
 //        client.sendMessage("miket", "hi");
-        
+//        client.loginAccount("Anthony", "1234");
 //        client.loginAccountNoServerSocket("Anthony", "1234");
 //          client.addToRoster("miket","Mike Tiraborelli","ClientDev");
 //          client.addToRoster("mikee","Mike Everett","ClientDev");
@@ -522,7 +524,7 @@ public class PGRPClientImpl implements PGRPClient{
 //          client.addToRoster("tim","Tim Julien","ClientDev");
 //          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
         
-      client.viewRoster();
+//      client.viewRoster();
 //        client.sendMessage("dan", "hi");
 
 //        client.sendMessage("lulu", "wassup");
