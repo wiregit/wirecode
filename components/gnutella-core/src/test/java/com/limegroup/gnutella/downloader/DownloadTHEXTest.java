@@ -207,9 +207,9 @@ public class DownloadTHEXTest extends DownloadTestCase {
         
         // eventually we should become shareable
         sleeps = 0;
-        while(!ifd.shouldBeShared() && sleeps++ < 20)
+        while(!ifd.hasUrnsAndPartialData() && sleeps++ < 20)
             Thread.sleep(500);
-        assertTrue(ifd.shouldBeShared());
+        assertTrue(ifd.hasUrnsAndPartialData());
         
         waitForComplete();
     }

@@ -26,6 +26,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 @SuppressWarnings( { "unchecked", "cast","null" } )
@@ -346,7 +347,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             FileDesc fd = fm.getFileDescForUrn(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
             assertInstanceof(IncompleteFileDesc.class, fd);
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            assertFalse(ifd.shouldBeShared());
+            assertFalse(ifd.hasUrnsAndPartialData());
             
             //Write to disk.
             tmp=File.createTempFile("IncompleteFileManagerTest", ".dat");
@@ -386,7 +387,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             fd = fm.getFileDescForUrn(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
             assertInstanceof(IncompleteFileDesc.class, fd);
             ifd = (IncompleteFileDesc)fd;
-            assertFalse(ifd.shouldBeShared());
+            assertFalse(ifd.hasUrnsAndPartialData());
         } finally {
             if (tmp!=null)
                 tmp.delete();
@@ -409,12 +410,13 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             FileDesc fd = fm.getFileDescForUrn(sha1);
             assertInstanceof(IncompleteFileDesc.class, fd);
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            assertFalse(ifd.shouldBeShared());
+            assertFalse(ifd.hasUrnsAndPartialData());
             
             // update with a ttroot
-            ifd.updateTTROOT(UrnHelper.TTROOT);
-            IncompleteFileManager.globalTigerTreeCache.get().addRoot(sha1, UrnHelper.TTROOT);
-            assertTrue(ifd.shouldBeShared());
+            ifd.setTTRoot(UrnHelper.TTROOT);
+            IncompleteFileManager.globalTigerTreeCache.get();
+            TigerTreeCache.addRoot(sha1, UrnHelper.TTROOT);
+            assertTrue(ifd.hasUrnsAndPartialData());
             
             //Write to disk.
             tmp=File.createTempFile("IncompleteFileManagerTest", ".dat");
@@ -454,7 +456,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             fd = fm.getFileDescForUrn(sha1);
             assertInstanceof(IncompleteFileDesc.class, fd);
             ifd = (IncompleteFileDesc)fd;
-            assertTrue(ifd.shouldBeShared());
+            assertTrue(ifd.hasUrnsAndPartialData());
         } finally {
             if (tmp!=null)
                 tmp.delete();

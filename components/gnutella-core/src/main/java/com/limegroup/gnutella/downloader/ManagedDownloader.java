@@ -3036,10 +3036,11 @@ public class ManagedDownloader extends AbstractDownloader
         if (set && tree != null) { // warning?
             URN sha1 = getSHA1Urn();
             URN ttroot = URN.createTTRootUrn(tree.getRootHash());
-            tigerTreeCache.get().addRoot(sha1, ttroot);
+            tigerTreeCache.get();
+            TigerTreeCache.addRoot(sha1, ttroot);
             synchronized(fileManager) {
                 FileDesc fd = fileManager.getFileDescForUrn(sha1);
-                if (fd.updateTTROOT(ttroot))
+                if (fd.setTTRoot(ttroot))
                     fileManager.fileURNSUpdated(fd); // refresh as the partial file may now be shared
             }
         }

@@ -216,7 +216,7 @@ public class FileDesc implements StringLookup {
      * updates this FD as carrying a ttroot.
      * @return true if we didn't already know about that root
      */
-    public boolean updateTTROOT(URN ttroot) {
+    public boolean setTTRoot(URN ttroot) {
         boolean ret = !getUrns().contains(ttroot);
         UrnSet s = new UrnSet();
         s.add(SHA1_URN);

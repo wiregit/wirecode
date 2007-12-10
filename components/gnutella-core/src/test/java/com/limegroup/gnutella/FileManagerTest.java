@@ -470,7 +470,7 @@ public class FileManagerTest extends LimeTestCase {
         
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
-        assertFalse(ifd.shouldBeShared());
+        assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,fman.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         
@@ -485,7 +485,7 @@ public class FileManagerTest extends LimeTestCase {
         
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
-        assertFalse(ifd.shouldBeShared());
+        assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,fman.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         
@@ -501,7 +501,7 @@ public class FileManagerTest extends LimeTestCase {
         
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
-        assertFalse(ifd.shouldBeShared());
+        assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,fman.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
 
@@ -518,7 +518,7 @@ public class FileManagerTest extends LimeTestCase {
         
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
-        assertTrue(ifd.shouldBeShared());
+        assertTrue(ifd.hasUrnsAndPartialData());
         assertGreaterThan(0,fman.query(qrDesiring).length);
         assertEquals(0,fman.query(notDesiring).length);
         assertTrue(fman.getQRT().contains(qrDesiring));
@@ -546,7 +546,7 @@ public class FileManagerTest extends LimeTestCase {
         
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
-        assertTrue(ifd.shouldBeShared());
+        assertTrue(ifd.hasUrnsAndPartialData());
         assertEquals(0,fman.query(qrDesiring).length);
         assertEquals(0,fman.query(notDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
@@ -563,12 +563,12 @@ public class FileManagerTest extends LimeTestCase {
         
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
-        assertFalse(ifd.shouldBeShared());
+        assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,fman.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         
-        ifd.updateTTROOT(UrnHelper.TTROOT);
-        assertTrue(ifd.shouldBeShared());
+        ifd.setTTRoot(UrnHelper.TTROOT);
+        assertTrue(ifd.hasUrnsAndPartialData());
         fman.fileURNSUpdated(ifd);
         assertGreaterThan(0,fman.query(qrDesiring).length);
         assertEquals(0,fman.query(notDesiring).length);

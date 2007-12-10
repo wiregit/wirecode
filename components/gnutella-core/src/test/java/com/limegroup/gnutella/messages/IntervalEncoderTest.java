@@ -4,12 +4,12 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class IntervalEncoderTest extends BaseTestCase {
+public class IntervalEncoderTest extends LimeTestCase {
     
     public IntervalEncoderTest(String name) {
         super(name);

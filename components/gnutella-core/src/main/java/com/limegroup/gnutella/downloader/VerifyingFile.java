@@ -680,6 +680,7 @@ public class VerifyingFile {
     /**
      * sets the HashTree the current download will use.  That affects whether
      * we do overlap checking.
+     * @return true if the new tree was accepted.
      */
     public synchronized boolean setHashTree(HashTree tree) {
         // doesn't match our expected tree, bail.

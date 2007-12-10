@@ -106,7 +106,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     /**
      * @return true if responses should be returned for this IFD.
      */
-    public boolean shouldBeShared() {
+    public boolean hasUrnsAndPartialData() {
         return getUrns().size() > 1 && // must have both ttroot & sha1 
             _verifyingFile.getBlockSize() >= MIN_CHUNK_SIZE;
     }

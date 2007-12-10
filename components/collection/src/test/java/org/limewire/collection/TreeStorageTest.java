@@ -99,32 +99,22 @@ public class TreeStorageTest extends BaseTestCase {
         // adding four does change things
         storage.add(4, tree.get(4));
         assertEquals(1,storage.getVerifiedNodes().size());
-//        assert !storage.map.get(3).verified;
-//        assert !storage.map.get(4).verified;
         
         // when we add 5 all nodes become verified
         storage.add(5, tree.get(5));
         assertTrue(storage.getVerifiedNodes().contains(3));
         assertTrue(storage.getVerifiedNodes().contains(4));
         assertTrue(storage.getVerifiedNodes().contains(5));
-//        assert storage.map.get(3).verified;
-//        assert storage.map.get(4).verified;
-//        assert storage.map.get(5).verified;
         
         // when we add 8 and 9 node 4 will dissapear
         storage.add(8, tree.get(8));
         assertFalse(storage.getVerifiedNodes().contains(8));
         assertTrue(storage.getVerifiedNodes().contains(4));
-//        assert !storage.map.get(8).verified;
-//        assert storage.map.containsKey(4);
         
         storage.add(9, tree.get(9));
         assertTrue(storage.getVerifiedNodes().contains(8));
         assertTrue(storage.getVerifiedNodes().contains(9));
         assertFalse(storage.getVerifiedNodes().contains(4));
-//        assert storage.map.get(8).verified;
-//        assert storage.map.get(9).verified;
-//        assert !storage.map.containsKey(4);
         
         
         // if we use 8 and 9 they will dissapear
@@ -138,25 +128,16 @@ public class TreeStorageTest extends BaseTestCase {
         assertTrue(storage.getVerifiedNodes().contains(4));
         assertFalse(storage.getVerifiedNodes().contains(8));
         assertFalse(storage.getVerifiedNodes().contains(9));
-//        assert storage.map.containsKey(4);
-//        assert !storage.map.containsKey(8);
-//        assert !storage.map.containsKey(9);
         assertTrue(storage.getUsedNodes().contains(4));
-//        assert storage.map.get(4).used;
         
         // if we use 5 then 4 and 5 will dissapear
         // and 2 will appear
         assertFalse(storage.getVerifiedNodes().contains(2));
-//        assert !storage.map.containsKey(2);
         storage.used(5);
         assertFalse(storage.getVerifiedNodes().contains(4));
         assertFalse(storage.getVerifiedNodes().contains(5));
         assertTrue(storage.getVerifiedNodes().contains(2));
         assertTrue(storage.getUsedNodes().contains(2));
-//        assert !storage.map.containsKey(4);
-//        assert !storage.map.containsKey(5);
-//        assert storage.map.get(2).used;
-//        assert storage.map.get(2).verified;
         assertTrue(Arrays.equals(tree.get(2),storage.get(2)));
     }
     
@@ -176,8 +157,6 @@ public class TreeStorageTest extends BaseTestCase {
         assertEquals(1,storage.getUsedNodes().size());
         assertTrue(storage.getVerifiedNodes().containsAll(storage.getUsedNodes()));
         assertTrue(storage.getVerifiedNodes().contains(1));
-//        assert storage.map.size() == 1;
-//        assert storage.map.containsKey(1);
         
     }
     
@@ -197,10 +176,6 @@ public class TreeStorageTest extends BaseTestCase {
         assertFalse(storage.getVerifiedNodes().contains(5));
         assertFalse(storage.getVerifiedNodes().contains(9));
         assertFalse(storage.getVerifiedNodes().contains(16));
-//        assert !storage.map.get(3).verified;
-//        assert !storage.map.get(5).verified;
-//        assert !storage.map.get(9).verified;
-//        assert !storage.map.get(16).verified;
         
         // add broken 17, nothing changes
         assertFalse(storage.add(17, tree.get(16)));
@@ -218,12 +193,6 @@ public class TreeStorageTest extends BaseTestCase {
         assertTrue(storage.getVerifiedNodes().contains(16));
         assertTrue(storage.getVerifiedNodes().contains(17));
         assertEquals(6, storage.getVerifiedNodes().size());
-//        assert storage.map.get(3).verified;
-//        assert storage.map.get(5).verified;
-//        assert storage.map.get(9).verified;
-//        assert storage.map.get(16).verified;
-//        assert storage.map.get(17).verified;
-//        assert storage.map.size() == 6;
         
         // use 3, 5, 9, 16
         storage.used(3);

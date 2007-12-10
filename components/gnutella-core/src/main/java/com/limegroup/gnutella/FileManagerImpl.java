@@ -1788,7 +1788,7 @@ public abstract class FileManagerImpl implements FileManager {
         updateUrnIndex(fd);
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.shouldBeShared()) {
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.hasUrnsAndPartialData()) {
                 loadKeywords(_incompleteKeywordTrie, fd);
                 _needRebuild = true;
             }
@@ -2256,7 +2256,7 @@ public abstract class FileManagerImpl implements FileManager {
                 if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
                     continue;
                 IncompleteFileDesc ifd = (IncompleteFileDesc)fds[i];
-                if (!ifd.shouldBeShared())
+                if (!ifd.hasUrnsAndPartialData())
                     continue;
                 
                 _queryRouteTable.add(ifd.getFileName());
