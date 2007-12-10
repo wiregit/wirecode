@@ -383,12 +383,7 @@ public class PGRPClientImpl implements PGRPClient{
             if(data.getIPAddress()!=null){
                 //create new session and add to buddyListManager
                 try {
-                    System.out.println("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());
-//                    Socket socket = new Socket();
-//                    socket.setSoTimeout(5000);
-//                    
-//                    socket.connect(new InetSocketAddress(data.getIPAddress(), 9999));
-                    
+                    System.out.println("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());   
                     buddyListManager.addChatManager(remoteUserNameServer, localUsername, new Socket(data.getIPAddress(), 9999));
                     return true;
                 } catch (NumberFormatException e) {
@@ -497,11 +492,11 @@ public class PGRPClientImpl implements PGRPClient{
         
 //          client.loginAccountNoServerSocket("Dan", "1234");
         
-//        client.loginAccountNoServerSocket("Felix", "1234");
+        client.loginAccountNoServerSocket("Felix", "1234");
         
 //        client.setRemoteConnection("anthony@lw-intern02", "dan");
-      client.loginAccount("Dan", "1234");
-//          client.sendMessage("anthony@lw-intern02", "test");
+//      client.loginAccount("Anthony", "1234");
+//          client.sendMessage("dan@lw-intern02", "test");
 //        ChatManager temp = client.getBuddyListManager().getManager("anthony@lw-intern02");
         
         
@@ -525,7 +520,7 @@ public class PGRPClientImpl implements PGRPClient{
 //          client.addToRoster("tim","Tim Julien","ClientDev");
 //          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
         
-//      client.viewRoster();
+      client.viewRoster();
 //        client.sendMessage("dan", "hi");
 
 //        client.sendMessage("lulu", "wassup");
