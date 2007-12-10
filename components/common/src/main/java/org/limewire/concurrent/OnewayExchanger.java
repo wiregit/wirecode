@@ -35,13 +35,13 @@ import java.util.concurrent.TimeoutException;
  * java.util.concurrent.Exchanger are:
  * 
  * <ol>
- * <li> Multiple Threads can wait for a result from a single Thread
- * <li> It's an one-way exchange
- * <li> The setter Thread may sets an Exception as the result causing
- * it to be thrown on the getter side
- * <li> The OnewayExchanger is cancellable
+ * <li> Multiple Threads can wait for a result from a single Thread.
+ * <li> It's a one-way exchange.
+ * <li> The setter Thread may set an exception causing this exception
+ * to be thrown on the getter side.
+ * <li> The OnewayExchanger is cancellable.
  * <li> The OnewayExchanger can be configured for a single shot. That
- * means once an return value or an Exception have been set they cannot
+ * means once a return value or an exception has been set they cannot
  * be changed anymore.
  * </ol>
  */
