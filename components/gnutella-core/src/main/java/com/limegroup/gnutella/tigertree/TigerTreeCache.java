@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
-import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
@@ -237,11 +236,16 @@ public final class TigerTreeCache {
      * @return Map of SHA1->HashTree
      */
     private static Map<URN, HashTree> createMap() {
+        File toRead = OLD_CACHE_FILE;
+        try {
+            toRead = FileUtils.getCanonicalFile(toRead);
+        } catch (IOException ignore){}
+        
         ObjectInputStream ois = null;
         try {
             ois = new ConverterObjectInputStream(
                     new BufferedInputStream(
-                        new FileInputStream(OLD_CACHE_FILE)));
+                        new FileInputStream(toRead)));
             return GenericsUtils.scanForMap(ois.readObject(), URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
             LOG.error("Can't read tiger trees", t);
@@ -255,8 +259,8 @@ public final class TigerTreeCache {
      * Loads values from the root and tree caches
      */
     private static void loadCaches() throws IOException, ClassNotFoundException {
-        Object roots = FileUtils.readObject(ROOT_CACHE_FILE.getAbsolutePath());
-        Object trees = FileUtils.readObject(TREE_CACHE_FILE.getAbsolutePath());
+        Object roots = FileUtils.readObject(ROOT_CACHE_FILE);
+        Object trees = FileUtils.readObject(TREE_CACHE_FILE);
 
         Map<URN,URN> rootsMap = GenericsUtils.scanForMap(roots, URN.class, URN.class, GenericsUtils.ScanMode.REMOVE);
         Map<URN,HashTree> treesMap = GenericsUtils.scanForMap(trees, URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
@@ -325,13 +329,10 @@ public final class TigerTreeCache {
         removeOldEntries(ROOT_MAP, TREE_MAP, fileManager, downloadManager);
 
         try {
-            FileUtils.writeObject(ROOT_CACHE_FILE.getAbsolutePath(), ROOT_MAP);
-            FileUtils.writeObject(TREE_CACHE_FILE.getAbsolutePath(), TREE_MAP);
-        } catch (IOException e) {
-            ErrorService.error(e);
-        } 
-        
-        dirty = true;
+            FileUtils.writeObject(ROOT_CACHE_FILE, ROOT_MAP);
+            FileUtils.writeObject(TREE_CACHE_FILE, TREE_MAP);
+            dirty = false;
+        } catch (IOException e) {} 
     }
 
     /**
