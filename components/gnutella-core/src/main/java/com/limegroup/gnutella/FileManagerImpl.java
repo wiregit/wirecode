@@ -1788,7 +1788,9 @@ public abstract class FileManagerImpl implements FileManager {
         updateUrnIndex(fd);
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && ifd.hasUrnsAndPartialData()) {
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+                    SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
+                    ifd.hasUrnsAndPartialData()) {
                 loadKeywords(_incompleteKeywordTrie, fd);
                 _needRebuild = true;
             }
@@ -2255,6 +2257,8 @@ public abstract class FileManagerImpl implements FileManager {
             if (fds[i] instanceof IncompleteFileDesc) {
                 if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
                     continue;
+                if (!SharingSettings.PUBLISH_PARTIAL_QRP.getValue())
+                    continue;
                 IncompleteFileDesc ifd = (IncompleteFileDesc)fds[i];
                 if (!ifd.hasUrnsAndPartialData())
                     continue;
@@ -2448,7 +2452,9 @@ public abstract class FileManagerImpl implements FileManager {
 
             //Search for keyword, i.e., keywords[i...j-1].  
             Iterator<IntSet> iter= _keywordTrie.getPrefixedBy(query, i, j);
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && partial)
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+                    SharingSettings.ALLOW_PARTIAL_RESPONSES.getValue() &&
+                    partial)
                 iter = new MultiIterator<IntSet>(iter,_incompleteKeywordTrie.getPrefixedBy(query, i, j));
             
             if (iter.hasNext()) {
