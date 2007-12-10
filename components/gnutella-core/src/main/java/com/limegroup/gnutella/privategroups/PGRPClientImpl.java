@@ -497,10 +497,11 @@ public class PGRPClientImpl implements PGRPClient{
         
 //          client.loginAccountNoServerSocket("Dan", "1234");
         
-        client.loginAccountNoServerSocket("Felix", "1234");
+//        client.loginAccountNoServerSocket("Felix", "1234");
         
 //        client.setRemoteConnection("anthony@lw-intern02", "dan");
-          client.sendMessage("anthony@lw-intern02", "test");
+      client.loginAccount("Dan", "1234");
+//          client.sendMessage("anthony@lw-intern02", "test");
 //        ChatManager temp = client.getBuddyListManager().getManager("anthony@lw-intern02");
         
         

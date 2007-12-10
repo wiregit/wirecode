@@ -107,6 +107,8 @@ public class PGRPServerSocket{
                     ProviderManager providerManager = ProviderManager.getInstance();
                     providerManager.addIQProvider("serveripquery", "jabber:iq:serveripquery", new com.limegroup.gnutella.privategroups.ServerIPQueryProvider());
                     
+                    System.out.println("remote ip address is: " + remoteIPAddress);
+                    
                     
                     ServerIPQuery queryPacket = new ServerIPQuery(remoteIPAddress);
                     queryPacket.setTo(servername);
