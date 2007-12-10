@@ -187,7 +187,6 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
                 MessageService.showError(I18nMarker.marktr("A file used to save your preferences was corrupted. LimeWire will use default values."));
             }
         } catch(IOException e) {
-            ErrorService.error(e);
             // the default properties will be used -- this is fine and expected
         } finally {
             if( fis != null ) {
