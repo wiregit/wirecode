@@ -416,6 +416,13 @@ public class VerifyingFile {
     }
     
     /**
+     * @return a clone of the partial IntervalSet.
+     */
+    public synchronized IntervalSet getPartialIntervalSet() {
+        return partialBlocks.clone();
+    }
+    
+    /**
      * @return byte-packed representation of the verified blocks.
      */
     public synchronized IntervalSet.ByteIntervals toBytes() {
