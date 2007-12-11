@@ -80,6 +80,8 @@ public class MessageTestUtils {
             ignoring(qr).getRichQuery();
             ignoring(qr).hasQueryUrns();
             ignoring(qr).isWhatIsNewRequest();
+            ignoring(qr).desiresXMLResponses();
+            ignoring(qr).desiresOutOfBandReplies();
         }};
     }
     
