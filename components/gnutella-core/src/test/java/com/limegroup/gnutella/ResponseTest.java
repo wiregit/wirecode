@@ -890,7 +890,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // a verifying file with some stuff verified
         VerifyingFileFactory vfactory = injector.getInstance(VerifyingFileFactory.class);
         VerifyingFile vf = vfactory.createVerifyingFile(1024*1024);
-        Range r = Range.createRange(0,1024 * 10 - 1);
+        Range r = Range.createRange(0,1024 * 101 - 1);
         IntervalSet verified = new IntervalSet();
         verified.add(r);
         PrivilegedAccessor.setValue(vf,"verifiedBlocks",verified);
@@ -902,7 +902,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
         IntervalSet s = resp.getRanges();
         assertEquals(1,s.getNumberOfIntervals());
-        assertEquals(10240, s.getSize());
+        assertEquals(1024 * 101, s.getSize());
         assertTrue(s.contains(r));
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -912,7 +912,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         Response read = responseFactoryImpl.createFromStream(bais);
         s = read.getRanges();
         assertEquals(1,s.getNumberOfIntervals());
-        assertEquals(10240, s.getSize());
+        assertEquals(1024 * 101, s.getSize());
         assertTrue(s.contains(r));
     }
     
