@@ -29,9 +29,7 @@ public class BasicSpecialResultsDatabaseImplLeniencyTest extends AbstractBasicSp
     /* Testing missing fields */
     
     public void testNoFileName() throws IOException {
-        runTestWithStringNull(NO_FILE_NAME, new Getter() {
-            public Object get(SearchResult sr) { return sr.getFileName(); }
-        });
+        runTestAndExpectNothing(NO_FILE_NAME);
     }   
     
     public void testNoSize() throws IOException {

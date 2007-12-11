@@ -55,15 +55,26 @@ abstract class AbstractBasicSpecialResultsDatabaseImplTestSupport extends LimeTe
         BasicSpecialResultsDatabaseImpl db = helper.newDatabase(buf);
         db.find("cat", null /* this is ok */, new ThirdPartyResultsDatabase.SearchResultsCallback() {
             public void process(List<SearchResult> results, SearchInformation info) {
-                SearchResult sr = results.get(0);
-                assertNotNull(sr);
-                Object o = getter.get(sr);
-                assertTrue(expected + " != " + o,
-                           expected == o || 
-                           (expected instanceof Number&& o instanceof Number 
-                            && ((Number)expected).intValue() ==  ((Number)o).intValue()));
+                if(expected == NOTHING) {
+                    assertTrue(results.isEmpty());
+                } else {
+                    assertFalse(results.isEmpty());
+                    SearchResult sr = results.get(0);
+                    assertNotNull(sr);
+                    Object o = getter.get(sr);
+                    assertTrue(expected + " != " + o,
+                               expected == o || 
+                               (expected instanceof Number&& o instanceof Number 
+                                && ((Number)expected).intValue() ==  ((Number)o).intValue()));
+                }
             }
         });
+    }
+    
+    private static final Object NOTHING = new Object();
+    
+    protected final void runTestAndExpectNothing(String buf) {
+        runTestWithString(NOTHING, buf, null);
     }
     
     /**
