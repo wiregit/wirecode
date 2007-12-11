@@ -49,6 +49,6 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
     }
 
     public String toString() {
-        return "FindNodeRequest: " + lookupId;
+        return "FindNodeRequest: " + lookupId+ " from "+getContact();
     }
 }

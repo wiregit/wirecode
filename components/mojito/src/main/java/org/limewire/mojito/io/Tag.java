@@ -215,7 +215,7 @@ public class Tag {
     }
     
     public String toString() {
-        return "Tag for " + message.toString();
+        return "Tag for " + message.toString()+ " going to id "+getNodeID()+" dest: "+dst;
     }
     
     /**

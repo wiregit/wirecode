@@ -373,9 +373,6 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
             
         foundNewContacts |= newContacts;
         
-        /*
-         * at this point we can either retry bootstrapping or terminate it.
-         */
         boolean retry = false;
         boolean terminate = false;
         
@@ -392,6 +389,9 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
                 }
             }
 
+            /*
+             * at this point we can either retry bootstrapping or terminate it.
+             */
             if (highFailures) {
                 switch(status.get()) {
                 case BOOTSTRAPPING :
@@ -448,9 +448,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private float getPercentage(RouteTable table) {
-        synchronized(table) {
-            return RouteTableUtils.getPercentageOfAliveContacts(table);
-        }
+        return RouteTableUtils.getPercentageOfAliveContacts(table);
    }
     
     private void bootstrapped(boolean bootstrapped) {

@@ -12,6 +12,9 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.result.FindNodeResult;
 
+/**
+ * A worker thread that continuously refreshes buckets provided by the BootstrapProcess.
+ */
 class BootstrapWorker implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(BootstrapWorker.class);
@@ -32,7 +35,8 @@ class BootstrapWorker implements Runnable {
         LOG.debug("starting worker");
         while(!shutdown.get()) {
             KUID nextBucket = process.getNextBucket();
-            LOG.debug(this+" will refresh "+nextBucket);
+            if (LOG.isDebugEnabled())
+                LOG.debug(this+" will refresh "+nextBucket);
             if (nextBucket == null)
                 return;
             refreshBucket(nextBucket);
@@ -53,7 +57,8 @@ class BootstrapWorker implements Runnable {
             value = c.get();
         } catch (InterruptedException ignore) {}
         catch (CancellationException cancelled) {
-            assert shutdown.get();
+            if (!shutdown.get())
+                throw new IllegalStateException(cancelled);
         }
         catch (ExecutionException ee) {
             LOG.info("ExecutionException", ee);
