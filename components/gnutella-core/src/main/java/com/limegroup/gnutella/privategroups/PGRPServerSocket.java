@@ -13,6 +13,7 @@ import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
 
+import com.limegroup.gnutella.gui.GuiCoreMediator;
 import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
 
 
@@ -30,7 +31,7 @@ public class PGRPServerSocket{
         private XMPPConnection connection;
         private boolean passCheck = true;
         private BuddyListManager buddyListManager;
-        private String servername = "lw-intern02";
+        private static String servername = GuiCoreMediator.getPGRPClient().getServername();
         private String localUsername;
         
         public PGRPServerSocket(String localUsername, XMPPConnection connection, BuddyListManager buddyListManager){           
@@ -124,9 +125,17 @@ public class PGRPServerSocket{
                     
                     if (result instanceof ServerIPQuery) {
                         data = (ServerIPQuery) result;
-                        buddyListManager.addChatManager(data.getUsername(), localUsername, mySocket);
-                        System.out.println("got a conversation request from: " + data.getUsername() + ". let's open gui window now");
-                        RosterListMediator.getInstance().initMessageWindow(data.getUsername(), localUsername);
+                        String usernameExt = data.getUsername()+ "@" + servername;
+                        
+                        
+                        
+                        buddyListManager.addChatManager("felix@lw-intern02", localUsername, mySocket);
+                        System.out.println("got a conversation request from: " + "felix@lw-intern02" + ". let's open gui window now");
+                        RosterListMediator.getInstance().initMessageWindow("felix@lw-intern02", localUsername);
+                        
+//                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
+//                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
+//                        RosterListMediator.getInstance().initMessageWindow(usernameExt, localUsername);
                     }
                 }     
             }    

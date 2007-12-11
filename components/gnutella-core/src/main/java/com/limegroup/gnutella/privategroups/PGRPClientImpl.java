@@ -55,6 +55,10 @@ public class PGRPClientImpl implements PGRPClient{
         connectToServerNoPort(servername);
     }
     
+    public String getServername(){
+        return servername;
+    }
+    
     private void connectToServerNoPort(String serverAddress){
         
         // Create a connection to the jabber.org server.
@@ -492,7 +496,7 @@ public class PGRPClientImpl implements PGRPClient{
         
 //          client.loginAccountNoServerSocket("Dan", "1234");
         
-        client.loginAccountNoServerSocket("Felix", "1234");
+        client.loginAccountNoServerSocket("Anthony", "1234");
         
 //        client.setRemoteConnection("anthony@lw-intern02", "dan");
 //      client.loginAccount("Anthony", "1234");
@@ -519,6 +523,18 @@ public class PGRPClientImpl implements PGRPClient{
 //          client.addToRoster("curtis","Curtis Jones","ClientDev");
 //          client.addToRoster("tim","Tim Julien","ClientDev");
 //          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
+        
+        
+      client.removeFromRoster("miket","ClientDev");
+      client.removeFromRoster("mikee","ClientDev");
+      client.removeFromRoster("sam","ClientDev");
+      client.removeFromRoster("dan","ClientDev");
+      client.removeFromRoster("zlatin","ClientDev");
+//      client.addToRoster("felix","Felix Berger","ClientDev");
+      client.removeFromRoster("curtis","ClientDev");
+      client.removeFromRoster("tim","ClientDev");
+      client.removeFromRoster("anthony", "ClientDev");
+        
         
       client.viewRoster();
 //        client.sendMessage("dan", "hi");

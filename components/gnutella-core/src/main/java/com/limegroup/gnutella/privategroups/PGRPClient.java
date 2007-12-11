@@ -65,4 +65,10 @@ public interface PGRPClient {
      * gets the current user's roster.
      */
     public Roster getRoster();
+    
+    /**
+     * returns the name of the server that has openfire
+     */        
+    public String getServername();
+    
 }
