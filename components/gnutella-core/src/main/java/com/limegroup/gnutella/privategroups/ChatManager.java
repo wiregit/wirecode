@@ -146,13 +146,12 @@ public class ChatManager{
         }
 
         public void run() {
-//            while(readSocket.isConnected()){
+            while(readSocket.isConnected()){
                 try{      
                     MXParser parser = new MXParser();
                     //System.out.println("buffer text is : "+ is.readLine());
                     
                     synchronized(is){
-                        if(is.ready()){
                         Message parsedMsg = null; 
                         
                         parser.setInput(is);
@@ -166,9 +165,7 @@ public class ChatManager{
                                 
                                 handleEvent(new MessageEvent(parsedMsg, null));
                             }
-                        }
                     }
-                    //}
                 }catch(IOException e){
                     //continue to loop for input
                 } catch (XmlPullParserException e) {
@@ -176,7 +173,7 @@ public class ChatManager{
                 } catch (Exception e) {
                     System.out.println("remote host has closed the connection!!");
                 }
-//            }
+            }
         }
     }
 }
