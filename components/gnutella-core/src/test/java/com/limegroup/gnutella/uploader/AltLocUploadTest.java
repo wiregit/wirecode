@@ -157,9 +157,8 @@ public class AltLocUploadTest extends LimeTestCase {
         // we must use a separate copy method
         // because the filename has a # in it which can't be a resource.
         LimeTestUtils.copyFile(testFile, sharedFile);
-        assertTrue("should exist", new File(_sharedDir, fileName).exists());
-        assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
-                .length());
+        assertTrue("should exist", sharedFile.exists());
+        assertGreaterThan("should have data", 0, sharedFile.length());
 
         // initialize services
         injector = LimeTestUtils.createInjector(new AbstractModule() {
@@ -178,7 +177,7 @@ public class AltLocUploadTest extends LimeTestCase {
 //        startServices();
         fileManager = injector.getInstance(FileManager.class);
         fileManager.loadSettingsAndWait(2000);
-        fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
+        fd = fileManager.getFileDescForFile(sharedFile);
         assertNotNull(fd);
         
         altLocManager = injector.getInstance(AltLocManager.class);
@@ -1097,6 +1096,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 ignoring(request).desiresXMLResponses();
                 ignoring(request).isMulticast();
                 ignoring(request).getLength();
+                ignoring(request).desiresPartialResults();
             }});
             
             messageRouter.handleMessage(request, handler);
