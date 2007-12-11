@@ -23,7 +23,7 @@ public class BuddyListManager {
 	    if(manager ==null){
 	        manager = new ChatManager(socket);
 	        buddyMap.put(remoteUsername, manager);
-	        RosterListMediator.getInstance().initMessageWindow("felix@lw-intern02", localUsername);
+	        RosterListMediator.getInstance().initMessageWindow(remoteUsername, localUsername);
 	    }
 	    else{
 	    	//replace old socket with new ones

@@ -130,12 +130,12 @@ public class PGRPServerSocket{
                         //check if existing chatmanager already exists
                         
                         
-                        buddyListManager.addChatManager("felix@lw-intern02", localUsername, mySocket);
-                        System.out.println("got a conversation request from: " + "felix@lw-intern02" + ". let's open gui window now");
+//                        buddyListManager.addChatManager("felix@lw-intern02", localUsername, mySocket);
+//                        System.out.println("got a conversation request from: " + "felix@lw-intern02" + ". let's open gui window now");
                         
                         
-//                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
-//                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
+                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
+                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
 //                        RosterListMediator.getInstance().initMessageWindow(usernameExt, localUsername);
                     }
                 }     
