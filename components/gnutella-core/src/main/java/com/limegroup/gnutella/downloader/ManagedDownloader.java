@@ -3039,6 +3039,8 @@ public class ManagedDownloader extends AbstractDownloader
             TigerTreeCache.addRoot(sha1, ttroot);
             synchronized(fileManager) {
                 FileDesc fd = fileManager.getFileDescForUrn(sha1);
+                if (fd == null) // possible for in-network downloads
+                    return;
                 if (fd.setTTRoot(ttroot))
                     fileManager.fileURNSUpdated(fd); // refresh as the partial file may now be shared
             }
