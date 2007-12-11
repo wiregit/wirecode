@@ -36,7 +36,7 @@ public class ChatManager{
     public ChatManager(Socket socket){
         this.socket = socket;
         
-        initThreads();
+        initThreads(socket);
 
     }
     
@@ -56,12 +56,12 @@ public class ChatManager{
     }
     
     //initialize reading and writing threads
-    private void initThreads(){
+    private void initThreads(Socket currentSocket){
         
-        readThread = new Thread(new ReaderThread(socket));
+        readThread = new Thread(new ReaderThread(currentSocket));
         readThread.start();
         
-        writeThread = new Thread(new WriterThread(socket));
+        writeThread = new Thread(new WriterThread(currentSocket));
         writeThread.start();
 
     }
@@ -75,6 +75,12 @@ public class ChatManager{
             e.printStackTrace();
         }
         return false;
+    }
+    
+    public void replaceSocket(Socket newSocket){
+        closeChatManager();
+        socket = newSocket;
+        initThreads(socket);
     }
     
     //to send a something, user simply appends to the buffer.  The writer thread will automatically send 
@@ -110,7 +116,7 @@ public class ChatManager{
         private WriterThread(Socket writeSocket) {
             this.writeSocket = writeSocket;
             try {
-                os = new PrintWriter(writeSocket.getOutputStream(), true);
+                os = new PrintWriter(socket.getOutputStream(), true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -118,7 +124,7 @@ public class ChatManager{
 
         public void run() {
            
-            while(writeSocket.isConnected()){
+            while(!socket.isClosed()){
                 //if buffer is empty, do not write
                 synchronized(buffer){
                     while(buffer.length()!=0)
@@ -139,14 +145,14 @@ public class ChatManager{
             this.readSocket = readSocket;
 
                 try {
-                    is = new BufferedReader(new InputStreamReader(readSocket.getInputStream()));
+                    is = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
         }
 
         public void run() {
-            while(readSocket.isConnected()){
+            while(!socket.isClosed()){
                 try{      
                     MXParser parser = new MXParser();
                     //System.out.println("buffer text is : "+ is.readLine());

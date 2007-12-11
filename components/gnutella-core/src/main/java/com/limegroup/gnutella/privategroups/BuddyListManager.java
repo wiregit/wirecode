@@ -3,8 +3,8 @@ package com.limegroup.gnutella.privategroups;
 import java.net.Socket;
 import java.util.HashMap;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
 
 
 /**
@@ -19,8 +19,17 @@ public class BuddyListManager {
     private HashMap<String, ChatManager> buddyMap = new HashMap<String, ChatManager>();
             
     public void addChatManager(String remoteUsername, String localUsername, Socket socket){
-            ChatManager manager = new ChatManager(socket);
-            buddyMap.put(remoteUsername, manager);
+	    ChatManager manager = buddyMap.get(remoteUsername);
+	    if(manager ==null){
+	        manager = new ChatManager(socket);
+	        buddyMap.put(remoteUsername, manager);
+	        RosterListMediator.getInstance().initMessageWindow("felix@lw-intern02", localUsername);
+	    }
+	    else{
+	    	//replace old socket with new ones
+	    	manager.replaceSocket(socket);
+	    	
+	    }
     }
     
     public ChatManager getManager(String name){

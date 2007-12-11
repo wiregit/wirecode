@@ -127,11 +127,12 @@ public class PGRPServerSocket{
                         data = (ServerIPQuery) result;
                         String usernameExt = data.getUsername()+ "@" + servername;
                         
+                        //check if existing chatmanager already exists
                         
                         
                         buddyListManager.addChatManager("felix@lw-intern02", localUsername, mySocket);
                         System.out.println("got a conversation request from: " + "felix@lw-intern02" + ". let's open gui window now");
-                        RosterListMediator.getInstance().initMessageWindow("felix@lw-intern02", localUsername);
+                        
                         
 //                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
 //                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
