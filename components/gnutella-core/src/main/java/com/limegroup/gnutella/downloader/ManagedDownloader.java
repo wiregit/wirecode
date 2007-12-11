@@ -2354,9 +2354,8 @@ public class ManagedDownloader extends AbstractDownloader
         //need to get the VerifyingFile ready to write
         try {
             commonOutFile.open(incompleteFile);
-        } catch(IOException e) {
-            if(!IOUtils.handleException(e, IOUtils.ErrorType.DOWNLOAD))
-                ErrorService.error(e);
+        } catch (IOException e) {
+            IOUtils.handleException(e, IOUtils.ErrorType.DOWNLOAD);
             throw e;
         }
     }
