@@ -139,7 +139,6 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 if (port > 0) {
                     baseDir += ":" + port;
                 }
-                String msg = null;
                 String fileName = fileString.getValue();
                 if (fileName == null) {
                     fileName = fileNameFromURL(urlString.getValue());
@@ -163,9 +162,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     // invalid url or other causes, fail silently
                 }
 
-                String res = "invalid.download";
-                if (msg != null) res += msg;
-                return res;
+                return "invalid.download";
             }
             
             private String fileNameFromURL(String urlString) {

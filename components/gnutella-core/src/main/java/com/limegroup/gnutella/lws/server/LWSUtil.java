@@ -27,7 +27,7 @@ public final class LWSUtil {
     public static Tagged<String> getArg(Map<String, String> args, String name, String action) {
         String res = args.get(name);
         if (res == null || res.equals("")) {
-            String detail = "Invalid '" + name + "' while " + action;
+            //String detail = "Invalid '" + name + "' while " + action;
             return new Tagged<String>(LWSDispatcherSupport.ErrorCodes.MISSING_PARAMETER, false);
         }
         String result = res;
