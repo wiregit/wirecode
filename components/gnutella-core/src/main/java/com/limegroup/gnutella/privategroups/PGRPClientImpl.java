@@ -2,9 +2,7 @@ package com.limegroup.gnutella.privategroups;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -15,6 +13,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
@@ -48,6 +48,7 @@ public class PGRPClientImpl implements PGRPClient{
     private static String servername = "lw-intern02";
     private XMPPConnection connection;
     private BuddyListManager buddyListManager;
+    private static final Log LOG = LogFactory.getLog(PGRPClientImpl.class);
 
     @Inject
     public PGRPClientImpl(BuddyListManager buddyListManager) {
@@ -159,15 +160,17 @@ public class PGRPClientImpl implements PGRPClient{
     
     public boolean loginAccount(String username, String password){
         try {
-
+            LOG.debug("begin loginAccount");
             connection.login(username, password);
             System.out.println("login successful");
             
             localUsername = username;
             
+            LOG.debug("set Subscription to Manual");
             //set subscription manual mode
             setSubscriptionModeManual();
             
+            LOG.debug("Register IQStor Provider");
             //register IQ provider
             ProviderManager providerManager = ProviderManager.getInstance();
             providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
@@ -180,6 +183,7 @@ public class PGRPClientImpl implements PGRPClient{
             
             port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
             
+            LOG.debug("Generate key pairs");
             //generate public and private keys
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance( "DSA" );
             keyGen.initialize( 1024 );
@@ -187,6 +191,7 @@ public class PGRPClientImpl implements PGRPClient{
             this.privateKey = pair.getPrivate();
             this.publicKey = pair.getPublic();
             
+            LOG.debug("Create ValueStorage packet to set user credentials and send to server");
             //store ip address, port, and public key in the server
             ValueStorage storagePacket = new ValueStorage();
             storagePacket.setType(IQ.Type.SET);
@@ -198,6 +203,7 @@ public class PGRPClientImpl implements PGRPClient{
             
             connection.sendPacket(storagePacket);
             
+            LOG.debug("Start ServerSocket");
             //start serverSocket
             serverSocket = new PGRPServerSocket(localUsername, connection, buddyListManager);
             serverSocket.start();
@@ -230,6 +236,8 @@ public class PGRPClientImpl implements PGRPClient{
     }
     
     public boolean sendMessage(String username, String message){
+        
+        LOG.debug("Send Message Method");
         //hack to append servername - will change later
         if(username.indexOf('@')==-1){
             //append servername
@@ -239,8 +247,10 @@ public class PGRPClientImpl implements PGRPClient{
         
         //check list to see if buddy is a buddy
         if(findRosterUserName(username)){
+            LOG.debug("find user name. is buddy or not?");
             ChatManager chatManager = buddyListManager.getManager(username);
             if(chatManager== null){
+                    LOG.debug("Could not find chatManager");
                     //need to get remote user info and establish session
                     if(setRemoteConnection(username, localUsername)){
                         chatManager = buddyListManager.getManager(username);
@@ -249,6 +259,7 @@ public class PGRPClientImpl implements PGRPClient{
                     }
             }
             else{
+                LOG.debug("found chatManager");
                 chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
                 return true;
             }
@@ -363,36 +374,45 @@ public class PGRPClientImpl implements PGRPClient{
      * queries the server to find the ip address associated with the remote username
      */
     public boolean setRemoteConnection(String remoteUserNameServer, String localUsername){
-        
+        LOG.debug("setRemoteConnection method");
         //remove the server name part of the string
         int index = remoteUserNameServer.lastIndexOf('@');
         String remoteUserNameOnly = remoteUserNameServer.substring(0, index);
         
+        LOG.debug("Send storage packet to server to get username associated with ip address");
         //use valueStorage packet to get ip address, port, and public key
         ValueStorage storagePacket = new ValueStorage();
         storagePacket.setTo(servername);
         storagePacket.setUsername(remoteUserNameOnly);
         storagePacket.setType(IQ.Type.GET);
         
+
         PacketFilter filter = new AndFilter(new PacketIDFilter(storagePacket.getPacketID()),
                 new PacketTypeFilter(IQ.class));
         PacketCollector collector = connection.createPacketCollector(filter);
 
         connection.sendPacket(storagePacket);
 
+        
+        LOG.debug("Get Result IQ from the collector");
         IQ result = (IQ)collector.nextResult(SmackConfiguration.getPacketReplyTimeout());
         
         if (result instanceof ValueStorage) {
+            LOG.debug("Result is an instance of ValueStorage");
             ValueStorage data = (ValueStorage) result;
             if(data.getIPAddress()!=null){
+                LOG.debug("Result has an IP Address");
                 //create new session and add to buddyListManager
                 try {
+                    LOG.debug("Add a new chat manager for the local user for the new conversation");
                     System.out.println("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());   
                     buddyListManager.addChatManager(remoteUserNameServer, localUsername, new Socket(data.getIPAddress(), 9999));
                     return true;
                 } catch (NumberFormatException e) {
+                    LOG.debug("Encountered NumberFormatException");
                     e.printStackTrace();
                 } catch (IOException e) {
+                    LOG.debug("Encountered IOException");
                     e.printStackTrace();
                 }
             }
@@ -494,9 +514,9 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.createAccount("Dan", "1234");   
 //        client.createAccount("Anthony", "1234"); 
         
-//          client.loginAccountNoServerSocket("Dan", "1234");
+          client.loginAccountNoServerSocket("Dan", "1234");
         
-        client.loginAccountNoServerSocket("Anthony", "1234");
+//        client.loginAccountNoServerSocket("Anthony", "1234");
         
 //        client.setRemoteConnection("anthony@lw-intern02", "dan");
 //      client.loginAccount("Anthony", "1234");
@@ -525,15 +545,15 @@ public class PGRPClientImpl implements PGRPClient{
 //          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
         
         
-      client.removeFromRoster("miket","ClientDev");
-      client.removeFromRoster("mikee","ClientDev");
-      client.removeFromRoster("sam","ClientDev");
-      client.removeFromRoster("dan","ClientDev");
-      client.removeFromRoster("zlatin","ClientDev");
+//      client.removeFromRoster("miket","ClientDev");
+//      client.removeFromRoster("mikee","ClientDev");
+//      client.removeFromRoster("sam","ClientDev");
+//      client.removeFromRoster("dan","ClientDev");
+//      client.removeFromRoster("zlatin","ClientDev");
 //      client.addToRoster("felix","Felix Berger","ClientDev");
-      client.removeFromRoster("curtis","ClientDev");
-      client.removeFromRoster("tim","ClientDev");
-      client.removeFromRoster("anthony", "ClientDev");
+//      client.removeFromRoster("curtis","ClientDev");
+//      client.removeFromRoster("tim","ClientDev");
+//      client.removeFromRoster("anthony", "ClientDev");
         
         
       client.viewRoster();

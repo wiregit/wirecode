@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.PacketParserUtils;
@@ -31,9 +33,12 @@ public class ChatManager{
     private Thread readThread;
     private Thread writeThread;
     private final WeakEventListenerList<Event> listeners = new WeakEventListenerList<Event>();
+    private static final Log LOG = LogFactory.getLog(ChatManager.class);
     
   
     public ChatManager(Socket socket){
+        
+        LOG.debug("ChatManager: constructor");
         this.socket = socket;
         
         initThreads(socket);
@@ -41,6 +46,7 @@ public class ChatManager{
     }
     
     public void registerListener(String strongRef, EventListener listener){
+        LOG.debug("ChatManager: registerListener");
         listeners.addListener(strongRef, listener);
     }
     
@@ -51,12 +57,14 @@ public class ChatManager{
     
     private void handleEvent(Event E) {
         //can check if window exists
-        
+        LOG.debug("broadcast to listeners");
         listeners.broadcast(E);
     }
     
     //initialize reading and writing threads
     private void initThreads(Socket currentSocket){
+        
+        LOG.debug("ChatManager: initThreads");
         
         readThread = new Thread(new ReaderThread(currentSocket));
         readThread.start();
@@ -105,6 +113,7 @@ public class ChatManager{
     }
     
     private void emptyBuffer(){
+        LOG.debug("Empty buffer");
         buffer.delete(0, buffer.length());
     }
     
@@ -114,10 +123,13 @@ public class ChatManager{
         private Socket writeSocket;
         
         private WriterThread(Socket writeSocket) {
+            LOG.debug("WriterThread initialization");
             this.writeSocket = writeSocket;
             try {
+                LOG.debug("establish PrintWriter for writer thread");
                 os = new PrintWriter(socket.getOutputStream(), true);
             } catch (IOException e) {
+                LOG.debug("got a problem with establishing PrintWriter");
                 e.printStackTrace();
             }
         }
@@ -125,11 +137,14 @@ public class ChatManager{
         public void run() {
            
             while(!socket.isClosed()){
+                LOG.debug("WriterThread: run()");
                 //if buffer is empty, do not write
                 synchronized(buffer){
                     while(buffer.length()!=0)
                     {
+                        LOG.debug("Buffer is not empty.  Use PrintWriter to write it out");
                         os.println(buffer);
+                        LOG.debug("Empty Buffer now that the contents have been written out.  Don't want to write the same things again in the next iteration");
                         emptyBuffer();                        
                     }
                 }
@@ -142,17 +157,22 @@ public class ChatManager{
         private Socket readSocket;
         
         public ReaderThread(Socket readSocket){
+            LOG.debug("ReaderThread initialization");
             this.readSocket = readSocket;
 
-                try {
-                    is = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                LOG.debug("establish BufferedReader for reader thread");
+                is = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            } catch (IOException e) {
+                LOG.debug("got a problem with establishing BufferedReader");
+                e.printStackTrace();
+            }
         }
 
         public void run() {
+            LOG.debug("ReaderThread: run()");
             while(!socket.isClosed()){
+                LOG.debug("socket is not closed - run while loop");
                 try{      
                     MXParser parser = new MXParser();
                     //System.out.println("buffer text is : "+ is.readLine());
@@ -164,20 +184,24 @@ public class ChatManager{
                         int eventType = parser.next();
                        
                             if (eventType == XmlPullParser.START_TAG){
+                                LOG.debug("got a START tag in the XML message - there is something to parse");
                                 if (parser.getName().equals("message")) {
+                                    LOG.debug("got a message object - beging parsing");
                                     //parseMessage(parser) returns a SMACK message object
                                     parsedMsg = (Message) PacketParserUtils.parseMessage(parser);
+                                    LOG.debug("done parsing message object");
                                 }
                                 
                                 handleEvent(new MessageEvent(parsedMsg, null));
                             }
                     }
                 }catch(IOException e){
+                    LOG.debug("Caught IOException in ReaderThread: run()");
                     //continue to loop for input
                 } catch (XmlPullParserException e) {
-                    e.printStackTrace();
+                    LOG.debug("Caught XMLPullException in ReaderThread: run()");
                 } catch (Exception e) {
-                    System.out.println("remote host has closed the connection!!");
+                    LOG.debug("Caught Exception in ReaderThread: run()");
                 }
             }
         }

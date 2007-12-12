@@ -3,6 +3,9 @@ package com.limegroup.gnutella.privategroups;
 import java.net.Socket;
 import java.util.HashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
 
@@ -17,15 +20,20 @@ public class BuddyListManager {
 
     //map to store user and ChatManager info
     private HashMap<String, ChatManager> buddyMap = new HashMap<String, ChatManager>();
+    private static final Log LOG = LogFactory.getLog(BuddyListManager.class);
             
     public void addChatManager(String remoteUsername, String localUsername, Socket socket){
+        LOG.debug("BuddyListManager:addChatManager");
 	    ChatManager manager = buddyMap.get(remoteUsername);
 	    if(manager ==null){
+	        LOG.debug("chatManager did not exist before.  create a new one");
 	        manager = new ChatManager(socket);
 	        buddyMap.put(remoteUsername, manager);
+	        LOG.debug("chatManager is now in the Map. start a new message window");
 	        RosterListMediator.getInstance().initMessageWindow(remoteUsername, localUsername);
 	    }
 	    else{
+	        LOG.debug("chatManager existed.  simply replace socket");
 	    	//replace old socket with new ones
 	    	manager.replaceSocket(socket);
 	    	
