@@ -119,6 +119,12 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
             
         }
         
+        // if address isn't there or private, reset address and fwt
+        if (addr == null || !NetworkUtils.isValidExternalIpPort(addr)) {
+            fwtVersion = 0;
+            addr = null;
+        }
+        
         return createPushEndpoint(guid, proxies, (byte)(proxies.size() | fwtVersion << 3), fwtVersion, addr);
     }    
 

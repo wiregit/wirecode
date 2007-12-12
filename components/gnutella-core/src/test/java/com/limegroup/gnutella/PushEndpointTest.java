@@ -1,7 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -559,6 +561,26 @@ public class PushEndpointTest extends BaseTestCase {
         assertEquals(RemoteFileDesc.BOGUS_IP,noFWT2.getAddress());
         assertEquals(4,noFWT2.getProxies().size());
     }
+    
+    /**
+     * Ensures invalid push endpoint binary representations that specify fwt
+     * but don't provide a host are not deserialized into PushEndPoints, this
+     * varies from reading invalid PushEndPoints from an http value.
+     */
+    public void testCreateFromBytesFWTPushEndPointWithoutHost() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        // set fwt version to 1 and one proxy
+        out.write(1 | 1 << 3);
+        out.write(new GUID().bytes());
+        out.write(new byte[] { (byte)129, 12, 1, 1 });
+        ByteOrder.short2leb((short)5555, out);
+        
+        try {
+            factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(out.toByteArray())));
+            fail("IOException expected for fwt push endpoint without host info");
+        } catch (IOException ie) {
+        }
+    }
 
     public void testUnknownFeatures() throws Exception {
         PushEndpoint unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235");
@@ -566,7 +588,7 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(0,unknown.supportsFWTVersion());
     	
     	//now an endpoint with the fwt header moved elsewhere
-    	unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235");
+    	unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235;555:129.1.2.3");
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(1,unknown.supportsFWTVersion());
     	
