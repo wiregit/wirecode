@@ -27,7 +27,7 @@ public class BuddyListManager {
 	    ChatManager manager = buddyMap.get(remoteUsername);
 	    if(manager ==null){
 	        LOG.debug("chatManager did not exist before.  create a new one");
-	        manager = new ChatManager(socket);
+	        manager = new ChatManager(socket, remoteUsername);
 	        buddyMap.put(remoteUsername, manager);
 	        LOG.debug("chatManager is now in the Map. start a new message window");
 	        RosterListMediator.getInstance().initMessageWindow(remoteUsername, localUsername);

@@ -19,6 +19,8 @@ import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.limegroup.gnutella.gui.GuiCoreMediator;
+
 /**
  * 
  * ChatManager holds socket and threads for reading/writing
@@ -34,15 +36,16 @@ public class ChatManager{
     private Thread writeThread;
     private final WeakEventListenerList<Event> listeners = new WeakEventListenerList<Event>();
     private static final Log LOG = LogFactory.getLog(ChatManager.class);
+    private String chatManagerKey;
     
     private LinkedBlockingQueue<Packet> linkedBlockingQueue= new LinkedBlockingQueue<Packet>();
     
   
-    public ChatManager(Socket socket){
+    public ChatManager(Socket socket, String chatManagerKey){
         
         LOG.debug("ChatManager: constructor");
         this.socket = socket;
-        
+        this.chatManagerKey = chatManagerKey;
         initThreads(socket);
 
     }
@@ -199,7 +202,9 @@ public class ChatManager{
                     }
                 }catch(IOException e){
                     LOG.debug("Caught IOException in ReaderThread: run()");
-                    //other end has closed the connection - notify user here
+                    //remote user disconnected so remove chatmanager
+                    GuiCoreMediator.getPGRPClient().getBuddyListManager().removeChatManager(chatManagerKey);
+                    
                 } catch (XmlPullParserException e) {
                     LOG.debug("Caught XMLPullException in ReaderThread: run()");
                 } catch (Exception e) {
