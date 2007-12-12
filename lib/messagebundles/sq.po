@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-09-30 18:19+0000\n"
+"PO-Revision-Date: 2007-12-12 15:19+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1755,7 +1755,7 @@ msgstr "Po Ngarkohet Menaxhimi i Spameve..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:434
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "Ngarkuat Dëgjuesit e Rrjetit..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -2463,6 +2463,11 @@ msgid ""
 "full access to incoming and outgoing connections. To disable this feature, "
 "click 'No'."
 msgstr ""
+"LimeWire nuk arriti të nisë Protokollin e Hyrjes të Zërit Dixhital (për "
+"shpërndarjen e skedave në iTunes) sepse një fajruoll po e bllokon hyrjen. Që "
+"të vijoni të përdorni këtë veçori, klikoni 'Po' dhe ndryshoni fajruollin që "
+"'LimeWire.exe' të lejohet të ketë hyrje të plotë në lidhjet hyrëse e dalëse. "
+"Që të çaktivizoni këtë veçori, klikoni 'Jo'."
 
 #. *
 #. * Constant for when the user selects the yes button
@@ -2609,7 +2614,7 @@ msgstr "Arritje"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 msgid "&Browser"
-msgstr ""
+msgstr "&Shfletuesi"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
 #, java-format
@@ -2647,6 +2652,8 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"LimeWire nuk arrin të gjejë një licensë për skedën. Gjithsesi, a doni të "
+"shkarkoni skedën?"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1405
 #, java-format
@@ -3080,12 +3087,12 @@ msgstr "kërkime"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:23
 msgid "My Shared Files"
-msgstr ""
+msgstr "Skedat e Mia të Shpërndara"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
 #, java-format
 msgid "View My {0} Shared Files"
-msgstr ""
+msgstr "Shiko {0} Skedat e Mia të Shpërndara"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:37
 msgid ""
@@ -3150,11 +3157,11 @@ msgstr "LimeWire diktoi një fajruoll"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:499
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Ju nuk jeni i lidhur me Dyqanin e LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:502
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Ju nuk jeni i lidhur me Dyqanin e LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:594
 msgid "Connection"
@@ -3257,7 +3264,7 @@ msgstr "Shfaqe Statustin e Fajruollit"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:809
 msgid "Show Store Indicator"
-msgstr ""
+msgstr "Shfaqe Treguesin e Dyqanit"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:825
 msgid "Show Bandwidth Consumption"
@@ -3396,6 +3403,10 @@ msgid ""
 "stars and a speed of 'Ethernet'. These results have the greatest chance of "
 "completing successfully."
 msgstr ""
+"Sa më tepër yje të ketë rezultati i kërkimit, aq më të mira janë shanset që "
+"shkarkimi të përfundojë me sukses! Disa rezultate të kërkimit mundet edhe të "
+"shfaqen me kater yje blu dhe me shpejtësi 'Ethernet'. Këto kanë shansin më "
+"të madh që të përfundojnë me sukses."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:30
 msgid ""
@@ -3412,24 +3423,33 @@ msgid ""
 "the Library will count how many times LimeWire has returned a result from "
 "someone searching for that file."
 msgstr ""
+"Jeni kurioz të dini sa njerëz po i kerkojnë skedat tuaja? Kolona 'hitet' në "
+"Librari numëron sa here LimeWire kthen një rezultat nga dikush që e kërkon "
+"skedën."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:32
 msgid ""
 "It helps the network if you keep your LimeWire running. Others will connect "
 "to the network easier and searches will perform better. "
 msgstr ""
+"Rrjeti ndihmohet nëse LimeWire rri në veprim. Të tjerët do të lidhen më "
+"lehtë në rrjet dhe kërkimet do të kryhen më mirë. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
 msgid ""
 "Looking for something rare? The more detailed your search is, the better "
 "your chances of getting a result you want!"
 msgstr ""
+"Po kërkoni diçka të rrallë? Sa më i detajuar të jetë kërkimi juaj, aq më të "
+"mëdha janë shanset që të merrni rezultatin e kërkuar!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
 msgid ""
 "Want to open this Tip Of The Day dialog after you've closed it? Go to the "
 "Help menu and choose 'Tip of the Day'."
 msgstr ""
+"Doni që kjo tabelë me Këshillat e Ditës të hapet edhe kur ju e mbyllni atë? "
+"Shkoni në menynë Ndihmë dhe zgjidhni 'Këshillat e Ditës'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
 msgid ""
@@ -3613,12 +3633,16 @@ msgid ""
 "Did you know? LimeWire supports two different peer-to-peer file sharing "
 "protocols: Gnutella and BitTorrent."
 msgstr ""
+"A e dinit? LimeWire përkrah dy protokolle skedë-shpërndarëse pikë më pikë të "
+"ndryshme: Gnutella dhe BitTorrent."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:57
 msgid ""
 "To download a file with BitTorrent, just click a link to a .torrent file on "
 "the Web, or drag a .torrent file to LimeWire's Downloads section."
 msgstr ""
+"Për të shkarkuar një skedë me BitTorrent, thjesht klikoni një skedë .torrent "
+"në Rrjet, ose hidheni një skedë .torrent te sektori Shkarkesat e LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:58
 msgid ""
@@ -3633,6 +3657,9 @@ msgid ""
 "marked with a lock icon in the Quality column are official communications "
 "from Lime Wire, LLC."
 msgstr ""
+"Rezultatet e kërkimit në LimeWire vijnë nga përdoruesit e tjerë si ju. "
+"Rezultatet e kërkimit të shenjuara me një ikonë me kyç ne kolonën Cilësia "
+"janë komunikime zyrtare të Lime Wire, LLC."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:60
 msgid ""
@@ -3641,6 +3668,10 @@ msgid ""
 "Click the circle in the upper left corner of a box, and choose a new option "
 "from the menu."
 msgstr ""
+"Pas nisjes së kërkimit, ju mund të porositni tre kutitë në të majtë me "
+"titujt si Media, Artisti dhe Albumi. Ju mund të ndryshoni se çfarë tregojnë "
+"këto kutitë. Klikoni rrethin në cepin e e sipërm majtas të një kutie, dhe "
+"zgjidhni një mundësi të re nga menyja."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:61
 msgid ""
@@ -3655,6 +3686,8 @@ msgid ""
 "If you try to download a file that you already have, LimeWire lets you know, "
 "even if the file has a different name."
 msgstr ""
+"Nëse provoni të shkarkoni një skedë që e keni edhe më parë, LimeWire do ju "
+"tregojë, edhe nëse skeda ka një emër të ndryshëm."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:63
 msgid ""
@@ -3663,6 +3696,10 @@ msgid ""
 "entering your LimeWire. Double-click an incoming query to perform a search "
 "for that keyword."
 msgstr ""
+"Jeni kurioz të dini se çfarë po kërkojnë të tjerët? Shkoni në tabelën "
+"Monitori, dhe zgjidhni Trego Kërkimet e Hyra për të parë kërkimet e njerëzve "
+"të tjerë që po hyjnë në LimeWire-n tuaj. Klikoni dy herë njësinë hyrëse për "
+"të kryer një kërkim të asaj fjale kyçe."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:64
 msgid ""
@@ -3706,12 +3743,17 @@ msgid ""
 "of LimeWire show how fast all of your files are downloading or uploading "
 "combined."
 msgstr ""
+"Numrat anash shigjetave lart e poshtë në shufrën e statusit në fund të "
+"LimeWire tregojnë se sa shpejt po shkarkohen apo ngarkohen skedat tuaja, të "
+"kombinuara."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
 msgid ""
 "Don't strain your eyes to use LimeWire! You can adjust the text size by "
 "going to View &gt; Increase Font Size."
 msgstr ""
+"Mos i picërroni sytë gjatë përdorimit të LimeWire! Përmasa e shkrimit mund "
+"të ndreqet duke shkuar në Pamje &gt, Rrite Masën e Shkrimit."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:71
 msgid ""

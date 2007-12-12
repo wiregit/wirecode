@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-12-04 21:53+0000\n"
+"PO-Revision-Date: 2007-12-10 22:06+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
@@ -880,6 +880,10 @@ msgid ""
 "full access to incoming and outgoing connections. To disable this feature, "
 "click 'No'."
 msgstr ""
+"Güvenlik duvarının engellemesi nedeniyle Limewire Dijital Ses Erişim "
+"Protokolü nü (iTunes'le odsya paylaşımı için) başlatamadı. Devam edebilmek "
+"için 'Evet' i seçip güvenlik duvarınızın 'Limewire.exe' ye tam yetki verecek "
+"şekilde ayarlayın. Kullanmak istemiyorsanız 'Hayır'ı seçin."
 
 #. *
 #. * Constant for when the user selects the yes button
@@ -2121,6 +2125,9 @@ msgid ""
 "computer in the following format: 'ip address:port'. The port can be found "
 "in LimeWire's Options in the Advanced &gt; Firewall Config section."
 msgstr ""
+"Arkadaşlarınızın Limewire kütüphanesini görmek mi istiyorsunuz? Arama &gt; "
+"Direk Bağlantı'ya girin, arkadaşınızın bilgisayarının ip adresini ve port "
+"numarasını 'ip adresi:port' şeklinde girin."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
 msgid ""
@@ -2211,18 +2218,17 @@ msgstr ""
 "ayarlayabilirsiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:71
-#, fuzzy
 msgid ""
 "Instead of putting all your files in a single folder, LimeWire can "
 "automatically sort them by media type. In the Options &gt; Saving window, "
 "select a Media Type like Audio, and click the Browse button. You can group "
 "files by media type in the Library even if all saved files are in one folder."
 msgstr ""
-"Tüm dosyalarınızı tek bir klasörde bulundurmaktansa, LimeWire bunları Ortam "
-"Türüne göre otomatik olarak sıralayabilir. \n"
-"Seçenekler&gt;  Kayıdet pensere altında Ortam Türü Ses gibi bir seçim yapın "
-"ve Gözat butonuna basın. Dosyalarınızı tümü tek bir klasörde kaydedilmiş "
-"olsa bile Ortam Türüne göre Kütüphane'de gruplayabilirsiniz."
+"Tüm dosyalarınızı tek bir klasörde bulundurmaktansa, LimeWire bunları ortam "
+"türüne göre otomatik olarak sıralayabilir. Seçenekler&gt; Kaydet penceresi "
+"altında Ortam Türü Ses gibi bir seçim yapın ve Gözat butonuna basın. "
+"Dosyalarınızı tümü tek bir klasörde kaydedilmiş olsa bile Ortam Türüne göre "
+"Kütüphane'de gruplayabilirsiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
 msgid ""
@@ -2377,6 +2383,8 @@ msgid ""
 "etc... These preferences (and more) are available at the Tools &gt; Options "
 "menu."
 msgstr ""
+"Limewire'ın Kayıt yeri, Paylaşım klasörü benzeri özelliklerini "
+"kişiselleştirebilirsiniz. Bu ve daha fazlası Araçlar %gt; Ayarlar menüsünde."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:97
 msgid ""
@@ -2393,6 +2401,9 @@ msgid ""
 "and uploads are complete by going to Tools &gt; Options and looking at the "
 "'Shutdown' options."
 msgstr ""
+"İyi bir paylaşımcı olun ve biri sizden dosya alırken Limewire'ı kapatmayın. "
+"Limewire'ın tüm indirme ve yüklemeler bittikten sonra kapanmasını Araçlar "
+"&gt; Kapanma ayarlarından sağlayabilirsiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:99
 msgid ""
@@ -2593,6 +2604,8 @@ msgid ""
 "Tired of the OSX Aqua look? Try using a new theme, available from the View "
 "&gt; Apply Themes menu. "
 msgstr ""
+"OSX Aqua bakışından usandın mı? Yeni bir temayı kullanmayı dene görünüş &gt; "
+"Tema menüsünü uygula. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:129
 msgid ""
@@ -2617,6 +2630,10 @@ msgid ""
 "and uploads are complete by going to LimeWire &gt; Preferences and looking "
 "at the 'Shutdown' options. "
 msgstr ""
+"İyi bir şebeke katılımcısı ol eğer birisi senden yüklüyorsa LimeWire'yi "
+"kapatma . Otomatik olarak kapatması için LimeWire'ye söyleyebilirsin, bütün "
+"indirmeler ve yüklemeler tam olduktan sonra kapanma LimeWire "
+"&gt;seçeneklerde   tercihlere  bak 'Kapanma' "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:132
 msgid ""
@@ -2625,6 +2642,10 @@ msgid ""
 "This can be done via LimeWire &gt; Preferences and altering the 'Sharing' "
 "options. "
 msgstr ""
+"LimeWire otomatik olarak dosyaların bütün tiplerini paylaşmaz. Eğer senin "
+"özel bir dosyan varsa paylaşmayı seçeceksin uzatmasının paylaşılıyor "
+"olduğuna emin olacaksın. Bu LimeWire yoluyla yapılabilir &gt ; Tercihler ve "
+"'Paylaşma' seçeneklerini değiştirmek. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:133
 msgid ""
@@ -2662,6 +2683,9 @@ msgid ""
 "'Preferences' from the 'LimeWire' menu and adding new words to those listed "
 "under Filters &gt; Keywords. "
 msgstr ""
+"Lime Wİre menüden Özellikleri seçerek ve Filtreler&Anahtar kelimeler altında "
+"listelenenlere yani kelimeler ekleyerek, belli kelimelerin arama "
+"sonuçlarınızın içinde görünmesini engelleyebilirsiniz. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:138
 msgid ""
@@ -2712,6 +2736,8 @@ msgid ""
 "Control-click a search result, then choose Search More, then Get More "
 "Results. "
 msgstr ""
+"Sen alınan arama sonuçlarının küçük sayısıyla mutsuz musun? Bir arama "
+"sonucunu tıkla ve sonra daha çok aramayı  seç ,  daha çok sonuc alır. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:144
 msgid ""
@@ -2780,6 +2806,9 @@ msgid ""
 "Want to play music in your default media player instead of in LimeWire? "
 "Control-click the LimeWire status bar and deselect 'Show Media Player'. "
 msgstr ""
+"müziklerinizi, LimeWire yerine kendi ön tanımlı media oynatıcınızla mı "
+"çalmak istiyorsunuz? LimeWire durum çubuğuna Control+Fare ile tıklayın ve "
+"\"Media Player'ı Göster\" seçeneğini seçili olmadığından emin olun "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:151
 msgid ""
@@ -3305,7 +3334,7 @@ msgstr "Sıkıştırılmış (G/Ç)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:96
 msgid "SSL Overhead (I/O)"
-msgstr ""
+msgstr "SSL Overhead (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:103
 msgid "QRP (%)"
@@ -3607,7 +3636,7 @@ msgstr "Kaynaklar saptanıyor"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:269
 msgid "LimeWire cannot download this torrent.  The tracker responded"
-msgstr ""
+msgstr "LimeWire, bu seli indiremez.İzleyici  yanıt verdi"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:359
 msgid "Priority"
@@ -3922,7 +3951,7 @@ msgstr "Ekle"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:365
 msgid "Appends (#) to filename"
-msgstr ""
+msgstr "Dosya adına (#) ekle"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:379
 msgid "Cancel the Download"
@@ -3990,12 +4019,12 @@ msgstr "LimeWire startupta seçilen birliklerle neyi yapmalıydı?"
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:67
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:71
 msgid "Always take the selected associations."
-msgstr ""
+msgstr "Her zaman seçilen birlikleri al."
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:69
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:73
 msgid "Ignore all missing associations."
-msgstr ""
+msgstr "Bütün kaçırma birliklerini görmezlikten gel."
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:71
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:75
@@ -4560,7 +4589,6 @@ msgid "Folders to share"
 msgstr "Paylaşılacak dosyalar"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:76
-#, fuzzy
 msgid ""
 "The following folders and subfolders will be shared.  You can uncheck any "
 "folders you do not want to share.  (You can change your shared folders at "
@@ -4618,7 +4646,7 @@ msgstr "&Gelişmiş"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:28
 msgid "Mojito &DHT Arcs View"
-msgstr ""
+msgstr "Mojito &DHT Arcs View"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:29
 msgid "Display a view of the incoming and outgoing DHT messages"
@@ -5267,6 +5295,10 @@ msgid ""
 "shared. By enabling filtering, you are instructing LimeWire to confirm all "
 "files you download or share with a list of removed content."
 msgstr ""
+"Telif hakkı sahiplerinin rica etmediği dosyaları süzmesi için LimeWire'ye "
+"söyleyebilirsin, paylaşılabilirsin.Süzerken senin indirdiğin veya çıkarılmış "
+"içeriğin bir listesiyle paylaştığın bütün dosyaları doğrulaması için "
+"LimeWire'ye bilgi veriyorsun."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:28
 msgid "Enable Content Filters"
@@ -5306,6 +5338,9 @@ msgid ""
 "You can share your Music on the Local Area Network and make it accessible "
 "for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players."
 msgstr ""
+"Sen yerel alan şebekesinde senin müziğini paylaşabilirsin ve onu iTunes için "
+"erişilebilir yapabilirsin ve diğer dijital ses erişim protokolü (DAAP) "
+"oyuncularıda erişim  sağlar."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:24
 msgid "Share My Music:"
@@ -6238,7 +6273,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:20
 msgid "Enable iTunes importing:"
-msgstr ""
+msgstr "İTunes ithal etmesini sağla:"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:47
 msgid "Open..."
@@ -6540,7 +6575,7 @@ msgstr "aramayı kapat"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
 msgid "Launch Action"
-msgstr ""
+msgstr "Hareketi başlat"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 msgid "Chat With Host"
@@ -6639,7 +6674,7 @@ msgstr "yapıldı"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:93
 msgid "Junk Rating"
-msgstr ""
+msgstr "Derecelendirmeyi at"
 
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:267
 msgid "Media"
@@ -6648,7 +6683,7 @@ msgstr "Ortam"
 #: gui/com/limegroup/gnutella/gui/search/TableLine.java:681
 msgid ""
 "This is a secure result. No information in this result has been tampered."
-msgstr ""
+msgstr "Bu emniyetli bir sonuçtur. Bu sonuçta hiçbir bilgi tahrip edilmedi."
 
 #: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:157
 msgid "View in Browser..."
@@ -6827,7 +6862,7 @@ msgstr "Kaydedilen Dosyalar Deposunu Görüntüle"
 
 #: gui/com/limegroup/gnutella/gui/tabs/LoggingTab.java:23
 msgid "View Logging Messages"
-msgstr ""
+msgstr "Günlüğe kaydetilmiş mesajları  gör"
 
 #: gui/com/limegroup/gnutella/gui/tabs/MonitorUploadTab.java:35
 msgid "Monitor"

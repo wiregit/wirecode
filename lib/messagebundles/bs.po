@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-08-23 14:59+0000\n"
+"PO-Revision-Date: 2007-12-10 12:13+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1561,7 +1561,7 @@ msgstr "Punjenje sa starim downloadom..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "Provjeravam za Nadogradnje..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Loading Directed Querier..."
@@ -1590,7 +1590,7 @@ msgstr "Priključni menadžer se puni..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:434
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "Čekam Slušaće Mreže..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -1629,7 +1629,7 @@ msgstr "Slike"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "Ne može se prosecuirati loš MAGNET link {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:196
@@ -1844,7 +1844,7 @@ msgstr "Slike"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr ""
+msgstr "Opis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -1864,11 +1864,11 @@ msgstr "Dokumenti"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr ""
+msgstr "Tema"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
@@ -1888,19 +1888,19 @@ msgstr "Promjeni ime"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Izdavač"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "Platforma"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:100
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "Odabrani .torrent fajn može sadržavati nesigurne podatke."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:102
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWire ne može skinuti ovaj .torrent fajl sa ovog URL-a"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -2058,7 +2058,7 @@ msgstr "Kopiraj izvještaj"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:302
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
 msgid "OK"
-msgstr ""
+msgstr "U redu"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -2101,6 +2101,14 @@ msgid ""
 "collection of protocols that is constantly improving -- a testament to the "
 "power of open protocols and open standards."
 msgstr ""
+"Inspirisan LimeWire-ovim gazdom, Markom Gordonom, LimeWire projekt je "
+"colaborativna aplikacija  <a href=\"http://www.limewire.org/\">otvorenog "
+"koda</a> koja uključuje programere iz cijelog svijeta. Kolaborativna priroda "
+"Guntella mreže je također reflektovana na Guntella Developers Forum (GDF), "
+"LimeWire je njihov saradnik. Članovi GDF-a rade svakodnevno da bi Guntella "
+"mrežu unaprijedili i učinili lakšom i pristupačnijom krajnjim korsinicima - "
+"prateći aktuelne programe i projekte mreže otvorenog koda (open source) "
+"zajednice."
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
@@ -2108,6 +2116,8 @@ msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
 msgstr ""
+"LimeWire je također, naravno, rezultat bezbrojnih sati rada LimeWire-ovog "
+"razvojnog tima:"
 
 #. business developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:197
@@ -2122,12 +2132,16 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
+"LimeWire <a href=\"http://www.limewire.com/\">web site</a> i LimeWire "
+"grafički design je rad LimeWire-ovog web tima:"
 
 #. support staff
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:215
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
+"LimeWire PRO pitanja su u potpunosti odgovarana od LimeWire-ovog tima "
+"tehničke podrške:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:223
@@ -2135,6 +2149,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
+"Dodajemo, sljedeći pojedinci su radili na LimeWire-u u prošlosti do prelaska "
+"na druge projekte:"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
@@ -2152,6 +2168,8 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
 msgstr ""
+"LimeWire bi također zahvalio mnogim učesnicima internaciolanizovanog "
+"projekta, kako za aplikaciju LimeWire, tako i za web stranicu."
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:289
@@ -2159,6 +2177,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
+"Nekoliko kolega iz Guntella mreže zaslužuju specijalne pohvale. Kao na "
+"primjer:"
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:310
@@ -2413,7 +2433,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "Prikaži {0} Ekrana"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:227
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -2439,6 +2459,7 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"LimeWire je u nemogućnosti da pronađe licencu za ovaj fajl. Skini ga svakako?"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1405
 #, java-format
@@ -2446,6 +2467,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LemeWire ne može locirati vaš web pretraživač da bi prikazao sljedeću "
+"stranicu: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1424
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1447

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-10-03 18:16+0000\n"
+"PO-Revision-Date: 2007-12-12 16:03+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -861,6 +861,9 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Valed või mittevajalikud seaded võivad põhjustada hulganisti jõudlus ja/või "
+"mälu probleeme. Kui  sa just tead mida sa teed, on kõrgelt soovitataud et "
+"Limewire käsitleb neid seadeid ise."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
@@ -880,7 +883,7 @@ msgstr "Turvalise prügi kinnitus."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Ekspertaalne ketta ligipääs"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:76
 msgid "Internal Error"

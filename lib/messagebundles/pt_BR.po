@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-15 17:04+0000\n"
+"PO-Revision-Date: 2007-12-12 09:43+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1813,7 +1813,7 @@ msgstr "Imagens"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "Impossível processar link MAGNET quebrado {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:196
@@ -2484,6 +2484,11 @@ msgid ""
 "full access to incoming and outgoing connections. To disable this feature, "
 "click 'No'."
 msgstr ""
+"O LimeWire não pode iniciar um Protocolo de Acesso a Áudio Digital (para "
+"compartilhamento de arquivos no iTunes) porque um firewall está bloqueando o "
+"acesso. Para continuar a usar essa opção, clique em 'Sim' e altere suas "
+"configurações de firewall para pemitir total acesso de 'LimeWire.exe' para "
+"conexões de entrada e saída. Para desativar essa opção, clique em 'Não'."
 
 #. *
 #. * Constant for when the user selects the yes button
@@ -2631,7 +2636,7 @@ msgstr "Iniciando sessão"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 msgid "&Browser"
-msgstr ""
+msgstr "&Navegador"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
 #, java-format
@@ -2670,6 +2675,11 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"O LimeWire não conseguiu encontrar uma licensa para esse arquivo. Baixar "
+"assim mesmo?\n"
+"\n"
+"Atenção: O LimeWire não pode monitorar ou controlar o conteúdo da rede "
+"Gnutella. Por favor respeite suas leis de copyright locais."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1405
 #, java-format
@@ -3110,12 +3120,12 @@ msgstr "Pesquisas"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:23
 msgid "My Shared Files"
-msgstr ""
+msgstr "Meus Arquivos Compartilhados"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
 #, java-format
 msgid "View My {0} Shared Files"
-msgstr ""
+msgstr "Ver Meus {0} Arquivos Compartilhados"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:37
 msgid ""
@@ -3180,11 +3190,11 @@ msgstr "O LimeWire detectou um firewall."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:499
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Você não está conectado à Loja LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:502
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Você está conectado à Loja LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:594
 msgid "Connection"
@@ -3286,8 +3296,9 @@ msgid "Show Firewall Status"
 msgstr "Mostrar status do firewall"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:809
+#, fuzzy
 msgid "Show Store Indicator"
-msgstr ""
+msgstr "Mostrar Indicador da Loja"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:825
 msgid "Show Bandwidth Consumption"
@@ -3365,6 +3376,11 @@ msgid ""
 "chance of getting your file! In case a junk result appears to have a lot of "
 "sources, use the 'Junk' button to train LimeWire's junk filter."
 msgstr ""
+"Cansado de downloads que param pela metade? Um dica é escolher resultados "
+"com um número maior na coluna 'N⁰'. O 'N⁰' é a quantidade de lugares na rede "
+"que armazenam esse arquivo. Quanto mais fontes, maior a chance de conseguir "
+"seu arquivo! Caso um arquivo spam tenha muitas fontes, use o botão 'spam' "
+"para treinar o filtro de spam do LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:25
 msgid ""
@@ -3373,6 +3389,10 @@ msgid ""
 "places to download the file and automatically resume downloading if it finds "
 "any matches."
 msgstr ""
+"Quando seus downloads indicam 'São necessárias mais fontes', tente escolher "
+"esse download e clicar 'Encontrar mais fontes'. O LimeWire irá buscar na "
+"rede novos locais para baixar o arquivo e automaticamente continuará o "
+"download se ele encontrar arquivos compatíveis."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:26
 msgid ""
@@ -3380,6 +3400,9 @@ msgid ""
 "the bar in the bottom-left corner will change colors. Once all bars are "
 "green (or blue!), LimeWire has completely connected."
 msgstr ""
+"Quando o LimeWire é iniciado ele tem que se conectar à rede. Nesse período, "
+"a barrra no canto inferior esquerdo muda de cor; Quando todas as barras "
+"estão verdes (ou azuis!), o LimeWire está conectado completamente."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:27
 msgid ""
@@ -3389,6 +3412,11 @@ msgid ""
 "'Download into LimeWire' links, LimeWire will automatically ask if you want "
 "to use the new skin when the download completes."
 msgstr ""
+"Você pode mudar a aparência do LimeWire indo em Exibir &gt; Aplicar Temas e "
+"escolhendo um novo tema. No site do LimeWire há novos temas que podem ser "
+"acessados escolhendo 'Baixar mais temas'. Se você baixar os temas pelos "
+"links 'Download into LimeWire', o LimeWire perguntará se você deseja usar o "
+"novo tema quando o download for completado."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:28
 msgid ""
@@ -3396,6 +3424,9 @@ msgid ""
 "column to sort by is the '#' column, which can put the results that have the "
 "highest chance of downloading at the top of the list."
 msgstr ""
+"Você pode ordenar os resultados da sua busca clicando numa coluna. A coluna "
+"mais útil para ordenar é a '#', que  pode colocar os resultados com maior "
+"chance de download no topo da lista."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:29
 msgid ""
@@ -3404,6 +3435,10 @@ msgid ""
 "stars and a speed of 'Ethernet'. These results have the greatest chance of "
 "completing successfully."
 msgstr ""
+"Quanto mais estrelas um resultado de busca tem, maiores as chances de "
+"completar o download! Alguns resultados podem até aparecer com quatro "
+"estrelas azuis e a velocidade 'Ethernet'. Esses resultados são os que "
+"possuem mais chance de serem completados com sucesso."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:30
 msgid ""
@@ -3413,6 +3448,10 @@ msgid ""
 "that file, and 'X' is the number of people that have successfully uploaded "
 "it."
 msgstr ""
+"Você pode descobrir quantas vezes alguém fez o upload de um arquivo "
+"selecionando a aba 'Biblioteca' e olhando na coluna Upload. A informação é "
+"listada como 'X/Y', sendo 'Y' o número de pessoas que tentaram o upload do "
+"arquivo, e 'X' o número de pessoas que tiveram sucesso no upload."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -3420,12 +3459,17 @@ msgid ""
 "the Library will count how many times LimeWire has returned a result from "
 "someone searching for that file."
 msgstr ""
+"Curioso para saber quantas pessoas estão buscando os seus arquivos? A coluna "
+"'acessos' na Biblioteca conta quantas vezes o LimeWire retornou um resultado "
+"de alguém procurando pelo arquivo."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:32
 msgid ""
 "It helps the network if you keep your LimeWire running. Others will connect "
 "to the network easier and searches will perform better. "
 msgstr ""
+"Ajuda a rede se você deixar seu LimeWire rodando. Outras pessoas poderão se "
+"conectar mais facilmente e as buscas serão feitas melhor. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
 msgid ""
@@ -3440,6 +3484,8 @@ msgid ""
 "Want to open this Tip Of The Day dialog after you've closed it? Go to the "
 "Help menu and choose 'Tip of the Day'."
 msgstr ""
+"Quer abrir essa janela de Dica do Dia depois de ter fechado? Vá no menu em "
+"ajuda e escolha 'Dica do Dia'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
 msgid ""
@@ -3457,6 +3503,10 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Precisa de ajuda? Visite <a href=\"{0}\">nosso fórum</a> e veja se outros já "
+"responderam a sua pergunta! Você pode ainda ver o <a href=\"{1}\">FAQ</a> "
+"para respostas a perguntas freqüentes ou o <a href=\"{2}\">Guia do "
+"Usuário</a> para mais informações"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -3465,6 +3515,10 @@ msgid ""
 "resume downloading and click resume. LimeWire will automatically search for "
 "that file and begin downloading it again."
 msgstr ""
+"Acidentalmente apagou seu download? Clique na aba Biblioteca, escolha a "
+"pasta Arquivos Incompletos, e selecione o aquivo que você gostaria de "
+"continuar a baixar e clique Retomar. O LimeWire irá automaticamente procurar "
+"o arquivo e começar a baixá-lo novamente."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
@@ -3472,6 +3526,8 @@ msgid ""
 "Do you have a tip for effectively using LimeWire? Add it to <a "
 "href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
+"Você tem uma dia para o uso mais efetivo do LimeWire? Adicione-a a <a "
+"href=\"{0}\">the wiki</a> e ela pode ser tornar uma Dica do Dia!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
 msgid ""
@@ -3479,6 +3535,9 @@ msgid ""
 "file again. LimeWire will automatically restart the download if it finds any "
 "matching results."
 msgstr ""
+"Você pode iniciar downloads que dizem 'Aguardando Fontes' procurando o "
+"arquivo novamente. O LimeWire irá reiniciar o download automaticamente se "
+"ele encontrar resultados compatíveis."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:40
 #, java-format
@@ -3487,6 +3546,9 @@ msgid ""
 "on LimeWire's <a href=\"{0}\">message boards</a> and it may be added to "
 "future versions!"
 msgstr ""
+"Você tem alguma opção legal que gostaria de ver colocada no LimeWire? Sugira-"
+"a no <a href=\"{0}\">fórum</a> do LimeWire e ela pode ser colocada nas "
+"versões futuras!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:41
 #, java-format
@@ -3503,6 +3565,8 @@ msgid ""
 "Want to know more about the development of LimeWire? Visit <a "
 "href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
+"Quer saber mais sobre o desenvolvimento do LimeWire? Visite <a "
+"href=\"{0}\">Site de código-aberto do LimeWire</a> e confira!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
 #, fuzzy
@@ -3519,12 +3583,18 @@ msgid ""
 "Connections tab from View &gt; Show/Hide, and take a look at LimeWire's "
 "connections."
 msgstr ""
+"Curioso em saber em quais servidores o LimeWire está conectado ou se "
+"conectando? Ative a aba Conexões em Exibir &gt; Mostrar/Ocultar, e veja as "
+"conexões do LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:45
 msgid ""
 "You can chat with other people who are running LimeWire. Choose any download "
 "or search result that has a smiley in the Chat column and then click 'Chat'."
 msgstr ""
+"Você pode conversar com outras pessoas que estão rodando o LimeWire. Escolha "
+"qualquer download ou resultado que tenha uma carinha na coluna na coluna "
+"'Chat' e então clique em 'Chat'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:46
 #, java-format

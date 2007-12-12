@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-26 20:00+0000\n"
+"PO-Revision-Date: 2007-12-10 23:38+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -370,91 +370,89 @@ msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr "Niestety, LimeWire nie mógł ponowić ściągania starych plików."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:304
-#, fuzzy
 msgid "Loading TLS Encryption..."
-msgstr "Ładowanie TLS Encryption..."
+msgstr "Ładowanie: Szyfrowanie TLS"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:316
 msgid "Loading Safe Content Management..."
-msgstr "Ładowanie Safe Content Management..."
+msgstr "Ładowanie: Zarządzania stabilnego połączenia"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:321
 msgid "Loading Message Router..."
-msgstr "Ładownie Message Router..."
+msgstr "Ładownia rutera wiadomości"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:326
 msgid "Loading Upload Management..."
-msgstr "Ładowanie Upload Management..."
+msgstr "Ładowanie: Zarządzanie uploadu"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
 msgid "Loading Connection Listener..."
-msgstr "Ładowanie Connection Listener..."
+msgstr "Ładowanie: Nasłuch połączeń"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:345
 msgid "Loading Connection Management..."
-msgstr "Ładownie Connection Management..."
+msgstr "Ładowanie: Zarządzanie połączeniami"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:350
-#, fuzzy
 msgid "Loading Download Management..."
-msgstr "Ładowanie Download Management..."
+msgstr "Ładowanie: Zarządzanie downloadem"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:356
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Ładowanie Ultrapeer/DHT Management..."
+msgstr "Ładowanie: Zarządzanie Ultraperem/DHT"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:361
 msgid "Locating Peers..."
-msgstr "Ustalanie Peers..."
+msgstr "Lokalizacja Peerów..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:377
 msgid "Loading Shared Files..."
-msgstr "Ładowanie Shared Files..."
+msgstr "Ładowanie: Udostępnione pliki"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:382
 msgid "Loading bittorrent Management..."
-msgstr "Ładowanie bittorrent Management..."
+msgstr "Ładowanie: Zarządzanie BitTorrentem"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:388
 msgid "Loading Old Downloads..."
-msgstr "Ładowanie poprzednich ściągnięć..."
+msgstr "Ładowanie: Stare pobrania"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Checking for Updates..."
-msgstr "Sprawdzam aktualizacje..."
+msgstr "Sprawdzanie aktualizacji..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Loading Directed Querier..."
-msgstr "Ładowanie Directed Querier..."
+msgstr "Ładowanie: Bezpośrednie zapytania"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 msgid "Loading Magnet Listener..."
-msgstr "Ładowanie MAGNET-listener..."
+msgstr "Ładowanie: Nasłuch Magneta"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:414
 msgid "Loading Peer Listener..."
-msgstr "Ładowanie Peer Listener..."
+msgstr "Ładowanie: Nasłuch Peerów"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:419
 msgid "Loading Stale Connection Management..."
-msgstr "Ładowanie Stale Connection Management..."
+msgstr "Ładowanie: Zarządzanie stabilnymi połączeniami"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:424
 msgid "Loading Saved Files..."
-msgstr "Ładowanie zapisanych plików..."
+msgstr "Ładowanie: Zapisane pliki"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:429
 msgid "Loading Spam Management..."
-msgstr "Ładowanie Spam Management..."
+msgstr "Ładowanie: Zarządzanie połączeniem"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:434
 msgid "Loading Network Listeners..."
-msgstr "Ładowanie Network Listeners..."
+msgstr "Ładowanie: Nasłuch sieci"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
 msgid "All Types"
-msgstr "Dowolne"
+msgstr "Wszystkie Typy"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Documents"
@@ -479,7 +477,7 @@ msgstr "Filmy"
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
-msgstr "Obrazki"
+msgstr "Pliki graficzne"
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:190
@@ -520,9 +518,8 @@ msgstr "Wesprzyj rozwój systemu peer-to-peer LimeWire'a. Nabądź wersję PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
-#, fuzzy
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Zakup LimeWire PRO by pomóc nam tworzyć szybsze połączenia."
+msgstr "Kup LimeWire Pro aby pomóc nam tworzyć szybsze downloady"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
@@ -560,9 +557,8 @@ msgstr "Rozwijanie LimeWire kosztuje prawdziwe pieniądze. Kup wersję PRO."
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:269
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
-#, fuzzy
 msgid "Title"
-msgstr "&Plik"
+msgstr "Tytuł"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
@@ -576,9 +572,8 @@ msgstr "Artysta"
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:273
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
-#, fuzzy
 msgid "Album"
-msgstr "O programie"
+msgstr "Album"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:275
@@ -598,9 +593,8 @@ msgstr "Ścieżka"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:115
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:58
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:80
-#, fuzzy
 msgid "Type"
-msgstr "Typ:"
+msgstr "Typ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
@@ -613,9 +607,8 @@ msgstr "Czas trwania"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:279
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
-#, fuzzy
 msgid "Year"
-msgstr "Wyczysc"
+msgstr "Rok"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
@@ -631,21 +624,18 @@ msgstr "Rozdzielczo??"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
-#, fuzzy
 msgid "Comments"
-msgstr "Dokumenty"
+msgstr "Komentarze"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
-#, fuzzy
 msgid "Action"
-msgstr "Lokalizacja"
+msgstr "Akcja"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
-#, fuzzy
 msgid "Copyright"
-msgstr "Kopiuj"
+msgstr "Prawa autorskie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -664,9 +654,8 @@ msgid "Producer"
 msgstr "Producent"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
-#, fuzzy
 msgid "Studio"
-msgstr "Stop"
+msgstr "Studio"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 #, fuzzy
@@ -970,6 +959,14 @@ msgid ""
 "collection of protocols that is constantly improving -- a testament to the "
 "power of open protocols and open standards."
 msgstr ""
+"Zainspirowany przez właściciela LimeWire Marka Gordona projekt LimeWire jest "
+"w spół opracowywanym <a href=\"http://www.limewire.org/\">wysiłkiem "
+"otwartego źródła</a> zrzeszającym programistów i naukowców z całego świata. "
+"Współtwórcza natura Gnutelli jest również reflektowana na Gnutella "
+"Developers Forum (GDF), którego LimeWire jest częścią. Członkowie GDF "
+"pracują w okopach każdego dnia aby zrobić z Gnutelli prawdziwie innowacyjną "
+"kolekcję protokołów, które są ciągle udoskonalane - testament mocy otwartych "
+"protokołów i standardów"
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
@@ -986,6 +983,8 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
+"Poza scenami biznesowej strategii i codziennych spraw obsługiwanych przez "
+"deweloperów biznesowych LimeWire:"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:207
@@ -1002,6 +1001,8 @@ msgstr ""
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
+"Pytania dotyczące LimeWire Pro są obowiązkowo odpowiadanie przez techniczny "
+"support LimeWire:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:223
@@ -1009,6 +1010,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
+"W dodatku następujące osoby pracowały w zespole LimeWire w przeszłości, ale "
+"przeniosły się do innych projektów:"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
@@ -1018,6 +1021,10 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
+"Współtwórcy otwartego źródła LimeWire dostarczyli istotny kod i wiele łatek, "
+"pomysłów, badań, itp. do projektu. Ci wymienieni poniżej dostarczyli albo "
+"pisany kod, który dystrybuowany jest z każdą wersją LimeWire, albo "
+"zidentyfikowali poważne błędy w kodzie, albo jedno i drugie:"
 
 #. internationalization contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:285
@@ -1026,6 +1033,8 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
 msgstr ""
+"LimeWire chciało by również podziękować wielu współtwórcom projektu "
+"tłumaczenia, zarówno samej aplikacji, jak i  strony LimeWire"
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:289
@@ -1033,6 +1042,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
+"Wielu kolegów w wspólnocie Gnutelli zasługuje na specjalne podziękowania. Są "
+"to między innymi:"
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:310
@@ -1041,6 +1052,9 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
+"Na koniec LimeWire chciało by  rozszerzyć swoje szczere podziękowania do "
+"tych twórców, którzy dostarczyli swoje pomysły do projektu. Bez użytkowników "
+"sieć LimeWire by nie istniała."
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:315
 msgid ""
@@ -1105,7 +1119,7 @@ msgstr "Co nowego"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:122
 msgid "Creative Commons"
-msgstr ""
+msgstr "Kreatywne ogóły"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:182
 msgid ""
@@ -1113,6 +1127,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
+"LimeWire napotkał błąd w Cyfrowym Protokole Dźwięku (do współdzielenia "
+"plików w iTunes). Ta funkcja zostanie wyłączona. Można ją z powrotem włączyć "
+"pod iTunes -> Współdzielenie"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:326
 msgid ""

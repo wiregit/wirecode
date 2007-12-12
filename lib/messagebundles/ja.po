@@ -10,14 +10,14 @@ msgstr ""
 "Project-Id-Version: ja\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-24 21:46+0000\n"
+"PO-Revision-Date: 2007-12-12 09:18+0000\n"
 "Last-Translator: Steffen Pingel <steffenp@gmx.de>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1338,9 +1338,8 @@ msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr "残念ながら、前回のダウンロードを再開できません。"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:304
-#, fuzzy
 msgid "Loading TLS Encryption..."
-msgstr "TLS暗号化システムを読み込み中…"
+msgstr "TLS 暗号化エンジンを読み込み中..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:316
 #, fuzzy
@@ -1419,7 +1418,7 @@ msgstr "保存したファイルを読み込んでいます…"
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:429
 #, fuzzy
 msgid "Loading Spam Management..."
-msgstr "接続管理をロード中..."
+msgstr "スパム・マネージメントを読み込み中・・・"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:434
 msgid "Loading Network Listeners..."
@@ -1448,7 +1447,6 @@ msgstr "オーディオ"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
-#, fuzzy
 msgid "Video"
 msgstr "ビデオ"
 
@@ -1459,9 +1457,9 @@ msgstr "イメージ"
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:190
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
-#, java-format
+#, fuzzy, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "次の不良MAGNETリンクを処理できませんでした。{0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:196
@@ -1474,7 +1472,7 @@ msgstr "マグネット・リンクに使われているURLが無効。ファイ
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
 #, fuzzy, java-format
 msgid "You have already downloaded {0}"
-msgstr "このファイルは、\"{0}\"へ既にダウンロードを開始しています。"
+msgstr "このファイルはすでにダウンロードが完了しています。 {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
 #, fuzzy, java-format
@@ -2102,6 +2100,9 @@ msgid ""
 "full access to incoming and outgoing connections. To disable this feature, "
 "click 'No'."
 msgstr ""
+"ファイアウォールの防御機能によりデジタルオーディオプロトコール（iTunesファイル共有のため）を起動できませんでした。この機能を続行するためには、「はい"
+"」を選択し、ファイアウォールの「LimeWire.exe」にかかるアップ/ダウンロード制限を解除してください。この機能を利用しない場合は「いいえ」を選択し"
+"てください。"
 
 #. *
 #. * Constant for when the user selects the yes button
@@ -2248,12 +2249,12 @@ msgstr "ロード中"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 msgid "&Browser"
-msgstr ""
+msgstr "＆ブラウザー"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "{0}スクリーンを表示する"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:227
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -2284,6 +2285,8 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"LimeWireはこのファイルのライセンスを見つけることができませんでした。それでもダウンロードを続けますか？\n"
+"注：LimeWireはグヌーテラ・ネットワークのすべての活動を管理・監視できません。お住まいの国/地域の著作権法を尊重してください。"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1405
 #, java-format
@@ -2306,6 +2309,9 @@ msgid ""
 "\n"
 "Executed command: {0}."
 msgstr ""
+"セキュリティ上の理由から、指定されたファイルを開けません。\n"
+"\n"
+"次のコマンドが実行されました: {0}"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1429
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1452
@@ -2716,9 +2722,9 @@ msgid "My Shared Files"
 msgstr "私の共有されるファイル"
 
 #: gui/com/limegroup/gnutella/gui/MySharedFilesButton.java:44
-#, java-format
+#, fuzzy, java-format
 msgid "View My {0} Shared Files"
-msgstr ""
+msgstr "自分の{0}個の共有ファイルを見る"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:37
 msgid ""
@@ -2781,11 +2787,11 @@ msgstr "LimeWireはファイアウォールを検知しました"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:499
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "LimeWire Storeに接続していません。"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:502
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "LimeWire Storeに接続中です。"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:594
 msgid "Connection"
@@ -2907,7 +2913,7 @@ msgstr[0] "あなたは、｛0｝ファイルを共有しています"
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] "あなたは{0} ファイルを共有しています(読み込み中てん)"
+msgstr[0] "あなたは{0} ファイルを共有しています(読み込み中...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:980
 msgid "Downloads:"
@@ -3225,19 +3231,25 @@ msgstr ""
 "めに、<a href=\"{0}\">www.limewire.org</a> を訪問してください。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
+#, fuzzy
 msgid ""
 "Bombarded with nonsense search results? Select the search result, and then "
 "click the Junk button. As you mark search results as Junk or Not Junk, "
 "LimeWire learns what to block and what not to block. After a short training "
 "period, LimeWire automatically blocks most junk results. Try it!"
 msgstr ""
+"大量の意味のない検索結果に悩まされていませんか？不要な検索結果を選択し、ごみ箱（＝Junk）ボタンを押しましょう。ごみ（Junk）をマークすることによって"
+"LimeWireはごみ（Junk）とごみ（Junk）でないものを覚えていきます。しばらくするとほとんどのごみ（Junk）を自動的にブロックしてくれるように"
+"なりますよ！試してみてください。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
+#, fuzzy
 msgid ""
 "Small variations in the search title will still work. For example, if your "
 "buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
 "file will still be found. "
 msgstr ""
+"多少の検索タイトルの言葉違いは問題ありません。例えば「Limers」を探していて「The Limers」と入力してしまったとしてもきちんと見つかります。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:56
 #, fuzzy
@@ -3263,11 +3275,14 @@ msgid ""
 msgstr "デスクトップ上のファイルを共有しますか？　フォルダ又はファイルをデスクトップからLimeWireLibraryへドラッグして下さい。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
+#, fuzzy
 msgid ""
 "Search results in LimeWire come from other users like you. Search results "
 "marked with a lock icon in the Quality column are official communications "
 "from Lime Wire, LLC."
 msgstr ""
+"LimeWireの検索結果はあなたを含めユーザーからきています。クオリティ欄に鍵のアイコンが表示されている検索結果はLimeWire, "
+"LLCからの正式な情報を意味しています。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:60
 msgid ""
@@ -3321,6 +3336,9 @@ msgid ""
 "click the Publish button. Visit the <a href=\"{0}\">creative commons "
 "website</a> for more information."
 msgstr ""
+"Gnutella ネットワーク上で、クリエイティブ・コモンズ・ライセンスの下、自分の作品を公開することが出来ます。ライブラリの .ogg または "
+".mp3 ファイルを選択し、Publish ボタンをクリックしてください。詳しい情報は <a href=\"{0}\">クリエイティブ・コモンズ "
+"Website</a> で得られます。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:66
 msgid ""
@@ -3377,27 +3395,36 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
+#, fuzzy
 msgid ""
 "LimeWire autocompletes what you type in the search box. To prevent "
 "autocompletion, open the Options window. Under View, choose Autocompletion. "
 "Uncheck the box Enable Autocompletion of Text Fields, and click OK."
 msgstr ""
+"LimeWireではデフォルトでオートコンプリート機能が有効になっています。この機能を無効にするには「ツール」→「オプション」→「View」の中の「テキス"
+"トのオートコンプリートを有効にする」ボックスのチェックを外してください。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
+#, fuzzy
 msgid ""
 "While LimeWire is running, your audio and video files are automatically "
 "shared with iTunes and other programs that support the DAAP protocol. You "
 "can disable this sharing in the Options window by going to iTunes &gt; "
 "Sharing."
 msgstr ""
+"LimeWire起動中は自動的にiTunes等DAAPプロトコールを搭載するプログラムと音声及び動画ファイルが共有されています。これは「ツール」→「オプシ"
+"ョン」→iTunesの中のSharingで変更できます。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:74
+#, fuzzy
 msgid ""
 "Do you connect to the Internet both wired and wirelessly? At the same time? "
 "Just want LimeWire to use one of the connections? Piece of cake! You can "
 "change your network interface by going to Tools &gt; Options &gt; Advanced "
 "&gt; Network Interface."
 msgstr ""
+"インターネットへの接続は複数回線で行っていますか？同時に？LimeWireの利用回線を指定したいですか？簡単です！ネットワークへの接続は「ツール」→「オプ"
+"ション」→「Advanced」の中の「Network Interface」で変更できます。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:75
 msgid ""
@@ -3417,11 +3444,14 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:77
+#, fuzzy
 msgid ""
 "Unlike other peer-to-peer file-sharing programs, LimeWire can transfer files "
 "even if both parties are behind a firewall. You don't have to do anything "
 "extra because it happens automatically!"
 msgstr ""
+"他のピア・ツー・ピア　ファイル共有プログラムと違ってLimeWireではファイアウォールを利用していてもファイル転送が可能です。特別な設定をしなくても自動"
+"的に行ってくれます。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
 msgid ""
@@ -3434,11 +3464,14 @@ msgstr ""
 "ireは自動的にそれ自体を例外のリストに加えます。これらのことは、あなたの経験をできるだけなめらかにするために、バックグラウンドで実行されます。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:79
+#, fuzzy
 msgid ""
 "LimeWire uses a technology called DHT to help users better find rare files. "
 "In order to be eligible for inclusion in the DHT, make sure you are not "
 "behind a firewall, and leave LimeWire running for as long as possible."
 msgstr ""
+"LimeWireではDHTと呼ばれる技術を使って珍しいファイルも見つけるようにお手伝いします。この機能を発揮するには、ファイアウォール機能を解除し、なるべ"
+"く長い間LimeWireを起動するようにしてください。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
 #, fuzzy
@@ -3467,10 +3500,11 @@ msgstr ""
 "に行って、活動しているLimeWireのソース・コードを見てください! (心臓の気絶のためにではない)"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
+#, fuzzy
 msgid ""
 "Wondering if someone browsed your shared library? Go to View &gt; Show/Hide "
 "&gt; Logging to see the recent activity. "
-msgstr ""
+msgstr "自分の共有ライブラリを誰かが覗いたか知りたいですか？　「表示」→「表示/隠す」の中の「Logging」で参照履歴が確認できます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:84
 #, fuzzy
@@ -3587,12 +3621,15 @@ msgstr ""
 "ラッグすることによって順番を替えることができます。"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:107
+#, fuzzy
 msgid ""
 "You can tell LimeWire which downloads to start next. Right-click on the "
 "column headers in the download area and check the 'Priority' column. Select "
 "the download you want to start next and click the up arrow until it's at the "
 "top!"
 msgstr ""
+"どのダウンロードを次にはじめるか指定することができます。ダウンロード・リストの中で右クリックし、プライオリティ（優先）の項目を選び、次にダウンロードを開始"
+"したい品目を選択し、その品目が一番上にくるまで「やじるし」をクリックしましょう！"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
 msgid ""
@@ -3624,6 +3661,9 @@ msgid ""
 "TCP). Go to Tools &gt; Options &gt; Advanced &gt; Firewall Config to find "
 "the port number. "
 msgstr ""
+"Gnutella ネットワークに接続でない場合: もしファイアーウォールを利用している場合は、LimeWire が利用するポート(上り/下り, "
+"UDP/TCP)を開けるよう設定してください。ポート番号を調べるには、ツール &gt; オプション &gt; 上級 &gt; ファイアーウォール構成 "
+"を開いてください。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:112
 msgid ""
@@ -3632,6 +3672,8 @@ msgid ""
 "download in progress by right-clicking the download and choosing Change File "
 "Location. "
 msgstr ""
+"ダウンロードファイルの保存先を個別に指定するには: 検索結果を右クリックして、Download As "
+"を選択します。また、ダウンロード中であっても、右クリックして Change File Location を選択することで、保存場所を変更できます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:113
 msgid ""
@@ -3662,6 +3704,8 @@ msgid ""
 "stricter. Adjust that and more by going to Tools &gt; Options &gt; Filters "
 "&gt; Junk. "
 msgstr ""
+"ジャンクフィルタの強度を高めに設定し、検索結果を絞り込むには: ツール &gt; オプション &gt; フィルタ &gt; ジャンク "
+"を開き、フィルタ強度を上げる。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:117
 msgid ""
@@ -3669,6 +3713,8 @@ msgid ""
 "Feedback on new features is always welcomed and appreciated! Go to Tools "
 "&gt; Options &gt; Updates to get notified of beta releases. "
 msgstr ""
+"リリース後すぐに新機能を試すには: 我々は新機能へのフィードバックを常に歓迎し、感謝いたします。ツール &gt; オプション &gt; アップデート "
+"を開き、\"ベータ・リリース\" を選択してください。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:127
 msgid ""
@@ -3842,12 +3888,16 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:146
+#, fuzzy
 msgid ""
 "You can save individual downloads to custom locations. Control-click a "
 "search result and choose Download As. You can even change the location of a "
 "download in progress by control-clicking the download and choosing Change "
 "File Location. "
 msgstr ""
+"各ダウンロードを特定の場所に保存することもできます。検索結果の中で選んだ品目を右クリックし「Dowload "
+"As」を選択し、保存先を指定してください。ダウンロード中のファイルも同様に右クリックし「Changing File "
+"Location」を選択することで保存先を変更することができます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:147
 msgid ""
@@ -3857,47 +3907,67 @@ msgid ""
 "arrow to increase the priority. LimeWire attempts to download files of "
 "higher priority first. "
 msgstr ""
+"特定のファイルを他のものよりも早くダウンロードするには: ダウンロード・セクションの列ヘッダーを右クリックして、\"優先順位\" "
+"を選択し、キューの上矢印をクリックすることで優先順位を上げられます。LimeWire は、優先順位が高いファイルからダウンロードを試行します。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:148
+#, fuzzy
 msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "control-click it and choose Stop Sharing File. "
 msgstr ""
+"共有したくないファイルをダウンロードしましたか？このような場合、ライブラリで右クリックし「Stop Sharing "
+"File」を選択することで共有をストップすることができます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:149
+#, fuzzy
 msgid ""
 "LimeWire's Library is a file manager, not just an MP3 Playlist. That means "
 "that when you delete a file from the Library, you have the option to either "
 "permanently delete the file from your computer or move it to the Trash. "
 msgstr ""
+"LimeWireのライブラリでは再生だけでなく、ファイルを管理することもできます。例えば、ライブラリからファイルを削除する場合、パソコン上から完全にファイ"
+"ルを消去するのか、ごみ箱に移すのか選択することができます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:150
+#, fuzzy
 msgid ""
 "Want to play music in your default media player instead of in LimeWire? "
 "Control-click the LimeWire status bar and deselect 'Show Media Player'. "
 msgstr ""
+"音楽をLimeWireではなくいつもご利用のメディア・プレーヤーで再生したいですか？下部のLimeWireステータスバーで右クリックし「Show "
+"Media Player」のチェックを外してください。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:151
+#, fuzzy
 msgid ""
 "Did you know you can save different types of files, such as audio, video, or "
 "images, in different folders on your computer automatically? Just go to "
 "LimeWire &gt; Preferences &gt; Saving to choose the location for each type "
 "of file. "
 msgstr ""
+"オーディオ、ビデオ、イメージ等異なる種類のファイルをそれぞれ違うフォルダに自動的に保存できることをご存知でしたか？「ツール」→「オプション」→「Savin"
+"g」の「Saving」の中でファイルの種類毎に保存先を指定することができます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:152
+#, fuzzy
 msgid ""
 "Make LimeWire's Junk filter block more results by making the filter "
 "stricter. Adjust that and more by going to LimeWire &gt; Preferences &gt; "
 "Filters &gt; Junk. "
 msgstr ""
+"Junkフィルターの機能を強化することで検索結果のJunkを減らすことができます。「ツール」→「オプション」→「Filters」の中でJunkをはじめ、フ"
+"ィルターの設定を変更できます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:153
+#, fuzzy
 msgid ""
 "Do you like trying out new product features as soon as they are released? "
 "Feedback on new features is always welcomed and appreciated! Go to LimeWire "
 "&gt; Preferences &gt; Updates to get notified of beta releases. "
 msgstr ""
+"新リリースをいち早く試してみたいですか？新しい機能へのご意見は大歓迎です！「ツール」→「オプション」→「Updates」ではLimeWireからの通知を設"
+"定することができます。「ベータ版」をお選びいただくとベータ版がリリースされ次第通知します。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:162
 msgid ""
@@ -3906,10 +3976,13 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:163
+#, fuzzy
 msgid ""
 "Want to play music in your default media player instead of in LimeWire? "
 "Right-click the LimeWire status bar and deselect 'Show Media Player'. "
 msgstr ""
+"ご自身のデフォルト音楽プレーヤーで音楽を再生したいですか？LimeWireのステータスバーで右クリックし「Show Media "
+"Player」のチェックを外してください。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:164
 msgid ""
@@ -3917,6 +3990,8 @@ msgid ""
 "highlight the file and click 'Explore'. LimeWire will open that folder in "
 "the Explorer. "
 msgstr ""
+"共有ファイルがどこにあるか確認するには: "
+"ライブラリを開き、ファイルを反転させて、\"参照\"をクリックしてください。エクスプローラでそのフォルダが開かれます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:165
 msgid ""
@@ -3926,6 +4001,9 @@ msgid ""
 "will warn you. To share a single file instead of the whole folder, just drag "
 "that file to LimeWire's Library. "
 msgstr ""
+"税務書類やパスワードなどの機密情報を共有しないように気をつけてください。一般的なユーザがそうしたデータを保存するフォルダ "
+"(マイドキュメント、デスクトップ、Program Files など) を共有しようとすると、LimeWire "
+"は警告します。フォルダごとではなく、単一のファイルを共有するには、LimeWire のライブラリにそのファイルをドラッグしてください。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:166
 msgid ""
@@ -3937,12 +4015,15 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:167
+#, fuzzy
 msgid ""
 "LimeWire's Library is a file manager, not just an MP3 Playlist. That means "
 "that when you delete a file from the Library, you have the option to either "
 "permanently delete the file from your computer or move it to the Recycle "
 "Bin. "
 msgstr ""
+"LimeWireのライブラリはMP3の再生リストだけではなく、ファイル管理機能も有しています。ライブラリからファイルを削除する際は、パソコン上から完全にフ"
+"ァイルを消去するのかごみ箱に移すのか選択することができます。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
 msgid ""
@@ -3973,6 +4054,8 @@ msgid ""
 "Right-click the LimeWire status bar and deselect 'Show Media Player'. Then "
 "go to Tools &gt; Options &gt; Helper Apps to set the program of your choice. "
 msgstr ""
+"LimeWire 以外の、任意のメディア・プレイヤーで音楽を再生するには: ステータスバーを右クリックして、 \"メディア・プレイヤー\" "
+"の選択を解除してください。次に、ツール &gt; オプション &gt; 補助アプリケーション を開き、プログラムを指定してください。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:196
 msgid "Thank you for supporting LimeWire! We hope you enjoy LimeWire PRO. "
@@ -3995,10 +4078,11 @@ msgstr ""
 "href=\"{0}\">ライムワイヤーPRO</a>のご購入をお願いします。 "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:207
+#, fuzzy
 msgid ""
 "The spinning lime in the top-right corner of LimeWire indicates that a "
 "search is in progress. "
-msgstr ""
+msgstr "右上のライムが回転中は検索中であることを示しています。 "
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:36
 msgid "New Version Available!"
@@ -4150,16 +4234,19 @@ msgid "Disconnect from the Network"
 msgstr "ネットワークを切断する"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:108
+#, fuzzy
 msgid "O&pen Magnet or Torrent"
-msgstr ""
+msgstr "MagnetまたはTorrentを開く"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:109
+#, fuzzy
 msgid "Opens a magnet link or torrent file"
-msgstr ""
+msgstr "MagnetリンクまたはTorrentファイルを開く"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:133
+#, fuzzy
 msgid "Open Magnet or Torrent"
-msgstr ""
+msgstr "MagnetまたはTorrentを開く"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:166
 msgid ""
@@ -4183,7 +4270,7 @@ msgstr "ブラウザ"
 msgid ""
 "LimeWire cannot download this address. Make sure you typed it correctly, and "
 "then try again."
-msgstr ""
+msgstr "このアドレスはダウンロードできません。打ち間違えがないか確認のうえ、再試行してください。"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:332
 msgid "&Close"
@@ -4464,7 +4551,7 @@ msgstr "不良"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:390
 msgid "Use TLS:"
-msgstr ""
+msgstr "TLS を使う:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:26
 msgid "Peer"
@@ -4478,12 +4565,13 @@ msgstr "0.6"
 msgid ""
 "You dropped the following files/folders on LimeWire, please select the ones "
 "you would like to share."
-msgstr ""
+msgstr "次のファイル／フォルダをLimeWireにドロップしました。共有したいものを選んでください。"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:94
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:259
+#, fuzzy
 msgid "All folders you select will also have their subfolders shared."
-msgstr ""
+msgstr "選択したフォルダのサブフォルダも共有されます。"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:99
 #, fuzzy
@@ -4491,8 +4579,9 @@ msgid "Share Dropped Files?"
 msgstr "共有ファイル"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:115
+#, fuzzy
 msgid "Yes, Try Again"
-msgstr ""
+msgstr "もう一度試してみよう"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:116
 #, fuzzy
@@ -4505,10 +4594,11 @@ msgid "Do not show this message again."
 msgstr "今後このメッセージを表示しない"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:122
+#, fuzzy
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
 "try again?"
-msgstr ""
+msgstr "「OK」を選択しましたが共有ファイルをひとつも選択していません。やり直しますか？"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadButtons.java:49
 msgid "Queue"
@@ -4521,9 +4611,9 @@ msgid "Queued"
 msgstr "待ち行列"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:69
-#, java-format
+#, fuzzy, java-format
 msgid "Connecting ({0} hosts tried)..."
-msgstr ""
+msgstr "{0}のホストに接続中・・・"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:75
 msgid "Waiting On Busy Hosts"
@@ -4599,7 +4689,7 @@ msgstr "一時停止"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:170
 msgid "Content Removed"
-msgstr ""
+msgstr "コンテンツは削除されました"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:174
 #, fuzzy
@@ -4685,7 +4775,7 @@ msgstr "ソースを検索中..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:269
 msgid "LimeWire cannot download this torrent.  The tracker responded"
-msgstr ""
+msgstr "この torrent をダウンロードできません。トラッカーはレスポンスを返しました"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:359
 msgid "Priority"
@@ -4731,7 +4821,7 @@ msgstr "速度："
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:962
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
 msgid "BitTorrent"
-msgstr ""
+msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1023
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:860
@@ -4836,7 +4926,7 @@ msgstr "タイトル付きの新しいスキンをダウンロードした{0}\"�
 msgid ""
 "LimeWire was unable to load the torrent file \"{0}\", - it may be malformed "
 "or LimeWire does not have permission to access this file."
-msgstr ""
+msgstr "torrent ファイル \"{0}\" をロードできません。ファイルが不正か、アクセス権限が無い可能性があります。"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:614
 msgid "Choose Save Location"
@@ -4953,11 +5043,11 @@ msgstr "ダウンロードした最後のファイル名を編集する"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:128
 msgid "Always Save As..."
-msgstr ""
+msgstr "常に次のように保存する"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:130
 msgid "Always Append (#)"
-msgstr ""
+msgstr "常に連番を追加"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:132
 #, fuzzy
@@ -5011,7 +5101,7 @@ msgstr "取りこぼし (入/出)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:365
 msgid "Appends (#) to filename"
-msgstr ""
+msgstr "常にファイル名に連番を追加"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:379
 msgid "Cancel the Download"
@@ -5063,7 +5153,7 @@ msgstr "アクション："
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "File & Protocol Associations"
-msgstr ""
+msgstr "ファイルとプロトコルの関連づけ"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "What type of resources should LimeWire open?"
@@ -5072,7 +5162,7 @@ msgstr "LimeWireは、どんなタイプの資源を開けなければなりま�
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:65
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:69
 msgid "What should LimeWire do with the selected associations on startup?"
-msgstr ""
+msgstr "起動時に選択された関連づけに対してどの処理を行いますか?"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:67
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:71
@@ -5149,22 +5239,27 @@ msgid "Choose Language:"
 msgstr "言語を変更"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:59
+#, fuzzy
 msgid "Save Folder and Shared Folders"
-msgstr ""
+msgstr "フォルダと共有フォルダを保存する"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:72
+#, fuzzy
 msgid ""
 "Please choose a folder where you would like your files to be downloaded. You "
 "can also choose folders you would like to share with other users running "
 "LimeWire."
-msgstr ""
+msgstr "ダウンロード先のフォルダを選択してください。また、他のLimeWireユーザーと共有するフォルダ（複数可）も選択してください。"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:74
+#, fuzzy
 msgid ""
 "LimeWire now downloads files to a new, different, directory.  Please confirm "
 "the folder where you would like your files to be downloaded. You can also "
 "choose folders you would like to share with other users running LimeWire."
 msgstr ""
+"LimeWireのダウンロードのディレクトリが変更になりました。新しいダウンロード先のフォルダを指定してください。また、他のLimeWireユーザーと共有"
+"するフォルダ（複数可）も選択できかす。"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
@@ -5188,17 +5283,17 @@ msgid ""
 msgstr "LimeWireは指定したフォルダでファイル保存不可。別フォルダを指定。"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:174
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
 "already exists."
-msgstr ""
+msgstr "既に同じ名前のフォルダが存在するため、デフォルトの共有フォルダ{0}を作成することができませんでした。"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:178
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
-msgstr ""
+msgstr "指定されたフォルダは共有できないため、デフォルトの共有フォルダ{0}を作成することができませんでした。"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:192
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
@@ -5371,12 +5466,14 @@ msgid "Incomplete Files"
 msgstr "未完成ファイルを保持する日数："
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:22
+#, fuzzy
 msgid "Individual Store Files"
-msgstr ""
+msgstr "個別保存ファイル"
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:27
+#, fuzzy
 msgid "List of All Individual Purchased Files"
-msgstr ""
+msgstr "個別購入ファイル一覧"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:109
 msgid "Loading Library Window..."
@@ -5393,8 +5490,9 @@ msgid "Configure..."
 msgstr "設定..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
+#, fuzzy
 msgid "Songs purchased from the LimeWire Store"
-msgstr ""
+msgstr "LimeWire Storeで購入された曲"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:55
 #, fuzzy
@@ -5498,10 +5596,11 @@ msgid "Are you sure you want to delete the selected file(s)?"
 msgstr "選択したファイルを本当に削除するか？"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:903
+#, fuzzy
 msgid ""
 "The following files could not be deleted. They may be in use by another "
 "application or are currently being downloaded to."
-msgstr ""
+msgstr "次のファイルを削除できませんでした。他のプログラムで使用中かダウンロード中の可能性があります。"
 
 #. notify the user that renaming failed
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:975
@@ -5510,10 +5609,10 @@ msgid ""
 msgstr "次のファイルの名称変更ができない {0} 他のアプリケーションで、使用されているかもしれない"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1033
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
-msgstr ""
+msgstr "ファイル{0}は有効なファイルでないため回復できません。"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1250
 msgid "Enqueue"
@@ -5604,7 +5703,7 @@ msgstr "このフォルダの共有を本当に停止？"
 msgid ""
 "LimeWire will not allow you delete to the folder reserved for incomplete "
 "files."
-msgstr ""
+msgstr "不完全なファイルのための予約済みフォルダの削除をユーザに許可しない。"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:784
 msgid "Shared Files"
@@ -5621,7 +5720,7 @@ msgstr "再生リストへフォルダの内容を加える"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:870
 msgid "Hide .torrent Files"
-msgstr ""
+msgstr ".torrent ファイルを非表示"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:873
 #, fuzzy
@@ -5646,7 +5745,7 @@ msgstr "共有オプションを設定"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:68
 msgid "Folders to share"
-msgstr ""
+msgstr "共有フォルダ"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:76
 msgid ""
@@ -5654,6 +5753,8 @@ msgid ""
 "folders you do not want to share.  (You can change your shared folders at "
 "any time in LimeWire's options.)"
 msgstr ""
+"以下のフォルダとサブフォルダが共有されます。チェックを外すことで、共有したくないフォルダを除外することが出来ます。(オプションでいつでも共有フォルダは変更"
+"可能です。)"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:255
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:293
@@ -5685,11 +5786,11 @@ msgstr "全ての個別共有ファイル･リスト"
 
 #: gui/com/limegroup/gnutella/gui/library/TorrentMetaFileDirectoryHolder.java:15
 msgid "List of .torrent files"
-msgstr ""
+msgstr ".torrent ファイルのリスト"
 
 #: gui/com/limegroup/gnutella/gui/library/TorrentMetaFileDirectoryHolder.java:17
 msgid ".torrent files"
-msgstr ""
+msgstr ".torrent ファイル"
 
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:36
 #: gui/com/limegroup/gnutella/gui/tabs/LoggingTab.java:22
@@ -5708,11 +5809,11 @@ msgstr "アドバンスド(&A)"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:28
 msgid "Mojito &DHT Arcs View"
-msgstr ""
+msgstr "Mojito &DHT Arcs ビュー"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:29
 msgid "Display a view of the incoming and outgoing DHT messages"
-msgstr ""
+msgstr "DHT メッセージの送受信ビューの表示"
 
 #: gui/com/limegroup/gnutella/gui/menu/FileMenu.java:26
 msgid "&File"
@@ -5829,7 +5930,7 @@ msgstr "表示/隠す (&W)"
 #: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:46
 #, java-format
 msgid "Show {0} Window"
-msgstr ""
+msgstr "ウィンドウ {0} を表示"
 
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:64
 msgid "&Get More Skins"
@@ -5974,10 +6075,11 @@ msgid "Options"
 msgstr "オプション"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:224
+#, fuzzy
 msgid ""
 "You have made LimeWire settings changes. Would you like to save these "
 "changes?"
-msgstr ""
+msgstr "LimeWireの設定を変更しました。この変更を保存しますか？"
 
 #. set text before adding the document listener
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:255
@@ -6001,12 +6103,13 @@ msgstr "ベーシック"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 msgid "Types"
-msgstr ""
+msgstr "タイプ"
 
 #. store options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
+#, fuzzy
 msgid "LimeWire Store"
-msgstr ""
+msgstr "LimeWireストア"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
 msgid "Slots"
@@ -6060,8 +6163,9 @@ msgstr "表示"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
+#, fuzzy
 msgid "Popups"
-msgstr ""
+msgstr "ポップアップ"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Autocompletion"
@@ -6074,8 +6178,9 @@ msgstr "検索"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
+#, fuzzy
 msgid "Quality"
-msgstr ""
+msgstr "品質"
 
 #. filter options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
@@ -6123,7 +6228,7 @@ msgstr "プロキシ"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:401
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
-msgstr ""
+msgstr "ネットワークインターフェース"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:58
@@ -6133,7 +6238,7 @@ msgstr "別の位置"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Performance"
-msgstr ""
+msgstr "パフォーマンス"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsMediator.java:70
 msgid "Loading Options Window..."
@@ -6182,8 +6287,9 @@ msgstr ""
 "\"192.168.12.16/28\""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:29
+#, fuzzy
 msgid "Links and File Types"
-msgstr ""
+msgstr "リンクとファイルの種類"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:31
 msgid ""
@@ -6290,8 +6396,9 @@ msgstr ""
 "を選択すると、エラーを破棄し何もしなくなる。\"常に破棄\"を選択することはお勧めしできないところである。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:99
+#, fuzzy
 msgid "Send Errors Automatically if LimeWire is Frozen"
-msgstr ""
+msgstr "フリーズした場合エラーを自動申告する"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:20
 msgid "Host Communication"
@@ -6363,7 +6470,7 @@ msgstr "Enable Content Filters"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:14
 msgid "Buffer Size"
-msgstr ""
+msgstr "バッファサイズ"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:16
 msgid ""
@@ -6424,11 +6531,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:49
 msgid "Always Show the 'Save As' Dialog"
-msgstr ""
+msgstr "\"名前をつけて保存\"ダイアログを常に表示"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:50
 msgid "Always Append (#) to the Filename"
-msgstr ""
+msgstr "ファイル名に常に連番を追加する"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:51
 #, fuzzy
@@ -6754,6 +6861,7 @@ msgid "Reset to Default Download Folder"
 msgstr "初期設定のダウンロードフォルダに再設定"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:35
+#, fuzzy
 msgid ""
 "You can tell LimeWire to bind outgoing connections to an IP address from a "
 "specific network interface. Listening sockets will still listen on all "
@@ -6761,6 +6869,9 @@ msgid ""
 "disable this interface, LimeWire will revert to binding to an arbitrary "
 "address."
 msgstr ""
+"ネットワーク・インタフェースから外向き接続に用いる IP "
+"アドレスを指定できます。着信用のソケットは、利用可能な全てのインタフェースでリッスン状態になります。これは、マルチホームされたホストでの利用に有効です。こ"
+"のインタフェースの指定を無効にすると、ランダムなアドレスをバインドします。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:48
 msgid "Use a specific network interface."
@@ -6770,7 +6881,7 @@ msgstr "特定のネットワークインターフェースを使用してくだ
 msgid ""
 "LimeWire was unable to determine which network interfaces are available on "
 "this machine. Outgoing connections will bind to any arbitrary interface."
-msgstr ""
+msgstr "このコンピュータ上の有効なネットワーク・インタフェースを検出できません。外向き接続はランダムなインタフェースにバインドされます。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:20
 #, fuzzy
@@ -6781,11 +6892,11 @@ msgstr "位置"
 msgid ""
 "LimeWire can display popups to notify you when certain things happen, such "
 "as a download completing. "
-msgstr ""
+msgstr "LimeWireは「ダウンロード完了」といったアクションをポップアップでお知らせすることができます。 "
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:25
 msgid "Show Notifications:"
-msgstr ""
+msgstr "通知を表示する："
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:19
 msgid "Partial Files"
@@ -7021,11 +7132,11 @@ msgstr "終了したダウンロードを共有："
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "すべてのダウンロードを共有する。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads in shared folders will be shared."
-msgstr ""
+msgstr "共有フォルダのダウンロードのみ共有する。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 #, fuzzy
@@ -7085,7 +7196,7 @@ msgstr "最小アップロード・スロット："
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensitivity"
-msgstr ""
+msgstr "フィルタ強度"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
 msgid "Adjust the sensitivity of LimeWire's junk filter"
@@ -7172,7 +7283,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:23
 msgid "You can display your LimeWire Store status in the status bar."
-msgstr ""
+msgstr "LimeWireストアの状況をステータスバーに表示することができます。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:30
 msgid "Show LimeWire Store Indicator:"
@@ -7217,7 +7328,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
 msgid "Template"
-msgstr ""
+msgstr "テンプレート"
 
 #. *
 #. * Label for a drop down with options that can be added to the template
@@ -7231,7 +7342,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
 msgid "Templates"
-msgstr ""
+msgstr "テンプレート"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
 msgid "Insert a Variable"
@@ -7239,28 +7350,28 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:156
 msgid "Insert a template"
-msgstr ""
+msgstr "テンプレートの挿入"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:160
 msgid "iTunes like"
-msgstr ""
+msgstr "iTunes方式"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:197
 #, java-format
 msgid "Invalid template {0}"
-msgstr ""
+msgstr "無効なテンプレート{0}"
 
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:21
 msgid "LimeWire Store - Save Folder"
-msgstr ""
+msgstr "LimeWireストア－保存フォルダ"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:23
 msgid ""
 "You can choose the folder for saving files purchased from the LimeWire Store."
-msgstr ""
+msgstr "LimeWireストアで購入したファイルの保存先を選択することができます。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 #, fuzzy
@@ -7268,8 +7379,9 @@ msgid "System Tray Icon"
 msgstr "終了"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:22
+#, fuzzy
 msgid "You can display the system tray icon while LimeWire is visible."
-msgstr ""
+msgstr "LimeWire表示中はシステム・トレイのアイコンを表示することができます。"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:29
 #, fuzzy
@@ -7352,8 +7464,9 @@ msgid "Remove Selected File from Playlist"
 msgstr "選択したファイルを再生リストから除去する"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:56
+#, fuzzy
 msgid "Removes all Files from Playlist"
-msgstr ""
+msgstr "プレイリストからすべてのファイルを取り除く"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:26
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:37
@@ -7362,7 +7475,7 @@ msgstr "数"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:90
 msgid "Comment"
-msgstr ""
+msgstr "コメント"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:152
 msgid "MP3 Playlist"
@@ -7397,7 +7510,7 @@ msgstr "再生リストを別名で保存..."
 msgid ""
 "Warning: a file with the name {0} already exists in the directory. Overwrite "
 "this file?"
-msgstr ""
+msgstr "警告：{0}という名前のファイルはディレクトリに既に存在します。上書き保存しますか？"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:789
 msgid "Playlist Files (*.m3u)"
@@ -7441,11 +7554,11 @@ msgstr "すべて"
 #, java-format
 msgid ""
 "You are sharing {0} files. You can control which files LimeWire shares."
-msgstr ""
+msgstr "あなたは{0}個のファイルを共有しています。どのファイルを共有するか管理することができます。"
 
 #: gui/com/limegroup/gnutella/gui/search/MyFilesResultPanel.java:234
 msgid "Configure"
-msgstr ""
+msgstr "設定"
 
 #: gui/com/limegroup/gnutella/gui/search/MyFilesResultPanel.java:235
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:38
@@ -7490,20 +7603,21 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:402
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:491
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#, fuzzy
 msgid "Not Junk"
-msgstr ""
+msgstr "非ジャンク"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:304
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:417
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:473
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:495
 msgid "Mark selected search results as Junk"
-msgstr ""
+msgstr "選択された検索結果をジャンクに設定"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:403
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:492
 msgid "Mark selected search results as Not Junk"
-msgstr ""
+msgstr "選択された検索結果を非ジャンクに設定"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:578
 msgid "Do you want to block search results from the following list of hosts?"
@@ -7627,7 +7741,7 @@ msgstr "与えられた言葉でネットワークを検索する"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:657
 msgid "The address format is incorrect, please use host:port."
-msgstr "アドレスフォーマットは誤っています.、ホスト：ポート を使ってください。"
+msgstr "アドレスフォーマットが不正です。「ホスト：ポート」 で指定してください。"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
 msgid "Close Search"
@@ -7677,7 +7791,7 @@ msgstr "検索が特定化されすぎているので、検索を小規模にし
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:441
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
-msgstr ""
+msgstr "読み込みが完了し検索可能になるまでしばらくお待ちください。"
 
 #. if not connected or connecting, show one message.
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:450
@@ -7739,60 +7853,61 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:157
 msgid "View in Browser..."
-msgstr ""
+msgstr "ブラウザで表示..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:57
 msgid "Extension Sharing Settings"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
+#, fuzzy
 msgid ""
 "This options clears any extension sharing changes you made and sets "
 "LimeWire's extension sharing preferences to the original preferences. Do you "
 "wish to continue?"
-msgstr ""
+msgstr "このオプションは、共有するファイル拡張子の設定をクリアし、LimeWire の既定の設定に変更します。続行しますか?"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:60
 msgid "Enter the extension pattern:"
-msgstr ""
+msgstr "拡張パターンを入力:"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:61
 msgid "The extension name was not valid, could not add."
-msgstr ""
+msgstr "拡張名が不正です。追加できませんでした。"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:62
 msgid "To allow selection enable sharing of sensitive types."
-msgstr ""
+msgstr "機密情報の共有設定を許可する"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:66
 msgid "Sharing Extensions"
-msgstr ""
+msgstr "共有する拡張子"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:69
 msgid ""
 "Select the types of files on your computer that you wish to share with "
 "LimeWire."
-msgstr ""
+msgstr "共有したいファイル・タイプを選択してください。"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:93
 msgid "My Extensions"
-msgstr ""
+msgstr "ユーザ定義拡張子"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:94
 msgid "Other"
-msgstr ""
+msgstr "その他"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:521
 msgid "Add New Extension"
-msgstr ""
+msgstr "新しい拡張子を追加"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:522
 msgid "Add a New Extension to My Extensions"
-msgstr ""
+msgstr "ユーザ定義拡張子に新規追加"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:564
 msgid "Do Not Share Sensitive File Types"
-msgstr ""
+msgstr "機密ファイルを共有しないでください"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:565
 msgid ""
@@ -7802,11 +7917,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:752
 msgid "File types you added to share."
-msgstr ""
+msgstr "共有に追加したファイルタイプ"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:756
 msgid "Other types of files."
-msgstr ""
+msgstr "ほかのファイルタイプ"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:25
 #, java-format
@@ -7815,6 +7930,9 @@ msgid ""
 "this folder because it is either not a folder or cannot be "
 "read.<br><br>Please select another folder to share.</table></html>"
 msgstr ""
+"<html><table "
+"width=400>次のアイテムはフォルダではないか、読み取り出来ません。</i><br>{0}<br><br>他のフォルダを選択してください。</tab"
+"le></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:31
 #, java-format
@@ -7823,6 +7941,9 @@ msgid ""
 "this folder for security reasons.<br><br>Please select another folder to "
 "share.</table></html>"
 msgstr ""
+"<html><table "
+"width=400>セキュリティ上の理由から次のフォルダを共有できません。<br><i>{0}</i><br><br>他のフォルダを選択してください。</"
+"table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:48
 #, java-format
@@ -7832,20 +7953,23 @@ msgid ""
 "NOT</b> share this folder.<br><br>Are you sure you want to share "
 "it?</table></html>"
 msgstr ""
+"<html><table width=400>次のフォルダ <i>{0}</i><br> "
+"は機密情報あるいは個人情報を含んでいる可能性があります。<br><br> このフォルダの共有は <b>非推奨</b> "
+"です。<br><br>本当に共有してもよろしいですか?</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
-msgstr ""
+msgstr "\".torrent\" ファイル"
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:87
 msgid "\"magnet:\" links"
-msgstr ""
+msgstr "\"magnet:\"  リンク"
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:48
 msgid ""
 "One or more files or protocols that LimeWire uses are no longer associated "
 "with LimeWire. Would you like LimeWire to re-associate them?"
-msgstr ""
+msgstr "LimeWire が利用するいくつかのファイル、または、プロトコルの関連付けが無効です。もう一度関連づけをしなおしますか?"
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:50
 #, fuzzy
@@ -7855,7 +7979,7 @@ msgstr "ログイン詳細"
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:116
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:210
 msgid "Idle"
-msgstr ""
+msgstr "待機中"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:253
 msgid "Go"
@@ -7863,11 +7987,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:292
 msgid "Back"
-msgstr ""
+msgstr "戻る"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:304
 msgid "Forward"
-msgstr ""
+msgstr "進む"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:46
 msgid "Revert To Default"
@@ -7926,7 +8050,7 @@ msgstr "検索とアップロードを表示する"
 
 #: gui/com/limegroup/gnutella/gui/tabs/SWTBrowserSearchTab.java:19
 msgid "Shop at the LimeWire Store"
-msgstr ""
+msgstr "LimeWire ストアで買い物"
 
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:42
 msgid "Search and Download Files"
@@ -8143,12 +8267,12 @@ msgstr "同じファイルが既にダウンロードされている"
 msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
 "filesystem. {0} "
-msgstr ""
+msgstr "親フォルダのパスの最大長がファイルシステムの上限を超えました。{0} "
 
 #: gui/com/limegroup/gnutella/gui/util/GUILauncher.java:67
 #, java-format
 msgid "There is nothing to preview for file {0}."
-msgstr ""
+msgstr "ファイル {0} をプレビューできません。"
 
 #: gui/com/limegroup/gnutella/gui/xml/IndentingPanel.java:131
 msgid "More Search Options"
@@ -8236,7 +8360,7 @@ msgstr "選択したファイルを本当に削除するか？"
 #, java-format
 msgid ""
 "The description for this file is too short. Please enter at least {0} words."
-msgstr ""
+msgstr "このファイルの説明は、あまりに短いです。少なくとも {0} 語を入力してください。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:317
 msgid ""
@@ -8252,8 +8376,9 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:327
+#, fuzzy
 msgid "Modify the license of this file"
-msgstr ""
+msgstr "このファイルのライセンスを修正する"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:330
 msgid "Permanently remove the license from this file"
@@ -8262,12 +8387,13 @@ msgstr "永久に、このファイルから許可を取り除いてください
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:334
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:433
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:504
+#, fuzzy
 msgid "This tool helps you publish audio under a Creative Commons license."
-msgstr ""
+msgstr "これはCreative Commons Licenseに則ったオーディオ作品を発表するための補助ツールです。"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:337
 msgid "How does it work?"
-msgstr ""
+msgstr "どのように作動するか"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:423
 #, fuzzy
@@ -8276,11 +8402,11 @@ msgstr "ファイル共有"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:440
 msgid "Allow commercial use of your work?"
-msgstr ""
+msgstr "あなたの作品の商用利用を許可しますか？"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:458
 msgid "Allow modification of your work?"
-msgstr ""
+msgstr "あなたの作品の修正を許可しますか？"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:498
 #, fuzzy
@@ -8572,14 +8698,12 @@ msgid "Stars: (Please separate with comma)"
 msgstr "星："
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:68
-#, fuzzy
 msgid "Producer: (Please separate with comma)"
-msgstr "星："
+msgstr "作成者 (カンマ区切り)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:69
-#, fuzzy
 msgid "Subtitles: (Please separate with comma)"
-msgstr "星："
+msgstr "サブタイトル (カンマ区切り)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-11-19 17:40-0500\n"
-"PO-Revision-Date: 2007-11-26 19:57+0000\n"
+"PO-Revision-Date: 2007-12-09 20:19+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Norwegian Bokmal <nb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2007-12-04 22:57+0000\n"
+"X-Launchpad-Export-Date: 2007-12-12 16:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:35
@@ -245,7 +245,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:207
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr "Du laster allerede ned filen \"{0}\"."
+msgstr "Du har alt lastet ned denne filen \"{0}\""
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:212
 #, java-format
@@ -822,11 +822,15 @@ msgid "Creative Commons"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:182
+#, fuzzy
 msgid ""
 "LimeWire encountered an error in the Digital Audio Access Protocol (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
+"Limewire kom over en feil i Digital lyd tilgang`s protokollen (for å dele "
+"filer i iTunes). denne muligheten vil bli deaktivert. Du kan skru den på "
+"igjen på innstillinger, under iTunes-> deling."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:326
 msgid ""
@@ -856,7 +860,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:416
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:426
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #. *
 #. * Constant for when the user selects the no button
@@ -1083,11 +1087,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:390
 msgid "Loading Icons..."
-msgstr ""
+msgstr "Laster ikoner..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:396
 msgid "Loading Internationalization Support..."
-msgstr ""
+msgstr "Laster internasjonalisering`s brukerstøtte"
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:418
 msgid "Loading Digital Audio Access Protocol..."
@@ -1179,7 +1183,7 @@ msgstr "Ikke Vis Dette Igjen"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:173
 msgid "LimeWire must be restarted for the new language to take effect."
-msgstr ""
+msgstr "LimeWire må restartes for det nye språkvalget skal tre i kraft."
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
@@ -1199,12 +1203,14 @@ msgstr "Godkjenn"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:427
 msgid "LimeWire was unable to locate the details of this license."
-msgstr ""
+msgstr "LimeWire kunne ikke finne lisens detaljene"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:432
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:558
+#, fuzzy
 msgid "You can try validating this license again by clicking 'Verify'."
 msgstr ""
+"du kan prøve å aktivere denne lisensen igjen ved å klikke på \"aktiver\""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:437
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:563
@@ -1221,7 +1227,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:573
 msgid "License Details:"
-msgstr ""
+msgstr "lisens detaljer:"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:452
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:578
@@ -1231,18 +1237,21 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:457
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:583
 msgid "LimeWire is currently locating the details of this license."
-msgstr ""
+msgstr "LimeWire lokaliserer detaljene for denne lisensen."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:462
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:588
+#, fuzzy
 msgid ""
 "LimeWire has not yet verified this license.\n"
 "Click 'verify' to locate the details of this Creative Commons license."
 msgstr ""
+"LimeWire har ikke bekreftet denne lisensen.\n"
+"klikk \"bekreft\" for å finne detaljene for denne Creativ Commons lisens"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:467
 msgid "Creative Commons Details"
-msgstr ""
+msgstr "creative commons detaljer"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:485
 msgid "LimeWire was unable to locate the details of this Weed file."
@@ -5431,7 +5440,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:23
 msgid "You can share files that you download to unshared folders."
-msgstr ""
+msgstr "Du kan dele filer som du laster ned til udelte mapper"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:30
 msgid "Share Finished Downloads:"
@@ -5675,7 +5684,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:197
 #, java-format
 msgid "Invalid template {0}"
-msgstr ""
+msgstr "Ukjent mal {0}"
 
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
@@ -5691,7 +5700,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 msgid "System Tray Icon"
-msgstr ""
+msgstr "Systempanel-ikon"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:22
 msgid "You can display the system tray icon while LimeWire is visible."
@@ -5703,27 +5712,27 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:18
 msgid "Update Options"
-msgstr ""
+msgstr "Oppdaterings innstillinger"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:20
 msgid "You can choose when you want to be notified of new LimeWire releases."
-msgstr ""
+msgstr "Du kan velge om du vil få beskjed om nye Limewire utgivelser."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:35
 msgid "Beta Releases"
-msgstr ""
+msgstr "Beta Utgivelser"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:36
 msgid "Service Releases"
-msgstr ""
+msgstr "Service Utgivelser"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:37
 msgid "Major Releases"
-msgstr ""
+msgstr "Store Utgivelser"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:28
 msgid "Upload Bandwidth"
-msgstr ""
+msgstr "Båndbredde for Opplasting"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:30
 msgid ""
