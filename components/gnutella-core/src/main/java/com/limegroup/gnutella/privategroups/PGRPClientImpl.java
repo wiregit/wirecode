@@ -247,26 +247,35 @@ public class PGRPClientImpl implements PGRPClient{
         
         //check list to see if buddy is a buddy
         if(findRosterUserName(username)){
-            LOG.debug("find user name. is buddy or not?");
+            LOG.debug("find user name. remote user is a buddy");
             ChatManager chatManager = buddyListManager.getManager(username);
-            if(chatManager== null){
-                    LOG.debug("Could not find chatManager");
-                    //need to get remote user info and establish session
-                    if(setRemoteConnection(username, localUsername)){
-                        chatManager = buddyListManager.getManager(username);
-                        chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
-                        return true;
-                    }
-            }
-            else{
-                LOG.debug("found chatManager");
+            
+            if(setRemoteConnection(username, localUsername)){
+                chatManager = buddyListManager.getManager(username);
                 chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
                 return true;
             }
             return false;
+      
+            
+//            if(chatManager== null){
+//                    LOG.debug("Could not find chatManager");
+//                    //need to get remote user info and establish session
+//                    if(setRemoteConnection(username, localUsername)){
+//                        chatManager = buddyListManager.getManager(username);
+//                        chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
+//                        return true;
+//                    }
+//            }
+//            else{
+//                LOG.debug("found chatManager");
+//                chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
+//                return true;
+//            }
+//            return false;
         }
         else{
-            System.out.println("you cannot send a message to somebody not on your buddy list!");
+            LOG.debug("you cannot send a message to somebody not on your buddy list!");
             return false;
         }
     }
