@@ -204,6 +204,7 @@ public class ChatManager{
                     LOG.debug("Caught IOException in ReaderThread: run()");
                     //remote user disconnected so remove chatmanager
                     (ChatManager.this).closeChatManager();
+                    System.out.println(chatManagerKey);
                     GuiCoreMediator.getPGRPClient().getBuddyListManager().removeChatManager(chatManagerKey);
                     
                 } catch (XmlPullParserException e) {

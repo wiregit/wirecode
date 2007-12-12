@@ -29,6 +29,7 @@ public class BuddyListManager {
 	        LOG.debug("chatManager did not exist before.  create a new one");
 	        manager = new ChatManager(socket, remoteUsername);
 	        buddyMap.put(remoteUsername, manager);
+	        System.out.println(" ADDED NEW CHATMANAGER: key is " + remoteUsername);
 	        LOG.debug("chatManager is now in the Map. start a new message window");
 	        RosterListMediator.getInstance().initMessageWindow(remoteUsername, localUsername);
 	    }
@@ -46,6 +47,7 @@ public class BuddyListManager {
     
     public boolean removeChatManager(String name){
         //remove session from the list
+        System.out.println("REMOVE CHATMANAGEr: key is " + name);
         ChatManager manager = buddyMap.remove(name);
         
         //close sockets and chatmanagers

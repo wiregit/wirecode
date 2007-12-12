@@ -513,7 +513,7 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.createAccount("Dan", "1234");   
 //        client.createAccount("Anthony", "1234"); 
         
-          client.loginAccountNoServerSocket("Dan", "1234");
+          client.loginAccountNoServerSocket("Anthony", "1234");
         
 //        client.loginAccountNoServerSocket("Anthony", "1234");
         
@@ -549,7 +549,7 @@ public class PGRPClientImpl implements PGRPClient{
 //      client.removeFromRoster("sam","ClientDev");
 //      client.removeFromRoster("dan","ClientDev");
 //      client.removeFromRoster("zlatin","ClientDev");
-//      client.addToRoster("felix","Felix Berger","ClientDev");
+      client.addToRoster("felix","Felix Berger","ClientDev");
 //      client.removeFromRoster("curtis","ClientDev");
 //      client.removeFromRoster("tim","ClientDev");
 //      client.removeFromRoster("anthony", "ClientDev");
