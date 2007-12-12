@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
@@ -33,9 +35,11 @@ public class PGRPServerSocket{
         private BuddyListManager buddyListManager;
         private static String servername = GuiCoreMediator.getPGRPClient().getServername();
         private String localUsername;
+        private static final Log LOG = LogFactory.getLog(BuddyListManager.class);
         
         public PGRPServerSocket(String localUsername, XMPPConnection connection, BuddyListManager buddyListManager){           
             try {
+                LOG.debug("PGRPServerSocket:constructor");
                 this.connection = connection;
                 this.MyService = new ServerSocket(port);
                 this.buddyListManager = buddyListManager;
@@ -56,6 +60,7 @@ public class PGRPServerSocket{
         }
         
         public void start(){
+            LOG.debug("PGRPServerSocket:start server socket()");
             
             new Thread(new Runnable(){ 
                     public void run(){
@@ -99,21 +104,23 @@ public class PGRPServerSocket{
             //2) query database for username
             //3) store buddySession with username and socket
             private void handleSocket(){
+                LOG.debug("SocketHandler:handleSocket");
                 ServerIPQuery data;
                 
                 if (mySocket!=null){
+                    LOG.debug("got a new socket");
                     String remoteIPAddress = mySocket.getInetAddress().getHostAddress();
                     
+                    LOG.debug("register IQ ServerIPQuery Provider");
                     //register IQ provider
                     ProviderManager providerManager = ProviderManager.getInstance();
-                    providerManager.addIQProvider("serveripquery", "jabber:iq:serveripquery", new com.limegroup.gnutella.privategroups.ServerIPQueryProvider());
-                    
-                    System.out.println("remote ip address is: " + remoteIPAddress);
+                    providerManager.addIQProvider("serveripquery", "jabber:iq:serveripquery", new com.limegroup.gnutella.privategroups.ServerIPQueryProvider()); 
                     
                     
                     ServerIPQuery queryPacket = new ServerIPQuery(remoteIPAddress);
                     queryPacket.setTo(servername);
                     queryPacket.setType(IQ.Type.GET);
+                    
                     
                     PacketFilter filter = new AndFilter(new PacketIDFilter(queryPacket.getPacketID()),
                             new PacketTypeFilter(IQ.class));
@@ -121,22 +128,23 @@ public class PGRPServerSocket{
 
                     conn.sendPacket(queryPacket);
                     
+                    LOG.debug("get result back from server");
                     IQ result = (IQ)collector.nextResult(SmackConfiguration.getPacketReplyTimeout());
                     
                     if (result instanceof ServerIPQuery) {
+                        LOG.debug("result is of type ServerIPQuery");
                         data = (ServerIPQuery) result;
-                        String usernameExt = data.getUsername()+ "@" + servername;
+                        String usernameExt = data.getUsername()+ "@" + servername; 
                         
-                        //check if existing chatmanager already exists
+                        LOG.debug("let's add a chatmanager now");
                         
+                        buddyListManager.addChatManager("felix@lw-intern02", localUsername, mySocket);
+                        System.out.println("got a conversation request from: " + "felix@lw-intern02" + ". let's open gui window now");
                         
-//                        buddyListManager.addChatManager("felix@lw-intern02", localUsername, mySocket);
-//                        System.out.println("got a conversation request from: " + "felix@lw-intern02" + ". let's open gui window now");
+                        LOG.debug("end of SocketHandler");
                         
-                        
-                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
-                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
-//                        RosterListMediator.getInstance().initMessageWindow(usernameExt, localUsername);
+//                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
+//                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
                     }
                 }     
             }    
