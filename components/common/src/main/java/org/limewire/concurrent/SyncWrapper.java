@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.concurrent;
 
 /**
  * A synchronized reference of a given type that allows custom lock

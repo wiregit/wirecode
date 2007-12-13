@@ -75,6 +75,6 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     }
     
     public String toString() {
-        return "FindNodeResponse: securityToken=" + securityToken + ", nodes=" + nodes;
+        return "FindNodeResponse: securityToken=" + securityToken + ", nodes=" + nodes+ " from "+getContact();
     }
 }

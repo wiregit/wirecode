@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.SyncWrapper;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
@@ -37,7 +38,6 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.StrictIpPortSet;
-import com.limegroup.gnutella.util.SyncWrapper;
 
 
 /**
