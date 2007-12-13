@@ -47,8 +47,6 @@ public class WhoIsRequestTest extends BaseTestCase {
         request.doRequest();
         
         assertNotNull(request.getNetRange());
-        
-        System.out.println(request.getNetRange());
     }
     
 }
