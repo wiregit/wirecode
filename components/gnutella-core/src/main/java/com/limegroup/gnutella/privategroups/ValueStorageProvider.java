@@ -21,8 +21,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * The ValueStorage Provider provides a class to parse ServerIPQuery responses from the server.
- * They must be registered with the ProviderManager
+ * The ValueStorage Provider provides a class to parse <code>ValueStorage</code> responses from the server.
+ * They must be registered with the <code>ProviderManager</code>
  *
  */
 public class ValueStorageProvider implements IQProvider {

@@ -31,7 +31,7 @@ import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.PrivateGroupsUtils;
+import org.limewire.privategroups.utils.PrivateGroupsUtil;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -205,7 +205,7 @@ public class PGRPClientImpl implements PGRPClient{
             
             LOG.debug("Start ServerSocket");
             //start serverSocket
-            serverSocket = new PGRPServerSocket(localUsername, connection, buddyListManager);
+            serverSocket = new PGRPServerSocket(localUsername, servername, connection, buddyListManager);
             serverSocket.start();
 
             return true;
@@ -238,11 +238,6 @@ public class PGRPClientImpl implements PGRPClient{
     public boolean sendMessage(String username, String message){
         
         LOG.debug("Send Message Method");
-        //hack to append servername - will change later
-        if(username.indexOf('@')==-1){
-            //append servername
-            username = username + "@" + servername;
-        }
           
         //check list to see if buddy is a buddy
         if(findRosterUserName(username)){
@@ -253,14 +248,14 @@ public class PGRPClientImpl implements PGRPClient{
                 //need to get remote user info and establish session
                 if(setRemoteConnection(username, localUsername)){
                     chatManager = buddyListManager.getManager(username);
-                    chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
+                    chatManager.send(PrivateGroupsUtil.createMessage(localUsername, username, message));
                     chatManager.setRemoteWindowExists(true);
                     return true;
                 }
             }
             else{
                 LOG.debug("found chatManager");
-                chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
+                chatManager.send(PrivateGroupsUtil.createMessage(localUsername, username, message));
                 return true;
             }
             return false;
@@ -274,6 +269,7 @@ public class PGRPClientImpl implements PGRPClient{
 
     
     public boolean addToRoster(String username, String nickName, String groupName) {
+        LOG.debug("PGRPClientImpl: addToRoster");
         Roster roster = connection.getRoster();
         String jid = username + "@"+ servername;
         
@@ -300,6 +296,7 @@ public class PGRPClientImpl implements PGRPClient{
                 return false;
             }
         }
+        LOG.debug("addtoRoster is finished");
         return true;
     }
     
@@ -350,11 +347,6 @@ public class PGRPClientImpl implements PGRPClient{
     
 
     public boolean findRosterUserName(String username){
-        //hack to append servername - will change later
-        if(username.indexOf('@')==-1){
-            //append servername
-            username = username + "@" + servername;
-        }
         
         Roster roster = connection.getRoster();
         Collection <RosterEntry> usernames = roster.getEntries();

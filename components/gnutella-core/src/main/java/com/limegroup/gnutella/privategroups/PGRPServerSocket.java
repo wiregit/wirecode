@@ -33,30 +33,24 @@ public class PGRPServerSocket{
         private XMPPConnection connection;
         private boolean passCheck = true;
         private BuddyListManager buddyListManager;
-        private static String servername = GuiCoreMediator.getPGRPClient().getServername();
+        private static String servername;
         private String localUsername;
         private static final Log LOG = LogFactory.getLog(BuddyListManager.class);
         
-        public PGRPServerSocket(String localUsername, XMPPConnection connection, BuddyListManager buddyListManager){           
+        public PGRPServerSocket(String localUsername, String servername, XMPPConnection connection, BuddyListManager buddyListManager){           
             try {
                 LOG.debug("PGRPServerSocket:constructor");
                 this.connection = connection;
                 this.MyService = new ServerSocket(port);
                 this.buddyListManager = buddyListManager;
                 this.localUsername = localUsername;
+                this.servername = servername;
+                
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("could not start server socket");
             }
             System.out.println("server socket started successfully");
-        }
-        
-        public void setServerName(String name){
-            servername = name;
-        }
-        
-        public StringBuffer getBuffer(){
-            return buffer;
         }
         
         public void start(){
@@ -134,9 +128,11 @@ public class PGRPServerSocket{
                     if (result instanceof ServerIPQuery) {
                         LOG.debug("result is of type ServerIPQuery");
                         data = (ServerIPQuery) result;
+                        
+                        //need to concatenate the servername with the username because the server returns the username only
                         String usernameExt = data.getUsername()+ "@" + servername; 
                         
-                        LOG.debug("let's add a chatmanager now");                      
+                        LOG.debug("let's add a chatmanager now");                    
                         
                         buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
                         System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");

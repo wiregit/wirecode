@@ -2,6 +2,9 @@ package org.limewire.listener;
 
 import org.limewire.util.BaseTestCase;
 
+/**
+ * A class to test the methods of WeakEventListenerList
+ */
 public class WeakEventListenerListTest extends BaseTestCase {
     
     public WeakEventListenerListTest(String name) {

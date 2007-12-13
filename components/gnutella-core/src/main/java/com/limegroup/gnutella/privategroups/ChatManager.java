@@ -19,8 +19,6 @@ import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.limegroup.gnutella.gui.GuiCoreMediator;
-
 /**
  * 
  * ChatManager holds socket and threads for reading/writing
@@ -38,24 +36,20 @@ public class ChatManager{
     private static final Log LOG = LogFactory.getLog(ChatManager.class);
     private String chatManagerKey;
     private boolean remoteWindowExists = true;
-    
+    private BuddyListManager buddyListManager;
     private LinkedBlockingQueue<Packet> linkedBlockingQueue= new LinkedBlockingQueue<Packet>();
-    
-    public boolean checkIfRemoteWindowExists(){
-        return remoteWindowExists;
-    }
     
     public void setRemoteWindowExists(boolean existence){
         remoteWindowExists = existence;
     }
     
-    public ChatManager(Socket socket, String chatManagerKey){
+    public ChatManager(BuddyListManager buddyListManager, Socket socket, String chatManagerKey){
         
         LOG.debug("ChatManager: constructor");
         this.socket = socket;
+        this.buddyListManager = buddyListManager;
         this.chatManagerKey = chatManagerKey;
         initThreads(socket);
-
     }
     
     public void registerListener(String strongRef, EventListener listener){
@@ -65,6 +59,10 @@ public class ChatManager{
     
     public void removeListener(String strongRef, EventListener listener){
         listeners.removeListener(strongRef, listener);
+    }
+    
+    public boolean checkIfRemoteWindowExists(){
+        return remoteWindowExists;
     }
     
     private void handleEvent(Event E) {
@@ -97,6 +95,7 @@ public class ChatManager{
         return false;
     }
     
+    //replaces the socket only.  the chat window already exists.
     public void replaceSocket(Socket newSocket){
         closeChatManager();
         socket = newSocket;
@@ -114,16 +113,13 @@ public class ChatManager{
             //this will print to the local msg window
             handleEvent(new MessageEvent(msg, null));
         }
-        
         pushQueue(packet);
     } 
     
     private void pushQueue(Packet packet){
         linkedBlockingQueue.add(packet);
     }
-    
-    
-    
+
     private class WriterThread implements Runnable{
         
         private Socket writeSocket;
@@ -183,7 +179,6 @@ public class ChatManager{
 
                 try{      
                     MXParser parser = new MXParser();
-                    //System.out.println("buffer text is : "+ is.readLine());
                     
                     synchronized(is){
                         Message parsedMsg = null; 
@@ -191,25 +186,25 @@ public class ChatManager{
                         parser.setInput(is);
                         int eventType = parser.next();
                        
-                            if (eventType == XmlPullParser.START_TAG){
-                                LOG.debug("got a START tag in the XML message - there is something to parse");
-                                if (parser.getName().equals("message")) {
-                                    LOG.debug("got a message object - begin parsing");
-                                    //parseMessage(parser) returns a SMACK message object
-                                    parsedMsg = (Message) PacketParserUtils.parseMessage(parser);
-                                    LOG.debug("done parsing message object");
-                                }
-                                
-                                handleEvent(new MessageEvent(parsedMsg, null));
+                        if (eventType == XmlPullParser.START_TAG){
+                            LOG.debug("got a START tag in the XML message - there is something to parse");
+                            if (parser.getName().equals("message")) {
+                                LOG.debug("got a message object - begin parsing");
+                                //parseMessage(parser) returns a SMACK message object
+                                parsedMsg = (Message) PacketParserUtils.parseMessage(parser);
+                                LOG.debug("done parsing message object");
                             }
-                            else{
-                                LOG.debug("EventType is not a START_TAG.  It is " + eventType);
-                            }
+                            
+                            handleEvent(new MessageEvent(parsedMsg, null));
+                        }
+                        else{
+                            LOG.debug("EventType is not a START_TAG.  It is " + eventType);
+                        }
                     }
                 }catch(IOException e){
                     LOG.debug("Caught IOException in ReaderThread: run()");
-                    //remote user disconnected so remove chatmanager
-                    if(GuiCoreMediator.getPGRPClient().getBuddyListManager().getManager(chatManagerKey)!= null){
+                    //remote user disconnected so remove chatmanager.  check if manager exists (exists if the window has not been closed)
+                    if(buddyListManager.getManager(chatManagerKey)!= null){
                         remoteWindowExists = false;
                         break;
                     }

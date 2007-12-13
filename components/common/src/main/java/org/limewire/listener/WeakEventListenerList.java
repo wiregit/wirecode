@@ -54,19 +54,4 @@ public class  WeakEventListenerList<E extends Event> implements WeakEventListene
             }
         }
     }
-    
-//    /** Temporary hack to check if the window listener exists for PGRP **/
-//    public boolean checkWindowExistence(Object strongRef) {
-//        for(List<EventListener<E>> listenerList : listenerMap.values()) {
-//            if(listenerList != null) {
-//                for(EventListener<E> listener : listenerList) {
-//                    if(listener instanceof PrivateGroupsMessageWindow)
-//                        return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
-    
-
 }

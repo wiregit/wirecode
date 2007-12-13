@@ -3,6 +3,10 @@ package com.limegroup.gnutella.privategroups;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 
+/**
+ * Interface that defines all basic functions of a buddy list/private groups client.
+ *
+ */
 public interface PGRPClient {
     
     /**

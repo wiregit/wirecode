@@ -2,6 +2,9 @@ package com.limegroup.gnutella.privategroups;
 
 import org.limewire.listener.Event;
 
+/**
+ * A message event is used to notify that there is a new message received by the ChatManager ReaderThread
+ */
 public class MessageEvent<Message, E extends Enum> implements Event<Message, E>{
 
     private final Message msg;

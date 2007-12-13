@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.gui.GuiCoreMediator;
 import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
 
 
@@ -27,17 +28,15 @@ public class BuddyListManager {
 	    ChatManager manager = buddyMap.get(remoteUsername);
 	    if(manager ==null){
 	        LOG.debug("chatManager did not exist before.  create a new one");
-	        manager = new ChatManager(socket, remoteUsername);
+	        manager = new ChatManager(this, socket, remoteUsername);
 	        buddyMap.put(remoteUsername, manager);
 	        LOG.debug("chatManager is now in the Map. start a new message window");
-	        RosterListMediator.getInstance().initMessageWindow(remoteUsername, localUsername);
+	        GuiCoreMediator.getRosterListMediator().initMessageWindow(remoteUsername, localUsername);
 	    }
 	    else{
 	        LOG.debug("chatManager existed.  simply replace socket");
 	    	//replace old socket with new ones
 	    	manager.replaceSocket(socket);
-	        
-	    	
 	    }
     }
     
@@ -47,7 +46,7 @@ public class BuddyListManager {
     
     public boolean removeChatManager(String name){
         //remove session from the list
-        System.out.println("REMOVE CHATMANAGEr: key is " + name);
+        LOG.debug("Remove ChatManager: " + name);
         ChatManager manager = buddyMap.remove(name);
         
         //close sockets and chatmanagers

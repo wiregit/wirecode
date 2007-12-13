@@ -1,16 +1,9 @@
-package org.limewire.util;
+package org.limewire.privategroups.utils;
 
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Message.Type;
 
-/**
- * A class of utility methods for Private Groups
- */
-public class PrivateGroupsUtils {
-    private PrivateGroupsUtils(){
-        
-    }
-
+public class PrivateGroupsUtil {
     // a method to automatically create a message object given a username, and the message body
     public static Message createMessage(String localUsername, String remoteuser, String body){
         Message msg = new Message();
