@@ -45,6 +45,10 @@ public class ChatManager{
         return remoteWindowExists;
     }
     
+    public void setRemoteWindowExists(boolean existence){
+        remoteWindowExists = existence;
+    }
+    
     public ChatManager(Socket socket, String chatManagerKey){
         
         LOG.debug("ChatManager: constructor");
@@ -207,12 +211,7 @@ public class ChatManager{
                     //remote user disconnected so remove chatmanager
                     if(GuiCoreMediator.getPGRPClient().getBuddyListManager().getManager(chatManagerKey)!= null){
                         remoteWindowExists = false;
-//                        (ChatManager.this).closeChatManager();
-//                        System.out.println(chatManagerKey);
-//    
-//                        //remove chatManager so that a new socket connection will be established if the user 
-//                        //clicks on the send button
-//                        GuiCoreMediator.getPGRPClient().getBuddyListManager().removeChatManager(chatManagerKey);
+                        break;
                     }
                 } catch (XmlPullParserException e) {
                     LOG.debug("Caught XMLPullException in ReaderThread: run()");

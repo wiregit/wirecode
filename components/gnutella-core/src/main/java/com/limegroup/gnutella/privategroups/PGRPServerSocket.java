@@ -136,15 +136,11 @@ public class PGRPServerSocket{
                         data = (ServerIPQuery) result;
                         String usernameExt = data.getUsername()+ "@" + servername; 
                         
-                        LOG.debug("let's add a chatmanager now");
+                        LOG.debug("let's add a chatmanager now");                      
                         
-                        buddyListManager.addChatManager("felix@lw-intern02", localUsername, mySocket);
-                        System.out.println("got a conversation request from: " + "felix@lw-intern02" + ". let's open gui window now");
-                        
+                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
+                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
                         LOG.debug("end of SocketHandler");
-                        
-//                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
-//                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
                     }
                 }     
             }    
