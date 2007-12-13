@@ -3,10 +3,9 @@ package org.limewire.privategroups.utils;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Message.Type;
 
-/**
- * A utility class for buddy lists/private groups
- */
 public class PrivateGroupsUtil {
+
+
     // a method to automatically create a message object given a username, and the message body
     public static Message createMessage(String localUsername, String remoteuser, String body){
         Message msg = new Message();
@@ -24,4 +23,5 @@ public class PrivateGroupsUtil {
         }
         return msg;
     }
+
 }
