@@ -257,6 +257,15 @@ public class PGRPClientImpl implements PGRPClient{
                     return true;
                 }
             }
+            else if(!chatManager.checkIfRemoteWindowExists()){
+                LOG.debug("remote host has closed their window.  establish a new connection");
+                //remote host has closed their window, which means our window is still here
+                if(setRemoteConnection(username, localUsername)){
+                    chatManager = buddyListManager.getManager(username);
+                    chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));
+                    return true;
+                }
+            }
             else{
                 LOG.debug("found chatManager");
                 chatManager.send(PrivateGroupsUtils.createMessage(localUsername, username, message));

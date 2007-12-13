@@ -37,10 +37,14 @@ public class ChatManager{
     private final WeakEventListenerList<Event> listeners = new WeakEventListenerList<Event>();
     private static final Log LOG = LogFactory.getLog(ChatManager.class);
     private String chatManagerKey;
+    private boolean remoteWindowExists = true;
     
     private LinkedBlockingQueue<Packet> linkedBlockingQueue= new LinkedBlockingQueue<Packet>();
     
-  
+    public boolean checkIfRemoteWindowExists(){
+        return remoteWindowExists;
+    }
+    
     public ChatManager(Socket socket, String chatManagerKey){
         
         LOG.debug("ChatManager: constructor");
@@ -59,9 +63,9 @@ public class ChatManager{
         listeners.removeListener(strongRef, listener);
     }
     
-    public boolean checkWindowExistence(String strongRef){
-        return listeners.checkWindowExistence(strongRef);
-    }
+//    public boolean checkWindowExistence(String strongRef){
+//        return listeners.checkWindowExistence(strongRef);
+//    }
     
     
     private void handleEvent(Event E) {
@@ -103,7 +107,6 @@ public class ChatManager{
     //to send a something, user simply appends to the buffer.  The writer thread will automatically send 
     //buffer data to the output stream
     public void send(Packet packet){
-        
         
         if(packet instanceof Message)
         {
@@ -208,12 +211,13 @@ public class ChatManager{
                     LOG.debug("Caught IOException in ReaderThread: run()");
                     //remote user disconnected so remove chatmanager
                     if(GuiCoreMediator.getPGRPClient().getBuddyListManager().getManager(chatManagerKey)!= null){
-                        (ChatManager.this).closeChatManager();
-                        System.out.println(chatManagerKey);
-    
-                        //remove chatManager so that a new socket connection will be established if the user 
-                        //clicks on the send button
-                        GuiCoreMediator.getPGRPClient().getBuddyListManager().removeChatManager(chatManagerKey);
+                        remoteWindowExists = false;
+//                        (ChatManager.this).closeChatManager();
+//                        System.out.println(chatManagerKey);
+//    
+//                        //remove chatManager so that a new socket connection will be established if the user 
+//                        //clicks on the send button
+//                        GuiCoreMediator.getPGRPClient().getBuddyListManager().removeChatManager(chatManagerKey);
                     }
                 } catch (XmlPullParserException e) {
                     LOG.debug("Caught XMLPullException in ReaderThread: run()");
