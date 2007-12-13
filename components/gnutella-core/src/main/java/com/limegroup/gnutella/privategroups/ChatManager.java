@@ -59,6 +59,10 @@ public class ChatManager{
         listeners.removeListener(strongRef, listener);
     }
     
+    public boolean checkWindowExistence(String strongRef){
+        return listeners.checkWindowExistence(strongRef);
+    }
+    
     
     private void handleEvent(Event E) {
         //can check if window exists

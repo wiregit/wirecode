@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import com.limegroup.gnutella.gui.privategroups.PrivateGroupsMessageWindow;
+
 /**
  * Maintains event listeners and broadcasts events to all listeners.
  * Listeners are kept by weak references to a key value, allowing anonymous
@@ -51,6 +53,19 @@ public class  WeakEventListenerList<E extends Event> implements WeakEventListene
                 }
             }
         }
+    }
+    
+    /** Temporary hack to check if the window listener exists for PGRP **/
+    public boolean checkWindowExistence(Object strongRef) {
+        for(List<EventListener<E>> listenerList : listenerMap.values()) {
+            if(listenerList != null) {
+                for(EventListener<E> listener : listenerList) {
+                    if(listener instanceof PrivateGroupsMessageWindow)
+                        return true;
+                }
+            }
+        }
+        return false;
     }
     
 
