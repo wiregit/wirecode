@@ -202,7 +202,7 @@ public class ChatManager{
                         }
                     }
                 }catch(IOException e){
-                    LOG.debug("Caught IOException in ReaderThread: run()");
+                    LOG.debug("Socket Exception: caused by the remote user closing their window");
                     //remote user disconnected so remove chatmanager.  check if manager exists (exists if the window has not been closed)
                     if(buddyListManager.getManager(chatManagerKey)!= null){
                         remoteWindowExists = false;

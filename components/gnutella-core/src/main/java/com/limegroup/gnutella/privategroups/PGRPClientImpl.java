@@ -247,8 +247,11 @@ public class PGRPClientImpl implements PGRPClient{
                 LOG.debug("Could not find chatManager");
                 //need to get remote user info and establish session
                 if(setRemoteConnection(username, localUsername)){
+                    LOG.debug("get chatmanager");
                     chatManager = buddyListManager.getManager(username);
+                    LOG.debug("send message through chatmanager");
                     chatManager.send(PrivateGroupsUtil.createMessage(localUsername, username, message));
+                    LOG.debug("set remote window exists to true");
                     chatManager.setRemoteWindowExists(true);
                     return true;
                 }
