@@ -130,6 +130,8 @@ public class PGRPServerSocket{
                         
                         LOG.debug("let's add a chatmanager now");                    
                         
+                        buddyListManager.addListener(usernameExt, new ChatWindowListener());
+                        
                         buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
                         System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
                         LOG.debug("end of SocketHandler");
