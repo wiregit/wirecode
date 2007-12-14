@@ -68,11 +68,4 @@ public class BuddyListManager {
         //close sockets and chatmanagers
         return manager.closeChatManager();
     }
-    
-    
-    
-    
-    
-    
-    
 }
