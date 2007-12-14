@@ -28,22 +28,6 @@ public class PGRPClientTest extends TestCase {
         
     }
     
-
-//    public void setup(){
-//        try {
-//            super.setUp();
-//        } catch (Exception e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        LimeTestUtils.createInjector(new AbstractModule() { 
-//            @Override
-//            protected void configure() {
-//                requestStaticInjection(GuiCoreMediator.class);
-//            }
-//        });
-//    }
-    
     /**
      * test to..
      * 1) login with an account that does not exist
@@ -143,30 +127,4 @@ public class PGRPClientTest extends TestCase {
         }
     }
     
-    public void testMessaging(){
-        
-        RosterListMediator mockRosterListMediator = mockery.mock(RosterListMediator.class);
-        
-        //need 2 clients
-        client1 = new PGRPClientImpl(new BuddyListManager());
-        client1.createAccount("user1", "password1");
-        
-        client2 = new PGRPClientImpl(new BuddyListManager());
-        client2.createAccount("user2", "password2");
-        
-        client1.loginAccount("user1", "password1");
-        
-        client2.loginAccountNoServerSocket("user2", "password2");
-        client2.addToRoster("user1", "", "");
-        
-        //send a message to a user who exists
-        assertTrue(client2.sendMessage("user1"+servername, "hello user 1"));
-        
-        try {
-            assertEquals(client1.removeAccount(), true);
-            assertEquals(client2.removeAccount(), true);
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
-    }
 }

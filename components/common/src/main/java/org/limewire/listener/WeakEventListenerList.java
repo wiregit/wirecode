@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import com.limegroup.gnutella.gui.privategroups.PrivateGroupsMessageWindow;
-
 /**
  * Maintains event listeners and broadcasts events to all listeners.
  * Listeners are kept by weak references to a key value, allowing anonymous

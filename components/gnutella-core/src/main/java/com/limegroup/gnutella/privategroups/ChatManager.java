@@ -63,12 +63,6 @@ public class ChatManager{
         return remoteWindowExists;
     }
     
-    private void handleEvent(Event E) {
-        //can check if window exists
-        LOG.debug("broadcast to listeners");
-        listeners.broadcast(E);
-    }
-    
     //initialize reading and writing threads
     public void initReadWriteThreads(){
         
@@ -109,7 +103,7 @@ public class ChatManager{
             Message msg = (Message) packet;
             
             //this will print to the local msg window
-            handleEvent(new MessageEvent(msg, null));
+            listeners.broadcast(new MessageEvent(msg, null));
         }
         pushQueue(packet);
     } 
@@ -192,8 +186,7 @@ public class ChatManager{
                                 parsedMsg = (Message) PacketParserUtils.parseMessage(parser);
                                 LOG.debug("done parsing message object");
                             }
-                            
-                            handleEvent(new MessageEvent(parsedMsg, null));
+                            listeners.broadcast(new MessageEvent(parsedMsg, null));
                         }
                         else{
                             LOG.debug("EventType is not a START_TAG.  It is " + eventType);

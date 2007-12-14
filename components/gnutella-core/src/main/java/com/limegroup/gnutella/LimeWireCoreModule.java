@@ -322,8 +322,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(PrivateGroupsManagerFactory.class).to(PrivateGroupsManagerFactoryImpl.class);
         bind(PGRPClient.class).to(PGRPClientImpl.class);
         
-        
-        
+
         bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
         bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);

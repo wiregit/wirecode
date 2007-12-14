@@ -56,7 +56,6 @@ public class PGRPClientImpl implements PGRPClient{
     @Inject
     public PGRPClientImpl(BuddyListManager buddyListManager) {
         this.buddyListManager = buddyListManager;
-        connectToServerNoPort(servername);
     }
     
     public String getServername(){
@@ -164,6 +163,7 @@ public class PGRPClientImpl implements PGRPClient{
     public boolean loginAccount(String username, String password){
         try {
             LOG.debug("begin loginAccount");
+            connectToServerNoPort(servername);
             connection.login(username, password);
             System.out.println("login successful");
             
@@ -215,6 +215,7 @@ public class PGRPClientImpl implements PGRPClient{
             
         } catch (XMPPException e) {
             System.out.println("Could not login to the server");
+            connection.disconnect();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } 
@@ -516,7 +517,7 @@ public class PGRPClientImpl implements PGRPClient{
 //        client.createAccount("Dan", "1234");   
 //        client.createAccount("Anthony", "1234"); 
         
-          client.loginAccountNoServerSocket("Dan", "1234");
+          client.loginAccountNoServerSocket("asdasdsad", "1234");
         
 //        client.loginAccountNoServerSocket("Anthony", "1234");
         
@@ -544,7 +545,7 @@ public class PGRPClientImpl implements PGRPClient{
 //          client.addToRoster("felix","Felix Berger","ClientDev");
 //          client.addToRoster("curtis","Curtis Jones","ClientDev");
 //          client.addToRoster("tim","Tim Julien","ClientDev");
-          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
+//          client.addToRoster("anthony", "Anthony Bow", "ClientDev");
         
         
 //      client.removeFromRoster("miket","ClientDev");
@@ -557,8 +558,8 @@ public class PGRPClientImpl implements PGRPClient{
 //      client.removeFromRoster("tim","ClientDev");
 //      client.removeFromRoster("anthony", "ClientDev");
         
-        
-      client.viewRoster();
+//        
+//      client.viewRoster();
 //        client.sendMessage("dan", "hi");
 
 //        client.sendMessage("lulu", "wassup");
