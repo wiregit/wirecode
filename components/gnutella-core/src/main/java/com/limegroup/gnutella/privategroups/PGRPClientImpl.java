@@ -36,6 +36,9 @@ import org.limewire.privategroups.utils.PrivateGroupsUtil;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Defines implementation of the interface, PGRPClient
+ */
 @Singleton
 public class PGRPClientImpl implements PGRPClient{
 
@@ -492,6 +495,10 @@ public class PGRPClientImpl implements PGRPClient{
         } 
         
         return false;
+    }
+    
+    public PrivateKey getPrivateKey(){
+        return privateKey;
     }
     
 

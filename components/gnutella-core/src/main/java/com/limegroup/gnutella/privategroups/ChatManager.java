@@ -27,7 +27,6 @@ import org.xmlpull.v1.XmlPullParserException;
 public class ChatManager{
     
     private Socket socket;
-    private StringBuffer buffer = new StringBuffer(100);
     private BufferedReader is;
     private PrintWriter os;    
     private Thread readThread;

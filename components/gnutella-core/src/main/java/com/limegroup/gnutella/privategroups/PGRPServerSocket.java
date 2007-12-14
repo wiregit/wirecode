@@ -15,9 +15,6 @@ import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
 
-import com.limegroup.gnutella.gui.GuiCoreMediator;
-import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
-
 
 /**
  * The PGRPServerSocket handles an incoming socket connection.  Once the handler accepts the incoming client
@@ -28,7 +25,6 @@ import com.limegroup.gnutella.gui.privategroups.RosterListMediator;
 public class PGRPServerSocket{
     
         private ServerSocket MyService = null;
-        private StringBuffer buffer = new StringBuffer(100);
         private int port = 9999;
         private XMPPConnection connection;
         private boolean passCheck = true;
