@@ -27,11 +27,12 @@ public class BuddyListManager {
         LOG.debug("BuddyListManager:addChatManager");
 	    ChatManager manager = buddyMap.get(remoteUsername);
 	    if(manager ==null){
-	        LOG.debug("chatManager did not exist before.  create a new one");
+	        LOG.debug("chatManager did not exist before.  create a new one");  
 	        manager = new ChatManager(this, socket, remoteUsername);
 	        buddyMap.put(remoteUsername, manager);
 	        LOG.debug("chatManager is now in the Map. start a new message window");
 	        RosterListMediator.getInstance().initMessageWindow(remoteUsername, localUsername);
+	        manager.initReadWriteThreads();
 //	        GuiCoreMediator.getRosterListMediator().initMessageWindow(remoteUsername, localUsername);
 	    }
 	    else{

@@ -37,7 +37,7 @@ public class ChatManager{
     private String chatManagerKey;
     private boolean remoteWindowExists = true;
     private BuddyListManager buddyListManager;
-    private LinkedBlockingQueue<Packet> linkedBlockingQueue= new LinkedBlockingQueue<Packet>();
+    private LinkedBlockingQueue<Packet> writerLinkedBlockingQueue= new LinkedBlockingQueue<Packet>();
     
     public void setRemoteWindowExists(boolean existence){
         remoteWindowExists = existence;
@@ -49,7 +49,6 @@ public class ChatManager{
         this.socket = socket;
         this.buddyListManager = buddyListManager;
         this.chatManagerKey = chatManagerKey;
-        initThreads(socket);
     }
     
     public void registerListener(String strongRef, EventListener listener){
@@ -72,14 +71,14 @@ public class ChatManager{
     }
     
     //initialize reading and writing threads
-    private void initThreads(Socket currentSocket){
+    public void initReadWriteThreads(){
         
         LOG.debug("ChatManager: initThreads");
         
-        readThread = new Thread(new ReaderThread(currentSocket));
+        readThread = new Thread(new ReaderThread(socket));
         readThread.start();
         
-        writeThread = new Thread(new WriterThread(currentSocket));
+        writeThread = new Thread(new WriterThread(socket));
         writeThread.start();
 
     }
@@ -99,7 +98,7 @@ public class ChatManager{
     public void replaceSocket(Socket newSocket){
         closeChatManager();
         socket = newSocket;
-        initThreads(socket);
+        initReadWriteThreads();
     }
     
     //to send a something, user simply appends to the buffer.  The writer thread will automatically send 
@@ -117,7 +116,7 @@ public class ChatManager{
     } 
     
     private void pushQueue(Packet packet){
-        linkedBlockingQueue.add(packet);
+        writerLinkedBlockingQueue.add(packet);
     }
 
     private class WriterThread implements Runnable{
@@ -142,7 +141,7 @@ public class ChatManager{
                 LOG.debug("WriterThread: run()");
                 //if buffer is empty, do not write
                 try {
-                    Packet popPacket = linkedBlockingQueue.take(); 
+                    Packet popPacket = writerLinkedBlockingQueue.take(); 
                     if(popPacket instanceof Message){
                         String xml = popPacket.toXML();
                         os.println(xml);
