@@ -120,7 +120,7 @@ public abstract class AbstractDHTController implements DHTController {
     
     public AbstractDHTController(Vendor vendor, Version version,
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
-            DHTMode mode, DHTControllerFacade dhtControllerFacade) {
+            final DHTMode mode, DHTControllerFacade dhtControllerFacade) {
 
         this.dhtControllerFacade = dhtControllerFacade;
         
@@ -191,7 +191,7 @@ public abstract class AbstractDHTController implements DHTController {
                         case ADD_CACHED_CONTACT:
                         case UPDATE_CONTACT:
                             Contact node = event.getContact();
-                            if (!dht.getLocalNodeID().equals(node.getNodeID()))
+                            if (mode == DHTMode.ACTIVE || !dht.getLocalNodeID().equals(node.getNodeID()))
                                 forwardContact(node);
                             break;
                     }
