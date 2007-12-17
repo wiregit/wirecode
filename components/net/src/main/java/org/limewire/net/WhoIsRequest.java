@@ -16,7 +16,7 @@ import org.limewire.io.IP;
  */
 public interface WhoIsRequest {
     
-    public void doRequest() throws WhoIsException, IOException;
+    public void doRequest() throws IOException;
     
     public IP getNetRange ();
     

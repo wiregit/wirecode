@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.io.IP;
@@ -54,7 +56,7 @@ public class WhoIsRequestImpl implements WhoIsRequest {
      * infinite loops, use this value to make sure that
      * we only follow a whois referral once.
      */
-    protected Map<String,String> referrals;
+    protected Set<String> referrals;
     
     /**
      * The socket manager, as you may have guessed.
@@ -70,17 +72,31 @@ public class WhoIsRequestImpl implements WhoIsRequest {
      * @param name Request name (ie, "apple.com" or 
      * "17.149.160.49").
      */
-    public WhoIsRequestImpl(String name, SocketsManager socketsManager, Map<String,String> defaultServers) throws WhoIsException {
+    public WhoIsRequestImpl(String name, SocketsManager socketsManager, Map<String,String> defaultServers) {
         if (name == null)
             throw new NullPointerException();
         
         if (name.length() == 0)
-            throw new WhoIsException("Zero-length request name.");
+            throw new IllegalArgumentException("Zero-length name is not allowed.");
+        
+        // if there are no periods in the request name, 
+        // then it is definitely not a valid DNS name nor
+        // an IP address.
+        //
+        // if the period is at the end of the request name,
+        // then it is similarly invalid.
+        //
+        {
+            int ndx = name.lastIndexOf(".");
+            
+            if (ndx == -1 || ndx == name.length() - 1)
+                throw new IllegalArgumentException("Invalid request name.");
+        }
         
         this.name = name;
         this.values = new HashMap<String,String>();
         this.socketsManager = socketsManager;
-        this.referrals = new HashMap<String,String>();
+        this.referrals = new HashSet<String>();
         this.servers = defaultServers;
     }
     
@@ -94,7 +110,7 @@ public class WhoIsRequestImpl implements WhoIsRequest {
      * guarantee. Don't block in the UI on a call to this.
      * 
      */
-    public void doRequest() throws WhoIsException, IOException {
+    public void doRequest() throws IOException {
         // only parse and find a whois server if there is
         // not already one defined.
         //
@@ -108,12 +124,12 @@ public class WhoIsRequestImpl implements WhoIsRequest {
         
         // no server, no luck
         if (this.whoisServer == null)
-            throw new WhoIsException("Unsupported request name, '" + this.name + "'");
+            throw new IllegalArgumentException("Unsupported request name, '" + this.name + "'");
         
         // store this whois server so that when following
         // referrals, we do not ever enter a loop.
         //
-        this.referrals.put(this.whoisServer, this.whoisServer);
+        this.referrals.add(this.whoisServer);
         
         // there really isn't a standard whois format, 
         // other than to say that there is a rough
@@ -176,7 +192,7 @@ public class WhoIsRequestImpl implements WhoIsRequest {
                 if (name != null) {
                     // if this is the start of a new name:value pair....
                     if (-1 != (index = line.indexOf(":"))) {
-                        this.setValue(name.toUpperCase(), value.toString());
+                        this.setValue(name.toUpperCase(Locale.ENGLISH), value.toString());
                         name = line.substring(0, index);
                         value = new StringBuilder(100);
                         
@@ -187,7 +203,7 @@ public class WhoIsRequestImpl implements WhoIsRequest {
                                 continue;
                             }
                             
-                            this.setValue(name.toUpperCase(), line);
+                            this.setValue(name.toUpperCase(Locale.ENGLISH), line);
                             name = null;
                         }
                     }
@@ -211,7 +227,7 @@ public class WhoIsRequestImpl implements WhoIsRequest {
                             continue;
                         }
                         
-                        this.setValue(name.toUpperCase(), line);
+                        this.setValue(name.toUpperCase(Locale.ENGLISH), line);
                         name = null;
                     }
                 }
@@ -221,22 +237,8 @@ public class WhoIsRequestImpl implements WhoIsRequest {
             }
             
             if (this.name != null)
-                this.setValue(this.name.toUpperCase(), value.toString());
+                this.setValue(this.name.toUpperCase(Locale.ENGLISH), value.toString());
         }
-        
-        // for testing. prints out all of the values that
-        // were parsed from the reply.
-        //
-        /*
-        {
-            Iterator<String> iter = this.values.keySet().iterator();
-            
-            while (iter.hasNext()) {
-                String key = iter.next();
-                System.out.println(key + " = " + this.values.get(key));
-            }
-        }
-        */
         
         // if this whois response contains the key "WHOIS 
         // SERVER", then we should refer to the target
@@ -251,7 +253,7 @@ public class WhoIsRequestImpl implements WhoIsRequest {
             String referral = this.values.get("WHOIS SERVER");
             
             if (referral != null && referral.length() != 0 && 
-                    !this.referrals.containsKey(referral)) {
+                    !this.referrals.contains(referral)) {
                 this.whoisServer = referral;
                 this.doRequest();
             }
@@ -296,9 +298,9 @@ public class WhoIsRequestImpl implements WhoIsRequest {
      * and returns the reply.
      * 
      * @return Verbatim reply from the whois server.
-     * @throws WhoIsException 
+     * @throws IOException 
      */
-    protected String doRequestGetWhoIsResponse() throws WhoIsException, IOException {
+    protected String doRequestGetWhoIsResponse() throws IOException {
         StringBuilder sb = new StringBuilder(1000);
         Socket socket = null;
         
@@ -327,7 +329,7 @@ public class WhoIsRequestImpl implements WhoIsRequest {
             }
         }
         catch (IOException e) {
-            throw new WhoIsException("Failed to socket, " + e.getMessage());
+            throw e;
         }
         finally {
             IOUtils.close(socket);
@@ -341,28 +343,15 @@ public class WhoIsRequestImpl implements WhoIsRequest {
      * server list for the request name.
      * 
      * @return Appropriate whois server host name.
-     * @throws WhoIsException If the request name is invalid.
+     * @throws
      */
-    public String getWhoIsServer() throws WhoIsException {
+    public String getWhoIsServer() {
         String server = null;
         
         if (NetworkUtils.isDottedIPV4(this.name))
             server = this.servers.get("0");
-        else {
-            int ndx = this.name.lastIndexOf(".");
-            
-            // if there are no periods in the request name, 
-            // then it is definitely not a valid DNS name nor
-            // an IP address.
-            //
-            // if the period is at the end of the request name,
-            // then it is similarly invalid.
-            //
-            if (ndx == -1 || ndx == this.name.length() - 1)
-                throw new WhoIsException("Invalid request name.");
-            
-            server = this.servers.get(this.name.substring(ndx+1).toLowerCase());
-        }
+        else
+            server = this.servers.get(this.name.substring(this.name.lastIndexOf(".")+1).toLowerCase(Locale.ENGLISH));
         
         return server;
     }

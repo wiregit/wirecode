@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import org.limewire.net.SocketsManager;
 import org.limewire.net.WhoIsRequest;
-import org.limewire.net.WhoIsException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -223,14 +222,14 @@ public class WhoIsRequestFactoryImpl implements WhoIsRequestFactory {
     /**
      * Specify the request name (ie, "google.com", "64.233.187.99", etc.).
      */
-    public WhoIsRequest createWhoIsRequest (String name) throws WhoIsException {
+    public WhoIsRequest createWhoIsRequest (String name) {
         return new WhoIsRequestImpl(name, this.socketsManager.get(), this.defaultServers);
     }
     
     /**
      * Specify the request name and a server list.
      */
-    public WhoIsRequest createWhoIsRequest (String name, Map<String,String> servers) throws WhoIsException {
+    public WhoIsRequest createWhoIsRequest (String name, Map<String,String> servers) {
         return new WhoIsRequestImpl(name, this.socketsManager.get(), servers);
     }
     

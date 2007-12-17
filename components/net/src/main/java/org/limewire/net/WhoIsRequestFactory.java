@@ -10,8 +10,8 @@ import java.util.Map;
  */
 public interface WhoIsRequestFactory {
 
-    public WhoIsRequest createWhoIsRequest (String name) throws WhoIsException;
+    public WhoIsRequest createWhoIsRequest (String name);
     
-    public WhoIsRequest createWhoIsRequest (String name, Map<String,String> servers) throws WhoIsException;
+    public WhoIsRequest createWhoIsRequest (String name, Map<String,String> servers);
     
 }
