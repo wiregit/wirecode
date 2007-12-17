@@ -96,6 +96,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
@@ -313,6 +314,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
     @SuppressWarnings("unused")
     private final SecureMessageVerifier secureMessageVerifier;
+    
+    /** writers of statistics if any */
+    enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
+    private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
 
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -414,6 +419,14 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         if (observer == null && isOutgoing())
             throw new NullPointerException("must have an observer if outgoing!");
 
+        // add some heavier stats code in betas
+        if (LimeWireUtils.isBetaRelease() || LimeWireUtils.isTestingVersion()) {
+            statsWriters.put(StatsWriters.TOP,new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.DEFLATER, new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.DELAYER, new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.THROTTLE, new StatisticGatheringWriter());
+        }
+        
         Properties requestHeaders;
         HandshakeResponder responder;
 
@@ -677,13 +690,22 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         _outputRunner = messager;
         
         ChannelWriter writer = messager;
+        if (statsWriters.containsKey(StatsWriters.TOP))
+            writer = addWriter(writer, statsWriters.get(StatsWriters.TOP));
 
-        if (isWriteDeflated())
+        if (isWriteDeflated()) {
             writer = addWriter(writer, new DeflaterWriter(deflater));
+            if (statsWriters.containsKey(StatsWriters.DEFLATER))
+                writer = addWriter(writer, statsWriters.get(StatsWriters.DEFLATER));
+        }
         
         writer = addWriter(writer, new DelayedBufferWriter(1400));
+        if (statsWriters.containsKey(StatsWriters.DELAYER))
+            writer = addWriter(writer, statsWriters.get(StatsWriters.DELAYER));
+        
         writer = addWriter(writer, new ThrottleWriter(_nbThrottle));
-        writer = addWriter(writer, new StatisticGatheringWriter());
+        if (statsWriters.containsKey(StatsWriters.THROTTLE))
+            writer = addWriter(writer, statsWriters.get(StatsWriters.THROTTLE));
 
         ((NIOMultiplexor) getSocket()).setWriteObserver(messager);
     }
@@ -1318,6 +1340,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("pdn", getConnectionCapabilities().remostHostIsPassiveDHTNode());
         data.put("pan", getConnectionCapabilities().remostHostIsActiveDHTNode());
         data.put("myip", getConnectionCapabilities().getHeadersRead().props().getProperty(HeaderNames.REMOTE_IP));
+        
+        // add the writer stats if they exist
+        for (StatsWriters name : statsWriters.keySet())
+            data.put(name.toString(),statsWriters.get(name).inspect());
+        
         return data;
     }
 
