@@ -22,7 +22,7 @@ public class StatisticGatheringWriter extends AbstractChannelInterestWriter {
     private final long nanoStart = System.nanoTime();
     private final long msStart = System.currentTimeMillis();
     
-    private long amountWrote;
+    private long amountWrote, totalHandleWrite, totalInterestWrite, positiveInterestWrite;
     
     @Override
     public int write(ByteBuffer src) throws IOException {
@@ -36,6 +36,7 @@ public class StatisticGatheringWriter extends AbstractChannelInterestWriter {
     @Override
     public boolean handleWrite() throws IOException {
         handleWrites.add(System.nanoTime() - nanoStart);
+        totalHandleWrite++;
         return super.handleWrite();
     }
 
@@ -43,6 +44,9 @@ public class StatisticGatheringWriter extends AbstractChannelInterestWriter {
     public void interestWrite(WriteObserver observer, boolean status) {
         interestWrites.add(System.nanoTime() - nanoStart);
         interestWritesStatus.add(status);
+        totalInterestWrite++;
+        if (status)
+            positiveInterestWrite++;
         super.interestWrite(observer, status);
     }
     
@@ -55,6 +59,10 @@ public class StatisticGatheringWriter extends AbstractChannelInterestWriter {
         ret.put("iws", getPackedBool(interestWritesStatus));
         ret.put("wt",getPacked(writeTimes));
         ret.put("wa",getPacked(writeAmounts));
+        ret.put("totalWrote", amountWrote);
+        ret.put("totalHW", totalHandleWrite);
+        ret.put("totalIW", totalInterestWrite);
+        ret.put("totalIWP", positiveInterestWrite);
         return ret;
     }
     
