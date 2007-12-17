@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Maintains event listeners and broadcasts events to all listeners.
@@ -22,38 +23,32 @@ public class  WeakEventListenerList<E extends Event> implements WeakEventListene
     
     /** Adds the listener. */
     public void addListener(Object strongRef, EventListener<E> listener) {
-        synchronized(listenerMap){
-            List<EventListener<E>> listeners = listenerMap.get(strongRef);
-            if(listeners == null){
-                listeners = new ArrayList<EventListener<E>>();
-                listenerMap.put(strongRef, listeners);
-            }
-            listeners.add(listener);
+        List<EventListener<E>> listeners = listenerMap.get(strongRef);
+        if(listeners == null){
+            listeners = new CopyOnWriteArrayList<EventListener<E>>();
+            listenerMap.put(strongRef, listeners);
         }
+        listeners.add(listener);
     }
     
     /** Returns true if the listener was removed. */
     public boolean removeListener(Object strongRef, EventListener<E> listener) {
-        synchronized(listenerMap){
-            List<EventListener<E>> listeners = listenerMap.get(strongRef);
-            if(listeners != null) {
-                listeners.remove(listener);
-                if(listeners.isEmpty())
-                    listenerMap.remove(strongRef);
-                return true;
-            }
-            return false;
+        List<EventListener<E>> listeners = listenerMap.get(strongRef);
+        if(listeners != null) {
+            listeners.remove(listener);
+            if(listeners.isEmpty())
+                listenerMap.remove(strongRef);
+            return true;
         }
+        return false;
     }
     
     /** Broadcasts an event to all listeners. */
     public void broadcast(E event) {
-        synchronized(listenerMap){
-            for(List<EventListener<E>> listenerList : listenerMap.values()) {
-                if(listenerList != null) {
-                    for(EventListener<E> listener : listenerList) {
-                        listener.handleEvent(event);
-                    }
+        for(List<EventListener<E>> listenerList : listenerMap.values()) {
+            if(listenerList != null) {
+                for(EventListener<E> listener : listenerList) {
+                    listener.handleEvent(event);
                 }
             }
         }
