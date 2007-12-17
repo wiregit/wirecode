@@ -537,11 +537,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         }
         
         for (Runnable task : process) {
-            try {
-                task.run();
-            } catch (Throwable t) {
-                LOG.error("Throwable", t);
-            }
+            task.run();
         }
     }
     
