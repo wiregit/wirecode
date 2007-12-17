@@ -191,7 +191,8 @@ public abstract class AbstractDHTController implements DHTController {
                         case ADD_CACHED_CONTACT:
                         case UPDATE_CONTACT:
                             Contact node = event.getContact();
-                            forwardContact(node);
+                            if (!dht.getLocalNodeID().equals(node.getNodeID()))
+                                forwardContact(node);
                             break;
                     }
                 }

@@ -111,7 +111,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         connectionManager = injector.getInstance(ConnectionManager.class);
         
         dhtManager = injector.getInstance(DHTManager.class);
-        
         // Start and bootstrap a bunch of DHT Nodes
         k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         dhts = new ArrayList<MojitoDHT>();
@@ -194,7 +193,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
 
         // Connect a leaf Node to the Ultrapeer
         BlockingConnection out = createLeafConnection();
-        
         try {
             assertTrue(out.isOpen());
             assertTrue(out.isOutgoing());
@@ -235,7 +233,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             Thread.sleep(250);
             assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
             
-            
             // Bootstrap the Ultrapeer
             dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
             
@@ -267,10 +264,15 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             // That means our Ultrapeer may not hit all 2*k DHT Nodes
             // and will therefore send us less. 
             //assertEquals(2*k, nodes.size());
+           
             
             // See above
             assertTrue("k=" + k + ", size=" + nodes.size(), 
-                    nodes.size() >= k && nodes.size() <= 2*k);
+                    nodes.size() >= k && nodes.size() <= 2*k); 
+            
+            // the ultrapeer id should not be sent as ups are passive.
+            for (Contact c : nodes) 
+                assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getNodeID()));
         } finally {
             out.close();
         }
