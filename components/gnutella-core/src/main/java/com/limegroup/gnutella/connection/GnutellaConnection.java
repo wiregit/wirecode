@@ -23,7 +23,9 @@ import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.DeflaterWriter;
 import org.limewire.nio.channel.DelayedBufferWriter;
 import org.limewire.nio.channel.InflaterReader;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
+import org.limewire.nio.channel.StatisticGatheringWriter;
 import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
@@ -673,19 +675,22 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
         MessageWriter messager = new MessageWriter(_connectionStats, queue, this);
         _outputRunner = messager;
+        
         ChannelWriter writer = messager;
 
-        if (isWriteDeflated()) {
-            DeflaterWriter deflateWriter = new DeflaterWriter(deflater);
-            messager.setWriteChannel(deflateWriter);
-            writer = deflateWriter;
-        }
-        DelayedBufferWriter delayer = new DelayedBufferWriter(1400);
-        writer.setWriteChannel(delayer);
-        writer = delayer;
-        writer.setWriteChannel(new ThrottleWriter(_nbThrottle));
+        if (isWriteDeflated())
+            writer = addWriter(writer, new DeflaterWriter(deflater));
+        
+        writer = addWriter(writer, new DelayedBufferWriter(1400));
+        writer = addWriter(writer, new ThrottleWriter(_nbThrottle));
+        writer = addWriter(writer, new StatisticGatheringWriter());
 
         ((NIOMultiplexor) getSocket()).setWriteObserver(messager);
+    }
+    
+    private <T extends InterestWritableByteChannel & ChannelWriter> ChannelWriter addWriter(ChannelWriter chain, T newWriter) {
+        chain.setWriteChannel(newWriter);
+        return newWriter;
     }
 
     /*

@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 /** 
  * A simple channel that buffers data in a <code>ByteBuffer</code>. 
  */
-public abstract class AbstractChannelWriter implements ChannelWriter {
+public abstract class AbstractBufferChannelWriter implements ChannelWriter {
     
     /**
      * The sink channel we write to & interest ourselves on.
@@ -19,7 +19,7 @@ public abstract class AbstractChannelWriter implements ChannelWriter {
     
     protected volatile boolean shutdown;
     
-    public AbstractChannelWriter(int bufferSize) {
+    public AbstractBufferChannelWriter(int bufferSize) {
         buffer = ByteBuffer.allocate(bufferSize);
     }
     

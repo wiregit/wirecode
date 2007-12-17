@@ -15,7 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
-import org.limewire.nio.channel.AbstractChannelWriter;
+import org.limewire.nio.channel.AbstractBufferChannelWriter;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.statemachine.IOState;
@@ -343,7 +343,7 @@ public class InstantMessengerImpl implements InstantMessenger {
         }
     }
 
-    private class MessageSender extends AbstractChannelWriter {
+    private class MessageSender extends AbstractBufferChannelWriter {
 
         public MessageSender() {
             super(1024);
