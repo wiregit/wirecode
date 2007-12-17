@@ -44,16 +44,12 @@ public class BuddyListManager {
 	    }
     }
     
-    public void addListener(String strongRef, EventListener listener){
+    public void addListener(Object strongRef, EventListener listener){
         buddyManagerList.addListener(strongRef, listener);
     }
     
-    public void removeListener(String strongRef, EventListener listener){
+    public void removeListener(Object strongRef, EventListener listener){
         buddyManagerList.removeListener(strongRef, listener);
-    }
-    
-    public void broadcastListeners(Event e){
-        buddyManagerList.broadcast(e);
     }
     
     public ChatManager getManager(String name){
@@ -67,5 +63,14 @@ public class BuddyListManager {
         
         //close sockets and chatmanagers
         return manager.closeChatManager();
+    }
+    
+    @Override
+    protected void finalize() throws Throwable {
+        // TODO Auto-generated method stub
+        super.finalize();
+        
+        System.out.println("I AM FINALIZING!!");
+        Thread.dumpStack();
     }
 }

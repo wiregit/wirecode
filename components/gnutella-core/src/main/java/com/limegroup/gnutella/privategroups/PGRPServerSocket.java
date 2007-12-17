@@ -127,13 +127,10 @@ public class PGRPServerSocket{
                         
                         //need to concatenate the servername with the username because the server returns the username only
                         String usernameExt = data.getUsername()+ "@" + servername; 
-                        
                         LOG.debug("let's add a chatmanager now");                    
                         
-                        buddyListManager.addListener(usernameExt, new ChatWindowListener());
-                        
+                        buddyListManager.addListener(buddyListManager, new ChatWindowListener());
                         buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
-                        System.out.println("got a conversation request from: " + usernameExt + ". let's open gui window now");
                         LOG.debug("end of SocketHandler");
                     }
                 }     

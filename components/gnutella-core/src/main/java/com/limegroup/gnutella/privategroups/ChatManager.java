@@ -50,12 +50,12 @@ public class ChatManager{
         this.chatManagerKey = chatManagerKey;
     }
     
-    public void registerListener(String strongRef, EventListener listener){
+    public void registerListener(Object strongRef, EventListener listener){
         LOG.debug("ChatManager: registerListener");
         listeners.addListener(strongRef, listener);
     }
     
-    public void removeListener(String strongRef, EventListener listener){
+    public void removeListener(Object strongRef, EventListener listener){
         listeners.removeListener(strongRef, listener);
     }
     
@@ -145,6 +145,15 @@ public class ChatManager{
                 }
             }
         }   
+    }
+    
+    @Override
+    protected void finalize() throws Throwable {
+        // TODO Auto-generated method stub
+        super.finalize();
+        
+        System.out.println("I AM FINALIZING!!");
+        Thread.dumpStack();
     }
     
     private class ReaderThread implements Runnable{
