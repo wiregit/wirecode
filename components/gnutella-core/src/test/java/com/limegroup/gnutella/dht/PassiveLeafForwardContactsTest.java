@@ -120,6 +120,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             dht.start();
             
             if (i > 0) {
+                Thread.sleep(100);
                 dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
             }
             
@@ -258,6 +259,10 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             assertGreaterThanOrEquals(nodes.size(), count);
             
+            // the ultrapeer id should not be sent as ups are passive.
+            for (Contact c : nodes) 
+                assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getNodeID()));
+            
             // Note: This assert can sometimes fail! It's not a bug!
             // The reason for this lies in the lookup algorithm which
             // terminates as soon as it can't find any closer Nodes.
@@ -270,9 +275,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertTrue("k=" + k + ", size=" + nodes.size(), 
                     nodes.size() >= k && nodes.size() <= 2*k); 
             
-            // the ultrapeer id should not be sent as ups are passive.
-            for (Contact c : nodes) 
-                assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getNodeID()));
         } finally {
             out.close();
         }

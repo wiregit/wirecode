@@ -156,6 +156,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 dht.start();
                 
                 if (i > 0) {
+                    Thread.sleep(100);
                     dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
                     // the bootstrapper needs to ping every joining node.
                     first.ping(new InetSocketAddress("localhost", PORT+i)).get();
