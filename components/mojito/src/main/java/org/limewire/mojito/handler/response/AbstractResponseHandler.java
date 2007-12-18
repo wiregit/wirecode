@@ -367,7 +367,9 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * call() method
      */
     protected void setException(DHTException ex) {
-    	exchanger.setException(new ExecutionException(ex));
+        ExecutionException e = new ExecutionException(ex);
+        e.setStackTrace(ex.getStackTrace());
+    	exchanger.setException(e);
     }
     
     /**
