@@ -80,6 +80,7 @@ public class PassiveLeafTest extends DHTTestCase {
                 dht.start();
                 
                 if (i > 0) {
+                    Thread.sleep(100);
                     dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
                 }
                 
