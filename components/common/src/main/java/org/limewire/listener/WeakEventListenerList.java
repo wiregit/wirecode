@@ -21,14 +21,12 @@ import com.limegroup.gnutella.gui.privategroups.PrivateGroupsMessageWindow;
 //       or a ConcurrentMap.  (See Google Collection's ReferenceMap.)
 public class  WeakEventListenerList<E extends Event> implements WeakEventListenerSupport<E> {
     
-//    private  final Map<Object, List<EventListener<E>>> listenerMap;
     private  final ReferenceMap<Object, List<EventListener<E>>> listenerMap;
     private static final Log LOG = LogFactory.getLog(PrivateGroupsMessageWindow.class);
 
     public WeakEventListenerList() {
         
         this.listenerMap = new ReferenceMap(ReferenceType.WEAK, ReferenceType.STRONG, new ConcurrentHashMap<Object, List<EventListener<E>>>());
-//        this.listenerMap = new WeakHashMap<Object, List<EventListener<E>>>();
     }
     
     /** Adds the listener. */
@@ -42,27 +40,15 @@ public class  WeakEventListenerList<E extends Event> implements WeakEventListene
             
         }
         listeners.add(listener);
-        System.out.println("STREF: " + strongRef);
-        System.out.println("HELLO: " + listenerMap.isEmpty());
-        System.out.println("values: " + listenerMap.values());
         LOG.debug("after put value in the map");
     }
     
     /** Returns true if the listener was removed. */
     public boolean removeListener(Object strongRef, EventListener<E> listener) {
-        
-        System.out.println("REMOVE LISTENER: " + strongRef);
-        System.out.println("HELLO: " + listenerMap.isEmpty());
-        System.out.println("values: " + listenerMap.values());
-        
+   
         List<EventListener<E>> listeners = listenerMap.get(strongRef);
-        if(listeners != null) {
-            System.out.println("HELLO: " + listeners.isEmpty());
-            System.out.println("values: " + listeners);
-            
-            listeners.remove(listener);
-            System.out.println("values after remove: " + listeners);
-            
+        if(listeners != null) {  
+            listeners.remove(listener);            
             if(listeners.isEmpty())
                 listenerMap.remove(strongRef);
             return true;
@@ -73,9 +59,6 @@ public class  WeakEventListenerList<E extends Event> implements WeakEventListene
     /** Broadcasts an event to all listeners. */
     public void broadcast(E event) {
         LOG.debug("in WeakHashMap broadcast");
-        System.out.println("HELLO AGAIN: " + listenerMap.isEmpty());
-        System.out.println("HELLO AGAIN2: " + listenerMap.isEmpty());
-        System.out.println("LISTENER VALUES: " + listenerMap.values());
         for(List<EventListener<E>> listenerList : listenerMap.values()) {
            
             LOG.debug("for each list in listenerMap");
