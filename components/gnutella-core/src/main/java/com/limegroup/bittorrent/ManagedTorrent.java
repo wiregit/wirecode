@@ -49,8 +49,7 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
  * It keeps track of the known and connected peers and contains the
  * logic for starting and stopping the torrent.
  */
-public class ManagedTorrent implements Torrent, DiskManagerListener,
-BTLinkListener {
+public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListener {
 	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
@@ -233,7 +232,7 @@ BTLinkListener {
 		
 		diskInvoker.execute(new Runnable() {
 			public void run() {
-				
+			    
 				if (state.get() != TorrentState.QUEUED) // something happened, do not start.
 					return;
 				
@@ -1014,5 +1013,11 @@ BTLinkListener {
 	public boolean isSuspended() {
 		return isComplete() && linkManager.hasInterested() &&
 		!linkManager.hasUnchoked();
+	}
+	
+	/**
+	 * Call back to notify that secondary peer searching is complete
+	 */
+	void notifyPeerLocatorComplete(boolean success) {
 	}
 }
