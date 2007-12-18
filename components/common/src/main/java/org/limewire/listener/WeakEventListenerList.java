@@ -1,6 +1,7 @@
 package org.limewire.listener;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -21,7 +22,7 @@ import com.limegroup.gnutella.gui.privategroups.PrivateGroupsMessageWindow;
 //       or a ConcurrentMap.  (See Google Collection's ReferenceMap.)
 public class  WeakEventListenerList<E extends Event> implements WeakEventListenerSupport<E> {
     
-    private  final ReferenceMap<Object, List<EventListener<E>>> listenerMap;
+    private  final Map<Object, List<EventListener<E>>> listenerMap;
     private static final Log LOG = LogFactory.getLog(PrivateGroupsMessageWindow.class);
 
     public WeakEventListenerList() {
