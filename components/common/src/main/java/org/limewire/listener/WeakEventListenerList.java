@@ -1,13 +1,14 @@
 package org.limewire.listener;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.ReferenceType;
+import com.google.common.collect.ReferenceMap;
 import com.limegroup.gnutella.gui.privategroups.PrivateGroupsMessageWindow;
 
 
@@ -21,12 +22,12 @@ import com.limegroup.gnutella.gui.privategroups.PrivateGroupsMessageWindow;
 public class  WeakEventListenerList<E extends Event> implements WeakEventListenerSupport<E> {
     
 //    private  final Map<Object, List<EventListener<E>>> listenerMap;
-    private  final Map<Object, List<EventListener<E>>> listenerMap;
+    private  final ReferenceMap<Object, List<EventListener<E>>> listenerMap;
     private static final Log LOG = LogFactory.getLog(PrivateGroupsMessageWindow.class);
 
     public WeakEventListenerList() {
         
-        this.listenerMap = new ConcurrentHashMap<Object, List<EventListener<E>>>();
+        this.listenerMap = new ReferenceMap(ReferenceType.WEAK, ReferenceType.STRONG, new ConcurrentHashMap<Object, List<EventListener<E>>>());
 //        this.listenerMap = new WeakHashMap<Object, List<EventListener<E>>>();
     }
     
@@ -49,9 +50,19 @@ public class  WeakEventListenerList<E extends Event> implements WeakEventListene
     
     /** Returns true if the listener was removed. */
     public boolean removeListener(Object strongRef, EventListener<E> listener) {
+        
+        System.out.println("REMOVE LISTENER: " + strongRef);
+        System.out.println("HELLO: " + listenerMap.isEmpty());
+        System.out.println("values: " + listenerMap.values());
+        
         List<EventListener<E>> listeners = listenerMap.get(strongRef);
         if(listeners != null) {
+            System.out.println("HELLO: " + listeners.isEmpty());
+            System.out.println("values: " + listeners);
+            
             listeners.remove(listener);
+            System.out.println("values after remove: " + listeners);
+            
             if(listeners.isEmpty())
                 listenerMap.remove(strongRef);
             return true;

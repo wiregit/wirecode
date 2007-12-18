@@ -125,13 +125,13 @@ public class PGRPServerSocket{
                         LOG.debug("result is of type ServerIPQuery");
                         data = (ServerIPQuery) result;
                         
-                        //need to concatenate the servername with the username because the server returns the username only
-                        String usernameExt = data.getUsername()+ "@" + servername; 
-                        LOG.debug("let's add a chatmanager now");                    
                         
+                        LOG.debug("let's add a chatmanager now");                    
                         buddyListManager.addListener(buddyListManager, new ChatWindowListener());
-                        buddyListManager.addChatManager(usernameExt, localUsername, mySocket);
-                        LOG.debug("end of SocketHandler");
+                        
+                       //need to concatenate the servername with the username because the server returns the username only
+                        buddyListManager.addChatManager(data.getUsername()+ "@" + servername, localUsername, mySocket);
+                        LOG.debug("end of SocketHandler"); 
                     }
                 }     
             }    
