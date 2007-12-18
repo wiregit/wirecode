@@ -270,9 +270,9 @@ public class ExternalControl {
 		    port = ConnectionSettings.PORT.getValue();
         }   
 		try {
-			socket = socketsManager.connect(new InetSocketAddress(LOCALHOST, port), 500);
+			socket = socketsManager.connect(new InetSocketAddress(LOCALHOST, port), 1000);
 			InputStream istream = socket.getInputStream(); 
-			socket.setSoTimeout(500); 
+			socket.setSoTimeout(1000); 
 		    ByteReader byteReader = new ByteReader(istream);
 		    OutputStream os = socket.getOutputStream();
 		    OutputStreamWriter osw = new OutputStreamWriter(os);
