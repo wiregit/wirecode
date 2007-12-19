@@ -387,12 +387,13 @@ public class NodeAssigner {
         
         // Check if the DHT was disabled by somebody. If so shut it
         // down and return
-        if (!dhtManager.get().isEnabled()) {
+        /*if (!dhtManager.get().isEnabled()) {
             if (current != mode) {
                 switchDHTMode(current, mode);
             }
             return mode;
         }
+        */
         
         // If we're an Ultrapeer, connect to the DHT in passive mode or if 
         // we were connected as active node before, switch to passive mode

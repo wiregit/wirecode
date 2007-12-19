@@ -87,4 +87,8 @@ public class BTConnectionTriple {
     public boolean getSuccess() {
         return this.success;
     }
+    
+    public String toString() {
+        return "(" + this.ip + ":" + this.port + " - " + this.peerID + ")";
+    }
 }

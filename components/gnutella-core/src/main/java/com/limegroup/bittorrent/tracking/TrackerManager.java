@@ -189,9 +189,11 @@ public class TrackerManager {
                     lastFailureReason = response.FAILURE_REASON;
 				} else
 					t.recordSuccess();
-		} else 
-			t.recordFailure();
-
+		} else {
+		    t.recordFailure();
+		    torrent.trackerRequestFailed();
+		}
+		
 		if (torrent.isActive()) {
 			if (isHopeless() && torrent.shouldStop()) {
 				torrent.stopVoluntarily();

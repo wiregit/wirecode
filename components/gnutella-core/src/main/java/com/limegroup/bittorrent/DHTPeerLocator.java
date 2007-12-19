@@ -28,11 +28,10 @@ import com.limegroup.gnutella.dht.DHTManager;
 
 public class DHTPeerLocator implements PeerLocator {
     
-    public static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple", "LIME_BT_PEER");
+    public static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple", "PEER");
     
     private static final Log LOG = LogFactory.getLog(DHTPeerLocator.class);
     
-
     private final DHTManager          manager;
     private final ApplicationServices applicationServices;
     private final NetworkManager      networkManager;
@@ -68,20 +67,30 @@ public class DHTPeerLocator implements PeerLocator {
     }
         
     public void publish() {
+        System.out.println("hello");
+        
         synchronized (manager) {
             MojitoDHT dht = manager.getMojitoDHT();
         
+            System.out.println(dht);
+           
             if (dht == null || !dht.isBootstrapped()) {
                 return;
             }
+        
+            System.out.println("check 1");
             
             if (dht.isFirewalled()) {
                 return;
             }
+        
+            System.out.println("check 2");
             
             byte[] msg = getBTHost().getEncoded();
             KUID key = KUID.createWithBytes(torrentMeta.getInfoHash());
         
+            System.out.println(msg);
+            
             // TODO: possible retries?
             dht.put(key, new DHTValueImpl(BT_PEER_TRIPLE, Version.ZERO, msg));
         }
@@ -111,12 +120,15 @@ public class DHTPeerLocator implements PeerLocator {
     }
     
     private boolean dispatch(DHTValueEntity entity) {
+        System.out.println(entity.toString()); // REMOVE
         
         DHTValue value = entity.getValue();
             
         final BTConnectionTriple triple = new BTConnectionTriple(value.getValue());
         
         if (triple.getSuccess() && !isSelf(triple)) {
+            
+            System.out.println(triple); // REMOVE
             
             Runnable endpointAdder = new Runnable() {
                 public void run() {

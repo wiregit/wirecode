@@ -137,6 +137,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
     
     private final PeerLocatorFactory peerLocatorFactory;
     
+    private final PeerLocator peerLocator;
+    
 	/**
 	 * Constructs new ManagedTorrent
 	 * 
@@ -177,6 +179,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 		_peers = Collections.emptySet();
 		linkManager = linkManagerFactory.getLinkManager(); 
 		trackerManager = trackerManagerFactory.getTrackerManager(this);
+		
+		peerLocator = this.peerLocatorFactory.create(this, this.getMetaInfo());
 	}
 
 	/**
@@ -225,7 +229,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 	 * @see com.limegroup.bittorrent.Torrent#start()
 	 */
 	public void start() {
-		if (LOG.isDebugEnabled())
+	    
+	    if (LOG.isDebugEnabled())
 			LOG.debug("requesting torrent start", new Exception());
 
 		synchronized(state.getLock()) {
@@ -478,6 +483,14 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 			rechoke();
 	}
 
+    public void trackerRequestFailed() {
+        synchronized(state.getLock()) {
+            if (state.get() == TorrentState.SCRAPING)
+                state.set(TorrentState.WAITING_FOR_TRACKER);
+        }
+    }
+
+	
 	/**
 	 * Initializes some state relevant to the torrent
 	 */
@@ -1023,5 +1036,33 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 	 * Call back to notify that secondary peer searching is complete
 	 */
 	void notifyPeerLocatorComplete(boolean success) {
+	    
+	    System.out.println("Complete: " + success);
+	    
+	}
+	
+	// TODO: Remove
+	void michaelTest() {
+	    System.out.println("starting test... waiting...");
+
+	    
+	    (new Thread(new Runnable() { 
+	        public void run() {
+	            
+	            try {
+                    Thread.sleep(100000);
+                } catch (InterruptedException e) {}
+                
+	            
+	            peerLocator.publish();
+	            
+	            try {
+	                Thread.sleep(10000);
+	            } catch (InterruptedException e) {}
+	            
+	            
+	            peerLocator.startSearching();
+	        }
+	    })).start();
 	}
 }

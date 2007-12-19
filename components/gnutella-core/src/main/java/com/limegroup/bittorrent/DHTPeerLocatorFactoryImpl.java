@@ -20,11 +20,10 @@ public class DHTPeerLocatorFactoryImpl implements PeerLocatorFactory {
         this.networkManager      = networkManager;
     }    
     
-    public DHTPeerLocator create(ManagedTorrent torrent, BTMetaInfo torrentMeta) {
-        
+    public PeerLocator create(ManagedTorrent torrent, BTMetaInfo torrentMeta) {
+
         return new DHTPeerLocator(manager, applicationServices, networkManager, 
                                     torrent, torrentMeta);
         
     }
-
 }
