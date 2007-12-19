@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,9 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.limewire.i18n.I18nMarker;
-import org.limewire.service.ErrorService;
-import org.limewire.service.MessageService;
+import org.limewire.io.IOUtils;
 import org.limewire.util.FileUtils;
 
 
@@ -75,7 +74,11 @@ With the call sf.save(), setting.txt now includes:
  * If setting.txt didn't have the key MAX_MESSAGE_SIZE prior to the 
  * <code>createIntSetting</code> call, then the MAX_MESSAGE_SIZE is 0.
  */
-public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteSettingController {    
+public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteSettingController {
+    
+    /** Marked true in the event of an error in the load/save of any settings file */ 
+    private static boolean loadSaveFailureEncountered = false;   
+    
     /** Time interval, after which the accumulated information expires */
     private static final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
     
@@ -141,6 +144,27 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
     }
     
     /**
+     * Indicated if a failure has occurred for delayed reporting 
+     */
+    public static boolean hasLoadSaveFailure() {
+        return loadSaveFailureEncountered;
+    }
+
+    /**
+     * Saves a failure event for delayed reporting
+     */
+    private static void markFailure() {
+        loadSaveFailureEncountered = true;
+    }
+    
+    /**
+     * Resets the failure flag 
+     */
+    public static void resetLoadSaveFailure() {
+        loadSaveFailureEncountered = false;
+    }
+    
+    /**
      * Returns the iterator over the settings stored in this factory.
      *
      * LOCKING: The caller must ensure that this factory's monitor
@@ -165,35 +189,30 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
             return;
         }
         FileInputStream fis = null;
+        
         try {
+            
             fis = new FileInputStream(SETTINGS_FILE);
-            // Loading properties can cause problems if the
-            // file is invalid.  Ignore these invalid values,
-            // as the default properties will be used and that's
-            // a-OK.
+            
             try {
                 PROPS.load(fis);
-            } catch(IllegalArgumentException ignored) {
-            } catch(StringIndexOutOfBoundsException sioobe) {
-            } catch(IOException iox) {
-                String msg = iox.getMessage();
-                if(msg != null) {
-                    msg = msg.toLowerCase();
-                    if(msg.indexOf("corrupted") == -1)
-                        throw iox; 
-                }
-                //it was the "file or directory corrupted" exception
-                SETTINGS_FILE.delete();//revert to defaults
-                MessageService.showError(I18nMarker.marktr("A file used to save your preferences was corrupted. LimeWire will use default values."));
+            } catch(IllegalArgumentException e) {
+                // Ignored -- Use best guess
+            } catch(StringIndexOutOfBoundsException e) {
+                // Ignored -- Use best guess
+            } catch(IOException e) {
+                // Serious Problems --- Use defaults
+                markFailure();
             }
-        } catch(IOException e) {
-            // the default properties will be used -- this is fine and expected
+            
+        } catch(FileNotFoundException e) {
+            
+            if (SETTINGS_FILE.exists()) {
+                markFailure();
+            }
+
         } finally {
-            if( fis != null ) {
-                try {
-                    fis.close();
-                } catch(IOException e) {}
-            }
+            IOUtils.close(fis);
         }
         
         // Reload all setting values
@@ -258,7 +277,7 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
      * (Note that we cannot use 'store' since it's only available in 1.2)
      */
     public synchronized void save() {
-        Properties toSave = (Properties)PROPS.clone();
+        Properties toSave = (Properties) PROPS.clone();
 
         //Add any settings which require saving or aren't default
         for(Setting set : settings) {
@@ -276,27 +295,35 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
             File parent = SETTINGS_FILE.getParentFile();
             if(parent != null) {
                 parent.mkdirs();
-                FileUtils.setWriteable(parent);
             }
+            
             FileUtils.setWriteable(SETTINGS_FILE);
+            
+            if (SETTINGS_FILE.exists() && !SETTINGS_FILE.canRead()) {
+                SETTINGS_FILE.delete();
+            }
+            
             try {
                 out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
             } catch(IOException ioe) {
-                // try deleting the file & recreating the input stream.
-                SETTINGS_FILE.delete();
-                out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
+                // Try again.
+                if (SETTINGS_FILE.exists()) {
+                    SETTINGS_FILE.delete();
+                    out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
+                }
+                
+                markFailure();
             }
 
             // save the properties to disk.
-            toSave.store( out, HEADING);            
+            toSave.store(out, HEADING);        
+            
         } catch (IOException e) {
-            ErrorService.error(e);
+            
+            markFailure();
+            
         } finally {
-            if ( out != null ) {
-                try {
-                    out.close();
-                } catch (IOException ignored) {}
-            }
+            IOUtils.close(out);
         }
     }
     

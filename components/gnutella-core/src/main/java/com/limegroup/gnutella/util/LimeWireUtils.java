@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.setting.SettingsFactory;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
@@ -356,8 +357,11 @@ public final class LimeWireUtils {
         // If neither a), b) nor c) exist, then the former is created in preference of
         // of a), then b).        
         File userDir = CommonUtils.getUserHomeDir();
-        if(userDir != null && userDir.exists())
+
+        // Changing permissions without permission in Unix is rude
+        if(!OSUtils.isPOSIX() && userDir != null && userDir.exists())
             FileUtils.setWriteable(userDir);
+        
         File settingsDir = new File(userDir, LIMEWIRE_PREFS_DIR_NAME);
         if (OSUtils.isWindows()) {
             String appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath(SpecialLocations.APPLICATION_DATA));
@@ -416,10 +420,20 @@ public final class LimeWireUtils {
     public static boolean isTemporaryDirectoryInUse() {
         return temporaryDirectoryInUse;
     }
+    
+    /** Returns whether or not failures were encountered in load/save settings on startup. */
+    public static boolean hasSettingsLoadSaveFailures() {
+        return SettingsFactory.hasLoadSaveFailure();
+    }
+
 
     /** Sets whether or not a temporary directory is in use. */
     public static void setTemporaryDirectoryInUse(boolean inUse) {
         temporaryDirectoryInUse = inUse;
+    }
+    
+    public static void resetSettingsLoadSaveFailures() {
+        SettingsFactory.resetLoadSaveFailure();
     }
 }
 
