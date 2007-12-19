@@ -534,14 +534,14 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	 * Returns whether or not the status changed.
 	 */
 	boolean setIncoming(boolean canReceiveIncoming) {
-        if (_acceptedIncoming == canReceiveIncoming)
-            return false;
-
         if (canReceiveIncoming) {
             Future<?> resetter = resetterFuture;
             if (resetter != null)
                 resetter.cancel(false);
         }
+	    
+	    if (_acceptedIncoming == canReceiveIncoming)
+            return false;
         
 	    _acceptedIncoming = canReceiveIncoming;
 		activityCallback.get().acceptedIncomingChanged(canReceiveIncoming);
