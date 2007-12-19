@@ -76,7 +76,7 @@ public class UDPPushTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(AcceptorImpl.class).to(AcceptorStub.class);
+                bind(Acceptor.class).to(AcceptorStub.class);
             }
         });
         
