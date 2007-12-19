@@ -28,7 +28,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 
 public class DHTPeerLocator implements PeerLocator {
     
-    public static final DHTValueType BT_PEER_TRIP = DHTValueType.valueOf("LimeBT Peer Triple", "LIME_BT_PEER");
+    public static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple", "LIME_BT_PEER");
     
     private static final Log LOG = LogFactory.getLog(DHTPeerLocator.class);
     
@@ -41,8 +41,6 @@ public class DHTPeerLocator implements PeerLocator {
     private final ManagedTorrent torrent;
     private final ScheduledExecutorService invoker;
     
-    private PeerLocatorState state;
-
     DHTPeerLocator(DHTManager manager, ApplicationServices applicationServices,
                     NetworkManager networkManager, ManagedTorrent torrent, 
                     BTMetaInfo torrentMeta) {
@@ -55,8 +53,6 @@ public class DHTPeerLocator implements PeerLocator {
         this.torrentMeta = torrentMeta;
         
         this.invoker     = torrent.getNetworkScheduledExecutorService();
-        
-        this.state = PeerLocatorState.READY;
     }
     
     private BTConnectionTriple getBTHost() {
@@ -71,15 +67,6 @@ public class DHTPeerLocator implements PeerLocator {
                 && applicationServices.getMyBTGUID().equals(triple.getPeerID());
     }
         
-    public synchronized PeerLocatorState getState() {
-        return this.state;
-    }
-    
-    private synchronized void setState(PeerLocatorState state) {
-        this.state = state;
-    }
-    
-    
     public void publish() {
         synchronized (manager) {
             MojitoDHT dht = manager.getMojitoDHT();
@@ -96,21 +83,19 @@ public class DHTPeerLocator implements PeerLocator {
             KUID key = KUID.createWithBytes(torrentMeta.getInfoHash());
         
             // TODO: possible retries?
-            dht.put(key, new DHTValueImpl(BT_PEER_TRIP, Version.ZERO, msg));
+            dht.put(key, new DHTValueImpl(BT_PEER_TRIPLE, Version.ZERO, msg));
         }
     }
     
-    public synchronized Shutdownable startSearching() {
-        this.state = PeerLocatorState.SEARCHING;
-        
+    public Shutdownable startSearching() {
+      
         KUID key = KUID.createWithBytes(torrentMeta.getInfoHash());
-        EntityKey eKey = EntityKey.createEntityKey(key, BT_PEER_TRIP);
+        EntityKey eKey = EntityKey.createEntityKey(key, BT_PEER_TRIPLE);
         
         
         synchronized (manager) {
             MojitoDHT dht = manager.getMojitoDHT();
             if (dht == null || !dht.isBootstrapped()) {
-                this.state = PeerLocatorState.FAILURE;
                 return null;
             }
             
@@ -119,7 +104,6 @@ public class DHTPeerLocator implements PeerLocator {
             
             return new Shutdownable() {
                 public void shutdown() {
-                    setState(PeerLocatorState.CANCLED);
                     future.cancel(true);
                 }
             };
@@ -178,7 +162,7 @@ public class DHTPeerLocator implements PeerLocator {
                 }
                 
                 for (EntityKey entityKey : result.getEntityKeys()) {
-                    if (!entityKey.getDHTValueType().equals(BT_PEER_TRIP)) {
+                    if (!entityKey.getDHTValueType().equals(BT_PEER_TRIPLE)) {
                         continue;
                     }
                         
@@ -203,7 +187,6 @@ public class DHTPeerLocator implements PeerLocator {
                 }
             }
             
-            setState(success ? PeerLocatorState.SUCCESS : PeerLocatorState.FAILURE); 
             torrent.notifyPeerLocatorComplete(success);
         }
         
