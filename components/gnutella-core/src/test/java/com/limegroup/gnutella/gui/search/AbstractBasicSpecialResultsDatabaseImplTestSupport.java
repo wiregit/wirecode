@@ -94,4 +94,13 @@ abstract class AbstractBasicSpecialResultsDatabaseImplTestSupport extends LimeTe
     protected final void runTestWithStringZero(String buf, Getter getter) {
         runTestWithString(0, buf, getter);
     }
+    
+    /**
+     * Calls
+     * {@link #runTestWithString(Object, String, com.limegroup.gnutella.gui.search.AbstractBasicSpecialResultsDatabaseImplTest.Getter)}
+     * expecting a <code>-1</code> number.
+     */    
+    protected final void runTestWithStringNegativeOne(String buf, Getter getter) {
+        runTestWithString(-1, buf, getter);
+    }
 }

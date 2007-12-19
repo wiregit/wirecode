@@ -33,7 +33,7 @@ public class BasicSpecialResultsDatabaseImplLeniencyTest extends AbstractBasicSp
     }   
     
     public void testNoSize() throws IOException {
-        runTestWithStringZero(NO_SIZE, new Getter() {
+        runTestWithStringNegativeOne(NO_SIZE, new Getter() {
             public Object get(SearchResult sr) { return sr.getSize(); }
         });
     }
@@ -65,7 +65,7 @@ public class BasicSpecialResultsDatabaseImplLeniencyTest extends AbstractBasicSp
     }
     
     public void testBadSize() throws IOException {
-        runTestWithStringZero(BAD_SIZE, new Getter() {
+        runTestWithStringNegativeOne(BAD_SIZE, new Getter() {
             public Object get(SearchResult sr) { return sr.getSize(); }
         });
     }    
