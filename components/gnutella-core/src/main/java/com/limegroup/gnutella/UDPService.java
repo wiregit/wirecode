@@ -800,9 +800,9 @@ public class UDPService implements ReadWriteObserver {
                                 messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);
                             }
                         };
-                    backgroundExecutor.scheduleWithFixedDelay(checkThread, 
+                    backgroundExecutor.schedule(checkThread, 
                             acceptor.get().getWaitTimeAfterRequests(),
-                            0, TimeUnit.MILLISECONDS);
+                            TimeUnit.MILLISECONDS);
                 }
                 else
                     messageRouter.get().unregisterMessageListener(cbGuid.bytes(), ml);

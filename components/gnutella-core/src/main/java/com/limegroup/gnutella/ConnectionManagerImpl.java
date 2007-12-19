@@ -1857,7 +1857,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
             };
             _needPrefInterrupterScheduled = true;
             // shut off this guy if he didn't have any luck
-            backgroundExecutor.scheduleWithFixedDelay(interrupted, 15 * 1000, 0, TimeUnit.MILLISECONDS);
+            backgroundExecutor.schedule(interrupted, 15 * 1000, TimeUnit.MILLISECONDS);
         }
     }    
 

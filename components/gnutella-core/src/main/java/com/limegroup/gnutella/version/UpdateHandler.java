@@ -206,11 +206,11 @@ public class UpdateHandler implements HttpClientListener {
         
         // Try to update ourselves (re-use hosts for downloading, etc..)
         // at a specified interval.
-        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.schedule(new Runnable() {
             public void run() {
                 QUEUE.execute(new Poller());
             }
-        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0, TimeUnit.MILLISECONDS);
+        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(), TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -383,9 +383,9 @@ public class UpdateHandler implements HttpClientListener {
             
             updateInfo.setUpdateCommand(null);
             
-            backgroundExecutor.scheduleWithFixedDelay(new NotificationFailover(_lastId),
+            backgroundExecutor.schedule(new NotificationFailover(_lastId),
                     delay(clock.now(), uc.getTimestamp()),
-                    0, TimeUnit.MILLISECONDS);
+                    TimeUnit.MILLISECONDS);
         } else if (isMyUpdateDownloaded(updateInfo)) {
             LOG.debug("there is an update for me, but I happen to have it on disk");
             activityCallback.get().updateAvailable(updateInfo);
@@ -407,11 +407,11 @@ public class UpdateHandler implements HttpClientListener {
             if (LOG.isDebugEnabled())
                 LOG.debug("scheduling http failover in "+when);
             
-            backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+            backgroundExecutor.schedule(new Runnable() {
                 public void run() {
                     launchHTTPUpdate();
                 }
-            }, when, 0, TimeUnit.MILLISECONDS);
+            }, when, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -697,7 +697,7 @@ public class UpdateHandler implements HttpClientListener {
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);
-                        backgroundExecutor.scheduleWithFixedDelay(new NotificationFailover(_lastId),delay,0, TimeUnit.MILLISECONDS);
+                        backgroundExecutor.schedule(new NotificationFailover(_lastId),delay,TimeUnit.MILLISECONDS);
                     } else
                         activityCallback.get().updateAvailable(updateInfo);
                 }
@@ -778,11 +778,11 @@ public class UpdateHandler implements HttpClientListener {
         public void run() {
             downloadUpdates(_updatesToDownload, null);
             killHopelessUpdates(_updatesToDownload);
-            backgroundExecutor.scheduleWithFixedDelay( new Runnable() {
+            backgroundExecutor.schedule( new Runnable() {
                 public void run() {
                     QUEUE.execute(new Poller());
                 }
-            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0, TimeUnit.MILLISECONDS);
+            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(), TimeUnit.MILLISECONDS);
         }
     }
     

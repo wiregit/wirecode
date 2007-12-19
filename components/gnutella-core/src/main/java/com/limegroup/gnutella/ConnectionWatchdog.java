@@ -111,7 +111,7 @@ public final class ConnectionWatchdog {
             snapshot.put(c, new ConnectionState(c));
         }
         
-        backgroundExecutor.scheduleWithFixedDelay(new DudChecker(snapshot, false), EVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
+        backgroundExecutor.schedule(new DudChecker(snapshot, false), EVALUATE_TIME, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -140,7 +140,7 @@ public final class ConnectionWatchdog {
             messageRouter.get().sendPingRequest(pingRequestFactory.createPingRequest((byte)1), c);
         }
         
-        backgroundExecutor.scheduleWithFixedDelay(new DudChecker(snapshot, true), REEVALUATE_TIME, 0, TimeUnit.MILLISECONDS);
+        backgroundExecutor.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, TimeUnit.MILLISECONDS);
     }
 
     /** Returns an iterable of all initialized connections in this, including

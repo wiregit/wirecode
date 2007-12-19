@@ -634,7 +634,7 @@ public class DownloadWorker {
             _currentState.setState(DownloadState.QUEUED);
         }
 
-        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.schedule(new Runnable() {
             public void run() {
                 LOG.debug("Queue time up");
 
@@ -653,7 +653,7 @@ public class DownloadWorker {
                             }
                         });
             }
-        }, status.getQueuePollTime(), 0, TimeUnit.MILLISECONDS);
+        }, status.getQueuePollTime(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -785,12 +785,12 @@ public class DownloadWorker {
             _manager.registerPushObserver(observer, details);
             pushDownloadManager.get().sendPush(_rfd,
                     observer);
-            backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+            backgroundExecutor.schedule(new Runnable() {
                 public void run() {
                     _manager.unregisterPushObserver(details, true);
                 }
             }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME
-                    : PUSH_CONNECT_TIME, 0, TimeUnit.MILLISECONDS);
+                    : PUSH_CONNECT_TIME, TimeUnit.MILLISECONDS);
         } else {
             finishWorker();
         }

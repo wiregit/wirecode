@@ -2740,7 +2740,7 @@ public class ManagedDownloader extends AbstractDownloader
             }
         };
         
-        backgroundExecutor.scheduleWithFixedDelay(r,0,0, TimeUnit.MILLISECONDS);
+        backgroundExecutor.execute(r);
 
     }
             

@@ -184,7 +184,7 @@ public class UDPPingerImpl implements UDPPinger {
                 };
          
             // Purge after 20 seconds.
-            backgroundExecutor.scheduleWithFixedDelay(udpMessagePurger, expireTime, 0, TimeUnit.MILLISECONDS);
+            backgroundExecutor.schedule(udpMessagePurger, expireTime, TimeUnit.MILLISECONDS);
         }
     }
     

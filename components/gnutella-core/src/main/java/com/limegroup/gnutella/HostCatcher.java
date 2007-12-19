@@ -1329,13 +1329,13 @@ public class HostCatcher {
         
         // schedule new runnable to clear the set of endpoints that
         // were pinged while trying to connect
-        backgroundExecutor.scheduleWithFixedDelay(
+        backgroundExecutor.schedule(
                 new Runnable() {
                     public void run() {
                         uniqueHostPinger.resetData();
                     }
                 },
-                PONG_RANKING_EXPIRE_TIME,0, TimeUnit.MILLISECONDS);
+                PONG_RANKING_EXPIRE_TIME, TimeUnit.MILLISECONDS);
     }
 
     /**

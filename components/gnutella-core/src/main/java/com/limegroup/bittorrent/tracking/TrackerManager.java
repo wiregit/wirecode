@@ -157,7 +157,7 @@ public class TrackerManager {
 		LOG.debug("scheduling new tracker request");
 		if (scheduledAnnounce != null)
 			scheduledAnnounce.cancel(true);
-		scheduledAnnounce = backgroundExecutor.scheduleWithFixedDelay(scheduled, minDelay, 0, TimeUnit.MILLISECONDS);
+		scheduledAnnounce = backgroundExecutor.schedule(scheduled, minDelay, TimeUnit.MILLISECONDS);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	

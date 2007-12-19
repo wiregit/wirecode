@@ -985,11 +985,11 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
         md.initialize(downloadReferencesFactory.create(md));
 		waiting.add(md);
         callback(md).addDownload(md);
-        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.execute(new Runnable() {
         	public void run() {
         		writeSnapshot(); // Save state for crash recovery.
         	}
-        },0,0, TimeUnit.MILLISECONDS);
+        });
     }
     
     /**

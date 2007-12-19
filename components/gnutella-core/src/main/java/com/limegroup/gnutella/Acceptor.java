@@ -737,8 +737,8 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                                 networkManager.incomingStatusChanged();
                         }
                     };
-                    resetterFuture = backgroundExecutor.scheduleWithFixedDelay(resetter, 
-                                           waitTimeAfterRequests, 0, TimeUnit.MILLISECONDS);
+                    resetterFuture = backgroundExecutor.schedule(resetter, 
+                                           waitTimeAfterRequests, TimeUnit.MILLISECONDS);
                 } 
             } 
         }
