@@ -17,6 +17,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
@@ -435,6 +436,13 @@ BTLinkListener {
 		if (!notInterested.isChoked())
 			rechoke();
 	}
+	
+	public void trackerRequestFailed() {
+        synchronized(state.getLock()) {
+            if (state.get() == TorrentState.SCRAPING)
+                state.set(TorrentState.WAITING_FOR_TRACKER);
+        }
+    }
 
 	/**
 	 * Initializes some state relevant to the torrent
