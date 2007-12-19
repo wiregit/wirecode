@@ -13,6 +13,8 @@ public class ServerIPQuery extends IQ {
 
     private String remoteUsername;
     private String remoteIPAddress;
+    private String remoteIPPort;
+    private String remoteIPPublicKey;
 
     
     
@@ -37,6 +39,44 @@ public class ServerIPQuery extends IQ {
     public void setUsername(String username) {
         this.remoteUsername = username;
     }
+    
+    
+    /**
+     * Returns the remote port, or <tt>null</tt> if the port hasn't been sent.
+     *
+     * @return the remote port.
+     */
+    public String getPort() {
+        return remoteIPPort;
+    }
+    
+    /**
+     * Sets the remote port.
+     *
+     * @param username the remote port.
+     */
+    public void setPort(String port) {
+        this.remoteIPPort = port;
+    }
+    
+    /**
+     * Returns the remote public key, or <tt>null</tt> if the public key hasn't been sent.
+     *
+     * @return the remote public key.
+     */
+    public String getPublicKey() {
+        return remoteIPPublicKey;
+    }
+    
+    /**
+     * Sets the remote public key.
+     *
+     * @param username the remote public key.
+     */
+    public void setPublicKey(String publicKey) {
+        this.remoteIPPublicKey = publicKey;
+    }
+  
 
     public String getChildElementXML() {
         StringBuilder buf = new StringBuilder();
@@ -56,6 +96,24 @@ public class ServerIPQuery extends IQ {
             }
             else {
                 buf.append("<ipAddress>").append(StringUtils.escapeForXML(remoteIPAddress)).append("</ipAddress>");
+            }
+        }
+        
+        if (remoteIPPort != null) {
+            if (remoteIPPort.equals("")) {
+                buf.append("<port/>");
+            }
+            else {
+                buf.append("<port>").append(StringUtils.escapeForXML(remoteIPPort)).append("</port>");
+            }
+        }
+        
+        if (remoteIPPublicKey != null) {
+            if (remoteIPPublicKey.equals("")) {
+                buf.append("<publicKey/>");
+            }
+            else {
+                buf.append("<publicKey>").append(StringUtils.escapeForXML(remoteIPPublicKey)).append("</publicKey>");
             }
         }
 

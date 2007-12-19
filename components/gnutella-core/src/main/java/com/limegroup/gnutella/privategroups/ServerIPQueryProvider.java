@@ -90,6 +90,8 @@ public class ServerIPQueryProvider implements IQProvider {
         public void initializeFields() {
             
             serverIPQueryValue.setUsername(getTagContents("username"));
+            serverIPQueryValue.setPort(getTagContents("port"));
+            serverIPQueryValue.setPublicKey(getTagContents("publicKey"));
         }
 
         private String getTagContents(String tag) {
