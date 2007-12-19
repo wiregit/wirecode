@@ -10,7 +10,7 @@ public class HTTPConnectionData {
     private boolean firewalled;
     
     private boolean push;
-
+    
     public boolean isLocal() {
         return local;
     }

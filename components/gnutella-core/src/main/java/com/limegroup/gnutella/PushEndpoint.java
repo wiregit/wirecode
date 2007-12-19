@@ -18,6 +18,7 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.PushEndpointCache.CachedPushEndpoint;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 
 /**
@@ -136,7 +137,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     
     private final PushEndpointCache pushEndpointCache;
 
-    PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features,
+    public PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features,
             int version, IpPort addr, PushEndpointCache pushEndpointCache) {
         this.pushEndpointCache = pushEndpointCache;
         
@@ -215,7 +216,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		}
         
         // If we're including TLS, then add a byte for which proxies support it.
-        BitNumbers bn = new BitNumbers(Math.min(proxies.size(), MAX_PROXIES));
+        
         int pptlsIdx = offset;
         int i=0;
         if(includeTLS) {
@@ -239,9 +240,6 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
             if(i >= MAX_PROXIES)
                 break;
             
-            if(includeTLS && ppi instanceof Connectable && ((Connectable)ppi).isTLSCapable())
-                bn.set(i);
-            
 			byte [] addr = ppi.getInetAddress().getAddress();
 			short port = (short)ppi.getPort();
 			
@@ -252,7 +250,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 			i++;
 		}
         
-        // insert the tls indexes & turn the feature on!
+        // insert the tls indices & turn the feature on if TLS should be included
+        BitNumbers bn = includeTLS ? HTTPHeaderUtils.getTLSIndices(proxies, (Math.min(proxies.size(), MAX_PROXIES))) : BitNumbers.EMPTY_BN;
         if(!bn.isEmpty()) {
             byte[] tlsIndexes = bn.toByteArray();
             assert tlsIndexes.length == 1;
@@ -277,6 +276,9 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    return ret;
 	}
 	
+	/**
+	 * Returns the GUID of the client that can be reached through the pushproxies.
+	 */
     public byte [] getClientGUID() {
 		return _clientGUID;
 	}
@@ -390,32 +392,15 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		
 		}
 		
-		int proxiesWritten=0;
-        int proxyIndex = httpString.length();
         Set<? extends IpPort> proxies = getProxies();
-        BitNumbers bn = new BitNumbers(proxies.size());
-        for(IpPort cur : proxies) {
-            if(proxiesWritten >= MAX_PROXIES)
-                break;
-			
-            if(cur instanceof Connectable && ((Connectable)cur).isTLSCapable())
-                bn.set(proxiesWritten);
-                
-            // use getInetAddress.getAddress to guarantee it's in bitform
-			httpString.append(NetworkUtils.ip2string(
-				        cur.getInetAddress().getAddress()));
-			httpString.append(":").append(cur.getPort()).append(";");
-			proxiesWritten++;
-		}
-        
-        if(!bn.isEmpty())
-            httpString.insert(proxyIndex, PPTLS_HTTP + "=" + bn.toHexString() + ";");
-		
-		//trim the ; at the end
-		httpString.deleteCharAt(httpString.length()-1);
-		
+        if (!proxies.isEmpty()) {
+            httpString.append(HTTPHeaderUtils.encodePushProxies(proxies, ";", PushEndpoint.MAX_PROXIES));
+        } else {
+            //trim the ; at the end
+            httpString.deleteCharAt(httpString.length()-1);
+        }
+
 		return httpString.toString();
-		
 	}
 	
 	/**
@@ -447,11 +432,6 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     public InetAddress getInetAddress() {
         IpPort addr = getIpPort();
         return addr != null ? addr.getInetAddress() : null;
-    }
-    
-    /** Returns the GUID for this PushEndpoint. */
-    public byte[] getGuid() {
-        return _guid.bytes();
     }
     
     /**

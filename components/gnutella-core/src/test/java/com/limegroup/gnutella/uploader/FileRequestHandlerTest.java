@@ -148,5 +148,27 @@ public class FileRequestHandlerTest extends LimeTestCase {
         assertTrue(uploader.isChatEnabled());
         assertTrue(uploader.isBrowseHostEnabled());
     }
+    
+    /**
+     * Tests if browse host is enabled on the uploader if the downloader sent
+     * its push endpoint information along in the X-FWT-Node header.  
+     */
+    public void testIsFWTBrowseHostEnabled() throws Exception {
+        HTTPUploadSession session = new HTTPUploadSession(null, null, null);
+        HTTPUploader uploader = new HTTPUploader("filename", session);
+        uploader.setFileDesc(fd);
+        sessionManager.uploader = uploader;
+        HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
+
+        HttpRequest request = new BasicHttpRequest("GET", "/get/0/abc1.txt");
+        
+        String pushEndpoint = "FF9EEA9E8B2E1D737828EFD1B7DAC500;129.168.0.1:5555";
+        
+        request.addHeader(HTTPHeaderName.FW_NODE_INFO.create(pushEndpoint));
+        fileRequestHandler.handle(request, response, new BasicHttpContext(null));
+        
+        assertTrue(uploader.isBrowseHostEnabled());
+        assertEquals(pushEndpoint, uploader.getPushEndpoint().httpStringValue());
+    }
 
 }

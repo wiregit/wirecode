@@ -1,25 +1,21 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 @Singleton
 public class PushEndpointCacheImpl implements PushEndpointCache {
@@ -61,32 +57,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
      * @param httpString comma-separated list of proxies and possible proxy features
      */
     public void overwriteProxies(byte [] guid, String httpString) {
-        Set<IpPort> newSet = new HashSet<IpPort>();
-        StringTokenizer tok = new StringTokenizer(httpString,",");
-        BitNumbers tlsProxies = null;
-        while(tok.hasMoreTokens()) {
-            String proxy = tok.nextToken().trim();
-            // only read features when we haven't read proxies yet.
-            if(newSet.size() == 0 && proxy.startsWith(PushEndpoint.PPTLS_HTTP)) {
-                try {
-                    String value = HTTPUtils.parseValue(proxy);
-                    if(value != null) {
-                        try {
-                            tlsProxies = new BitNumbers(value);
-                        } catch(IllegalArgumentException ignored) {}
-                    }
-                } catch(IOException invalid) {}
-                continue;
-            }
-            
-            boolean tlsCapable = tlsProxies != null && tlsProxies.isSet(newSet.size());
-            try {
-                newSet.add(NetworkUtils.parseIpPort(proxy, tlsCapable));
-            } catch(IOException ohWell){
-                tlsProxies = null; // unset, since index may be off.
-            }
-        }
-    
+        Set<? extends Connectable> newSet = HTTPHeaderUtils.decodePushProxies(httpString, ",");
         overwriteProxies(guid, newSet);
     }
 

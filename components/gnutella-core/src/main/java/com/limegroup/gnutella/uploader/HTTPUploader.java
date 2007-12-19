@@ -8,6 +8,7 @@ import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocTracker;
@@ -40,6 +41,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     private String method;
 	
     private HttpResponse lastResponse;
+
+    private PushEndpoint pushEndpoint;
 
     public HTTPUploader(String fileName, HTTPUploadSession session) {
         super(fileName, session);
@@ -234,7 +237,14 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     @Override
     public boolean isBrowseHostEnabled() {
-        return super.isBrowseHostEnabled() && getGnutellaPort() != -1;
+        return super.isBrowseHostEnabled() && (getGnutellaPort() != -1 || pushEndpoint != null);
     }
-    
+
+    public void setPushEndpoint(PushEndpoint pushEndpoint) {
+        this.pushEndpoint = pushEndpoint;
+    }
+
+    public PushEndpoint getPushEndpoint() {
+        return pushEndpoint;
+    }
 }

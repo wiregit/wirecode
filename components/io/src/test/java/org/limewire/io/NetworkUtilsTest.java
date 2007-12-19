@@ -1,5 +1,6 @@
 package org.limewire.io;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -757,6 +758,34 @@ public class NetworkUtilsTest extends BaseTestCase {
         assertFalse(NetworkUtils.isAddress("host::"));
         assertFalse(NetworkUtils.isAddress(""));
         assertFalse(NetworkUtils.isAddress(":123"));
+    }
+    
+    public void testParseInvalidIpPort() throws Exception {
+        try {
+            NetworkUtils.parseIpPort(":4545", false);
+            fail("should not have parsed successfully");
+        } catch (IOException ie) { }
+        try {
+            NetworkUtils.parseIpPort("127.0.0.1:", false);
+            fail("should not have parsed successfully");
+        } catch (IOException ie) { }
+    }
+    
+    public void testParsePortIp() throws Exception {
+        // valid one
+        IpPort ipPort = NetworkUtils.parsePortIp("5454:127.0.0.1");
+        assertEquals(5454, ipPort.getPort());
+        assertEquals("127.0.0.1", ipPort.getAddress());
+        
+        // invalid ones
+        try {
+            NetworkUtils.parsePortIp("5454:");
+            fail("should not have parsed successfully, empty host part");
+        } catch (IOException ie) { }
+        try {
+            NetworkUtils.parsePort(":127.0.0.1");
+            fail("should not have parsed successfully, empty host part");
+        } catch (IOException ie) { }
     }
     
     private static void assertNotTLS(IpPort ipp) {

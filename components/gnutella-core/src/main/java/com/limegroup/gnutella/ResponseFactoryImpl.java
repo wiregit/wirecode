@@ -16,7 +16,6 @@ import java.util.StringTokenizer;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.NameValue;
-import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
@@ -39,6 +38,7 @@ import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.messages.IntervalEncoder;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -417,17 +417,9 @@ public class ResponseFactoryImpl implements ResponseFactory {
 
         GGEP info = new GGEP(true);
         if (ggep.locations.size() > 0) {
-            BitNumbers bn = new BitNumbers(ggep.locations.size());
-            int i = 0;
-            for (IpPort ipp : ggep.locations) {
-                if (ipp instanceof Connectable
-                        && ((Connectable) ipp).isTLSCapable())
-                    bn.set(i);
-                i++;
-            }
-
             byte[] output = NetworkUtils.packIpPorts(ggep.locations);
             info.put(GGEP.GGEP_HEADER_ALTS, output);
+            BitNumbers bn = HTTPHeaderUtils.getTLSIndices(ggep.locations);
             if (!bn.isEmpty())
                 info.put(GGEP.GGEP_HEADER_ALTS_TLS, bn.toByteArray());
         }

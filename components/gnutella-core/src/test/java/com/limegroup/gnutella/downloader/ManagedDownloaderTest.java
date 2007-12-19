@@ -693,6 +693,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final Provider<CreationTimeCache> creationTimeCache;
         private final BandwidthManager bandwidthManager;
         private final Provider<PushEndpointCache> pushEndpointCache;
+        private final PushEndpointFactory pushEndpointFactory;
 
         @Inject
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
@@ -700,20 +701,22 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 DownloadManager downloadManager,
                 Provider<CreationTimeCache> creationTimeCache,
                 BandwidthManager bandwidthManager,
-                Provider<PushEndpointCache> pushEndpointCache) {
+                Provider<PushEndpointCache> pushEndpointCache,
+                PushEndpointFactory pushEndpointFactory) {
             this.networkManager = networkManager;
             this.alternateLocationFactory = alternateLocationFactory;
             this.downloadManager = downloadManager;
             this.creationTimeCache = creationTimeCache;
             this.bandwidthManager = bandwidthManager;
             this.pushEndpointCache = pushEndpointCache;
+            this.pushEndpointFactory = pushEndpointFactory;
         }
         
         public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
                 VerifyingFile incompleteFile, boolean inNetwork) {
             return new AltLocDownloaderStub(rfd, incompleteFile,
                     networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache.get(), bandwidthManager, pushEndpointCache);
+                    creationTimeCache.get(), bandwidthManager, pushEndpointCache, pushEndpointFactory);
         }
 
     }
@@ -725,9 +728,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	public AltLocDownloaderStub(RemoteFileDesc rfd, VerifyingFile incompleteFile,
                 NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                 DownloadManager downloadManager, CreationTimeCache creationTimeCache,
-                BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache) {
+                BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
+                PushEndpointFactory pushEndpointFactory) {
             super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache, bandwidthManager, pushEndpointCache);
+                    creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory);
             this.rfd = rfd;
         }
     	

@@ -10,6 +10,7 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 
@@ -22,6 +23,7 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
     private final Provider<CreationTimeCache> creationTimeCache;
     private final BandwidthManager bandwidthManager;
     private final Provider<PushEndpointCache> pushEndpointCache;
+    private final PushEndpointFactory pushEndpointFactory;
 
 
     /**
@@ -37,13 +39,15 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
             DownloadManager downloadManager,
             Provider<CreationTimeCache> creationTimeCache,
             BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache) {
+            Provider<PushEndpointCache> pushEndpointCache,
+            PushEndpointFactory pushEndpointFactory) {
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
         this.creationTimeCache = creationTimeCache;
         this.bandwidthManager = bandwidthManager;
         this.pushEndpointCache = pushEndpointCache;
+        this.pushEndpointFactory = pushEndpointFactory;
     }
     
 
@@ -54,7 +58,7 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
             VerifyingFile incompleteFile, boolean inNetwork) {
         return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork, true,
                 networkManager, alternateLocationFactory, downloadManager,
-                creationTimeCache.get(), bandwidthManager, pushEndpointCache);
+                creationTimeCache.get(), bandwidthManager, pushEndpointCache, pushEndpointFactory);
     }
 
 

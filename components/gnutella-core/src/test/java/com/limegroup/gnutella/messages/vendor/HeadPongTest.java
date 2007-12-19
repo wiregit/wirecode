@@ -148,15 +148,15 @@ public class HeadPongTest extends LimeTestCase {
         assertFalse(peIterator.hasNext());
         PushEndpoint m1, m2;
         // figure out which order the set put the PEs in...
-        if(Arrays.equals(read1.getGuid(), g1)) {
+        if(Arrays.equals(read1.getClientGUID(), g1)) {
             m1 = read1;
             m2 = read2;
         } else {
             m1 = read2;
             m2 = read1;
         }
-        assertEquals(g1, m1.getGuid());
-        assertEquals(g2, m2.getGuid());
+        assertEquals(g1, m1.getClientGUID());
+        assertEquals(g2, m2.getClientGUID());
         assertEquals(1, m1.getProxies().size());
         assertEquals(2, m2.getProxies().size());
         
@@ -242,15 +242,15 @@ public class HeadPongTest extends LimeTestCase {
         assertFalse(peIterator.hasNext());
         PushEndpoint m1, m2;
         // figure out which order the set put the PEs in...
-        if(Arrays.equals(read1.getGuid(), g1)) {
+        if(Arrays.equals(read1.getClientGUID(), g1)) {
             m1 = read1;
             m2 = read2;
         } else {
             m1 = read2;
             m2 = read1;
         }
-        assertEquals(g1, m1.getGuid());
-        assertEquals(g2, m2.getGuid());
+        assertEquals(g1, m1.getClientGUID());
+        assertEquals(g2, m2.getClientGUID());
         assertEquals(1, m1.getProxies().size());
         assertEquals(2, m2.getProxies().size());
         
@@ -334,15 +334,15 @@ public class HeadPongTest extends LimeTestCase {
         assertFalse(peIterator.hasNext());
         PushEndpoint m1, m2;
         // figure out which order the set put the PEs in...
-        if(Arrays.equals(read1.getGuid(), g1)) {
+        if(Arrays.equals(read1.getClientGUID(), g1)) {
             m1 = read1;
             m2 = read2;
         } else {
             m1 = read2;
             m2 = read1;
         }
-        assertEquals(g1, m1.getGuid());
-        assertEquals(g2, m2.getGuid());
+        assertEquals(g1, m1.getClientGUID());
+        assertEquals(g2, m2.getClientGUID());
         assertEquals(1, m1.getProxies().size());
         assertEquals(2, m2.getProxies().size());
         
@@ -1120,7 +1120,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(0, pe3.supportsFWTVersion());
         
         // Ok, it's easy enough to test the FWT one, since there's only one.
-        assertEquals(peFwtGUID.bytes(), pe2.getGuid());
+        assertEquals(peFwtGUID.bytes(), pe2.getClientGUID());
         assertEquals("20.21.23.23", pe2.getAddress());
         assertEquals(10, pe2.getPort());
         Set<? extends IpPort> proxies = pe2.getProxies();
@@ -1147,14 +1147,14 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(0, copy.size());
         
         // Setup so that pe1 is peGUID && pe3 == tlsGUID
-        if(!Arrays.equals(pe1.getGuid(), peGUID.bytes())) {
+        if(!Arrays.equals(pe1.getClientGUID(), peGUID.bytes())) {
             PushEndpoint tmp = pe1;
             pe1 = pe3;
             pe3 = tmp;
         }
         
-        assertEquals(pe1.getGuid(), peGUID.bytes());
-        assertEquals(pe3.getGuid(), peTlsGUID.bytes());
+        assertEquals(pe1.getClientGUID(), peGUID.bytes());
+        assertEquals(pe3.getClientGUID(), peTlsGUID.bytes());
         
         // PE1 only has 1 proxy, and it's not TLS capable.
         proxies = pe1.getProxies();
@@ -1253,7 +1253,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(-1, in.read());
         
         assertEquals(1, pe1.supportsFWTVersion());
-        assertEquals(peFwtGUID.bytes(), pe1.getGuid());
+        assertEquals(peFwtGUID.bytes(), pe1.getClientGUID());
         assertEquals("20.21.23.23", pe1.getAddress());
         assertEquals(10, pe1.getPort());
         Set<? extends IpPort> proxies = pe1.getProxies();

@@ -19,7 +19,6 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
-import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
@@ -44,6 +43,7 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -1106,7 +1106,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 int numWritten = 0;
-                BitNumbers bn = new BitNumbers(Math.min(MAX_PROXIES, proxies.size()));
+                BitNumbers bn = HTTPHeaderUtils.getTLSIndices(proxies, Math.min(MAX_PROXIES, proxies.size()));
                 if (!proxies.isEmpty()) {
                     Iterator<? extends IpPort> iter = proxies.iterator();
                     while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
@@ -1114,12 +1114,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                         IPPortCombo combo = new IPPortCombo(ppi.getInetSocketAddress());
                         try {
                             baos.write(combo.toBytes());
-                            if(ppi instanceof Connectable && ((Connectable)ppi).isTLSCapable())
-                                bn.set(numWritten);
                             numWritten++;
-                        } catch (IOException terrible) {
-                            ErrorService.error(terrible);
-                        }
+                        } catch (IOException ignored) { } // cannot happen on ByteArrayOutputStream
                     }
                 }
 
@@ -1135,10 +1131,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                     baos.reset();
                     retGGEP.write(baos);
                     retGGEPBlock = baos.toByteArray();
-                } catch (IOException terrible) {
-                    ErrorService.error(terrible);
-                }
-
+                } catch (IOException ignored) { } // cannot happen on ByteArrayOutputStream
             }
             // else if (supportsBH && supportsFWTransfer &&
             // isMulticastResponse), since supportsFWTransfer is only helpful

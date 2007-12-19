@@ -972,36 +972,75 @@ public final class NetworkUtils {
     }
 
     /**
-     * Returns an IpPort (or Connectable if tlsCapable == true) of the ipport
-     * as described by "a.b.c.d:port".
+     * Parses port from string and checks if it's valid.
+     * 
+     * @throws IOException if the port could not be parsed or is invalid
+     */
+    static int parsePort(String portString) throws IOException {
+        try {
+            int port = Integer.parseInt(portString);
+            if(!isValidPort(port)) {
+                throw new IOException("invalid port: " + port);
+            }
+            return port;
+        } catch(NumberFormatException invalid) {
+            throw (IOException)new IOException().initCause(invalid);
+        }
+    }
+    
+    /**
+     * Gets {@link InetAddress} and checks if it's valid.
+     * @throws IOException if the address is not valid or a private address
+     */
+    static InetAddress getAndCheckAddress(String addressString) throws IOException {
+        InetAddress address = InetAddress.getByName(addressString);
+        if (!isValidAddress(address) || isPrivateAddress(address))
+            throw new IOException("invalid addr: " + address);
+        
+        return address;
+    }
+    
+    /**
+     * Returns the index of the ':' separator between ip and port and checks
+     * if it's at a valid position.
+     * @param ipPort
+     * @return
+     * @throws IOException if separator is not found or not at a valid position
+     */
+    static int getAndCheckIpPortSeparator(String ipPort) throws IOException {
+        int separator = ipPort.indexOf(":");
+        
+        //see if this is a valid ip:port address; 
+        if (separator <= 0 || separator!= ipPort.lastIndexOf(":") || separator == ipPort.length() - 1)
+            throw new IOException("invalid separator in http: " + ipPort);
+        
+        return separator;
+    }
+    
+    /**
+     * Returns a Connectable of the ipport as described by "a.b.c.d:port".
      * 
      * @param ipPort a string representing an ip and porte 
      * @throws IOException parsing failed.
      */
-    public static IpPort parseIpPort(String ipPort, boolean tlsCapable) throws IOException {
-        int separator = ipPort.indexOf(":");
-    	
-    	//see if this is a valid ip:port address; 
-    	if (separator == -1 || separator!= ipPort.lastIndexOf(":") || separator == ipPort.length())
-    		throw new IOException("invalid separator in http: " + ipPort);
-    		
-    	String host = ipPort.substring(0,separator);
-    	
-    	if (!isValidAddress(host) || isPrivateAddress(host))
-    	    throw new IOException("invalid addr: " + host);
-    	
-    	String portS = ipPort.substring(separator+1);
-    	
-    	try {
-    		int port = Integer.parseInt(portS);
-    		if(!isValidPort(port))
-    		    throw new IOException("invalid port: " + port);
-            if(tlsCapable)
-                return new ConnectableImpl(host, port, true);
-            else
-                return new IpPortImpl(host, port); // could technically also return a ConnectableImpl w/ tls=false
-    	} catch(NumberFormatException invalid) {
-    	    throw (IOException)new IOException().initCause(invalid);
-    	}
+    public static Connectable parseIpPort(String ipPort, boolean tlsCapable) throws IOException {
+        int separator = getAndCheckIpPortSeparator(ipPort);
+    	InetAddress address = getAndCheckAddress(ipPort.substring(0, separator));
+    	int port = parsePort(ipPort.substring(separator+1));
+    	return new ConnectableImpl(new InetSocketAddress(address, port), tlsCapable);
+    }
+    
+    
+    /**
+     * Returns an  
+     * @param http a string representing a port and an ip
+     * @return an object implementing IpPort 
+     * @throws IOException parsing failed.
+     */
+    public static IpPort parsePortIp(String http) throws IOException{
+        int separator = getAndCheckIpPortSeparator(http);
+        int port = parsePort(http.substring(0, separator));
+        InetAddress address = getAndCheckAddress(http.substring(separator+1));
+        return new IpPortImpl(address, port);
     }
 }

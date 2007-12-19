@@ -22,6 +22,7 @@ public class NetworkManagerStub implements NetworkManager {
     private GUID udpConnectBackGUI = new GUID();
     private boolean oobCapable;
     private int stableUDPPort = 7777;
+    private int fwtVersion;
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -147,7 +148,11 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public int supportsFWTVersion() {
-        return 0;
+        return fwtVersion;
+    }
+    
+    public void setSupportsFWTVersion(int version) {
+        fwtVersion = version;
     }
 
     public void setCanReceiveSolicited(boolean canReceiveSolicited) {

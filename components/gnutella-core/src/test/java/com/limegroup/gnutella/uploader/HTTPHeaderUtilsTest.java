@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.uploader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,9 +14,11 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpResponse;
-import org.limewire.inject.Providers;
+import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
@@ -41,7 +45,6 @@ import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -54,6 +57,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
     private AltLocManager altLocManager;
     private HTTPHeaderUtils httpHeaderUtils;
     private AlternateLocationFactory alternateLocationFactory;
+    private NetworkManagerStub networkManager;
 
     public HTTPHeaderUtilsTest(String name) {
         super(name);
@@ -65,7 +69,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
 
     @Override
     public void setUp() throws Exception {
-        final NetworkManager networkManager = new NetworkManagerStub();
+        networkManager = new NetworkManagerStub();
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -77,8 +81,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         connectionManager = (StubConnectionManager) injector.getInstance(ConnectionManager.class);
         connectionManager.proxies = new StrictIpPortSet<Connectable>();
         altLocManager = new AltLocManager();
-        
-        httpHeaderUtils = new HTTPHeaderUtils(new FeaturesWriter(networkManager), networkManager, Providers.of((ConnectionManager) connectionManager));
+        httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
     }
 
     @Override
@@ -185,6 +188,57 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         Header header = response.getLastHeader("X-Push-Proxy");
         assertNotNull("Missing X-Push-Proxy header", header);
         assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", header.getValue());
+    }
+    
+    public void testGetFullFirewalledHeaders() throws Exception {
+        connectionManager.proxies.add(new ConnectableImpl("1.2.3.4", 5, true));
+        connectionManager.proxies.add(new ConnectableImpl("2.3.4.5", 6, true));
+        connectionManager.proxies.add(new ConnectableImpl("3.4.5.6", 7, true));
+        connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, true));
+        connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, true));
+        networkManager.setCanDoFWT(true);
+        networkManager.setStableUDPPort(4545);
+        List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
+        assertEquals(2, headers.size());
+        assertEquals("pptls=F,1.2.3.4:5,2.3.4.5:6,3.4.5.6:7,4.5.6.7:8", headers.get(0).getValue());
+        assertEquals("4545", headers.get(1).getValue());
+    }
+    
+    public void testGetEmptyFirewalledHeaders() {
+        assertTrue(httpHeaderUtils.getFirewalledHeaders().isEmpty());
+    }
+    
+    public void testGetTLSIndices() throws Exception {
+       Collection<? extends IpPort> proxies = Arrays.asList(new ConnectableImpl("localhost", 4545, true),
+               new IpPortImpl("helloword.com", 6666),
+               new ConnectableImpl("192.168.0.1", 7777, true));
+       BitNumbers bn = HTTPHeaderUtils.getTLSIndices(proxies);
+       assertFalse(bn.isEmpty());
+       assertTrue(bn.isSet(0));
+       assertFalse(bn.isSet(1));
+       assertTrue(bn.isSet(2));
+       assertEquals(3, bn.getMax());
+       
+       bn = HTTPHeaderUtils.getTLSIndices(proxies, 2);
+       assertFalse(bn.isEmpty());
+       assertTrue(bn.isSet(0));
+       assertFalse(bn.isSet(1));
+       assertFalse(bn.isSet(2));
+       assertEquals(2, bn.getMax());
+       
+       // empty set
+       proxies = Collections.emptyList();
+       bn = HTTPHeaderUtils.getTLSIndices(proxies);
+       assertTrue(bn.isEmpty());
+    }
+    
+    public void testFirewalledHeadersNoFWTPort() throws Exception {
+        connectionManager.proxies.add(new ConnectableImpl("4.5.6.7", 8, false));
+        connectionManager.proxies.add(new ConnectableImpl("5.6.7.8", 9, false));
+        networkManager.setCanDoFWT(false);
+        networkManager.setStableUDPPort(4545);
+        List<Header> headers = httpHeaderUtils.getFirewalledHeaders();
+        assertEquals(1, headers.size());
     }
     
     private Collection<DirectAltLoc> altsFor(String... locs) throws Exception {
