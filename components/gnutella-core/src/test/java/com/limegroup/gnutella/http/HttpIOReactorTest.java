@@ -34,6 +34,7 @@ import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.AcceptorImpl;
 import com.limegroup.gnutella.LimeTestUtils;
 
 public class HttpIOReactorTest extends BaseTestCase {
@@ -76,7 +77,7 @@ public class HttpIOReactorTest extends BaseTestCase {
 
         requestFactory = new DefaultHttpRequestFactory();
         
-        connectionDispatcher = acceptor.getConnectionDispatcher();
+        connectionDispatcher = ((AcceptorImpl)acceptor).getConnectionDispatcher();
         
         socketsManager = injector.getInstance(SocketsManager.class);
     }

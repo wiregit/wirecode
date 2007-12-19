@@ -35,7 +35,7 @@ public interface NetworkManager {
     /**
      * Returns the port used for downloads and messaging connections.
      * Used to fill out the My-Address header in ManagedConnection.
-     * @see Acceptor#getPort
+     * @see AcceptorImpl#getPort
      */
     public int getPort();
 

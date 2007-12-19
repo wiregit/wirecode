@@ -8,7 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.AcceptorImpl;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
@@ -19,7 +19,7 @@ import com.limegroup.gnutella.UPnPManager;
 import com.limegroup.gnutella.filters.IPFilter;
 
 @Singleton
-public class AcceptorStub extends Acceptor {
+public class AcceptorStub extends AcceptorImpl {
 
     @Inject
     public AcceptorStub(NetworkManager networkManager,

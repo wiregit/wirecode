@@ -174,7 +174,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         LEAF = new BlockingConnection[numLs];
 
         connect();
-        LimeTestUtils.establishIncoming(injector.getInstance(Acceptor.class).getPort(false));
+        LimeTestUtils.establishIncoming(injector.getInstance(AcceptorImpl.class).getPort(false));
         
         for (int i = 0; i < ULTRAPEER.length; i++) {
             assertTrue("should be open, index = " + i, ULTRAPEER[i].isOpen());

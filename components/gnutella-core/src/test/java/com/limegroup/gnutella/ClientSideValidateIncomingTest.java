@@ -41,7 +41,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     private static final long MY_VALIDATE_TIME = 3 * 1000;
 
     private static byte[] cbGuid = null;
-    private Acceptor acceptor;
+    private AcceptorImpl acceptor;
     private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
     private NetworkManager networkManager;
     private UDPService udpService;
@@ -63,7 +63,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     
     public void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
-        acceptor = injector.getInstance(Acceptor.class);
+        acceptor = (AcceptorImpl)injector.getInstance(Acceptor.class);
         
         // set values before everything is initialized
         acceptor.setIncomingExpireTime(MY_EXPIRE_TIME);

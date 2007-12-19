@@ -18,29 +18,31 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.IOUtils;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
-import org.limewire.service.ErrorService;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AcceptorTest extends LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(AcceptorTest.class);
     
-    private Acceptor acceptor;
+    private Injector injector;
+    private AcceptorImpl acceptor;
     private ConnectionDispatcher connectionDispatcher;
+    private StubCM connectionManager;
+    private StubAC activityCallback;
 
     private SocketsManager socketsManager;
 
@@ -58,14 +60,25 @@ public class AcceptorTest extends LimeTestCase {
     
     @Override
     public void setUp() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub().setTLSCapable(true));
+        connectionManager = new StubCM();
+        activityCallback = new StubAC();
         
-        Injector injector = LimeTestUtils.createInjector();
-        
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ConnectionManager.class).toInstance(connectionManager);
+                bind(ActivityCallback.class).toInstance(activityCallback);
+                
+            }
+        });
+
         connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
         socketsManager = injector.getInstance(SocketsManager.class);
         
-        acceptor = injector.getInstance(Acceptor.class);
+        acceptor = (AcceptorImpl)injector.getInstance(Acceptor.class);
+        acceptor.setIncomingExpireTime(2000);
+        acceptor.setTimeBetweenValidates(2000);
+        acceptor.setWaitTimeAfterRequests(2000);
         acceptor.start();
         
         //shut off the various services,
@@ -79,6 +92,50 @@ public class AcceptorTest extends LimeTestCase {
         //if an exception is thrown, something bad happened.
         acceptor.setListeningPort(0);
         ConnectionSettings.LOCAL_IS_PRIVATE.revertToDefault();
+    }
+    
+    public void testValidateIncomingTimer() throws Exception {
+        int port = bindAcceptor();
+        
+        assertEquals(0, activityCallback.getChanges());
+        assertFalse(activityCallback.getLastStatus());
+        connectionManager.setShouldSendRequests(true);
+        assertTrue(connectionManager.awaitSend());
+        
+        // make sure we don't send it again which could screw the test!
+        connectionManager.setShouldSendRequests(false);
+        
+        // Turn incoming on, make sure it triggers a change...
+        acceptor.setIncoming(true);
+        assertEquals(1, activityCallback.getChanges());
+        assertTrue(activityCallback.getLastStatus());
+        
+        // Make sure we revert back to false, since no incoming came...
+        assertFalse(activityCallback.waitForNextChange());
+        assertEquals(2, activityCallback.getChanges());
+                
+        // Send another request, but this time we're gonna make sure
+        // incoming stays on!
+        connectionManager.setShouldSendRequests(true);
+        assertTrue(connectionManager.awaitSend());
+        connectionManager.setShouldSendRequests(false);
+        
+        acceptor.setIncoming(true);
+        assertEquals(3, activityCallback.getChanges());
+        assertTrue(activityCallback.getLastStatus());
+        
+        // Now send the connectback..
+        Socket socket = socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), port), 1000);
+        socket.getOutputStream().write("CONNECT BACK\r\n".getBytes());
+        socket.getOutputStream().flush();
+        IOUtils.close(socket);
+        
+        // Sleep a bit, make sure incoming is still on!
+        Thread.sleep(10000);
+        
+        assertTrue(acceptor.acceptedIncoming());
+        assertEquals(3, activityCallback.getChanges());
+        assertTrue(activityCallback.getLastStatus());
     }
         
     /**
@@ -103,8 +160,7 @@ public class AcceptorTest extends LimeTestCase {
         try {
             acceptor.setListeningPort(portToTry);
             assertTrue("had no trouble binding UDP port!", false);
-        }
-        catch (IOException expected) {
+        } catch (IOException expected) {
             udp.close();
         }
     }
@@ -121,8 +177,7 @@ public class AcceptorTest extends LimeTestCase {
             try {
                 tcp = new ServerSocket(portToTry);
                 break;
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 portToTry++;
                 continue;
             }
@@ -138,8 +193,7 @@ public class AcceptorTest extends LimeTestCase {
         catch (IOException expected) {
             try {
                 tcp.close();
-            }
-            catch (Exception ignored) {}
+            } catch (IOException ignored) {}
         }
     }
 
@@ -153,8 +207,7 @@ public class AcceptorTest extends LimeTestCase {
             try {
                 acceptor.setListeningPort(portToTry);
                 break;
-            }
-            catch (IOException occupied) {
+            } catch (IOException occupied) {
                 portToTry++;
                 continue;
             }
@@ -164,15 +217,15 @@ public class AcceptorTest extends LimeTestCase {
             DatagramSocket udp = new DatagramSocket(portToTry);
             udp.close();
             fail("had no trouble binding UDP to occupied port!");
+        } catch (IOException good) {
         }
-        catch (IOException good) {}
-        
+
         try {
             ServerSocket tcp = new ServerSocket(portToTry);
             tcp.close();
             fail("had no trouble binding TCP to occupied port!");
+        } catch (IOException good) {
         }
-        catch (IOException good) {}
     }
      
      public void testAcceptedIncoming() throws Exception {
@@ -191,13 +244,9 @@ public class AcceptorTest extends LimeTestCase {
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
-             } catch (Throwable t) {
-                 ErrorService.error(t);
              } finally {
-                 if(sock != null)
-                     try { sock.close(); } catch(IOException ignored) {}
-                 if(os != null)
-                     try { os.close(); } catch(IOException ignored) {}
+                 IOUtils.close(sock);
+                 IOUtils.close(os);
              }
          }        
 
@@ -222,13 +271,9 @@ public class AcceptorTest extends LimeTestCase {
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
-             } catch (Throwable t) {
-                 ErrorService.error(t);
              } finally {
-                 if(sock != null)
-                     try { sock.close(); } catch(IOException ignored) {}
-                 if(os != null)
-                     try { os.close(); } catch(IOException ignored) {}
+                 IOUtils.close(sock);
+                 IOUtils.close(os);
              }
          }        
 
@@ -253,13 +298,9 @@ public class AcceptorTest extends LimeTestCase {
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
-             } catch (Throwable t) {
-                 ErrorService.error(t);
              } finally {
-                 if(sock != null)
-                     try { sock.close(); } catch(IOException ignored) {}
-                 if(os != null)
-                     try { os.close(); } catch(IOException ignored) {}
+                 IOUtils.close(sock);
+                 IOUtils.close(os);
              }
          }        
 
@@ -284,13 +325,9 @@ public class AcceptorTest extends LimeTestCase {
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
-             } catch (Throwable t) {
-                 ErrorService.error(t);
              } finally {
-                 if(sock != null)
-                     try { sock.close(); } catch(IOException ignored) {}
-                 if(os != null)
-                     try { os.close(); } catch(IOException ignored) {}
+                 IOUtils.close(sock);
+                 IOUtils.close(os);
              }
          }        
 
@@ -341,27 +378,29 @@ public class AcceptorTest extends LimeTestCase {
      }
      
      private int bindAcceptor() throws Exception {
-         for(int p = 2000; p < Integer.MAX_VALUE; p++) {
-             try {
-                 acceptor.setListeningPort(p);
-                 return p;
-             } catch(IOException ignored) {}
-         }
-         throw new IOException("unable to bind acceptor");
-     }
+        for (int p = 2000; p < Integer.MAX_VALUE; p++) {
+            try {
+                acceptor.setListeningPort(p);
+                return p;
+            } catch (IOException ignored) {
+            }
+        }
+        throw new IOException("unable to bind acceptor");
+    }
 
-     private static class MyConnectionAcceptor implements ConnectionAcceptor {
-         private final String word;
-         private CountDownLatch latch = new CountDownLatch(1);
-         
-         MyConnectionAcceptor(String word) {
-             this.word = word;
-         }
-         
-         public void acceptConnection(String word, Socket s) {
+    private static class MyConnectionAcceptor implements ConnectionAcceptor {
+        private final String word;
+
+        private CountDownLatch latch = new CountDownLatch(1);
+
+        MyConnectionAcceptor(String word) {
+            this.word = word;
+        }
+
+        public void acceptConnection(String word, Socket s) {
             LOG.debug("Got connection for word: " + word + ", socket: " + s);
             assertEquals(this.word, word);
-            if("BLOCKING".equals(word)) {
+            if ("BLOCKING".equals(word)) {
                 try {
                     LOG.debug("Getting IS");
                     InputStream in = s.getInputStream();
@@ -372,20 +411,71 @@ public class AcceptorTest extends LimeTestCase {
                     assertEquals("MORE DATA", new String(b, 0, read));
                     latch.countDown();
                     s.close();
-                } catch(IOException iox) {
+                } catch (IOException iox) {
                     throw new RuntimeException(iox);
                 }
             }
-         }
-         
-         boolean waitForAccept() throws Exception {
-             return latch.await(5, TimeUnit.SECONDS);
-         }
-         
-         public boolean isBlocking() {
+        }
+
+        boolean waitForAccept() throws Exception {
+            return latch.await(5, TimeUnit.SECONDS);
+        }
+
+        public boolean isBlocking() {
             return true;
         }
-         
-     }
-     
+
+    }
+
+    private static class StubCM extends ConnectionManagerAdapter {
+        private volatile CountDownLatch latch;
+        private volatile boolean shouldSendRequests;
+
+        void setShouldSendRequests(boolean send) {
+            this.latch = new CountDownLatch(1);
+            this.shouldSendRequests = send;
+        }
+
+        boolean awaitSend() throws InterruptedException {
+            return latch.await(8000, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public boolean sendTCPConnectBackRequests() {
+            if(shouldSendRequests) {
+                latch.countDown();
+                return true;
+            }            
+            return false;
+        }
+    }
+    
+    private static class StubAC extends ActivityCallbackAdapter {
+        private volatile int changes = 0;
+        private volatile boolean lastStatus = false;
+        private volatile CountDownLatch latch;
+        
+        @Override
+        public void acceptedIncomingChanged(boolean status) {
+            changes++;
+            lastStatus = status;
+            if(latch != null)
+                latch.countDown();
+        }
+        
+        int getChanges() {
+            return changes;
+        }
+        
+        boolean getLastStatus() {
+            return lastStatus;
+        }
+        
+        boolean waitForNextChange() throws InterruptedException {
+            latch = new CountDownLatch(1);
+            if(!latch.await(5000, TimeUnit.MILLISECONDS))
+                fail("Didn't get countdown");
+            return lastStatus;
+        }
+    }
 }
