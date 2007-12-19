@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.limewire.io.IOUtils;
 import org.limewire.util.FileUtils;
 
 
@@ -212,7 +211,11 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
             }
 
         } finally {
-            IOUtils.close(fis);
+            if( fis != null ) {
+                try {
+                    fis.close();
+                } catch(IOException e) {}
+            }
         }
         
         // Reload all setting values
@@ -323,7 +326,11 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
             markFailure();
             
         } finally {
-            IOUtils.close(out);
+            if( out != null ) {
+                try {
+                    out.close();
+                } catch(IOException e) {}
+            }
         }
     }
     
