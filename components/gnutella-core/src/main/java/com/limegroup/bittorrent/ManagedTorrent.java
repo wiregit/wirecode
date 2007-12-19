@@ -135,6 +135,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 
     private final FileManager fileManager;
     
+    private final PeerLocatorFactory peerLocatorFactory;
+    
 	/**
 	 * Constructs new ManagedTorrent
 	 * 
@@ -157,7 +159,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
             ContentManager contentManager,
             IPFilter ipFilter,
             TorrentManager torrentManager, 
-            FileManager fileManager) {
+            FileManager fileManager,
+            PeerLocatorFactory peerLocatorFactory) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
 		this.dispatcher = dispatcher;
@@ -168,6 +171,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
         this.ipFilter = ipFilter;
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
+        this.peerLocatorFactory = peerLocatorFactory;
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();

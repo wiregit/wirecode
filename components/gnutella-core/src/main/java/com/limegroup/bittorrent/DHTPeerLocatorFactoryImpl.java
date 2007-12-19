@@ -7,7 +7,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager;
 
 @Singleton
-public class DHTPeerLocatorFactoryImpl implements DHTPeerLocatorFactory {
+public class DHTPeerLocatorFactoryImpl implements PeerLocatorFactory {
 
     private final DHTManager          manager;
     private final ApplicationServices applicationServices;

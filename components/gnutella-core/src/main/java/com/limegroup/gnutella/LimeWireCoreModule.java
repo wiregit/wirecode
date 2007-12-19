@@ -51,8 +51,10 @@ import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTDownloaderFactoryImpl;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.BTUploaderFactoryImpl;
+import com.limegroup.bittorrent.DHTPeerLocatorFactoryImpl;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
+import com.limegroup.bittorrent.PeerLocatorFactory;
 import com.limegroup.bittorrent.TorrentEvent;
 import com.limegroup.bittorrent.TorrentEventListener;
 import com.limegroup.bittorrent.TorrentManager;
@@ -344,6 +346,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
         bind(MessageHandlerBinder.class).to(MessageHandlerBinderImpl.class);
         bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
+        bind(PeerLocatorFactory.class).to(DHTPeerLocatorFactoryImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
