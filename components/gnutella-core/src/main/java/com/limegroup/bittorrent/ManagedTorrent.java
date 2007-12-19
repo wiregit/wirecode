@@ -474,6 +474,13 @@ BTLinkListener {
 		if (!notInterested.isChoked())
 			rechoke();
 	}
+	
+	public void trackerRequestFailed() {
+	    synchronized(state.getLock()) {
+	        if (state.get() == TorrentState.SCRAPING)
+	            state.set(TorrentState.WAITING_FOR_TRACKER);
+	    }
+	}
 
 	/**
 	 * Initializes some state relevant to the torrent
