@@ -21,8 +21,9 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
     public static final StringSetting SEARCH_DATABASE =
         FACTORY.createRemoteStringSetting("SEARCH_DATABASE", readTemporary(), "searchDatabase");
     private static String readTemporary() {
-        final StringBuffer sb = new StringBuffer();
-        sb.append("limewire|name=limewire\turl=http://limewire.com\tartist=dr. seuss0\talbum=limewire in the hat0\tcreation_time=1231230\tvendor=someone0\tgenre=childrens0\tlicense=free\n");
+        StringBuffer sb = new StringBuffer();
+        sb.append("jesse rubenfeld|name=Jesse Rubenfeld - Let It Go - EP\turl=http://limewire.com\tartist=Jesse Rubenfeld\talbum=Let It Go - EP\tgenre=Rock\n");
+        sb.append("jesse rubenfeld|name=Jesse Rubenfeld - Live At The Bitter End\turl=http://limewire.com\tartist=Jesse Rubenfeld\talbum=Live At The Bitter End\tgenre=Rock\n");        
         sb.append("limewire1\tlimewire|name=limewire1 or limewire\turl=http://limewire.com\t\tartist=dr. seuss1\talbum=limewire in the hat1\tcreation_time=1231231\tvendor=someone1\tgenre=childrens1\tlicense=free\n");
         sb.append("limewire2\tlimewire1\tlimewire0\tname=limewire2 or limewire1 or limewire0|url=http://limewire.com\tsize=1232\tartist=dr. seuss2\talbum=limewire in the hat2\tcreation_time=1231232\tvendor=someone2\tgenre=childrens2\tlicense=free\n");
         sb.append("limewire3|name=limewire3\turl=http://limewire.com\tsize=1233\tartist=dr. seuss3\talbum=limewire in the hat3\tcreation_time=1231233\tvendor=someone3\tgenre=childrens3\tlicense=free\n");
