@@ -46,11 +46,15 @@ public class LimeCoreGlueTest extends BaseTestCase {
                              "org.limewire.setting.RemoteSettingManager",
                              "com.limegroup.gnutella.util.LimeWireUtils", 
                              "org.limewire.util.CommonUtils", 
-                             "org.limewire.util.FileUtils", 
                              "org.limewire.util.OSUtils"}));
+        
         if(OSUtils.isWindows() || OSUtils.isMacOSX()) {
             expected.add("org.limewire.util.SystemUtils");
             expected.add("org.limewire.util.SystemUtils$SpecialLocations");
+        }
+        
+        if(!OSUtils.isPOSIX()) {
+            expected.add("org.limewire.util.FileUtils");
         }
         
         removeClasses(nextLoaded, expected);
