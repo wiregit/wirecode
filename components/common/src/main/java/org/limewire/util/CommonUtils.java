@@ -346,7 +346,7 @@ public class CommonUtils {
      * @return
      */
     public static String convertFileName(File parentDir, String name) throws IOException {
-        int parentLength = parentDir.getAbsolutePath().getBytes(Charset.defaultCharset()).length;
+        int parentLength = parentDir.getAbsolutePath().getBytes(Charset.defaultCharset().name()).length;
         if (parentLength >= OSUtils.getMaxPathLength() - 1 /* for the separator char*/) {
             throw new IOException("Path too long");
         }
