@@ -236,7 +236,7 @@ public class AltLocUploadTest extends LimeTestCase {
         ((PushAltLoc) push).updateProxies(true);
         PushAltLoc pushFwt = (PushAltLoc) alternateLocationFactory.create(clientGUID2
                 .toHexString()
-                + ";fwt/1.0;1.2.3.4:6", sha1);
+                + ";5555:129.168.9.5;fwt/1.0;1.2.3.4:6", sha1);
         pushFwt.updateProxies(true);
 
         altLocManager.add(direct, null);
@@ -275,7 +275,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 + ";1.2.3.4:5", sha1);
         ((PushAltLoc) push).updateProxies(true);
         final PushAltLoc pushFwt = (PushAltLoc) alternateLocationFactory.create(
-                clientGUID2.toHexString() + ";fwt/1.0;1.2.3.4:6", sha1);
+                clientGUID2.toHexString() + ";5555:129.168.9.5;fwt/1.0;1.2.3.4:6", sha1);
         pushFwt.updateProxies(true);
 
         altLocManager.add(direct, null);
@@ -320,7 +320,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 + ";1.2.3.4:5", sha1);
         ((PushAltLoc) push).updateProxies(true);
         final PushAltLoc pushFwt = (PushAltLoc) alternateLocationFactory.create(
-                clientGUID2.toHexString() + ";fwt/1.0;1.2.3.4:6", sha1);
+                clientGUID2.toHexString() + ";5555:129.168.9.5;fwt/1.0;1.2.3.4:6", sha1);
         pushFwt.updateProxies(true);
 
         altLocManager.add(direct, null);
