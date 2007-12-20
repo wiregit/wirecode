@@ -155,14 +155,14 @@ public class CommonUtilsTest extends BaseTestCase {
      * Tests that IO exception is thrown if parent dir's byte representation
      * already execeeds max path length, but its char representation does not.
      */
-    public void testConvertFileNameDiscardsTooLongParentPaths() {
+    public void testConvertFileNameDiscardsTooLongParentPaths() throws Exception {
         char c = '\u30d5';
         char[] dirName = new char[OSUtils.getMaxPathLength() - 10];
         Arrays.fill(dirName, c);
         dirName[0] = '/';
         String dir = new String(dirName);
         assertEquals(OSUtils.getMaxPathLength() - 10, dir.length());
-        assertGreaterThan(OSUtils.getMaxPathLength(), dir.getBytes(Charset.defaultCharset()).length);
+        assertGreaterThan(OSUtils.getMaxPathLength(), dir.getBytes(Charset.defaultCharset().name()).length);
         try {
             CommonUtils.convertFileName(new File(dir), "somename");
             fail("Should have thrown IOException");
