@@ -21,7 +21,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 
 @Singleton
-public class DownloadManagerStub extends DownloadManager {
+public class DownloadManagerStub extends DownloadManagerImpl {
     
 	
     @Inject

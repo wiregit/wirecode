@@ -288,7 +288,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BTConnectionFactory.class).to(BTConnectionFactoryImpl.class);
         bind(SocketProcessor.class).to(AcceptorImpl.class);
         bind(PushedSocketHandlerRegistry.class).to(PushDownloadManager.class);
-        bind(DownloadManager.class).asEagerSingleton();
+        bind(DownloadManager.class).to(DownloadManagerImpl.class).asEagerSingleton();
         bind(BrowseHostHandlerManagerImpl.class).asEagerSingleton();
         bind(ReplyNumberVendorMessageFactory.class).to(ReplyNumberVendorMessageFactoryImpl.class);
         bind(GuidMapManager.class).to(GuidMapManagerImpl.class);

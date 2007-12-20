@@ -1,72 +1,23 @@
 package com.limegroup.gnutella;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.DualIterator;
-import org.limewire.collection.MultiIterable;
-import org.limewire.i18n.I18nMarker;
-import org.limewire.io.IOUtils;
-import org.limewire.io.IpPort;
-import org.limewire.service.MessageService;
-import org.limewire.util.ConverterObjectInputStream;
-import org.limewire.util.FileUtils;
-import org.limewire.util.GenericsUtils;
-import org.limewire.util.GenericsUtils.ScanMode;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTMetaInfo;
-import com.limegroup.bittorrent.TorrentFileSystem;
-import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
-import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
-import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
-import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
-import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
-import com.limegroup.gnutella.downloader.RequeryDownloader;
-import com.limegroup.gnutella.downloader.ResumeDownloader;
-import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
-import com.limegroup.gnutella.downloader.AbstractDownloader.DownloaderType;
-import com.limegroup.gnutella.library.SharingUtils;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 
@@ -86,119 +37,9 @@ import com.limegroup.gnutella.version.DownloadInformation;
  * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
-@Singleton
-// TODO: make a DownloadManager interface, for easier testing
-public class DownloadManager implements BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate, PushedSocketHandler {
+public interface DownloadManager extends BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate, PushedSocketHandler {
     
-    private static final Log LOG = LogFactory.getLog(DownloadManager.class);
-    
-    /** The time in milliseconds between checkpointing downloads.dat.  The more
-     * often this is written, the less the lost data during a crash, but the
-     * greater the chance that downloads.dat itself is corrupt.  */
-    private int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
-
-    /** The repository of incomplete files 
-     *  INVARIANT: incompleteFileManager is same as those of all downloaders */
-    private IncompleteFileManager incompleteFileManager
-        =new IncompleteFileManager();
-
-    /** The list of all ManagedDownloader's attempting to download.
-     *  INVARIANT: active.size()<=slots() && active contains no duplicates 
-     *  LOCKING: obtain this' monitor */
-    private final List <AbstractDownloader> active=new LinkedList<AbstractDownloader>();
-    /** The list of all queued ManagedDownloader. 
-     *  INVARIANT: waiting contains no duplicates 
-     *  LOCKING: obtain this' monitor */
-    private final List <AbstractDownloader> waiting=new LinkedList<AbstractDownloader>();
-    
-    private final MultiIterable<AbstractDownloader> activeAndWaiting = 
-    	new MultiIterable<AbstractDownloader>(active,waiting); 
-    
-    /**
-     * Whether or not the GUI has been init'd.
-     */
-    private volatile boolean guiInit = false;
-    
-    /** The number if IN-NETWORK active downloaders.  We don't count these when
-     * determing how many downloaders are active.
-     */
-    private int innetworkCount = 0;
-
-    /**
-     * The number of active store downloads. These are counted when determining
-     * how many downloaders are active
-     */
-    private int storeDownloadCount = 0;
-
-    /** This will hold the MDs that have sent requeries.
-     *  When this size gets too big - meaning bigger than active.size(), then
-     *  that means that all MDs have been serviced at least once, so you can
-     *  clear it and start anew....
-     */
-    private List<AbstractDownloader> querySentMDs = new ArrayList<AbstractDownloader>();
-    
-    /**
-     * The number of times we've been bandwidth measures
-     */
-    private int numMeasures = 0;
-    
-    /**
-     * The average bandwidth over all downloads.
-     * This is only counted while downloads are active.
-     */
-    private float averageBandwidth = 0;
-    
-    /** The last measured bandwidth, as counted from measureBandwidth. */
-    private volatile float lastMeasuredBandwidth;
-    
-    /**
-     * The runnable that pumps inactive downloads to the correct state.
-     */
-    private Runnable _waitingPump;
-    
-    private final NetworkManager networkManager;
-    private final DownloadReferencesFactory downloadReferencesFactory;
-    private final DownloadCallback innetworkCallback;
-    private final BTDownloaderFactory btDownloaderFactory;
-    private final Provider<DownloadCallback> downloadCallback;
-    private final Provider<MessageRouter> messageRouter;
-    private final ScheduledExecutorService backgroundExecutor;
-    private final Provider<TorrentManager> torrentManager;
-    private final Provider<PushDownloadManager> pushDownloadManager;
-    private final GnutellaDownloaderFactory gnutellaDownloaderFactory;
-    private final PurchasedStoreDownloaderFactory purchasedDownloaderFactory;
-    
-    @Inject
-    public DownloadManager(NetworkManager networkManager,
-            DownloadReferencesFactory downloadReferencesFactory,
-            @Named("inNetwork") DownloadCallback innetworkCallback,
-            BTDownloaderFactory btDownloaderFactory,
-            Provider<DownloadCallback> downloadCallback,
-            Provider<MessageRouter> messageRouter,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<TorrentManager> torrentManager,
-            Provider<PushDownloadManager> pushDownloadManager,
-            GnutellaDownloaderFactory gnutellaDownloaderFactory,
-            PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
-        this.networkManager = networkManager;
-        this.downloadReferencesFactory = downloadReferencesFactory;
-        this.innetworkCallback = innetworkCallback;
-        this.btDownloaderFactory = btDownloaderFactory;
-        this.downloadCallback = downloadCallback;
-        this.messageRouter = messageRouter;
-        this.backgroundExecutor = backgroundExecutor;
-        this.torrentManager = torrentManager;
-        this.pushDownloadManager = pushDownloadManager;
-        this.gnutellaDownloaderFactory = gnutellaDownloaderFactory;
-        this.purchasedDownloaderFactory = purchasedDownloaderFactory;
-    }
-
-    @Inject
-    public void register(PushedSocketHandlerRegistry registry) {
-        registry.register(this);
-    }
-
-    //////////////////////// Creation and Saving /////////////////////////
+    public void register(PushedSocketHandlerRegistry registry);
 
     /** 
      * Initializes this manager. <b>This method must be called before any other
@@ -210,9 +51,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      *     @uses RouterService.getFileManager for the FileManager
      *       to check if files exist
      */
-    public void initialize() {
-        scheduleWaitingPump();
-    }
+    public void initialize();
 
     /**
      * Performs the slow, low-priority initialization tasks: reading in
@@ -220,362 +59,85 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      * 
      * @param lwsManager 
      */
-    public void postGuiInit() {
-        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
-        // Try once with the real file, then with the backup file.
-        if( !readAndInitializeSnapshot(real) ) {
-            LOG.debug("Reading real downloads.dat failed");
-            // if backup succeeded, copy into real.
-            if( readAndInitializeSnapshot(backup) ) {
-                LOG.debug("Reading backup downloads.bak succeeded.");
-                copyBackupToReal();
-            // only show the error if the files existed but couldn't be read.
-            } else if(backup.exists() || real.exists()) {
-                LOG.debug("Reading both downloads files failed.");
-                MessageService.showError(I18nMarker.marktr("Sorry, but LimeWire was unable to restart your old downloads."));
-            }   
-        } else {
-            LOG.debug("Reading downloads.dat worked!");
-        }
-        
-        Runnable checkpointer=new Runnable() {
-            public void run() {
-                if (downloadsInProgress() > 0) { //optimization
-                    // If the write failed, move the backup to the real.
-                    if(!writeSnapshot())
-                        copyBackupToReal();
-                }
-            }
-        };
-        backgroundExecutor.scheduleWithFixedDelay(checkpointer, 
-                               SNAPSHOT_CHECKPOINT_TIME, 
-                               SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);                
-                               
-        guiInit = true;
-    }      
-    
+    public void postGuiInit();
+
     /**
      * Is the GUI init'd?
      */
-    public boolean isGUIInitd() {
-        return guiInit;
-    }
-    
+    public boolean isGUIInitd();
+
     /**
      * Determines if an 'In Network' download exists in either active or waiting.
      */
-    public synchronized boolean hasInNetworkDownload() {
-        if(innetworkCount > 0)
-            return true;
-        for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
-            if(i.next().getDownloadType() == DownloaderType.INNETWORK)
-                return true;
-        }
-        return false;
-    }
-    
+    public boolean hasInNetworkDownload();
+
     /**
      * Determines if any store download exists in either active or waiting
      * state. 
      */
-    public synchronized boolean hasStoreDownload() {
-        if(storeDownloadCount > 0)
-            return true;
-        for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
-            if( i.next().getDownloadType() == DownloaderType.STORE)
-                return true;
-        }
-        return false;
-    }
-    
+    public boolean hasStoreDownload();
+
     /**
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
-    public synchronized void killDownloadersNotListed(Collection<? extends DownloadInformation> updates) {
-        if (updates == null)
-            return;
-        
-        Set<String> urns = new HashSet<String>(updates.size());
-        for(DownloadInformation ui : updates)
-            urns.add(ui.getUpdateURN().httpStringValue());
-        
-        for (Iterator<AbstractDownloader> iter = new DualIterator<AbstractDownloader>(waiting.iterator(),active.iterator());
-        iter.hasNext();) {
-            AbstractDownloader d = iter.next();
-            if (d.getDownloadType() == DownloaderType.INNETWORK  && 
-                    !urns.contains(d.getSHA1Urn().httpStringValue())) 
-                d.stop();
-        }
-        
-        Set<String> hopeless = UpdateSettings.FAILED_UPDATES.getValue();
-        hopeless.retainAll(urns);
-        UpdateSettings.FAILED_UPDATES.setValue(hopeless);
-    }
-    
-    public PushDownloadManager getPushManager() {
-    	return pushDownloadManager.get();
-    }
+    public void killDownloadersNotListed(Collection<? extends DownloadInformation> updates);
 
-    /**
-     * Delegates the incoming socket out to BrowseHostHandler & then attempts to assign it
-     * to any ManagedDownloader.
-     * 
-     * Closes the socket if neither BrowseHostHandler nor any ManagedDownloaders wanted it.
-     * 
-     * @param file
-     * @param index
-     * @param clientGUID
-     * @param socket
-     */
-    private synchronized boolean handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
-    	 boolean handled = false;
-         for (AbstractDownloader md : activeAndWaiting) {
-         	if (! (md instanceof ManagedDownloader))
-         		continue; // pushes apply to gnutella downloads only
-         	ManagedDownloader mmd = (ManagedDownloader)md;
-         	if (mmd.acceptDownload(file, socket, index, clientGUID))
-         		handled = true;
-         }                 
-         return handled;
-    }
+    public PushDownloadManager getPushManager();
 
-    public boolean acceptPushedSocket(String file, int index,
-            byte[] clientGUID, Socket socket) {
-        return handleIncomingPush(file, index, clientGUID, socket);
-    }
-    
-    
+    public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket);
+
     /**
      * Schedules the runnable that pumps through waiting downloads.
      */
-    public void scheduleWaitingPump() {
-        if(_waitingPump != null)
-            return;
-            
-        _waitingPump = new Runnable() {
-            public void run() {
-                pumpDownloads();
-            }
-        };
-        backgroundExecutor.scheduleWithFixedDelay(_waitingPump,
-                               1000,
-                               1000, TimeUnit.MILLISECONDS);
-    }
-    
-    /**
-     * Pumps through each waiting download, either removing it because it was
-     * stopped, or adding it because there's an active slot and it requires
-     * attention.
-     */
-    protected synchronized void pumpDownloads() {
-        int index = 1;
-        for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
-            AbstractDownloader md = i.next();
-            if(md.isAlive()) {
-                continue;
-            } else if(md.shouldBeRemoved()) {
-                i.remove();
-                cleanupCompletedDownload(md, false);
-            }
-            // handle downloads from LWS seperately, only allow 1 at a time
-            else if( storeDownloadCount == 0 && md.getDownloadType() == DownloaderType.STORE ) {
-                    i.remove();
-                    storeDownloadCount++;
-                    active.add(md);
-                    md.startDownload();
-            } else if(hasFreeSlot() && (md.shouldBeRestarted()) && (md.getDownloadType() != DownloaderType.STORE)) {
-                i.remove();
-                if(md.getDownloadType() == DownloaderType.INNETWORK)
-                    innetworkCount++;
-                active.add(md);
-                md.startDownload();
-            } else {
-                if(md.isQueuable())
-                    md.setInactivePriority(index++);
-                md.handleInactivity();
-            }
-        }
-    }
-    
-    /**
-     * Copies the backup downloads.dat (downloads.bak) file to the
-     * the real downloads.dat location.
-     */
-    private synchronized void copyBackupToReal() {
-        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();        
-        real.delete();
-        FileUtils.copy(backup, real);
-    }
-    
+    public void scheduleWaitingPump();
+
     /**
      * Determines if the given URN has an incomplete file.
      */
-    public boolean isIncomplete(URN urn) {
-        return incompleteFileManager.getFileForUrn(urn) != null;
-    }
-    
+    public boolean isIncomplete(URN urn);
+
     /**
      * Returns whether or not we are actively downloading this file.
      */
-    public boolean isActivelyDownloading(URN urn) {
-        Downloader md = getDownloaderForURN(urn);
-        
-        if(md == null)
-            return false;
-            
-        switch(md.getState()) {
-        case QUEUED:
-        case BUSY:
-        case ABORTED:
-        case GAVE_UP:
-        case DISK_PROBLEM:
-        case CORRUPT_FILE:
-        case REMOTE_QUEUED:
-        case WAITING_FOR_USER:
-            return false;
-        default:
-            return true;
-        }
-    }
-    
+    public boolean isActivelyDownloading(URN urn);
+
     /**
      * Returns the IncompleteFileManager used by this DownloadManager
      * and all ManagedDownloaders.
      */
-    public IncompleteFileManager getIncompleteFileManager() {
-        return incompleteFileManager;
-    }    
- 
-    public synchronized int downloadsInProgress() {
-        return active.size() + waiting.size();
-    }
-    
-    public synchronized int getNumIndividualDownloaders() {
-        int ret = 0;
-        for (Iterator<AbstractDownloader> iter=active.iterator(); iter.hasNext(); ) {  //active
-        	Object next = iter.next();
-        	if (! (next instanceof ManagedDownloader))
-        		continue; // TODO: count torrents separately
-            ManagedDownloader md=(ManagedDownloader)next;
-            ret += md.getNumDownloaders();
-       }
-       return ret;
-    }
-    
+    public IncompleteFileManager getIncompleteFileManager();
+
+    public int downloadsInProgress();
+
+    public int getNumIndividualDownloaders();
+
     /**
      * Inner network traffic and downloads from the LWS don't count towards overall
      * download activity.
      */
-    public synchronized int getNumActiveDownloads() {
-        return active.size() - innetworkCount - storeDownloadCount;
-    }
-   
-    public synchronized int getNumWaitingDownloads() {
-        return waiting.size();
-    }
-    
-    public synchronized Downloader getDownloaderForURN(URN sha1) {
-    	for (AbstractDownloader md : activeAndWaiting) {
-    		if (md.getSHA1Urn() != null && sha1.equals(md.getSHA1Urn()))
-    			return md;
-    	}
-    	return null;
-    }
-    
-    public synchronized Downloader getDownloaderForURNString(String urn) {
-        for (AbstractDownloader md : activeAndWaiting) {
-            if (md.getSHA1Urn() != null && urn.equals(md.getSHA1Urn().toString()))
-                return md;
-        }
-        return null;
-    }    
-    
+    public int getNumActiveDownloads();
+
+    public int getNumWaitingDownloads();
+
+    public Downloader getDownloaderForURN(URN sha1);
+
+    public Downloader getDownloaderForURNString(String urn);
+
     /**
      * Returns the active or waiting downloader that uses or will use 
      * <code>file</code> as incomplete file.
      * @param file the incomplete file candidate
      * @return <code>null</code> if no downloader for the file is found
      */
-    public synchronized Downloader getDownloaderForIncompleteFile(File file) {
-    	for (AbstractDownloader dl : activeAndWaiting) {
-    		if (dl.conflictsWithIncompleteFile(file)) {
-    			return dl;
-    		}
-    	}
-    	return null;
-    }
+    public Downloader getDownloaderForIncompleteFile(File file);
 
-    public synchronized boolean isGuidForQueryDownloading(GUID guid) {
-    	for (AbstractDownloader md : activeAndWaiting) {
-    		GUID dGUID = md.getQueryGUID();
-    		if ((dGUID != null) && (dGUID.equals(guid)))
-    			return true;
-    	}
-        return false;
-    }
-    
+    public boolean isGuidForQueryDownloading(GUID guid);
+
     /**
      * Clears all downloads.
      */
-    public void clearAllDownloads() {
-        List<Downloader> buf;
-        synchronized(this) {
-            buf = new ArrayList<Downloader>(active.size() + waiting.size());
-            buf.addAll(active);
-            buf.addAll(waiting);
-            active.clear();
-            waiting.clear();
-        }
-        for(Downloader md : buf ) 
-            md.stop();
-    }   
-    
-    
-
-    /** Writes a snapshot of all downloaders in this and all incomplete files to
-     *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
-     *  at any time for checkpointing purposes.  Returns true iff the file was
-     *  successfully written. */
-    boolean writeSnapshot() {
-        List<AbstractDownloader> buf;
-        synchronized(this) {
-            buf = new ArrayList<AbstractDownloader>(active.size() + waiting.size());
-            buf.addAll(active);
-            buf.addAll(waiting);
-        }
-        
-        File outFile = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File backupFile = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
-        
-        //must delete in order for renameTo to work.
-        backupFile.delete();
-        outFile.renameTo(backupFile);
-        
-        // Write list of active and waiting downloaders, then block list in
-        //   IncompleteFileManager.
-        ObjectOutputStream out = null;
-        try {
-            out=new ObjectOutputStream(
-                    new BufferedOutputStream(
-                        new FileOutputStream(outFile)));
-            
-            out.writeObject(buf);
-            //Blocks can be written to incompleteFileManager from other threads
-            //while this downloader is being serialized, so lock is needed.
-            synchronized (incompleteFileManager) {
-                out.writeObject(incompleteFileManager);
-            }
-            out.flush();
-            return true;
-        } catch (IOException e) {
-            return false;
-        } finally {
-            IOUtils.close(out);
-        }
-    }
+    public void clearAllDownloads();
 
     /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
      *  to this, queued.  The queued downloads will restart immediately if slots
@@ -583,87 +145,11 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. 
      *  It is public for testing purposes only!  
      *  @param file the downloads.dat snapshot file */
-    public synchronized boolean readAndInitializeSnapshot(File file) {
-        List<AbstractDownloader> buf;
-        try {
-            buf = readSnapshot(file);
-        } catch(IOException iox) {
-            LOG.warn("Couldn't read snapshot", iox);
-            return false;
-        }
+    public boolean readAndInitializeSnapshot(File file);
 
-        //Initialize and start downloaders. This code is a little tricky.  It is
-        //important that instruction (3) follow (1) and (2), because we must not
-        //pass an uninitialized Downloader to the GUI.  (The call to getFileName
-        //will throw NullPointerException.)  I believe the relative order of (1)
-        //and (2) does not matter since this' monitor is held.  (The download
-        //thread must obtain the monitor to acquire a queue slot.)
-        try {
-            for (AbstractDownloader downloader : buf) {                
-                // ignore RequeryDownloaders -- they're legacy
-                if(downloader instanceof RequeryDownloader)
-                    continue;
-                
-                waiting.add(downloader);
-                downloader.initialize(downloadReferencesFactory.create(downloader));
-                callback(downloader).addDownload(downloader);
-            }
-            return true;
-        } finally {
-            // Remove entries that are too old or no longer existent and not actively 
-            // downloaded.  
-            if (incompleteFileManager.initialPurge(getActiveDownloadFiles(buf)))
-                writeSnapshot();
-        }
-    }
-    
     /* public for testing only right now. */
-    public List<AbstractDownloader> readSnapshot(File file) throws IOException {        
-        //Read downloaders from disk.
-        List<AbstractDownloader> buf=null;
-        ObjectInputStream in = null;
-        try {
-            in = new ConverterObjectInputStream(
-                                    new BufferedInputStream(
-                                        new FileInputStream(file)));
-            //This does not try to maintain backwards compatibility with older
-            //versions of LimeWire, which only wrote the list of downloaders.
-            //Note that there is a minor race condition here; if the user has
-            //started some downloads before this method is called, the new and
-            //old downloads will use different IncompleteFileManager instances.
-            //This doesn't really cause an errors, however.
-            buf = GenericsUtils.scanForList(in.readObject(), AbstractDownloader.class, ScanMode.REMOVE);
-            incompleteFileManager=(IncompleteFileManager)in.readObject();
-        } catch(Throwable t) {
-            LOG.error("Unable to read download file", t);
-            throw (IOException)new IOException().initCause(t);
-        } finally {
-            IOUtils.close(in);
-        }
-        
-        // Pump the downloaders through a set, to remove duplicate values.
-        // This is necessary in case LimeWire got into a state where a
-        // downloader was written to disk twice.
-        return new LinkedList<AbstractDownloader>(new LinkedHashSet<AbstractDownloader>(buf));
-    }
-    
-    private static Collection<File> getActiveDownloadFiles(List<AbstractDownloader> downloaders) {
-        List<File> ret = new ArrayList<File>(downloaders.size());
-        for (Downloader d : downloaders) {
-    	    File f = d.getFile();
-    	    if (f != null) {
-                try {
-                    ret.add(FileUtils.getCanonicalFile(f));
-                } catch (IOException iox) { 
-                    ret.add(f.getAbsoluteFile());
-                }
-    	    }
-        }
-        
-        return ret;
-    }
-    ////////////////////////// Main Public Interface ///////////////////////
-           
+    public List<AbstractDownloader> readSnapshot(File file) throws IOException;
+
     /** 
      * Tries to "smart download" any of the given files.<p>  
      *
@@ -687,48 +173,17 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      * @param queryGUID the guid of the query that resulted in the RFDs being
      * downloaded.
      * @param saveDir can be null, then the default save directory is used
-	 * @param fileName can be null, then the first filename of one of element of
-	 * <code>files</code> is taken.
+     * @param fileName can be null, then the first filename of one of element of
+     * <code>files</code> is taken.
      * @throws SaveLocationException when there was an error setting the
      * location of the final download destination.
      *
      *     @modifies this, disk 
      */
-    public synchronized Downloader download(RemoteFileDesc[] files,
-                                            List<? extends RemoteFileDesc> alts, GUID queryGUID, 
-                                            boolean overwrite, File saveDir,
-											String fileName) 
-		throws SaveLocationException {
+    public Downloader download(RemoteFileDesc[] files, List<? extends RemoteFileDesc> alts,
+            GUID queryGUID, boolean overwrite, File saveDir, String fileName)
+            throws SaveLocationException;
 
-		String fName = getFileName(files, fileName);
-        if (conflicts(files, new File(saveDir,fName))) {
-			throw new SaveLocationException
-			(SaveLocationException.FILE_ALREADY_DOWNLOADING,
-					new File(fName != null ? fName : ""));
-        }
-
-        //Purge entries from incompleteFileManager that have no corresponding
-        //file on disk.  This protects against stupid users who delete their
-        //temporary files while LimeWire is running, either through the command
-        //prompt or the library.  Note that you could optimize this by just
-        //purging files corresponding to the current download, but it's not
-        //worth it.
-        incompleteFileManager.purge();
-
-        //Start download asynchronously.  This automatically moves downloader to
-        //active if it can.
-        ManagedDownloader downloader =
-            gnutellaDownloaderFactory.createManagedDownloader(files, incompleteFileManager,
-                queryGUID, saveDir, fileName, overwrite);
-
-        initializeDownload(downloader);
-        
-        //Now that the download is started, add the sources w/o caching
-        downloader.addDownload(alts,false);
-        
-        return downloader;
-    }   
-    
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
      * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
@@ -746,43 +201,11 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      *  if unknown
      *
      * @exception IllegalArgumentException all urn, textQuery, filename are
-	 *  null 
+     *  null 
      * @throws SaveLocationException 
      */
-    public synchronized Downloader download(MagnetOptions magnet,
-			boolean overwrite,
-			File saveDir,
-			String fileName)
-	throws IllegalArgumentException, SaveLocationException {
-		
-		if (!magnet.isDownloadable()) 
-            throw new IllegalArgumentException("magnet not downloadable");
-        
-        //remove entry from IFM if the incomplete file was deleted.
-        incompleteFileManager.purge();
-        
-        if (fileName == null) {
-        	fileName = magnet.getFileNameForSaving();
-        }
-        if (conflicts(magnet.getSHA1Urn(), 0, new File(saveDir,fileName))) {
-			throw new SaveLocationException
-			(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
-        }
-
-        //Note: If the filename exists, it would be nice to check that we are
-        //not already downloading the file by calling conflicts with the
-        //filename...the problem is we cannot do this effectively without the
-        //size of the file (atleast, not without being risky in assuming that
-        //two files with the same name are the same file). So for now we will
-        //just leave it and download the same file twice.
-
-        //Instantiate downloader, validating incompleteFile first.
-        MagnetDownloader downloader = 
-            gnutellaDownloaderFactory.createMagnetDownloader(incompleteFileManager, magnet,
-                overwrite, saveDir, fileName);
-        initializeDownload(downloader);
-        return downloader;
-    }
+    public Downloader download(MagnetOptions magnet, boolean overwrite, File saveDir,
+            String fileName) throws IllegalArgumentException, SaveLocationException;
 
     /**
      * Creates a new LimeWire Store (LWS) download. Store downloads are handled in a similar fashion as
@@ -799,343 +222,47 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      * @throws IllegalArgumentException
      * @throws SaveLocationException
      */
-    public synchronized Downloader downloadFromStore( RemoteFileDesc rfd,
-            boolean overwrite,
-            File saveDir,
-            String fileName)
-    throws IllegalArgumentException, SaveLocationException {
-        
-        //Purge entries from incompleteFileManager that have no corresponding
-        //file on disk.  This protects against stupid users who delete their
-        //temporary files while LimeWire is running, either through the command
-        //prompt or the library.  Note that you could optimize this by just
-        //purging files corresponding to the current download, but it's not
-        //worth it.
-        incompleteFileManager.purge();
-        
-        if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir,fileName))) {
-            throw new SaveLocationException
-            (SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
-        }
-      
-        //Start download asynchronously.  This automatically moves downloader to
-        //active if it can.
-        StoreDownloader downloader =
-            purchasedDownloaderFactory.createStoreDownloader(rfd, incompleteFileManager, 
-                                  saveDir, fileName, overwrite);
-
-        initializeDownload(downloader);
-        
-        return downloader;
-    }
+    public Downloader downloadFromStore(RemoteFileDesc rfd, boolean overwrite, File saveDir,
+            String fileName) throws IllegalArgumentException, SaveLocationException;
 
     /**
      * Starts a resume download for the given incomplete file.
      * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
      * @throws SaveLocationException 
-     */ 
-    public synchronized Downloader download(File incompleteFile)
-            throws CantResumeException, SaveLocationException { 
-     
-		if (conflictsWithIncompleteFile(incompleteFile)) {
-			throw new SaveLocationException
-			(SaveLocationException.FILE_ALREADY_DOWNLOADING, incompleteFile);
-		}
-		
-		if (IncompleteFileManager.isTorrentFolder(incompleteFile)) 
-			return resumeTorrentDownload(incompleteFile);
+     */
+    public Downloader download(File incompleteFile) throws CantResumeException,
+            SaveLocationException;
 
-        //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
-        //to the GUI, so they know what they're overwriting.
-        //if (! overwrite) {
-        //    try {
-        //        File downloadDir=SettingsManager.instance().getSaveDirectory();
-        //        File completeFile=new File(
-        //            downloadDir, 
-        //            incompleteFileManager.getCompletedName(incompleteFile));
-        //        if (completeFile.exists())
-        //            throw new FileExistsException(filename);
-        //    } catch (IllegalArgumentException e) {
-        //        throw new CantResumeException(incompleteFile.getName());
-        //    }
-        //}
-
-        //Purge entries from incompleteFileManager that have no corresponding
-        //file on disk.  This protects against stupid users who delete their
-        //temporary files while LimeWire is running, either through the command
-        //prompt or the library.  Note that you could optimize this by just
-        //purging files corresponding to the current download, but it's not
-        //worth it.
-        incompleteFileManager.purge();
-
-        //Instantiate downloader, validating incompleteFile first.
-        ResumeDownloader downloader=null;
-        try {
-            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
-            String name=IncompleteFileManager.getCompletedName(incompleteFile);
-            long size= IncompleteFileManager.getCompletedSize(incompleteFile);
-            downloader = gnutellaDownloaderFactory.createResumeDownloader(incompleteFileManager,
-                                              incompleteFile,
-                                              name,
-                                              size);
-        } catch (IllegalArgumentException e) {
-            throw new CantResumeException(incompleteFile.getName());
-        } catch (IOException ioe) {
-            throw new CantResumeException(incompleteFile.getName());
-        }
-        
-        initializeDownload(downloader);
-        return downloader;
-    }
-    
-    private Downloader resumeTorrentDownload(File torrentFolder) 
-    throws CantResumeException, SaveLocationException {
-    	File infohash = null; 
-    	for (File f : torrentFolder.listFiles()){
-    		if (f.getName().startsWith(".dat")) {
-    			infohash = f;
-    			break;
-    		}
-    	}
-    	
-    	String name = IncompleteFileManager.getCompletedName(torrentFolder);
-        if(infohash == null)
-            throw new CantResumeException(name);
-    	
-    	BTMetaInfo info = null;
-    	try {
-    		Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());
-    		info = (BTMetaInfo)infoObj;
-    	} catch (Throwable bad) {
-    		throw new CantResumeException(name);
-    	}
-    	
-    	Downloader ret = downloadTorrent(info, false);
-    	if (ret.isResumable())
-    		ret.resume();
-    	return ret;
-    }
-    
     /**
      * Downloads an InNetwork update, using the info from the DownloadInformation.
      */
-    public synchronized Downloader download(DownloadInformation info, long now) 
-    throws SaveLocationException {
-        File dir = SharingUtils.PREFERENCE_SHARE;
-        dir.mkdirs();
-        File f = new File(dir, info.getUpdateFileName());
-        if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))
-			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
-        
-        incompleteFileManager.purge();
-        ManagedDownloader d = gnutellaDownloaderFactory.createInNetworkDownloader(
-                incompleteFileManager, info, dir, now);
-        initializeDownload(d);
-        return d;
-    }
-    
-    public synchronized Downloader downloadTorrent(BTMetaInfo info, boolean overwrite) 
-    throws SaveLocationException {
-    	TorrentFileSystem system = info.getFileSystem();
-    	checkActiveAndWaiting(info.getURN(), system);
-    	if (!overwrite)
-    		checkTargetLocation(system, overwrite);
-    	else
-    		torrentManager.get().killTorrentForFile(system.getCompleteFile());
-    	AbstractDownloader ret = btDownloaderFactory.createBTDownloader(info);
-    	initializeDownload(ret);
-    	return ret;
-    }
-    
-    private void checkTargetLocation(TorrentFileSystem info, boolean overwrite) 
-    throws SaveLocationException{
-    	for (File f : info.getFilesAndFolders()) {
-    		if (f.exists())
-    			throw new SaveLocationException
-    			(SaveLocationException.FILE_ALREADY_EXISTS, f);
-    	}
-    }
-    
-    private void checkActiveAndWaiting(URN urn, TorrentFileSystem system) 
-    throws SaveLocationException {
-    	for (AbstractDownloader current : activeAndWaiting) {
-    		if (urn.equals(current.getSHA1Urn())) {
-    			// this is the place to add new trackers eventually.
-    			throw new SaveLocationException
-    			(SaveLocationException.FILE_ALREADY_DOWNLOADING, system.getCompleteFile());
-    		}
-    		for (File f : system.getFilesAndFolders()) {
-    			if (current.conflictsSaveFile(f)) {
-    				throw new SaveLocationException
-    				(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, f);
-    			}
-    		}
-    	}
-    }
-    
-    /**
-     * Performs common tasks for initializing the download.
-     * 1) Initializes the downloader.
-     * 2) Adds the download to the waiting list.
-     * 3) Notifies the callback about the new downloader.
-     * 4) Writes the new snapshot out to disk.
-     */
-    private void initializeDownload(AbstractDownloader md) {
-        md.initialize(downloadReferencesFactory.create(md));
-		waiting.add(md);
-        callback(md).addDownload(md);
-        backgroundExecutor.execute(new Runnable() {
-        	public void run() {
-        		writeSnapshot(); // Save state for crash recovery.
-        	}
-        });
-    }
-    
-    /**
-     * Returns the callback that should be used for the given md.
-     */
-    private DownloadCallback callback(Downloader md) {
-        return (md instanceof InNetworkDownloader) ? innetworkCallback : downloadCallback.get();
-    }
-        
-	/**
-	 * Returns true if there already exists a download for the same file.
-	 * <p>
-	 * Same file means: same urn, or as fallback same filename + same filesize
-	 * @param rfds
-	 * @return
-	 */
-	private boolean conflicts(RemoteFileDesc[] rfds, File... fileName) {
-		URN urn = null;
-		for (int i = 0; i < rfds.length && urn == null; i++) {
-			urn = rfds[0].getSHA1Urn();
-		}
-		
-		return conflicts(urn, rfds[0].getSize(), fileName);
-	}
-	
-	/**
-	 * Returns <code>true</code> if there already is a download with the same urn. 
-	 * @param urn may be <code>null</code>, then a check based on the fileName
-	 * and the fileSize is performed
-	 * @return
-	 */
-	public boolean conflicts(URN urn, long fileSize, File... fileName) {
-		
-		if (urn == null && fileSize == 0) {
-			return false;
-		}
-		
-		synchronized (this) {
-			for (AbstractDownloader md : activeAndWaiting) {
-				if (md.conflicts(urn, fileSize, fileName)) 
-					return true;
-			}
-			return false;
-		}
-	}
-	
-	/**
-	 * Returns <code>true</code> if there already is a download that is or
-	 * will be saving to this file location.
-	 * @param candidateFile the final file location.
-	 * @return
-	 */
-	public synchronized boolean isSaveLocationTaken(File candidateFile) {
-		for (AbstractDownloader md : activeAndWaiting) {
-			if (md.conflictsSaveFile(candidateFile)) 
-				return true;
-		}
-		return false;
-	}
+    public Downloader download(DownloadInformation info, long now) throws SaveLocationException;
 
-	private synchronized boolean conflictsWithIncompleteFile(File incompleteFile) {
-		for (AbstractDownloader md : activeAndWaiting) {
-			if (md.conflictsWithIncompleteFile(incompleteFile))
-				return true;
-		}
-		return false;
-	}
-	
+    public Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
+            throws SaveLocationException;
+
+    /**
+     * Returns <code>true</code> if there already is a download with the same urn. 
+     * @param urn may be <code>null</code>, then a check based on the fileName
+     * and the fileSize is performed
+     * @return
+     */
+    public boolean conflicts(URN urn, long fileSize, File... fileName);
+
+    /**
+     * Returns <code>true</code> if there already is a download that is or
+     * will be saving to this file location.
+     * @param candidateFile the final file location.
+     * @return
+     */
+    public boolean isSaveLocationTaken(File candidateFile);
+
     /** 
      * Adds all responses (and alternates) in qr to any downloaders, if
      * appropriate.
      */
-    public void handleQueryReply(QueryReply qr) {
-        // first check if the qr is of 'sufficient quality', if not just
-        // short-circuit.
-        if (qr.calculateQualityOfService(
-                !networkManager.acceptedIncomingConnection(), networkManager) < 1)
-            return;
-
-        List<Response> responses;
-        HostData data;
-        try {
-            responses = qr.getResultsAsList();
-            data = qr.getHostData();
-        } catch(BadPacketException bpe) {
-            return; // bad packet, do nothing.
-        }
-        
-        addDownloadWithResponses(responses, data);
-    }
-
-    /**
-     * Iterates through all responses seeing if they can be matched
-     * up to any existing downloaders, adding them as possible
-     * sources if they do.
-     */
-    private void addDownloadWithResponses(List<? extends Response> responses, HostData data) {
-        if(responses == null)
-            throw new NullPointerException("null responses");
-        if(data == null)
-            throw new NullPointerException("null hostdata");
-
-        // need to synch because active and waiting are not thread safe
-        List<AbstractDownloader> downloaders = new ArrayList<AbstractDownloader>(active.size() + waiting.size());
-        synchronized (this) { 
-            // add to all downloaders, even if they are waiting....
-            downloaders.addAll(active);
-            downloaders.addAll(waiting);
-        }
-        
-        // short-circuit.
-        if(downloaders.isEmpty())
-            return;
-
-        //For each response i, offer it to each downloader j.  Give a response
-        // to at most one downloader.
-        // TODO: it's possible that downloader x could accept response[i] but
-        //that would cause a conflict with downloader y.  Check for this.
-        for(Response r : responses) {
-            // Don't bother with making XML from the EQHD.
-            RemoteFileDesc rfd = r.toRemoteFileDesc(data);
-            for(Downloader current : downloaders) {
-            	if ( !(current instanceof ManagedDownloader))
-            		continue; // can't add sources to torrents yet
-                ManagedDownloader currD = (ManagedDownloader) current;
-                // If we were able to add this specific rfd,
-                // add any alternates that this response might have
-                // also.
-                if (currD.addDownload(rfd, true)) {
-                    for(IpPort ipp : r.getLocations()) {
-                        // don't cache alts.
-                        currD.addDownload(new RemoteFileDesc(rfd, ipp), false);
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    // //////////// Callback Methods for ManagedDownloaders ///////////////////
-
-    /** @requires this monitor' held by caller */
-    private boolean hasFreeSlot() {
-        return active.size() - innetworkCount - storeDownloadCount
-            < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
-    }
+    public void handleQueryReply(QueryReply qr);
 
     /**
      * Removes downloader entirely from the list of current downloads.
@@ -1144,77 +271,14 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      * puts the download back in the waiting list to be finished later.
      *     @modifies this, callback
      */
-    public synchronized void remove(AbstractDownloader downloader, 
-                                    boolean completed) {
-        boolean isRemoved = active.remove(downloader);
-        if(downloader.getDownloadType() == DownloaderType.INNETWORK)
-            innetworkCount--;
-        // make sure an active download was removed prior to decrementing this index
-        if(downloader.getDownloadType() == DownloaderType.STORE && isRemoved)
-            storeDownloadCount--;
-        
-        waiting.remove(downloader);
-        if(completed)
-            cleanupCompletedDownload(downloader, true);
-        else
-            waiting.add(downloader);
-    }
+    public void remove(AbstractDownloader downloader, boolean completed);
 
     /**
      * Bumps the priority of an inactive download either up or down
      * by amt (if amt==0, bump to start/end of list).
      */
-    public synchronized void bumpPriority(Downloader downl,
-                                          boolean up, int amt) {
-    	AbstractDownloader downloader = (AbstractDownloader)downl;
-        int idx = waiting.indexOf(downloader);
-        if(idx == -1)
-            return;
+    public void bumpPriority(Downloader downl, boolean up, int amt);
 
-        if(up && idx != 0) {
-            waiting.remove(idx);
-            if (amt > idx)
-                amt = idx;
-            if (amt != 0)
-                waiting.add(idx - amt, downloader);
-            else
-                waiting.add(0, downloader);     //move to top of list
-        } else if(!up && idx != waiting.size() - 1) {
-            waiting.remove(idx);
-            if (amt != 0) {
-                amt += idx;
-                if (amt > waiting.size())
-                    amt = waiting.size();
-                waiting.add(amt, downloader);
-            } else {
-                waiting.add(downloader);    //move to bottom of list
-            }
-        }
-    }
-
-    /**
-     * Cleans up the given Downloader after completion.
-     *
-     * If ser is true, also writes a snapshot to the disk.
-     */
-    private void cleanupCompletedDownload(AbstractDownloader dl, boolean ser) {
-        synchronized(this) {
-            querySentMDs.remove(dl);
-        }
-        dl.finish();
-        if (dl.getQueryGUID() != null)
-            messageRouter.get().downloadFinished(dl.getQueryGUID());
-        callback(dl).removeDownload(dl);
-        
-        //Save this' state to disk for crash recovery.
-        if(ser)
-            writeSnapshot();
-
-        // Enable auto shutdown
-        if(active.isEmpty() && waiting.isEmpty())
-            callback(dl).downloadsComplete();
-    }           
-    
     /** 
      * Attempts to send the given requery to provide the given downloader with 
      * more sources to download.  May not actually send the requery if it doing
@@ -1229,124 +293,31 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager, L
      * @return true iff the query was actually sent.  If false is returned,
      *  the downloader should attempt to send the query later.
      */
-    public synchronized boolean sendQuery(ManagedDownloader requerier, 
-                                          QueryRequest query) {
-        //NOTE: this algorithm provides global but not local fairness.  That is,
-        //if two requeries x and y are competing for a slot, patterns like
-        //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
-        if(LOG.isTraceEnabled())
-            LOG.trace("DM.sendQuery():" + query.getQuery());
-        assert waiting.contains(requerier) : "Unknown or non-waiting MD trying to send requery.";
-
-        //Disallow if global time limits exceeded.  These limits don't apply to
-        //queries that are requeries.
-// Requeries are disabled elsewhere.  This code should be reworked when we reenable.
-//        boolean isRequery=GUID.isLimeRequeryGUID(query.getGUID());
-//        long elapsed=System.currentTimeMillis()-lastGnutellaRequeryTime;
-//        if (isRequery && elapsed <= TIME_BETWEEN_GNUTELLA_REQUERIES) {
-//            return false;
-//        }
-
-        //Has everyone had a chance to send a query?  If so, clear the slate.
-        if (querySentMDs.size() >= waiting.size()) {
-            LOG.trace("DM.sendQuery(): reseting query sent queue");
-            querySentMDs.clear();
-        }
-
-        //If downloader has already sent a query, give someone else a turn.
-        if (querySentMDs.contains(requerier)) {
-            // nope, sorry, must lets others go first...
-            if(LOG.isWarnEnabled())
-                LOG.warn("DM.sendQuery(): out of turn:" + query.getQuery());
-            return false;
-        }
-        
-        if(LOG.isTraceEnabled())
-            LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
-        querySentMDs.add(requerier);                  
-//        lastGnutellaRequeryTime = System.currentTimeMillis();
-        messageRouter.get().sendDynamicQuery(query);
-        return true;
-    }
+    public boolean sendQuery(ManagedDownloader requerier, QueryRequest query);
 
     /** Calls measureBandwidth on each uploader. */
-    public void measureBandwidth() {
-        List<AbstractDownloader> activeCopy;
-        synchronized(this) {
-            activeCopy = new ArrayList<AbstractDownloader>(active);
-        }
-        
-        float currentTotal = 0f;
-        boolean c = false;
-        for (BandwidthTracker bt : activeCopy) {
-            if (bt instanceof InNetworkDownloader)
-                continue;
-            
-            c = true;
-            bt.measureBandwidth();
-            currentTotal += bt.getAverageBandwidth();
-        }
-        
-        if ( c ) {
-            synchronized(this) {
-                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-                    / ++numMeasures;
-            }
-        }
-    }
+    public void measureBandwidth();
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
-    public float getMeasuredBandwidth() {
-        List<AbstractDownloader> activeCopy;
-        synchronized(this) {
-            activeCopy = new ArrayList<AbstractDownloader>(active);
-        }
-        
-        float sum=0;
-        for (BandwidthTracker bt : activeCopy) {
-            if (bt instanceof InNetworkDownloader)
-                continue;
-            
-            float curr = 0;
-            try{
-                curr = bt.getMeasuredBandwidth();
-            } catch(InsufficientDataException ide) {
-                curr = 0;//insufficient data? assume 0
-            }
-            sum+=curr;
-        }
-                
-        lastMeasuredBandwidth = sum;
-        return sum;
-    }
-    
+    public float getMeasuredBandwidth();
+
     /**
      * returns the summed average of the downloads
      */
-    public synchronized float getAverageBandwidth() {
-        return averageBandwidth;
-    }
-    
+    public float getAverageBandwidth();
+
     /**
      * Returns the measured bandwidth as calculated from the last
      * getMeasuredBandwidth() call.
      */
-    public float getLastMeasuredBandwidth() {
-        return lastMeasuredBandwidth;
-    }
-	
-	private String getFileName(RemoteFileDesc[] rfds, String fileName) {
-		for (int i = 0; i < rfds.length && fileName == null; i++) {
-			fileName = rfds[i].getFileName();
-		}
-		return fileName;
-	}
-	
-	// ---------------------------------------------------------------
-	// Implementation of LWSIntegrationServicesDelegate
+    public float getLastMeasuredBandwidth();
 
-    public final Iterable<AbstractDownloader> getAllDownloaders() {
-        return activeAndWaiting;
-    }    
+    public Iterable<AbstractDownloader> getAllDownloaders();
+    
+    /** Writes a snapshot of all downloaders in this and all incomplete files to
+     *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
+     *  at any time for checkpointing purposes.  Returns true iff the file was
+     *  successfully written. */
+    public boolean writeSnapshot();
 
 }
