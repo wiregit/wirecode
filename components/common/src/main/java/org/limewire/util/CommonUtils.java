@@ -338,7 +338,7 @@ public class CommonUtils {
      * The name is cleared from illegal filesystem characters and it is ensured
      * that the maximum path system on the system is not exceeded unless the 
      * parent directory path has already the maximum path length.
-
+     *
      * @param parentDir
      * @param name
      * @throws IOException if the parent directory's path takes up 
@@ -346,7 +346,7 @@ public class CommonUtils {
      * @return
      */
     public static String convertFileName(File parentDir, String name) throws IOException {
-        int parentLength = parentDir.getAbsolutePath().length();
+        int parentLength = parentDir.getAbsolutePath().getBytes(Charset.defaultCharset()).length;
         if (parentLength >= OSUtils.getMaxPathLength() - 1 /* for the separator char*/) {
             throw new IOException("Path too long");
         }
@@ -370,10 +370,13 @@ public class CommonUtils {
      * @return the cleaned up file name
      */
     public static String convertFileName(String name, int maxBytes) {
+        // use default encoding which is also used for files judging from the
+        // property name "file.encoding"
         try {
             return convertFileName(name, maxBytes, Charset.defaultCharset());
         } catch (CharacterCodingException cce) {
             try {
+                // UTF-8 should always be available
                 return convertFileName(name, maxBytes, Charset.forName("UTF-8"));
             } catch (CharacterCodingException e) {
                 // should not happen, UTF-8 can encode unicode and gives us a
@@ -474,8 +477,6 @@ public class CommonUtils {
      * handle the characters in the string
      */
     static byte[] getMaxBytes(String string, int maxBytes, Charset charSet) throws CharacterCodingException {
-        // use default encoding which is also used for files judging from the
-        // property name "file.encoding"
         byte[] bytes = new byte[maxBytes];
         ByteBuffer out = ByteBuffer.wrap(bytes);
         CharBuffer in = CharBuffer.wrap(string.toCharArray());
