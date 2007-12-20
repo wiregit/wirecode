@@ -401,7 +401,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         LOG.trace("START UpdateManager.instance");
         activityCallback.get().componentLoading(I18nMarker.marktr("Checking for Updates..."));
-        updateHandler.get();
+        updateHandler.get().initialize();
         LOG.trace("STOP UpdateManager.instance");
 
         LOG.trace("START QueryUnicaster");

@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,11 +18,11 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.security.SignatureVerifier;
+import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
@@ -108,12 +107,7 @@ public class UpdateHandler implements HttpClientListener {
     /**
      * means to override the current time for tests
      */
-    private static Clock clock = new Clock();
-    
-    /**
-     * The queue that handles all incoming data.
-     */
-    private final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("UpdateHandler");
+    private final Clock clock;
     
     /**
      * The most recent update info for this machine.
@@ -177,7 +171,8 @@ public class UpdateHandler implements HttpClientListener {
             Provider<DownloadManager> downloadManager,
             Provider<FileManager> fileManager,
             ApplicationServices applicationServices,
-            UpdateCollectionFactory updateCollectionFactory) {
+            UpdateCollectionFactory updateCollectionFactory,
+            Clock clock) {
         this.backgroundExecutor = backgroundExecutor;
         this.activityCallback = activityCallback;
         this.connectionServices = connectionServices;
@@ -189,16 +184,15 @@ public class UpdateHandler implements HttpClientListener {
         this.fileManager = fileManager;
         this.applicationServices = applicationServices;
         this.updateCollectionFactory = updateCollectionFactory;
-        
-        initialize(); // TODO: move to an initializer
+        this.clock = clock;
     }
 
     /**
      * Initializes data as read from disk.
      */
-    private void initialize() {
+    public void initialize() {
         LOG.trace("Initializing UpdateHandler");
-        QUEUE.execute(new Runnable() {
+        backgroundExecutor.execute(new Runnable() {
             public void run() {
                 handleDataInternal(FileUtils.readFileFully(getStoredFile()), true, null);
             }
@@ -206,18 +200,14 @@ public class UpdateHandler implements HttpClientListener {
         
         // Try to update ourselves (re-use hosts for downloading, etc..)
         // at a specified interval.
-        backgroundExecutor.schedule(new Runnable() {
-            public void run() {
-                QUEUE.execute(new Poller());
-            }
-        }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(), TimeUnit.MILLISECONDS);
+        backgroundExecutor.schedule(new Poller(), UpdateSettings.UPDATE_RETRY_DELAY.getValue(), TimeUnit.MILLISECONDS);
     }
     
     /**
      * Sparks off an attempt to download any pending updates.
      */
     public void tryToDownloadUpdates() {
-        QUEUE.execute(new Runnable() {
+        backgroundExecutor.execute(new Runnable() {
             public void run() {
                 UpdateInformation updateInfo = _updateInfo;
                 
@@ -236,7 +226,7 @@ public class UpdateHandler implements HttpClientListener {
      */
     public void handleUpdateAvailable(final ReplyHandler rh, final int version) {
         if(version == _lastId) {
-            QUEUE.execute(new Runnable() {
+            backgroundExecutor.execute(new Runnable() {
                 public void run() {
                     addSourceIfIdMatches(rh, version);
                 }
@@ -253,7 +243,7 @@ public class UpdateHandler implements HttpClientListener {
      */
     public void handleNewData(final byte[] data, final ReplyHandler handler) {
         if(data != null) {
-            QUEUE.execute(new Runnable() {
+            backgroundExecutor.execute(new Runnable() {
                 public void run() {
                     LOG.trace("Parsing new data...");
                     handleDataInternal(data, false, handler);
@@ -704,7 +694,7 @@ public class UpdateHandler implements HttpClientListener {
             }
         };
         
-        QUEUE.execute(r);
+        backgroundExecutor.execute(r);
     }
     
     /**
@@ -778,11 +768,6 @@ public class UpdateHandler implements HttpClientListener {
         public void run() {
             downloadUpdates(_updatesToDownload, null);
             killHopelessUpdates(_updatesToDownload);
-            backgroundExecutor.schedule( new Runnable() {
-                public void run() {
-                    QUEUE.execute(new Poller());
-                }
-            },UpdateSettings.UPDATE_RETRY_DELAY.getValue(), TimeUnit.MILLISECONDS);
         }
     }
     
@@ -801,14 +786,5 @@ public class UpdateHandler implements HttpClientListener {
             shown = true;
             notifyAboutInfo(id);
         }
-    }
-}
-
-/**
- * to be overriden in tests
- */
-class Clock {
-    public long now() {
-        return System.currentTimeMillis();
     }
 }
