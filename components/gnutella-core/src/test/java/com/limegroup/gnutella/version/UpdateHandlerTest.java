@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.version;
 
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -33,11 +35,16 @@ public class UpdateHandlerTest extends LimeTestCase {
     public static Test suite() {
         return buildTestSuite(UpdateHandlerTest.class);
     }
+
+    /**
+     * used to bypass the signer - customize the UpdateCollectionFactory to actually test.
+     */
+    private final String SIGNED_ASDF = "GAWAEFDW7Q73ILI2N5FSNPS7ASVYZ646BFYLZLQCCQ6G3VLJD4EE7KNGHVUDPLCALWTH2R4BLQ||asdf\n";
     
     private Injector injector;
     
     private Mockery m;
-    private ScheduledExecutorService ses;
+    private ImmediateExecutor ses;
     private ActivityCallback ac;
     private HttpExecutor httpEx;
     private CapabilitiesVMFactory cvmf;
@@ -63,7 +70,7 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         
         // these are used from multiple threads so cannot be mocked.
-        ses = new ScheduledExecutorServiceStub();
+        ses = new ImmediateExecutor();
         clock = new ClockStub();
         sp = new SettingsProvider() {
             public long getChangePeriod() {
@@ -93,20 +100,57 @@ public class UpdateHandlerTest extends LimeTestCase {
     }
     
     /**
-     * tests that we set up bindings correctly
+     * tests that we parse strings
      */
-    public void testBindings() throws Exception {
+    public void testParses() throws Exception {
+        final UpdateCollection uc = m.mock(UpdateCollection.class);
         m.checking(new Expectations() {{
+            one(ucf).createUpdateCollection("asdf\n");
+            will(returnValue(uc));
+            
             ignoring(ac);
             ignoring(httpEx);
             ignoring(cvmf);
             ignoring(cm);
             ignoring(fm);
             ignoring(as);
-            ignoring(ucf);
             ignoring(dm);
+            ignoring(uc);
             
         }});
-        injector.getInstance(UpdateHandler.class);
+        UpdateHandler h = injector.getInstance(UpdateHandler.class);
+        h.handleNewData(SIGNED_ASDF.getBytes(), null);
+        m.assertIsSatisfied();
+    }
+    
+    private class ImmediateExecutor extends ScheduledExecutorServiceStub {
+
+        volatile Runnable scheduled;
+        
+        @Override
+        public void execute(Runnable command) {
+            command.run();
+        }
+
+        @Override
+        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+            scheduled = command;
+            return null;
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay,
+                long period, TimeUnit unit) {
+            scheduled = command;
+            return null;
+        }
+
+        @Override
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay,
+                long delay, TimeUnit unit) {
+            scheduled = command;
+            return null;
+        }
+        
     }
 }

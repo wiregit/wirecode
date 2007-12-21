@@ -9,7 +9,7 @@ import org.limewire.util.Version;
  * Contains the ID & timestamp of the message, as well as the list
  * of UpdateData information for individual messages.
  */
-interface UpdateCollection {
+public interface UpdateCollection {
     
     /**
      * Gets the id of this UpdateCollection.
