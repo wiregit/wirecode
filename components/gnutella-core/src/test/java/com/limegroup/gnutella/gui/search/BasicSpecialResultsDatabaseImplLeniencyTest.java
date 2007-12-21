@@ -33,25 +33,25 @@ public class BasicSpecialResultsDatabaseImplLeniencyTest extends AbstractBasicSp
     }   
     
     public void testNoSize() throws IOException {
-        runTestWithStringNegativeOne(NO_SIZE, new Getter() {
+        runTestWithString(-1, NO_SIZE, new Getter() {
             public Object get(SearchResult sr) { return sr.getSize(); }
         });
     }
     
     public void testNoCreationTime() throws IOException {
-        runTestWithStringZero(NO_CREATION_TIME, new Getter() {
+        runTestWithString(0, NO_CREATION_TIME, new Getter() {
             public Object get(SearchResult sr) { return sr.getCreationTime(); }
         });
     }
     
     public void testNoVendor() throws IOException {
-        runTestWithStringNull(NO_VENDOR, new Getter() {
+        runTestWithString("", NO_VENDOR, new Getter() {
             public Object get(SearchResult sr) { return sr.getVendor(); }
         });
     } 
     
     public void testNoHost() throws IOException {
-        runTestWithStringNull(NO_HOST, new Getter() {
+        runTestWithString(null, NO_HOST, new Getter() {
             public Object get(SearchResult sr) { return sr.getHost(); }
         });
     }
@@ -59,13 +59,13 @@ public class BasicSpecialResultsDatabaseImplLeniencyTest extends AbstractBasicSp
     /* Testing bad fields */
     
     public void testBadCreationTime() throws IOException {
-        runTestWithStringZero(BAD_CREATION_TIME, new Getter() {
+        runTestWithString(0, BAD_CREATION_TIME, new Getter() {
             public Object get(SearchResult sr) { return sr.getCreationTime(); }
         });
     }
     
     public void testBadSize() throws IOException {
-        runTestWithStringNegativeOne(BAD_SIZE, new Getter() {
+        runTestWithString(-1, BAD_SIZE, new Getter() {
             public Object get(SearchResult sr) { return sr.getSize(); }
         });
     }    

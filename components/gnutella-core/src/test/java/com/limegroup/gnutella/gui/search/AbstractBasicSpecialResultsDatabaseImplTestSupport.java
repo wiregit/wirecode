@@ -76,31 +76,4 @@ abstract class AbstractBasicSpecialResultsDatabaseImplTestSupport extends LimeTe
     protected final void runTestAndExpectNothing(String buf) {
         runTestWithString(NOTHING, buf, null);
     }
-    
-    /**
-     * Calls
-     * {@link #runTestWithString(Object, String, com.limegroup.gnutella.gui.search.AbstractBasicSpecialResultsDatabaseImplTest.Getter)}
-     * expecting a <code>null</code> Object.
-     */
-    protected final void runTestWithStringNull(String buf, Getter getter) {
-        runTestWithString(null, buf, getter);
-    }
-    
-    /**
-     * Calls
-     * {@link #runTestWithString(Object, String, com.limegroup.gnutella.gui.search.AbstractBasicSpecialResultsDatabaseImplTest.Getter)}
-     * expecting a <code>0</code> number.
-     */    
-    protected final void runTestWithStringZero(String buf, Getter getter) {
-        runTestWithString(0, buf, getter);
-    }
-    
-    /**
-     * Calls
-     * {@link #runTestWithString(Object, String, com.limegroup.gnutella.gui.search.AbstractBasicSpecialResultsDatabaseImplTest.Getter)}
-     * expecting a <code>-1</code> number.
-     */    
-    protected final void runTestWithStringNegativeOne(String buf, Getter getter) {
-        runTestWithString(-1, buf, getter);
-    }
 }
