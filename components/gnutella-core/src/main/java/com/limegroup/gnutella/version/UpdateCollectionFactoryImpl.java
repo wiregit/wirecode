@@ -15,7 +15,7 @@ public class UpdateCollectionFactoryImpl implements UpdateCollectionFactory {
     }
     
     public UpdateCollection createUpdateCollection(String xml) {
-        return new UpdateCollection(xml, applicationServices);
+        return new UpdateCollectionImpl(xml, applicationServices);
     }
 
 }
