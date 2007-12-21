@@ -187,6 +187,8 @@ import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateCollectionFactoryImpl;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.version.UpdateHandlerImpl;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
@@ -345,6 +347,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(MessageHandlerBinder.class).to(MessageHandlerBinderImpl.class);
         bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
         bind(Acceptor.class).to(AcceptorImpl.class);
+        bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
+        bindConstant().annotatedWith(Names.named("failoverUpdateLocation")).to("http://update.limewire.com/version.def");
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
