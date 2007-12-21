@@ -61,9 +61,9 @@ public class DHTPeerLocator implements PeerLocator {
     }
     
     private boolean isSelf(BTConnectionTriple triple) {
-        return     networkManager.getAddress().equals(triple.getIP())
+        return     compare(networkManager.getAddress(), triple.getIP())
                 && networkManager.getPort() == triple.getPort()
-                && applicationServices.getMyBTGUID().equals(triple.getPeerID());
+                && compare(applicationServices.getMyBTGUID(), triple.getPeerID());
     }
         
     public void publish() {
@@ -224,6 +224,17 @@ public class DHTPeerLocator implements PeerLocator {
             
             torrent.notifyPeerLocatorComplete(false);
         }
+        
+    }
+    
+    private static boolean compare(byte[] a, byte[] b) {
+        
+        if (a.length != b.length)  return false;
+        
+        for ( int i=0 ; i<a.length && i<b.length ; i++ )
+            if (a[i] != b[i])  return false;
+        
+        return true;
         
     }
 }
