@@ -7,8 +7,8 @@ import org.limewire.listener.Event;
  */
 public class ChatWindowEvent implements Event{
 
-    private String remoteUser;
-    private String localUser;
+    private final String remoteUser;
+    private final String localUser;
     
     public ChatWindowEvent(String remoteUser, String localUser){
         this.remoteUser = remoteUser;

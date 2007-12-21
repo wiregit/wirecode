@@ -59,7 +59,7 @@ public class PGRPServerSocket{
                             try {
                                 new SocketHandler(MyService.accept(), connection).handleSocket();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                //server socket is closed - ignore
                             }
                             
                         }   
@@ -129,9 +129,16 @@ public class PGRPServerSocket{
                         LOG.debug("let's add a chatmanager now");                    
                         buddyListManager.addListener(buddyListManager, new ChatWindowListener());
                         
-                       //need to concatenate the servername with the username because the server returns the username only
-                        buddyListManager.addChatManager(data.getUsername()+ "@" + servername, localUsername, mySocket);
+//                       //need to concatenate the servername with the username because the server returns the username only
+//                        buddyListManager.addChatManager(data.getUsername()+ "@" + servername, localUsername, mySocket);
+//                        LOG.debug("end of SocketHandler"); 
+                        
+                        //need to concatenate the servername with the username because the server returns the username only
+                        buddyListManager.addChatManager("mary@" + servername, localUsername, mySocket);
                         LOG.debug("end of SocketHandler"); 
+                    }
+                    else{
+                        LOG.debug("result is of type UNKNOWN");
                     }
                 }     
             }    

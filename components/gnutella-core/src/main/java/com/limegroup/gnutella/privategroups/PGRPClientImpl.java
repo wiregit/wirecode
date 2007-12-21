@@ -72,7 +72,7 @@ public class PGRPClientImpl implements PGRPClient{
             System.out.println("connection successful");
             
         } catch (XMPPException e) {
-            System.out.println("could not connect to the server: " + serverAddress);
+            LOG.debug("could not connect to the server: " + serverAddress);
             e.printStackTrace();
         }
     }
@@ -104,12 +104,12 @@ public class PGRPClientImpl implements PGRPClient{
         if(roster!=null){
             Collection<RosterEntry> entries = roster.getEntries();
             for (RosterEntry entry : entries) {
-                System.out.println(entry + "status is " + ", " + entry.getStatus() + ", " + entry.getType());
+                LOG.debug(entry + "status is " + ", " + entry.getStatus() + ", " + entry.getType());
 
             }
         }
         else{
-            System.out.println("empty roster");
+            LOG.debug("empty roster");
         }
     }
     
@@ -119,7 +119,7 @@ public class PGRPClientImpl implements PGRPClient{
             try {
                 
                 accountManager.createAccount(username, password);
-                System.out.println("created account successfully");  
+                LOG.debug("created account successfully");  
             } catch (XMPPException e) {
                 e.printStackTrace();
                 return false;
@@ -127,7 +127,7 @@ public class PGRPClientImpl implements PGRPClient{
             
         }
         else
-            System.out.println(accountManager.getAccountInstructions());
+            LOG.debug("You need to fill in the following information to create a new account." + accountManager.getAccountInstructions());
         
         return true;
     }
@@ -149,7 +149,7 @@ public class PGRPClientImpl implements PGRPClient{
         //delete user account
         try {    
             accountManager.deleteAccount();
-            System.out.println("account deletion successful");
+            LOG.debug("account deletion successful");
             
         } catch (XMPPException e) {
             e.printStackTrace();
@@ -162,10 +162,11 @@ public class PGRPClientImpl implements PGRPClient{
     
     public boolean loginAccount(String username, String password){
         try {
+            
             LOG.debug("begin loginAccount");
             connectToServerNoPort(servername);
             connection.login(username, password);
-            System.out.println("login successful");
+            LOG.debug("login successful");
             
             localUsername = username;
             
@@ -176,6 +177,10 @@ public class PGRPClientImpl implements PGRPClient{
             LOG.debug("Register IQStor Provider");
             //register IQ provider
             ProviderManager providerManager = ProviderManager.getInstance();
+            
+            /**
+             * name and namespace identify the iq handler that handles ValueStorage packets.  "stor" is the name, and "jabber:iq:stor" is the namespace.
+             */
             providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
                        
             try {
@@ -184,7 +189,10 @@ public class PGRPClientImpl implements PGRPClient{
                 e.printStackTrace();
             }
             
-            port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
+            //should automatically detect the local port
+            //"new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();"
+            //for now the port will be hardcoded
+            port = "5222";
             
             LOG.debug("Generate key pairs");
             //generate public and private keys
@@ -214,7 +222,7 @@ public class PGRPClientImpl implements PGRPClient{
             return true;
             
         } catch (XMPPException e) {
-            System.out.println("Could not login to the server");
+            LOG.debug("Could not login to the server");
             connection.disconnect();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -230,10 +238,10 @@ public class PGRPClientImpl implements PGRPClient{
                 serverSocket.closeSocket();
             connection.disconnect();
             
-            System.out.println("logged off");
+            LOG.debug("logged off");
         
         }catch(Exception e){
-            System.out.println("could not disconnect user");
+            LOG.debug("could not disconnect user");
             return false;
         }
         return true;
@@ -268,7 +276,7 @@ public class PGRPClientImpl implements PGRPClient{
             return false;
         }
         else{
-            System.out.println("you cannot send a message to somebody not on your buddy list!");
+            LOG.debug("you cannot send a message to somebody not on your buddy list!");
             return false;
         }
     }
@@ -322,11 +330,10 @@ public class PGRPClientImpl implements PGRPClient{
                 if (rosterGroup.getName().equals(groupName)){
                     //found group, remove user
                     try {
-                        System.out.println("found group");
                         RosterEntry entry = rosterGroup.getEntry(usernameserver);
                         roster.removeEntry(entry);
                     } catch (XMPPException e) {
-                        System.out.println("couldn't remove entry");
+                        LOG.debug("couldn't remove entry");
                         return false;
                     }
                 }
@@ -404,7 +411,7 @@ public class PGRPClientImpl implements PGRPClient{
                 //create new session and add to buddyListManager
                 try {
                     LOG.debug("Add a new chat manager for the local user for the new conversation");
-                    System.out.println("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());   
+                    LOG.debug("remoteConnection: " + remoteUserNameServer + " and their ip address is "+ data.getIPAddress());   
                     buddyListManager.addChatManager(remoteUserNameServer, localUsername, new Socket(data.getIPAddress(), 9999));
                     return true;
                 } catch (NumberFormatException e) {
@@ -424,9 +431,9 @@ public class PGRPClientImpl implements PGRPClient{
      */
     private void viewAttributes() {
         Map <String, String> attributes = connection.getAccountManager().getAccountAttributesMap();
-        System.out.println("passphrase: " + attributes.get("passphrase"));
-        System.out.println("publickey: " + attributes.get("publickey"));
-        System.out.println("DONE");
+        LOG.debug("passphrase: " + attributes.get("passphrase"));
+        LOG.debug("publickey: " + attributes.get("publickey"));
+        LOG.debug("DONE");
     }
     
     /**
@@ -450,7 +457,7 @@ public class PGRPClientImpl implements PGRPClient{
         try {
 
             connection.login(username, password);
-            System.out.println("login successful");
+            LOG.debug("login successful");
             
             localUsername = username;
             
@@ -459,15 +466,22 @@ public class PGRPClientImpl implements PGRPClient{
             
             //register IQ provider
             ProviderManager providerManager = ProviderManager.getInstance();
+            /**
+             * name and namespace identify the iq handler that handles ValueStorage packets.  "stor" is the name, and "jabber:iq:stor" is the namespace.
+             */
             providerManager.addIQProvider("stor", "jabber:iq:stor", new com.limegroup.gnutella.privategroups.ValueStorageProvider());
-                       
+            
             try {
                 ipAddress = NetworkUtils.ip2string((InetAddress.getLocalHost()).getAddress());//NetworkUtils.ip2string(GuiCoreMediator.getNetworkManager().getAddress());
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
             
-            port = "5222";//new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();
+
+            //should automatically detect the local port
+            //"new Integer(GuiCoreMediator.getNetworkManager().getPort()).toString();"
+            //for now the port will be hardcoded
+            port = "5222";
             
             //generate public and private keys
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance( "DSA" );
@@ -490,7 +504,7 @@ public class PGRPClientImpl implements PGRPClient{
             return true;
             
         } catch (XMPPException e) {
-            System.out.println("Could not login to the server");
+            LOG.debug("Could not login to the server");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } 
@@ -508,16 +522,21 @@ public class PGRPClientImpl implements PGRPClient{
         XMPPConnection.DEBUG_ENABLED = true;
         
         PGRPClientImpl client = new PGRPClientImpl(new BuddyListManager());
-//        client.connectToServerNoPort(servername);
+        client.connectToServerNoPort(servername);
         
 //        client.loginAccount("admin", "admin");
 //        client.createAccount("MikeT", "1234");
 
         //  Create account
 //        client.createAccount("Dan", "1234");   
-//        client.createAccount("Anthony", "1234"); 
+//        client.createAccount("Bob", "1234"); 
+//        client.createAccount("Mary", "1234"); 
         
-          client.loginAccountNoServerSocket("asdasdsad", "1234");
+          client.loginAccount("Bob", "1234");
+//          
+//          client.addToRoster("Mary", "Mary LimeWire", "Tester");
+          client.viewRoster();
+          client.logoff();
         
 //        client.loginAccountNoServerSocket("Anthony", "1234");
         

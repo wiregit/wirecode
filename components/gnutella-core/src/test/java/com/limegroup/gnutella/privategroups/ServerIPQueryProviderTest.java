@@ -15,6 +15,9 @@ import org.limewire.util.BaseTestCase;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+/**
+ * A test class to that tests for proper parsing of ServerIPQuery objects
+ */
 public class ServerIPQueryProviderTest extends BaseTestCase {
 
     public ServerIPQueryProviderTest(String name) {
