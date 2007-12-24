@@ -46,6 +46,8 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -286,4 +288,14 @@ public interface MojitoDHT extends Closeable {
      * Returns the DHTExecutorService
      */
     public DHTExecutorService getDHTExecutorService();
+    
+    /**
+     * Sets the TokenProvider
+     */
+    public void setSecurityTokenProvider(SecurityToken.TokenProvider tokenProvider);
+    
+    /**
+     * Sets the MACCalculatorRepositoryManager
+     */
+    public void setMACCalculatorRepositoryManager(MACCalculatorRepositoryManager manager);
 }

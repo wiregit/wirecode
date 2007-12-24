@@ -19,19 +19,20 @@ import java.util.Arrays;
  */
 public abstract class AbstractSecurityToken implements SecurityToken {
 
+    private final MACCalculatorRepositoryManager mgr;
+    
     /** 
      * The encrypted data.
      */
     private final byte[] _securityToken;
     
-    protected AbstractSecurityToken(TokenData data) {
-        MACCalculatorRepositoryManager mgr 
-            = MACCalculatorRepositoryManager.getDefaultRepositoryManager();
-        
+    protected AbstractSecurityToken(TokenData data, MACCalculatorRepositoryManager mgr) {
+        this.mgr = mgr;
         _securityToken = getFromMAC(mgr.getMACBytes(data), data);
     }
     
-    protected AbstractSecurityToken(byte [] network) throws InvalidSecurityTokenException {
+    protected AbstractSecurityToken(byte [] network, MACCalculatorRepositoryManager mgr) throws InvalidSecurityTokenException {
+        this.mgr = mgr;
         if (!isValidBytes(network)) {
             throw new InvalidSecurityTokenException("invalid data: " + Arrays.toString(network));
         }
@@ -43,9 +44,6 @@ public abstract class AbstractSecurityToken implements SecurityToken {
         if(!isValidTokenData(data)) {
             return false;
         }
-        
-        MACCalculatorRepositoryManager mgr 
-            = MACCalculatorRepositoryManager.getDefaultRepositoryManager();
         
         Iterable<byte[]> tokens = mgr.getAllBytes(data);
         for (byte[] token : tokens) {

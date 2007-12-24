@@ -20,6 +20,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
@@ -184,7 +185,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
      * @throws BadPacketException 
      */
     protected PingReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
-                      GGEP ggep, InetAddress ip, Network network) throws BadPacketException {
+                      GGEP ggep, InetAddress ip, Network network, MACCalculatorRepositoryManager manager) throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length, network);
         PAYLOAD = payload;
         PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
@@ -246,7 +247,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
             if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    key = new AddressSecurityToken(bytes);
+                    key = new AddressSecurityToken(bytes, manager);
                 }
                 catch (InvalidSecurityTokenException e) {
                     throw new BadPacketException("invalid query key");

@@ -48,6 +48,7 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
 
@@ -61,8 +62,10 @@ import org.limewire.security.SecurityToken;
  */
 public class MessageInputStream extends DataInputStream {
     
-    public MessageInputStream(InputStream in) {
+    private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
+    public MessageInputStream(InputStream in, MACCalculatorRepositoryManager MACCalculatorRepositoryManager) {
         super(in);
+        this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
     }
     
     /**
@@ -85,7 +88,7 @@ public class MessageInputStream extends DataInputStream {
      * Reads a MessageID from the InputStream 
      */
     public MessageID readMessageID() throws IOException {
-        return DefaultMessageID.createWithInputStream(this);
+        return DefaultMessageID.createWithInputStream(this, MACCalculatorRepositoryManager);
     }
     
     /**
@@ -259,7 +262,7 @@ public class MessageInputStream extends DataInputStream {
         
         byte[] securityToken = new byte[length];
         readFully(securityToken, 0, securityToken.length);
-        return new AddressSecurityToken(securityToken);
+        return new AddressSecurityToken(securityToken, MACCalculatorRepositoryManager);
     }
     
     /**

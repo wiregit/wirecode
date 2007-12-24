@@ -11,6 +11,7 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
@@ -58,6 +59,7 @@ public class OOBHandlerTest extends BaseTestCase {
     private InetAddress address;
     private MyReplyHandler replyHandler;
     private ReplyNumberVendorMessageFactory factory;
+    private MACCalculatorRepositoryManager macManager;
     private volatile boolean canReceiveUnsolicited;
     
     ResponseFactory responseFactory;
@@ -66,7 +68,8 @@ public class OOBHandlerTest extends BaseTestCase {
     public void setUp() throws Exception {
         router = new MyMessageRouter();
         router.start();
-        handler = new OOBHandler(router);
+        macManager = new MACCalculatorRepositoryManager();
+        handler = new OOBHandler(router, macManager);
         g = new GUID(GUID.makeGuid());
         address = InetAddress.getByName("1.2.3.4");
         replyHandler = new MyReplyHandler(address, 1);
@@ -168,7 +171,7 @@ public class OOBHandlerTest extends BaseTestCase {
 
         byte[] bytes = new byte[8];
         new Random().nextBytes(bytes);
-        SecurityToken tokenFake = new AddressSecurityToken(bytes);
+        SecurityToken tokenFake = new AddressSecurityToken(bytes, macManager);
 
         // send back messages with fake token
         QueryReply reply = getReplyWithResults(g.bytes(), 10, address

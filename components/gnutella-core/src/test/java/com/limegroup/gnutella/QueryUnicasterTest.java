@@ -16,6 +16,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -67,6 +68,8 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
 
     private PingReplyFactory pingReplyFactory;
     
+    private MACCalculatorRepositoryManager macManager;
+    
     public QueryUnicasterTest(String name) {
         super(name);
     }
@@ -92,6 +95,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
 		queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
 		messageFactory = injector.getInstance(MessageFactory.class);
 		pingReplyFactory = injector.getInstance(PingReplyFactory.class);
+		macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
 		
         lifecycleManager.start();
     }
@@ -378,7 +382,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                             // send a AddressSecurityToken back!!!
                             AddressSecurityToken qk = 
                                 new AddressSecurityToken(datagram.getAddress(),
-                                        datagram.getPort());
+                                        datagram.getPort(), macManager);
                             
                             PingReply pRep = 
                                 pingReplyFactory.createQueryKeyReply(pr.getGUID(), 

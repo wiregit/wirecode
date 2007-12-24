@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import org.limewire.security.MACCalculatorRepositoryManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -11,12 +13,15 @@ public class VendorMessageParserBinderImpl implements VendorMessageParserBinder 
 
     private final ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
     private final HeadPongFactory headPongFactory;
+    private final MACCalculatorRepositoryManager macManager;
 
     @Inject
     public VendorMessageParserBinderImpl(ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
-            HeadPongFactory headPongFactory) {
+            HeadPongFactory headPongFactory,
+            MACCalculatorRepositoryManager macManager) {
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
         this.headPongFactory = headPongFactory;
+        this.macManager = macManager;
     }
     
     public void bind(VendorMessageFactory vendorMessageFactory) {
@@ -46,7 +51,7 @@ public class VendorMessageParserBinderImpl implements VendorMessageParserBinder 
         vendorMessageFactory.setParser(VendorMessage.F_OOB_PROXYING_CONTROL, VendorMessage.F_LIME_VENDOR_ID, new OOBProxyControlVendorMessageParser());
         vendorMessageFactory.setParser(VendorMessage.F_INSPECTION_REQ, VendorMessage.F_LIME_VENDOR_ID, new InspectionRequestVendorMessageParser());
         vendorMessageFactory.setParser(VendorMessage.F_ADVANCED_TOGGLE, VendorMessage.F_LIME_VENDOR_ID, new AdvancedStatsToggleVendorMessageParser());
-        vendorMessageFactory.setParser(VendorMessage.F_DHT_CONTACTS, VendorMessage.F_LIME_VENDOR_ID, new DHTContactsMessageParser());
+        vendorMessageFactory.setParser(VendorMessage.F_DHT_CONTACTS, VendorMessage.F_LIME_VENDOR_ID, new DHTContactsMessageParser(macManager));
     }
 
     
@@ -245,9 +250,13 @@ public class VendorMessageParserBinderImpl implements VendorMessageParserBinder 
     }
     
     private static class DHTContactsMessageParser implements VendorMessageParser {
+        private final MACCalculatorRepositoryManager macManager;
+        private DHTContactsMessageParser(MACCalculatorRepositoryManager macManager) {
+            this.macManager = macManager;
+        }
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, Network network) throws BadPacketException {
-            return new DHTContactsMessage(guid, ttl, hops, version, restOf, network);
+            return new DHTContactsMessage(guid, ttl, hops, version, restOf, network, macManager);
         }
     }
       

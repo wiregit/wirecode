@@ -8,6 +8,7 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
@@ -56,6 +57,7 @@ public class MiscTests extends LimeTestCase {
 
     // Makes sure QueryKeys have no problem going in and out of GGEP blocks
     public void testQueryKeysAndGGEP() throws Exception {
+        MACCalculatorRepositoryManager macManager = new MACCalculatorRepositoryManager();
         Random rand = new Random();
         for (int i = 4; i < 17; i++) {
             byte[] qk = new byte[i];
@@ -66,7 +68,7 @@ public class MiscTests extends LimeTestCase {
                 rand.nextBytes(qk);
                 Arrays.sort(qk);
             }
-            AddressSecurityToken addressSecurityToken = new AddressSecurityToken(qk);
+            AddressSecurityToken addressSecurityToken = new AddressSecurityToken(qk,macManager);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             addressSecurityToken.write(baos);
             GGEP in = new GGEP(true);
@@ -76,7 +78,7 @@ public class MiscTests extends LimeTestCase {
             in.write(baos);
             GGEP out = new GGEP(baos.toByteArray(), 0, null);
             AddressSecurityToken queryKey2 = 
-            new AddressSecurityToken(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
+            new AddressSecurityToken(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT),macManager);
             assertEquals("qks not equal, i = " + i,
                        addressSecurityToken, queryKey2);
         }

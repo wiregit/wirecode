@@ -9,6 +9,7 @@ import junit.framework.Test;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
@@ -50,7 +51,7 @@ public class VendorMessageTest extends BaseTestCase {
 		messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
 		networkManager = injector.getInstance(NetworkManager.class);
 
-        token = new AddressSecurityToken(InetAddress.getLocalHost(), 7090);
+        token = new AddressSecurityToken(InetAddress.getLocalHost(), 7090, injector.getInstance(MACCalculatorRepositoryManager.class));
     }
 
     public static void main(String[] args) {

@@ -10,6 +10,9 @@ import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.StorableModel;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 
+import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.security.SecurityToken;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -42,6 +45,8 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     private final Provider<PushProxiesModel> pushProxyModel;
     private final Provider<MessageDispatcherFactory> messageDispatcherFactory;
     private final DHTBootstrapperFactory dhtBootstrapperFactory;
+    private final Provider<SecurityToken.TokenProvider> securityTokenProvider;
+    private final Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager;
         
     @Inject
     public DHTControllerFacadeImpl(NetworkManager networkManager,
@@ -56,7 +61,9 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
             Provider<AltLocModel> altLocModel,
             Provider<PushProxiesModel> pushProxyModel,
             Provider<MessageDispatcherFactory> messageDispatcherFactory,
-            DHTBootstrapperFactory dhtBootstrapperFactory) {
+            DHTBootstrapperFactory dhtBootstrapperFactory,
+            Provider<SecurityToken.TokenProvider> securityTokenProvider,
+            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
         this.networkManager = networkManager;
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
@@ -70,6 +77,8 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
         this.pushProxyModel = pushProxyModel;
         this.messageDispatcherFactory = messageDispatcherFactory;
         this.dhtBootstrapperFactory = dhtBootstrapperFactory;
+        this.securityTokenProvider = securityTokenProvider;
+        this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
     }
     
     public boolean allow(SocketAddress addr) {
@@ -134,6 +143,14 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
 
     public DHTBootstrapper getDHTBootstrapper(DHTController dhtController) {
         return dhtBootstrapperFactory.createBootstrapper(dhtController);
+    }
+    
+    public SecurityToken.TokenProvider getSecurityTokenProvider() {
+        return securityTokenProvider.get();
+    }
+    
+    public MACCalculatorRepositoryManager getMACCalculatorRespositoryManager() {
+        return MACCalculatorRepositoryManager.get();
     }
 
 }

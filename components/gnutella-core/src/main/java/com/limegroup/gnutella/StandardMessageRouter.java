@@ -20,6 +20,7 @@ import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
@@ -104,7 +105,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
             Statistics statistics,
             ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
-            Provider<OOBHandler> oobHandlerFactory) {
+            Provider<OOBHandler> oobHandlerFactory,
+            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -116,7 +118,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 backgroundExecutor, pongCacher, simppManager, updateHandler,
                 guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
                 udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory,
-                pingRequestFactory, messageHandlerBinder, oobHandlerFactory);
+                pingRequestFactory, messageHandlerBinder, oobHandlerFactory, 
+                MACCalculatorRepositoryManager);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
     }

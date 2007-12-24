@@ -30,9 +30,10 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
      * <code>AddressSecurityToken</code>. 
      *  
      */
-    public AddressSecurityToken (SocketAddress address) {
+    public AddressSecurityToken (SocketAddress address, MACCalculatorRepositoryManager mgr) {
         this(((InetSocketAddress)address).getAddress(),
-                ((InetSocketAddress)address).getPort());
+                ((InetSocketAddress)address).getPort(), 
+                mgr);
     }
     
     /** Generates an <code>AddressSecurityToken</code> for a given IP:Port combo.
@@ -42,17 +43,17 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
      * @param ip the IP address of the other node
      * @param port the port of the other node
      */
-    public AddressSecurityToken (InetAddress ip, int port) {
-        this(new AddressTokenData(ip,port));
+    public AddressSecurityToken (InetAddress ip, int port, MACCalculatorRepositoryManager mgr) {
+        this(new AddressTokenData(ip,port), mgr);
     }
     
-    public AddressSecurityToken(AddressTokenData data) {
-        super(data);
+    public AddressSecurityToken(AddressTokenData data,MACCalculatorRepositoryManager mgr) {
+        super(data, mgr);
         _hashCode = genHashCode(getBytes());
     }    
 
-    public AddressSecurityToken(byte[] key) throws InvalidSecurityTokenException {
-        super(key.clone());
+    public AddressSecurityToken(byte[] key, MACCalculatorRepositoryManager mgr) throws InvalidSecurityTokenException {
+        super(key.clone(), mgr);
         _hashCode = genHashCode(getBytes());
     }
     

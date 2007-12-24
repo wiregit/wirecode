@@ -19,6 +19,7 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
@@ -50,12 +51,15 @@ public class OOBHandler implements MessageHandler, Runnable {
 	
 	private final MessageRouter router;
 	
+	private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
+	
     private final Map<Integer,OOBSession> OOBSessions =
         Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
     
     @Inject
-	public OOBHandler(MessageRouter router) {
+	public OOBHandler(MessageRouter router, MACCalculatorRepositoryManager MACCalculatorRepositoryManager) {
 		this.router = router;
+		this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
 	}
 
 	public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
@@ -88,7 +92,8 @@ public class OOBHandler implements MessageHandler, Runnable {
 		LimeACKVendorMessage ack;
         if (msg.isOOBv3()) {
 			ack = new LimeACKVendorMessage(g, toRequest, 
-                    new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest)));
+                    new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest), 
+                            MACCalculatorRepositoryManager));
         } else
             ack = new LimeACKVendorMessage(g, toRequest);
         
@@ -212,7 +217,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         }
 
         try {
-            OOBSecurityToken oobKey = new OOBSecurityToken(securityBytes);
+            OOBSecurityToken oobKey = new OOBSecurityToken(securityBytes, MACCalculatorRepositoryManager);
             OOBSecurityToken.OOBTokenData data = 
                 new OOBSecurityToken.OOBTokenData(handler, reply.getGUID(), securityBytes[0] & 0xFF);
             if (oobKey.isFor(data)) {

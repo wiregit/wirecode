@@ -37,6 +37,8 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.security.SecurityToken.TokenProvider;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -285,6 +287,14 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public EvictorManager getEvictorManager() {
             return null;
+        }
+
+        public void setMACCalculatorRepositoryManager(MACCalculatorRepositoryManager manager) {
+            
+        }
+
+        public void setSecurityTokenProvider(TokenProvider tokenProvider) {
+            
         }
     }
     

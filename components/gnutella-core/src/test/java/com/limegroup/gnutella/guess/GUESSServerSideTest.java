@@ -13,6 +13,7 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Backend;
@@ -46,6 +47,8 @@ public class GUESSServerSideTest extends LimeTestCase {
     private QueryRequestFactory queryRequestFactory;
 
     private MessageFactory messageFactory;
+    
+    private MACCalculatorRepositoryManager macManager;
 
     
     public GUESSServerSideTest(String name) {
@@ -70,6 +73,7 @@ public class GUESSServerSideTest extends LimeTestCase {
 		pingRequestFactory = injector.getInstance(PingRequestFactory.class);
 		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 		messageFactory = injector.getInstance(MessageFactory.class);
+		macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
     }
 
     public static void main(String[] args) {
@@ -134,7 +138,7 @@ public class GUESSServerSideTest extends LimeTestCase {
 
 		QueryRequest crapQuery = 
 			queryRequestFactory.createQueryKeyQuery("susheel", 
-											 new AddressSecurityToken(fakeQueryKey));
+											 new AddressSecurityToken(fakeQueryKey, macManager));
         //QueryRequest crapQuery = 
 		//  new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
 		//                   false, null, null, 

@@ -10,6 +10,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 
@@ -35,11 +36,11 @@ public class DHTContactsMessage extends VendorMessage {
     }
     
     public DHTContactsMessage(byte[] guid, byte ttl, byte hops, 
-            int version, byte[] payload, Network network) throws BadPacketException {
+            int version, byte[] payload, Network network, MACCalculatorRepositoryManager macManager) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_DHT_CONTACTS, version, payload, network);
         
         ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-        MessageInputStream in = new MessageInputStream(bais);
+        MessageInputStream in = new MessageInputStream(bais,macManager);
         
         try {
             this.nodes = in.readContacts();

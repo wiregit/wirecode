@@ -73,7 +73,7 @@ public class DefaultMessageFactory implements MessageFactory {
         MessageInputStream in = null;
         
         try {
-            in = new MessageInputStream(new ByteBufferInputStream(data));
+            in = new MessageInputStream(new ByteBufferInputStream(data), context.getMACCalculatorRepositoryManager());
             
             // --- GNUTELLA HEADER ---
             MessageID messageId = in.readMessageID();
@@ -135,7 +135,7 @@ public class DefaultMessageFactory implements MessageFactory {
             throw new IllegalArgumentException(dst + " is an invalid SocketAddress");
         }
         
-        return DefaultMessageID.createWithSocketAddress(dst);
+        return DefaultMessageID.createWithSocketAddress(dst, context.getMACCalculatorRepositoryManager());
     }
     
     public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 

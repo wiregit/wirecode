@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.I18NConvert;
@@ -354,11 +355,11 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
     QueryRequestImpl(byte[] guid, byte ttl, byte hops, byte[] payload, Network network,
-            LimeXMLDocumentFactory limeXMLDocumentFactory) throws BadPacketException {
+            LimeXMLDocumentFactory limeXMLDocumentFactory, MACCalculatorRepositoryManager manager) throws BadPacketException {
         super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
 		PAYLOAD=payload;
 		
-        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload, manager);
         
 		QUERY = parser.query;
 
@@ -871,8 +872,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     }
 
 
-    static byte[] patchInGGEP(byte[] payload, GGEP ggep) throws BadPacketException {
-        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
+    static byte[] patchInGGEP(byte[] payload, GGEP ggep, MACCalculatorRepositoryManager manager) throws BadPacketException {
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload, manager);
         HUGEExtension huge = parser.huge;
         if (huge != null) {
             // we write in the last modifiable block if available, so our
@@ -977,7 +978,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         
         int hugeEnd;
         
-        public QueryRequestPayloadParser(byte[] payload) throws BadPacketException {
+        public QueryRequestPayloadParser(byte[] payload, MACCalculatorRepositoryManager manager) throws BadPacketException {
             try {
                 PositionByteArrayInputStream bais = new PositionByteArrayInputStream(payload);
                 short sp = ByteOrder.leb2short(bais);
@@ -995,7 +996,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                     try {
                         if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                             byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                            addressSecurityToken = new AddressSecurityToken(qkBytes);
+                            addressSecurityToken = new AddressSecurityToken(qkBytes, manager);
                         }
                         if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
                             featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);

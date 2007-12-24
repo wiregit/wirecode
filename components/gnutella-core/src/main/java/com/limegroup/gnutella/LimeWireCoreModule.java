@@ -31,9 +31,9 @@ import org.limewire.rudp.UDPSelectorProviderFactory;
 import org.limewire.rudp.UDPService;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
-import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
+import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
 import org.limewire.statistic.StatisticsManager;
 
@@ -350,6 +350,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
         bind(Acceptor.class).to(AcceptorImpl.class);        
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
+        bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
+        bindConstant().annotatedWith(Names.named("failoverUpdateLocation")).to("http://update.limewire.com/version.def");
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
         
         
@@ -368,13 +370,10 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(AutoDownloadDetails.class);
         requestStaticInjection(LimeXMLDocument.class);
         requestStaticInjection(StatisticsManager.class);
-        requestStaticInjection(MACCalculatorRepositoryManager.class);
         requestStaticInjection(Pools.class);
         requestStaticInjection(LocalSocketAddressService.class);
-        requestStaticInjection(MACCalculatorRepositoryManager.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
-        bind(Statistics.class).asEagerSingleton();
         
         // TODO: Need to add interface to these classes
         //----------------------------------------------

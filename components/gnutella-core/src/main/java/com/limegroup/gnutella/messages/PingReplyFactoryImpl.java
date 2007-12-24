@@ -10,6 +10,7 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
@@ -40,6 +41,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private final Provider<HostCatcher> hostCatcher;
     private final Provider<DHTManager> dhtManager;
     private final LocalPongInfo localPongInfo;
+    private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
 
     @Inject
     // TODO: All these objects should be folded into LocalPongInfo
@@ -48,7 +50,8 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             Provider<ConnectionManager> connectionManager,
             Provider<HostCatcher> hostCatcher,
             Provider<DHTManager> dhtManager,
-            LocalPongInfo localPongInfo) {
+            LocalPongInfo localPongInfo,
+            MACCalculatorRepositoryManager MACCalculatorRepositoryManager) {
         this.networkManager = networkManager;
         this.statistics = statistics;
         this.udpService = udpService;
@@ -56,6 +59,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         this.hostCatcher = hostCatcher;
         this.dhtManager = dhtManager;
         this.localPongInfo = localPongInfo;
+        this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
     }
 
     public PingReply create(byte[] guid, byte ttl,
@@ -228,7 +232,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
         try {
             return new PingReplyImpl(guid, ttl, (byte) 0, payload, ggep, ip,
-                    Network.UNKNOWN);
+                    Network.UNKNOWN, MACCalculatorRepositoryManager);
         } catch (BadPacketException e) {
             throw new IllegalStateException(e);
         }
@@ -337,7 +341,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                         + e.getMessage());
             }
         }
-        return new PingReplyImpl(guid, ttl, hops, payload, ggep, ip, network);
+        return new PingReplyImpl(guid, ttl, hops, payload, ggep, ip, network, MACCalculatorRepositoryManager);
     }
 
     public PingReply mutateGUID(PingReply pingReply, byte[] guid) {

@@ -142,6 +142,8 @@ public abstract class AbstractDHTController implements DHTController {
         
         assert (dht != null);
         dht.setMessageDispatcher(dhtControllerFacade.getMessageDispatcherFactory());
+        dht.setMACCalculatorRepositoryManager(dhtControllerFacade.getMACCalculatorRespositoryManager());
+        dht.setSecurityTokenProvider(dhtControllerFacade.getSecurityTokenProvider());                
         dht.getDHTExecutorService().setThreadFactory(new ThreadFactory() {
             public Thread newThread(Runnable runnable) {
                 return new ManagedThread(runnable);

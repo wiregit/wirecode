@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
@@ -28,7 +29,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
     protected void setUp() throws Exception {
 		Injector injector = LimeTestUtils.createInjector();
 		messageFactory = injector.getInstance(MessageFactory.class);
-        token = new AddressSecurityToken(InetAddress.getLocalHost(), 5904);
+        token = new AddressSecurityToken(InetAddress.getLocalHost(), 5904, injector.getInstance(MACCalculatorRepositoryManager.class));
     }
     
     public void testSecurityTokenBytesAreSet() {

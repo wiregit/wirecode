@@ -14,6 +14,7 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;
@@ -56,6 +57,8 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     private UrnCache urnCache;
 
     private MessageFactory messageFactory;
+    
+    private MACCalculatorRepositoryManager macManager;
 
     public ServerSideLeafGuessTest(String name) {
         super(name);
@@ -79,6 +82,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         urnCache = injector.getInstance(UrnCache.class);
         messageFactory = injector.getInstance(MessageFactory.class);
+        macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
 
         // first we need to set up GUESS capability
         networkManagerStub.setCanReceiveSolicited(true);
@@ -232,7 +236,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     public void testBadQueryKey() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
 
-        AddressSecurityToken qkToUse = new AddressSecurityToken(localHost, 0);
+        AddressSecurityToken qkToUse = new AddressSecurityToken(localHost, 0, macManager);
         assertNotNull(qkToUse);
 
         {

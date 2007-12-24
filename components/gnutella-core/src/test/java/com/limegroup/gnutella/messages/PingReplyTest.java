@@ -19,6 +19,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -60,6 +61,7 @@ public class PingReplyTest extends LimeTestCase {
     private NetworkManagerStub networkManagerStub;
     private HostCatcher hostCatcher;
     private TestConnectionManager testConnectionManager;
+    private MACCalculatorRepositoryManager macManager;
     
     public PingReplyTest(String name) {
         super(name);
@@ -90,6 +92,7 @@ public class PingReplyTest extends LimeTestCase {
         messageFactory = injector.getInstance(MessageFactory.class);
         hostCatcher = injector.getInstance(HostCatcher.class);
         testConnectionManager = (TestConnectionManager) injector.getInstance(ConnectionManager.class);
+        macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
     }
    
     /**
@@ -655,7 +658,7 @@ public class PingReplyTest extends LimeTestCase {
         AddressSecurityToken qk = null;
         GUID guid = new GUID(GUID.makeGuid());
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        qk = new AddressSecurityToken(randBytes);
+        qk = new AddressSecurityToken(randBytes, macManager);
         PingReply pr = 
             pingReplyFactory.createQueryKeyReply(guid.bytes(), (byte) 1, 6346, ip,
                                           2, 2, true, qk);

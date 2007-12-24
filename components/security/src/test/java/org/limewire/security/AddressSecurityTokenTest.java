@@ -10,6 +10,8 @@ import org.limewire.util.BaseTestCase;
 
 
 public class AddressSecurityTokenTest extends BaseTestCase {
+    private MACCalculatorRepositoryManager macManager = new MACCalculatorRepositoryManager();
+    
     public AddressSecurityTokenTest(String name) {
         super(name);
     }
@@ -20,12 +22,12 @@ public class AddressSecurityTokenTest extends BaseTestCase {
 
     public void testConstruction() throws Exception {
         try {
-            new AddressSecurityToken(new byte[3]);
+            new AddressSecurityToken(new byte[3],macManager);
             fail("exception should have been thrown.");
         }
         catch (InvalidSecurityTokenException ignored) {}
         try {
-            new AddressSecurityToken(new byte[17]);
+            new AddressSecurityToken(new byte[17],macManager);
             fail("exception should have been thrown.");
         }
         catch (InvalidSecurityTokenException ignored) {}
@@ -38,14 +40,14 @@ public class AddressSecurityTokenTest extends BaseTestCase {
             Arrays.sort(qk);
         }
         AddressSecurityToken key1 = null, key2 = null;
-        key1 = new AddressSecurityToken(qk);
-        key2 = new AddressSecurityToken(qk);
+        key1 = new AddressSecurityToken(qk,macManager);
+        key2 = new AddressSecurityToken(qk,macManager);
         assertEquals(key1,key2);
         assertEquals(key1.hashCode(), key2.hashCode());
         
         byte []qk3 = new byte[8];
         rand.nextBytes(qk3);
-        AddressSecurityToken key3 = new AddressSecurityToken(qk3);
+        AddressSecurityToken key3 = new AddressSecurityToken(qk3,macManager);
         assertNotEquals(key1, key3);
         assertNotEquals(key2, key3);
         assertEquals(key3, key3);
@@ -57,16 +59,16 @@ public class AddressSecurityTokenTest extends BaseTestCase {
         InetAddress ip = null;
         ip = InetAddress.getByName("www.limewire.com");
         int port = 6346;
-        AbstractSecurityToken qk1 = new AddressSecurityToken(ip, port);
-        AbstractSecurityToken qk2 = new AddressSecurityToken(ip, port);
+        AbstractSecurityToken qk1 = new AddressSecurityToken(ip, port,macManager);
+        AbstractSecurityToken qk2 = new AddressSecurityToken(ip, port,macManager);
         assertEquals(qk1,qk2);
         ip = InetAddress.getByName("10.254.0.42");
-        qk1 = new AddressSecurityToken(ip, port);
-        qk2 = new AddressSecurityToken(ip, port);
+        qk1 = new AddressSecurityToken(ip, port,macManager);
+        qk2 = new AddressSecurityToken(ip, port,macManager);
         assertEquals(qk1,qk2);
         ip = InetAddress.getByName("127.0.0.1");
-        qk1 = new AddressSecurityToken(ip, port);
-        qk2 = new AddressSecurityToken(ip, port);
+        qk1 = new AddressSecurityToken(ip, port,macManager);
+        qk2 = new AddressSecurityToken(ip, port,macManager);
         assertEquals(qk1,qk2);
     }
 
@@ -77,9 +79,9 @@ public class AddressSecurityTokenTest extends BaseTestCase {
         int port1 = 1234;
         int port2 = 4321;
         
-        AddressSecurityToken key1 = new AddressSecurityToken(addr1, port1);
-        AddressSecurityToken key2 = new AddressSecurityToken(addr1, port2);
-        AddressSecurityToken key3 = new AddressSecurityToken(addr2, port1);
+        AddressSecurityToken key1 = new AddressSecurityToken(addr1, port1,macManager);
+        AddressSecurityToken key2 = new AddressSecurityToken(addr1, port2,macManager);
+        AddressSecurityToken key3 = new AddressSecurityToken(addr2, port1,macManager);
         
         assertTrue(key1.isFor(addr1, port1));
         assertFalse(key1.equals(key2));
@@ -105,41 +107,35 @@ public class AddressSecurityTokenTest extends BaseTestCase {
     
     public void testOddsAndEnds() throws Exception {
         // test to make clover 100% for QK
-        AbstractSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(), 6346);
+        AbstractSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(), 6346,macManager);
         assertFalse(qk.equals(new Object()));
         qk.toString();
     }
     
     public void testQueryKeyExpiration() throws Exception {
-        MACCalculatorRepositoryManager previous = 
-            MACCalculatorRepositoryManager.getDefaultRepositoryManager();
-        try {
-            NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
-            MACCalculatorRepositoryManager.setDefaultSettingsProvider(settings);
+        NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
+        MACCalculatorRepositoryManager macManager2 = new MACCalculatorRepositoryManager(null,settings);
 
-            InetAddress address = InetAddress.getLocalHost();
+        InetAddress address = InetAddress.getLocalHost();
 
-            settings.notified = false;
-            AddressSecurityToken key = new AddressSecurityToken(address, 4545);
+        settings.notified = false;
+        AddressSecurityToken key = new AddressSecurityToken(address, 4545, macManager2);
 
-            // wait for secret key change, this relies on the implementation
-            // detail that when the rotation is run the setting provider is queried
-            // for its values, thus we can wake up when that happens
-            settings.waitForRotation();
+        // wait for secret key change, this relies on the implementation
+        // detail that when the rotation is run the setting provider is queried
+        // for its values, thus we can wake up when that happens
+        settings.waitForRotation();
 
-            // key should still be valid
-            assertTrue(key.isFor(address, 4545));
-            // different port
-            assertFalse(key.isFor(address, 4544));
+        // key should still be valid
+        assertTrue(key.isFor(address, 4545));
+        // different port
+        assertFalse(key.isFor(address, 4544));
 
-            // wait for grace period to be over
-            Thread.sleep(250);
+        // wait for grace period to be over
+        Thread.sleep(250);
 
-            assertFalse(key.isFor(address, 4545));
+        assertFalse(key.isFor(address, 4545));
 
-        } finally {
-            MACCalculatorRepositoryManager.setDefaultRepositoryManager(previous);
-        }
     }
     
     private static class NotifyingSettingsProvider implements SettingsProvider {

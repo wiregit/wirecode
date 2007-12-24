@@ -99,6 +99,7 @@ import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
@@ -149,6 +150,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** The provider interface to create SecurityTokens */
     private volatile SecurityToken.TokenProvider tokenProvider;
     
+    /** Manager of repositories of MAC Calculators */
+    private volatile MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
+    
     private final SecurityTokenHelper tokenHelper;
     
     private final DHTValueFactoryManager factoryManager = new DHTValueFactoryManager();
@@ -181,7 +185,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         keyPair = new KeyPair(masterKey, null);
         
         executorService = new DefaultDHTExecutorService(getName());
-        tokenProvider = new SecurityToken.AddressSecurityTokenProvider();
+        
+        MACCalculatorRepositoryManager = new MACCalculatorRepositoryManager();
+        tokenProvider = new SecurityToken.AddressSecurityTokenProvider(MACCalculatorRepositoryManager);
+        
         tokenHelper = new SecurityTokenHelper(this);
         
         setRouteTable(null);
@@ -566,6 +573,18 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public SecurityToken.TokenProvider getSecurityTokenProvider() {
         return tokenProvider;
+    }
+    
+    
+    public synchronized void setMACCalculatorRepositoryManager(MACCalculatorRepositoryManager manager) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MACManager while " + getName() + " is running");
+        }
+        this.MACCalculatorRepositoryManager = manager;
+    }
+    
+    public MACCalculatorRepositoryManager getMACCalculatorRepositoryManager() {
+        return MACCalculatorRepositoryManager;
     }
     
     /**

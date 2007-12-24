@@ -18,6 +18,7 @@ import junit.framework.Test;
 import org.limewire.collection.Range;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.SocketsManager;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -400,8 +401,9 @@ public class RequeryDownloadTest extends LimeTestCase {
                 Statistics statistics,
                 ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
                 PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
-                Provider<OOBHandler> oobHandlerFactory) {
-            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory);
+                Provider<OOBHandler> oobHandlerFactory,
+                Provider<MACCalculatorRepositoryManager> macManager) {
+            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager);
         } 
         
         public void sendDynamicQuery(QueryRequest query) {

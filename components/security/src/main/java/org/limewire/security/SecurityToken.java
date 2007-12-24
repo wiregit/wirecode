@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Defines the interface to authenticate a host based on its IP address, port 
  * or other pieces of data.
@@ -57,9 +60,17 @@ public interface SecurityToken {
     /**
      * Creates a <code>SecurityToken</code> from a <code>SocketAddress</code>.
      */
+    @Singleton
     public static class AddressSecurityTokenProvider implements TokenProvider {
+        private final MACCalculatorRepositoryManager manager;
+        
+        @Inject
+        public AddressSecurityTokenProvider(MACCalculatorRepositoryManager manager) {
+            this.manager = manager;
+        }
+        
         public SecurityToken getSecurityToken(SocketAddress addr) {
-            return new AddressSecurityToken(addr);
+            return new AddressSecurityToken(addr, manager);
         }
 
         public TokenData getTokenData(SocketAddress src) {

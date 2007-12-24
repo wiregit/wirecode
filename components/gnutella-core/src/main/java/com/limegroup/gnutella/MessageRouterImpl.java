@@ -38,6 +38,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.evt.SettingEvent;
@@ -337,6 +338,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private final Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory;
     private final Provider<AdvancedToggleHandler> advancedToggleHandlerFactory;
     private final Provider<OOBHandler> oobHandlerFactory;
+    private final Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager;
 
     private final PingRequestFactory pingRequestFactory;
 
@@ -387,7 +389,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
             Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
-            Provider<OOBHandler> oobHandlerFactory) {
+            Provider<OOBHandler> oobHandlerFactory,
+            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -425,6 +428,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.udpReplyHandlerCache = udpReplyHandlerCache;
         this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
         this.oobHandlerFactory = oobHandlerFactory;
+        this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
 
         _clientGUID = applicationServices.getMyGUID();
     }
@@ -1020,7 +1024,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // fast!
         InetAddress address = addr.getAddress();
         int port = addr.getPort();
-        AddressSecurityToken key = new AddressSecurityToken(address, port);
+        AddressSecurityToken key = new AddressSecurityToken(address, port, MACCalculatorRepositoryManager.get());
         
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 

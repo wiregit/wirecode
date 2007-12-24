@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.util.Set;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 
@@ -23,11 +24,16 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
 
     private final NetworkManager networkManager;
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
 
     @Inject
-    public QueryRequestFactoryImpl(NetworkManager networkManager, LimeXMLDocumentFactory limeXMLDocumentFactory) {
+    public QueryRequestFactoryImpl(NetworkManager networkManager, 
+            LimeXMLDocumentFactory limeXMLDocumentFactory,
+            MACCalculatorRepositoryManager MACCalculatorRepositoryManager) {
         this.networkManager = networkManager;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
+        this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
+        
     }
 
     /* (non-Javadoc)
@@ -337,7 +343,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
 
         try {
-            newPayload = QueryRequestImpl.patchInGGEP(newPayload, ggep);
+            newPayload = QueryRequestImpl.patchInGGEP(newPayload, ggep, MACCalculatorRepositoryManager);
             return createNetworkQuery(guid, qr.getTTL(), qr.getHops(),
                     newPayload, qr.getNetwork());
         } catch (BadPacketException ioe) {
@@ -496,7 +502,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     public QueryRequest createNetworkQuery(byte[] guid, byte ttl, byte hops,
             byte[] payload, Network network) throws BadPacketException {
-        return new QueryRequestImpl(guid, ttl, hops, payload, network, limeXMLDocumentFactory);
+        return new QueryRequestImpl(guid, ttl, hops, payload, network, limeXMLDocumentFactory, MACCalculatorRepositoryManager);
     }
 
     /**

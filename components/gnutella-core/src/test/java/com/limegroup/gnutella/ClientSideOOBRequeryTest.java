@@ -16,6 +16,7 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -91,6 +92,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     private PingReplyFactory pingReplyFactory;
 
     private OnDemandUnicaster onDemandUnicaster;
+    
+    private MACCalculatorRepositoryManager macManager;
 
     public ClientSideOOBRequeryTest(String name) {
         super(name);
@@ -136,6 +139,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         onDemandUnicaster = injector.getInstance(OnDemandUnicaster.class);
         callback = (MyCallback) injector.getInstance(ActivityCallback.class);
+        macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setCanReceiveSolicited(true);
@@ -822,7 +826,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // send back a query key
-        AddressSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(), SERVER_PORT);
+        AddressSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(), SERVER_PORT, macManager);
         {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
@@ -978,7 +982,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // Prepopulate Query Keys
         AddressSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(),
-                                           SERVER_PORT);
+                                           SERVER_PORT, macManager);
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
@@ -1275,7 +1279,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         // Prepopulate Query Keys
         AddressSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(),
-                                           SERVER_PORT);
+                                           SERVER_PORT, macManager);
         for (int i = 0; i < (UDP_ACCESS.length/2); i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 

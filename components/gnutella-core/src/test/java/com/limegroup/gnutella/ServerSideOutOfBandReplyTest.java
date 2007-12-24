@@ -17,6 +17,7 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
@@ -86,6 +87,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     private MessageRouterImpl messageRouterImpl;
 
+    private MACCalculatorRepositoryManager macManager;
+    
     public ServerSideOutOfBandReplyTest(String name) {
         super(name);
     }
@@ -139,6 +142,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         messageFactory = injector.getInstance(MessageFactory.class);
         vendorMessageFactory = injector.getInstance(VendorMessageFactory.class);
         messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
+        macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setCanReceiveSolicited(true);
@@ -295,7 +299,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(3, reply.getVersion());
         
         SecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
-                pack.getPort(), reply.getGUID(), reply.getNumResults())); 
+                pack.getPort(), reply.getGUID(), reply.getNumResults()), macManager); 
         
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -329,7 +333,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
-        SecurityToken receivedToken = new OOBSecurityToken(receivedTokenBytes);
+        SecurityToken receivedToken = new OOBSecurityToken(receivedTokenBytes, macManager);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
 
@@ -548,7 +552,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SecurityToken token = new AddressSecurityToken(InetAddress.getLocalHost(), 10000);
+        SecurityToken token = new AddressSecurityToken(InetAddress.getLocalHost(), 10000, macManager);
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 
                                      reply.getNumResults(), token);
@@ -632,7 +636,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SecurityToken token = new AddressSecurityToken(InetAddress.getLocalHost(), 10000);
+        SecurityToken token = new AddressSecurityToken(InetAddress.getLocalHost(), 10000, macManager);
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 
                                      reply.getNumResults(), token);
@@ -709,7 +713,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
         OOBSecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
-                pack.getPort(), reply.getGUID(), 1));
+                pack.getPort(), reply.getGUID(), 1), macManager);
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
         ack.write(baos);
@@ -736,7 +740,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(1, ((QueryReply)message).getResultCount());
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
-        SecurityToken receivedToken = new OOBSecurityToken(receivedTokenBytes);
+        SecurityToken receivedToken = new OOBSecurityToken(receivedTokenBytes, macManager);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
         assertEquals(1, receivedToken.getBytes()[0] & 0XFF);
@@ -811,7 +815,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         OOBSecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
-                pack.getPort(), reply.getGUID(), 0));
+                pack.getPort(), reply.getGUID(), 0), macManager);
         // constructor doesn't allow 0 responses anymore, so set 0 manually:
         LimeACKVendorMessage ack = new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
         ((byte[])PrivilegedAccessor.getValue(ack, "_payload"))[0] = 0;
@@ -884,7 +888,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         OOBSecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
-                pack.getPort(), reply.getGUID(), reply.getNumResults()));
+                pack.getPort(), reply.getGUID(), reply.getNumResults()), macManager);
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 
                                      reply.getNumResults(), token);

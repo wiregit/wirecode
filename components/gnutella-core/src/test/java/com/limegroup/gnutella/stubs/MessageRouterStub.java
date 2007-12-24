@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.SocketsManager;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
@@ -93,8 +94,9 @@ public class MessageRouterStub extends StandardMessageRouter {
             Statistics statistics,
             ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
-            Provider<OOBHandler> oobHandlerFactory) {
-        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder,oobHandlerFactory);
+            Provider<OOBHandler> oobHandlerFactory,
+            Provider<MACCalculatorRepositoryManager> macManager) {
+        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder,oobHandlerFactory,macManager);
     }
     
     @Override

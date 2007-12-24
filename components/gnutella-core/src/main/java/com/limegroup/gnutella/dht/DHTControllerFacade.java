@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.StorableModel;
 import org.limewire.mojito.io.MessageDispatcherFactory;
+import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
 
@@ -45,5 +47,9 @@ public interface DHTControllerFacade {
     void reloadIPFilter();
 
     DHTBootstrapper getDHTBootstrapper(DHTController dhtController);
+    
+    SecurityToken.TokenProvider getSecurityTokenProvider();
+    
+    MACCalculatorRepositoryManager getMACCalculatorRespositoryManager();
 
 }

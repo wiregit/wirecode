@@ -14,6 +14,7 @@ import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
 
@@ -64,6 +65,8 @@ public final class QueryRequestTest extends LimeTestCase {
     private QueryRequestFactory queryRequestFactory;
 
     private MessageFactory messageFactory;
+    
+    private MACCalculatorRepositoryManager macManager;
 	
 	/**
 	 * Constructs a new test instance for query requests.
@@ -90,6 +93,7 @@ public final class QueryRequestTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector();
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
+        macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
     }
     
     private boolean OOBv2Disabled;
@@ -111,7 +115,7 @@ public final class QueryRequestTest extends LimeTestCase {
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
                 (new Random()).nextBytes(bytes);
-                AddressSecurityToken qk = new AddressSecurityToken(bytes);
+                AddressSecurityToken qk = new AddressSecurityToken(bytes, macManager);
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
                 GGEP ggepBlock = new GGEP(true); // do COBS
@@ -523,7 +527,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * @throws InvalidSecurityTokenException 
 	 */
 	public void testStringQueryKeyConstructor() throws InvalidSecurityTokenException {
-		AddressSecurityToken key = new AddressSecurityToken(GUID.makeGuid());
+		AddressSecurityToken key = new AddressSecurityToken(GUID.makeGuid(), macManager);
 		QueryRequest qr =
 			queryRequestFactory.createQueryKeyQuery("test", key);
 
@@ -1150,7 +1154,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertFalse(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
-        byte[] newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
+        byte[] newPayload = QueryRequestImpl.patchInGGEP(payload, ggep, macManager);
         
         QueryRequest proxy = queryRequestFactory.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1162,7 +1166,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
-        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep, macManager);
         
         proxy = queryRequestFactory.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1185,7 +1189,7 @@ public final class QueryRequestTest extends LimeTestCase {
         query = queryRequestFactory.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
-        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep, macManager);
         
         proxy = queryRequestFactory.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1206,7 +1210,7 @@ public final class QueryRequestTest extends LimeTestCase {
         query = queryRequestFactory.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, Network.UNKNOWN);
         assertFalse(query.desiresOutOfBandReplies());
         
-        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(payload, ggep, macManager);
         
         proxy = queryRequestFactory.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, Network.UNKNOWN);
         assertTrue(proxy.doNotProxy());
@@ -1214,7 +1218,7 @@ public final class QueryRequestTest extends LimeTestCase {
         System.arraycopy(newPayload, startGem, part, 0, part.length);
         assertEquals(gemBytes, part);
         
-        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(newPayload);
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(newPayload, macManager);
         GGEP parsedGGEP = parser.huge.getGGEP();
         assertEquals("BF", parsedGGEP.getString("FB"));
         assertTrue(parsedGGEP.hasKey("uk"));
@@ -1226,7 +1230,7 @@ public final class QueryRequestTest extends LimeTestCase {
         query = queryRequestFactory.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Network.UNKNOWN);
         assertEquals("limewire", query.getQuery());
         
-        newPayload = QueryRequestImpl.patchInGGEP(query.getPayload(), ggep);
+        newPayload = QueryRequestImpl.patchInGGEP(query.getPayload(), ggep, macManager);
         
         QueryRequest patched = queryRequestFactory.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Network.UNKNOWN);
         assertEquals(query.getQuery(), patched.getQuery());
@@ -1402,7 +1406,7 @@ public final class QueryRequestTest extends LimeTestCase {
     
     public void testCreateDoNotProxyQuery() throws UnknownHostException {
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)1, 5,
-                "query", "", URN.NO_URN_SET, new AddressSecurityToken(InetAddress.getLocalHost(), 1094), false, Network.MULTICAST,
+                "query", "", URN.NO_URN_SET, new AddressSecurityToken(InetAddress.getLocalHost(), 1094, macManager), false, Network.MULTICAST,
                 false, 0, false, 0, false);
 
         try {

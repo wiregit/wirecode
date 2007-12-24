@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AbstractSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
@@ -24,8 +25,8 @@ public class OOBSecurityToken extends AbstractSecurityToken {
      * The query key consists of the # of results followed 
      * by the MAC checksum of the data object.
      */
-    public OOBSecurityToken(OOBTokenData data) {
-        super(data);
+    public OOBSecurityToken(OOBTokenData data, MACCalculatorRepositoryManager manager) {
+        super(data, manager);
     }
 
     /**
@@ -33,8 +34,8 @@ public class OOBSecurityToken extends AbstractSecurityToken {
      * byte is the # of results, the rest are the checksum to verify against.
      * @throws InvalidSecurityTokenException 
      */
-    public OOBSecurityToken(byte[] network) throws InvalidSecurityTokenException {
-        super(network);
+    public OOBSecurityToken(byte[] network, MACCalculatorRepositoryManager manager) throws InvalidSecurityTokenException {
+        super(network, manager);
     }
     
     protected byte [] getFromMAC(byte[] b, TokenData data) {

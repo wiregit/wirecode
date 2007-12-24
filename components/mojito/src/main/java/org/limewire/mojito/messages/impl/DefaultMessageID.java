@@ -33,6 +33,7 @@ import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.security.AbstractSecurityToken;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -62,8 +63,10 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     private final byte[] messageId;
 
     private final int hashCode;
+    
+    private final MACCalculatorRepositoryManager macManager;
 
-    private DefaultMessageID(byte[] messageId) {
+    private DefaultMessageID(byte[] messageId, MACCalculatorRepositoryManager macManager) {
         if (messageId == null) {
             throw new NullPointerException("messageId cannot be null");
         }
@@ -73,6 +76,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
                     + LENGTH + " bytes long: " + messageId.length);
         }
         
+        this.macManager = macManager;
         this.messageId = messageId;
         this.hashCode = Arrays.hashCode(messageId);
     }
@@ -80,7 +84,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     /**
      * Creates a MessageID from the given InputStream
      */
-    public static DefaultMessageID createWithInputStream(InputStream in) throws IOException {
+    public static DefaultMessageID createWithInputStream(InputStream in, MACCalculatorRepositoryManager manager) throws IOException {
         byte[] messageId = new byte[LENGTH];
         
         int len = -1;
@@ -93,7 +97,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             r += len;
         }
         
-        return new DefaultMessageID(messageId);
+        return new DefaultMessageID(messageId, manager);
     }
     
     /**
@@ -102,23 +106,23 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     public static DefaultMessageID createWithBytes(byte[] messageId) {
         byte[] copy = new byte[messageId.length];
         System.arraycopy(messageId, 0, copy, 0, messageId.length);
-        return new DefaultMessageID(copy);
+        return new DefaultMessageID(copy, null);
     }
 
     /**
      * Creates a pseudo random MessageID and tags it with the given 
      * SocketAddress. 
      */
-    public static DefaultMessageID createWithSocketAddress(SocketAddress dst) {
+    public static DefaultMessageID createWithSocketAddress(SocketAddress dst, MACCalculatorRepositoryManager macManager) {
         byte[] messageId = new byte[LENGTH];
         GENERATOR.nextBytes(messageId);
 
         if (dst instanceof InetSocketAddress) {
-            byte[] token = (new MessageSecurityToken(new DHTTokenData(dst))).getBytes();
+            byte[] token = (new MessageSecurityToken(new DHTTokenData(dst), macManager)).getBytes();
             System.arraycopy(token, 0, messageId, 0, 4);
         }
 
-        return new DefaultMessageID(messageId);
+        return new DefaultMessageID(messageId, macManager);
     }
 
     /**
@@ -126,7 +130,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
      * hex encoded String
      */
     public static DefaultMessageID createWithHexString(String messageId) {
-        return new DefaultMessageID(ArrayUtils.parseHexString(messageId));
+        return new DefaultMessageID(ArrayUtils.parseHexString(messageId), null);
     }
     
     /*
@@ -169,7 +173,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     private SecurityToken getSecurityToken() throws InvalidSecurityTokenException {
         byte[] token = new byte[4];
         System.arraycopy(messageId, 0, token, 0, token.length);
-        return new MessageSecurityToken(token);
+        return new MessageSecurityToken(token, macManager);
     }
     
     /*
@@ -261,12 +265,12 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
    
     public static class MessageSecurityToken extends AbstractSecurityToken {
         
-        public MessageSecurityToken(byte[] network) throws InvalidSecurityTokenException {
-            super(network);
+        public MessageSecurityToken(byte[] network, MACCalculatorRepositoryManager manager) throws InvalidSecurityTokenException {
+            super(network, manager);
         }
 
-        public MessageSecurityToken(DHTTokenData data) {
-            super(data);
+        public MessageSecurityToken(DHTTokenData data, MACCalculatorRepositoryManager manager) {
+            super(data, manager);
         }
 
         protected byte[] getFromMAC(byte[] mac, TokenData ignored) {
