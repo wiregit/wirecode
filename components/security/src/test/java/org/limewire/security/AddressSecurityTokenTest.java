@@ -6,6 +6,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.util.BaseTestCase;
 
 
@@ -114,7 +115,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
     
     public void testQueryKeyExpiration() throws Exception {
         NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
-        MACCalculatorRepositoryManager macManager2 = new MACCalculatorRepositoryManager(null,settings);
+        MACCalculatorRepositoryManager macManager2 = new MACCalculatorRepositoryManager(new SimpleTimer(true),settings);
 
         InetAddress address = InetAddress.getLocalHost();
 

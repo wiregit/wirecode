@@ -351,7 +351,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Acceptor.class).to(AcceptorImpl.class);        
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
-        bindConstant().annotatedWith(Names.named("failoverUpdateLocation")).to("http://update.limewire.com/version.def");
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
         
         
@@ -374,6 +373,7 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(LocalSocketAddressService.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
+        bind(Statistics.class).asEagerSingleton();
         
         // TODO: Need to add interface to these classes
         //----------------------------------------------

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.concurrent.SimpleTimer;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -22,9 +20,9 @@ public class MACCalculatorRepositoryManager {
     private final MACCalculatorRepository repository;
     
     @Inject
-    public MACCalculatorRepositoryManager(@Named("backgroundExecutor") ScheduledExecutorService defaultExecutor, 
+    public MACCalculatorRepositoryManager(@Named("backgroundExecutor") ScheduledExecutorService executor, 
             SettingsProvider provider) {
-        repository = new MACCalculatorRotator(defaultExecutor != null ? defaultExecutor : new SimpleTimer(true),
+        repository = new MACCalculatorRotator(executor,
                                               new TEAMACCalculatorFactory(),
                                               provider);
     }
