@@ -11,4 +11,6 @@ public interface BrowseHostHandlerManager extends PushedSocketHandler {
         void putInfo(GUID _serventid, PushRequestDetails details);
     }
 
+    public void initialize();
+
 }

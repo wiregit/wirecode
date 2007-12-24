@@ -15,9 +15,15 @@ import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 public class OutOfBandThroughputMeasurer {
     
     private static final Log LOG = LogFactory.getLog(OutOfBandThroughputMeasurer.class);
+    
+    private final ScheduledExecutorService backgroundExecutor;
 
     @Inject
     public OutOfBandThroughputMeasurer(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        this.backgroundExecutor = backgroundExecutor;
+    }
+    
+    void initialize() {
         Runnable adjuster = new Runnable() {
             public void run() {
                 if (LOG.isDebugEnabled())
@@ -31,8 +37,8 @@ public class OutOfBandThroughputMeasurer {
                 }
             }
         };
-        int thirtyMins = 30 * 60 * 1000;
         
+        int thirtyMins = 30 * 60 * 1000;
         backgroundExecutor.scheduleWithFixedDelay(adjuster, thirtyMins, thirtyMins, TimeUnit.MILLISECONDS);
     }
     

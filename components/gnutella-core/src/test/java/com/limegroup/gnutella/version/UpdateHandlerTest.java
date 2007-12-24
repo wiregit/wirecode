@@ -1,15 +1,25 @@
 package com.limegroup.gnutella.version;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.limewire.security.SettingsProvider;
-import org.limewire.util.Clock;
+import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
+
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.URIException;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.Sequence;
+import org.limewire.security.SettingsProvider;
+import org.limewire.util.Clock;
+import org.limewire.util.CommonUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -21,8 +31,10 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -31,25 +43,20 @@ public class UpdateHandlerTest extends LimeTestCase {
     public UpdateHandlerTest(String name) {
         super(name);
     }
-    
+
     public static Test suite() {
         return buildTestSuite(UpdateHandlerTest.class);
     }
 
-    /**
-     * used to bypass the signer - customize the UpdateCollectionFactory to actually test.
-     */
-    private final String SIGNED_ASDF = "GAWAEFDW7Q73ILI2N5FSNPS7ASVYZ646BFYLZLQCCQ6G3VLJD4EE7KNGHVUDPLCALWTH2R4BLQ||asdf\n";
-    
     private Injector injector;
 
     private Mockery mockery;
 
-    private ScheduledExecutorService backgroundExecutor;
+    private ImmediateExecutor backgroundExecutor;
 
     private ActivityCallback activityCallback;
 
-    private HttpExecutor httpExexecutor;
+    private HttpExecutor httpExecutor;
 
     private CapabilitiesVMFactory capabilitiesVmFactory;
 
@@ -66,38 +73,40 @@ public class UpdateHandlerTest extends LimeTestCase {
     private DownloadManager downloadManager;
 
     private SettingsProvider settingsProvider;
-    
-    public void setUp() {
-        createInjector(null);
-    }
 
-    private void createInjector(final String failoverUrl) {
+    private UpdateMessageVerifier updateMessageVerifier;
+
+    private File saveFile;
+
+    public void setUp() {
         mockery = new Mockery();
         activityCallback = mockery.mock(ActivityCallback.class);
-        httpExexecutor = mockery.mock(HttpExecutor.class);
+        httpExecutor = mockery.mock(HttpExecutor.class);
         capabilitiesVmFactory = mockery.mock(CapabilitiesVMFactory.class);
         connectionManager = mockery.mock(ConnectionManager.class);
         fileManager = mockery.mock(FileManager.class);
         applicationServices = mockery.mock(ApplicationServices.class);
         updateCollectionFactory = mockery.mock(UpdateCollectionFactory.class);
-        downloadManager = mockery.mock(DownloadManager.class);        
+        downloadManager = mockery.mock(DownloadManager.class);
         backgroundExecutor = new ImmediateExecutor();
+        updateMessageVerifier = mockery.mock(UpdateMessageVerifier.class);
         clock = new ClockStub();
         settingsProvider = new SettingsProvider() {
             public long getChangePeriod() {
                 return Long.MAX_VALUE;
             }
+
             public long getGracePeriod() {
                 return Long.MAX_VALUE - 1;
             }
         };
-        
+
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             public void configure() {
-                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(backgroundExecutor);
-                bind(ScheduledExecutorService.class).toInstance(backgroundExecutor); // also unnamed
+                bind(ScheduledExecutorService.class).annotatedWith(
+                        Names.named("backgroundExecutor")).toInstance(backgroundExecutor);
                 bind(ActivityCallback.class).toInstance(activityCallback);
-                bind(HttpExecutor.class).toInstance(httpExexecutor);
+                bind(HttpExecutor.class).toInstance(httpExecutor);
                 bind(CapabilitiesVMFactory.class).toInstance(capabilitiesVmFactory);
                 bind(ConnectionManager.class).toInstance(connectionManager);
                 bind(FileManager.class).toInstance(fileManager);
@@ -106,74 +115,585 @@ public class UpdateHandlerTest extends LimeTestCase {
                 bind(Clock.class).toInstance(clock);
                 bind(DownloadManager.class).toInstance(downloadManager);
                 bind(SettingsProvider.class).toInstance(settingsProvider);
-                if(failoverUrl != null)
-                    bindConstant().annotatedWith(Names.named("failoverUpdateLocation")).to("http://127.0.0.1:9999/update.def");
+                bind(UpdateMessageVerifier.class).toInstance(updateMessageVerifier);
             }
         });
+
+        saveFile = new File(CommonUtils.getUserSettingsDir(), "version.xml");
+        saveFile.delete();
+        assertFalse(saveFile.exists());
     }
-    
+
     /** tests that we set up bindings correctly */
     public void testBindings() throws Exception {
-        mockery.checking(new Expectations() {{
-            ignoring(activityCallback);
-            ignoring(httpExexecutor);
-            ignoring(capabilitiesVmFactory);
-            ignoring(connectionManager);
-            ignoring(fileManager);
-            ignoring(applicationServices);
-            ignoring(updateCollectionFactory);
-            ignoring(downloadManager);            
-        }});
-        UpdateHandlerImpl updateHandler = (UpdateHandlerImpl)injector.getInstance(UpdateHandler.class);
-        assertEquals("http://update.limewire.com/version.def", updateHandler.getFailoverLocation());
+        mockery.checking(new Expectations() {
+            {
+                ignoring(activityCallback);
+                ignoring(httpExecutor);
+                ignoring(capabilitiesVmFactory);
+                ignoring(connectionManager);
+                ignoring(fileManager);
+                ignoring(applicationServices);
+                ignoring(updateCollectionFactory);
+                ignoring(downloadManager);
+            }
+        });
+        UpdateHandlerImpl updateHandler = (UpdateHandlerImpl) injector
+                .getInstance(UpdateHandler.class);
+        assertEquals("http://update0.limewire.com/update.def", updateHandler.getTimeoutUrl());
+        List<String> maxUrls = updateHandler.getMaxUrls();
+        for (int i = 0; i < 10; i++)
+            assertEquals("http://update" + (i + 1) + ".limewire.com/update.def", maxUrls.get(i));
+        assertEquals(10, maxUrls.size());
     }
-    
-    /** tests that we set up bindings correctly */
-    public void testUpdateFailoverConstant() throws Exception {
-        createInjector("http://127.0.0.1:9999/update.def");
-        mockery.checking(new Expectations() {{
-            ignoring(activityCallback);
-            ignoring(httpExexecutor);
-            ignoring(capabilitiesVmFactory);
-            ignoring(connectionManager);
-            ignoring(fileManager);
-            ignoring(applicationServices);
-            ignoring(updateCollectionFactory);
-            ignoring(downloadManager);         
-        }});
 
-        UpdateHandlerImpl updateHandler = (UpdateHandlerImpl)injector.getInstance(UpdateHandler.class);
-        assertEquals("http://127.0.0.1:9999/update.def", updateHandler.getFailoverLocation());
-    }
-            
-    /**
-     * tests that we parse strings
-     */
-    public void testParses() throws Exception {
+    public void testMaxTriggersHttpAfterSmallDelay() {
+        final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
         final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
-        mockery.checking(new Expectations() {{
-            one(updateCollectionFactory).createUpdateCollection("asdf\n");
-            will(returnValue(updateCollection));
-            ignoring(activityCallback);
-            ignoring(httpExexecutor);
-            ignoring(capabilitiesVmFactory);
-            ignoring(connectionManager);
-            ignoring(fileManager);
-            ignoring(applicationServices);
-            ignoring(updateCollectionFactory);
-            ignoring(downloadManager);      
-            ignoring(updateCollection);
-        }});
+        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final Sequence requestSequence = mockery.sequence("Request Sequence");
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(new byte[0]);
+                will(returnValue("asdf\n"));
+                inSequence(requestSequence);
 
-        UpdateHandler h = injector.getInstance(UpdateHandler.class);
-        h.handleNewData(SIGNED_ASDF.getBytes(), null);
+                one(updateCollectionFactory).createUpdateCollection("asdf\n");
+                will(returnValue(updateCollection));
+                inSequence(requestSequence);
+
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(Integer.MAX_VALUE));
+                inSequence(requestSequence);
+
+                allowing(applicationServices).getMyGUID();
+                will(returnValue(new byte[16]));
+                inSequence(requestSequence);
+            }
+        });
+
+        UpdateHandlerImpl h = (UpdateHandlerImpl) injector.getInstance(UpdateHandler.class);
+        assertEquals(0, h.getLatestId());
+        h.setMaxUrls(Arrays.asList("http://127.0.0.1:9999/update.def"));
+        h.setSilentPeriodForMaxHttpRequest(0);
+        backgroundExecutor.scheduled = null;
+        clock.setNow(12345);
+        h.handleNewData(new byte[0], null);
+        
+        assertGreaterThanOrEquals(1000 * 60, backgroundExecutor.getInitialDelay());
+        assertLessThanOrEquals(1000 * 60 * 31, backgroundExecutor.getInitialDelay());
+        assertEquals(-1, backgroundExecutor.getPeriod());
+        assertNotNull(backgroundExecutor.scheduled);
+
+        mockery.checking(new Expectations() {
+            {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                        description.appendText("httpMethod");
+                    }
+
+                    public boolean matchesSafely(HttpMethod item) {
+                        assertEquals("GET", item.getName());
+                        try {
+                            assertTrue(item.getURI().toString(), item.getURI().toString()
+                                    .startsWith("http://127.0.0.1:9999/update.def?"));
+                        } catch (URIException e) {
+                            fail(e);
+                        }
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpClientListener>() {
+                    public void describeTo(Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpClientListener item) {
+                        httpClientListenerRef.set(item);
+                        return true;
+                    }
+                }), with(equal(10000)));
+                inSequence(requestSequence);
+            }
+        });
+
+        backgroundExecutor.scheduled.run();
+
+        assertNotNull(httpClientListenerRef.get());
+
+        mockery.checking(new Expectations() {
+            {
+                atLeast(1).of(method).getStatusCode();
+                will(returnValue(100));
+                inSequence(requestSequence);
+
+                one(httpExecutor).releaseResources(with(same(method)));
+                inSequence(requestSequence);
+            }
+        });
+
+        httpClientListenerRef.get().requestComplete(method);
+        assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        assertEquals(0, h.getLatestId());
+        assertFalse(saveFile.exists());
+
         mockery.assertIsSatisfied();
     }
-    
+
+    public void testNetworkMaxIsNotSavedToDiskAndNotForwarded() throws Exception {
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(new byte[0]);
+                will(returnValue("asdf\n"));
+
+                one(updateCollectionFactory).createUpdateCollection("asdf\n");
+                will(returnValue(updateCollection));
+
+                allowing(applicationServices).getMyGUID();
+                will(returnValue(new byte[16]));
+
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(Integer.MAX_VALUE));
+            }
+        });
+
+        UpdateHandlerImpl h = (UpdateHandlerImpl) injector.getInstance(UpdateHandler.class);
+        assertEquals(0, h.getLatestId());
+        h.setSilentPeriodForMaxHttpRequest(0);
+        backgroundExecutor.scheduled = null;
+        clock.setNow(12345);
+        h.handleNewData(new byte[0], null);
+        assertNotNull(backgroundExecutor.scheduled);
+        assertEquals(0, h.getLatestId());
+        assertFalse(saveFile.exists());
+
+        Thread.sleep(5000); // sleep a bit just to make sure it didn't take a
+        // while to save.
+        assertEquals(0, h.getLatestId());
+        assertFalse(saveFile.exists());
+
+        mockery.assertIsSatisfied();
+
+    }
+
+    public void testHttpMaxIsSavedToDiskAndForwards() throws Exception {
+        final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final Sequence requestSequence = mockery.sequence("Request Sequence");
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(new byte[0]);
+                will(returnValue("asdf\n"));
+                inSequence(requestSequence);
+
+                one(updateCollectionFactory).createUpdateCollection("asdf\n");
+                will(returnValue(updateCollection));
+                inSequence(requestSequence);
+
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(Integer.MAX_VALUE));
+                inSequence(requestSequence);
+
+                allowing(applicationServices).getMyGUID();
+                will(returnValue(new byte[16]));
+                inSequence(requestSequence);
+            }
+        });
+
+        UpdateHandlerImpl h = (UpdateHandlerImpl) injector.getInstance(UpdateHandler.class);
+        assertEquals(0, h.getLatestId());
+        h.setMaxUrls(Arrays.asList("http://127.0.0.1:9999/update.def"));
+        h.setSilentPeriodForMaxHttpRequest(0);
+        backgroundExecutor.scheduled = null;
+        clock.setNow(12345);
+        h.handleNewData(new byte[0], null);
+        assertNotNull(backgroundExecutor.scheduled);
+
+        mockery.checking(new Expectations() {
+            {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                        description.appendText("httpMethod");
+                    }
+
+                    public boolean matchesSafely(HttpMethod item) {
+                        assertEquals("GET", item.getName());
+                        try {
+                            assertTrue(item.getURI().toString(), item.getURI().toString()
+                                    .startsWith("http://127.0.0.1:9999/update.def?"));
+                        } catch (URIException e) {
+                            fail(e);
+                        }
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpClientListener>() {
+                    public void describeTo(Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpClientListener item) {
+                        httpClientListenerRef.set(item);
+                        return true;
+                    }
+                }), with(equal(10000)));
+                inSequence(requestSequence);
+            }
+        });
+
+        backgroundExecutor.scheduled.run();
+        assertNotNull(httpClientListenerRef.get());
+
+        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final UpdateCollection httpCollection = mockery.mock(UpdateCollection.class);
+        mockery.checking(new Expectations() {
+            {
+                atLeast(1).of(method).getStatusCode();
+                will(returnValue(200));
+                inSequence(requestSequence);
+
+                one(method).getResponseBody();
+                byte[] b = new byte[1];
+                will(returnValue(b));
+                inSequence(requestSequence);
+
+                one(updateMessageVerifier).inflateNetworkData(with(same(b)));
+                byte[] inflated = new byte[2];
+                inSequence(requestSequence);
+                will(returnValue(inflated));
+
+                one(httpExecutor).releaseResources(with(same(method)));
+                inSequence(requestSequence);
+
+                one(updateMessageVerifier).getVerifiedData(with(same(inflated)));
+                inSequence(requestSequence);
+                will(returnValue("http response"));
+
+                one(updateCollectionFactory).createUpdateCollection("http response");
+                inSequence(requestSequence);
+                will(returnValue(httpCollection));
+
+                atLeast(1).of(httpCollection).getId();
+                inSequence(requestSequence);
+                will(returnValue(Integer.MAX_VALUE));
+
+                one(httpCollection).getTimestamp();
+                inSequence(requestSequence);
+                will(returnValue(54321L));
+
+                one(capabilitiesVmFactory).updateCapabilities();
+                inSequence(requestSequence);
+
+                one(connectionManager).sendUpdatedCapabilities();
+                inSequence(requestSequence);
+            }
+        });
+
+        httpClientListenerRef.get().requestComplete(method);
+        assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
+        assertEquals(Integer.MAX_VALUE, h.getLatestId());
+        assertTrue(saveFile.exists());
+
+        mockery.assertIsSatisfied();
+    }
+
+
+    public void testHttpRequestOverridesLocalIfEqual() throws Exception {
+        final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final Sequence requestSequence = mockery.sequence("Request Sequence");
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(new byte[0]);
+                will(returnValue("asdf\n"));
+                inSequence(requestSequence);
+
+                one(updateCollectionFactory).createUpdateCollection("asdf\n");
+                will(returnValue(updateCollection));
+                inSequence(requestSequence);
+
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(Integer.MAX_VALUE));
+                inSequence(requestSequence);
+
+                allowing(applicationServices).getMyGUID();
+                will(returnValue(new byte[16]));
+                inSequence(requestSequence);
+            }
+        });
+
+        UpdateHandlerImpl h = (UpdateHandlerImpl) injector.getInstance(UpdateHandler.class);
+        assertEquals(0, h.getLatestId());
+        h.setMaxUrls(Arrays.asList("http://127.0.0.1:9999/update.def"));
+        h.setSilentPeriodForMaxHttpRequest(0);
+        backgroundExecutor.scheduled = null;
+        clock.setNow(12345);
+        h.handleNewData(new byte[0], null);
+        assertNotNull(backgroundExecutor.scheduled);
+
+        mockery.checking(new Expectations() {
+            {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                        description.appendText("httpMethod");
+                    }
+
+                    public boolean matchesSafely(HttpMethod item) {
+                        assertEquals("GET", item.getName());
+                        try {
+                            assertTrue(item.getURI().toString(), item.getURI().toString()
+                                    .startsWith("http://127.0.0.1:9999/update.def?"));
+                        } catch (URIException e) {
+                            fail(e);
+                        }
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpClientListener>() {
+                    public void describeTo(Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpClientListener item) {
+                        httpClientListenerRef.set(item);
+                        return true;
+                    }
+                }), with(equal(10000)));
+                inSequence(requestSequence);
+            }
+        });
+
+        backgroundExecutor.scheduled.run();
+        assertNotNull(httpClientListenerRef.get());
+
+        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final UpdateCollection httpCollection = mockery.mock(UpdateCollection.class);
+        mockery.checking(new Expectations() {
+            {
+                atLeast(1).of(method).getStatusCode();
+                will(returnValue(200));
+                inSequence(requestSequence);
+
+                one(method).getResponseBody();
+                byte[] b = new byte[1];
+                will(returnValue(b));
+                inSequence(requestSequence);
+
+                one(updateMessageVerifier).inflateNetworkData(with(same(b)));
+                byte[] inflated = new byte[2];
+                inSequence(requestSequence);
+                will(returnValue(inflated));
+
+                one(httpExecutor).releaseResources(with(same(method)));
+                inSequence(requestSequence);
+
+                one(updateMessageVerifier).getVerifiedData(with(same(inflated)));
+                inSequence(requestSequence);
+                will(returnValue("http response"));
+
+                one(updateCollectionFactory).createUpdateCollection("http response");
+                inSequence(requestSequence);
+                will(returnValue(httpCollection));
+
+                atLeast(1).of(httpCollection).getId();
+                inSequence(requestSequence);
+                will(returnValue(0));
+
+                one(httpCollection).getTimestamp();
+                inSequence(requestSequence);
+                will(returnValue(54321L));
+
+                one(capabilitiesVmFactory).updateCapabilities();
+                inSequence(requestSequence);
+
+                one(connectionManager).sendUpdatedCapabilities();
+                inSequence(requestSequence);
+            }
+        });
+
+        httpClientListenerRef.get().requestComplete(method);
+        assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
+        assertEquals(0, h.getLatestId());
+        assertTrue(saveFile.exists());
+
+        mockery.assertIsSatisfied();
+    }
+
+    public void testAfterMaxFromHttpNewMaxFromNetworkDoesntRetrigger() throws Exception {
+        final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final Sequence requestSequence = mockery.sequence("Request Sequence");
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(new byte[0]);
+                will(returnValue("asdf\n"));
+                inSequence(requestSequence);
+
+                one(updateCollectionFactory).createUpdateCollection("asdf\n");
+                will(returnValue(updateCollection));
+                inSequence(requestSequence);
+
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(Integer.MAX_VALUE));
+                inSequence(requestSequence);
+
+                allowing(applicationServices).getMyGUID();
+                will(returnValue(new byte[16]));
+                inSequence(requestSequence);
+            }
+        });
+
+        UpdateHandlerImpl h = (UpdateHandlerImpl) injector.getInstance(UpdateHandler.class);
+        assertEquals(0, h.getLatestId());
+        h.setMaxUrls(Arrays.asList("http://127.0.0.1:9999/update.def"));
+        h.setSilentPeriodForMaxHttpRequest(0);
+        backgroundExecutor.scheduled = null;
+        clock.setNow(12345);
+        h.handleNewData(new byte[0], null);
+        assertNotNull(backgroundExecutor.scheduled);
+
+        mockery.checking(new Expectations() {
+            {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                        description.appendText("httpMethod");
+                    }
+
+                    public boolean matchesSafely(HttpMethod item) {
+                        assertEquals("GET", item.getName());
+                        try {
+                            assertTrue(item.getURI().toString(), item.getURI().toString()
+                                    .startsWith("http://127.0.0.1:9999/update.def?"));
+                        } catch (URIException e) {
+                            fail(e);
+                        }
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpClientListener>() {
+                    public void describeTo(Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpClientListener item) {
+                        httpClientListenerRef.set(item);
+                        return true;
+                    }
+                }), with(equal(10000)));
+                inSequence(requestSequence);
+            }
+        });
+
+        backgroundExecutor.scheduled.run();
+        assertNotNull(httpClientListenerRef.get());
+
+        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final UpdateCollection httpCollection = mockery.mock(UpdateCollection.class);
+        mockery.checking(new Expectations() {
+            {
+                atLeast(1).of(method).getStatusCode();
+                will(returnValue(200));
+                inSequence(requestSequence);
+
+                one(method).getResponseBody();
+                byte[] b = new byte[1];
+                will(returnValue(b));
+                inSequence(requestSequence);
+
+                one(updateMessageVerifier).inflateNetworkData(with(same(b)));
+                byte[] inflated = new byte[2];
+                inSequence(requestSequence);
+                will(returnValue(inflated));
+
+                one(httpExecutor).releaseResources(with(same(method)));
+                inSequence(requestSequence);
+
+                one(updateMessageVerifier).getVerifiedData(with(same(inflated)));
+                inSequence(requestSequence);
+                will(returnValue("http response"));
+
+                one(updateCollectionFactory).createUpdateCollection("http response");
+                inSequence(requestSequence);
+                will(returnValue(httpCollection));
+
+                atLeast(1).of(httpCollection).getId();
+                inSequence(requestSequence);
+                will(returnValue(Integer.MAX_VALUE));
+
+                one(httpCollection).getTimestamp();
+                inSequence(requestSequence);
+                will(returnValue(54321L));
+
+                one(capabilitiesVmFactory).updateCapabilities();
+                inSequence(requestSequence);
+
+                one(connectionManager).sendUpdatedCapabilities();
+                inSequence(requestSequence);
+            }
+        });
+
+        httpClientListenerRef.get().requestComplete(method);
+        assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
+        assertEquals(Integer.MAX_VALUE, h.getLatestId());
+        assertTrue(saveFile.exists());
+        
+        clock.setNow(999999);        
+        saveFile.delete();
+        
+        backgroundExecutor.clear();
+        final UpdateCollection secondUpdateCollection = mockery.mock(UpdateCollection.class);
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(new byte[0]);
+                will(returnValue("asdf\n"));
+                inSequence(requestSequence);
+
+                one(updateCollectionFactory).createUpdateCollection("asdf\n");
+                will(returnValue(secondUpdateCollection));
+                inSequence(requestSequence);
+
+                atLeast(1).of(secondUpdateCollection).getId();
+                will(returnValue(Integer.MAX_VALUE));
+                inSequence(requestSequence);
+            }
+        });
+        h.handleNewData(new byte[0], null);
+        
+        assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
+        assertEquals(Integer.MAX_VALUE, h.getLatestId());
+        assertFalse(saveFile.exists());
+        assertNull(backgroundExecutor.getRunnable());
+
+        mockery.assertIsSatisfied();
+    }
+
     private class ImmediateExecutor extends ScheduledExecutorServiceStub {
 
-        volatile Runnable scheduled;
+        private volatile Runnable scheduled;
+        private volatile long initialDelay = -1;
+        private volatile long period = -1;
+        private volatile TimeUnit timeUnit;
         
+        Runnable getRunnable() {
+            return scheduled;
+        }
+        
+        long getInitialDelay() {
+            return initialDelay;
+        }
+        
+        long getPeriod() {
+            return period;
+        }
+        
+        TimeUnit getTimeUnit() {
+            return timeUnit;
+        }
+        
+        void clear() {
+            scheduled = null;
+            initialDelay = -1;
+            period = -1;
+            timeUnit = null;
+        }
+
         @Override
         public void execute(Runnable command) {
             command.run();
@@ -182,6 +702,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         @Override
         public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
             scheduled = command;
+            this.initialDelay = delay;
             return null;
         }
 
@@ -189,6 +710,9 @@ public class UpdateHandlerTest extends LimeTestCase {
         public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay,
                 long period, TimeUnit unit) {
             scheduled = command;
+            this.initialDelay = -1;
+            this.period = period;
+            this.timeUnit = unit;
             return null;
         }
 
@@ -196,8 +720,11 @@ public class UpdateHandlerTest extends LimeTestCase {
         public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay,
                 long delay, TimeUnit unit) {
             scheduled = command;
+            this.initialDelay = -1;
+            this.period = delay;
+            this.timeUnit = unit;
             return null;
         }
-        
+
     }
 }

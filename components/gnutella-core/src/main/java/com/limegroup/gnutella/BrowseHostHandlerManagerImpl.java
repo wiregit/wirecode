@@ -36,6 +36,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
     private final SocketsManager socketsManager;
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final Provider<ForMeReplyHandler> forMeReplyHandler;
+    private final ScheduledExecutorService backgroundExecutor;
 
     private final MessageFactory messageFactory;
 
@@ -52,9 +53,12 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
         this.pushDownloadManager = pushDownloadManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
+        this.backgroundExecutor = backgroundExecutor;
 
-        // TODO: move an an initializer
-        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), 0, 5000, TimeUnit.MILLISECONDS);
+    }
+    
+    public void initialize() {
+        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), 0, 5000, TimeUnit.MILLISECONDS);    
     }
 
     @Inject

@@ -189,6 +189,8 @@ import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateCollectionFactoryImpl;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.version.UpdateHandlerImpl;
+import com.limegroup.gnutella.version.UpdateMessageVerifier;
+import com.limegroup.gnutella.version.UpdateMessageVerifierImpl;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
@@ -346,9 +348,10 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
         bind(MessageHandlerBinder.class).to(MessageHandlerBinderImpl.class);
         bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
-        bind(Acceptor.class).to(AcceptorImpl.class);
+        bind(Acceptor.class).to(AcceptorImpl.class);        
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
-        bindConstant().annotatedWith(Names.named("failoverUpdateLocation")).to("http://update.limewire.com/version.def");
+        bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
+        
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
@@ -371,7 +374,6 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(MACCalculatorRepositoryManager.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
-        bind(OutOfBandThroughputMeasurer.class).asEagerSingleton();
         bind(Statistics.class).asEagerSingleton();
         
         // TODO: Need to add interface to these classes

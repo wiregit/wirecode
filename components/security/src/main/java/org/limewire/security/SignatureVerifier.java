@@ -72,40 +72,10 @@ public class SignatureVerifier {
             return false;
         }       
     }
-
-    /**
-     * Retrieves the data from a byte[] containing both the signature and content,
-     * returning the data only if it is verified.
-     */
-    public static String getVerifiedData(byte[] data, File keyFile, String alg, String dig) {
-        PublicKey key = readKey(keyFile, alg);
-        return parseAndVerify(key, data, alg, dig);
-    }
     
     public static String getVerifiedData(byte [] data, String keyBase32, String alg, String dig) {
         PublicKey key = readKey(keyBase32, alg);
-        return parseAndVerify(key, data, alg, dig);
-    }
-    
-    
-    private static String parseAndVerify(PublicKey key, byte [] data, String alg, String dig) {
-        byte[][] info = parseData(data);
-        return verify(key, info, alg, dig);
-    }
-    
-    /**
-     * Retrieves the data from a file, returning the data only if it is verified.
-     */
-    public static String getVerifiedData(File source, File keyFile, String alg, String dig) {
-        PublicKey key = readKey(keyFile, alg);
-        byte[][] info = parseData(FileUtils.readFileFully(source));
-        return verify(key, info, alg, dig);
-     }
-    
-    /**
-     * Verified the key, info, using the algorithm & digest algorithm.
-     */
-    private static String verify(PublicKey key, byte[][] info, String alg, String dig) {
+        byte[][] info = parseData(data);        
         if(key == null || info == null) {
             LOG.warn("No key or data to verify.");
             return null;

@@ -4,6 +4,7 @@ package com.limegroup.gnutella.version;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,9 +20,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Connectable;
-import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
-import org.limewire.security.SignatureVerifier;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -82,19 +81,11 @@ public class UpdateHandlerImpl implements UpdateHandler {
      */
     private static final String FILENAME = "version.xml";
     
-    /**
-     * The public key.
-     */
-    private static final String KEY = "GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJC" +
-            "SUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2" +
-            "NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6" +
-            "FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7" +
-            "AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25" +
-            "NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4" +
-            "N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMANJHPNL2" +
-            "K3FJIH54PPBPLMCHVEAVTDQQSU3GKB3N2WG7RDC4WSWCM3HACQJ3MNHJ32STPGSZJCTYZRPCHJORQR4HN2" +
-            "J4KXHJ6JYYLTIBM64EKRTDBVLTWFJDEIC5SYR24CTHM3H3" +
-            "NTBHY4AB26LFPFYMOSK3O4BACF2I4GCRGUPNJS6XGTSNU33APRHI2BJ7ZDJTTU5C4EI6DY";
+    private static final int IGNORE_ID = Integer.MAX_VALUE;
+    
+    private static enum UpdateType {
+        FROM_NETWORK, FROM_DISK, FROM_HTTP;
+    }
     
     /**
      * init the random generator on class load time
@@ -141,7 +132,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
     private boolean _killingObsoleteNecessary;
     
     /** If an HTTP failover update is in progress */
-    private final AtomicBoolean httpUpdate = new AtomicBoolean(false);
+    private final HttpRequestControl httpRequestControl = new HttpRequestControl();
     
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<ActivityCallback> activityCallback;
@@ -154,7 +145,22 @@ public class UpdateHandlerImpl implements UpdateHandler {
     private final Provider<FileManager> fileManager;
     private final ApplicationServices applicationServices;
     private final UpdateCollectionFactory updateCollectionFactory;
-    private final String failoverLocation;
+    private final UpdateMessageVerifier updateMessageVerifier;
+    
+    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/update.def";
+    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/update.def",
+            "http://update2.limewire.com/update.def",
+            "http://update3.limewire.com/update.def",
+            "http://update4.limewire.com/update.def",
+            "http://update5.limewire.com/update.def",
+            "http://update6.limewire.com/update.def",
+            "http://update7.limewire.com/update.def",
+            "http://update8.limewire.com/update.def",
+            "http://update9.limewire.com/update.def",
+            "http://update10.limewire.com/update.def");
+    private volatile int minMaxHttpRequestDelay = 1000 * 60;
+    private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
+    private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
     
     @Inject
     UpdateHandlerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -169,7 +175,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
             ApplicationServices applicationServices,
             UpdateCollectionFactory updateCollectionFactory,
             Clock clock,
-            @Named("failoverUpdateLocation") String failoverLocation) {
+            UpdateMessageVerifier updateMessageVerifier) {
         this.backgroundExecutor = backgroundExecutor;
         this.activityCallback = activityCallback;
         this.connectionServices = connectionServices;
@@ -182,11 +188,47 @@ public class UpdateHandlerImpl implements UpdateHandler {
         this.applicationServices = applicationServices;
         this.updateCollectionFactory = updateCollectionFactory;
         this.clock = clock;
-        this.failoverLocation = failoverLocation;
+        this.updateMessageVerifier = updateMessageVerifier;
+    }
+        
+    String getTimeoutUrl() {
+        return timeoutUpdateLocation;
     }
     
-    String getFailoverLocation() {
-        return failoverLocation;
+    void setTimeoutUrl(String url) {
+        this.timeoutUpdateLocation = url;
+    }
+    
+    List<String> getMaxUrls() {
+        return maxedUpdateList;
+    }
+    
+    void setMaxUrls(List<String> urls) {
+        this.maxedUpdateList = urls;
+    }
+    
+    int getMinHttpRequestUpdateDelayForMaxFailover() {
+        return minMaxHttpRequestDelay;
+    }
+    
+    int getMaxHttpRequestUpdateDelayForMaxFailover() {
+        return maxMaxHttpRequestDelay;
+    }
+    
+    void setMinHttpRequestUpdateDelayForMaxFailover(int min) {
+        minMaxHttpRequestDelay = min;
+    }
+    
+    void setMaxHttpRequestUpdateDelayForMaxFailover(int max) {
+        maxMaxHttpRequestDelay = max;
+    }
+    
+    int getSilentPeriodForMaxHttpRequest() {
+        return silentPeriodForMaxHttpRequest;
+    }
+    
+    void setSilentPeriodForMaxHttpRequest(int silentPeriodForMaxHttpRequest) {
+        this.silentPeriodForMaxHttpRequest = silentPeriodForMaxHttpRequest;
     }
 
     /**
@@ -196,7 +238,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
         LOG.trace("Initializing UpdateHandler");
         backgroundExecutor.execute(new Runnable() {
             public void run() {
-                handleDataInternal(FileUtils.readFileFully(getStoredFile()), true, null);
+                handleDataInternal(FileUtils.readFileFully(getStoredFile()), UpdateType.FROM_DISK, null);
             }
         });
         
@@ -248,7 +290,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
             backgroundExecutor.execute(new Runnable() {
                 public void run() {
                     LOG.trace("Parsing new data...");
-                    handleDataInternal(data, false, handler);
+                    handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
                 }
             });
         }
@@ -274,35 +316,81 @@ public class UpdateHandlerImpl implements UpdateHandler {
      *
      * (Processes the data immediately.)
      */
-    private void handleDataInternal(byte[] data, boolean fromDisk, ReplyHandler handler) {
-        if(data != null) {
-            String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
-            if(xml != null) {
-                if(!fromDisk && handler != null)
-                    networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
-                UpdateCollection uc = updateCollectionFactory.createUpdateCollection(xml);
-                if (fromDisk || uc.getId() <= _lastId)
-                    doHttpFailover(uc);
-                if(uc.getId() > _lastId)
-                    storeAndUpdate(data, uc, fromDisk);
-            } else {
-                if(!fromDisk && handler != null)
-                    networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.VERSION);
-                LOG.warn("Couldn't verify signature on data.");
-            }
-        } else {
-            if(!fromDisk && handler != null)
-                networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.VERSION);
+    private void handleDataInternal(byte[] data, UpdateType updateType, ReplyHandler handler) {
+        if (data == null) {
+            if (updateType == UpdateType.FROM_NETWORK && handler != null)
+                networkUpdateSanityChecker.get()
+                        .handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("No data to handle.");
+            return;
+        }
+
+        String xml = updateMessageVerifier.getVerifiedData(data);
+        if (xml == null) {
+            if (updateType == UpdateType.FROM_NETWORK && handler != null)
+                networkUpdateSanityChecker.get()
+                        .handleInvalidResponse(handler, RequestType.VERSION);
+            LOG.warn("Couldn't verify signature on data.");
+            return;
+        }
+        
+        if (updateType == UpdateType.FROM_NETWORK && handler != null)
+            networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
+
+        UpdateCollection uc = updateCollectionFactory.createUpdateCollection(xml);
+        if (LOG.isDebugEnabled())
+            LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + _lastId);
+
+        switch (updateType) {
+        case FROM_NETWORK:
+            // the common case:
+            // a) if max && no max already, do failover.
+            // b) if not max && <= last, check stale.
+            // c) if not max && > last, update
+            if (uc.getId() == IGNORE_ID) {
+                if (_lastId != IGNORE_ID)
+                    doHttpMaxFailover(uc);
+            } else if (uc.getId() <= _lastId) {
+                checkForStaleUpdateAndMaybeDoHttpFailover(uc);
+            } else {// is greater
+                storeAndUpdate(data, uc, updateType);
+            }
+            break;
+        case FROM_DISK:
+            // on first load:
+            // a) always check for stale
+            // b) update if we didn't get an update before this ran.
+            checkForStaleUpdateAndMaybeDoHttpFailover(uc);
+            if (uc.getId() > _lastId)
+                storeAndUpdate(data, uc, updateType);
+            break;
+        case FROM_HTTP:
+            // on HTTP response:
+            // a) update if >= stored.
+            // (note this is >=, different than >, which is from
+            // network)
+            if (uc.getId() >= _lastId)
+                storeAndUpdate(data, uc, updateType);
+            break;
         }
     }
     
     /**
-     * Stores the given data to disk & posts an update to neighboring connections.
-     * Starts the download of any updates
+     * Stores the given data to disk & posts an update to neighboring
+     * connections. Starts the download of any updates
      */
-    private void storeAndUpdate(byte[] data, UpdateCollection uc, boolean fromDisk) {
-        LOG.trace("Retrieved new data, storing & updating.");
+    private void storeAndUpdate(byte[] data, UpdateCollection uc, UpdateType updateType) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Retrieved new data from: " + updateType + ", storing & updating.");
+        if(uc.getId() == IGNORE_ID && updateType == UpdateType.FROM_NETWORK)
+            throw new IllegalStateException("shouldn't be here!");
+        
+        // If an http max request is pending, don't even bother with this stuff.
+        // We want to get it straight from the source...
+        if (updateType == UpdateType.FROM_NETWORK && httpRequestControl.isRequestPending()
+                && httpRequestControl.getRequestReason() == HttpRequestControl.RequestReason.MAX)
+            return;
+        
         _lastId = uc.getId();
         
         _lastTimestamp = uc.getTimestamp();
@@ -314,9 +402,10 @@ public class UpdateHandlerImpl implements UpdateHandler {
         
         _lastBytes = data;
         
-        if(!fromDisk) {
+        if(updateType != UpdateType.FROM_DISK) {
             // cancel any http and pretend we just updated.
-            httpUpdate.set(false);
+            if(httpRequestControl.getRequestReason() == HttpRequestControl.RequestReason.TIMEOUT)
+                httpRequestControl.cancelRequest();
             UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
             
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
@@ -388,12 +477,12 @@ public class UpdateHandlerImpl implements UpdateHandler {
     /**
      * begins an http failover.
      */
-    private void doHttpFailover(UpdateCollection uc) {
-        LOG.debug("checking for http failover");
+    private void checkForStaleUpdateAndMaybeDoHttpFailover(UpdateCollection uc) {
+        LOG.debug("checking for timeout http failover");
         long monthAgo = clock.now() - ONE_MONTH;
         if (UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue() < monthAgo && // more than a month ago
                 UpdateSettings.LAST_HTTP_FAILOVER.getValue() < monthAgo &&  // and last failover too
-                !httpUpdate.getAndSet(true)) { // and we're not already doing a failover
+                !httpRequestControl.requestQueued(HttpRequestControl.RequestReason.TIMEOUT)) { // and we're not already doing a failover
             
             long when = (connectionServices.isConnected() ? 1 : 5 ) * 60 * 1000;
             if (LOG.isDebugEnabled())
@@ -401,23 +490,40 @@ public class UpdateHandlerImpl implements UpdateHandler {
             
             backgroundExecutor.schedule(new Runnable() {
                 public void run() {
-                    launchHTTPUpdate();
+                    launchHTTPUpdate(timeoutUpdateLocation);
                 }
             }, when, TimeUnit.MILLISECONDS);
+        }
+    }
+    
+    private void doHttpMaxFailover(UpdateCollection updateCollection) {
+        long maxTimeAgo = clock.now() - silentPeriodForMaxHttpRequest; 
+        if(!httpRequestControl.requestQueued(HttpRequestControl.RequestReason.MAX) &&
+                UpdateSettings.LAST_HTTP_FAILOVER.getValue() < maxTimeAgo) {
+            LOG.debug("Scheduling http max failover...");
+            backgroundExecutor.schedule(new Runnable() {
+                public void run() {
+                    String url = maxedUpdateList.get(RANDOM.nextInt(maxedUpdateList.size()));
+                    launchHTTPUpdate(url);
+                }
+            }, RANDOM.nextInt(maxMaxHttpRequestDelay) + minMaxHttpRequestDelay, TimeUnit.MILLISECONDS);
+        } else {
+            LOG.debug("Ignoring http max failover.");
         }
     }
 
     /**
      * Launches an http update to the failover url.
      */
-    private void launchHTTPUpdate() {
-        if (!httpUpdate.get())
+    private void launchHTTPUpdate(String url) {
+        if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpMethod get = new GetMethod(LimeWireUtils.addLWInfoToUrl(failoverLocation, applicationServices.getMyGUID()));
+        HttpMethod get = new GetMethod(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID()));
         get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         get.setFollowRedirects(true);
+        httpRequestControl.requestActive();
         httpExecutor.get().execute(get, new RequestHandler(), 10000);
     }
     
@@ -755,14 +861,13 @@ public class UpdateHandlerImpl implements UpdateHandler {
 
     private class RequestHandler implements HttpClientListener {
         public boolean requestComplete(HttpMethod method) {
-            httpUpdate.set(false);
             LOG.debug("http request method succeeded");
             
             // remember we made an attempt even if it didn't succeed
             UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
-            byte [] inflated = null;
+            final byte[] inflated;
             try {
-                if (method.getStatusCode() < 200 || method.getStatusCode() >= 300) 
+                if (method.getStatusCode() < 200 || method.getStatusCode() >= 300)
                     throw new IOException("bad code "+method.getStatusCode());
     
                 byte [] resp = method.getResponseBody();
@@ -770,25 +875,80 @@ public class UpdateHandlerImpl implements UpdateHandler {
                     throw new IOException("bad body");
     
                 // inflate the response and process.
-                inflated = IOUtils.inflate(resp);
+                inflated = updateMessageVerifier.inflateNetworkData(resp);
             } catch (IOException failed) {
+                httpRequestControl.requestFinished();
                 LOG.warn("couldn't fetch data ",failed);
                 return false;
             } finally {
                 httpExecutor.get().releaseResources(method);
             }
             
-            handleNewData(inflated, null);
-            // no more requests
-            return false;
+            // Handle the data in the background thread.
+            backgroundExecutor.execute(new Runnable() {
+                public void run() {
+                    httpRequestControl.requestFinished();
+                    
+                    LOG.trace("Parsing new data...");
+                    handleDataInternal(inflated, UpdateType.FROM_HTTP, null);
+                }
+            });
+            
+            return false; // no more requests
         }
         
         public boolean requestFailed(HttpMethod m, IOException exc) {
             LOG.warn("http failover failed",exc);
-            httpUpdate.set(false);
+            httpRequestControl.requestFinished();
+            UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
+            
             httpExecutor.get().releaseResources(m);
             // nothing we can do.
             return false;
+        }
+    }
+    
+    /**
+     * A simple control to let the flow of HTTP requests happen differently
+     * depending on why it was requested.
+     */
+    private static class HttpRequestControl {
+        private static enum RequestReason { TIMEOUT, MAX };
+        
+        private final AtomicBoolean requestQueued = new AtomicBoolean(false);
+        private final AtomicBoolean requestActive = new AtomicBoolean(false);
+        private volatile RequestReason requestReason;
+        
+        /** Returns true if a request is queued or active. */
+        boolean isRequestPending() {
+            return requestActive.get() || requestQueued.get();
+        }
+        
+        /** Sets a queued request and returns true if a request is pending or active. */
+        boolean requestQueued(RequestReason reason) {
+            boolean prior = requestQueued.getAndSet(true);
+            if(!prior || reason == RequestReason.MAX) // upgrade reason
+                requestReason = reason;
+            return prior || requestActive.get();
+        }
+        
+        /** Sets a request to be active. */
+        void requestActive() {
+            requestActive.set(true);
+            requestQueued.set(false);
+        }
+        
+        /** Returns the reason the last request was queueud. */
+        RequestReason getRequestReason() {
+            return requestReason;
+        }
+        
+        void cancelRequest() {
+            requestQueued.set(false);
+        }
+        
+        void requestFinished() {
+            requestActive.set(false);
         }
     }
     

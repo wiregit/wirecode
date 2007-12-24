@@ -116,6 +116,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<LimeCoreGlue> limeCoreGlue;
     private final Provider<LWSManager> lwsManager;
     private final Provider<LWSIntegrationServices> lwsItegrationServices;
+    private final Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer;
+    private final Provider<BrowseHostHandlerManager> browseHostHandlerManager;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -171,7 +173,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<LicenseFactory> licenseFactory,
             Provider<LimeCoreGlue> limeCoreGlue,
             Provider<LWSManager> lwsManager,
-            Provider<LWSIntegrationServices> lwsItegrationServices) { 
+            Provider<LWSIntegrationServices> lwsItegrationServices,
+            Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
+            Provider<BrowseHostHandlerManager> browseHostHandlerManager) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -214,6 +218,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.limeCoreGlue = limeCoreGlue;
         this.lwsManager = lwsManager;
         this.lwsItegrationServices = lwsItegrationServices;
+        this.outOfBandThroughputMeasurer = outOfBandThroughputMeasurer;
+        this.browseHostHandlerManager = browseHostHandlerManager;
     }
     
     /* (non-Javadoc)
@@ -326,6 +332,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Message Router..."));
 		messageRouter.get().start();
 		LOG.trace("STOPMessageRouter");
+		
+        LOG.trace("START UpdateManager.instance");
+        activityCallback.get().componentLoading(I18nMarker.marktr("Checking for Updates..."));
+        updateHandler.get().initialize();
+        LOG.trace("STOP UpdateManager.instance");
 
         LOG.trace("START HTTPUploadManager");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Upload Management..."));
@@ -399,11 +410,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
         lwsItegrationServices.get().init();
         LOG.trace("STOP LWSIntegrationServices.postGuiInit");
         
-        LOG.trace("START UpdateManager.instance");
-        activityCallback.get().componentLoading(I18nMarker.marktr("Checking for Updates..."));
-        updateHandler.get().initialize();
-        LOG.trace("STOP UpdateManager.instance");
-
         LOG.trace("START QueryUnicaster");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Directed Querier..."));
 		queryUnicaster.get().start();
@@ -444,6 +450,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Network Listeners..."));
         initializeConnectionDispatcher();
         LOG.trace("STOP register connection dispatchers");
+        
+        LOG.trace("START Random Initializings");
+        outOfBandThroughputMeasurer.get().initialize();
+        browseHostHandlerManager.get().initialize();
+        LOG.trace("STOP Random Initializings");
 
         // Allow us to disable this remotely is needed
         if (LWSSettings.LWS_IS_ENABLED.getValue()) {
