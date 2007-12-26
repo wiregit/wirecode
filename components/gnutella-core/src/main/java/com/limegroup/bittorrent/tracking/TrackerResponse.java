@@ -171,20 +171,27 @@ class TrackerResponse {
 	 * @throws ValueException
 	 */
 	static List<TorrentLocation> parsePeers(byte[] bytes) throws ValueException {
+        boolean containedInvalid = false;
 		ArrayList<TorrentLocation> ret = new ArrayList<TorrentLocation>();
 		for (int i = 0; i < bytes.length - 5; i += 6) {
 			byte[] address = new byte[4];
 			System.arraycopy(bytes, i, address, 0, 4);
 			int port = ByteOrder.beb2int(bytes, i + 4, 2);
+            
+            if (!NetworkUtils.isValidPort(port)) {
+                containedInvalid = true;
+                continue;
+            }
 			try {
 				InetAddress addr = InetAddress.getByAddress(address);
 				ret.add(parsePeer(addr, port, null));
 			} catch (UnknownHostException uhe) {
-			    throw new ValueException(
-			            "bad tracker response - bad peer ip "
-			            + new String(address));
+			    containedInvalid = true;
 			}
 		}
+        
+        if (ret.isEmpty() && containedInvalid)
+            throw new ValueException("no peers or all invalid");
 
 		return Collections.unmodifiableList(ret);
 	}
