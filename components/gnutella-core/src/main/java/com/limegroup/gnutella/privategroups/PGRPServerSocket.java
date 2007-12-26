@@ -114,6 +114,8 @@ public class PGRPServerSocket{
                     
                     PacketFilter filter = new AndFilter(new PacketIDFilter(queryPacket.getPacketID()),
                             new PacketTypeFilter(IQ.class));
+                    
+                    //PacketCollector blocks
                     PacketCollector collector = conn.createPacketCollector(filter);
 
                     conn.sendPacket(queryPacket);
@@ -130,11 +132,7 @@ public class PGRPServerSocket{
                         buddyListManager.addListener(buddyListManager, new ChatWindowListener());
                         
 //                       //need to concatenate the servername with the username because the server returns the username only
-//                        buddyListManager.addChatManager(data.getUsername()+ "@" + servername, localUsername, mySocket);
-//                        LOG.debug("end of SocketHandler"); 
-                        
-                        //need to concatenate the servername with the username because the server returns the username only
-                        buddyListManager.addChatManager("mary@" + servername, localUsername, mySocket);
+                        buddyListManager.addChatManager(data.getUsername()+ "@" + servername, localUsername, mySocket);
                         LOG.debug("end of SocketHandler"); 
                     }
                     else{

@@ -29,6 +29,8 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.limewire.io.NetworkUtils;
 import org.limewire.privategroups.utils.PrivateGroupsUtil;
@@ -160,6 +162,20 @@ public class PGRPClientImpl implements PGRPClient{
         return true;
     }
     
+    public void sendSubscriptionResponse(boolean allow, String from){
+        
+        LOG.debug("PGRPClientImpl: sendSubscriptionResponse");
+        Presence response;
+        if(allow)
+            response = new Presence(Presence.Type.subscribed);
+        else
+            response = new Presence(Presence.Type.unsubscribed);
+        
+        response.setTo(from);
+        connection.sendPacket(response);
+    }
+    
+    
     public boolean loginAccount(String username, String password){
         try {
             
@@ -173,6 +189,16 @@ public class PGRPClientImpl implements PGRPClient{
             LOG.debug("set Subscription to Manual");
             //set subscription manual mode
             setSubscriptionModeManual();
+            
+            //register to listen for subscription requests
+            connection.addPacketListener(new SubscriptionListener(), new PacketFilter(){
+
+                public boolean accept(Packet packet) {
+                    if(packet instanceof Presence)
+                        if(((Presence)packet).getType().equals(Presence.Type.subscribe))
+                            return true;
+                    return false;
+                }});
             
             LOG.debug("Register IQStor Provider");
             //register IQ provider
@@ -395,6 +421,8 @@ public class PGRPClientImpl implements PGRPClient{
 
         PacketFilter filter = new AndFilter(new PacketIDFilter(storagePacket.getPacketID()),
                 new PacketTypeFilter(IQ.class));
+        
+        //PacketCollector blocks
         PacketCollector collector = connection.createPacketCollector(filter);
 
         connection.sendPacket(storagePacket);
@@ -427,16 +455,6 @@ public class PGRPClientImpl implements PGRPClient{
     }
     
     /**
-     * test method to view attribute values
-     */
-    private void viewAttributes() {
-        Map <String, String> attributes = connection.getAccountManager().getAccountAttributesMap();
-        LOG.debug("passphrase: " + attributes.get("passphrase"));
-        LOG.debug("publickey: " + attributes.get("publickey"));
-        LOG.debug("DONE");
-    }
-    
-    /**
      *  sets subscription mode to manual so that other users must agree to allow 
      *  others to see their online status
      * 
@@ -447,8 +465,6 @@ public class PGRPClientImpl implements PGRPClient{
         Roster roster = connection.getRoster();
         roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
     } 
-    
-
     
     /**
      * test method only --> for the client to not have a server socket (when testing on the same computer)

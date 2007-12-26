@@ -25,6 +25,11 @@ public interface PGRPClient {
     public boolean removeAccount() throws XMPPException;
     
     /**
+     * sends a response to the user who requested for subscription 
+     */
+    public void sendSubscriptionResponse(boolean allow, String from);
+    
+    /**
      * logs in a user with the given username and password 
      */
     public boolean loginAccount(String username, String password);
