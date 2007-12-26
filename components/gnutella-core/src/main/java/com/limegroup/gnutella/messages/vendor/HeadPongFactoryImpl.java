@@ -81,14 +81,14 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
      */
     public HeadPong createFromNetwork(byte[] guid, byte ttl, byte hops,
             int version, byte[] payload, Network network) throws BadPacketException {
-        return new HeadPong(guid, ttl, hops, version, payload, network, pushEndpointFactory);
+        return new HeadPongImpl(guid, ttl, hops, version, payload, network, pushEndpointFactory);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.vendor.HeadPongFactory#create(com.limegroup.gnutella.messages.vendor.HeadPongRequestor)
      */
     public HeadPong create(HeadPongRequestor ping) {
-        return new HeadPong(new GUID(ping.getGUID()), versionFor(ping), derivePayload(ping));
+        return new HeadPongImpl(new GUID(ping.getGUID()), versionFor(ping), derivePayload(ping));
     }
 
     /** Returns the byte[] of the written GGEP. */

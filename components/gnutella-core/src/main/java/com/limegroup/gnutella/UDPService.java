@@ -40,6 +40,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -426,6 +427,8 @@ public class UDPService implements ReadWriteObserver {
                 }
                 
             }
+            else if (message instanceof HeadPong)
+                _acceptedSolicitedIncoming = true;
         }
         // ReplyNumberVMs are always sent in an unsolicited manner,
         // so we can use this fact to keep the last unsolicited up

@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 
 import junit.framework.Test;
 
@@ -13,6 +17,10 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.util.MessageTestUtils;
 
 public class UDPStatusTest extends ClientSideTestCase {
 
@@ -71,6 +79,21 @@ public class UDPStatusTest extends ClientSideTestCase {
             s.close();
         }
     }
+    
+    public void testSolicitedHeadPong() throws Exception {
+        drainAll();
+        assertFalse(networkManager.canReceiveSolicited());
+        assertFalse(networkManager.canReceiveUnsolicited());
+        assertTrue(udpService.isListening());
+        
+        Mockery m = new Mockery();
+        
+        final HeadPong pong = m.mock(HeadPong.class);
+        m.checking(MessageTestUtils.createDefaultMessageExpectations(pong, HeadPong.class));
+        udpService.processMessage(pong, new InetSocketAddress("127.0.0.1",1000));
+        assertTrue(networkManager.canReceiveSolicited());
+    }
+    
     
     public void testUnsolicited() throws Exception {
         drainAll();
