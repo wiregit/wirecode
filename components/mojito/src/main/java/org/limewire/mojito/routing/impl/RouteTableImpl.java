@@ -1137,10 +1137,9 @@ public class RouteTableImpl implements RouteTable {
         };
         
         DHTExecutorService e = notifier;
-        if (e != null) {
-            // schedule ensures they happen sequentially
-            e.schedule(r, 0, TimeUnit.MILLISECONDS);
-        } else
+        if (e != null) 
+            e.executeSequentially(r);
+        else
             r.run();
     }
     

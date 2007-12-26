@@ -42,6 +42,8 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     
     private ExecutorService cachedExecutor;
     
+    private ExecutorService sequentialExecutor;
+    
     private final String name;
     
     private volatile boolean running = false;
@@ -59,6 +61,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
         if (!running) {
             initScheduledExecutor();
             initCachedExecutor();
+            initSequantialExecutor();
             running = true;
         }
     }
@@ -72,6 +75,7 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
             running = false;
             cancel(scheduledExecutor.shutdownNow());
             cancel(cachedExecutor.shutdownNow());
+            cancel(sequentialExecutor.shutdownNow());
         }
     }
 
@@ -117,6 +121,10 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
         };
         
         cachedExecutor = ExecutorsHelper.newThreadPool(factory);
+    }
+    
+    private void initSequantialExecutor() {
+        sequentialExecutor = ExecutorsHelper.newProcessingQueue("DHT-Sequential-Executor");
     }
     
     /*
@@ -184,6 +192,12 @@ public class DefaultDHTExecutorService implements DHTExecutorService {
     public void execute(Runnable command) {
         if (running) {
             cachedExecutor.execute(command);
+        }
+    }
+    
+    public void executeSequentially(Runnable command) {
+        if (running) {
+            sequentialExecutor.execute(command);
         }
     }
 }

@@ -96,4 +96,10 @@ public interface DHTExecutorService {
      * is executed on Mojito DHTs internal Executor (an unbound ThreadPoolExecutor).
      */
     public void execute(Runnable command);
+    
+    /**
+     * Executes the given command but does unlike execute() does not spawn
+     * more than one new thread.
+     */
+    public void executeSequentially(Runnable command);
 }
