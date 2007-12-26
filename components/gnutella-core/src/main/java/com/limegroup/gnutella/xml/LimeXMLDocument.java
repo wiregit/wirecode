@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -190,7 +191,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         scanFields();
         
         if(!isValid()) {
-            throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaObj: " + (schemaURI != null ? getSchema() : "n/a"));
+            throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaFields: " + (schemaURI != null ? Arrays.asList(getSchema().getCanonicalizedFieldNames()) : "n/a"));
         }
     }
     

@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLSchema;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 /**
@@ -43,9 +44,10 @@ public class MetaDataReader {
             throw new IOException("invalid/no data.");
 
         String uri = data.getSchemaURI();
-        if (limeXMLSchemaRepository.getSchema(uri) == null)
+        LimeXMLSchema schema = limeXMLSchemaRepository.getSchema(uri);
+        if (schema == null || schema.getCanonicalizedFields().isEmpty())
             throw new IOException("schema: " + uri + " doesn't exist");
-
+        
         try {
             return limeXMLDocumentFactory.createLimeXMLDocument(nameValList, uri);
         } catch(IllegalArgumentException iae) {

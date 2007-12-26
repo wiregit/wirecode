@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -122,31 +123,38 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	private final LifecycleManager lifecycleManager;
 	private final Provider<Acceptor> acceptor;
 	
+	private final AtomicBoolean started = new AtomicBoolean(false);
+	
 	@Inject
 	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
 	    this.lifecycleManager = lifecycleManager;	
 	    this.acceptor = acceptor;
     }
     
+	@Override
     public boolean start() {
-	    LOG.debug("Starting UPnP Manager.");
+        if (!started.getAndSet(true)) {
+            LOG.debug("Starting UPnP Manager.");
 
-	    addDeviceChangeListener(this);
-        
-	    synchronized(DEVICE_LOCK) {
-            try {
-    	        return super.start();
-    	    } catch(Exception bad) {
-    	        ConnectionSettings.DISABLE_UPNP.setValue(true);
-    	        ErrorService.error(bad);
-    	        return false;
-    	    }
+            addDeviceChangeListener(this);
+
+            synchronized (DEVICE_LOCK) {
+                try {
+                    return super.start();
+                } catch (Exception bad) {
+                    ConnectionSettings.DISABLE_UPNP.setValue(true);
+                    ErrorService.error(bad);
+                    return false;
+                }
+            }
+        } else {
+            return false; // already started
         }
-	}
+    }
 	
 	/**
-	 * @return whether we are behind an UPnP-enabled NAT/router
-	 */
+     * @return whether we are behind an UPnP-enabled NAT/router
+     */
 	public boolean isNATPresent() {
 	    return _router != null && _service != null;
 	}
