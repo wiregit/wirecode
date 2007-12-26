@@ -77,7 +77,7 @@ public class UDPStatusTest extends ClientSideTestCase {
         }
     }
     
-    public void testSolicitedHeadPong() throws Exception {
+    public void testSolicitedAnyUDP() throws Exception {
         drainAll();
         assertFalse(networkManager.canReceiveSolicited());
         assertFalse(networkManager.canReceiveUnsolicited());
@@ -85,9 +85,17 @@ public class UDPStatusTest extends ClientSideTestCase {
         
         Mockery m = new Mockery();
         
+        // any message will do
         final HeadPong pong = m.mock(HeadPong.class);
         m.checking(MessageTestUtils.createDefaultMessageExpectations(pong, HeadPong.class));
+        
+        // local address
         udpService.processMessage(pong, new InetSocketAddress("127.0.0.1",1000));
+        assertFalse(networkManager.canReceiveSolicited());
+        assertFalse(networkManager.canReceiveUnsolicited());
+        
+        // non-local address
+        udpService.processMessage(pong, new InetSocketAddress("1.2.3.4",1000));
         assertTrue(networkManager.canReceiveSolicited());
         assertFalse(networkManager.canReceiveUnsolicited());
     }
@@ -110,7 +118,7 @@ public class UDPStatusTest extends ClientSideTestCase {
             s.send(new DatagramPacket(buf,buf.length,InetAddress.getLocalHost(),
                     udpService.getStableUDPPort()));
             Thread.sleep(100);
-            assertFalse(networkManager.canReceiveSolicited());
+            assertTrue(networkManager.canReceiveSolicited()); // not possible to accept unsolicited but no solicited
             assertTrue(networkManager.canReceiveUnsolicited());
         } catch (IOException bad) {
             fail(bad);

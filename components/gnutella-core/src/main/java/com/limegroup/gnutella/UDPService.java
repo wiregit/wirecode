@@ -40,7 +40,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
@@ -397,20 +396,23 @@ public class UDPService implements ReadWriteObserver {
 	/** Updates internal state of the UDP Service. */
 	private void updateState(Message message, InetSocketAddress addr) {
         _lastReceivedAny = System.currentTimeMillis();
+        
+        if (isValidForIncoming(addr))
+            _acceptedSolicitedIncoming = true;
+        
 	    if (!isGUESSCapable()) {
             if (message instanceof PingRequest) {
                 GUID guid = new GUID(message.getGUID());
-                if(isValidForIncoming(CONNECT_BACK_GUID, guid, addr)) {
+                if(CONNECT_BACK_GUID.equals(guid) && isValidForIncoming(addr)) {
                     _acceptedUnsolicitedIncoming = true;
                 }
                 _lastUnsolicitedIncomingTime = _lastReceivedAny;
             }
             else if (message instanceof PingReply) {
                 GUID guid = new GUID(message.getGUID());
-                if(!isValidForIncoming(SOLICITED_PING_GUID, guid, addr ))
+                if(!SOLICITED_PING_GUID.equals(guid) || !isValidForIncoming(addr ))
                     return;
                 
-                _acceptedSolicitedIncoming = true;
                 
                 PingReply r = (PingReply)message;
                 if (r.getMyPort() != 0) {
@@ -427,8 +429,6 @@ public class UDPService implements ReadWriteObserver {
                 }
                 
             }
-            else if (message instanceof HeadPong)
-                _acceptedSolicitedIncoming = true;
         }
         // ReplyNumberVMs are always sent in an unsolicited manner,
         // so we can use this fact to keep the last unsolicited up
@@ -447,9 +447,7 @@ public class UDPService implements ReadWriteObserver {
 	 * Determines whether or not the specified message is valid for setting
 	 * LimeWire as accepting UDP messages (solicited or unsolicited).
 	 */
-	private boolean isValidForIncoming(GUID match, GUID guidReceived, InetSocketAddress addr) {
-        if(!match.equals(guidReceived))
-            return false;
+	private boolean isValidForIncoming(InetSocketAddress addr) {
             
 	    String host = addr.getAddress().getHostAddress();
         
