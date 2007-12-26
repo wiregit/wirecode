@@ -420,6 +420,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         routeTable.setContactPinger(this);
+        routeTable.setNotifier(getDHTExecutorService());
         routeTable.addRouteTableListener(new RoutingStatisticContainer.Listener());
         
         this.routeTable = routeTable;
@@ -656,6 +657,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setDHTExecutorService(com.limegroup.mojito.concurrent.DHTExecutorService)
+     * this method is not really used anywhere and not even tested...
      */
     public void setDHTExecutorService(DHTExecutorService executorService) {
         if (executorService == null) {
@@ -663,6 +665,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         this.executorService = executorService;
+        RouteTable rt = getRouteTable();
+        if (rt != null)
+            rt.setNotifier(executorService);
     }
     
     /*

@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
@@ -239,6 +240,10 @@ class PassiveDHTNodeRouteTable implements RouteTable {
     
     public synchronized void setContactPinger(ContactPinger pinger) {
         delegate.setContactPinger(pinger);
+    }
+    
+    public synchronized void setNotifier(DHTExecutorService e) {
+        delegate.setNotifier(e);
     }
 
     public synchronized int size() {

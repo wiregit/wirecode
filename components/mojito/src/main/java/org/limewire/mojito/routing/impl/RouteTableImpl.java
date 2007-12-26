@@ -30,12 +30,14 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
@@ -94,6 +96,11 @@ public class RouteTableImpl implements RouteTable {
      */
     private transient volatile List<RouteTableListener> listeners 
         = new CopyOnWriteArrayList<RouteTableListener>();
+    
+    /** 
+     * Executor where to offload notifications to RouteTableListeners
+     */
+    private transient volatile DHTExecutorService notifier;
     
     /**
      * Create a new RouteTable and generates a new random Node ID
@@ -160,6 +167,10 @@ public class RouteTableImpl implements RouteTable {
      */
     public void setContactPinger(ContactPinger pinger) {
         this.pinger = pinger;
+    }
+    
+    public void setNotifier(DHTExecutorService executor) {
+        this.notifier = executor;
     }
 
     /**
@@ -1114,12 +1125,23 @@ public class RouteTableImpl implements RouteTable {
             return;
         }
         
-        RouteTableEvent event = new RouteTableEvent(
+        final RouteTableEvent event = new RouteTableEvent(
                 this, bucket, left, right, existing, node, type);
         
-        for (RouteTableListener listener : listeners) {
-            listener.handleRouteTableEvent(event);
-        }
+        Runnable r = new Runnable() {
+            public void run() {
+                for (RouteTableListener listener : listeners) {
+                    listener.handleRouteTableEvent(event);
+                }
+            }
+        };
+        
+        DHTExecutorService e = notifier;
+        if (e != null) {
+            // schedule ensures they happen sequentially
+            e.schedule(r, 0, TimeUnit.MILLISECONDS);
+        } else
+            r.run();
     }
     
     public synchronized String toString() {

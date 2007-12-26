@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
@@ -132,6 +133,8 @@ class PassiveLeafRouteTable implements RouteTable {
 
     public synchronized void setContactPinger(ContactPinger pinger) {
     }
+    
+    public void setNotifier(DHTExecutorService e){}
 
     public synchronized int size() {
         return bucket.size() + 1;
