@@ -17,7 +17,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
  *  Used to ask a host that you are connected to to try and connect back to a
  *  3rd party via UDP.
  */
-public final class UDPConnectBackRedirect extends VendorMessage {
+public final class UDPConnectBackRedirect extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
 

@@ -7,7 +7,7 @@ package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.GUID;
 
-public class UDPCrawlerPong extends VendorMessage {
+public class UDPCrawlerPong extends AbstractVendorMessage {
 	
 	public static final int VERSION = 1;
 	

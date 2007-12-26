@@ -43,6 +43,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
+import com.limegroup.gnutella.messages.vendor.HeadPongImpl;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
@@ -564,7 +565,7 @@ public class PingRankerTest extends LimeTestCase {
     /**
      * a very customizable HeadPong
      */
-    class MockPong extends HeadPong {
+    class MockPong extends HeadPongImpl {
         
         private Set altLocs, pushLocs;
         private boolean have, full, firewalled, busy, downloading;

@@ -14,7 +14,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
  *  Used to ask a host you connect to do a TCP ConnectBack.
  */
-public final class TCPConnectBackVendorMessage extends VendorMessage {
+public final class TCPConnectBackVendorMessage extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
 

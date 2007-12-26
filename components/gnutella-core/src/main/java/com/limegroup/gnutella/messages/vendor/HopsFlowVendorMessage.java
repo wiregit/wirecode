@@ -12,7 +12,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  Used to ask a host you connect to to not send queries above the specified
  *  hops value....
  */
-public final class HopsFlowVendorMessage extends VendorMessage {
+public final class HopsFlowVendorMessage extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
 

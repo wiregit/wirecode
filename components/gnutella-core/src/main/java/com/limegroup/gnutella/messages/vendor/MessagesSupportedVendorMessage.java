@@ -21,7 +21,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  message is delivered over TCP).
  */
 @Singleton
-public final class MessagesSupportedVendorMessage extends VendorMessage {
+public final class MessagesSupportedVendorMessage extends AbstractVendorMessage {
 
     public static final int VERSION = 0;
 

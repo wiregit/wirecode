@@ -18,7 +18,7 @@ import com.limegroup.gnutella.messages.GGEP;
 /**
  * A request for content.
  */
-public class ContentRequest extends VendorMessage {
+public class ContentRequest extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
 

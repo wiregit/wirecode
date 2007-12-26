@@ -24,7 +24,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  2) after 1) has been released for a while, start using version 2
  *  3) some time after 2), stop accepting 1) (optional)
  */
-public final class UDPConnectBackVendorMessage extends VendorMessage {
+public final class UDPConnectBackVendorMessage extends AbstractVendorMessage {
 
     public static final int VERSION = 2;
 

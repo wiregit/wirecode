@@ -54,7 +54,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
  *   the rest - altlocs (if requested) 
  */
 
-public interface HeadPong extends com.limegroup.gnutella.messages.Message {
+public interface HeadPong extends VendorMessage {
 
     public static final int BINARY_VERSION = 1;
 

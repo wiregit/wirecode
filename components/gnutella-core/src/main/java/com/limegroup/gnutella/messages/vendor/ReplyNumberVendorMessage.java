@@ -26,7 +26,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  only necessary for UDP messages since in the UDP case there is probably no
  *  MessagesSupportedVM exchange.
  */
-public final class ReplyNumberVendorMessage extends VendorMessage {
+public final class ReplyNumberVendorMessage extends AbstractVendorMessage {
 
 
     public static final int OLD_VERSION = 2;

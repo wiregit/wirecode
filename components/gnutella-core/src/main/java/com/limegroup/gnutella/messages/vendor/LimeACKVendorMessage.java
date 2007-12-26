@@ -39,7 +39,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  * Adds a security token to prevent clients from spoofing their ip and just sending
  *  results back after a little while
  */
-public final class LimeACKVendorMessage extends VendorMessage {
+public final class LimeACKVendorMessage extends AbstractVendorMessage {
 
     public static final int VERSION = 3;
     

@@ -16,7 +16,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
  *  Used to ask a host that you are connected to to try and connect back to a
  *  3rd pary.
  */
-public final class TCPConnectBackRedirect extends VendorMessage {
+public final class TCPConnectBackRedirect extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
 

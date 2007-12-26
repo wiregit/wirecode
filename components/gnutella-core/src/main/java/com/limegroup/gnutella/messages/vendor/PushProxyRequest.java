@@ -12,7 +12,7 @@ import com.limegroup.gnutella.util.DataUtils;
  *  This message has no payload - we simply set the client guid as the GUID of
  *  the message.
  */
-public final class PushProxyRequest extends VendorMessage {
+public final class PushProxyRequest extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
 

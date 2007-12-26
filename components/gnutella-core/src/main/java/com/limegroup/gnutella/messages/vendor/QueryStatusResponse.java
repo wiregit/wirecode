@@ -14,7 +14,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  results the sending host has for the guid of a query (the guid of this
  *  message is the same as the original query).  
  */
-public final class QueryStatusResponse extends VendorMessage {
+public final class QueryStatusResponse extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
 

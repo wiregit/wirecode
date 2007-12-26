@@ -18,6 +18,7 @@ import com.limegroup.gnutella.PeerTestCase;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.vendor.AbstractVendorMessage;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.messages.vendor.UpdateRequest;
@@ -409,7 +410,7 @@ public class InterClientTest extends PeerTestCase {
         return baos.toByteArray();
     }
     
-    private static class UpdateRequestStub extends VendorMessage{
+    private static class UpdateRequestStub extends AbstractVendorMessage {
 
         public int version;
         public boolean hasGGEP,requestsCompressed;

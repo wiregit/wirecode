@@ -34,7 +34,7 @@ import com.limegroup.gnutella.messages.GGEP;
  * 
  */
 
-public class HeadPing extends VendorMessage implements HeadPongRequestor {
+public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor {
     
     /*
      * Version 1: Initial revision.

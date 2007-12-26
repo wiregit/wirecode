@@ -13,7 +13,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
  * Currently it doesn't do any validation of the source, i.e. we 
  * sent our list of ultrapeer to whomever requests it.
  */
-public class UDPCrawlerPing extends VendorMessage {
+public class UDPCrawlerPing extends AbstractVendorMessage {
 	
 	public static final int VERSION = 1;
 	

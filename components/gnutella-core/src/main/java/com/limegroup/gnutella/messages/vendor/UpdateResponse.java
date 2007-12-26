@@ -10,7 +10,7 @@ import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 
-public final class UpdateResponse extends VendorMessage {
+public final class UpdateResponse extends AbstractVendorMessage {
     
     private static final int NON_GGEP_VERSION = 1;
     

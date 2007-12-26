@@ -12,7 +12,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
  * Vendor message containing a serialized properties object which contains
  * the headers that need to be updated.
  */
-public class HeaderUpdateVendorMessage extends VendorMessage {
+public class HeaderUpdateVendorMessage extends AbstractVendorMessage {
    
     public static final int VERSION = 1;
    

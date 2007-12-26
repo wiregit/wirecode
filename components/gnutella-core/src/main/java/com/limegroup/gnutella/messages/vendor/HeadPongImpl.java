@@ -76,7 +76,7 @@ import com.limegroup.gnutella.util.DataUtils;
  *   n*8 bytes - n intervals (if requested && file partial && fits in packet)
  *   the rest - altlocs (if requested) 
  */
-public class HeadPongImpl extends VendorMessage implements HeadPong {
+public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     
     /** available ranges */
     private IntervalSet _ranges;

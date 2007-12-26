@@ -5,7 +5,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.DataUtils;
 
-public final class UpdateRequest extends VendorMessage {
+public final class UpdateRequest extends AbstractVendorMessage {
     
     public static final int VERSION = 1;
     

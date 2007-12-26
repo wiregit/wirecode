@@ -14,7 +14,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
  *  Used to ask a host you connect to do a TCP ConnectBack.
  */
-public final class PushProxyAcknowledgement extends VendorMessage {
+public final class PushProxyAcknowledgement extends AbstractVendorMessage {
 
     public static final int VERSION = 2;
 

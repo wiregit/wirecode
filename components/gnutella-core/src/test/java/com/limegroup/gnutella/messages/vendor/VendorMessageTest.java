@@ -578,7 +578,7 @@ public class VendorMessageTest extends BaseTestCase {
         assertNotNull(m2);
     }
     
-    private static class VM extends VendorMessage {
+    private static class VM extends AbstractVendorMessage {
         public VM(byte[] guid, byte ttl, byte hops, byte[] vendorID, 
                   int selector, int version, byte[] payload, Network network) 
             throws BadPacketException {

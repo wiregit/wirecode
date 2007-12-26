@@ -22,7 +22,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  * you add a capability you should modify this class.
  *
  */
-public final class CapabilitiesVM extends VendorMessage {
+public final class CapabilitiesVM extends AbstractVendorMessage {
 
     /**
      * Bytes for advertising that we support a 'feature' search.

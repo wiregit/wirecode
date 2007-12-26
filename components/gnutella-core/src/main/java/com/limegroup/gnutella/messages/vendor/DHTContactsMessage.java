@@ -19,7 +19,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
  * DHTContactsMessage to exchange fresh Contact information with each
  * other to keep their RouteTables updated w/o putting load on the DHT.
  */
-public class DHTContactsMessage extends VendorMessage {
+public class DHTContactsMessage extends AbstractVendorMessage {
     
     public static final int VERSION = 1;
     

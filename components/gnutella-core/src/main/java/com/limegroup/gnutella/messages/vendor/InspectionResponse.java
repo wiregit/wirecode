@@ -18,7 +18,7 @@ import com.limegroup.gnutella.util.DataUtils;
 /**
  * Response for an inspection request.
  */
-public class InspectionResponse extends VendorMessage {
+public class InspectionResponse extends AbstractVendorMessage {
     
     private static final int VERSION = 1;
     

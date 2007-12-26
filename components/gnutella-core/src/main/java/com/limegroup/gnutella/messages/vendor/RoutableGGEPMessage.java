@@ -22,7 +22,7 @@ import com.limegroup.gnutella.messages.SecureGGEPData;
  * A ggep-based message that may have a specific return address.  It requires
  * a routing version number and must be secure.
  */
-public class RoutableGGEPMessage extends VendorMessage implements SecureMessage {
+public class RoutableGGEPMessage extends AbstractVendorMessage implements SecureMessage {
     
     static final String RETURN_ADDRESS_KEY = "RA";
     static final String VERSION_KEY = "V";

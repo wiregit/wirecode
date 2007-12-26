@@ -11,7 +11,7 @@ import com.limegroup.gnutella.util.DataUtils;
  * * The value 0 is reserved to enable proxying for all versions
  * * A message without payload disables proxying for all versions
  */
-public class OOBProxyControlVendorMessage extends VendorMessage {
+public class OOBProxyControlVendorMessage extends AbstractVendorMessage {
 
     public static final int VERSION = 1;
     
