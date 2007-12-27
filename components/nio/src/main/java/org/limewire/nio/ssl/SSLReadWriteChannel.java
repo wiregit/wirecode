@@ -221,18 +221,57 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 // Initialize readOutgoing only if not shutdown,
                 // but grab the lock after we've checked to make sure
                 // it's non-null, to avoid lock every read.
+                // Lock is only necessary for 'shutdown'.
                 if(readOutgoing == null) {
                     synchronized(initLock) {
-                        if(!shutdown)
-                            readOutgoing = byteBufferCache.getHeap(engine.getSession().getApplicationBufferSize());
+                        if(shutdown)
+                            throw new IOException("Shutdown while sizing");
+                        
+                        readOutgoing = byteBufferCache.getHeap(engine.getSession().getApplicationBufferSize());
                     }
                 }
                 result = engine.unwrap(readIncoming, readOutgoing);
                 readProduced += result.bytesProduced();
                 readConsumed += result.bytesConsumed();
                 status = result.getStatus();
-                if(status == Status.BUFFER_OVERFLOW)
-                    throw new IllegalStateException("not enough room in fallback TLS buffer!  readOutgoing: " + readOutgoing + ", readIncoming: " + readIncoming + ", packet size: " + engine.getSession().getPacketBufferSize() + ", appl size: " + engine.getSession().getApplicationBufferSize());
+                if(status == Status.BUFFER_OVERFLOW) {
+                    if(readIncoming.position() == 0 && readIncoming.capacity() == 16665 && engine.getSession().getPacketBufferSize() == 33049) {
+                        // See: http://download.java.net/jdk7/docs/technotes/guides/security/jsse/JSSERefGuide.html#SSLSession
+                        // The SSL/TLS protocols specify 16KB as the buffer size, but some implementations
+                        // do it wrong and make it 32KB.  The Sun impl will dynamically resize up, so we 
+                        // need to handle that.
+                        // (We grab the lock to make sure that the buffers aren't recycled as we do this.)
+                        synchronized(initLock) {
+                            if(shutdown)
+                                throw new IOException("Shutdown while resizing.");
+                            
+                            // Transfer data from old readIncoming to newIncoming.
+                            ByteBuffer newIncoming = byteBufferCache.getHeap(engine.getSession().getPacketBufferSize());
+                            BufferUtils.transfer(readIncoming, newIncoming, false);
+                            newIncoming.flip();
+                            assert newIncoming.limit() == readIncoming.position();
+                            assert newIncoming.position() == 0;
+                            byteBufferCache.release(readIncoming);
+                            readIncoming = newIncoming;
+                            
+                            // Replace outgoing with upgraded version.
+                            assert readOutgoing.position() == 0;
+                            byteBufferCache.release(readOutgoing);
+                            readOutgoing = byteBufferCache.getHeap(engine.getSession().getApplicationBufferSize());
+                            
+                            // ... and try again!
+                            result = engine.unwrap(readIncoming, readOutgoing);
+                            readProduced += result.bytesProduced();
+                            readConsumed += result.bytesConsumed();
+                            status = result.getStatus();
+                            if(status == Status.BUFFER_OVERFLOW)
+                                throw new IllegalStateException("tried resizing, but still not enough room in fallback TLS buffer!  readOutgoing: " + readOutgoing + ", readIncoming: " + readIncoming + ", packet size: " + engine.getSession().getPacketBufferSize() + ", appl size: " + engine.getSession().getApplicationBufferSize());
+                        }
+                    } else {
+                        throw new IllegalStateException("cannot resize, and not enough room in fallback TLS buffer!  readOutgoing: " + readOutgoing + ", readIncoming: " + readIncoming + ", packet size: " + engine.getSession().getPacketBufferSize() + ", appl size: " + engine.getSession().getApplicationBufferSize());
+                    }
+                }
+                    
                 transferred += BufferUtils.transfer(readOutgoing, dst);
             }
             

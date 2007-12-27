@@ -14,8 +14,11 @@ import java.nio.channels.WritableByteChannel;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
@@ -533,8 +536,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         clientChannel.shutdown();
         serverChannel.shutdown();
     }    
-    
-    
+        
     // TODO: Test underflows & overflows
     
     
@@ -552,7 +554,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         final SSLReadWriteChannel channel = new SSLReadWriteChannel(context, executor, NIODispatcher.instance().getBufferCache(), NIODispatcher.instance().getScheduledExecutorService());
         
         SSLSocketFactory sslFactory = context.getSocketFactory();
-        final SSLSocket sslSocket = (SSLSocket)sslFactory.createSocket();
+        SSLSocket sslSocket = (SSLSocket)sslFactory.createSocket();
         sslSocket.setUseClientMode(!testServer);
         sslSocket.setWantClientAuth(false);
         sslSocket.setNeedClientAuth(false);
@@ -573,7 +575,45 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         IWWrapper iww = new IWWrapper(accepted.getOutputStream());
         channel.setReadChannel(irw);
         channel.setWriteChannel(iww);
+        
+        doDataTest(channel, sslSocket, irw, iww, 1);
+        
+        final AtomicBoolean rehandshakeCompleted = new AtomicBoolean(false);
+        HandshakeCompletedListener listener = new HandshakeCompletedListener() {
+            public void handshakeCompleted(HandshakeCompletedEvent event) {
+                rehandshakeCompleted.set(true);
+            }
+        };
+        sslSocket.addHandshakeCompletedListener(listener);
+        sslSocket.startHandshake();        
+        doDataTest(channel, sslSocket, irw, iww, 2);
+        sslSocket.removeHandshakeCompletedListener(listener);
+        if(!testServer)
+            assertTrue(rehandshakeCompleted.get());
+        
+        final AtomicBoolean rehandshake2Completed = new AtomicBoolean(false);
+        listener = new HandshakeCompletedListener() {
+            public void handshakeCompleted(HandshakeCompletedEvent event) {
+                rehandshake2Completed.set(true);
+            }
+        };
+        sslSocket.getSession().invalidate();
+        sslSocket.addHandshakeCompletedListener(listener);
+        sslSocket.startHandshake();
+        doDataTest(channel, sslSocket, irw, iww, 3);
+        sslSocket.removeHandshakeCompletedListener(listener);
+        if(testServer)
+            assertTrue(rehandshake2Completed.get());
        
+        sslSocket.close();
+        server.close();
+        accepted.close();
+        channel.close();
+        channel.shutdown();
+    }
+    
+    private void doDataTest(final SSLReadWriteChannel channel, final SSLSocket sslSocket, 
+                            IRWrapper irw, IWWrapper iww, int iteration) throws Exception {       
         final String INCOMING = "THIS IS A TEST\r\n";
         final String OUTGOING = "OUTGOING DATA\r\n";
         
@@ -615,17 +655,11 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         assertEquals(OUTGOING, new String(b, 0, OUTGOING.length()));
         
         assertEquals(irw.getTotalRead(), channel.getReadBytesConsumed());
-        assertEquals(INCOMING.length(), channel.getReadBytesProduced());
+        assertEquals(INCOMING.length() * iteration, channel.getReadBytesProduced());
         assertEquals(iww.getTotalWrote(), channel.getWrittenBytesProduced());
-        assertEquals(OUTGOING.length(), channel.getWrittenBytesConsumed());
+        assertEquals(OUTGOING.length() * iteration, channel.getWrittenBytesConsumed());
         assertGreaterThan(channel.getReadBytesProduced(), channel.getReadBytesConsumed());
         assertGreaterThan(channel.getWrittenBytesConsumed(), channel.getWrittenBytesProduced());
-        
-        sslSocket.close();
-        server.close();
-        accepted.close();
-        channel.close();
-        channel.shutdown();
     }
 
     private static class IRWrapper implements InterestReadableByteChannel {
