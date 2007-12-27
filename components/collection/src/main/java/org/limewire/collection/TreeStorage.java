@@ -1,8 +1,10 @@
 package org.limewire.collection;
 
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,7 +24,7 @@ public class TreeStorage {
      */
     private static final TreeNode PADDING = new TreeNode();
         
-    private final Map<Integer, TreeNode> map = new TreeMap<Integer, TreeNode>();
+    private final TreeNodeMap map = new TreeNodeMap(false);
     
     private final NodeGenerator generator;
     
@@ -89,16 +91,16 @@ public class TreeStorage {
      */
     public Collection<Integer> getUsedNodes() {
         // reel easy
-        List<Integer> l = new ArrayList<Integer>(map.keySet().size());
-        for (int i : map.keySet())
+        List<Integer> l = new ArrayList<Integer>(map.size());
+        for (int i : map)
             if (map.get(i).used)
                 l.add(i);
         return l;
     }
     
     public Collection<Integer> getVerifiedNodes() {
-        List<Integer> l = new ArrayList<Integer>(map.keySet().size());
-        for (int i : map.keySet())
+        List<Integer> l = new ArrayList<Integer>(map.size());
+        for (int i : map)
             if (map.get(i).verified)
                 l.add(i);
         return l;
@@ -237,8 +239,96 @@ public class TreeStorage {
     
     //////////////////////////////////////////////
    
-    
+    /**
+     * Mapping structure that optionally caches TreeNodes indefinitely.
+     */
+    private static class TreeNodeMap implements Iterable<Integer> {
+        
+        private final Map<Integer, TreeNode> hardMap = new TreeMap<Integer, TreeNode>();
+        private final Map<Integer, SoftReference<TreeNode>> softMap = 
+            new TreeMap<Integer, SoftReference<TreeNode>>();
+        
+        private final boolean soft;
+        
+        /**
+         * @param soft true if all nodes should be cached in soft references.
+         */
+        TreeNodeMap(boolean soft) {
+            this.soft = soft;
+        }
+        
+        public TreeNode get(int id) {
+            TreeNode ret = hardMap.get(id);
+            if (ret != null || !soft)
+                return ret;
+            
+            SoftReference<TreeNode> sr = softMap.get(id);
+            if (sr == null)
+                return null;
+           
+            return sr.get();
+        }
+        
+        public TreeNode put(int id, TreeNode node) {
+            
+            // remove cached copies
+            if (soft)
+                softMap.remove(id);
+            
+            return hardMap.put(id, node);
+        }
+        
+        public TreeNode remove(int id) {
+            TreeNode n = hardMap.remove(id);
+            if (n != null && soft) 
+                softMap.put(id, new SoftReference<TreeNode>(n));
+            return n;
+        }
+        
+        public int size() {
+            return hardMap.size();
+        }
+        
+        public Iterator<Integer> iterator() {
+            if (soft)
+                return new CachingIterator();
+            return hardMap.keySet().iterator();
+        }
+        
+        private class CachingIterator implements Iterator<Integer> {
+            
+            private final Iterator<Integer> hardIterator = hardMap.keySet().iterator();
+            
+            private int currentId;
+            private TreeNode currentNode;
 
+            public boolean hasNext() {
+                return hardIterator.hasNext();
+            }
+
+            public Integer next() {
+                currentId = hardIterator.next();
+                currentNode = hardMap.get(currentId);
+                return currentId;
+            }
+
+            public void remove() {
+                if (currentId <= 0)
+                    throw new IllegalStateException();
+                
+                hardIterator.remove();
+                
+                softMap.put(currentId, new SoftReference<TreeNode>(currentNode));
+                
+                currentId = 0;
+                currentNode = null;
+            }
+        }
+    }
+    
+    ////////////////////////////////////
+    // various utility methods below
+    ////////////////////////////////////
     
     // calculates the next n with 2^n > number
     public static int log2Ceil(long number) {
