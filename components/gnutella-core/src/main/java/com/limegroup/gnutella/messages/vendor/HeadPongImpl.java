@@ -149,6 +149,10 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     
 
     
+    public Class<HeadPong> getHandlerClass() {
+        return HeadPong.class;
+    }
+    
     /**
      * Sets all local fields based off the original version of the HeadPong,
      * from which the format was not very extensible.
