@@ -2,6 +2,7 @@ package com.limegroup.gnutella.privategroups;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Packet;
 
 /**
  * Interface that defines all basic functions of a buddy list/private groups client.
@@ -47,7 +48,7 @@ public interface PGRPClient {
     /**
      * sends a message to a remote user specified with the given username and message
      */
-    public boolean sendMessage(String username, String message);
+    public boolean sendPacket(String username, Packet packet);
     
     
     /**

@@ -273,7 +273,7 @@ public class PGRPClientImpl implements PGRPClient{
         return true;
     }
     
-    public boolean sendMessage(String username, String message){
+    public boolean sendPacket(String username, Packet packet){
         
         LOG.debug("Send Message Method");
           
@@ -287,8 +287,8 @@ public class PGRPClientImpl implements PGRPClient{
                 if(setRemoteConnection(username, localUsername)){
                     LOG.debug("get chatmanager");
                     chatManager = buddyListManager.getManager(username);
-                    LOG.debug("send message through chatmanager");
-                    chatManager.send(PrivateGroupsUtil.createMessage(localUsername, username, message));
+                    LOG.debug("send packet through chatmanager");
+                    chatManager.send(packet);
                     LOG.debug("set remote window exists to true");
                     chatManager.setRemoteWindowExists(true);
                     return true;
@@ -296,7 +296,7 @@ public class PGRPClientImpl implements PGRPClient{
             }
             else{
                 LOG.debug("found chatManager");
-                chatManager.send(PrivateGroupsUtil.createMessage(localUsername, username, message));
+                chatManager.send(packet);
                 return true;
             }
             return false;
@@ -411,7 +411,7 @@ public class PGRPClientImpl implements PGRPClient{
         int index = remoteUserNameServer.lastIndexOf('@');
         String remoteUserNameOnly = remoteUserNameServer.substring(0, index);
         
-        LOG.debug("Send storage packet to server to get username associated with ip address");
+        LOG.debug("Send storage packet to server to get username associated with ip address: " + remoteUserNameOnly);
         //use valueStorage packet to get ip address, port, and public key
         ValueStorage storagePacket = new ValueStorage();
         storagePacket.setTo(servername);
@@ -449,6 +449,8 @@ public class PGRPClientImpl implements PGRPClient{
                     LOG.debug("Encountered IOException");
                     e.printStackTrace();
                 }
+            }else{
+                LOG.debug("no ip address found");
             }
         }
         return false;
