@@ -455,6 +455,10 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		throws IOException, ClassNotFoundException {
         pushEndpointFactory = globalPushEndpointFactory.get();
         stream.defaultReadObject();
+        // port should never be invalid, so if it is, something messed up
+        if(!NetworkUtils.isValidPort(_port))
+            throw new IOException("invalid port!");
+        
         //Older downloads.dat files do not have _urns, so _urns will be null
         //(the default Java value).  Hence we also initialize
         //_browseHostEnabled.  See class overview for more details.
