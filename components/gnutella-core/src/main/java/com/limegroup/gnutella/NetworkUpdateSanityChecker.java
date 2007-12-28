@@ -42,7 +42,7 @@ public class NetworkUpdateSanityChecker {
         new HashMap<RequestType, Map<ReplyHandler, Boolean>>(RequestType.values().length);
     private final List<IP> failures = new ArrayList<IP>(MAXIMUM_FAILURES);
     private boolean finished = false;
-    private Set<RequestType> successes = EnumSet.noneOf(RequestType.class);
+    private final Set<RequestType> successes = EnumSet.noneOf(RequestType.class);
     
     private final Provider<ActivityCallback> activityCallback;
     
