@@ -211,11 +211,7 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
             }
 
         } finally {
-            if( fis != null ) {
-                try {
-                    fis.close();
-                } catch(IOException e) {}
-            }
+            FileUtils.close(fis);
         }
         
         // Reload all setting values
@@ -291,7 +287,8 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
         OutputStream out = null;
         try {
             // some bugs were reported where the settings file was a directory.
-            if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
+            if (SETTINGS_FILE.isDirectory())
+                SETTINGS_FILE.delete();
 
             // some bugs were reported where the settings file's parent
             // directory was deleted.
@@ -314,23 +311,19 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
                     SETTINGS_FILE.delete();
                     out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
                 }
-                
-                markFailure();
             }
 
-            // save the properties to disk.
-            toSave.store(out, HEADING);        
+            if(out != null) {
+                // save the properties to disk.
+                toSave.store(out, HEADING);
+            } else {
+                markFailure();
+            }
             
         } catch (IOException e) {
-            
             markFailure();
-            
         } finally {
-            if( out != null ) {
-                try {
-                    out.close();
-                } catch(IOException e) {}
-            }
+            FileUtils.close(out);
         }
     }
     
