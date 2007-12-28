@@ -64,13 +64,4 @@ public class BuddyListManager {
         //close sockets and chatmanagers
         return manager.closeChatManager();
     }
-    
-    @Override
-    protected void finalize() throws Throwable {
-        // TODO Auto-generated method stub
-        super.finalize();
-        
-        System.out.println("I AM FINALIZING!!");
-        Thread.dumpStack();
-    }
 }

@@ -3,6 +3,9 @@ package com.limegroup.gnutella.privategroups;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+/**
+ * This class was originally used to generate RSA keys - it is not used anymore
+ */
 public class RSA {
     private final BigInteger one      = new BigInteger("1");
     private final SecureRandom random = new SecureRandom();

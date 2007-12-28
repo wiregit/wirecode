@@ -15,6 +15,8 @@ import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
 
+import com.limegroup.gnutella.gui.privategroups.ChatWindowListener;
+
 
 /**
  * The PGRPServerSocket handles an incoming socket connection.  Once the handler accepts the incoming client
@@ -29,7 +31,7 @@ public class PGRPServerSocket{
         private XMPPConnection connection;
         private boolean passCheck = true;
         private BuddyListManager buddyListManager;
-        private static String servername;
+        private String servername;
         private String localUsername;
         private static final Log LOG = LogFactory.getLog(BuddyListManager.class);
         
@@ -132,7 +134,11 @@ public class PGRPServerSocket{
                         buddyListManager.addListener(buddyListManager, new ChatWindowListener());
                         
 //                       //need to concatenate the servername with the username because the server returns the username only
-                        buddyListManager.addChatManager(data.getUsername()+ "@" + servername, localUsername, mySocket);
+//                        buddyListManager.addChatManager(data.getUsername()+ "@" + servername, localUsername, mySocket);
+//                        LOG.debug("end of SocketHandler"); 
+                        
+                        //need to concatenate the servername with the username because the server returns the username only
+                        buddyListManager.addChatManager("mary@" + servername, localUsername, mySocket);
                         LOG.debug("end of SocketHandler"); 
                     }
                     else{

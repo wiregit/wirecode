@@ -16,8 +16,7 @@ public class ServerIPQuery extends IQ {
     private String remoteIPPort;
     private String remoteIPPublicKey;
 
-    
-    
+
     public ServerIPQuery(String remoteIPAddress) {
         this.remoteIPAddress = remoteIPAddress;
     }

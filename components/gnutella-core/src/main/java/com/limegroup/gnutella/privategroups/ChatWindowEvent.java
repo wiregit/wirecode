@@ -23,10 +23,12 @@ public class ChatWindowEvent implements Event{
         return localUser;
     }
     
+    //not implemented
     public Object getSource() {
         return null;
     }
-
+    
+    //not implemented
     public Enum getType() {
         return null;
     }

@@ -60,45 +60,8 @@ public class PGRPClientImpl implements PGRPClient{
         this.buddyListManager = buddyListManager;
     }
     
-    public String getServername(){
-        return servername;
-    }
-    
-    private void connectToServerNoPort(String serverAddress){
-        
-        // Create a connection to the jabber.org server.
-        connection = new XMPPConnection(serverAddress);
- 
-        try {
-            connection.connect();
-            System.out.println("connection successful");
-            
-        } catch (XMPPException e) {
-            LOG.debug("could not connect to the server: " + serverAddress);
-            e.printStackTrace();
-        }
-    }
-    
-    public BuddyListManager getBuddyListManager(){
-        return buddyListManager;
-    }
-    
-    public void connectToServerPort(String serverAddress, int portAddress){
-        
-     // Create a connection to the jabber.org server on a specific port.
-        ConnectionConfiguration config = new ConnectionConfiguration(serverAddress, portAddress);
-        XMPPConnection conn2 = new XMPPConnection(config);
-        try {
-            conn2.connect();
-        } catch (XMPPException e) {
-            System.out.println("could not connect to the server: " + serverAddress + ", on port: " + portAddress);
-            e.printStackTrace();
-        }
-    }
-    
     /**
-     * see the roster list
-     * 
+     * Test method to System print the roster list.
      */
     public void viewRoster(){
         System.out.println("view roster");
@@ -114,7 +77,9 @@ public class PGRPClientImpl implements PGRPClient{
             LOG.debug("empty roster");
         }
     }
-    
+    /**
+     * create a new user account - only an admin can call this method
+     */
     public boolean createAccount(String username, String password){
         AccountManager accountManager = new AccountManager(connection);
         if(accountManager.supportsAccountCreation()){
@@ -134,6 +99,9 @@ public class PGRPClientImpl implements PGRPClient{
         return true;
     }
     
+    /**
+     * remove an existing user account - only an admin call use this method
+     */
     public boolean removeAccount() throws XMPPException{
         AccountManager accountManager = new AccountManager(connection);
         
@@ -162,6 +130,9 @@ public class PGRPClientImpl implements PGRPClient{
         return true;
     }
     
+    /**
+     * send a subscription response to the requestee.
+     */
     public void sendSubscriptionResponse(boolean allow, String from){
         
         LOG.debug("PGRPClientImpl: sendSubscriptionResponse");
@@ -257,6 +228,7 @@ public class PGRPClientImpl implements PGRPClient{
         return false;
     }
     
+   
     public boolean logoff(){
         try{
             
@@ -273,6 +245,9 @@ public class PGRPClientImpl implements PGRPClient{
         return true;
     }
     
+    /**
+     * send a packet through an established socket connection.
+     */
     public boolean sendPacket(String username, Packet packet){
         
         LOG.debug("Send Message Method");
@@ -306,9 +281,10 @@ public class PGRPClientImpl implements PGRPClient{
             return false;
         }
     }
-    
 
-    
+    /**
+     * add a new buddy given a unique username, nickname, and groupname.
+     */
     public boolean addToRoster(String username, String nickName, String groupName) {
         LOG.debug("PGRPClientImpl: addToRoster");
         Roster roster = connection.getRoster();
@@ -341,6 +317,9 @@ public class PGRPClientImpl implements PGRPClient{
         return true;
     }
     
+    /**
+     * remove an existing buddy from the roster given the unique username and groupname
+     */
     public boolean removeFromRoster(String username, String groupName){
         Roster roster = connection.getRoster();
         String usernameserver = username+ "@" + servername;
@@ -385,7 +364,9 @@ public class PGRPClientImpl implements PGRPClient{
         return true;
     }
     
-
+    /**
+     * find if a user is in the local user's roster
+     */
     public boolean findRosterUserName(String username){
         
         Roster roster = connection.getRoster();
@@ -396,10 +377,6 @@ public class PGRPClientImpl implements PGRPClient{
                  return true;
         }
         return false;
-    }
-    
-    public Roster getRoster(){
-        return connection.getRoster();
     }
   
     /**
@@ -455,18 +432,6 @@ public class PGRPClientImpl implements PGRPClient{
         }
         return false;
     }
-    
-    /**
-     *  sets subscription mode to manual so that other users must agree to allow 
-     *  others to see their online status
-     * 
-     */
-  
-    private void setSubscriptionModeManual() {
-
-        Roster roster = connection.getRoster();
-        roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
-    } 
     
     /**
      * test method only --> for the client to not have a server socket (when testing on the same computer)
@@ -534,6 +499,62 @@ public class PGRPClientImpl implements PGRPClient{
         return privateKey;
     }
     
+    public BuddyListManager getBuddyListManager(){
+        return buddyListManager;
+    }
+    
+    /**
+     * return the local user's roster
+     */
+    public Roster getRoster(){
+        return connection.getRoster();
+    }
+    
+    /**
+     * Establish a connection to the user (no login yet) with the given server address only.
+     */
+    private void connectToServerNoPort(String serverAddress){
+        
+        // Create a connection to the jabber.org server.
+        connection = new XMPPConnection(serverAddress);
+ 
+        try {
+            connection.connect();
+            LOG.debug("connection successful");
+            
+        } catch (XMPPException e) {
+            LOG.debug("could not connect to the server: " + serverAddress);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Establish a connection to the user (no login yet) with the given server address and port.
+     */
+    private void connectToServerPort(String serverAddress, int portAddress){
+        
+        // Create a connection to the jabber.org server on a specific port.
+        ConnectionConfiguration config = new ConnectionConfiguration(serverAddress, portAddress);
+        XMPPConnection conn2 = new XMPPConnection(config);
+        try {
+            conn2.connect();
+            LOG.debug("connection successful");
+        } catch (XMPPException e) {
+            LOG.debug("could not connect to the server: " + serverAddress + ", on port: " + portAddress);
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     *  sets subscription mode to manual so that other users must agree to allow 
+     *  others to see their online status
+     */
+  
+    private void setSubscriptionModeManual() {
+
+        Roster roster = connection.getRoster();
+        roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
+    } 
 
     public static void main(String[] args) throws XMPPException {
         

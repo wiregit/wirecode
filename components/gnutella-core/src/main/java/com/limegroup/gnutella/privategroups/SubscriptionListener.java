@@ -12,7 +12,7 @@ import com.limegroup.gnutella.gui.tabs.BuddylistTab;
 
 
 /**
- * Class that listens for requests to subscribe to current user
+ * Class that listens for requests to subscribe to the local user
  */
 public class SubscriptionListener implements PacketListener{
 

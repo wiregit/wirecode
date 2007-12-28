@@ -76,9 +76,4 @@ public interface PGRPClient {
      */
     public Roster getRoster();
     
-    /**
-     * returns the name of the server that has openfire
-     */        
-    public String getServername();
-    
 }
