@@ -445,10 +445,10 @@ public class BTDownloader extends AbstractDownloader
 				String.class, Serializable.class, 
 				GenericsUtils.ScanMode.EXCEPTION);
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
+        if (attributes == null || _info == null)
+            throw new IOException("invalid serailized data");
 		urn = _info.getURN();
 		fileSystem = _info.getFileSystem();
-		if (attributes == null || _info == null)
-			throw new IOException("invalid serailized data");
 		averagedBandwidth = new NumericBuffer<Float>(10);
 		
 	}

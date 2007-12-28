@@ -172,7 +172,7 @@ public final class ConnectionSettings extends LimeProps {
 	 * The connection speed in kbyte/s
 	 */
     public static final IntSetting CONNECTION_SPEED = 
-        FACTORY.createIntSetting("CONNECTION_SPEED", SpeedConstants.MODEM_SPEED_INT);
+        FACTORY.createIntSetting("CONNECTION_SPEED", SpeedConstants.CABLE_SPEED_INT);
     
     /**
 	 * The port to connect on
