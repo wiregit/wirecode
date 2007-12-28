@@ -50,7 +50,7 @@ public class BTDownloader extends AbstractDownloader
 	/**
 	 * The <tt>BTMetaInfo</tt> for this torrent.
 	 */
-	private BTMetaInfo _info;
+	private volatile BTMetaInfo _info;
 	
 	/** Local ref to the urn */
 	private URN urn;
