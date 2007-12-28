@@ -101,7 +101,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     
     public IntervalSet getResponseRanges() {
         synchronized(_verifyingFile) {
-            assert hasUrnsAndPartialData();
+            assert hasUrnsAndPartialData() : "urns : "+getUrns().size()+" size "+_verifyingFile.getBlockSize();
             if (_verifyingFile.getVerifiedBlockSize() > 0)
                 return _verifyingFile.getVerifiedIntervalSet();
             return _verifyingFile.getPartialIntervalSet();
