@@ -385,5 +385,17 @@ public final class SearchSettings extends LimeProps {
      * Whether the user wishes to receive results for partial files.
      */
     public static final BooleanSetting DESIRES_PARTIAL_RESULTS =
-        FACTORY.createBooleanSetting("DESIRES_PARTIAL_RESULTS", false);
+        FACTORY.createBooleanSetting("DESIRES_PARTIAL_RESULTS", true);
+    
+    /**
+     * Whether client side is enabled at all
+     * TODO: remove beta when releasing
+     */
+    private static final BooleanSetting DESIRES_PARTIAL_RESULTS_REMOTE =
+        FACTORY.createRemoteBooleanSetting("DESIRES_PARTIAL_RESULTS_REMOTE_BETA", 
+                false ,"SearchSettings.desiresPartialResultsBeta");
+    
+    public static boolean desiresPartialResults() {
+        return DESIRES_PARTIAL_RESULTS.getValue() && DESIRES_PARTIAL_RESULTS_REMOTE.getValue();
+    }
 }
