@@ -1288,8 +1288,30 @@ public final class QueryRequestTest extends LimeTestCase {
         
     }
 
+    /**
+     * tests that we && properly the two settings
+     */
+    public void testDesiresPartialResultsSetting() throws Exception {
+        SearchSettings.DESIRES_PARTIAL_RESULTS.setValue(true);
+        SearchSettings.DESIRES_PARTIAL_RESULTS_REMOTE.setValue(true);
+        assertTrue(SearchSettings.desiresPartialResults());
+        
+        SearchSettings.DESIRES_PARTIAL_RESULTS.setValue(false);
+        SearchSettings.DESIRES_PARTIAL_RESULTS_REMOTE.setValue(true);
+        assertFalse(SearchSettings.desiresPartialResults());
+        
+        SearchSettings.DESIRES_PARTIAL_RESULTS.setValue(true);
+        SearchSettings.DESIRES_PARTIAL_RESULTS_REMOTE.setValue(false);
+        assertFalse(SearchSettings.desiresPartialResults());
+        
+        SearchSettings.DESIRES_PARTIAL_RESULTS.setValue(false);
+        SearchSettings.DESIRES_PARTIAL_RESULTS_REMOTE.setValue(false);
+        assertFalse(SearchSettings.desiresPartialResults());
+    }
+    
     public void testDesiresPartialResults() throws Exception {
         SearchSettings.DESIRES_PARTIAL_RESULTS.setValue(true);
+        SearchSettings.DESIRES_PARTIAL_RESULTS_REMOTE.setValue(true);
         QueryRequest request = queryRequestFactory.createOutOfBandQuery(GUID.makeGuid(), "query", "");
         assertTrue(request.desiresPartialResults());
         
