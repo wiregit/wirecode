@@ -197,6 +197,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             while(readIncoming.hasRemaining() && (read = readSink.read(readIncoming)) > 0);
             // if we last read EOF & nothing was put in sourceBuffer, EOF
             if(read == -1 && readIncoming.position() == 0) {
+                // TODO: Is this a better fix for EOF during handshaking?
+                //if(!firstReadDone.get() || (engine.getHandshakeStatus() != HandshakeStatus.NOT_HANDSHAKING && engine.getHandshakeStatus() != HandshakeStatus.FINISHED))
+                //    throw new ClosedChannelException();
+                
                 LOG.debug("Read EOF, no data to transfer.  Connection finished");
                 return -1;
             }

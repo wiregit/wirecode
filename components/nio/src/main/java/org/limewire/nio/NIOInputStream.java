@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -103,7 +104,15 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
         // This is a hack to allow TLSNIOSockets to handshake
         // without init'ing the whole InputStream.
         if(bufferLock == null) {
-            channel.read(BufferUtils.getEmptyBuffer());
+            int read = channel.read(BufferUtils.getEmptyBuffer());
+            // We're trying to read into an empty buffer -- not any real data,
+            // so if we read EOF, that means this connection is closed.
+            // TODO: Make sure that this is correct!  Maybe a better way is to turn
+            // read interest off, or do nothing and leave the responsibility to the
+            // channel we're reading from?  Read interest shouldn't even be on unless
+            // that channel requested it, or this was initialized...
+            if(read == -1)
+                throw new ClosedChannelException();
         } else {
             synchronized(bufferLock) {
                 int read = 0;

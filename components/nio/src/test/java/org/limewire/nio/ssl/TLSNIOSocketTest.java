@@ -12,6 +12,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 import junit.framework.Test;
 
+import org.limewire.nio.LimeTestUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -184,8 +185,28 @@ public class TLSNIOSocketTest extends BaseTestCase {
             acceptor.close();
         }
     }
-    
-   private static class ReadTester implements ChannelReadObserver {        
+
+    /**
+     * Test that if output on the remote side is shutdown after we write
+     * something, but before handshaking finishes, that we detect that and close
+     * the socket.
+     */
+    public void testWriteOnlyReadShuts() throws Exception {
+        TLSNIOServerSocket server = new TLSNIOServerSocket(9999);        
+        TLSNIOSocket socket = new TLSNIOSocket("127.0.0.1", 9999);        
+        Socket accepted = server.accept();        
+        OutputStream output = socket.getOutputStream();
+        output.write("Bugfinder".getBytes());
+        // IMPORTANT: do not tell accepted to read here, otherwise
+        // handshaking could finish before we shutdown output.
+        accepted.shutdownOutput();        
+        LimeTestUtils.waitForNIO();
+        assertTrue(socket.isClosed());
+        accepted.close();
+        server.close();
+    }
+
+    private static class ReadTester implements ChannelReadObserver {
         private InterestReadableByteChannel source;
         private ByteBuffer readData = ByteBuffer.allocate(128 * 1024);
         
