@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.connection;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -228,5 +231,16 @@ public class CompositeQueue implements MessageQueue {
     
     /** Does nothing. */
     public void resetCycle() {}
+    
+    public Object getDroppedStats() {
+        Map<String,Object> ret = new HashMap<String,Object>();
+        ret.put("ver",1);
+        for (int i = 0 ; i < _queues.length ; i++) {
+            MessageQueue mq = _queues[i];
+            if (mq != null)
+                ret.put(String.valueOf(i), mq.getDroppedStats());
+        }
+        return ret;
+    }
 }
 

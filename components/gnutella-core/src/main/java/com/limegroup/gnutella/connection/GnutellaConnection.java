@@ -1315,6 +1315,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("nmr", getNumMessagesReceived());
         data.put("nms", getNumMessagesSent());
         _connectionStats.addStats(data);
+        data.put("or", _outputRunner.inspect());
         data.put("nrmd", getNumReceivedMessagesDropped());
         data.put("nsmd", getNumSentMessagesDropped());
         data.put("qrteu", getQueryRouteTableEmptyUnits());

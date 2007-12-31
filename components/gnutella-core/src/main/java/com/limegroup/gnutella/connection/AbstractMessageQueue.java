@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.connection;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A priority queue for messages. Subclasses override the add,
@@ -21,6 +22,11 @@ public abstract class AbstractMessageQueue implements MessageQueue {
     private int _timeout;
     /** The number of messages dropped since the last call to resetDropped(). */
     protected int _dropped;
+
+    /** Count the number and type of dropped messages */
+    private final Message.MessageCounter messageCounter = 
+        new Message.MessageCounter( 
+                (LimeWireUtils.isBetaRelease() || LimeWireUtils.isAlphaRelease()) ? 5 : 1 );
 
     /**
      * @param cycle the number of messages to return per cycle, i.e., between 
@@ -48,9 +54,18 @@ public abstract class AbstractMessageQueue implements MessageQueue {
     public void add(Message m) {
         Message dropmsg = addInternal(m);
         if (dropmsg != null) {
-            _dropped++;
-            dropmsg.recordDrop();
+            drop(dropmsg);
         }
+    }
+    
+    private void drop(Message m) {
+        _dropped++;
+        m.recordDrop();
+        messageCounter.countMessage(m);
+    }
+    
+    public final Object getDroppedStats() {
+        return messageCounter.inspect();
     }
     
     /**
@@ -78,8 +93,7 @@ public abstract class AbstractMessageQueue implements MessageQueue {
             if (m==null)
                 return null;     //Nothing left, give up.
             if (m.getCreationTime()<expireTime) {
-                _dropped++;
-                m.recordDrop();
+                drop(m);
                 continue;        //Too old.  Keep searching.
             }
 

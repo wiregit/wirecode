@@ -26,4 +26,7 @@ public interface MessageQueue {
     /** Determines if this is empty. */
     public boolean isEmpty();
     
+    /** An inspectable object for dropped messages */
+    public Object getDroppedStats();
+    
 }

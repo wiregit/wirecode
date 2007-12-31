@@ -45,4 +45,8 @@ public class BasicQueue implements MessageQueue {
         return QUEUE.isEmpty();
     }
     
+    public Object getDroppedStats() {
+        return "basic queue";
+    }
+    
 }
