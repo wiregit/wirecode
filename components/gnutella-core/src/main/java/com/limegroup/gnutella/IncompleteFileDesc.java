@@ -99,16 +99,23 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return ret.toString();
     }
     
-    public IntervalSet getResponseRanges() {
+    /**
+     * @param dest where to load the ranges
+     * @return true if the loaded ranges were verified
+     */
+    public boolean loadResponseRanges(IntervalSet dest) {
         synchronized(_verifyingFile) {
             if (!hasUrnsAndPartialData()) {
                 assert getUrns().size() > 1 &&
                 _verifyingFile.getBlockSize() + _verifyingFile.getAmountLost() >= MIN_CHUNK_SIZE :
                     "urns : "+getUrns().size()+" size "+_verifyingFile.getBlockSize()+" lost "+_verifyingFile.getAmountLost();
             }
-            if (_verifyingFile.getVerifiedBlockSize() > 0)
-                return _verifyingFile.getVerifiedIntervalSet();
-            return _verifyingFile.getPartialIntervalSet();
+            if (_verifyingFile.getVerifiedBlockSize() > 0) {
+                dest.add(_verifyingFile.getVerifiedIntervalSet());
+                return true;
+            }
+            dest.add(_verifyingFile.getPartialIntervalSet());
+            return false;
         }
     }
     

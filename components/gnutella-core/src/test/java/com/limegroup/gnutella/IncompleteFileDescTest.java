@@ -14,6 +14,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 @SuppressWarnings("unchecked")
@@ -83,13 +84,40 @@ public class IncompleteFileDescTest extends LimeTestCase {
             "bytes 0-102499, 102550-204949", ifd.getAvailableRanges());
     }
     
+    public void testLoadResponseRanges() throws Exception {
+        Range small = Range.createRange(0, 200000);
+        addUnverifiedInterval(small);
+        
+        urns.add(UrnHelper.TTROOT);
+        ifd = new IncompleteFileDesc(
+                new File(fileName),
+                urns,
+                0,
+                fileName,
+                1981,
+                vf);
+        
+        IntervalSet i = new IntervalSet();
+        assertFalse(ifd.loadResponseRanges(i));
+        assertEquals(1,i.getNumberOfIntervals());
+        assertEquals(0,i.getFirst().getLow());
+        assertEquals(200000,i.getFirst().getHigh());
+        
+        // now add some verified ranges
+        Range verified = Range.createRange(300000, 500000);
+        addInterval(verified);
+        
+        // should only return the verified range
+        i = new IntervalSet();
+        assertTrue(ifd.loadResponseRanges(i));
+        assertEquals(1,i.getNumberOfIntervals());
+        assertEquals(300000,i.getFirst().getLow());
+        assertEquals(500000,i.getFirst().getHigh());
+    }
+    
     public void testisRangeSatisfiable() throws Exception {
         // no ranges.
         
-        
-        
-
-
 
            assertFalse( ifd.isRangeSatisfiable(0, 0) );   
         assertFalse( ifd.isRangeSatisfiable(0, 150) );
@@ -123,6 +151,13 @@ public class IncompleteFileDescTest extends LimeTestCase {
     private void addInterval(Range i) throws Exception {
         IntervalSet set = (IntervalSet)
             PrivilegedAccessor.getValue(vf,"verifiedBlocks");
+        
+        set.add(i);
+    }
+    
+    private void addUnverifiedInterval(Range i) throws Exception {
+        IntervalSet set = (IntervalSet)
+            PrivilegedAccessor.getValue(vf,"partialBlocks");
         
         set.add(i);
     }

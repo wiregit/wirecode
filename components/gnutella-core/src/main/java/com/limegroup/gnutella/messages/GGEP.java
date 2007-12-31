@@ -104,6 +104,8 @@ public class GGEP {
     public static final String GGEP_HEADER_LARGE_FILE = "LF";
     /** The prefix of the extention header (key) indicating support for partial results */
     public static final String GGEP_HEADER_PARTIAL_RESULT_PREFIX = "PR";
+    /** The extension header (key) to determine if the encoded ranges are unverified */
+    public static final String GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED = "PRU";
     
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;

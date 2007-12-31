@@ -409,17 +409,17 @@ public class VerifyingFile {
     }
     
     /**
-     * @return a clone of the verified IntervalSet.
+     * @return the verified IntervalSet.
      */
     public synchronized IntervalSet getVerifiedIntervalSet() {
-        return verifiedBlocks.clone();
+        return verifiedBlocks;
     }
     
     /**
-     * @return a clone of the partial IntervalSet.
+     * @return the partial IntervalSet.
      */
     public synchronized IntervalSet getPartialIntervalSet() {
-        return partialBlocks.clone();
+        return partialBlocks;
     }
     
     /**

@@ -85,6 +85,9 @@ public class Response {
     
     /** Ranges carried in this response, null if none */
     private final IntervalSet ranges;
+    
+    /** If the ranges carried in this response are verified */
+    private final boolean verified;
 
 
     /**
@@ -112,7 +115,8 @@ public class Response {
 					 int incomingNameByteArraySize, Set<? extends URN> urns, 
 					 LimeXMLDocument doc,
 					 Set<? extends IpPort> alternateLocations,
-					 long creationTime, byte[] extensions, IntervalSet ranges) {
+					 long creationTime, byte[] extensions, IntervalSet ranges, 
+					 boolean verified) {
         
                 
         if( (index & 0xFFFFFFFF00000000L)!=0 )
@@ -154,6 +158,7 @@ public class Response {
 
 		this.document = doc;
         this.ranges = ranges;
+        this.verified = verified;
     }
   
     /**
@@ -280,6 +285,10 @@ public class Response {
     
     public IntervalSet getRanges() {
         return ranges;
+    }
+    
+    public boolean isVerified() {
+        return verified;
     }
     
     /**

@@ -195,7 +195,7 @@ public class KeywordFilterTest extends BaseTestCase {
         long creationTime = 0;
         byte[] extensions = null;
         
-        qrResponse = new Response(index,size,response, -1, emptyurns, emptyDoc, alternateLocations, creationTime, extensions,null);
+        qrResponse = new Response(index,size,response, -1, emptyurns, emptyDoc, alternateLocations, creationTime, extensions,null, false);
                      
         /*
          * add Response to Response List

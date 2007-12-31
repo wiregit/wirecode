@@ -669,7 +669,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false);
         addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.
@@ -711,7 +711,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false);
         addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.
@@ -914,6 +914,43 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals(1,s.getNumberOfIntervals());
         assertEquals(1024 * 101, s.getSize());
         assertTrue(s.contains(r));
+        assertTrue(read.isVerified());
+    }
+    
+    public void testUnverifiedIntervals() throws Exception {
+        // response with two urns
+        UrnSet set = new UrnSet();
+        set.add(UrnHelper.SHA1);
+        set.add(UrnHelper.TTROOT);
+        
+        // a verifying file with some stuff verified
+        VerifyingFileFactory vfactory = injector.getInstance(VerifyingFileFactory.class);
+        VerifyingFile vf = vfactory.createVerifyingFile(1024*1024);
+        Range r = Range.createRange(0,1024 * 101 - 1);
+        IntervalSet partial = new IntervalSet();
+        partial.add(r);
+        PrivilegedAccessor.setValue(vf,"partialBlocks",partial);
+        
+        
+        IncompleteFileDesc ifd = new IncompleteFileDesc(new File("a"),set,11,"a",1024 * 1024,vf);
+        Response resp = responseFactoryImpl.createResponse(ifd);
+        assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
+        assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
+        IntervalSet s = resp.getRanges();
+        assertEquals(1,s.getNumberOfIntervals());
+        assertEquals(1024 * 101, s.getSize());
+        assertTrue(s.contains(r));
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resp.writeToStream(baos);
+        byte [] data = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        Response read = responseFactoryImpl.createFromStream(bais);
+        s = read.getRanges();
+        assertEquals(1,s.getNumberOfIntervals());
+        assertEquals(1024 * 101, s.getSize());
+        assertTrue(s.contains(r));
+        assertFalse(read.isVerified());
     }
     
     private void assertResponseParsingFails(Response r) throws Exception {

@@ -98,14 +98,16 @@ public class ResponseFactoryImpl implements ResponseFactory {
      */
     public Response createResponse(FileDesc fd) {
         IntervalSet ranges = null;
+        boolean verified = false;
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            ranges = ifd.getResponseRanges();
+            ranges = new IntervalSet();
+            verified = ifd.loadResponseRanges(ranges);
         }
         
         GGEPContainer container = new GGEPContainer(getAsIpPorts(altLocManager
                 .getDirect(fd.getSHA1Urn())), creationTimeCache.get()
-                .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize(), ranges);
+                .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize(), ranges, verified);
 
         return createResponse(fd.getIndex(), fd.getFileSize(),
                 fd.getFileName(), -1, fd.getUrns(), null, container, null);
@@ -218,7 +220,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (size <= Integer.MAX_VALUE)
                 ggepData = GGEPContainer.EMPTY;
             else // large filesizes require GGEP now
-                ggepData = new GGEPContainer(null, -1L, size, null);
+                ggepData = new GGEPContainer(null, -1L, size, null, false);
         }
 
         // build up extensions if it wasn't already!
@@ -226,7 +228,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             extensions = createExtBytes(urns, ggepData, size);
 
         return new Response(index, size, name, incomingNameByteArraySize, urns, doc,
-                ggepData.locations, ggepData.createTime, extensions, ggepData.ranges);
+                ggepData.locations, ggepData.createTime, extensions, ggepData.ranges, ggepData.verified);
     }
     
     private void checkFilename(String name) throws IOException {
@@ -430,8 +432,11 @@ public class ResponseFactoryImpl implements ResponseFactory {
         if (ggep.size64 > Integer.MAX_VALUE && ggep.size64 <= MAX_FILE_SIZE)
             info.put(GGEP.GGEP_HEADER_LARGE_FILE, ggep.size64);
         
-        if (ggep.ranges != null)
+        if (ggep.ranges != null) {
             IntervalEncoder.encode(size, info, ggep.ranges);
+            if (!ggep.verified)
+                info.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
+        }
 
         info.write(out);
     }
@@ -482,15 +487,18 @@ public class ResponseFactoryImpl implements ResponseFactory {
             }
         }
         
+        boolean verified = false;
         IntervalSet ranges = null;
         try {
             ranges = IntervalEncoder.decode(size64,ggep);
+            verified = !ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
         } catch (BadGGEPPropertyException ignore){}
+        
         
         if (locations == null && createTime == -1 && size64 <= Integer.MAX_VALUE && ranges == null)
             return GGEPContainer.EMPTY;
         
-        return new GGEPContainer(locations, createTime, size64, ranges);
+        return new GGEPContainer(locations, createTime, size64, ranges, verified);
     }
 
     /**
@@ -544,12 +552,13 @@ public class ResponseFactoryImpl implements ResponseFactory {
         final long size64;
         static final GGEPContainer EMPTY = new GGEPContainer();
         final IntervalSet ranges;
+        final boolean verified;
 
         private GGEPContainer() {
-            this(null, -1, 0, null);
+            this(null, -1, 0, null, false);
         }
 
-        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges) {
+        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges, boolean verified) {
             if (locs == null)
                 locations = Collections.emptySet();
             else
@@ -557,6 +566,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             createTime = create;
             this.size64 = size64;
             this.ranges = ranges;
+            this.verified = verified;
         }
 
         boolean isEmpty() {
