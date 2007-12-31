@@ -58,6 +58,10 @@ public class IntervalEncoder {
         availableSpace = addIfSpace(shortsB,g,2,availableSpace);
         availableSpace = addIfSpace(b24B,g,3,availableSpace);
         addIfSpace(intsB,g,4,availableSpace);
+        
+        // special case - for an empty interval set we add an extention
+        if (bytes.size() + shorts.size() + b24.size() + ints.size() == 0)
+            g.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+"0");
     }
     
     /**
@@ -81,14 +85,22 @@ public class IntervalEncoder {
         return available - toAdd.length;
     }
     
+    /**
+     * @return an IntervalSet contained in this GGEP.  Null if none.
+     */
     public static IntervalSet decode(long size, GGEP ggep) throws BadGGEPPropertyException{
-        IntervalSet ret = new IntervalSet();
+        if (ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+"0"))
+            return new IntervalSet();
+        IntervalSet ret = null;
         for (int i = 1; i <= 4; i++ ) {
             String key = GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+i;
             if (ggep.hasKey(key)) {
                 byte [] b = ggep.get(key);
                 if (b == null)
                     continue;
+                
+                if (ret == null)
+                    ret = new IntervalSet();
 
                 // is data valid?
                 if (b.length % i != 0)

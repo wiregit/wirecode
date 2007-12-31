@@ -19,6 +19,17 @@ public class IntervalEncoderTest extends LimeTestCase {
         return buildTestSuite(IntervalEncoderTest.class);
     }
     
+    /** 
+     * tests that empty interval sets are not the same as non-existent ones
+     */
+    public void testEmptyAndNone() throws Exception {
+        GGEP g = new GGEP();
+        assertNull(IntervalEncoder.decode(1024 * 1024L, g));
+        IntervalSet s = new IntervalSet();
+        IntervalEncoder.encode(1024 * 1024L, g, s);
+        assertNotNull(IntervalEncoder.decode(1024 * 1024L, g));
+    }
+    
     public void testEncode() throws Exception {
         SharingSettings.MAX_PARTIAL_ENCODING_SIZE.setValue(40);
         GGEP g = new GGEP();
