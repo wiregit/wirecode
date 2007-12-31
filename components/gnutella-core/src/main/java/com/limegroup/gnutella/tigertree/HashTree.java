@@ -90,6 +90,11 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      */
     private transient int _nodeSize;
     
+    /**
+     * The root urn
+     */
+    private final URN root;
+    
     @Inject
     static Provider<HashTreeNodeManager> hashTreeNodeManager;
     
@@ -100,6 +105,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         FILE_SIZE = -1;
         DEPTH = -1;
         THEX_URI = null;
+        root = null;
     }
 
     /**
@@ -124,6 +130,11 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         assert(NODES.size() * (long)nodeSize >= fileSize);
         hashTreeNodeManager.get().register(this, allNodes);
         _nodeSize = nodeSize;
+        URN urn = null;
+        try  {
+            urn = URN.createTTRootFromBytes(ROOT_HASH);
+        } catch (IOException notTiger){}
+        root = urn;
     }
     
     /**
@@ -376,6 +387,14 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     public byte[] getRootHashBytes() {
         return ROOT_HASH;
     }
+    
+    /**
+     * @return an URN object with the root hash
+     */
+    public URN getTTRootUrn() {
+        return root;
+    }
+    
     
     /**
      * @return String the THEX_URI.

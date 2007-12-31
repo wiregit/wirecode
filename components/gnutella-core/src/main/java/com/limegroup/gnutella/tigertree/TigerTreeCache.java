@@ -186,7 +186,7 @@ public final class TigerTreeCache {
      *            the <tt>HashTree</tt>
      */
     public static synchronized void addHashTree(URN sha1, HashTree tree) {
-        URN root = URN.createTTRootUrn(tree.getRootHash());
+        URN root = tree.getTTRootUrn();
         addRoot(sha1, root);
         if (tree.isGoodDepth()) {
             ROOT_MAP.put(sha1, root);
@@ -224,7 +224,7 @@ public final class TigerTreeCache {
         TREE_MAP = new HashMap<URN,HashTree>(m.size());
         for (URN urn : m.keySet()) {
             HashTree tree = m.get(urn);
-            URN root = URN.createTTRootUrn(tree.getRootHash());
+            URN root = tree.getTTRootUrn();
             ROOT_MAP.put(urn, root);
             TREE_MAP.put(root,tree);
         }

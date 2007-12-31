@@ -2305,7 +2305,7 @@ public class ManagedDownloader extends AbstractDownloader
             if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
                 tigerTreeCache.get(); // instantiate it. 
                 TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
-                return URN.createTTRootUrn(commonOutFile.getHashTree().getRootHash());
+                return commonOutFile.getHashTree().getTTRootUrn();
             }
             return null;
         }
@@ -3033,7 +3033,7 @@ public class ManagedDownloader extends AbstractDownloader
         
         if (set && tree != null) { // warning?
             URN sha1 = getSHA1Urn();
-            URN ttroot = URN.createTTRootUrn(tree.getRootHash());
+            URN ttroot = tree.getTTRootUrn();
             tigerTreeCache.get();
             TigerTreeCache.addRoot(sha1, ttroot);
             synchronized(fileManager) {
