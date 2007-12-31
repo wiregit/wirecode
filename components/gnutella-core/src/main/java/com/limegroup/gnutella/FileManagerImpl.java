@@ -1366,23 +1366,21 @@ public abstract class FileManagerImpl implements FileManager {
                         fd = createFileDesc(file, urns, fileIndex);
                     }
                 }
-                    
-                // try loading the fd so we can check the LimeXML info
-                if(fd != null) {
-                    loadFile(fd, file, metadata, urns);
-                } else {
-                    // If URNs was empty, or loading failed, notify...
+		        
+		        if(fd == null) {
+    		        // If URNs was empty, or loading failed, notify...
                     callback.handleFileEvent(new FileManagerEvent(FileManagerImpl.this, addFileType.getFailureType(), file));
                     return;
-                }
+		        }
+                    
+                // try loading the fd so we can check the LimeXML info
+                loadFile(fd, file, metadata, urns);
 
                 // check LimeXML to determine if is a store file
-                if(isStoreXML(fd.getXMLDocument())){ 
+                if (isStoreXML(fd.getXMLDocument())) {
                     addStoreFile(file, urns, addFileType, notify, callback);
-                }
-                // if a shared request
-                else if( addFileType == AddType.ADD_SHARE ){ 
-                     addSharedFile(file, fd, urns, addFileType, notify, callback);
+                } else if (addFileType == AddType.ADD_SHARE) {
+                    addSharedFile(file, fd, urns, addFileType, notify, callback);
                 }
                 
                 boolean finished = false;

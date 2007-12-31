@@ -22,6 +22,7 @@ import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.FileManagerImpl;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileManagerEvent.Type;
@@ -412,9 +413,10 @@ public class MetaFileManager extends FileManagerImpl {
                 res = fileManagerController.createPureMetadataResponse();
             } else { // meta-data about a specific file
                 FileDesc fd = getFileDescForFile(file);
-                if (fd == null) {
-                    // if fd is null, MetaFileManager is out of synch with
-                    // FileManager -- this is bad.
+                if (fd == null || isStoreFile(fd.getFile()) || fd instanceof IncompleteFileDesc) {
+                    // fd == null is bad -- would mean MetaFileManager is out of sync.
+                    // fd isStoreFile is not terrible, but can safeguard against responses here
+                    // fd incomplete should never happen, but apparently is somehow...
                     continue;
                 } else { // we found a file with the right name
                     res = fileManagerController.createResponse(fd);
