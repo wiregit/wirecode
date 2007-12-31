@@ -1109,6 +1109,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         //  Overridden methods do nothing
         public void send(Message m) {}
         public void shutdown() {}
+        public Object inspect() { return "NullRunner"; }
     }
     
     private static class ConnectionListener implements ConnectionLifecycleListener {
