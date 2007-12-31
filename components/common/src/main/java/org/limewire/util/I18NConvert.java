@@ -18,7 +18,7 @@ public class I18NConvert {
     private final static I18NConvert _instance = new I18NConvert();
     
     /** the class that handles the conversion */
-    private AbstractI18NConverter _convertDelegator;
+    private final AbstractI18NConverter _convertDelegator;
 
     /**
      * Empty constructor so nothing else can instantiate it.
