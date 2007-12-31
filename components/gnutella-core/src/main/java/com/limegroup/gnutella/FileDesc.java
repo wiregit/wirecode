@@ -200,6 +200,19 @@ public class FileDesc implements StringLookup {
     }
 
 	/**
+	 * @return the TTROOT URN from the set of urns.
+	 */
+	public URN getTTROOTUrn() {
+	    for(URN urn : URNS) {
+	        if(urn.isTTRoot())
+	            return urn;
+	    }
+	    
+	    // this can happen.
+	    return null;
+	}
+	
+	/**
 	 * Returns the <tt>File</tt> instance for this <tt>FileDesc</tt>.
 	 *
 	 * @return the <tt>File</tt> instance for this <tt>FileDesc</tt>

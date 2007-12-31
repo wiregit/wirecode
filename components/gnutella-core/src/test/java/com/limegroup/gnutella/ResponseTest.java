@@ -20,6 +20,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -35,6 +36,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -669,7 +671,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false, null);
         addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.
@@ -711,7 +713,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals("didn't filter out extras", 10, endpoints.size());
         
         // Add them to the output stream as a GGEP block.
-        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false);
+        ResponseFactoryImpl.GGEPContainer gc = new ResponseFactoryImpl.GGEPContainer(endpoints, -1, 0, null, false, null);
         addGGEP(baos, gc, 0);
         
         // See if we can correctly read the GGEP block.
@@ -953,6 +955,66 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertFalse(read.isVerified());
     }
     
+    public void testTTROOTInGGEP() throws Exception {
+        MessageSettings.TTROOT_IN_GGEP.setValue(true);
+        // response with two urns
+        UrnSet set = new UrnSet();
+        set.add(UrnHelper.SHA1);
+        set.add(UrnHelper.TTROOT);
+        File f = new File("a") {
+            @Override
+            public long length() {
+                return 1;
+            }
+        };
+        FileDesc fd = new FileDesc(f, set, 1);
+        Response resp = responseFactoryImpl.createResponse(fd);
+        assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
+        assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resp.writeToStream(baos);
+        byte [] data = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        Response read = responseFactoryImpl.createFromStream(bais);
+        assertTrue(read.getUrns().contains(UrnHelper.SHA1));
+        assertTrue(read.getUrns().contains(UrnHelper.TTROOT));
+
+        // go through the data, make sure its not in HUGE
+        String s = StringUtils.getASCIIString(data);
+        assertFalse(s.toLowerCase().contains("ttroot"));
+    }
+
+    public void testTTROOTInHUGE() throws Exception {
+        MessageSettings.TTROOT_IN_GGEP.setValue(false);
+        // response with two urns
+        UrnSet set = new UrnSet();
+        set.add(UrnHelper.SHA1);
+        set.add(UrnHelper.TTROOT);
+        File f = new File("a") {
+            @Override
+            public long length() {
+                return 1;
+            }
+        };
+        FileDesc fd = new FileDesc(f, set, 1);
+        Response resp = responseFactoryImpl.createResponse(fd);
+        assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
+        assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resp.writeToStream(baos);
+        byte [] data = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        Response read = responseFactoryImpl.createFromStream(bais);
+        assertTrue(read.getUrns().contains(UrnHelper.SHA1));
+        assertTrue(read.getUrns().contains(UrnHelper.TTROOT));
+
+        // go through the data, make sure its in HUGE
+        String s = StringUtils.getASCIIString(data);
+        assertTrue(s.toLowerCase().contains("ttroot"));
+    }
+
     private void assertResponseParsingFails(Response r) throws Exception {
         QueryReply qr = XMLDocFilterTest.createReply(r, 5555, new byte[] { 127, 0, 0, 1 }, queryReplyFactory, limeXMLDocumentHelper);
         try {

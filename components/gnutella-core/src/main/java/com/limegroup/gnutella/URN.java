@@ -279,8 +279,13 @@ public final class URN implements HTTPHeaderValue, Serializable {
      * @param ttroot a base32 encoded root of a hash tree
      * @return an URN object for that root
      */
-    public static URN createTTRootUrn(String ttroot) {
-        return new URN(Type.URN_NAMESPACE_ID+Type.TTROOT.getDescriptor()+ttroot, Type.TTROOT);
+    public static URN createTTRootUrn(String urnString) 
+    throws IOException {
+        String typeString = URN.getTypeString(urnString).toLowerCase(Locale.US);
+        if (typeString.indexOf(Type.TTROOT.getDescriptor()) == 4)
+            return new URN(urnString, Type.TTROOT);
+        else
+            throw new IOException("unsupported or malformed URN");
     }
     
 	/**
@@ -781,7 +786,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// insensitive)
         UrnSet ret = new UrnSet();
         URN sha1 = new URN(Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(md.digest()), Type.SHA1);
-        URN ttroot = createTTRootUrn(Base32.encode(tt.digest()));
+        URN ttroot = new URN(Type.URN_NAMESPACE_ID + Type.TTROOT.getDescriptor() + Base32.encode(tt.digest()), Type.TTROOT);
         ret.add(sha1);
         ret.add(ttroot);
         return ret;

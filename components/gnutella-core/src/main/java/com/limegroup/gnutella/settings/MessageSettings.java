@@ -43,4 +43,10 @@ public class MessageSettings extends LimeProps {
      */
     public static final StringSetting TRACKING_GUID = 
         FACTORY.createRemoteStringSetting("TRACKNG_GUID", "", "MessageSettings.trackingGUID");
+    
+    /**
+     * Whether ttroot urns should go in ggep instead of huge
+     */
+    public static final BooleanSetting TTROOT_IN_GGEP = 
+        FACTORY.createRemoteBooleanSetting("TTROOT_IN_GGEP", true, "MessageSettings.TTROOTInGGEP");
 }

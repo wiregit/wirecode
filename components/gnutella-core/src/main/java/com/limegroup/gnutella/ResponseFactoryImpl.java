@@ -38,6 +38,7 @@ import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.messages.IntervalEncoder;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -107,7 +108,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
         
         GGEPContainer container = new GGEPContainer(getAsIpPorts(altLocManager
                 .getDirect(fd.getSHA1Urn())), creationTimeCache.get()
-                .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize(), ranges, verified);
+                .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize(), ranges, 
+                verified, fd.getTTROOTUrn());
 
         return createResponse(fd.getIndex(), fd.getFileSize(),
                 fd.getFileName(), -1, fd.getUrns(), null, container, null);
@@ -183,6 +185,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
                 throw new IOException(" file too large " + ggep.size64);
             if (ggep.size64 > Integer.MAX_VALUE)
                 size = ggep.size64;
+            if (ggep.ttroot != null)
+                urns.add(ggep.ttroot);
 
             //changed to pass an additional parameter (baosByteArraySize) for the new response
             return createResponse(index, size, name, incomingNameByteArraySize, urns, doc, ggep, rawMeta);
@@ -220,7 +224,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (size <= Integer.MAX_VALUE)
                 ggepData = GGEPContainer.EMPTY;
             else // large filesizes require GGEP now
-                ggepData = new GGEPContainer(null, -1L, size, null, false);
+                ggepData = new GGEPContainer(null, -1L, size, null, false, null);
         }
 
         // build up extensions if it wasn't already!
@@ -334,12 +338,18 @@ public class ResponseFactoryImpl implements ResponseFactory {
                         .hasNext();) {
                     URN urn = iter.next();
                     assert urn != null : "Null URN";
+                    
+                    if (!urn.isSHA1() && MessageSettings.TTROOT_IN_GGEP.getValue()) 
+                        continue;
+                    
                     baos.write(urn.toString().getBytes());
                     // If there's another URN, add the separator.
                     if (iter.hasNext()) {
                         baos.write(EXT_SEPARATOR);
                     }
                 }
+                
+                assert !(ggep.isEmpty() && urns.size() > 1);
 
                 // If there's ggep data, write the separator.
                 if (!ggep.isEmpty())
@@ -413,7 +423,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
                 || (ggep.locations.size() == 0 && 
                         ggep.createTime <= 0 && 
                         ggep.size64 <= Integer.MAX_VALUE &&
-                        ggep.ranges == null))
+                        ggep.ranges == null &&
+                        ggep.ttroot == null))
             throw new IllegalArgumentException(
                     "null or empty locations and small size");
 
@@ -437,6 +448,9 @@ public class ResponseFactoryImpl implements ResponseFactory {
             if (!ggep.verified)
                 info.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
         }
+        
+        if (ggep.ttroot != null && MessageSettings.TTROOT_IN_GGEP.getValue())
+            info.put(GGEP.GGEP_HEADER_TTROOT,ggep.ttroot.getBytes());
 
         info.write(out);
     }
@@ -454,6 +468,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
         Set<? extends IpPort> locations = null;
         long createTime = -1;
         long size64 = size;
+        URN ttroot = null;
 
         // if the block has a ALTS value, get it, parse it,
         // and move to the next.
@@ -487,6 +502,14 @@ public class ResponseFactoryImpl implements ResponseFactory {
             }
         }
         
+        if (ggep.hasKey(GGEP.GGEP_HEADER_TTROOT)) {
+            try {
+                byte []tt = ggep.get(GGEP.GGEP_HEADER_TTROOT);
+                if (tt != null)
+                    ttroot = URN.createTTRootFromBytes(tt);
+            } catch (IOException bad){}
+        }
+        
         boolean verified = false;
         IntervalSet ranges = null;
         try {
@@ -495,10 +518,11 @@ public class ResponseFactoryImpl implements ResponseFactory {
         } catch (BadGGEPPropertyException ignore){}
         
         
-        if (locations == null && createTime == -1 && size64 <= Integer.MAX_VALUE && ranges == null)
+        if (locations == null && createTime == -1 && size64 <= Integer.MAX_VALUE && 
+                ranges == null & ttroot == null)
             return GGEPContainer.EMPTY;
         
-        return new GGEPContainer(locations, createTime, size64, ranges, verified);
+        return new GGEPContainer(locations, createTime, size64, ranges, verified, ttroot);
     }
 
     /**
@@ -553,12 +577,13 @@ public class ResponseFactoryImpl implements ResponseFactory {
         static final GGEPContainer EMPTY = new GGEPContainer();
         final IntervalSet ranges;
         final boolean verified;
+        final URN ttroot;
 
         private GGEPContainer() {
-            this(null, -1, 0, null, false);
+            this(null, -1, 0, null, false, null);
         }
 
-        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges, boolean verified) {
+        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges, boolean verified, URN ttroot) {
             if (locs == null)
                 locations = Collections.emptySet();
             else
@@ -567,11 +592,14 @@ public class ResponseFactoryImpl implements ResponseFactory {
             this.size64 = size64;
             this.ranges = ranges;
             this.verified = verified;
+            this.ttroot = ttroot;
+            assert ttroot == null || ttroot.isTTRoot();
         }
 
         boolean isEmpty() {
             return locations.isEmpty() && createTime <= 0
-                    && size64 <= Integer.MAX_VALUE && ranges == null;
+                    && size64 <= Integer.MAX_VALUE && ranges == null && 
+                    ttroot == null;
         }
     }
 }

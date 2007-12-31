@@ -110,7 +110,11 @@ public class HUGEExtension {
                                                       "UTF-8");
                         if (URN.isUrn(curExtStr)) {
                             // it's an URN to match, of form "urn:namespace:etc"
-                            URN urn = URN.createSHA1Urn(curExtStr);
+                            URN urn = null;
+                            if (curExtStr.toLowerCase().contains("sha1"))
+                                urn = URN.createSHA1Urn(curExtStr);
+                            else if (curExtStr.toLowerCase().contains("ttroot"))
+                                urn = URN.createTTRootUrn(curExtStr);
                             if(_urns == null) 
                                 _urns = new UrnSet();
                             _urns.add(urn);
