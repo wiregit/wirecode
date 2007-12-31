@@ -978,10 +978,10 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         Response read = responseFactoryImpl.createFromStream(bais);
         assertTrue(read.getUrns().contains(UrnHelper.SHA1));
-        assertTrue(read.getUrns().contains(UrnHelper.TTROOT));
+        assertFalse(read.getUrns().contains(UrnHelper.TTROOT));
 
         // go through the data, make sure its not in HUGE
-        String s = StringUtils.getASCIIString(data);
+        String s = StringUtils.getASCIIString(data).toLowerCase();
         assertFalse(s.toLowerCase().contains("ttroot"));
     }
 
@@ -1008,7 +1008,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         Response read = responseFactoryImpl.createFromStream(bais);
         assertTrue(read.getUrns().contains(UrnHelper.SHA1));
-        assertTrue(read.getUrns().contains(UrnHelper.TTROOT));
+        assertFalse(read.getUrns().contains(UrnHelper.TTROOT));
 
         // go through the data, make sure its in HUGE
         String s = StringUtils.getASCIIString(data);

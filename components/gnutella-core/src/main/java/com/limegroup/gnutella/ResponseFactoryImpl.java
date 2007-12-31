@@ -185,8 +185,6 @@ public class ResponseFactoryImpl implements ResponseFactory {
                 throw new IOException(" file too large " + ggep.size64);
             if (ggep.size64 > Integer.MAX_VALUE)
                 size = ggep.size64;
-            if (ggep.ttroot != null)
-                urns.add(ggep.ttroot);
 
             //changed to pass an additional parameter (baosByteArraySize) for the new response
             return createResponse(index, size, name, incomingNameByteArraySize, urns, doc, ggep, rawMeta);
