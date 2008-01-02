@@ -1,15 +1,29 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.io.ObjectInputStream.GetField;
+import java.util.concurrent.ScheduledExecutorService;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.DownloadCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
+import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnCache;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.QueryUtils;
 
 /**
@@ -20,10 +34,7 @@ import com.limegroup.gnutella.util.QueryUtils;
  * confused by the name; ManagedDownloader CAN resume from incomplete files,
  * but it is less strict about its choice of download.
  */
-public class ResumeDownloader extends ManagedDownloader 
-        implements Serializable {
-    /** Ensures backwards compatibility of the downloads.dat file. */
-    private static final long serialVersionUID = -4535935715006098724L;
+public class ResumeDownloader extends ManagedDownloader {
     
     /** The temporary file to resume to. */
     private volatile File _incompleteFile;
@@ -31,11 +42,6 @@ public class ResumeDownloader extends ManagedDownloader
     /** The name and size of the completed file, extracted from
      *  _incompleteFile. */
     private volatile String _name;
-    
-    /** The old size field.  Kept around for backwards-compatibility */
-    @Deprecated
-    @SuppressWarnings("unused")
-    private volatile int _size;
     
     /** The size of the file*/
     private volatile long _size64;
@@ -65,11 +71,26 @@ public class ResumeDownloader extends ManagedDownloader
      *  IncompleteFileManager.getCompletedName(incompleteFile)
      * @param size the size of the completed file, which MUST be the result of
      *  IncompleteFileManager.getCompletedSize(incompleteFile) */
-    ResumeDownloader(IncompleteFileManager incompleteFileManager,
-                            File incompleteFile,
-                            String name,
-                            long size, SaveLocationManager saveLocationManager) {
-        super( new RemoteFileDesc[0], incompleteFileManager, null, saveLocationManager);
+    ResumeDownloader(File incompleteFile, String name,
+            long size, SaveLocationManager saveLocationManager, DownloadManager downloadManager,
+            FileManager fileManager, IncompleteFileManager incompleteFileManager,
+            DownloadCallback downloadCallback, NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory, RequeryManagerFactory requeryManagerFactory,
+            QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
+            DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
+            ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
+            UrnCache urnCache, SavedFileManager savedFileManager,
+            VerifyingFileFactory verifyingFileFactory, DiskController diskController,
+            IPFilter ipFilter, ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
+            ApplicationServices applicationServices) throws SaveLocationException {
+        super(new RemoteFileDesc[0], null, null, name, false,
+                saveLocationManager, downloadManager, fileManager, incompleteFileManager,
+                downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
+                queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
+                contentManager, sourceRankerFactory, urnCache, savedFileManager,
+                verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
+                tigerTreeCache, applicationServices);
         if( incompleteFile == null )
             throw new NullPointerException("null incompleteFile");
         this._incompleteFile=incompleteFile;
@@ -84,11 +105,11 @@ public class ResumeDownloader extends ManagedDownloader
      * Overrides ManagedDownloader to ensure that progress is initially non-zero
      * and file previewing works.
      */
-    public void initialize(DownloadReferences downloadReferences) {
+    public void initialize() {
         if (_hash != null)
             downloadSHA1 = _hash;
         incompleteFile = _incompleteFile;
-        super.initialize(downloadReferences);
+        super.initialize();
         // Auto-activate the requeryManager if this was created
         // from clicking 'Resume' in the library (as opposed to
         // from being deserialized from disk).
@@ -126,10 +147,6 @@ public class ResumeDownloader extends ManagedDownloader
         return _size64;
     }
 
-    protected synchronized String getDefaultFileName() {
-        return _name.toString();
-    }
-
     /**
      * Overriden to unset deserializedFromDisk too.
      */
@@ -160,18 +177,5 @@ public class ResumeDownloader extends ManagedDownloader
             return queryRequestFactory.createQuery(queryName);
         else
             return queryRequestFactory.createQuery(queryName);
-    }
-    
-    private void readObject(ObjectInputStream stream)
-    throws IOException, ClassNotFoundException {
-        GetField gets = stream.readFields();
-        _hash = (URN)gets.get("_hash", null);
-        _name = (String) gets.get("_name", null);
-        _incompleteFile = (File)gets.get("_incompleteFile",null);
-        
-        // try to read the long size first, if not there read the int
-        _size64 = gets.get("_size64", -1L);
-        if (_size64 == -1L)
-            _size64 = gets.get("_size",0);
     }
 }

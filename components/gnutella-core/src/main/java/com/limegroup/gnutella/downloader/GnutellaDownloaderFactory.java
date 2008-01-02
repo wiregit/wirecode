@@ -11,25 +11,19 @@ import com.limegroup.gnutella.version.DownloadInformation;
 public interface GnutellaDownloaderFactory {
 
     public abstract ManagedDownloader createManagedDownloader(
-            RemoteFileDesc[] files, IncompleteFileManager ifc,
-            GUID originalQueryGUID, File saveDirectory, String fileName,
+            RemoteFileDesc[] files, GUID originalQueryGUID, File saveDirectory, String fileName,
             boolean overwrite) throws SaveLocationException;
 
-    public abstract ManagedDownloader createManagedDownloader(
-            RemoteFileDesc[] files, IncompleteFileManager ifc,
-            GUID originalQueryGUID);
-
     public abstract MagnetDownloader createMagnetDownloader(
-            IncompleteFileManager ifm, MagnetOptions magnet, boolean overwrite,
+            MagnetOptions magnet, boolean overwrite,
             File saveDir, String fileName) throws SaveLocationException;
 
     public abstract InNetworkDownloader createInNetworkDownloader(
-            IncompleteFileManager incompleteFileManager,
             DownloadInformation info, File dir, long startTime)
             throws SaveLocationException;
 
     public abstract ResumeDownloader createResumeDownloader(
-            IncompleteFileManager incompleteFileManager, File incompleteFile,
-            String name, long size);
+            File incompleteFile,
+            String name, long size) throws SaveLocationException;
 
 }

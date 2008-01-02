@@ -44,7 +44,6 @@ import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -53,7 +52,6 @@ import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
-import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.downloader.AbstractDownloader.DownloaderType;
@@ -108,13 +106,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
      * how many downloaders are active
      */
     private int storeDownloadCount = 0;
-
-    /** This will hold the MDs that have sent requeries.
-     *  When this size gets too big - meaning bigger than active.size(), then
-     *  that means that all MDs have been serviced at least once, so you can
-     *  clear it and start anew....
-     */
-    private List<AbstractDownloader> querySentMDs = new ArrayList<AbstractDownloader>();
     
     /**
      * The number of times we've been bandwidth measures
@@ -136,7 +127,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     private Runnable _waitingPump;
     
     private final NetworkManager networkManager;
-    private final DownloadReferencesFactory downloadReferencesFactory;
     private final DownloadCallback innetworkCallback;
     private final BTDownloaderFactory btDownloaderFactory;
     private final Provider<DownloadCallback> downloadCallback;
@@ -149,7 +139,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
     @Inject
     public DownloadManagerImpl(NetworkManager networkManager,
-            DownloadReferencesFactory downloadReferencesFactory,
             @Named("inNetwork") DownloadCallback innetworkCallback,
             BTDownloaderFactory btDownloaderFactory,
             Provider<DownloadCallback> downloadCallback,
@@ -160,7 +149,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
             GnutellaDownloaderFactory gnutellaDownloaderFactory,
             PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
         this.networkManager = networkManager;
-        this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
         this.btDownloaderFactory = btDownloaderFactory;
         this.downloadCallback = downloadCallback;
@@ -582,13 +570,10 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
         //and (2) does not matter since this' monitor is held.  (The download
         //thread must obtain the monitor to acquire a queue slot.)
         try {
-            for (AbstractDownloader downloader : buf) {                
-                // ignore RequeryDownloaders -- they're legacy
-                if(downloader instanceof RequeryDownloader)
-                    continue;
+            for (AbstractDownloader downloader : buf) {
                 
                 waiting.add(downloader);
-                downloader.initialize(downloadReferencesFactory.create(downloader));
+                downloader.initialize();
                 callback(downloader).addDownload(downloader);
             }
             return true;
@@ -677,7 +662,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader =
-            gnutellaDownloaderFactory.createManagedDownloader(files, incompleteFileManager,
+            gnutellaDownloaderFactory.createManagedDownloader(files, 
                 queryGUID, saveDir, fileName, overwrite);
 
         initializeDownload(downloader);
@@ -720,7 +705,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
 
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = 
-            gnutellaDownloaderFactory.createMagnetDownloader(incompleteFileManager, magnet,
+            gnutellaDownloaderFactory.createMagnetDownloader( magnet,
                 overwrite, saveDir, fileName);
         initializeDownload(downloader);
         return downloader;
@@ -802,7 +787,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
             String name=IncompleteFileManager.getCompletedName(incompleteFile);
             long size= IncompleteFileManager.getCompletedSize(incompleteFile);
-            downloader = gnutellaDownloaderFactory.createResumeDownloader(incompleteFileManager,
+            downloader = gnutellaDownloaderFactory.createResumeDownloader(
                                               incompleteFile,
                                               name,
                                               size);
@@ -857,7 +842,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
         
         incompleteFileManager.purge();
         ManagedDownloader d = gnutellaDownloaderFactory.createInNetworkDownloader(
-                incompleteFileManager, info, dir, now);
+                info, dir, now);
         initializeDownload(d);
         return d;
     }
@@ -912,7 +897,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
      * 4) Writes the new snapshot out to disk.
      */
     private void initializeDownload(AbstractDownloader md) {
-        md.initialize(downloadReferencesFactory.create(md));
+        md.initialize();
         waiting.add(md);
         callback(md).addDownload(md);
         backgroundExecutor.execute(new Runnable() {
@@ -1116,9 +1101,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
      * If ser is true, also writes a snapshot to the disk.
      */
     private void cleanupCompletedDownload(AbstractDownloader dl, boolean ser) {
-        synchronized(this) {
-            querySentMDs.remove(dl);
-        }
         dl.finish();
         if (dl.getQueryGUID() != null)
             messageRouter.get().downloadFinished(dl.getQueryGUID());
@@ -1136,44 +1118,8 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#sendQuery(com.limegroup.gnutella.downloader.ManagedDownloader, com.limegroup.gnutella.messages.QueryRequest)
      */
-    public synchronized boolean sendQuery(ManagedDownloader requerier, 
-                                          QueryRequest query) {
-        //NOTE: this algorithm provides global but not local fairness.  That is,
-        //if two requeries x and y are competing for a slot, patterns like
-        //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
-        if(LOG.isTraceEnabled())
-            LOG.trace("DM.sendQuery():" + query.getQuery());
-        assert waiting.contains(requerier) : "Unknown or non-waiting MD trying to send requery.";
-
-        //Disallow if global time limits exceeded.  These limits don't apply to
-        //queries that are requeries.
-// Requeries are disabled elsewhere.  This code should be reworked when we reenable.
-//        boolean isRequery=GUID.isLimeRequeryGUID(query.getGUID());
-//        long elapsed=System.currentTimeMillis()-lastGnutellaRequeryTime;
-//        if (isRequery && elapsed <= TIME_BETWEEN_GNUTELLA_REQUERIES) {
-//            return false;
-//        }
-
-        //Has everyone had a chance to send a query?  If so, clear the slate.
-        if (querySentMDs.size() >= waiting.size()) {
-            LOG.trace("DM.sendQuery(): reseting query sent queue");
-            querySentMDs.clear();
-        }
-
-        //If downloader has already sent a query, give someone else a turn.
-        if (querySentMDs.contains(requerier)) {
-            // nope, sorry, must lets others go first...
-            if(LOG.isWarnEnabled())
-                LOG.warn("DM.sendQuery(): out of turn:" + query.getQuery());
-            return false;
-        }
-        
-        if(LOG.isTraceEnabled())
-            LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
-        querySentMDs.add(requerier);                  
-//        lastGnutellaRequeryTime = System.currentTimeMillis();
+    public void sendQuery(QueryRequest query) {
         messageRouter.get().sendDynamicQuery(query);
-        return true;
     }
 
     /* (non-Javadoc)

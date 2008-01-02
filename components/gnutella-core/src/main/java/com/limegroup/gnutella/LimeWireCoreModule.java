@@ -100,8 +100,6 @@ import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
 import com.limegroup.gnutella.downloader.AutoDownloadDetails;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactoryImpl;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
@@ -259,7 +257,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
         bind(RequeryManagerFactory.class).to(RequeryManagerFactoryImpl.class);
-        bind(DownloadReferencesFactory.class).to(DownloadReferencesFactoryImpl.class);
         bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
         bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImpl.class);
         bind(UDPSelectorProviderFactory.class).to(DefaultUDPSelectorProviderFactory.class);

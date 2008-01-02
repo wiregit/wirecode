@@ -2,23 +2,38 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.DownloadCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
+import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.QueryUtils;
 
 /**
@@ -43,14 +58,11 @@ import com.limegroup.gnutella.util.QueryUtils;
  * simply make a HEAD request to get the content length before starting the
  * download.  
  */
-public class MagnetDownloader extends ManagedDownloader implements Serializable {
+public class MagnetDownloader extends ManagedDownloader {
 
     private static final Log LOG = LogFactory.getLog(MagnetDownloader.class);
-
-    /** Prevent versioning problems. */
-    private static final long serialVersionUID = 9092913030585214105L;
-
-	private static final transient String MAGNET = "MAGNET"; 
+    
+	private static final String MAGNET = "MAGNET"; 
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
@@ -71,24 +83,38 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
-    MagnetDownloader(IncompleteFileManager ifm,
-							MagnetOptions magnet,
-							boolean overwrite,
-                            File saveDir,
-                            String fileName, SaveLocationManager saveLocationManager) throws SaveLocationException {
-        //Initialize superclass with no locations.  We'll add the default
-        //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null, saveDir, 
-			  checkMagnetAndExtractFileName(magnet, fileName), overwrite, saveLocationManager);
+    MagnetDownloader(MagnetOptions magnet, boolean overwrite, File saveDir, String fileName,
+            SaveLocationManager saveLocationManager, DownloadManager downloadManager,
+            FileManager fileManager, IncompleteFileManager incompleteFileManager,
+            DownloadCallback downloadCallback, NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory, RequeryManagerFactory requeryManagerFactory,
+            QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
+            DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
+            ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
+            UrnCache urnCache, SavedFileManager savedFileManager,
+            VerifyingFileFactory verifyingFileFactory, DiskController diskController,
+            IPFilter ipFilter, ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
+            ApplicationServices applicationServices) throws SaveLocationException {
+        // Initialize superclass with no locations. We'll add the default
+        // location when the download control thread calls tryAllDownloads.
+        super(new RemoteFileDesc[0], null, saveDir,
+                checkMagnetAndExtractFileName(magnet, fileName), overwrite, saveLocationManager,
+                downloadManager, fileManager, incompleteFileManager, downloadCallback,
+                networkManager, alternateLocationFactory, requeryManagerFactory, queryRequestFactory,
+                onDemandUnicaster, downloadWorkerFactory, altLocManager, contentManager,
+                sourceRankerFactory, urnCache, savedFileManager, verifyingFileFactory,
+                diskController, ipFilter, backgroundExecutor, messageRouter, tigerTreeCache,
+                applicationServices);
         synchronized(this) {
             propertiesMap.put(MAGNET, magnet);
         }
     }
     
-    public void initialize(DownloadReferences downloadReferences) {
+    public void initialize() {
         assert (getMagnet() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
-        super.initialize(downloadReferences);
+        super.initialize();
     }
 
 	private synchronized MagnetOptions getMagnet() {
@@ -127,36 +153,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         return super.initializeDownload();
     }
     
-    /**
-     * Overrides ManagedDownloader to ensure that the default location is tried.
-     *
-    protected int performDownload() {     
-
-		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
-			//Send HEAD request to default location (if present)to get its size.
-			//This can block, so it must be done here instead of in constructor.
-			//See class overview and ManagedDownloader.tryAllDownloads.
-            try {
-                RemoteFileDesc defaultRFD = 
-                    createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
-                
-                //Add the faked up location before starting download. Note that 
-                //we must force ManagedDownloader to accept this RFD in case 
-                //it has no hash and a name that doesn't match the search 
-                //keywords.
-                super.addDownloadForced(defaultRFD,true);
-                
-            }catch(IOException badRFD) {
-                if(LOG.isWarnEnabled())
-                    LOG.warn("Ignoring magnet url: " + _defaultURLs[i]);
-            }
-		}
-
-        //Start the downloads for real.
-        return super.performDownload();
-		}*/
-
-
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
@@ -252,33 +248,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			initPropertiesMap(rfd);
 		return super.addDownloadForced(rfd, cache);
 	}
-
-	/**
-	 * Creates a magnet downloader object when converting from the old 
-	 * downloader version.
-	 * 
-	 * @throws IOException when the created magnet is not downloadable
-	 */
-	private void readObject(ObjectInputStream stream)
-	throws IOException, ClassNotFoundException {
-        MagnetOptions magnet = getMagnet();
-		if (magnet == null) {
-			ObjectInputStream.GetField fields = stream.readFields();
-			String textQuery = (String) fields.get("_textQuery", null);
-			URN urn = (URN) fields.get("_urn", null);
-			String fileName = (String) fields.get("_filename", null);
-			String[] defaultURLs = (String[])fields.get("_defaultURLs", null);
-			magnet = MagnetOptions.createMagnet(textQuery, fileName, urn, defaultURLs);
-			if (!magnet.isDownloadable()) {
-				throw new IOException("Old undownloadable magnet");
-			}
-			propertiesMap.put(MAGNET, magnet);
-		}
-        
-        if (propertiesMap.get(DEFAULT_FILENAME) == null) 
-            propertiesMap.put(DEFAULT_FILENAME, magnet.getFileNameForSaving());
-        
-    }
 
     /**
 	 * Only allow requeries when <code>downloadSHA1</code> is not null.

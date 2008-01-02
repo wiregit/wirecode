@@ -98,6 +98,12 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 
         return ret.toString();
     }
+
+    public boolean hasVerifiedRanges() {
+        synchronized(_verifyingFile) {
+            return !_verifyingFile.getVerifiedBlocksAsList().isEmpty();
+        }
+    }
     
     /**
      * @param dest where to load the ranges

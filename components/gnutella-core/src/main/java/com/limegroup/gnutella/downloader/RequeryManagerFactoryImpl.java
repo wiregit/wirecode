@@ -31,8 +31,8 @@ public class RequeryManagerFactoryImpl implements RequeryManagerFactory {
      * @see com.limegroup.gnutella.downloader.RequeryManagerFactory#createRequeryManager(com.limegroup.gnutella.downloader.ManagedDownloader)
      */
     public RequeryManager createRequeryManager(
-            ManagedDownloader managedDownloader) {
-        return new RequeryManager(managedDownloader, downloadManager.get(),
+            RequeryListener requeryListener) {
+        return new RequeryManager(requeryListener, downloadManager.get(),
                 altLocFinder.get(), dhtManager.get(), connectionServices);
     }
 }

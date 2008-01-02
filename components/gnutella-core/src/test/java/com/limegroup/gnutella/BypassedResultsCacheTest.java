@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
@@ -131,17 +130,18 @@ public class BypassedResultsCacheTest extends BaseTestCase {
         
         @Inject
         public GUIDActiveDownloadManager(NetworkManager networkManager,
-                 DownloadReferencesFactory downloadReferencesFactory,
-                 @Named("inNetwork")DownloadCallback innetworkCallback,
-                 BTDownloaderFactory btDownloaderFactory,
-                 Provider<DownloadCallback> downloadCallback,
-                 Provider<MessageRouter> messageRouter,
-                 @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor,
-                 Provider<TorrentManager> torrentManager,
-                 Provider<PushDownloadManager> pushDownloadManager,
-                 GnutellaDownloaderFactory gnutellaDownloaderFactory,
-                 PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
-            super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory,
+
+                @Named("inNetwork") DownloadCallback innetworkCallback,
+                BTDownloaderFactory btDownloaderFactory,
+                Provider<DownloadCallback> downloadCallback,
+                Provider<MessageRouter> messageRouter,
+                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                Provider<TorrentManager> torrentManager,
+                Provider<PushDownloadManager> pushDownloadManager,
+                BrowseHostHandlerManager browseHostHandlerManager,
+                GnutellaDownloaderFactory gnutellaDownloaderFactory,
+                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+            super(networkManager, innetworkCallback, btDownloaderFactory,
                     downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
                     gnutellaDownloaderFactory, purchasedDownloaderFactory);
         }

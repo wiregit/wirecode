@@ -12,7 +12,6 @@ import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
@@ -283,17 +282,11 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * Attempts to send the given requery to provide the given downloader with 
      * more sources to download.  May not actually send the requery if it doing
      * so would exceed the maximum requery rate.
-     * 
      * @param query the requery to send, which should have a marked GUID.
      *  Queries are subjected to global rate limiting iff they have marked 
      *  requery GUIDs.
-     * @param requerier the downloader requesting more sources.  Needed to 
-     *  ensure fair requery scheduling.  This MUST be in the waiting list,
-     *  i.e., it MUST NOT have a download slot.
-     * @return true iff the query was actually sent.  If false is returned,
-     *  the downloader should attempt to send the query later.
      */
-    public boolean sendQuery(ManagedDownloader requerier, QueryRequest query);
+    public void sendQuery(QueryRequest query);
 
     /** Calls measureBandwidth on each uploader. */
     public void measureBandwidth();
