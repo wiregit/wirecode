@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.db.DHTValue;
@@ -194,7 +195,7 @@ public class MessageInputStream extends DataInputStream {
         SocketAddress addr = readSocketAddress();
         
         if (addr == null) {
-            throw new UnknownHostException("SocketAddress is null");
+            throw new UnknownHostException("SocketAddress is "+addr);
         }
         
         return ContactFactory.createUnknownContact(vendor, version, nodeId, addr);
@@ -243,11 +244,13 @@ public class MessageInputStream extends DataInputStream {
      */
     public InetSocketAddress readSocketAddress() throws IOException {
         InetAddress addr = readInetAddress();
-        if (addr == null) {
+        if (addr == null || !NetworkUtils.isValidAddress(addr)) {
             return null;
         }
         
         int port = readPort();
+        if (!NetworkUtils.isValidPort(port))
+            return null;
         return new InetSocketAddress(addr, port);
     }
     
