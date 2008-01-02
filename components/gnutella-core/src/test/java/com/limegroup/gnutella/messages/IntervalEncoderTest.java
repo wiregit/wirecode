@@ -170,5 +170,29 @@ public class IntervalEncoderTest extends LimeTestCase {
         assertTrue(s.contains(Range.createRange(3 * 1024L * 1024L, 5 * 1024L * 1024L * 1024L - 1)));
         assertTrue(s.contains(Range.createRange(7 * 1024L * 1024L * 1024L ,7 * 1024L * 1024L * 1024L + 1023)));
     }
+    
+    public void testBigFile() throws Exception {
+        GGEP g = new GGEP();
+        IntervalSet s = new IntervalSet();
+        
+        final long halfTB = 1024L * 1024 * 1024 * 512;
+        Range r = Range.createRange(halfTB - 1024, halfTB -1 );
+        s.add(r);
+        IntervalEncoder.encode(halfTB * 2, g, s); // 1 TB file, 1 kb in the middle
+        
+        assertNull(g.get("PR0"));
+        assertNull(g.get("PR1"));
+        assertNull(g.get("PR2"));
+        assertNull(g.get("PR3"));
+        assertNotNull(g.get("PR4"));
+        
+        byte [] b = g.get("PR4");
+        assertEquals(4, b.length);
+        assertEquals( (Integer.MAX_VALUE / 2 + Integer.MAX_VALUE / 4 + 1), ByteOrder.beb2int(b, 0));
+        
+        IntervalSet decoded = IntervalEncoder.decode(halfTB * 2, g);
+        assertEquals(1, decoded.getNumberOfIntervals());
+        assertEquals(r, decoded.getFirst());
+    }
 
 }

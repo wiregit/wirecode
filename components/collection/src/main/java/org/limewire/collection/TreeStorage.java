@@ -54,7 +54,7 @@ public class TreeStorage {
      * @return true if the node was added and verified ok
      */
     public boolean add(int id, byte [] data) {
-        assert id <= maxId;
+        assert id > 0 && id <= maxId : "bad id "+id;
         TreeNode tn = map.get(id);
         if (tn != null && tn.verified)
             return false;

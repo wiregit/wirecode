@@ -186,6 +186,11 @@ public class IntervalSetTest extends BaseTestCase {
         encoded = iSet.encode(1024);
         assertEquals(1, encoded.size());
         assertTrue(encoded.contains(1));
+        
+        iSet.clear();
+        iSet.add(new Interval(0,1022));
+        encoded = iSet.encode(1024);
+        assertEquals(0, encoded.size());
     }
     
     public void testRangesAlligned() throws Exception {
