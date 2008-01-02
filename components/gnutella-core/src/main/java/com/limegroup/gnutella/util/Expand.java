@@ -132,6 +132,7 @@ public final class Expand {
                 File f = new File(dest, ze.getName());
                 // create intermediary directories - sometimes zip don't add them
                 File dirF=new File(f.getParent());
+                FileUtils.setWriteable(dirF);
                 dirF.mkdirs();
                 
                 if (ze.isDirectory()) {

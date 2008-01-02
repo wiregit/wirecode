@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.NameValue;
-import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,6 +21,8 @@ import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 @Singleton
 public class MetaDataReader {
 
+    private static final Log LOG = LogFactory.getLog(MetaDataReader.class);
+    
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
     private final LimeXMLSchemaRepository limeXMLSchemaRepository;
 
@@ -51,9 +54,12 @@ public class MetaDataReader {
         try {
             return limeXMLDocumentFactory.createLimeXMLDocument(nameValList, uri);
         } catch(IllegalArgumentException iae) {
-            // Wrap this into an IOException since calling classes will
-            // know to ignore, but for now we still want to debug this
-            ErrorService.error(iae); // remove if not harmful
+            LOG.warn("Error creating document", iae);
+            // See: LWC-1150.  It's sometimes the case that people had
+            // old schemas that don't contain all the newer fields, and
+            // some docs are setup with only newer fields, leading the
+            // attributeString to be empty, causing the doc to not validate.
+            // Is worked-around as much as possible.
             throw (IOException)new IOException().initCause(iae);
         }
     }
