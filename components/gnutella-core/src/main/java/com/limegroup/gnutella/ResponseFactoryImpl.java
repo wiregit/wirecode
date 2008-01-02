@@ -523,9 +523,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
                     b.append("size: ").append(size).append(" size64 ").append(size64);
                     b.append("\n").append(bad.getMessage());
                     
-                    // we don't need the old stack trace
-                    IllegalArgumentException report = new IllegalArgumentException(b.toString());
-                    throw report;
+                    ErrorService.error(bad, b.toString());
                 }
             }
         } catch (BadGGEPPropertyException ignore){}
