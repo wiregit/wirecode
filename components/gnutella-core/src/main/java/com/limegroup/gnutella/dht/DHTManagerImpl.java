@@ -33,6 +33,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.statistic.StatsUtils;
+import org.limewire.util.DebugRunnable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -142,7 +143,7 @@ public class DHTManagerImpl implements DHTManager {
      * @see com.limegroup.gnutella.dht.DHTManager#stop()
      */
     public synchronized void stop() {
-        Runnable command = new Runnable() {
+        Runnable command = new DebugRunnable(new Runnable() {
             public void run() {
                 synchronized (DHTManagerImpl.this) {
                     try {
@@ -152,7 +153,7 @@ public class DHTManagerImpl implements DHTManager {
                     }
                 }
             }
-        };
+        });
         
         executor.execute(command);
         
@@ -171,7 +172,7 @@ public class DHTManagerImpl implements DHTManager {
      * @return Runnable that switches the Mode
      */
     private Runnable createSwitchModeCommand(final DHTMode mode) {
-        Runnable command = new Runnable() {
+        Runnable command = new DebugRunnable(new Runnable() {
             public void run() {
                 synchronized (DHTManagerImpl.this) {
                     // Controller already running in the current mode?
@@ -198,7 +199,7 @@ public class DHTManagerImpl implements DHTManager {
                     controller.start();
                 }
             }
-        };
+        });
         
         return command;
     }
@@ -226,7 +227,7 @@ public class DHTManagerImpl implements DHTManager {
     public void addressChanged() {
         // Do this in a different thread as there are some blocking
         //disk and network ops.
-        executor.execute(new Runnable() {
+        executor.execute(new DebugRunnable(new Runnable() {
             public void run() {
                 synchronized(DHTManagerImpl.this) {
                     if (controller.isRunning()) {
@@ -235,7 +236,7 @@ public class DHTManagerImpl implements DHTManager {
                     }
                 }
             }
-        });
+        }));
     }
     
     public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
@@ -326,7 +327,7 @@ public class DHTManagerImpl implements DHTManager {
     public void handleConnectionLifecycleEvent(final ConnectionLifecycleEvent evt) {
         Runnable command = null;
         if (evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            command = new Runnable() {
+            command = new DebugRunnable( new Runnable() {
                 public void run() {
                     synchronized(DHTManagerImpl.this) {
                         if (controller.isRunning() 
@@ -336,7 +337,7 @@ public class DHTManagerImpl implements DHTManager {
                         }
                     }
                 }
-            };
+            });
         } else {
             command = new Runnable() {
                 public void run() {
