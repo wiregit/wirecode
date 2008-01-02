@@ -160,7 +160,7 @@ public class DownloadTHEXTest extends DownloadTestCase {
         assertEquals(1, testUploaders[0].getConnections());     
 
         // there should be an entry for the sha1 urn.
-        URN ttroot = URN.createTTRootUrn(tree.getRootHash());
+        URN ttroot = tree.getTTRootUrn();
         FileManager fm = injector.getInstance(FileManager.class);
         assertNotNull(fm.getFileDescForUrn(TestFile.hash()));
         
@@ -190,7 +190,7 @@ public class DownloadTHEXTest extends DownloadTestCase {
         while(vf.getHashTree() == null && sleeps++ < 20) 
             Thread.sleep(500);
         assertNotNull(vf.getHashTree());
-        URN ttroot = URN.createTTRootUrn(vf.getHashTree().getRootHash());
+        URN ttroot = vf.getHashTree().getTTRootUrn();
         assertEquals(ttroot, tigerTreeCache.getTTROOT(TestFile.hash()));
         
         // the sha1 should point to the filedesc 
