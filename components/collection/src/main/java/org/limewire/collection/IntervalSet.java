@@ -390,11 +390,10 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         ts.setAllowUnverifiedUse(true);
         for (Range r : intervals) {
             
-            // skip ranges that are too small unless they are the last range
-            if (r.getHigh() - r.getLow() + 1 < 1024 && r.getHigh() != maxSize - 1)
-                continue;
-            
             r = allign(r, maxSize);
+            
+            if (r == null)
+                continue;
             
             for (long i = r.getLow(); i <= r.getHigh(); i+= 1024) {
                 int chunk = ts.fileToNodeId((int)(i >> 10));
@@ -407,18 +406,28 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     
     /**
      * @param maxSize maximum size of the IntervalSet
-     * @return a range alligned to 1KB boundaries.
+     * @return a range alligned to 1KB boundaries, null if not possible
      */
     private Range allign(Range r, long maxSize) {
         long low = r.getLow();
         long high = r.getHigh();
-        System.out.println(low & KB_BOUNDARY);
+        
+        // if this is not the last range
+        if (high != maxSize - 1) {
+            // if its too small, it can't be alligned
+            if (high - low < 1023)
+                return null;
+        } else if (high % 1024 > (high - low))
+            return null;
+        
         if ((low & KB_BOUNDARY) != 0)
             low = (low & ~KB_BOUNDARY) + 1024;
         if (high != maxSize - 1 && ((high + 1) & KB_BOUNDARY) != 0)
             high =  ((high+1) & ~KB_BOUNDARY) - 1;
+        
         if (low == r.getLow() && high == r.getHigh())
             return r;
+        
         return Range.createRange(low, high);
     }
     

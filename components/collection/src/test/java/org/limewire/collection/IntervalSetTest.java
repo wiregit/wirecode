@@ -174,6 +174,18 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(2, decoded.getNumberOfIntervals());
         assertTrue(decoded.contains(new Interval(10 * 1024, 20 * 1024 - 1)));
         assertTrue(decoded.contains(new Interval(30 * 1024, 30 * 1024 + 99)));
+        
+        // a non-allignable end range should be ignored too
+        iSet.clear();
+        iSet.add(new Interval(1025, 1199));  // too small to be alligned
+        encoded = iSet.encode(1200);
+        assertTrue(encoded.isEmpty());
+        
+        iSet.clear();
+        iSet.add(new Interval(0,1023));
+        encoded = iSet.encode(1024);
+        assertEquals(1, encoded.size());
+        assertTrue(encoded.contains(1));
     }
     
     public void testRangesAlligned() throws Exception {
@@ -202,6 +214,17 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(1, decoded.getNumberOfIntervals());
         assertEquals(longBase + 1024, decoded.getFirst().getLow());
         assertEquals(longBase + 2047, decoded.getFirst().getHigh());
+        
+        // repeat with end range
+        iSet.clear();
+        iSet.add(Range.createRange(900, 1099));
+        encoded = iSet.encode(1100);
+        decoded = new IntervalSet();
+        for (int i : encoded)
+            decoded.decode(1100, i);
+        assertEquals(1, decoded.getNumberOfIntervals());
+        assertEquals(1024, decoded.getFirst().getLow());
+        assertEquals(1099, decoded.getFirst().getHigh());
     }
     
     // getNumberOfIntervals is used in pretty much every
