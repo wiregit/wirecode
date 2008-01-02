@@ -102,6 +102,7 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(1, iSet.getNumberOfIntervals());
         assertEquals(0 * 1024, iSet.getFirst().getLow());
         assertEquals(20 * 1024 - 1, iSet.getFirst().getHigh());
+        
     }
     
     public void testEncode() throws Exception {
@@ -158,6 +159,51 @@ public class IntervalSetTest extends BaseTestCase {
         assertTrue(encoded.toString(),encoded.contains(51));
     }
 	
+    public void testSmallRangesIgnored() throws Exception {
+        iSet.add(new Interval(0,100)); // small  range in beginning
+        iSet.add(new Interval(10 * 1024, 20 * 1024 - 1)); // large range
+        iSet.add(new Interval(30 * 1024, 30 * 1024 + 99)); //small range at end
+        
+        Collection<Integer> encoded = iSet.encode(30 * 1024 + 100);
+        
+        IntervalSet decoded = new IntervalSet();
+        for (int i : encoded)
+            decoded.decode(30 * 1024 + 100, i);
+        
+        // small range at beginning is gone, the rest are there
+        assertEquals(2, decoded.getNumberOfIntervals());
+        assertTrue(decoded.contains(new Interval(10 * 1024, 20 * 1024 - 1)));
+        assertTrue(decoded.contains(new Interval(30 * 1024, 30 * 1024 + 99)));
+    }
+    
+    public void testRangesAlligned() throws Exception {
+        iSet.add(new Interval(500, 2500));
+        Collection<Integer> encoded = iSet.encode(3 * 1024);
+        
+        IntervalSet decoded = new IntervalSet();
+        for (int i : encoded)
+            decoded.decode(3 * 1024, i);
+        
+        // only one range - [1024, 2047]
+        assertEquals(1, decoded.getNumberOfIntervals());
+        assertEquals(1024, decoded.getFirst().getLow());
+        assertEquals(2047, decoded.getFirst().getHigh());
+        
+        // repeat test with long values
+        iSet.clear();
+        long longBase = 0x1FFFFFFC00L;
+        iSet.add(Range.createRange( longBase + 500, longBase +2500));
+        encoded = iSet.encode(longBase + 3 * 1024);
+        
+        decoded = new IntervalSet();
+        for (int i : encoded)
+            decoded.decode(longBase + 3 * 1024, i);
+        
+        assertEquals(1, decoded.getNumberOfIntervals());
+        assertEquals(longBase + 1024, decoded.getFirst().getLow());
+        assertEquals(longBase + 2047, decoded.getFirst().getHigh());
+    }
+    
     // getNumberOfIntervals is used in pretty much every
     // test, so it should be tested first
     public void testGetNumberOfIntervals() {

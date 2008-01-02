@@ -54,6 +54,11 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     private static final int LINEAR = 16;
     
     /**
+     * Mask that tests if a range is at 1kb boundary.
+     */
+    private static final long KB_BOUNDARY = 0x3FF;
+    
+    /**
      * The sorted set of intervals this contains.
      */
     private final List<Range> intervals;
@@ -384,7 +389,13 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
         ts.setAllowUnverifiedUse(true);
         for (Range r : intervals) {
-            assert r.getLow() % 1024 == 0;
+            
+            // skip ranges that are too small unless they are the last range
+            if (r.getHigh() - r.getLow() + 1 < 1024 && r.getHigh() != maxSize - 1)
+                continue;
+            
+            r = allign(r, maxSize);
+            
             for (long i = r.getLow(); i <= r.getHigh(); i+= 1024) {
                 int chunk = ts.fileToNodeId((int)(i >> 10));
                 ts.add(chunk, null);
@@ -392,6 +403,23 @@ public class IntervalSet implements Iterable<Range>, Serializable{
             }
         }
         return ts.getUsedNodes();
+    }
+    
+    /**
+     * @param maxSize maximum size of the IntervalSet
+     * @return a range alligned to 1KB boundaries.
+     */
+    private Range allign(Range r, long maxSize) {
+        long low = r.getLow();
+        long high = r.getHigh();
+        System.out.println(low & KB_BOUNDARY);
+        if ((low & KB_BOUNDARY) != 0)
+            low = (low & ~KB_BOUNDARY) + 1024;
+        if (high != maxSize - 1 && ((high + 1) & KB_BOUNDARY) != 0)
+            high =  ((high+1) & ~KB_BOUNDARY) - 1;
+        if (low == r.getLow() && high == r.getHigh())
+            return r;
+        return Range.createRange(low, high);
     }
     
     /**
