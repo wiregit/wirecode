@@ -67,4 +67,11 @@ public class BugSettings extends LimeProps {
     /** Setting for whether or not deadlock bugs should be sent. */
     public static final BooleanSetting SEND_DEADLOCK_BUGS =
         FACTORY.createBooleanSetting("SEND_DEADLOCK_BUGS", true);
+    
+    /**
+     * Whether to report bugs in the org.limewire.collection.TreeStorage class.
+     */
+    public static final BooleanSetting SEND_TREE_STORAGE_BUGS =
+        FACTORY.createRemoteBooleanSetting("SEND_TREE_STORAGE_BUGS", 
+                true, "BugSettings.sendTreeStorageBugsBeta");
 }

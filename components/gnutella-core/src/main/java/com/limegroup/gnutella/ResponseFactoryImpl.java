@@ -38,6 +38,7 @@ import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.messages.IntervalEncoder;
+import com.limegroup.gnutella.settings.BugSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
@@ -511,8 +512,22 @@ public class ResponseFactoryImpl implements ResponseFactory {
         boolean verified = false;
         IntervalSet ranges = null;
         try {
-            ranges = IntervalEncoder.decode(size64,ggep);
-            verified = !ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
+            try {
+                ranges = IntervalEncoder.decode(size64,ggep);
+                verified = !ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
+            } catch (IllegalArgumentException bad) {
+                if (BugSettings.SEND_TREE_STORAGE_BUGS.getValue()) {
+                    // create more informative bug report
+                    StringBuilder b = new StringBuilder();
+                    b.append("TreeStorage problem:\n");
+                    b.append("size: ").append(size).append(" size64 ").append(size64);
+                    b.append("\n").append(bad.getMessage());
+                    
+                    // we don't need the old stack trace
+                    IllegalArgumentException report = new IllegalArgumentException(b.toString());
+                    throw report;
+                }
+            }
         } catch (BadGGEPPropertyException ignore){}
         
         
