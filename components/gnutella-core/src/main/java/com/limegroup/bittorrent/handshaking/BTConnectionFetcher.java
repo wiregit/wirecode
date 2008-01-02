@@ -179,11 +179,11 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	}
 	
 	public void shutdown() {
-		if (shutdown)
-			return;
-		synchronized(this) {
-			shutdown = true;
-		}
+	    synchronized(this) {
+	        if (shutdown)
+	            return;
+	        shutdown = true;
+	    }
 		scheduled.unschedule();
 
 		// copy because shutdown() removes
