@@ -44,7 +44,6 @@ import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -125,13 +124,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      * how many downloaders are active
      */
     private int storeDownloadCount = 0;
-
-    /** This will hold the MDs that have sent requeries.
-     *  When this size gets too big - meaning bigger than active.size(), then
-     *  that means that all MDs have been serviced at least once, so you can
-     *  clear it and start anew....
-     */
-    private List<AbstractDownloader> querySentMDs = new ArrayList<AbstractDownloader>();
     
     /**
      * The number of times we've been bandwidth measures
@@ -153,7 +145,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     private Runnable _waitingPump;
     
     private final NetworkManager networkManager;
-    private final DownloadReferencesFactory downloadReferencesFactory;
     private final DownloadCallback innetworkCallback;
     private final BTDownloaderFactory btDownloaderFactory;
     private final Provider<DownloadCallback> downloadCallback;
@@ -167,7 +158,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
     
     @Inject
     public DownloadManager(NetworkManager networkManager,
-            DownloadReferencesFactory downloadReferencesFactory,
             @Named("inNetwork") DownloadCallback innetworkCallback,
             BTDownloaderFactory btDownloaderFactory,
             Provider<DownloadCallback> downloadCallback,
@@ -179,7 +169,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             GnutellaDownloaderFactory gnutellaDownloaderFactory,
             PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
         this.networkManager = networkManager;
-        this.downloadReferencesFactory = downloadReferencesFactory;
         this.innetworkCallback = innetworkCallback;
         this.btDownloaderFactory = btDownloaderFactory;
         this.downloadCallback = downloadCallback;
@@ -591,7 +580,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         try {
             for (AbstractDownloader downloader : buf) {                
                 waiting.add(downloader);
-                downloader.initialize(downloadReferencesFactory.create(downloader));
+                downloader.initialize();
                 callback(downloader).addDownload(downloader);
             }
             return true;
@@ -704,7 +693,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader =
-            gnutellaDownloaderFactory.createManagedDownloader(files, incompleteFileManager,
+            gnutellaDownloaderFactory.createManagedDownloader(files, 
                 queryGUID, saveDir, fileName, overwrite);
 
         initializeDownload(downloader);
@@ -764,7 +753,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
 
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = 
-            gnutellaDownloaderFactory.createMagnetDownloader(incompleteFileManager, magnet,
+            gnutellaDownloaderFactory.createMagnetDownloader(magnet,
                 overwrite, saveDir, fileName);
         initializeDownload(downloader);
         return downloader;
@@ -861,7 +850,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
             String name=IncompleteFileManager.getCompletedName(incompleteFile);
             long size= IncompleteFileManager.getCompletedSize(incompleteFile);
-            downloader = gnutellaDownloaderFactory.createResumeDownloader(incompleteFileManager,
+            downloader = gnutellaDownloaderFactory.createResumeDownloader(
                                               incompleteFile,
                                               name,
                                               size);
@@ -915,8 +904,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge();
-        ManagedDownloader d = gnutellaDownloaderFactory.createInNetworkDownloader(
-                incompleteFileManager, info, dir, now);
+        ManagedDownloader d = gnutellaDownloaderFactory.createInNetworkDownloader(info, dir, now);
         initializeDownload(d);
         return d;
     }
@@ -968,7 +956,7 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      * 4) Writes the new snapshot out to disk.
      */
     private void initializeDownload(AbstractDownloader md) {
-        md.initialize(downloadReferencesFactory.create(md));
+        md.initialize();
 		waiting.add(md);
         callback(md).addDownload(md);
         backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -1184,9 +1172,6 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      * If ser is true, also writes a snapshot to the disk.
      */
     private void cleanupCompletedDownload(AbstractDownloader dl, boolean ser) {
-        synchronized(this) {
-            querySentMDs.remove(dl);
-        }
         dl.finish();
         if (dl.getQueryGUID() != null)
             messageRouter.get().downloadFinished(dl.getQueryGUID());
@@ -1205,54 +1190,18 @@ public class DownloadManager implements BandwidthTracker, SaveLocationManager {
      * Attempts to send the given requery to provide the given downloader with 
      * more sources to download.  May not actually send the requery if it doing
      * so would exceed the maximum requery rate.
-     * 
      * @param query the requery to send, which should have a marked GUID.
      *  Queries are subjected to global rate limiting iff they have marked 
      *  requery GUIDs.
-     * @param requerier the downloader requesting more sources.  Needed to 
-     *  ensure fair requery scheduling.  This MUST be in the waiting list,
-     *  i.e., it MUST NOT have a download slot.
-     * @return true iff the query was actually sent.  If false is returned,
-     *  the downloader should attempt to send the query later.
      */
-    public synchronized boolean sendQuery(ManagedDownloader requerier, 
-                                          QueryRequest query) {
+    public synchronized void sendQuery(QueryRequest query) {
         //NOTE: this algorithm provides global but not local fairness.  That is,
         //if two requeries x and y are competing for a slot, patterns like
         //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
         if(LOG.isTraceEnabled())
             LOG.trace("DM.sendQuery():" + query.getQuery());
-        assert waiting.contains(requerier) : "Unknown or non-waiting MD trying to send requery.";
-
-        //Disallow if global time limits exceeded.  These limits don't apply to
-        //queries that are requeries.
-// Requeries are disabled elsewhere.  This code should be reworked when we reenable.
-//        boolean isRequery=GUID.isLimeRequeryGUID(query.getGUID());
-//        long elapsed=System.currentTimeMillis()-lastGnutellaRequeryTime;
-//        if (isRequery && elapsed <= TIME_BETWEEN_GNUTELLA_REQUERIES) {
-//            return false;
-//        }
-
-        //Has everyone had a chance to send a query?  If so, clear the slate.
-        if (querySentMDs.size() >= waiting.size()) {
-            LOG.trace("DM.sendQuery(): reseting query sent queue");
-            querySentMDs.clear();
-        }
-
-        //If downloader has already sent a query, give someone else a turn.
-        if (querySentMDs.contains(requerier)) {
-            // nope, sorry, must lets others go first...
-            if(LOG.isWarnEnabled())
-                LOG.warn("DM.sendQuery(): out of turn:" + query.getQuery());
-            return false;
-        }
-        
-        if(LOG.isTraceEnabled())
-            LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
-        querySentMDs.add(requerier);                  
-//        lastGnutellaRequeryTime = System.currentTimeMillis();
+ 
         messageRouter.get().sendDynamicQuery(query);
-        return true;
     }
 
     /** Calls measureBandwidth on each uploader. */

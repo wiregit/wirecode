@@ -46,7 +46,6 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
@@ -398,10 +397,6 @@ public class LimeWireCore {
 
     public SavedFileManager getSavedFileManager() {
         return injector.getInstance(SavedFileManager.class);
-    }
-
-    public DownloadReferencesFactory getDownloadReferencesFactory() {
-        return injector.getInstance(DownloadReferencesFactory.class);
     }
     
     public DownloadCallback getInNetworkCallback() {

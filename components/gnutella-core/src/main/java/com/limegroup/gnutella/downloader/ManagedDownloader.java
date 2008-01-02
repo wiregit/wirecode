@@ -62,6 +62,7 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -224,21 +225,7 @@ public class ManagedDownloader extends AbstractDownloader
      *
      * Never obtain manager's lock if you hold this.
      ***********************************************************************/
-    
-    /** This' manager for callbacks and queueing. */
-    private DownloadManager manager;
-    /** The place to share completed downloads (and their metadata) */
-    protected FileManager fileManager;
-    /** The repository of incomplete files. */
-    protected IncompleteFileManager incompleteFileManager;
-    /** A ManagedDownloader needs to have a handle to the DownloadCallback, so
-     * that it can notify the gui that a file is corrupt to ask the user what
-     * should be done.  */
-    private DownloadCallback callback;
-    
-    private NetworkManager networkManager;
-    private AlternateLocationFactory alternateLocationFactory;
-    
+        
     
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
@@ -446,24 +433,30 @@ public class ManagedDownloader extends AbstractDownloader
 	 */
     private volatile int triedHosts;
     
-    protected volatile RequeryManager requeryManager;
 
-    protected QueryRequestFactory queryRequestFactory;
-    protected OnDemandUnicaster onDemandUnicaster;
-    protected DownloadWorkerFactory downloadWorkerFactory;
-    protected AltLocManager altLocManager;
-    protected ContentManager contentManager;
-    protected SourceRankerFactory sourceRankerFactory;
-    protected UrnCache urnCache;
-    protected SavedFileManager savedFileManager;
-    protected VerifyingFileFactory verifyingFileFactory;
-    protected DiskController diskController;
-    protected IPFilter ipFilter;
-    protected ScheduledExecutorService backgroundExecutor;
-    protected Provider<MessageRouter> messageRouter;
-    protected Provider<TigerTreeCache> tigerTreeCache;
-    protected ApplicationServices applicationServices;
-    
+    private final DownloadManager downloadManager;
+    protected final FileManager fileManager;
+    protected final IncompleteFileManager incompleteFileManager;
+    private final DownloadCallback downloadCallback;    
+    private final NetworkManager networkManager;
+    private final AlternateLocationFactory alternateLocationFactory;
+    protected final RequeryManager requeryManager;
+    protected final QueryRequestFactory queryRequestFactory;
+    protected final OnDemandUnicaster onDemandUnicaster;
+    protected final DownloadWorkerFactory downloadWorkerFactory;
+    protected final AltLocManager altLocManager;
+    protected final ContentManager contentManager;
+    protected final SourceRankerFactory sourceRankerFactory;
+    protected final UrnCache urnCache;
+    protected final SavedFileManager savedFileManager;
+    protected final VerifyingFileFactory verifyingFileFactory;
+    protected final DiskController diskController;
+    protected final IPFilter ipFilter;
+    protected final ScheduledExecutorService backgroundExecutor;
+    protected final Provider<MessageRouter> messageRouter;
+    protected final Provider<TigerTreeCache> tigerTreeCache;
+    protected final ApplicationServices applicationServices;
+
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
@@ -475,38 +468,59 @@ public class ManagedDownloader extends AbstractDownloader
      * useful for WAITING_FOR_USER state.  can be null.
 	 * @throws SaveLocationException
      */
-    protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+    protected ManagedDownloader(RemoteFileDesc[] files, 
                              GUID originalQueryGUID, File saveDirectory, 
                              String fileName, boolean overwrite, 
-                             SaveLocationManager saveLocationManager) 
+                             SaveLocationManager saveLocationManager,
+                             DownloadManager downloadManager, FileManager fileManager,
+                             IncompleteFileManager incompleteFileManager, DownloadCallback downloadCallback,
+                             NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
+                             RequeryManagerFactory requeryManagerFactory, QueryRequestFactory queryRequestFactory,
+                             OnDemandUnicaster onDemandUnicaster, DownloadWorkerFactory downloadWorkerFactory,
+                             AltLocManager altLocManager, ContentManager contentManager,
+                             SourceRankerFactory sourceRankerFactory, UrnCache urnCache,
+                             SavedFileManager savedFileManager, VerifyingFileFactory verifyingFileFactory,
+                             DiskController diskController, IPFilter ipFilter,
+                             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
+                             Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices) 
 		throws SaveLocationException {
-		this(files, ifc, originalQueryGUID, saveLocationManager);
+        super(saveLocationManager);
+        this.downloadManager = downloadManager;
+        this.fileManager = fileManager;
+        this.incompleteFileManager = incompleteFileManager;
+        this.downloadCallback = downloadCallback;
+        this.networkManager = networkManager;
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.requeryManager = requeryManagerFactory.createRequeryManager(new RequeryListenerImpl());
+        this.queryRequestFactory = queryRequestFactory;
+        this.onDemandUnicaster = onDemandUnicaster;
+        this.downloadWorkerFactory = downloadWorkerFactory;
+        this.altLocManager = altLocManager;
+        this.contentManager = contentManager;
+        this.sourceRankerFactory = sourceRankerFactory;
+        this.urnCache = urnCache;
+        this.savedFileManager = savedFileManager;
+        this.verifyingFileFactory = verifyingFileFactory;
+        this.diskController = diskController;
+        this.ipFilter = ipFilter;
+        this.backgroundExecutor = backgroundExecutor;
+        this.messageRouter = messageRouter;
+        this.tigerTreeCache = tigerTreeCache;
+        this.applicationServices = applicationServices;
         
+        this.cachedRFDs = new HashSet<RemoteFileDesc>();
+        cachedRFDs.addAll(Arrays.asList(files));
+        if (files.length > 0) 
+            initPropertiesMap(files[0]);
+
+        this.originalQueryGUID = originalQueryGUID;
+        this.deserializedFromDisk = false;
+                
         assert files.length > 0 || fileName != null;
         if (files.length == 0)
             propertiesMap.put(DEFAULT_FILENAME,fileName);
         
 		setSaveFile(saveDirectory, fileName, overwrite);
-    }
-	
-	protected ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
-							 GUID originalQueryGUID, SaveLocationManager saveLocationManager) {
-	    super(saveLocationManager);
-	    
-		if(files == null) {
-			throw new NullPointerException("null RFDS");
-		}
-		if(ifc == null) {
-			throw new NullPointerException("null incomplete file manager");
-		}
-        this.cachedRFDs = new HashSet<RemoteFileDesc>();
-		cachedRFDs.addAll(Arrays.asList(files));
-		if (files.length > 0) 
-			initPropertiesMap(files[0]);
-
-        this.incompleteFileManager = ifc;
-        this.originalQueryGUID = originalQueryGUID;
-        this.deserializedFromDisk = false;
     }
 
     protected synchronized void initPropertiesMap(RemoteFileDesc rfd) {
@@ -527,29 +541,7 @@ public class ManagedDownloader extends AbstractDownloader
      * @param deserialized True if this downloader is being initialized after 
      * being read from disk, false otherwise.
      */
-    public void initialize(DownloadReferences downloadReferences) {
-        this.saveLocationManager = downloadReferences.getDownloadManager();
-        this.manager=downloadReferences.getDownloadManager();
-		this.fileManager=downloadReferences.getFileManager();
-        this.callback=downloadReferences.getDownloadCallback();
-        this.requeryManager = downloadReferences.getRequeryManagerFactory().createRequeryManager(this);
-        this.networkManager = downloadReferences.getNetworkManager();
-        this.alternateLocationFactory = downloadReferences.getAlternateLocationFactory();
-        this.queryRequestFactory = downloadReferences.getQueryRequestFactory();
-        this.onDemandUnicaster = downloadReferences.getOnDemandUnicaster();
-        this.downloadWorkerFactory = downloadReferences.getDownloadWorkerFactory();
-        this.altLocManager = downloadReferences.getAltLocManager();
-        this.contentManager = downloadReferences.getContentManager();
-        this.sourceRankerFactory = downloadReferences.getSourceRankerFactory();
-        this.urnCache = downloadReferences.getUrnCache();
-        this.savedFileManager = downloadReferences.getSavedFileManager();
-        this.verifyingFileFactory = downloadReferences.getVerifyingFileFactory();
-        this.diskController = downloadReferences.getDiskController();
-        this.ipFilter = downloadReferences.getIpFilter();
-        this.backgroundExecutor = downloadReferences.getBackgroundExecutor();
-        this.messageRouter = downloadReferences.getMessageRouter();
-        this.tigerTreeCache = downloadReferences.getTigerTreeCache();
-        this.applicationServices = downloadReferences.getApplicationServices();
+    public void initialize() {
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -675,7 +667,7 @@ public class ManagedDownloader extends AbstractDownloader
                     // download completely and message the error.
                     ManagedDownloader.this.stop();
                     setState(DownloadStatus.ABORTED);
-                    manager.remove(ManagedDownloader.this, true);
+                    downloadManager.remove(ManagedDownloader.this, true);
                     
                     ErrorService.error(t);
                 } finally {
@@ -736,7 +728,7 @@ public class ManagedDownloader extends AbstractDownloader
         // Notify the manager that this download is done.
         // This MUST be done outside of this' lock, else
         // deadlock could occur.
-        manager.remove(this, complete);
+        downloadManager.remove(this, complete);
         
         if (clearingNeeded) {
             synchronized(altLock) {
@@ -2602,7 +2594,7 @@ public class ManagedDownloader extends AbstractDownloader
      * Hook for sending a corrupt callback.
      */
     protected void sendCorruptCallback() {
-        callback.promptAboutCorruptDownload(this);
+        downloadCallback.promptAboutCorruptDownload(this);
     }
 
     /**
@@ -3026,5 +3018,57 @@ public class ManagedDownloader extends AbstractDownloader
     @Override
     public DownloaderType getDownloadType() {
         return DownloaderType.MANAGED;
+    }
+        
+    private class RequeryListenerImpl implements RequeryListener {
+        public QueryRequest createQuery() {
+            try {
+                return newRequery(0);
+            } catch(CantResumeException cre) {
+                return null;
+            }
+        }
+
+        public URN getSHA1Urn() {
+            return getSHA1Urn();
+        }
+
+        public void lookupFinished(QueryType queryType) {
+            switch (queryType) {
+            case DHT:
+                setStateIfExistingStateIs(DownloadStatus.GAVE_UP, DownloadStatus.QUERYING_DHT);
+                break;
+            case GNUTELLA:
+                setState(DownloadStatus.GAVE_UP);
+                break;
+            default:
+                throw new IllegalStateException("invalid type: " + queryType);
+            }
+
+        }
+
+        public void lookupPending(QueryType queryType, int length) {
+            switch (queryType) {
+            case GNUTELLA:
+                setState(DownloadStatus.WAITING_FOR_CONNECTIONS, length);
+                break;
+            default:
+                throw new IllegalStateException("invalid type: " + queryType);
+            }
+
+        }
+
+        public void lookupStarted(QueryType queryType, long length) {
+            switch(queryType) {
+            case DHT:
+                setState(DownloadStatus.QUERYING_DHT, length);
+                break;
+            case GNUTELLA:
+                setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, length);
+                break;
+            default:
+                throw new IllegalStateException("invalid type: " + queryType);
+            }
+        }
     }
 }

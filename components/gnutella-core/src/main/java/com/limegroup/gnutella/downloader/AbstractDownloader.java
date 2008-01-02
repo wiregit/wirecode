@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
@@ -52,11 +53,10 @@ public abstract class AbstractDownloader implements Downloader {
 	 */
 	protected Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 
-	protected volatile SaveLocationManager saveLocationManager;
+	protected final SaveLocationManager saveLocationManager;
 	
 	protected AbstractDownloader(SaveLocationManager saveLocationManager) {
-	    this.saveLocationManager = saveLocationManager;
-	    
+	    this.saveLocationManager = Objects.nonNull(saveLocationManager, "saveLocationManager");	    
 	    synchronized(this) {
 	        propertiesMap = new HashMap<String, Serializable>();
 	        propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
@@ -158,8 +158,7 @@ public abstract class AbstractDownloader implements Downloader {
 		return getSaveFile().equals(saveFile);
 	}
 	
-	// TODO: See: CORE-306
-	public abstract void initialize(DownloadReferences downloadReferences);
+	public abstract void initialize();
 
 	/**
 	 * Returns the type of download

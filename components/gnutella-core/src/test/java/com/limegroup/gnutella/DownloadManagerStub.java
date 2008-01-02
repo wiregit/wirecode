@@ -10,10 +10,8 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.downloader.DownloadReferencesFactory;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -26,7 +24,6 @@ public class DownloadManagerStub extends DownloadManager {
 	
     @Inject
     public DownloadManagerStub(NetworkManager networkManager,
-            DownloadReferencesFactory downloadReferencesFactory,
             @Named("inNetwork") DownloadCallback innetworkCallback,
             BTDownloaderFactory btDownloaderFactory,
             Provider<DownloadCallback> downloadCallback,
@@ -37,7 +34,7 @@ public class DownloadManagerStub extends DownloadManager {
             BrowseHostHandlerManager browseHostHandlerManager,
             GnutellaDownloaderFactory gnutellaDownloaderFactory,
             PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
-        super(networkManager, downloadReferencesFactory, innetworkCallback, btDownloaderFactory, downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager, browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
+        super(networkManager, innetworkCallback, btDownloaderFactory, downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager, browseHostHandlerManager, gnutellaDownloaderFactory, purchasedDownloaderFactory);
     }
 
     @Override
@@ -67,11 +64,7 @@ public class DownloadManagerStub extends DownloadManager {
     @Override
     public void handleQueryReply(QueryReply qr) { }
     //public void remove(ManagedDownloader downloader, boolean success) { }
-    @Override
-    public boolean sendQuery(ManagedDownloader requerier, QueryRequest query) { 
-
-		return !GUID.isLimeRequeryGUID(query.getGUID());
-    }
+    
     @Override
     public synchronized void measureBandwidth() { }
     @Override

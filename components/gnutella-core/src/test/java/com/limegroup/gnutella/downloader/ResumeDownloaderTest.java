@@ -59,8 +59,6 @@ public class ResumeDownloaderTest extends LimeTestCase {
 
     private Injector injector;
 
-    private DownloadReferencesFactory downloadReferencesFactory;
-
     public ResumeDownloaderTest(String name) {
         super(name);
     }
@@ -82,7 +80,6 @@ public class ResumeDownloaderTest extends LimeTestCase {
         hash = TestFile.hash();
         rfd = newRFD(name, size, hash);
         ifm = injector.getInstance(IncompleteFileManager.class);
-        downloadReferencesFactory = injector.getInstance(DownloadReferencesFactory.class);
         
         incompleteFile = ifm.getFile(rfd);
         VerifyingFile vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(size);
@@ -97,12 +94,12 @@ public class ResumeDownloaderTest extends LimeTestCase {
     }
     
     /** Returns a new ResumeDownloader with stubbed-out DownloadManager, etc. */
-    private ResumeDownloader newResumeDownloader() {
+    private ResumeDownloader newResumeDownloader() throws Exception {
         // this ResumeDownloader is started from the library, not from restart,
         // that is why the last param to init is false
         ResumeDownloader downloader = injector.getInstance(GnutellaDownloaderFactory.class).createResumeDownloader(
-                ifm, incompleteFile, name, size);
-        downloader.initialize(downloadReferencesFactory.create(downloader));
+                incompleteFile, name, size);
+        downloader.initialize();
         downloader.startDownload();
         return downloader;
     }
@@ -164,7 +161,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         // deserialize
         ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
         downloader = (ResumeDownloader) in.readObject();
-        downloader.initialize(downloadReferencesFactory.create(downloader));
+        downloader.initialize();
         downloader.startDownload();
 
         // Check same state as before serialization.
@@ -203,7 +200,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
                 .getResourceFile(filePath + file)));
         try {
             ResumeDownloader rd = (ResumeDownloader) in.readObject();
-            rd.initialize(downloadReferencesFactory.create(rd));
+            rd.initialize();
             QueryRequest qr = rd.newRequery(0);
             URN _hash = (URN) PrivilegedAccessor.getValue(rd, "_hash");
             if (expectHash) {

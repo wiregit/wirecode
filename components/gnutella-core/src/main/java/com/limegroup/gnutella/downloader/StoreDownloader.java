@@ -4,22 +4,39 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.DownloadCallback;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
+import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 /**
  *  Allows the rest of LimeWire to treat this as a regular download. Handles downloading
@@ -29,11 +46,27 @@ public class StoreDownloader extends ManagedDownloader {
     
     private static final Log LOG = LogFactory.getLog(StoreDownloader.class);
     
-    public StoreDownloader(RemoteFileDesc rfd, IncompleteFileManager ifc, 
+    public StoreDownloader(RemoteFileDesc rfd, 
             File saveDirectory, String fileName, boolean overwrite,
-            SaveLocationManager manager) throws SaveLocationException {
-        super(new RemoteFileDesc[]{rfd}, ifc, null,
-                saveDirectory, fileName, overwrite, manager);
+            SaveLocationManager saveLocationManager, DownloadManager downloadManager,
+            FileManager fileManager, IncompleteFileManager incompleteFileManager,
+            DownloadCallback downloadCallback, NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory, RequeryManagerFactory requeryManagerFactory,
+            QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
+            DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
+            ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
+            UrnCache urnCache, SavedFileManager savedFileManager,
+            VerifyingFileFactory verifyingFileFactory, DiskController diskController,
+            IPFilter ipFilter, ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
+            ApplicationServices applicationServices) throws SaveLocationException {
+        super(new RemoteFileDesc[]{rfd}, null,
+                saveDirectory, fileName, overwrite, saveLocationManager, downloadManager, fileManager, incompleteFileManager,
+                downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
+                queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
+                contentManager, sourceRankerFactory, urnCache, savedFileManager,
+                verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
+                tigerTreeCache, applicationServices);
     } 
            
     

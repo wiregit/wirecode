@@ -4,19 +4,36 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.DownloadCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
+import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.QueryUtils;
 
 /**
@@ -66,24 +83,38 @@ public class MagnetDownloader extends ManagedDownloader {
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
-    MagnetDownloader(IncompleteFileManager ifm,
-							MagnetOptions magnet,
-							boolean overwrite,
-                            File saveDir,
-                            String fileName, SaveLocationManager saveLocationManager) throws SaveLocationException {
-        //Initialize superclass with no locations.  We'll add the default
-        //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0], ifm, null, saveDir, 
-			  checkMagnetAndExtractFileName(magnet, fileName), overwrite, saveLocationManager);
+    MagnetDownloader(MagnetOptions magnet, boolean overwrite, File saveDir, String fileName,
+            SaveLocationManager saveLocationManager, DownloadManager downloadManager,
+            FileManager fileManager, IncompleteFileManager incompleteFileManager,
+            DownloadCallback downloadCallback, NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory, RequeryManagerFactory requeryManagerFactory,
+            QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
+            DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
+            ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
+            UrnCache urnCache, SavedFileManager savedFileManager,
+            VerifyingFileFactory verifyingFileFactory, DiskController diskController,
+            IPFilter ipFilter, ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
+            ApplicationServices applicationServices) throws SaveLocationException {
+        // Initialize superclass with no locations. We'll add the default
+        // location when the download control thread calls tryAllDownloads.
+        super(new RemoteFileDesc[0], null, saveDir,
+                checkMagnetAndExtractFileName(magnet, fileName), overwrite, saveLocationManager,
+                downloadManager, fileManager, incompleteFileManager, downloadCallback,
+                networkManager, alternateLocationFactory, requeryManagerFactory, queryRequestFactory,
+                onDemandUnicaster, downloadWorkerFactory, altLocManager, contentManager,
+                sourceRankerFactory, urnCache, savedFileManager, verifyingFileFactory,
+                diskController, ipFilter, backgroundExecutor, messageRouter, tigerTreeCache,
+                applicationServices);
         synchronized(this) {
             propertiesMap.put(MAGNET, magnet);
         }
     }
     
-    public void initialize(DownloadReferences downloadReferences) {
+    public void initialize() {
         assert (getMagnet() != null);
         downloadSHA1 = getMagnet().getSHA1Urn();
-        super.initialize(downloadReferences);
+        super.initialize();
     }
 
 	private synchronized MagnetOptions getMagnet() {
