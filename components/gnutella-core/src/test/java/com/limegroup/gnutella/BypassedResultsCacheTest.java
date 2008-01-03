@@ -25,7 +25,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class BypassedResultsCacheTest extends BaseTestCase {
 
-    private QueryActiveActivityCallback callback;
+    private Provider<QueryActiveActivityCallback> callback;
     
     private GUIDActiveDownloadManager manager;
     
@@ -48,7 +48,12 @@ public class BypassedResultsCacheTest extends BaseTestCase {
                 bind(DownloadManager.class).to(GUIDActiveDownloadManager.class);
             };
         });
-        callback = (QueryActiveActivityCallback)injector.getInstance(ActivityCallback.class);
+        final QueryActiveActivityCallback qaac = (QueryActiveActivityCallback)injector.getInstance(ActivityCallback.class); 
+        callback = new Provider<QueryActiveActivityCallback>() {
+            public QueryActiveActivityCallback get() {
+                return qaac;
+            }
+        };
         manager = (GUIDActiveDownloadManager)injector.getInstance(DownloadManager.class);
         
         point1 = new GUESSEndpoint(InetAddress.getLocalHost(), 5555);
@@ -65,12 +70,12 @@ public class BypassedResultsCacheTest extends BaseTestCase {
         BypassedResultsCache cache = new BypassedResultsCache(callback, manager);
         
         // success
-        callback.isQueryAlive = true;
+        callback.get().isQueryAlive = true;
         GUID guid = new GUID();
         assertTrue(cache.addBypassedSource(guid, point1));
         assertFalse(cache.addBypassedSource(guid, point1));
         
-        callback.isQueryAlive = false;
+        callback.get().isQueryAlive = false;
         manager.isGUIDFor = true;
         assertTrue(cache.addBypassedSource(guid, point2));
         assertFalse(cache.addBypassedSource(guid, point2));
@@ -84,7 +89,7 @@ public class BypassedResultsCacheTest extends BaseTestCase {
     
     public void testExpiration() {
         BypassedResultsCache cache = new BypassedResultsCache(callback, manager);
-        callback.isQueryAlive = true;
+        callback.get().isQueryAlive = true;
         GUID guid = new GUID();
         assertTrue(cache.addBypassedSource(guid, point1));
         
@@ -95,14 +100,14 @@ public class BypassedResultsCacheTest extends BaseTestCase {
         
         assertTrue(cache.addBypassedSource(guid, point1));
         
-        callback.isQueryAlive = false;
+        callback.get().isQueryAlive = false;
         cache.downloadFinished(guid);
         
         assertTrue(cache.getQueryLocs(guid).isEmpty());
     }
     
     public void testUpperThreshholdIsHonored() throws UnknownHostException {
-        callback.isQueryAlive = true;
+        callback.get().isQueryAlive = true;
         GUID guid = new GUID();
         BypassedResultsCache cache = new BypassedResultsCache(callback, manager);
         

@@ -206,7 +206,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
 
     
-    private volatile BypassedResultsCache _bypassedResultsCache;
+    private final BypassedResultsCache _bypassedResultsCache;
     
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
@@ -431,6 +431,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
 
         _clientGUID = applicationServices.getMyGUID();
+        _bypassedResultsCache = new BypassedResultsCache(activityCallback, downloadManager);
     }
     
     /** Sets a new handler to the given handlerMap, for the given class. */
@@ -542,7 +543,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @see com.limegroup.gnutella.MessageRouter#initialize()
      */
     public void start() {
-		_bypassedResultsCache = new BypassedResultsCache(activityCallback.get(), downloadManager);
         
 		// TODO listener leaking, we should have a shutdown event
 		connectionManager.addEventListener(connectionListener);

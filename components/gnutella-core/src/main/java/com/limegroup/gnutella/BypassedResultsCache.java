@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 
 /**
@@ -19,7 +20,7 @@ public class BypassedResultsCache {
      */
     static int MAX_BYPASSED_RESULTS = 150;
     
-    private final ActivityCallback _callback;
+    private final Provider<? extends ActivityCallback> _callback;
     
     private final DownloadManager _downloadManager;
     
@@ -30,7 +31,7 @@ public class BypassedResultsCache {
     private final Map<GUID, Set<GUESSEndpoint>> _bypassedResults = Collections.synchronizedMap(new HashMap<GUID, Set<GUESSEndpoint>>());
 
 
-    public BypassedResultsCache(ActivityCallback callback, DownloadManager downloadManager) {
+    public BypassedResultsCache(Provider<? extends ActivityCallback> callback, DownloadManager downloadManager) {
         _callback = callback;
         _downloadManager = downloadManager;
     }
@@ -72,7 +73,7 @@ public class BypassedResultsCache {
      * active query or a download for this guid. 
      */
     private boolean isGUIDOfInterest(GUID guid) {
-        return _callback.isQueryAlive(guid) || _downloadManager.isGuidForQueryDownloading(guid);
+        return _callback.get().isQueryAlive(guid) || _downloadManager.isGuidForQueryDownloading(guid);
     }
     
     /**
