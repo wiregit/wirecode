@@ -30,12 +30,13 @@ public class RemoteContactTest extends MojitoTestCase {
         setLocalIsPrivate(false);
         
         // External Port == 0 -> force firewalled if it isn't!
+        // even w/o calling fix..
         RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
                 null, Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 0), 0, Contact.DEFAULT_FLAG);
         
         assertNull(node1.getSourceAddress());
-        assertFalse(node1.isFirewalled());
+        assertTrue(node1.isFirewalled());
         
         node1.fixSourceAndContactAddress(new InetSocketAddress("localhost", 1024));
         
