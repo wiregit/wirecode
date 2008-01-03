@@ -4,6 +4,7 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.Sequence;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
@@ -48,6 +49,7 @@ public class RequeryManagerTest extends LimeTestCase {
     private DownloadManager downloadManager;
     private MyAltLocFinder altLocFinder;
     private Mockery mockery;
+    private Sequence sequence;
     
     public void setUp() throws Exception {
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
@@ -56,6 +58,7 @@ public class RequeryManagerTest extends LimeTestCase {
         mockery = new Mockery();
         requeryListener = mockery.mock(RequeryListener.class);
         downloadManager = mockery.mock(DownloadManager.class);
+        sequence = mockery.sequence("Sequence");
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
            @Override
@@ -95,7 +98,8 @@ public class RequeryManagerTest extends LimeTestCase {
         dhtManager.on = true;
         RequeryManager requeryManager = requeryManagerFactory.createRequeryManager(requeryListener);
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         requeryManager.activate();
         requeryManager.sendQuery();
@@ -103,9 +107,11 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.isWaitingForResults());
         assertFalse(altLocFinder.cancelled);
         
-        mockery.checking(new Expectations() {{
-            one(requeryListener).lookupFinished(QueryType.DHT);
-        }});
+        // We're stubbing out the Shutdownable, so it doesn't actually notify us it finished..
+        // but we do check to make sure it was cancelled.
+//        mockery.checking(new Expectations() {{
+//            one(requeryListener).lookupFinished(QueryType.DHT);
+//        }});
         
         requeryManager.cleanUp();
         assertTrue(altLocFinder.cancelled);
@@ -137,10 +143,11 @@ public class RequeryManagerTest extends LimeTestCase {
         dhtManager.on = true;
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertTrue(requeryManager.canSendQueryNow());
-        requeryManager.sendQuery();
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
+        requeryManager.sendQuery();
         assertSame(requeryManager, altLocFinder.listener);
         
         // But immediately after, requires an activate (for gnet query)
@@ -149,14 +156,15 @@ public class RequeryManagerTest extends LimeTestCase {
         
         // but if some time passes, a dht query will work again.
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupFinished(QueryType.DHT);
+            one(requeryListener).lookupFinished(QueryType.DHT); inSequence(sequence);
         }});
         requeryManager.handleAltLocSearchDone(false);
         PrivilegedAccessor.setValue(requeryManager, "lastQuerySent", 1);
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         // and we should start a lookup
         requeryManager.sendQuery();
@@ -166,7 +174,7 @@ public class RequeryManagerTest extends LimeTestCase {
         
         // make sure after that lookup finishes, can still do gnet 
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupFinished(QueryType.DHT);
+            one(requeryListener).lookupFinished(QueryType.DHT); inSequence(sequence);
         }});
         requeryManager.handleAltLocSearchDone(false);
         assertTrue(requeryManager.canSendQueryAfterActivate());
@@ -175,7 +183,7 @@ public class RequeryManagerTest extends LimeTestCase {
         // some time passes, but we've hit our dht queries limit
         // can still send gnet though
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupFinished(QueryType.DHT);
+            one(requeryListener).lookupFinished(QueryType.DHT); inSequence(sequence);
         }});
         requeryManager.handleAltLocSearchDone(false);
         PrivilegedAccessor.setValue(requeryManager, "lastQuerySent", 1);
@@ -200,13 +208,13 @@ public class RequeryManagerTest extends LimeTestCase {
         final QueryRequest queryRequest = mockery.mock(QueryRequest.class);
         // first try a requery that will not work
         mockery.checking(new Expectations() {{
-            one(requeryListener).createQuery();
+            one(requeryListener).createQuery(); inSequence(sequence);
             will(returnValue(queryRequest));
+
+            one(downloadManager).sendQuery(with(same(queryRequest))); inSequence(sequence);
             
-            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);
-            
-            one(downloadManager).sendQuery(with(same(queryRequest)));
-            
+            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES); inSequence(sequence);
+           
         }});
         requeryManager.sendQuery();
         assertNull(altLocFinder.listener); // should not try dht
@@ -226,7 +234,7 @@ public class RequeryManagerTest extends LimeTestCase {
         RequeryManager requeryManager = requeryManagerFactory.createRequeryManager(requeryListener);
         requeryManager.activate();
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupPending(QueryType.GNUTELLA, 750);
+            one(requeryListener).lookupPending(QueryType.GNUTELLA, 750); inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertTrue(requeryManager.canSendQueryAfterActivate());
@@ -234,17 +242,16 @@ public class RequeryManagerTest extends LimeTestCase {
         
         // now we get connected
         RequeryManager.NO_DELAY = true;
-        requeryManager.sendQuery();
         final QueryRequest queryRequest = mockery.mock(QueryRequest.class);
         mockery.checking(new Expectations() {{
-            one(requeryListener).createQuery();
+            one(requeryListener).createQuery(); inSequence(sequence);
             will(returnValue(queryRequest));
             
-            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);
+            one(downloadManager).sendQuery(with(same(queryRequest))); inSequence(sequence);
             
-            one(downloadManager).sendQuery(with(same(queryRequest)));
-            
+            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES); inSequence(sequence);
         }});
+        requeryManager.sendQuery();
         // should be sent.
         assertFalse(requeryManager.canSendQueryAfterActivate());
         assertFalse(requeryManager.canSendQueryNow());
@@ -258,13 +265,12 @@ public class RequeryManagerTest extends LimeTestCase {
         final QueryRequest queryRequest = mockery.mock(QueryRequest.class);
         // first try a requery that will not work
         mockery.checking(new Expectations() {{
-            one(requeryListener).createQuery();
+            one(requeryListener).createQuery(); inSequence(sequence);
             will(returnValue(queryRequest));
             
-            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);
+            one(downloadManager).sendQuery(with(same(queryRequest)));  inSequence(sequence);
             
-            one(downloadManager).sendQuery(with(same(queryRequest)));
-            
+            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);  inSequence(sequence);            
         }});
         requeryManager.activate();
         requeryManager.sendQuery();
@@ -283,7 +289,8 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         // and we should start a lookup
         requeryManager.sendQuery();
@@ -293,8 +300,8 @@ public class RequeryManagerTest extends LimeTestCase {
         
         // make sure after that lookup finishes, we still can't do gnet 
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupFinished(QueryType.DHT);
-        }});
+            one(requeryListener).lookupFinished(QueryType.DHT);  inSequence(sequence);
+        }}); 
         requeryManager.handleAltLocSearchDone(false);
         assertFalse(requeryManager.canSendQueryAfterActivate());
         assertFalse(requeryManager.canSendQueryNow());
@@ -305,7 +312,8 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager, altLocFinder.listener);
@@ -328,7 +336,8 @@ public class RequeryManagerTest extends LimeTestCase {
         
         // with dht on, start a requery
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager, altLocFinder.listener);
@@ -349,13 +358,12 @@ public class RequeryManagerTest extends LimeTestCase {
         final QueryRequest queryRequest = mockery.mock(QueryRequest.class);
         // first try a requery that will not work
         mockery.checking(new Expectations() {{
-            one(requeryListener).createQuery();
+            one(requeryListener).createQuery();  inSequence(sequence);
             will(returnValue(queryRequest));
             
-            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);
+            one(downloadManager).sendQuery(with(same(queryRequest)));  inSequence(sequence);
             
-            one(downloadManager).sendQuery(with(same(queryRequest)));
-            
+            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);  inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertTrue(requeryManager.isWaitingForResults());
@@ -379,13 +387,14 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager, altLocFinder.listener); // sent a DHT query
         assertTrue(requeryManager.isWaitingForResults());
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupFinished(QueryType.DHT);
+            one(requeryListener).lookupFinished(QueryType.DHT);  inSequence(sequence);
         }});
         requeryManager.handleAltLocSearchDone(false); // finish it
         assertFalse(requeryManager.isWaitingForResults());
@@ -399,13 +408,12 @@ public class RequeryManagerTest extends LimeTestCase {
         final QueryRequest queryRequest = mockery.mock(QueryRequest.class);
         // first try a requery that will not work
         mockery.checking(new Expectations() {{
-            one(requeryListener).createQuery();
+            one(requeryListener).createQuery();  inSequence(sequence);
             will(returnValue(queryRequest));
             
-            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);
-            
-            one(downloadManager).sendQuery(with(same(queryRequest)));
-            
+            one(downloadManager).sendQuery(with(same(queryRequest)));  inSequence(sequence);
+
+            one(requeryListener).lookupStarted(QueryType.GNUTELLA, RequeryManager.TIME_BETWEEN_REQUERIES);  inSequence(sequence);
         }});
         requeryManager.sendQuery();       
         assertTrue(requeryManager.isWaitingForResults());
@@ -422,7 +430,8 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager, altLocFinder.listener); // sent a DHT query
@@ -431,7 +440,7 @@ public class RequeryManagerTest extends LimeTestCase {
         // now turn the dht off
         dhtManager.on = false;
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupFinished(QueryType.DHT);
+            one(requeryListener).lookupFinished(QueryType.DHT);  inSequence(sequence);
         }});
         requeryManager.handleDHTEvent(new DHTEvent(new NullDHTController(), DHTEvent.Type.STOPPED));
         assertFalse(requeryManager.isWaitingForResults());
@@ -446,7 +455,8 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
-            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());
+            one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
+            one(requeryListener).getSHA1Urn(); inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager, altLocFinder.listener); // sent a DHT query

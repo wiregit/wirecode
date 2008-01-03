@@ -208,7 +208,7 @@ public class MagnetDownloader extends ManagedDownloader {
      * Overrides ManagedDownloader to use the query words 
      * specified by the MAGNET URI.
      */
-    protected QueryRequest newRequery(int numRequeries)
+    protected QueryRequest newRequery()
         throws CantResumeException {
         MagnetOptions magnet = getMagnet();
 		String textQuery = magnet.getQueryString();

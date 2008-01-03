@@ -166,7 +166,7 @@ public class ResumeDownloader extends ManagedDownloader {
 
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */
-    protected QueryRequest newRequery(int numRequeries) {
+    protected QueryRequest newRequery() {
         // Extract a query string from our filename.
         String queryName = QueryUtils.createQueryString(getDefaultFileName());
 

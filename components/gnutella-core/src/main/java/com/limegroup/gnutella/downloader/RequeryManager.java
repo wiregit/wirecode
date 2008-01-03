@@ -42,9 +42,9 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
     
     private final RequeryListener requeryListener;
     
-    private final DownloadManager manager;
+    private final DownloadManager downloadManager;
     
-    private final AltLocFinder finder;
+    private final AltLocFinder altLocFinder;
     
     private final DHTManager dhtManager;
     
@@ -77,8 +77,8 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
             DHTManager dhtManager,
             ConnectionServices connectionServices) {
         this.requeryListener = requeryListener;
-        this.manager = manager;
-        this.finder = finder;
+        this.downloadManager = manager;
+        this.altLocFinder = finder;
         this.dhtManager = dhtManager;
         this.connectionServices = connectionServices;
         dhtManager.addEventListener(this);
@@ -193,7 +193,7 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
         requeryListener.lookupStarted(QueryType.DHT, Math.max(TIME_BETWEEN_REQUERIES, 
                 LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
       
-        dhtQuery = finder.findAltLocs(requeryListener.getSHA1Urn(), this);
+        dhtQuery = altLocFinder.findAltLocs(requeryListener.getSHA1Urn(), this);
     }
     
     /** Sends a Gnutella Query */
@@ -202,7 +202,7 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
         if (hasStableConnections()) {
             QueryRequest qr = requeryListener.createQuery();
             if(qr != null) {
-                manager.sendQuery(qr);
+                downloadManager.sendQuery(qr);
                 LOG.debug("Sent a gnutella requery!");
                 sentGnutellaQuery = true;
                 lastQueryType = QueryType.GNUTELLA;
@@ -222,11 +222,11 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
      * How long we'll wait before attempting to download again after checking
      * for stable connections (and not seeing any)
      */
-    private static final int CONNECTING_WAIT_TIME = 750;
+    private static final int CONNECTING_WAIT_TIME     = 750;
     private static final int MIN_NUM_CONNECTIONS      = 2;
     private static final int MIN_CONNECTION_MESSAGES  = 6;
     private static final int MIN_TOTAL_MESSAGES       = 45;
-    public static boolean   NO_DELAY                 = false; // For testing
+            static boolean   NO_DELAY                 = false; // For testing
     
     /**
      *  Determines if we have any stable connections to send a requery down.

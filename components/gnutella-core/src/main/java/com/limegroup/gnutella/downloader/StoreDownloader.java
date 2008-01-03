@@ -77,7 +77,7 @@ public class StoreDownloader extends ManagedDownloader {
      * since we can't requery the store
      */
     @Override
-    public QueryRequest newRequery(int numRequeries)
+    public QueryRequest newRequery()
         throws CantResumeException {
             return null;
     }

@@ -91,7 +91,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         //create a valid download
         StoreDownloader downloader = (StoreDownloader) downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
         
-        assertNull(downloader.newRequery(9) );
+        assertNull(downloader.newRequery() );
         
         assertFalse(downloader.allowAddition(null));
         

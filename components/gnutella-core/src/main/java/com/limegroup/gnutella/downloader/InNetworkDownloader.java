@@ -144,9 +144,9 @@ public class InNetworkDownloader extends ManagedDownloader {
     /**
      * Sends a targetted query for this.
      */
-    protected synchronized QueryRequest newRequery(int numRequeries) 
+    protected synchronized QueryRequest newRequery() 
     throws CantResumeException {
-        QueryRequest qr = super.newRequery(numRequeries);
+        QueryRequest qr = super.newRequery();
         qr.setTTL((byte)2);
         return qr;
     }

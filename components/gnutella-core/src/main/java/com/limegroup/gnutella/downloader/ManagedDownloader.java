@@ -1161,21 +1161,12 @@ public class ManagedDownloader extends AbstractDownloader
 
     /** 
      * Returns a new QueryRequest for requery purposes.  Subclasses may wish to
-     * override this to be more or less specific.  Note that the requery will
-     * not be sent if global limits are exceeded.<p>
+     * override this to be more or less specific.<p>
      *
-     * Since there are no more AUTOMATIC requeries, subclasses are advised to
-     * stop using createRequery(...).  All attempts to 'requery' the network is
-     * spawned by the user, so use createQuery(...) .  The reason we need to
-     * use createQuery is because DownloadManager.sendQuery() has a global
-     * limit on the number of requeries sent by LW (as IDed by the guid), but
-     * it allows normal queries to always be sent.
-     *
-     * @param numRequeries the number of requeries that have already happened
      * @exception CantResumeException if this doesn't know what to search for 
 	 * @return a new <tt>QueryRequest</tt> for making the requery
      */
-    protected synchronized QueryRequest newRequery(int numRequeries)
+    protected synchronized QueryRequest newRequery()
       throws CantResumeException {
 		    
         String queryString = QueryUtils.createQueryString(getDefaultFileName());
@@ -3055,7 +3046,7 @@ public class ManagedDownloader extends AbstractDownloader
     private class RequeryListenerImpl implements RequeryListener {
         public QueryRequest createQuery() {
             try {
-                return newRequery(0);
+                return newRequery();
             } catch(CantResumeException cre) {
                 return null;
             }

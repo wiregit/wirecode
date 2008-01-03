@@ -70,7 +70,7 @@ public class GnutellaDownloaderFactoryImpl implements GnutellaDownloaderFactory 
             Provider<SourceRankerFactory> sourceRankerFactory,
             Provider<ContentManager> contentManager, Provider<SavedFileManager> savedFileManager,
             Provider<DiskController> diskController,
-            Provider<VerifyingFileFactory> verifyingFileFactory, Provider<IPFilter> ipFilter,
+            Provider<VerifyingFileFactory> verifyingFileFactory, @Named("ipFilter") Provider<IPFilter> ipFilter,
             Provider<TigerTreeCache> tigerTreeCache, Provider<MessageRouter> messageRouter,
             ApplicationServices applicationServices,
             @Named("backgroundExecutor") Provider<ScheduledExecutorService> backgroundExecutor) {

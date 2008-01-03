@@ -201,7 +201,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         try {
             ResumeDownloader rd = (ResumeDownloader) in.readObject();
             rd.initialize();
-            QueryRequest qr = rd.newRequery(0);
+            QueryRequest qr = rd.newRequery();
             URN _hash = (URN) PrivilegedAccessor.getValue(rd, "_hash");
             if (expectHash) {
                 assertEquals("unexpected hash", hash, _hash);
