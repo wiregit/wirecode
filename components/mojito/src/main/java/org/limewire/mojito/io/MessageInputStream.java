@@ -249,8 +249,6 @@ public class MessageInputStream extends DataInputStream {
         }
         
         int port = readPort();
-        if (!NetworkUtils.isValidPort(port))
-            return null;
         return new InetSocketAddress(addr, port);
     }
     

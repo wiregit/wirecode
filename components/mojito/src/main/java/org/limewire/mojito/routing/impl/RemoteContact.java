@@ -59,28 +59,28 @@ public class RemoteContact implements Contact {
     private final int instanceId;
     
     /** The IP:Port of the Contact as reported in the IP Packet */
-    private transient SocketAddress sourceAddress;
+    private transient volatile SocketAddress sourceAddress;
     
     /** The IP:Port of the Contact as reported in the DHTMessage */
-    private SocketAddress contactAddress;
+    private volatile SocketAddress contactAddress;
     
     /** The Round Trip Time (RTT) */
     private transient long rtt = -1L;
     
     /** The time of the last successful contact */
-    private long timeStamp = 0L;
+    private volatile long timeStamp = 0L;
     
     /** The time of the last unsuccessful contact  */
-    private long lastFailedTime = 0L;
+    private volatile long lastFailedTime = 0L;
     
     /** The number of errors that have occurred */
-    private int failures = 0;
+    private volatile int failures = 0;
     
     /** The current state of the Node */
-    private transient State state = State.UNKNOWN;
+    private transient volatile State state = State.UNKNOWN;
     
     /** Whether or not this Node is firewalled */
-    private int flags = DEFAULT_FLAG;
+    private volatile int flags = DEFAULT_FLAG;
     
     public RemoteContact(SocketAddress sourceAddress, Vendor vendor, Version version, 
             KUID nodeId, SocketAddress contactAddress, 
@@ -109,6 +109,14 @@ public class RemoteContact implements Contact {
             
             fixSourceAndContactAddress(sourceAddress);
         }
+        
+        checkPortConsistent();
+    }
+    
+    private void checkPortConsistent() {
+        int port = ((InetSocketAddress)contactAddress).getPort();
+        if (port == 0)
+            setFirewalled(true);
     }
     
     private void init() {
@@ -124,7 +132,7 @@ public class RemoteContact implements Contact {
      * set the sourceAddress as contactAddress and marks this Contact
      * as firewalled.
      */
-    public void fixSourceAndContactAddress(SocketAddress sourceAddress) {
+    public final void fixSourceAndContactAddress(SocketAddress sourceAddress) {
         if (sourceAddress != null) {
             this.sourceAddress = sourceAddress;
             
@@ -140,7 +148,7 @@ public class RemoteContact implements Contact {
                 }
                 
                 contactAddress = sourceAddress;
-                setFirewalled(true); // Force Firewalled!
+                checkPortConsistent();
                 
             } else if (!NetworkSettings.ACCEPT_FORCED_ADDRESS.getValue()) {
                 // If the source address is a PRIVATE address then 
