@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
 
-
 /**
  * Unit tests for IntervalSet
  */
@@ -860,6 +859,30 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(32, interval.getHigh()); 
     }
     
+    public void testDeleteLarge() throws Exception {
+        // to test the narrowRange method we need a min number of intervals 
+        for (int i = 0; i < IntervalSet.LINEAR * 2 + 4; i+=2)
+            iSet.add(Range.createRange(0x1L << i, (0x1L << (i+1)) - 1));
+        assertGreaterThan(IntervalSet.LINEAR, iSet.getNumberOfIntervals());
+        iSet.delete(new Interval(20,80));
+        List<Range> listr = iSet.getAllIntervalsAsList();
+        assertEquals(1, listr.get(0).getLow());
+        assertEquals(1, listr.get(0).getHigh());
+        assertEquals(4, listr.get(1).getLow());
+        assertEquals(7, listr.get(1).getHigh());
+        assertEquals(16, listr.get(2).getLow());
+        assertEquals(19, listr.get(2).getHigh());
+        assertEquals(81, listr.get(3).getLow());
+        assertEquals(127, listr.get(3).getHigh());
+        
+        // the rest unchanged
+        for (int i = 4; i < listr.size() ; i++) {
+            assertEquals(0x1L << (i*2), listr.get(i).getLow());
+            assertEquals((0x1L << (i*2+1)) - 1, listr.get(i).getHigh());
+        }
+        
+    }
+    
     public void testGetFirstAndIsEmpty() {
         iSet = IntervalSet.createSingletonSet(0,4);
         iSet.add(new Interval(17));
@@ -921,7 +944,28 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(new Interval(0, 99), inverted.getAllIntervals().next());
         iSet.add(new Interval(0, 100));
         inverted = iSet.invert(0);
-        assertEquals(0, inverted.getAllIntervalsAsList().size());        
+        assertEquals(0, inverted.getAllIntervalsAsList().size());
+        
+        iSet.clear();
+        iSet.add(new Interval(10,20));
+        iSet.add(new Interval(50,60));
+        inverted = iSet.invert(100);
+        assertEquals(3,inverted.getNumberOfIntervals());
+        List<Range> invl = inverted.getAllIntervalsAsList();
+        assertEquals(0,invl.get(0).getLow());
+        assertEquals(9,invl.get(0).getHigh());
+        assertEquals(21, invl.get(1).getLow());
+        assertEquals(49, invl.get(1).getHigh());
+        assertEquals(61, invl.get(2).getLow());
+        assertEquals(99, invl.get(2).getHigh());
+        
+        inverted = iSet.invert(50);
+        assertEquals(2,inverted.getNumberOfIntervals());
+        invl = inverted.getAllIntervalsAsList();
+        assertEquals(0,invl.get(0).getLow());
+        assertEquals(9,invl.get(0).getHigh());
+        assertEquals(21, invl.get(1).getLow());
+        assertEquals(49, invl.get(1).getHigh());
     }
     
     public void testClone() {
@@ -981,6 +1025,14 @@ public class IntervalSetTest extends BaseTestCase {
         iSet.add(new Interval(1645963,1835007));
         iSet.add(new Interval(2077669,2228223));
         assertTrue(iSet.contains(new Interval(1542374,1543397)));  
+    }
+    
+    public void testContainsAny() throws Exception {
+        iSet.add(new Interval(10, 20));
+        assertTrue(iSet.containsAny(new Interval(0,10)));
+        assertTrue(iSet.containsAny(new Interval(20,30)));
+        assertTrue(iSet.containsAny(new Interval(0,30)));
+        assertTrue(iSet.containsAny(new Interval(15,16)));
     }
     
     ///// Private helper methods ///// 

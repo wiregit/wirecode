@@ -51,7 +51,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     /** 
      * size below which binary search is not worth it.  Total guess..
      */
-    private static final int LINEAR = 16;
+    static final int LINEAR = 16;
     
     /**
      * Mask that tests if a range is at 1kb boundary.
