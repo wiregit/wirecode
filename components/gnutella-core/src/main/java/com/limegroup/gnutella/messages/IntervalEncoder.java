@@ -45,9 +45,9 @@ public class IntervalEncoder {
         byte [] b24B = new byte[b24.size() * 3];
         for (int i = 0; i < b24.size(); i++) {
             int value = b24.get(i);
-            b24B[i] = (byte)((value & 0xFF0000) >> 16);
-            b24B[i+1] = (byte)((value & 0xFF00) >> 8);
-            b24B[i+2] = (byte)(value & 0xFF);
+            b24B[i*3] = (byte)((value & 0xFF0000) >> 16);
+            b24B[i*3 + 1] = (byte)((value & 0xFF00) >> 8);
+            b24B[i*3 + 2] = (byte)(value & 0xFF);
         }
         
         byte [] intsB = new byte[ints.size() * 4];

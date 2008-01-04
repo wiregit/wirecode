@@ -18,7 +18,7 @@ public class IntervalEncoderTest extends LimeTestCase {
     public static Test suite() {
         return buildTestSuite(IntervalEncoderTest.class);
     }
-    
+
     /** 
      * tests that empty interval sets are not the same as non-existent ones
      */
@@ -194,5 +194,27 @@ public class IntervalEncoderTest extends LimeTestCase {
         assertEquals(1, decoded.getNumberOfIntervals());
         assertEquals(r, decoded.getFirst());
     }
+    
+    
+    public void testPR3Fix() throws Exception {
+        GGEP g = new GGEP();
+        final long size = 733765632;
+        IntervalSet s = new IntervalSet();
+        s.add(Range.createRange(500000, 505000));
+        s.add(Range.createRange(600000, 605000));
+        IntervalEncoder.encode(size, g, s);
+        assertNotNull(g.get("PR3"));
+        byte [] b = g.get("PR3");
+        assertGreaterThan(3, b.length);
+        IntervalSet decoded = IntervalEncoder.decode(size, g);
+        assertEquals(2, decoded.getNumberOfIntervals());
+        
+        // both decoded intervals are sub-intervals of the originals
+        assertGreaterThanOrEquals(500000, decoded.getFirst().getLow());
+        assertGreaterThanOrEquals(600000, decoded.getLast().getLow());
+        assertLessThanOrEquals(505000, decoded.getFirst().getHigh());
+        assertLessThanOrEquals(605000, decoded.getLast().getHigh());
+    }
+    
 
 }
