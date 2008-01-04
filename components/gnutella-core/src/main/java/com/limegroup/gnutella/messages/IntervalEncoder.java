@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.collection.IntervalSet;
-import org.limewire.util.Base32;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -114,13 +113,8 @@ public class IntervalEncoder {
                         nodeId |= (b[j + k] & 0xFF);
                     }
                     
-                    try {
-                        ret.decode(size, nodeId);
-                    } catch (IllegalArgumentException iae) {
-                        // something went wrong - this will be treated as a network error
-                        // once we're sure its not an encoding issue
-                        throw new IllegalArgumentException("key "+key+" with size "+size+" raw data "+Base32.encode(b), iae);
-                    }
+                    if (!ret.decode(size, nodeId))
+                        throw new BadGGEPPropertyException("bad id "+nodeId);
                 }
             }
         }

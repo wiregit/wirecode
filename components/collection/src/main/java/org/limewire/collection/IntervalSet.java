@@ -437,15 +437,19 @@ public class IntervalSet implements Iterable<Range>, Serializable{
      * 
      * @param maxSize the size of the file
      * @param id integers from the encoding
+     * @return true if the decoding succeeded
      */
-    public void decode(long maxSize, Integer... id) {
+    public boolean decode(long maxSize, Integer... id) {
         long numLeafs = getNumLeafs(maxSize);
         TreeStorage ts = new TreeStorage(null, new NodeGenerator.NullGenerator(), (int)numLeafs);
         for (int i : id) {
+            if (!ts.isValidId(i))
+                return false;
             int [] nodes = ts.nodeToFileId(i);
             Range r = Range.createRange(nodes[0] * 1024L, Math.min((nodes[1]+1) * 1024L - 1, maxSize-1));
             add(r);
         }
+        return true;
     }
     
     private static int getNumLeafs(long size) {

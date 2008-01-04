@@ -216,5 +216,15 @@ public class IntervalEncoderTest extends LimeTestCase {
         assertLessThanOrEquals(605000, decoded.getLast().getHigh());
     }
     
+    public void testInvalid() throws Exception {
+        GGEP g = new GGEP();
+        byte [] pr1 = new byte[]{100};
+        g.put("PR1",pr1);
+        try {
+            IntervalEncoder.decode(1024, g);
+            fail("should not decode invalid value");
+        } catch (BadGGEPPropertyException expected){}
+    }
+    
 
 }
