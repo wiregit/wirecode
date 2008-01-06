@@ -1,17 +1,18 @@
 package org.limewire.lws.server;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.lws.server.LWSSenderOfMessagesToServer;
-import org.limewire.lws.server.StringCallback;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.params.HttpProtocolParams;
+import org.limewire.io.IOUtils;
+import org.limewire.http.HttpClientManager;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 
@@ -137,8 +138,7 @@ public final class LocalServerDelegate {
                try { tmpSock = socketsManager.connect(new InetSocketAddress(host,port), 5000);} catch (IOException e) { /* skip */ }
                 if (tmpSock != null) break;
             } 
-            final Socket sock = tmpSock; 
-            BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream())); 
+            final Socket sock = tmpSock;
             //
             // We'll always be adding this from the web page
             // to ensure a new script is loaded
@@ -146,45 +146,24 @@ public final class LocalServerDelegate {
             Map<String,String> newArgs = new HashMap<String,String>(args);
             newArgs.put("_f", String.valueOf(System.currentTimeMillis()));
             String request = ctor.constructURL(msg, newArgs);
-            wr.write("GET /" + request + " HTTP/1.1\n\r\n\r");
-            wr.flush();
-            BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-            StringBuffer sb = new StringBuffer();
-            //
-            // We will have a similar response and can only give
-            // StringCallbacks the actual response
-            //
-            // HTTP/1.1 200 OK
-            // Last-modified: Fri, 19-10-2007 14:38:54 GMT
-            // Server: null
-            // Date: Fri Oct 19 14:38:54 EDT 2007
-            // Content-length: 2
-            //   
-            // ok
-            //
-            // So just extract the 'ok'
-            //
-            String ln;
-            boolean reading = false;
-            //
-            // Read past the header
-            //
-            while ((ln = in.readLine()) != null) {
-                if (reading) {
-                    sb.append(ln);
-                    sb.append("\n");
-                } else if (ln.equals("") || ln.equals("\n")) {
-                    reading = true;
+
+            HttpClient client = HttpClientManager.getNewClient(sock);
+            HttpGet get = new HttpGet("/" + request);
+            HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
+            
+            HttpResponse response = client.execute(get);
+
+            if(response.getEntity() != null) {
+                String res = "";
+                byte [] body = IOUtils.readFully(response.getEntity().getContent());
+                if(body.length > 0) {
+                    res = new String(body);
                 }
+                IOUtils.close(sock);
+                
+                cb.process(res);
             }
-            String res = sb.toString();
-            
-            in.close();
-            wr.close();
-            sock.close();
-            
-            cb.process(res);
-        } catch (IOException e) {
+        } catch (Exception e) {
             ErrorService.error(e, "trying to connect on " + host + ":" + port);
         }
     }

@@ -7,13 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.limewire.http.HttpClientManager;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
 
@@ -39,6 +38,8 @@ import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
+import junit.framework.Test;
+
 public class HTTPUploaderTest extends LimeTestCase {
 
     private static final int PORT = 6668;
@@ -58,6 +59,8 @@ public class HTTPUploaderTest extends LimeTestCase {
     private FileDescStub fd1;
 
     private Acceptor acceptor;
+    
+    private String host;
 
     public HTTPUploaderTest(String name) {
         super(name);
@@ -108,13 +111,9 @@ public class HTTPUploaderTest extends LimeTestCase {
 
         ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
-        
-        HostConfiguration config = new HostConfiguration();
-        config.setHost("localhost", PORT);
 
-        client = new HttpClient();
-        client.setHostConfiguration(config);
-        client.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
+        client = new DefaultHttpClient();
+        host = "http://localhost:" + PORT;
     }
 
     @Override
@@ -129,24 +128,25 @@ public class HTTPUploaderTest extends LimeTestCase {
     }
 
     public void testChatAndBrowseEnabled() throws Exception {
-        GetMethod method = new GetMethod("/uri-res/N2R?" + urn1);
+        HttpGet method = new HttpGet(host + "/uri-res/N2R?" + urn1);
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertEquals(1, cb.uploads.size());
             HTTPUploader uploader = (HTTPUploader) cb.uploads.get(0);
             assertFalse(uploader.isChatEnabled());
             assertFalse(uploader.isBrowseHostEnabled());
             assertEquals("127.0.0.1", uploader.getHost());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
-        method = new GetMethod("/uri-res/N2R?" + urn1);
-        method.addRequestHeader("X-Features", "chat/0.1");
+        method = new HttpGet(host + "/uri-res/N2R?" + urn1);
+        method.addHeader("X-Features", "chat/0.1");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertEquals(1, cb.uploads.size());
             HTTPUploader uploader = (HTTPUploader) cb.uploads.get(0);
             assertFalse(uploader.isChatEnabled());
@@ -154,15 +154,15 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals("127.0.0.1", uploader.getHost());
 
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
-        method = new GetMethod("/uri-res/N2R?" + urn1);
-        method.addRequestHeader("X-Node", "123.123.123.123:456");
-        method.addRequestHeader("X-Features", "chat/0.1");
+        method = new HttpGet(host + "/uri-res/N2R?" + urn1);
+        method.addHeader("X-Node", "123.123.123.123:456");
+        method.addHeader("X-Features", "chat/0.1");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertEquals(1, cb.uploads.size());
             HTTPUploader uploader = (HTTPUploader) cb.uploads.get(0);
             assertTrue(uploader.isChatEnabled());
@@ -170,14 +170,14 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals(456, uploader.getGnutellaPort());
             assertEquals("123.123.123.123", uploader.getHost());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
-        method = new GetMethod("/uri-res/N2R?" + urn1);
-        method.addRequestHeader("Chat", "123.123.123.123:456");
+        method = new HttpGet(host + "/uri-res/N2R?" + urn1);
+        method.addHeader("Chat", "123.123.123.123:456");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertEquals(1, cb.uploads.size());
             HTTPUploader uploader = (HTTPUploader) cb.uploads.get(0);
             assertTrue(uploader.isChatEnabled());
@@ -185,22 +185,23 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals(456, uploader.getGnutellaPort());
             assertEquals("123.123.123.123", uploader.getHost());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
     }
 
     public void testAmountRead() throws Exception {
         HTTPUploader uploader;
-        GetMethod method = new GetMethod("/get/0/" + fd1.getFileName());
+        HttpGet method = new HttpGet(host + "/get/0/" + fd1.getFileName());
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertEquals(1, cb.uploads.size());
 
             uploader = (HTTPUploader) cb.uploads.get(0);
             assertEquals(UploadType.SHARED_FILE, uploader.getUploadType());
 
-            InputStream in = method.getResponseBodyAsStream();
+            InputStream in = response.getEntity().getContent();
 
             LimeTestUtils.readBytes(in, 500);
             Thread.sleep(500);
@@ -210,7 +211,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             Thread.sleep(500);
             assertGreaterThanOrEquals(1000, uploader.amountUploaded());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         LimeTestUtils.waitForNIO();
         assertEquals(UploadStatus.COMPLETE, uploader.getState());

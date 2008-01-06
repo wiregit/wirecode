@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.io.CopyStreamException;
+import org.apache.http.HttpException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
@@ -65,7 +67,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 	abstract protected String getFtpPath();
 	abstract protected boolean isFtpDirPreMade();
 	
-	abstract protected void checkin() throws IOException;
+	abstract protected void checkin() throws IOException, HttpException, URISyntaxException, InterruptedException;
 
 	
 	/**
@@ -100,10 +102,10 @@ abstract class ArchiveContribution extends AbstractContribution {
 	 * 		   or if java's xml parser is configured badly
 	 */
 	
-	public void upload() throws UnknownHostException, SocketException, 
-	FTPConnectionClosedException, LoginFailedException,
-	DirectoryChangeFailedException, CopyStreamException, 
-	RefusedConnectionException, IOException {
+	public void upload() throws UnknownHostException, SocketException,
+            FTPConnectionClosedException, LoginFailedException,
+            DirectoryChangeFailedException, CopyStreamException,
+            RefusedConnectionException, IOException, HttpException, URISyntaxException, InterruptedException {
 		
 		final int  NUM_XML_FILES = 2;
 		final String META_XML_SUFFIX = "_meta.xml";

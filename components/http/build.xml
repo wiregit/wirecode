@@ -17,14 +17,18 @@
         <do.setup-properties component="http">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-				<pathelement location="${limewire.lib.jars}/commons-httpclient.jar"/>
-				<pathelement location="${limewire.lib.jars}/httpcore.jar"/>
-				<pathelement location="${limewire.lib.jars}/httpcore-nio.jar"/>
-			    <path refid="build.limewire.components.common.buildpath"/>
+				<pathelement location="${limewire.lib.jars}/httpclient-4.0-alpha2.jar"/>
+				<pathelement location="${limewire.lib.jars}/httpcore-4.0-alpha6.jar"/>
+				<pathelement location="${limewire.lib.jars}/httpcore-nio-4.0-alpha6.jar"/>
+                <pathelement location="${limewire.lib.jars}/httpcore-niossl-4.0-alpha6.jar"/>
+                <path refid="build.limewire.components.common.buildpath"/>
 			    <path refid="build.limewire.components.io.buildpath"/>
 			    <path refid="build.limewire.components.nio.buildpath"/>
 			    <path refid="build.limewire.components.net.buildpath"/>
 			</src-classpath>
+            <build-tests-classpath>
+                <path refid="tests.limewire.components.net.classpath"/>
+            </build-tests-classpath>
         </do.setup-properties>
     </target>
 	

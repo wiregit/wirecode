@@ -2,6 +2,9 @@ package com.limegroup.gnutella.archive;
 
 import java.io.IOException;
 import java.util.Set;
+import java.net.URISyntaxException;
+
+import org.apache.http.HttpException;
 
 import com.limegroup.gnutella.FileDesc;
 
@@ -16,7 +19,7 @@ public interface Contribution {
 	 * @return normalized identifier
 	 */
 	public String requestIdentifier(String identifier)
-			throws IdentifierUnavailableException, IOException;
+            throws IdentifierUnavailableException, IOException, HttpException, URISyntaxException, InterruptedException;
 
 	/**
 	 * only call this after having successfully called requestIdentifier()
@@ -24,7 +27,7 @@ public interface Contribution {
 	 */
 	public String getIdentifier();
 
-	public void upload() throws IOException;
+	public void upload() throws IOException, HttpException, URISyntaxException, InterruptedException;
 
 	public void addFileDesc(FileDesc fd);
 

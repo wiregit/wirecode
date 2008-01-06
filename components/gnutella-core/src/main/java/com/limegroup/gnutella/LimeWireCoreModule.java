@@ -10,6 +10,7 @@ import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
@@ -217,6 +218,7 @@ public class LimeWireCoreModule extends AbstractModule {
     protected void configure() {
         binder().install(new LimeWireCommonModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
+        binder().install(new LimeWireHttpModule());
         
         bind(LimeWireCore.class);
         

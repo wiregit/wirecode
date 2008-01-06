@@ -1,15 +1,16 @@
 package com.limegroup.gnutella.lws.server;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.limewire.http.HttpClientManager;
+import org.limewire.io.IOUtils;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.net.HttpClientManager;
 
 
 /**
@@ -27,28 +28,28 @@ class CommandSender {
      * @param callback TODO
      */
     public String sendMessage(String command, Map<String, String> args) {
-        String url = "http://localhost:" + LocalServerImpl.PORT + "/" 
-        + LWSDispatcher.PREFIX
-            + LocalServerDelegate.NormalStyleURLConstructor.INSTANCE.constructURL(command,args);
-        final GetMethod get = new GetMethod(url);
-        //
-        // This is going to block, but that should be OK. This code will never
-        // run in the client and really should be running outside, because it
-        // represents making a call in Javascript from a web page
-        //
-        HttpClient client = HttpClientManager.getNewClient();
-        String res = null;
+        String url = "http://localhost:" + (LocalServerImpl.PORT )  + "/"
+                + LWSDispatcher.PREFIX
+                + LocalServerDelegate.NormalStyleURLConstructor.INSTANCE.constructURL(command, args);
+        HttpResponse response = null;
         try {
-            HttpClientManager.executeMethodRedirecting(client,get);
-            res = get.getResponseBodyAsString();
-        } catch (HttpException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            final HttpGet get = new HttpGet(url);
+            //
+            // This is going to block, but that should be OK. This code will never
+            // run in the client and really should be running outside, because it
+            // represents making a call in Javascript from a web page
+            //
+            HttpClient client = HttpClientManager.getNewClient();
+            response = client.execute(get);
+            if (response.getEntity() != null) {
+                return new String(IOUtils.readFully(response.getEntity().getContent()));
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            get.releaseConnection();
+            HttpClientManager.close(response);
         }
-        return res;
+        return null;
     }
 
     public void detach() {

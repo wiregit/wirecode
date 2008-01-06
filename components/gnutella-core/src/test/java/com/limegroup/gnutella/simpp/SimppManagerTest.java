@@ -2,8 +2,8 @@ package com.limegroup.gnutella.simpp;
 
 import java.io.File;
 
-import junit.framework.Test;
-
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -19,6 +19,8 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.Test;
 
 
 public class SimppManagerTest extends LimeTestCase {
@@ -82,7 +84,7 @@ public class SimppManagerTest extends LimeTestCase {
     }
 
     public void setUp() throws Exception {
-        
+        //Logger.getRootLogger().setLevel(Level.DEBUG);
         setSettings();
         
     }

@@ -18,15 +18,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
 import org.hamcrest.Description;
 import org.hamcrest.Matchers;
@@ -34,7 +34,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
-import org.limewire.net.HttpClientManager;
+import org.limewire.http.HttpClientManager;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.AbstractModule;
@@ -70,10 +70,10 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -82,6 +82,9 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
 
 public class AltLocUploadTest extends LimeTestCase {
 
@@ -92,23 +95,23 @@ public class AltLocUploadTest extends LimeTestCase {
 
     private static final String fileName = "alphabet test file#2.txt";
 
-    private static final String fileNameUrl = "/get/0/alphabet%20test+file%232.txt";
+    private static final String fileNameUrl = "http://localhost:" + PORT + "/get/0/alphabet%20test+file%232.txt";
 
     /** The hash of the file contents. */
     private static final String baseHash = "GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
     
     private static final String hash = "urn:sha1:" + baseHash;
 
-    private static final String hashUrl = "/uri-res/N2R?" + hash;
+    private static final String hashUrl = "http://localhost:" + PORT + "/uri-res/N2R?" + hash;
     
     /**
      * Features for push loc testing.
      */
-    private final static Header FALTFeatures = new Header(
+    private final static Header FALTFeatures = new BasicHeader(
             HTTPHeaderName.FEATURES.httpStringValue(),
             ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE.httpStringValue());
 
-    private final static Header FWALTFeatures = new Header(
+    private final static Header FWALTFeatures = new BasicHeader(
             HTTPHeaderName.FEATURES.httpStringValue(),
             ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE.httpStringValue());
 
@@ -185,12 +188,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 
-        HostConfiguration config = new HostConfiguration();
-        config.setHost("localhost", PORT);
-
-        client = HttpClientManager.getNewClient();
-        client.setHostConfiguration(config);
-        client.setHttpConnectionManager(new MultiThreadedHttpConnectionManager());
+        client = new DefaultHttpClient();
     }
 
     @Override
@@ -248,14 +246,15 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(3, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        GetMethod method = new GetMethod(fileNameUrl);
-        method.addRequestHeader("X-Alt", "");
+        HttpGet method = new HttpGet(fileNameUrl);
+        method.addHeader("X-Alt", "");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNull(method.getResponseHeader("X-Falt"));
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNull(response.getFirstHeader("X-Falt"));
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         assertEquals(1, uploadManager.activeUploads.size());
@@ -287,19 +286,20 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(3, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        GetMethod method = new GetMethod(fileNameUrl);
-        method.addRequestHeader(FALTFeatures);
+        HttpGet method = new HttpGet(fileNameUrl);
+        method.addHeader(FALTFeatures);
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-FAlt"));
-            String value = method.getResponseHeader("X-FAlt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-FAlt"));
+            String value = response.getFirstHeader("X-FAlt").getValue();
             assertEquals((push.httpStringValue() + ","
                     + pushFwt.httpStringValue()).length(), value.length());
             assertTrue(value.contains(push.httpStringValue()));
             assertTrue(value.contains(pushFwt.httpStringValue()));
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         assertEquals(1, uploadManager.activeUploads.size());
@@ -332,16 +332,17 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(3, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        GetMethod method = new GetMethod(fileNameUrl);
-        method.addRequestHeader(FWALTFeatures);
+        HttpGet method = new HttpGet(fileNameUrl);
+        method.addHeader(FWALTFeatures);
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-FAlt"));
-            String value = method.getResponseHeader("X-FAlt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-FAlt"));
+            String value = response.getFirstHeader("X-FAlt").getValue();
             assertEquals(pushFwt.httpStringValue(), value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         assertEquals(1, uploadManager.activeUploads.size());
@@ -363,14 +364,15 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(0, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        GetMethod method = new GetMethod(fileNameUrl);
-        method.addRequestHeader("X-Alt", direct.httpStringValue());
-        method.addRequestHeader("X-FAlt", push.httpStringValue());
+        HttpGet method = new HttpGet(fileNameUrl);
+        method.addHeader("X-Alt", direct.httpStringValue());
+        method.addHeader("X-FAlt", push.httpStringValue());
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         assertEquals(2, altLocManager.getNumLocs(
@@ -387,97 +389,99 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
    public void testAlternateLocationAddAndRemove() throws Exception {
-        // add a simple marker alt so we know it only contains that
-        AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
-        altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
-        try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
-            assertEquals("1.1.1.1:1", value);
-        } finally {
-            method.releaseConnection();
-        }
-        
-        // ensure that one removal doesn't stop it.
-        altLocManager.remove(al, null);
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
-        try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
-            assertEquals("1.1.1.1:1", value);
-        } finally {
-            method.releaseConnection();
-        }
+       // add a simple marker alt so we know it only contains that
+       AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
+       altLocManager.add(al, null);
+       HttpGet method = new HttpGet(hashUrl);
+       method.addHeader("Connection", "close");
+       HttpResponse response = null;
+       try {
+           response = client.execute(method);
+           assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+           assertNotNull(response.getFirstHeader("X-Alt"));
+           String value = response.getFirstHeader("X-Alt").getValue();
+           assertEquals("1.1.1.1:1", value);
+       } finally {
+           HttpClientManager.close(response);
+       }
 
-        // add a second one, so we can check to make sure
-        // another removal removes the first one.
-        AlternateLocation al2 = alternateLocationFactory.create("2.2.2.2:2", hashURN);
-        altLocManager.add(al2, null);
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
-        try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
-            assertEquals("2.2.2.2:2,1.1.1.1:1".length(), value.length());
-            assertTrue(value.contains("1.1.1.1:1"));
-            assertTrue(value.contains("2.2.2.2:2"));
-        } finally {
-            method.releaseConnection();
-        }
+       // ensure that one removal doesn't stop it.
+       altLocManager.remove(al, null);
+       method = new HttpGet(hashUrl);
+       method.addHeader("Connection", "close");
+       try {
+           response = client.execute(method);
+           assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+           assertNotNull(response.getFirstHeader("X-Alt"));
+           String value = response.getFirstHeader("X-Alt").getValue();
+           assertEquals("1.1.1.1:1", value);
+       } finally {
+           HttpClientManager.close(response);
+       }
 
-        // remove the first guy again, should only have loc2 left.
-        altLocManager.remove(al, null);
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
-        try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
-            assertEquals("2.2.2.2:2", value);
-        } finally {
-            method.releaseConnection();
-        }
-    }
+       // add a second one, so we can check to make sure
+       // another removal removes the first one.
+       AlternateLocation al2 = alternateLocationFactory.create("2.2.2.2:2", hashURN);
+       altLocManager.add(al2, null);
+       method = new HttpGet(hashUrl);
+       method.addHeader("Connection", "close");
+       try {
+           response = client.execute(method);
+           assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+           assertNotNull(response.getFirstHeader("X-Alt"));
+           String value = response.getFirstHeader("X-Alt").getValue();
+           assertEquals("2.2.2.2:2,1.1.1.1:1".length(), value.length());
+           assertTrue(value.contains("1.1.1.1:1"));
+           assertTrue(value.contains("2.2.2.2:2"));
+       } finally {
+           HttpClientManager.close(response);
+       }
+
+       // remove the first guy again, should only have loc2 left.
+       altLocManager.remove(al, null);
+       method = new HttpGet(hashUrl);
+       method.addHeader("Connection", "close");
+       try {
+           response = client.execute(method);
+           assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+           assertNotNull(response.getFirstHeader("X-Alt"));
+           String value = response.getFirstHeader("X-Alt").getValue();
+           assertEquals("2.2.2.2:2", value);
+       } finally {
+           HttpClientManager.close(response);
+       }
+   }
 
     public void testSentHeaderIsUsed() throws Exception {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
+        HttpGet method = new HttpGet(hashUrl);
+        method.addHeader("Connection", "close");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // add a header that gives a new location.
         AlternateLocation sendAl = alternateLocationFactory.create("2.2.2.2:2", hashURN);
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", sendAl.httpStringValue());
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-Alt", sendAl.httpStringValue());
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // make sure the FD has that loc now.
@@ -492,32 +496,32 @@ public class AltLocUploadTest extends LimeTestCase {
         assertTrue(alts.contains(sendAl));
 
         // make sure a request will give us both locs now.
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("2.2.2.2:2,1.1.1.1:1".length(), value.length());
             assertTrue(value.contains("1.1.1.1:1"));
             assertTrue(value.contains("2.2.2.2:2"));
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // demote the location (don't remove)
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", sendAl.httpStringValue());
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-NAlt", sendAl.httpStringValue());
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // should still have it.
@@ -529,17 +533,17 @@ public class AltLocUploadTest extends LimeTestCase {
         assertTrue(alts.contains(sendAl));
 
         // now remove
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", sendAl.httpStringValue());
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-NAlt", sendAl.httpStringValue());
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         assertEquals("unexpected number of locs", 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
@@ -549,36 +553,37 @@ public class AltLocUploadTest extends LimeTestCase {
         // Add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
+        HttpGet method = new HttpGet(hashUrl);
+        method.addHeader("Connection", "close");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // now try a header without a port, should be 6346.
         AlternateLocation sendAl = alternateLocationFactory.create("2.3.4.5:6346", hashURN);
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", "2.3.4.5");
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-Alt", "2.3.4.5");
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // nake sure the FD has that loc now.
         AlternateLocationCollection<DirectAltLoc> alc = altLocManager
-        .getDirect(fd.getSHA1Urn());
+                .getDirect(fd.getSHA1Urn());
         assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         List<DirectAltLoc> alts = new LinkedList<DirectAltLoc>();
         for (Iterator<DirectAltLoc> it = alc.iterator(); it.hasNext();) {
@@ -596,36 +601,37 @@ public class AltLocUploadTest extends LimeTestCase {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
+        HttpGet method = new HttpGet(hashUrl);
+        method.addHeader("Connection", "close");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // add a header that gives a new location.
         AlternateLocation al1 = alternateLocationFactory.create("1.2.3.1:1", hashURN);
         AlternateLocation al2 = alternateLocationFactory.create("1.2.3.2:2", hashURN);
         AlternateLocation al3 = alternateLocationFactory.create("1.2.3.4:6346", hashURN);
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", al1.httpStringValue() + ", " + 
-                                al2.httpStringValue() + ", " + al3.httpStringValue());
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-Alt", al1.httpStringValue() + ", " +
+                al2.httpStringValue() + ", " + al3.httpStringValue());
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
-        
+
         // make sure the FD has that loc now.
         AlternateLocationCollection<DirectAltLoc> alc = altLocManager
                 .getDirect(fd.getSHA1Urn());
@@ -640,28 +646,28 @@ public class AltLocUploadTest extends LimeTestCase {
         assertTrue(alts.contains(al3));
 
         // demote
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", "1.2.3.1:1, " + al2.httpStringValue() + ", " + al3.httpStringValue());
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-NAlt", "1.2.3.1:1, " + al2.httpStringValue() + ", " + al3.httpStringValue());
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // should still have it
         assertEquals("wrong # locs", 4, alc.getAltLocsSize());
 
         // remove
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NAlt", al1.httpStringValue() + ", 1.2.3.2:2, " + al3.httpStringValue());
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-NAlt", al1.httpStringValue() + ", 1.2.3.2:2, " + al3.httpStringValue());
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         assertEquals("wrong # locs", 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
@@ -688,14 +694,15 @@ public class AltLocUploadTest extends LimeTestCase {
         altLocManager.add(bcd, null);
         assertEquals(1, altLocManager.getNumLocs(urn));
 
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NFAlt", abcHttp);
-        method.addRequestHeader("Connection", "close");
+        HttpGet method = new HttpGet(hashUrl);
+        method.addHeader("X-NFAlt", abcHttp);
+        method.addHeader("Connection", "close");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // two of the proxies of bcd should be gone
@@ -706,14 +713,14 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // now repeat, sending all three original proxies of bce as NFAlts
         //Thread.sleep(1000);
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-NFAlt", bcdHttp);
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-NFAlt", bcdHttp);
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // all proxies should be gone, and bcd should be removed from
@@ -731,31 +738,32 @@ public class AltLocUploadTest extends LimeTestCase {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
+        HttpGet method = new HttpGet(hashUrl);
+        method.addHeader("Connection", "close");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // add an invalid alt
         String invalidAddr = "http://0.0.0.0:6346/uri-res/N2R?" + hash;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", invalidAddr);
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-Alt", invalidAddr);
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         // FD should still only have 1
         AlternateLocationCollection alc = altLocManager
@@ -764,17 +772,17 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(al, alc.iterator().next());
 
         invalidAddr = "http://255.255.255.255:6346/uri-res/N2R?" + hash;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", invalidAddr);
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-Alt", invalidAddr);
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
@@ -782,34 +790,34 @@ public class AltLocUploadTest extends LimeTestCase {
 
         // add an invalid port
         String invalidPort = "http://1.2.3.4:0/uri-res/N2R?" + hash;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", invalidPort);
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-Alt", invalidPort);
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
 
         invalidPort = "http://1.2.3.4:-2/uri-res/N2R?" + hash;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("X-Alt", invalidPort);
-        method.addRequestHeader("Connection", "close");
+        method = new HttpGet(hashUrl);
+        method.addHeader("X-Alt", invalidPort);
+        method.addHeader("Connection", "close");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
@@ -820,16 +828,17 @@ public class AltLocUploadTest extends LimeTestCase {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.setHttp11(false);
+        HttpGet method = new HttpGet(hashUrl);
+        HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         for (int i = 0; i < 20; i++) {
@@ -849,15 +858,15 @@ public class AltLocUploadTest extends LimeTestCase {
                 + pre + 12 + post + comma + pre + 1 + post + comma + pre + 14
                 + post + comma + pre + 11 + post + comma + pre + 0 + post
                 + comma + pre + "1:1";
-        method = new GetMethod(hashUrl);
-        method.setHttp11(false);
+        method = new HttpGet(hashUrl);
+        HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
     }
 
@@ -882,16 +891,17 @@ public class AltLocUploadTest extends LimeTestCase {
         int i = 0;
         try {
             for (i = 0; i < 10; i++) {
-                GetMethod method = new GetMethod(hashUrl);
-                method.addRequestHeader("Connection", "close");
+                HttpGet method = new HttpGet(hashUrl);
+                method.addHeader("Connection", "close");
+                HttpResponse response = null;
                 try {
-                    int response = client.executeMethod(method);
-                    assertEquals(HttpStatus.SC_OK, response);
-                    assertNotNull(method.getResponseHeader("X-Alt"));
-                    String value = method.getResponseHeader("X-Alt").getValue();
+                    response = client.execute(method);
+                    assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+                    assertNotNull(response.getFirstHeader("X-Alt"));
+                    String value = response.getFirstHeader("X-Alt").getValue();
                     assertEquals("1.1.1.1:1", value);
                 } finally {
-                    method.releaseConnection();
+                    HttpClientManager.close(response);
                 }
             }
             fail("altloc didn't expire");
@@ -960,16 +970,17 @@ public class AltLocUploadTest extends LimeTestCase {
         int i = 0;
         try {
             for (; i < 20; i++) {
-                GetMethod method = new GetMethod(hashUrl);
-                method.addRequestHeader("Connection", "close");
+                HttpGet method = new HttpGet(hashUrl);
+                method.addHeader("Connection", "close");
+                HttpResponse response = null;
                 try {
-                    int response = client.executeMethod(method);
-                    assertEquals(HttpStatus.SC_OK, response);
-                    assertNotNull(method.getResponseHeader("X-Alt"));
-                    String value = method.getResponseHeader("X-Alt").getValue();
+                    response = client.execute(method);
+                    assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+                    assertNotNull(response.getFirstHeader("X-Alt"));
+                    String value = response.getFirstHeader("X-Alt").getValue();
                     assertEquals("1.1.1.1:1", value);
                 } finally {
-                    method.releaseConnection();
+                    HttpClientManager.close(response);
                 }
             }
             fail("altloc didn't expire");
@@ -1120,16 +1131,17 @@ public class AltLocUploadTest extends LimeTestCase {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
+        HttpGet method = new HttpGet(hashUrl);
+        method.addHeader("Connection", "close");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         for (int i = 0; i < 20; i++) {
@@ -1151,15 +1163,15 @@ public class AltLocUploadTest extends LimeTestCase {
                 + pre + 12 + post + comma + pre + 1 + post + comma + pre + 14
                 + post + comma + pre + 11 + post + comma + pre + 0 + post
                 + comma + pre + "1:1";
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=0-1");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=0-1");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         required = pre + 5 + post + comma + pre + 2 + post + comma
@@ -1167,42 +1179,42 @@ public class AltLocUploadTest extends LimeTestCase {
                 + post + comma + pre + 17 + post + comma + pre + 6 + post
                 + comma + pre + 3 + post + comma + pre + 19 + post + comma
                 + pre + 8 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=2-3");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=2-3");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         required = pre + 9 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=4-5");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=4-5");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         // Now if some more are added to file desc, make sure they're reported.
         altLocManager.add(
                 alternateLocationFactory.create("1.1.1.99:6346", hashURN), null);
         required = pre + 99 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=6-7");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=6-7");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
     }
 
@@ -1210,16 +1222,17 @@ public class AltLocUploadTest extends LimeTestCase {
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
-        GetMethod method = new GetMethod(hashUrl);
-        method.addRequestHeader("Connection", "close");
+        HttpGet method = new HttpGet(hashUrl);
+        method.addHeader("Connection", "close");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            String value = method.getResponseHeader("X-Alt").getValue();
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
         // get rid of it.
         altLocManager.remove(al, null);
@@ -1275,15 +1288,15 @@ public class AltLocUploadTest extends LimeTestCase {
                 + pre + 44 + post + comma + pre + 45 + post + comma + pre + 46
                 + post + comma + pre + 47 + post + comma + pre + 48 + post
                 + comma + pre + 49 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=0-1");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=0-1");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         required = pre + 16 + post + comma + pre + 13 + post
@@ -1291,15 +1304,15 @@ public class AltLocUploadTest extends LimeTestCase {
                 + pre + 15 + post + comma + pre + 12 + post + comma + pre + 17
                 + post + comma + pre + 14 + post + comma + pre + 11 + post
                 + comma + pre + 19 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=2-3");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=2-3");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         required = pre + 35 + post + comma + pre + 32 + post
@@ -1307,15 +1320,15 @@ public class AltLocUploadTest extends LimeTestCase {
                 + pre + 31 + post + comma + pre + 39 + post + comma + pre + 36
                 + post + comma + pre + 33 + post + comma + pre + 30 + post
                 + comma + pre + 38 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=4-5");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=4-5");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         required = pre + 5 + post + comma + pre + 2 + post + comma
@@ -1323,15 +1336,15 @@ public class AltLocUploadTest extends LimeTestCase {
                 + post + comma + pre + 9 + post + comma + pre + 6 + post
                 + comma + pre + 3 + post + comma + pre + 0 + post + comma + pre
                 + 8 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=6-7");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=6-7");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
 
         required = pre + 24 + post + comma + pre + 21 + post
@@ -1339,15 +1352,15 @@ public class AltLocUploadTest extends LimeTestCase {
                 + pre + 23 + post + comma + pre + 20 + post + comma + pre + 28
                 + post + comma + pre + 25 + post + comma + pre + 22 + post
                 + comma + pre + 27 + post;
-        method = new GetMethod(hashUrl);
-        method.addRequestHeader("Range", "bytes=8-9");
+        method = new HttpGet(hashUrl);
+        method.addHeader("Range", "bytes=8-9");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response);
-            assertNotNull(method.getResponseHeader("X-Alt"));
-            assertHeaderEquals(required, method.getResponseHeader("X-Alt").getValue());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
+            assertNotNull(response.getFirstHeader("X-Alt"));
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.close(response);
         }
     }
 
@@ -1359,16 +1372,17 @@ public class AltLocUploadTest extends LimeTestCase {
         altLocManager.add(al, null);
 
         for (int i = 0; i < 10; i++) {
-            GetMethod method = new GetMethod(hashUrl);
-            method.addRequestHeader("Connection", "close");
+            HttpGet method = new HttpGet(hashUrl);
+            method.addHeader("Connection", "close");
+            HttpResponse response = null;
             try {
-                int response = client.executeMethod(method);
-                assertEquals(HttpStatus.SC_OK, response);
-                assertNotNull(method.getResponseHeader("X-Alt"));
-                String value = method.getResponseHeader("X-Alt").getValue();
+                response = client.execute(method);
+                assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+                assertNotNull(response.getFirstHeader("X-Alt"));
+                String value = response.getFirstHeader("X-Alt").getValue();
                 assertEquals("1.1.1.1:1", value);
             } finally {
-                method.releaseConnection();
+                HttpClientManager.close(response);
             }
             Thread.sleep(8 * 1000);
         }

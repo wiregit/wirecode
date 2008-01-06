@@ -2,15 +2,18 @@ package com.limegroup.gnutella.archive;
 
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.net.URISyntaxException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.Header;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicHeader;
+import org.limewire.http.HttpClientManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,8 +22,8 @@ import org.xml.sax.SAXException;
 class ArchiveRequest {
 
 	private final String _url;
-	private final NameValuePair[] _parameters;
-	private PostMethod _post; 
+	private final BasicHeader[] _parameters;
+	private HttpPost _post; 
 	
 	private ArchiveResponse _response;
 		
@@ -31,7 +34,7 @@ class ArchiveRequest {
 		_parameters = null;
 	}
 	
-	ArchiveRequest( String url, NameValuePair[] parameters ) {
+	ArchiveRequest( String url, BasicHeader[] parameters ) {
 		_url = url;
 		_parameters = parameters;		
 	}
@@ -46,30 +49,38 @@ class ArchiveRequest {
 	 *         If java's xml parser is broken
 	 */
 		
-	void execute() throws BadResponseException, HttpException, 
-	IOException {
+	void execute() throws BadResponseException,
+            IOException, URISyntaxException, HttpException, InterruptedException {
+
+        final HttpPost post;
+        post = new HttpPost( _url );
+        post.addHeader("Content-type","application/x-www-form-urlencoded");
+		post.addHeader("Accept","text/plain");
+		for(Header header : _parameters) {
+            post.addHeader(header);
+        }
 	
-		final PostMethod post = new PostMethod( _url );
-		post.addRequestHeader("Content-type","application/x-www-form-urlencoded");
-		post.addRequestHeader("Accept","text/plain");
-		post.addParameters( _parameters );
-	
-		final HttpClient client = new HttpClient();
+		final HttpClient client = HttpClientManager.getNewClient();
 				
 		synchronized(this) {
 			_post = post;
 		}
 		
-		client.executeMethod( post );
+		HttpResponse response = client.execute( post );
 		
-		final String responseString = post.getResponseBodyAsString();
-		final InputStream responseStream = post.getResponseBodyAsStream();
+		// TODO final String responseString = post.getResponseBodyAsString();
+        InputStream responseStream;
+        if(response.getEntity() != null) {
+            responseStream = response.getEntity().getContent();
+        } else {
+            throw new BadResponseException("no HTTP response body");
+        }
 		
 		synchronized(this) {
 			_post = null;
 		}
 		
-		post.releaseConnection();
+		 HttpClientManager.close(response);
 		
 		/*
 		 * kinds of responses we might get back:
@@ -118,7 +129,7 @@ class ArchiveRequest {
 		
 		if ( resultElement == null ) {
 			throw new BadResponseException( "No top level element <" + 
-					RESULT_ELEMENT + ">\n" + responseString );
+					RESULT_ELEMENT + ">\n"); // TODO + responseString );
 		}
 		
 		final String type = resultElement.getAttribute( TYPE_ATTR );
@@ -126,7 +137,7 @@ class ArchiveRequest {
 		if ( type.equals( "" ) ) {
 			throw new BadResponseException( "<" + RESULT_ELEMENT + 
 					"> element does not have a \"" + TYPE_ATTR + "" +
-					"\" attribute\n" + responseString );
+					"\" attribute\n"); // TODO + responseString );
 		}
 		
 		final String code = resultElement.getAttribute( CODE_ATTR );

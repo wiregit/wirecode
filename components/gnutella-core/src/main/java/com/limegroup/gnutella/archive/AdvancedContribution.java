@@ -2,9 +2,10 @@ package com.limegroup.gnutella.archive;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
+import java.net.URISyntaxException;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.HttpException;
 
 
 class AdvancedContribution extends ArchiveContribution {
@@ -106,9 +107,9 @@ class AdvancedContribution extends ArchiveContribution {
 		}
 	}
 
-	public String requestIdentifier(String identifier) 
-	throws IdentifierUnavailableException, BadResponseException, 
-	HttpException, IOException {
+	public String requestIdentifier(String identifier)
+            throws IdentifierUnavailableException, BadResponseException,
+            IOException, HttpException, URISyntaxException, InterruptedException {
 		
 		final String CREATE_ID_URL = "http://www.archive.org/services/check_identifier.php";
 		
@@ -119,8 +120,8 @@ class AdvancedContribution extends ArchiveContribution {
 		String nId = Archives.normalizeName( identifier );
 		
 		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
-					new NameValuePair( "identifier", nId )
+			_request = new ArchiveRequest( CREATE_ID_URL, new BasicHeader[] {
+					new BasicHeader( "identifier", nId )
 			});
 		}
 		
@@ -158,7 +159,7 @@ class AdvancedContribution extends ArchiveContribution {
 	}
 	
 
-	protected void checkin() throws HttpException, BadResponseException, IOException {
+	protected void checkin() throws BadResponseException, IOException, HttpException, URISyntaxException, InterruptedException {
 	
 		final String CHECKIN_URL = "http://www.archive.org/services/contrib-submit.php";
 		final String username = getUsername();
@@ -171,10 +172,10 @@ class AdvancedContribution extends ArchiveContribution {
 		}
 		
 		synchronized( _requestLock ) {
-			_request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
-					new NameValuePair( "user_email", username ),
-					new NameValuePair( "server", getFtpServer() ),
-					new NameValuePair( "dir", _identifier )
+			_request = new ArchiveRequest( CHECKIN_URL, new BasicHeader[] {
+					new BasicHeader( "user_email", username ),
+					new BasicHeader( "server", getFtpServer() ),
+					new BasicHeader( "dir", _identifier )
 			});
 		}
 		

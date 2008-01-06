@@ -1,17 +1,18 @@
 package com.limegroup.bittorrent.tracking;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.params.HttpConnectionParams;
+import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.net.HttpClientManager;
+import org.limewire.http.HttpClientManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
 
@@ -188,35 +189,41 @@ class Tracker {
 	 * @return InputStream
 	 */
 	private static TrackerResponse connectHTTP(URI uri, String query) {
-		HttpMethod get = new GetMethod(uri + query);
-		get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
-		get.addRequestHeader("Cache-Control", "no-cache");
-		get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
-				"close");
-		get.setFollowRedirects(true);
-		HttpClient client = HttpClientManager.getNewClient(
-				HTTP_TRACKER_TIMEOUT, HTTP_TRACKER_TIMEOUT);
-		try {
-			HttpClientManager.executeMethodRedirecting(client, get);
+        HttpResponse response = null;
+        try {
+            HttpGet get = new HttpGet(uri + query);
+            get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
+            get.addHeader("Cache-Control", "no-cache");
+            get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                    "close");
 
-			// response too long
-			if (get.getResponseContentLength() > 32768)
-				return null;
+            HttpClient client = HttpClientManager.getNewClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), HTTP_TRACKER_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(client.getParams(), HTTP_TRACKER_TIMEOUT);
 
-			byte[] response = get.getResponseBody();
-			
-			if (response == null)
-				return null;
+            response = client.execute(get);
+            // response too long
+            if (response.getEntity() != null) {
+                if (response.getEntity().getContentLength() > 32768) {
+                    return null;
+                }
 
-			if (LOG.isDebugEnabled())
-				LOG.debug(new String(response));
-			return new TrackerResponse(Token.parse(response));
-		} catch (IOException e) {
-			return null;
-		} finally {
-			get.releaseConnection();
-		}
-	}
+                byte[] body = IOUtils.readFully(response.getEntity().getContent());
+
+                if (body.length == 0)
+                    return null;
+
+                if (LOG.isDebugEnabled())
+                    LOG.debug(new String(body));
+                return new TrackerResponse(Token.parse(body));
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            HttpClientManager.close(response);
+        }
+    }
 
 	/**
 	 * helper method adding a field to the HTTP GET query string

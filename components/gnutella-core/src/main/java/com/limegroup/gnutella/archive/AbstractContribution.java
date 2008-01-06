@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.net.URISyntaxException;
+
+import org.apache.http.HttpException;
 
 import com.limegroup.gnutella.FileDesc;
 
@@ -52,8 +55,8 @@ abstract class AbstractContribution implements Contribution {
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#requestIdentifier(java.lang.String)
 	 */
-	abstract public String requestIdentifier( String identifier ) throws 
-        IdentifierUnavailableException, IOException;
+	abstract public String requestIdentifier( String identifier ) throws
+            IdentifierUnavailableException, IOException, HttpException, URISyntaxException, InterruptedException;
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#getIdentifier()
@@ -63,7 +66,7 @@ abstract class AbstractContribution implements Contribution {
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#upload()
 	 */
-	abstract public void upload() throws IOException;
+	abstract public void upload() throws IOException, HttpException, URISyntaxException, InterruptedException;
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#addFileDesc(com.limegroup.gnutella.FileDesc)

@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent.tracking;
 
-import org.apache.commons.httpclient.URI;
+import java.net.URI;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

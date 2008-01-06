@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.NIOSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
@@ -27,6 +28,10 @@ public interface SocketsManager {
             return factory;
         }
     }
+    
+    public Socket create(ConnectType type) throws IOException;
+    
+    public Socket connect(NBSocket socket, String localAddress, int localPort, InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
     
     /**
      * Connects and returns a socket to the given host, with a timeout.

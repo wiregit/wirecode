@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
@@ -35,7 +37,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
     private final Provider<ActivityCallback> activityCallback;
     private final SocketsManager socketsManager;
     private final Provider<PushDownloadManager> pushDownloadManager;
-    private final Provider<ForMeReplyHandler> forMeReplyHandler;
+    private final Provider<ReplyHandler> forMeReplyHandler;
 
     private final MessageFactory messageFactory;
 
@@ -45,7 +47,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
             Provider<ActivityCallback> activityCallback,
             SocketsManager socketsManager,
             Provider<PushDownloadManager> pushDownloadManager,
-            Provider<ForMeReplyHandler> forMeReplyHandler,
+            @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
             MessageFactory messageFactory) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
@@ -100,9 +102,18 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
-                        finalPRD.getBrowseHostHandler().browseExchange(socket);
-                    } catch (IOException ohWell) {
-                        LOG.debug("error while push transfer", ohWell);
+                        finalPRD.getBrowseHostHandler().browseHost(socket);
+                    } catch (IOException e) {
+                        LOG.debug("error while push transfer", e);
+                        finalPRD.getBrowseHostHandler().failed();
+                    } catch (HttpException e) {
+                        LOG.debug("error while push transfer", e);
+                        finalPRD.getBrowseHostHandler().failed();
+                    } catch (URISyntaxException e) {
+                        LOG.debug("error while push transfer", e);
+                        finalPRD.getBrowseHostHandler().failed();
+                    } catch (InterruptedException e) {
+                        LOG.debug("error while push transfer", e);
                         finalPRD.getBrowseHostHandler().failed();
                     }
                 }

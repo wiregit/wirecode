@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.Set;
 
-import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -183,15 +184,20 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         Set<URN> urns= new UrnSet();
         if (urn!=null)
             urns.add(urn);
-        
-        URI uri = new URI(url);
-        
+
+        URI uri = null;
+        try {
+            uri = new URI(url.toString());
+        } catch (URISyntaxException e) {
+            throw new IOException("malormed URL: " + url, e);
+        }
+
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
                 0l,             //index--doesn't matter since we won't push
                 filename != null ? filename : MagnetOptions.extractFileName(uri),
-                HTTPUtils.contentLength(url),
+                HTTPUtils.contentLength(uri),
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
                 false,          //no chat support

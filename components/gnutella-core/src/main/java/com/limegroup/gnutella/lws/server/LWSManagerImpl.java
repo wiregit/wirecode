@@ -6,9 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.net.URISyntaxException;
 
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSConnectionListener;
@@ -16,10 +21,10 @@ import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
 import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.LWSDispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
-import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -157,8 +162,13 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                                           final Map<String, String> args, 
                                           final StringCallback cb) throws IOException {
         String url = constructURL(msg, args);
-        final GetMethod get = new GetMethod(url);
-        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
+        final HttpGet get;
+        try {
+            get = new HttpGet(url);
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
+        get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         //
         // we don't care what this response is, because we are
         // always talking to the remote web server, so process it
@@ -166,19 +176,22 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         //
         //
         cb.process(Responses.OK);
-        exe.execute(get, new HttpClientListener() {
+        HttpParams params = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(params, 1000);
+        HttpConnectionParams.setSoTimeout(params, 1000);
+        exe.execute(get, params, new HttpClientListener() {
             
-            public boolean requestComplete(HttpMethod method) {
-                exe.releaseResources(get);
+            public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
+                exe.releaseResources(response);
                 return false;
             }
             
-            public boolean requestFailed(HttpMethod method, IOException exc) {
-                exe.releaseResources(get);
+            public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
+                exe.releaseResources(response);
                 return false;
             }
                     
-        }, 1000);
+        });
         
     }
     

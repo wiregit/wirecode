@@ -2,7 +2,9 @@ package com.limegroup.gnutella.http;
 
 import java.util.concurrent.ExecutorService;
 
-import org.apache.commons.httpclient.HttpMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.HttpParams;
 import org.limewire.collection.Cancellable;
 import org.limewire.nio.observer.Shutdownable;
 
@@ -19,7 +21,7 @@ public interface HttpExecutor {
      * This returns a Shutdownable that can be used to shutdown the execution
      * of requesting all methods, to stop the current processing.
 	 */
-	public Shutdownable execute(HttpMethod method, HttpClientListener listener, int timeout);
+	public Shutdownable execute(HttpUriRequest method, HttpParams params, HttpClientListener listener);
 	
 	/**
 	 * Execute the provided <tt>HttpMethod</tt> using the provided <tt>ThreadPool</tt>
@@ -28,9 +30,9 @@ public interface HttpExecutor {
      * This returns a Shutdownable that can be used to shutdown the execution
      * of requesting all methods, to stop the current processing.
 	 */
-	public Shutdownable execute(HttpMethod method, 
-			HttpClientListener listener,
-			int timeout,
+	public Shutdownable execute(HttpUriRequest method,
+            HttpParams params,
+            HttpClientListener listener,
 			ExecutorService executor);
 	
 	/**
@@ -42,9 +44,9 @@ public interface HttpExecutor {
      * of requesting all methods, to stop the current processing.
 	 */
 	public Shutdownable executeAny(HttpClientListener listener,
-			int timeout,
 			ExecutorService executor,
-			Iterable<? extends HttpMethod> methods,
+			Iterable<? extends HttpUriRequest> methods,
+            HttpParams params,
             Cancellable canceller);
 	
 	/**
@@ -52,5 +54,5 @@ public interface HttpExecutor {
 	 * The users of this class must call this method once they're done
 	 * processing their HttpMethod object.
 	 */
-	public void releaseResources(HttpMethod method);
+	public void releaseResources(HttpResponse method);
 }

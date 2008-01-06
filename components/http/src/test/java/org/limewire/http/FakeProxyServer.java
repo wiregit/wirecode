@@ -1,4 +1,4 @@
-package org.limewire.net;
+package org.limewire.http;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;

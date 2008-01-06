@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.archive;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.HttpException;
 
 class DirectContribution extends ArchiveContribution {
 
@@ -85,9 +86,9 @@ class DirectContribution extends ArchiveContribution {
 	 * 			If java's xml parser configuration is bad
 	 * 
 	 */
-	public String requestIdentifier(String identifier) 
-	throws IdentifierUnavailableException, BadResponseException, 
-	HttpException, IOException {
+	public String requestIdentifier(String identifier)
+            throws IdentifierUnavailableException, BadResponseException,
+            IOException, HttpException, URISyntaxException, InterruptedException {
 			
 			final String CREATE_ID_URL = "http://www.archive.org:80/create.php";
 			
@@ -97,10 +98,10 @@ class DirectContribution extends ArchiveContribution {
 			
 			String nId = Archives.normalizeName( identifier );
 			
-            ArchiveRequest request = new ArchiveRequest( CREATE_ID_URL, new NameValuePair[] {
-                    new NameValuePair( "xml", "1" ),
-                    new NameValuePair( "user", getUsername() ),
-                    new NameValuePair( "identifier", nId )});
+            ArchiveRequest request = new ArchiveRequest( CREATE_ID_URL, new BasicHeader[] {
+                    new BasicHeader( "xml", "1" ),
+                    new BasicHeader( "user", getUsername() ),
+                    new BasicHeader( "identifier", nId )});
 			synchronized( _requestLock ) {
 				_request = request;
 			}
@@ -169,7 +170,7 @@ class DirectContribution extends ArchiveContribution {
 	 *         If the checkin fails
 	 *
 	 */
-	protected void checkin() throws HttpException, BadResponseException, IOException {
+	protected void checkin() throws BadResponseException, IOException, HttpException, URISyntaxException, InterruptedException {
 		
 		final String CHECKIN_URL = "http://www.archive.org/checkin.php";
 		final String username = getUsername();
@@ -181,10 +182,10 @@ class DirectContribution extends ArchiveContribution {
 			throw new IllegalStateException( "identifier not set" );
 		}
 		
-        ArchiveRequest request = new ArchiveRequest( CHECKIN_URL, new NameValuePair[] {
-                new NameValuePair( "xml", "1" ),
-                new NameValuePair( "user", username ),
-                new NameValuePair( "identifier", _identifier )
+        ArchiveRequest request = new ArchiveRequest( CHECKIN_URL, new BasicHeader[] {
+                new BasicHeader( "xml", "1" ),
+                new BasicHeader( "user", username ),
+                new BasicHeader( "identifier", _identifier )
         }); 
 		synchronized( _requestLock ) {
 			_request = request; 

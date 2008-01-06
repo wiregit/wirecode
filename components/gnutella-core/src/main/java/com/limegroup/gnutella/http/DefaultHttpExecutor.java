@@ -3,11 +3,16 @@ package com.limegroup.gnutella.http;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.AbortableHttpRequest;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.HttpParams;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.net.HttpClientManager;
+import org.limewire.http.HttpClientManager;
+import org.limewire.io.IOUtils;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Singleton;
@@ -22,17 +27,16 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	private static final ExecutorService POOL = 
         ExecutorsHelper.newThreadPool("HttpClient pool");
 	
-	public Shutdownable execute(HttpMethod method, HttpClientListener listener, int timeout) {
-		return execute(method, listener, timeout, POOL);
+	public Shutdownable execute(HttpUriRequest method, HttpParams params, HttpClientListener listener) {
+		return execute(method, params, listener, POOL);
 	}
 
-	public Shutdownable execute(final HttpMethod method, final HttpClientListener listener,
-			final int timeout,
+	public Shutdownable execute(final HttpUriRequest method, final HttpParams params, final HttpClientListener listener,
 			ExecutorService executor) {
 		
 		Runnable r = new Runnable() {
 			public void run() {
-				performRequest(method, listener, timeout);		
+				performRequest(method, params, listener);		
 			}
 		};
 		executor.execute(r);
@@ -40,26 +44,32 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	}
 	
 	private class Aborter implements Shutdownable {
-		private final HttpMethod toAbort;
-		Aborter(HttpMethod toAbort) {
-			this.toAbort = toAbort;
-		}
+		private final AbortableHttpRequest toAbort;
+		Aborter(HttpUriRequest toAbort) {
+            if(toAbort instanceof AbortableHttpRequest) {
+                this.toAbort = (AbortableHttpRequest)toAbort;
+            } else {
+                this.toAbort = null;
+            }
+        }
 		
-		public void shutdown() {
-			toAbort.abort();
-		}
-	}
+        public void shutdown() {
+            if(toAbort != null) {
+                 toAbort.abort();
+            }
+        }
+    }
 	
-	public void releaseResources(HttpMethod method) {
-		method.releaseConnection();
+	public void releaseResources(HttpResponse response) {
+        HttpClientManager.close(response);
 	}
 
 	public Shutdownable executeAny(HttpClientListener listener, 
-                        		   int timeout,
-                                   ExecutorService executor, 
-                        		   Iterable<? extends HttpMethod> methods,
+                        		   ExecutorService executor, 
+                        		   Iterable<? extends HttpUriRequest> methods,
+                                   HttpParams params,
                                    Cancellable canceller) {
-		MultiRequestor r = new MultiRequestor(listener, timeout, methods, canceller);
+		MultiRequestor r = new MultiRequestor(listener, methods, params, canceller);
 		executor.execute(r);
 		return r;
 	}
@@ -69,36 +79,42 @@ public class DefaultHttpExecutor implements HttpExecutor {
      * Returns true if no more requests should be processed,
      * false if another request should be processed.
      */
-	private boolean performRequest(HttpMethod method, HttpClientListener listener, int timeout) {
-		HttpClient client = HttpClientManager.getNewClient(timeout, timeout);
-		try {
-			HttpClientManager.executeMethodRedirecting(client, method);
+	private boolean performRequest(HttpUriRequest method, HttpParams params, HttpClientListener listener) {
+		HttpClient client = HttpClientManager.getNewClient(params);
+
+        HttpResponse response;
+        try {
+			response = client.execute(method);
 		} catch (IOException failed) {
-			return !listener.requestFailed(method, failed);
-		} 
-		
-		return !listener.requestComplete(method);
+			return !listener.requestFailed(method, null, failed);
+		} catch (HttpException e) {
+            return !listener.requestFailed(method, null, new IOException(e));
+        } catch (InterruptedException e) {
+            return !listener.requestFailed(method, null, new IOException(e));
+        }
+
+        return !listener.requestComplete(method, response);
 	}
 	
     /** Runs all requests until the listener told it to not do anymore. */
 	private class MultiRequestor implements Runnable, Shutdownable {
 		private boolean shutdown;
-		private HttpMethod currentMethod;
-		private final Iterable<? extends HttpMethod> methods;
+		private HttpUriRequest currentMethod;
+		private final Iterable<? extends HttpUriRequest> methods;
 		private final HttpClientListener listener;
-		private final int timeout;
+        private HttpParams params;
         private final Cancellable canceller;
 		
-		MultiRequestor(HttpClientListener listener, int timeout, 
-				Iterable<? extends HttpMethod> methods, Cancellable canceller) {
+		MultiRequestor(HttpClientListener listener, 
+				Iterable<? extends HttpUriRequest> methods, HttpParams params, Cancellable canceller) {
 			this.methods = methods;
-			this.timeout = timeout;
 			this.listener = listener;
+            this.params = params;
             this.canceller = canceller;
 		}
 		
 		public void run() {
-			for (HttpMethod m : methods) {
+			for (HttpUriRequest m : methods) {
 				synchronized(this) {
 					if (shutdown)
 						return;
@@ -106,20 +122,21 @@ public class DefaultHttpExecutor implements HttpExecutor {
 				}
 				if (canceller.isCancelled())
 					return;
-				if (performRequest(m, listener, timeout))
+				if (performRequest(m, params, listener))
 					return;
 			}
 		}
 		
 		public void shutdown() {
-			HttpMethod m;
+			HttpUriRequest m;
 			synchronized (this) {
 				shutdown = true;
 				m = currentMethod;
 			}
-			if (m != null)
-				m.abort();
-		}
+			if (m != null) {
+				// m.abort();  TODO
+            }
+        }
 	}
 
 }

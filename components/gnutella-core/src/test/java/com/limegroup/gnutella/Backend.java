@@ -220,9 +220,10 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
         } else if (errorMonitor == null) {
             ServerSocket errorServer = null;
             try {
-                errorServer = new ServerSocket(ERROR_PORT);
+                errorServer = new ServerSocket(ERROR_PORT+1);
             } catch (IOException e) {
-                callback.error(e);
+                //e.printStackTrace();
+                //callback.error(e);
                 return;
             }
             errorMonitor = new ErrorMonitor(callback, errorServer);

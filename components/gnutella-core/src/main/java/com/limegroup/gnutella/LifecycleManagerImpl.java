@@ -16,7 +16,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.net.ConnectionDispatcher;
-import org.limewire.net.HttpClientManager;
+import org.limewire.http.HttpClientManager;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;

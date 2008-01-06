@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
 
@@ -14,6 +15,8 @@ import org.limewire.nio.observer.ConnectObserver;
  * can connect at a given time.
  */
 public interface SocketController {
+    
+    Socket connect(NBSocket socket, String localHost, int localPort, NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException;
 
     /** 
      * Enqueue's this socket for wanting a connection.

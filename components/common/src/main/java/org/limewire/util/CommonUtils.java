@@ -217,8 +217,10 @@ public class CommonUtils {
     			?  cl.getResource(fileName)
     			:  ClassLoader.getSystemResource(fileName);
                 
-            if(resource == null)
+            if(resource == null) {
+                // TODO this is swallowed in this method and silently ignored
                 throw new IOException("resource: " + fileName + " doesn't exist.");
+            }
             
             InputStream is = resource.openStream();
     		

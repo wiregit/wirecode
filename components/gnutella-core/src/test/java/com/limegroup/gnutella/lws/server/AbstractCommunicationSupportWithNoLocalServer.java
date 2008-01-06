@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.net.SocketsManager;
@@ -114,6 +116,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
     @Override
     protected final void setUp() throws Exception {
+        //Logger.getRootLogger().setLevel(Level.WARN);
         
         note("begin setUp");
 
