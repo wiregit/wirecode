@@ -760,8 +760,10 @@ public class UpdateHandlerImpl implements UpdateHandler {
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);
                         backgroundExecutor.schedule(new NotificationFailover(_lastId),delay,TimeUnit.MILLISECONDS);
-                    } else
+                    } else {
                         activityCallback.get().updateAvailable(updateInfo);
+                        connectionManager.get().sendUpdatedCapabilities();
+                    }
                 }
             }
         };
