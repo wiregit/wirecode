@@ -28,7 +28,6 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
@@ -149,21 +148,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
      */
     private final boolean HAS_GGEP_EXTENSION;
 
-    /**
-     * Cached constant for the vendor GGEP extension.
-     */
-    static final byte[] CACHED_VENDOR = new byte[5];
-    
-    // performs any necessary static initialization of fields,
-    // such as the vendor GGEP extension
-    static {
-        // set 'LIME'
-        System.arraycopy(LimeWireUtils.QHD_VENDOR_NAME.getBytes(),
-                         0, CACHED_VENDOR, 0,
-                         LimeWireUtils.QHD_VENDOR_NAME.getBytes().length);
-        CACHED_VENDOR[4] = convertToGUESSFormat(LimeWireUtils.getMajorVersionNumber(),
-                                         LimeWireUtils.getMinorVersionNumber());
-    }
+   
 
     /**
      * Constant for the locale
@@ -573,6 +558,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
      * @return the 4-character vendor code reported in the pong, or the
      *  empty string if no vendor code was successfully read
      */
+    @Deprecated
     public String getVendor() {
         return VENDOR;
     }
@@ -583,6 +569,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
      * @return the major version number of the vendor returning this pong,
      *  or -1 if the version could not be read
      */
+    @Deprecated
     public int getVendorMajorVersion() {
         return VENDOR_MAJOR_VERSION;
     }
@@ -592,6 +579,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
      * @return the minor version number of the vendor returning this pong,
      *  or -1 if the version could not be read
      */
+    @Deprecated
     public int getVendorMinorVersion() {
         return VENDOR_MINOR_VERSION;
     }
@@ -779,23 +767,6 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
     
     public byte[] getPayload() {
         return PAYLOAD;
-    }
-
-    /** puts major as the high order bits, minor as the low order bits.
-     *  @exception IllegalArgumentException thrown if major/minor is greater 
-     *  than 15 or less than 0.
-     */
-    static byte convertToGUESSFormat(int major, int minor) 
-        throws IllegalArgumentException {
-        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
-            throw new IllegalArgumentException();
-        // set major
-        int retInt = major;
-        retInt = retInt << 4;
-        // set minor
-        retInt |= minor;
-    
-        return (byte) retInt;
     }
     
     public Class<? extends Message> getHandlerClass() {

@@ -42,9 +42,12 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private final Provider<DHTManager> dhtManager;
     private final LocalPongInfo localPongInfo;
     private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
+    
+    /** Cached constant for the vendor GGEP extension.*/
+    private final byte[] CACHED_VENDOR = new byte[5];
 
-    @Inject
     // TODO: All these objects should be folded into LocalPongInfo
+    @Inject
     public PingReplyFactoryImpl(NetworkManager networkManager,
             Provider<Statistics> statistics, Provider<UDPService> udpService,
             Provider<ConnectionManager> connectionManager,
@@ -60,6 +63,11 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         this.dhtManager = dhtManager;
         this.localPongInfo = localPongInfo;
         this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
+        
+        // set 'LIME'
+        System.arraycopy(LimeWireUtils.QHD_VENDOR_NAME.getBytes(), 0, CACHED_VENDOR, 0,
+                LimeWireUtils.QHD_VENDOR_NAME.getBytes().length);
+        CACHED_VENDOR[4] = 0;
     }
 
     public PingReply create(byte[] guid, byte ttl,
@@ -368,7 +376,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
         if (isGUESSCapable && isUltrapeer) {
             // indicate guess support
-            byte[] vNum = { PingReplyImpl.convertToGUESSFormat(LimeWireUtils
+            byte[] vNum = { convertToGUESSFormat(LimeWireUtils
                     .getGUESSMajorVersionNumber(), LimeWireUtils
                     .getGUESSMinorVersionNumber()) };
             ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
@@ -382,7 +390,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         addDHTExtension(ggep);
 
         // all pongs should have vendor info
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, PingReplyImpl.CACHED_VENDOR);
+        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR);
 
         // add our support of TLS
         if (SSLSettings.isIncomingTLSEnabled())
@@ -494,7 +502,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private void addUltrapeerExtension(GGEP ggep) {
         byte[] payload = new byte[3];
         // put version
-        payload[0] = PingReplyImpl.convertToGUESSFormat(LimeWireUtils
+        payload[0] = convertToGUESSFormat(LimeWireUtils
                 .getUPMajorVersionNumber(), LimeWireUtils
                 .getUPMinorVersionNumber());
         payload[1] = localPongInfo.getNumFreeLimeWireLeafSlots();
@@ -620,6 +628,23 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             return 536870912; //1<<29
         else
             return 1073741824; //1<<30
+    }
+    
+    /** puts major as the high order bits, minor as the low order bits.
+     *  @exception IllegalArgumentException thrown if major/minor is greater 
+     *  than 15 or less than 0.
+     */
+    @Deprecated // this is broken!
+    private byte convertToGUESSFormat(int major, int minor) throws IllegalArgumentException {
+        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
+            throw new IllegalArgumentException();
+        // set major
+        int retInt = major;
+        retInt = retInt << 4;
+        // set minor
+        retInt |= minor;
+    
+        return (byte) retInt;
     }
 
 }
