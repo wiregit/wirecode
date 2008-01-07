@@ -113,8 +113,7 @@ public class IntervalEncoder {
                         nodeId |= (b[j + k] & 0xFF);
                     }
                     
-                    if (!ret.decode(size, nodeId))
-                        throw new BadGGEPPropertyException("bad id "+nodeId);
+                    ret.decode(size, nodeId);
                 }
             }
         }

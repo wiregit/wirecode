@@ -218,12 +218,12 @@ public class IntervalEncoderTest extends LimeTestCase {
     
     public void testInvalid() throws Exception {
         GGEP g = new GGEP();
-        byte [] pr1 = new byte[]{100};
+        byte [] pr1 = new byte[]{2,100};
         g.put("PR1",pr1);
-        try {
-            IntervalEncoder.decode(1024, g);
-            fail("should not decode invalid value");
-        } catch (BadGGEPPropertyException expected){}
+        IntervalSet decoded = IntervalEncoder.decode(2048, g);
+        assertEquals(1,decoded.getNumberOfIntervals());
+        assertEquals(0,decoded.getFirst().getLow());
+        assertEquals(1023,decoded.getFirst().getHigh());
     }
     
 
