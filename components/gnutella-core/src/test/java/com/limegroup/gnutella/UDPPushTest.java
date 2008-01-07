@@ -1,34 +1,31 @@
 package com.limegroup.gnutella;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SSLSettings;
+import com.limegroup.gnutella.stubs.AcceptorStub;
+import com.limegroup.gnutella.util.LimeTestCase;
 import junit.framework.Test;
-
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIOSocket;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.stubs.AcceptorStub;
-import com.limegroup.gnutella.util.LimeTestCase;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.*;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Tests the issuing of Push Request through udp and failover to tcp.

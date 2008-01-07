@@ -1,21 +1,14 @@
 package org.limewire.http;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.PlainSocketFactory;
-import org.apache.http.conn.Scheme;
-import org.apache.http.conn.SchemeRegistry;
-import org.apache.http.conn.SocketFactory;
+import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.conn.*;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -25,10 +18,12 @@ import org.apache.http.params.HttpParams;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NBSocket;
-import org.limewire.io.IOUtils;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 /**
@@ -126,7 +121,13 @@ public class HttpClientManager {
         } else {
             manager = createSocketWrappingManager(socket);
         }
-        return new DefaultHttpClient(manager, params); 
+        DefaultHttpClient client = new DefaultHttpClient(manager, params);
+        client.setHttpRequestRetryHandler(new HttpRequestRetryHandler() {
+            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                return false;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
+        return client;
     }
         
     /**
@@ -144,7 +145,13 @@ public class HttpClientManager {
         } else {
             manager = BLOCKING_MANAGER;
         }
-        return new DefaultHttpClient(manager, params);
+        DefaultHttpClient client = new DefaultHttpClient(manager, params);
+        client.setHttpRequestRetryHandler(new HttpRequestRetryHandler() {
+            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                return false;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
+        return client;
         //return new DefaultHttpClient(new ThreadSafeClientConnManager(MANAGER.getParams(), MANAGER.getSchemeRegistry()), params);
     }
     

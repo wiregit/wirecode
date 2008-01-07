@@ -1,31 +1,26 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.dime.DIMEParser;
+import com.limegroup.gnutella.dime.DIMERecord;
+import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.downloader.VerifyingFileFactory;
+import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
+import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.util.LimeTestCase;
+import junit.framework.Test;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.Scheme;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.params.HttpConnectionParams;
@@ -41,35 +36,19 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.HTTPAcceptor;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UploadManager;
-import com.limegroup.gnutella.dime.DIMEParser;
-import com.limegroup.gnutella.dime.DIMERecord;
-import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.downloader.VerifyingFileFactory;
-import com.limegroup.gnutella.settings.ChatSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.util.LimeTestCase;
-
-import junit.framework.Test;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test that a client uploads a file correctly. Depends on a file containing the
@@ -189,7 +168,7 @@ public class UploadTest extends LimeTestCase {
         HttpConnectionParams.setConnectionTimeout(client.getParams(), 500);
         HttpConnectionParams.setSoTimeout(client.getParams(), 2000);
         
-        //Logger.getRootLogger().setLevel(Level.DEBUG);
+        Logger.getRootLogger().setLevel(Level.DEBUG);
     }
 
     @Override
@@ -556,7 +535,7 @@ public class UploadTest extends LimeTestCase {
         HttpUploadClient client = new HttpUploadClient();
         try {
             client.connect("localhost", PORT);
-            HttpRequest request = new BasicHttpRequest("GET", fileNameUrl);
+            HttpRequest request = new BasicHttpRequest("GET", fileNameUrl.substring(host.length()));
             client.writeRequest(request);
             client.writeRequest(request);
             client.writeRequest(request);
@@ -1061,7 +1040,7 @@ public class UploadTest extends LimeTestCase {
         try {
             response = client.execute(method);
             fail("Expected HttpConnection due to connection close, got: " + response);
-        } catch (HttpException expected) {
+        } catch (IOException expected) {
             // the connection was either closed or timed out due to a failed TLS
             // handshake
         } finally {
@@ -1072,13 +1051,13 @@ public class UploadTest extends LimeTestCase {
 
     public void testHTTP11ExpectContinue() throws Exception {
         HttpPost method = new HttpPost(host + "/uri-res/N2R?" + hash) {
-            // TODO @Override
-            // TODO public String getName() {
-            // TODO     return "GET";
-            // TODO }
+            @Override
+            public String getMethod() {
+                return "GET";
+             }
         };
         // TODO method.setUseExpectHeader(true);
-        // TODO method.setRequestBody("Foo");
+        method.setEntity(new StringEntity("Foo"));
         HttpResponse response = null;
         try {
             response = client.execute(method);

@@ -1,68 +1,9 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HttpContext;
-import org.hamcrest.Description;
-import org.hamcrest.Matchers;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.api.Action;
-import org.jmock.api.Invocation;
-import org.limewire.http.HttpClientManager;
-import org.limewire.util.CommonUtils;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HTTPAcceptor;
-import com.limegroup.gnutella.HTTPUploadManager;
-import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UploadManager;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.RoutedConnection;
@@ -76,15 +17,38 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.LimeTestCase;
-
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HttpContext;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.hamcrest.Description;
+import org.hamcrest.Matchers;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.api.Action;
+import org.jmock.api.Invocation;
+import org.limewire.http.HttpClientManager;
+import org.limewire.util.CommonUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AltLocUploadTest extends LimeTestCase {
 
@@ -825,6 +789,7 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     public void test10AltsAreSent() throws Exception {
+        Logger.getRootLogger().setLevel(Level.DEBUG);
         // add a simple marker alt so we know it only contains that
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
