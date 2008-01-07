@@ -352,6 +352,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
                     doHttpMaxFailover(uc);
             } else if (uc.getId() <= _lastId) {
                 checkForStaleUpdateAndMaybeDoHttpFailover(uc);
+                addSourceIfIdMatches(handler, uc.getId());
             } else {// is greater
                 storeAndUpdate(data, uc, updateType);
             }
