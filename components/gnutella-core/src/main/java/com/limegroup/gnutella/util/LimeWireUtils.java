@@ -435,6 +435,23 @@ public final class LimeWireUtils {
     public static void resetSettingsLoadSaveFailures() {
         SettingsFactory.resetLoadSaveFailure();
     }
+    
+    /**
+     * Returns the root folder from which all Saved/Shared/etc..
+     * folders should be placed.
+     */
+    public static File getLimeWireRootFolder() {
+        String root = null;
+        
+        if(OSUtils.isWindows()) {
+            root = SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS);
+        }
+        
+        if(root == null || "".equals(root))
+            root = CommonUtils.getUserHomeDir().getParent();
+        
+        return new File(root, "LimeWire");
+    }
 }
 
 

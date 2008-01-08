@@ -13,10 +13,11 @@ import org.limewire.setting.IntSetting;
 import org.limewire.setting.Setting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.gui.options.panes.StoreSaveTemplateProcessor.IllegalTemplateException;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -36,15 +37,15 @@ public class SharingSettings extends LimeProps {
 	
     
     public static final File DEFAULT_SAVE_DIR =
-        new File(CommonUtils.getUserHomeDir(), "LimeWire Saved");
+        new File(LimeWireUtils.getLimeWireRootFolder(), "Saved");
     
     public static final File DEFAULT_SHARE_DIR = 
-        new File(CommonUtils.getUserHomeDir(), "LimeWire Shared");
+        new File(LimeWireUtils.getLimeWireRootFolder(), "Shared");
     /**
      * Default directory for songs purchased from LWS
      */
     public static final File DEFAULT_SAVE_LWS_DIR = 
-        new File(CommonUtils.getUserHomeDir(), "LimeWire Store Purchased");
+        new File(LimeWireUtils.getLimeWireRootFolder(), "Store Purchased");
     
     /**
      * Whether or not we're going to add an alternate for ourselves
