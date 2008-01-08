@@ -91,5 +91,7 @@
 	<classpathentry kind="lib" path="lib/jars/tests/pmd.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/saxpath-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/xerces.jar"/>
+	<classpathentry kind="lib" path="lib/jars/onion-common.jar"/>
+	<classpathentry kind="lib" path="lib/jars/onion-fec.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

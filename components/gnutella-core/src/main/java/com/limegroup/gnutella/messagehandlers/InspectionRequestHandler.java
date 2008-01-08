@@ -1,12 +1,9 @@
 package com.limegroup.gnutella.messagehandlers;
 
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 
-import org.limewire.inspection.Inspector;
 import org.limewire.security.SecureMessageVerifier;
-import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -19,6 +16,7 @@ import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.InspectionResponse;
+import com.limegroup.gnutella.messages.vendor.InspectionResponseFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -30,32 +28,34 @@ import com.limegroup.gnutella.simpp.SimppManager;
  */
 public class InspectionRequestHandler extends RestrictedResponder {
     
-    private static final String INSPECTION_FILE = "inspection.props";
-
     private final Provider<MessageRouter> router;
-    private final Inspector inspector;
+    private final InspectionResponseFactory factory;
     
     @Inject
     public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager, 
             SimppManager simppManager, 
             UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
-            Inspector inspector, @Named("inspection") SecureMessageVerifier inspectionVerifier,
+            InspectionResponseFactory factory, @Named("inspection") SecureMessageVerifier inspectionVerifier,
             @Named("messageExecutor") ExecutorService dispatch) {
         super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
                 inspectionVerifier,
                 MessageSettings.INSPECTION_VERSION, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, dispatch);
         this.router = router;
-        this.inspector = inspector;
-        this.inspector.load(new File(CommonUtils.getCurrentDirectory(),INSPECTION_FILE));
+        this.factory = factory;
+        
     }
     
     @Override
     protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
         assert msg instanceof InspectionRequest;
         InspectionRequest ir = (InspectionRequest)msg;
-        InspectionResponse r = new InspectionResponse(ir, inspector);
+        
+        // send first response back right away
+        InspectionResponse r = factory.createResponses(ir)[0];
         if (r.shouldBeSent())
             handler.reply(r);
         router.get().forwardInspectionRequestToLeaves(ir);
+        
+        // eventually schedule the rest of the responses 
     }
 }

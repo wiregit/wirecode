@@ -155,6 +155,8 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactoryImpl;
+import com.limegroup.gnutella.messages.vendor.InspectionResponseFactory;
+import com.limegroup.gnutella.messages.vendor.InspectionResponseFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
@@ -352,6 +354,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
+        bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
         
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
