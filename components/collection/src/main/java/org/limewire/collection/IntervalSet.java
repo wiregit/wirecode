@@ -390,7 +390,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         ts.setAllowUnverifiedUse(true);
         for (Range r : intervals) {
             
-            r = allign(r, maxSize);
+            r = align(r, maxSize);
             
             if (r == null)
                 continue;
@@ -406,15 +406,15 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     
     /**
      * @param maxSize maximum size of the IntervalSet
-     * @return a range alligned to 1KB boundaries, null if not possible
+     * @return a range aligned to 1KB boundaries, null if not possible
      */
-    private Range allign(Range r, long maxSize) {
+    private Range align(Range r, long maxSize) {
         long low = r.getLow();
         long high = r.getHigh();
         
         // if this is not the last range
         if (high != maxSize - 1) {
-            // if its too small, it can't be alligned
+            // if its too small, it can't be aligned
             if (high - low < 1023)
                 return null;
         } else if (high % 1024 > (high - low))
@@ -427,6 +427,11 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         
         if (low == r.getLow() && high == r.getHigh())
             return r;
+        
+        // possible for ranges less than 2k
+        // low --- 1kb boundary --- end or LWC-1229
+        if (high < low) 
+            return null;
         
         return Range.createRange(low, high);
     }

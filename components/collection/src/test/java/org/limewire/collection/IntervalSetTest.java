@@ -229,6 +229,13 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(1, decoded.getNumberOfIntervals());
         assertEquals(1024, decoded.getFirst().getLow());
         assertEquals(1099, decoded.getFirst().getHigh());
+        
+        // test LWC-1229 
+        // [low -- 1kb boundary -- high], high - low < 2048
+        iSet.clear();
+        iSet.add(Range.createRange(2,1026));
+        encoded = iSet.encode(2000);
+        assertEquals(0,encoded.size());
     }
     
     // getNumberOfIntervals is used in pretty much every
