@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.Inflater;
@@ -39,6 +40,9 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
+import com.onionnetworks.fec.FECCode;
+import com.onionnetworks.fec.FECCodeFactory;
+import com.onionnetworks.util.Buffer;
 
 @Singleton
 public class InspectionTest extends ServerSideTestCase {
@@ -289,6 +293,52 @@ public class InspectionTest extends ServerSideTestCase {
         return (Map)Token.parse(s.getBytes());
     }
     
+    public void testFEC() throws Exception {
+        System.setProperty("com.onionnetworks.fec.keys", "pure8,pure16"); // disable native
+        FECCodeFactory factory = FECCodeFactory.getDefault();
+        
+        // 7 data packets, 3 checksums
+        final int SIZE = 7;
+        final int ENC_SIZE = 10;
+        FECCode code = factory.createFECCode(SIZE, ENC_SIZE);
+        Buffer [] in = new Buffer[SIZE];
+        Buffer [] out = new Buffer[ENC_SIZE];
+        int [] indices = new int[ENC_SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            byte [] bb = new byte[1024];
+            Arrays.fill(bb, (byte)i);
+            in[i] = new Buffer(bb);
+            out[i] = new Buffer(new byte[1024]);
+            indices[i] = i;
+        }
+        for (int i = SIZE; i < ENC_SIZE; i++) { 
+            out[i] = new Buffer(new byte[1024]);
+            indices[i] = i;
+        }
+        
+        code.encode(in, out, indices);
+        
+        // "lose" one of the data packets, receive an encoded one instead
+        int [] received = new int[SIZE];
+        Buffer[] receivedBuf = new Buffer[SIZE];
+        for (int i = 0; i < SIZE - 1; i++) {
+            received[i] = i;
+            receivedBuf[i] = out[i];
+        }
+        received[SIZE - 1] = SIZE+1;
+        receivedBuf[SIZE - 1] = out[SIZE+1];
+        
+        
+        boolean allMatch = true;
+        for (int i = 0; i < SIZE; i++)
+            allMatch &= Arrays.equals(receivedBuf[i].b, in[i].b);
+        assertFalse(allMatch);
+        
+        // decode should restore original
+        code.decode(receivedBuf, received);
+        for (int i = 0; i < SIZE; i++)
+            assertTrue(i+" doesn't match ",Arrays.equals(in[i].b,receivedBuf[i].b));
+    }
 }
 @SuppressWarnings("unchecked")
 class BEObject implements Inspectable {
