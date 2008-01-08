@@ -16,7 +16,6 @@ import org.limewire.setting.StringSetting;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.gui.options.panes.StoreSaveTemplateProcessor.IllegalTemplateException;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 
@@ -260,7 +259,6 @@ public class SharingSettings extends LimeProps {
     
     /**
      * @return directory of where to save songs purchased from LimeWire Store
-     * @throws IllegalTemplateException 
      */
     public static final File getSaveLWSDirectory(File incompleteFile) {
 //        final String template = getSaveLWSTemplate();
