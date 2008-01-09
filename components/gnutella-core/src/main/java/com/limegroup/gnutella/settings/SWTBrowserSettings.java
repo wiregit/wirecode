@@ -32,8 +32,13 @@ public final class SWTBrowserSettings extends LimeProps {
       */
     public static final StringSetting SWT_BROWSER_TITLE =
         FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE", 
-                                          "Browse the Web", 
+                                          "Browser", 
                                           "SWTBrowserSettings.swtBrowserTitle");
+    
+    public static final StringSetting SWT_BROWSER_TOOLTIP =
+        FACTORY.createRemoteStringSetting("SWT_BROWSER_TOOLTIP", 
+                                          "Browse The Web", 
+                                          "SWTBrowserSettings.swtBrowserTooltip");
     
     /** Whether or not the address bar is visible. */
     public static final BooleanSetting BROWSER_SHOW_ADDRESS =
