@@ -46,5 +46,9 @@ public class FECUtilsImplTest extends LimeTestCase {
         encoded.set(12, null);
         byte [] decoded = fecUtils.decode(encoded, 10000);
         assertTrue(Arrays.equals(data, decoded));
+        
+        // lose one more packet and decoding fails
+        encoded.set(2, null);
+        assertNull(fecUtils.decode(encoded, 10000));
     }
 }

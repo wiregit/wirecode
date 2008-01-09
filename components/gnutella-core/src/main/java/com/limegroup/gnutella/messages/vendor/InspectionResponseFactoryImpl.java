@@ -42,6 +42,8 @@ public class InspectionResponseFactoryImpl implements InspectionResponseFactory 
      */
     private static final int PACKET_SIZE = 1300; // give some room for GGEP & headers
     
+    private static final float REDUNDANCY = 1.2f;
+    
     private final Inspector inspector;
     
     private final FECUtils fecUtils;
@@ -60,7 +62,7 @@ public class InspectionResponseFactoryImpl implements InspectionResponseFactory 
         
         
         // package responses
-        List<byte []> chunks = fecUtils.encode(payload, PACKET_SIZE, 1.2f); 
+        List<byte []> chunks = fecUtils.encode(payload, PACKET_SIZE, REDUNDANCY); 
         List<InspectionResponse> ret = new ArrayList<InspectionResponse>(chunks.size());
         for (int i = 0; i < chunks.size() ; i++ ) {
             
