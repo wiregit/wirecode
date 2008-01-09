@@ -4,8 +4,6 @@ import java.util.List;
 
 /**
  * Encapsulates code dealing with FEC
- * @author zbalevsky
- *
  */
 public interface FECUtils {
     /**
