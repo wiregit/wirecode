@@ -64,6 +64,8 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
             will(returnValue(new String[]{"asdf"}));
             one(request).requestsTimeStamp();
             will(returnValue(Boolean.TRUE));
+            one(request).supportsEncoding();
+            will(returnValue(Boolean.FALSE));
             allowing(request).getGUID();
             will(returnValue(new GUID().bytes()));
             one(inspector).inspect("asdf");

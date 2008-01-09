@@ -3,7 +3,9 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
 
@@ -16,7 +18,9 @@ import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.FECUtils;
 
 @Singleton
 public class InspectionResponseFactoryImpl implements InspectionResponseFactory {
@@ -24,18 +28,61 @@ public class InspectionResponseFactoryImpl implements InspectionResponseFactory 
     private static final String INSPECTION_FILE = "inspection.props";
     
     private static final int OLD_VERSION = 1;
+    private static final int GGEP_VERSION = 2;
+    
+    
+    /** a bunch of ggep keys */
+    private static final String DATA_KEY = "D";
+    private static final String CHUNK_ID_KEY = "I";
+    private static final String TOTAL_CHUNKS_KEY = "T";
+    private static final String LENGTH_KEY = "L";
+    
+    /** 
+     * How much data to put in each packet.  Must be less than the MTU.
+     */
+    private static final int PACKET_SIZE = 1300; // give some room for GGEP & headers
     
     private final Inspector inspector;
     
+    private final FECUtils fecUtils;
+    
     @Inject
-    public InspectionResponseFactoryImpl(Inspector inspector) {
+    public InspectionResponseFactoryImpl(Inspector inspector, FECUtils fecUtils) {
         this.inspector = inspector;
         this.inspector.load(new File(CommonUtils.getCurrentDirectory(),INSPECTION_FILE));
-        //TODO: put FEC object here eventually
+        this.fecUtils = fecUtils;
     }
     
     public InspectionResponse[] createResponses(InspectionRequest request) {
-        return new InspectionResponse[]{new InspectionResponse(OLD_VERSION, request.getGUID(), derivePayload(request))};
+        byte [] payload = derivePayload(request);
+        if (payload.length < PACKET_SIZE || !request.supportsEncoding())
+            return new InspectionResponse[]{new InspectionResponse(OLD_VERSION, request.getGUID(), payload)};
+        
+        
+        // package responses
+        List<byte []> chunks = fecUtils.encode(payload, PACKET_SIZE, 1.2f); 
+        List<InspectionResponse> ret = new ArrayList<InspectionResponse>(chunks.size());
+        for (int i = 0; i < chunks.size() ; i++ ) {
+            
+            GGEP g = new GGEP();
+            g.put(DATA_KEY,chunks.get(i));
+            g.put(CHUNK_ID_KEY,i);
+            
+            // need to be in every packet
+            g.put(TOTAL_CHUNKS_KEY,chunks.size());
+            g.put(LENGTH_KEY, payload.length);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                g.write(baos);
+            } catch (IOException impossible) {
+                continue; // don't disturb the user
+            }
+            
+            ret.add(new InspectionResponse(GGEP_VERSION, request.getGUID(), baos.toByteArray()));
+        }
+        
+        InspectionResponse [] rett = new InspectionResponse[ret.size()];
+        return ret.toArray(rett);
     }
 
     private byte[] derivePayload(InspectionRequest request) {
