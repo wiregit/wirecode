@@ -117,7 +117,7 @@ public class LimeXMLReplyCollection {
      * @param URI This collection's schema URI
      * @param fileManager 
      */
-    LimeXMLReplyCollection(String URI, String path, Provider<FileManager> fileManager,
+    LimeXMLReplyCollection(String URI, File path, Provider<FileManager> fileManager,
             LimeXMLDocumentFactory limeXMLDocumentFactory, MetaDataReader metaDataReader) {
         this.schemaURI = URI;
         this.fileManager = fileManager;
@@ -665,6 +665,10 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             if(!dirty)
                 return true;
+            
+            File parent = dataFile.getParentFile();
+            if(parent != null)
+                parent.mkdirs();
                 
             ObjectOutputStream out = null;
             try {
@@ -673,6 +677,7 @@ public class LimeXMLReplyCollection {
                 out.flush();
                 wrote = true;
             } catch(Throwable ignored) {
+                ignored.printStackTrace();
                 LOG.trace("Unable to write", ignored);
             } finally {
                 IOUtils.close(out);

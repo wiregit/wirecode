@@ -386,7 +386,7 @@ public class CollectionTest extends LimeTestCase {
     }
 
     private void clearDirectory() {
-        File dir = new File(limeXMLProperties.getXMLDocsDir());
+        File dir = limeXMLProperties.getXMLDocsDir();
         if (dir.exists() && dir.isDirectory()) {
             // clear the files in the directory....
             File[] files = dir.listFiles();

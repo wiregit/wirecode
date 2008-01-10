@@ -26,13 +26,8 @@ public class LimeXMLProperties {
     /** image resource directory. */
     private static final String IMAGE_RESOURCE_PATH = "org/limewire/xml/image/";
     
-    /**
-     * The name of the directory in which XML Documents will be 
-     * kept for querying and responding.
-     */
-    private static final String XML_DOCS_DIR_DEF = "xml" + File.separator + 
-                                                "data" + File.separator;    
-    
+    /** place where serialized XML data is stored. */
+    private static final String XML_DOCS_DIR = "xml/data";
 
     /**
      * Returns the name of the resource path in which XML Images are located.
@@ -44,9 +39,8 @@ public class LimeXMLProperties {
     /**
      * Returns the name of the directory where the XML Documents are located
      */
-    public String getXMLDocsDir() {
-        String xmlDocsDirRel = XML_DOCS_DIR_DEF;
-        return CommonUtils.getUserSettingsDir() + xmlDocsDirRel;
+    public File getXMLDocsDir() {
+        return new File(CommonUtils.getUserSettingsDir(), XML_DOCS_DIR);
     }
 
     /**
