@@ -63,9 +63,16 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         mockery.assertIsSatisfied();
     }
     
+    private Expectations createExpectations(InspectionRequest request,
+            final boolean supported,
+            final Object inspectedValue) throws Exception {
+        return createExpectations(request, supported, inspectedValue, (new GUID()).bytes());
+    }
+    
     private Expectations createExpectations(final InspectionRequest request, 
             final boolean supported,
-            final Object inspectedValue)
+            final Object inspectedValue,
+            final byte[] guid)
     throws Exception {
         return new Expectations() {{
             allowing(inspector).load(with(Matchers.any(File.class)));
@@ -76,7 +83,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
             allowing(request).supportsEncoding();
             will(returnValue(supported));
             allowing(request).getGUID();
-            will(returnValue(new GUID().bytes()));
+            will(returnValue(guid));
             one(inspector).inspect("asdf");
             will(returnValue(inspectedValue));
         }};
@@ -123,9 +130,9 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
     public void testNotSupported() throws Exception {
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         byte [] data = new byte[10000];
-        Arrays.fill(data, (byte)'a');
-        String dataS = new String(data);
-        mockery.checking(createExpectations(request, false, dataS));
+        Random r = new Random();
+        r.nextBytes(data);
+        mockery.checking(createExpectations(request, false, data));
         InspectionResponseFactory factory = injector.getInstance(InspectionResponseFactoryImpl.class);
         InspectionResponse[] resp = factory.createResponses(request);
         mockery.assertIsSatisfied();
@@ -139,7 +146,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.inflate(uncompressed);
         Map<String,Object> o = (Map<String,Object>) Token.parse(uncompressed);
         assertTrue(o.containsKey("-1"));
-        assertTrue(Arrays.equals(dataS.getBytes(),(byte[])o.get("0")));
+        assertTrue(Arrays.equals(data,(byte[])o.get("0")));
     }
     
     public void testEncoded() throws Exception {
@@ -147,7 +154,9 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         final byte [] data = new byte[3000];
         Random r = new Random();
         r.nextBytes(data);
-        mockery.checking(createExpectations(request, true, data));
+        byte [] guid = new byte[16];
+        r.nextBytes(guid);
+        mockery.checking(createExpectations(request, true, data, guid));
         
         final List<byte []> chunks= new ArrayList<byte[]> ();
         for (int i = 0; i < 5; i++) {
@@ -157,7 +166,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         }
         
         mockery.checking(new Expectations() {{
-            one(fecUtils).encode(with(Matchers.any(byte[].class)), 
+            one(fecUtils).encode(with(Matchers.any(byte[].class)), // this is the bencoded & compressed data
                     with(Matchers.equalTo(1300)), 
                     with(Matchers.equalTo(1.2f)));
             will(returnValue(chunks));
@@ -168,14 +177,12 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         mockery.assertIsSatisfied();
         
         assertEquals(5, resp.length);
-        byte [] guid = null;
         for (int i = 0; i < resp.length; i++) {
             InspectionResponse response = resp[i];
+            // make sure its definitely smaller than the fragmentation limit
+            assertLessThan(1400, response.getTotalLength());
             assertEquals(2, response.getVersion());
-            if (guid == null)
-                guid = response.getGUID();
-            else
-                assertTrue(Arrays.equals(guid, response.getGUID()));
+            assertTrue(Arrays.equals(guid, response.getGUID()));
             
             GGEP g = new GGEP(response.getPayload(),0);
             assertEquals(i, g.getInt("I")); // chunk id
