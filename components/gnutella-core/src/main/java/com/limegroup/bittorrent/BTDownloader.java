@@ -17,6 +17,7 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
+import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 
 /**

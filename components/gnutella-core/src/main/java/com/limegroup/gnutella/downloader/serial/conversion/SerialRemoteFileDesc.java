@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.downloader.serial;
+package com.limegroup.gnutella.downloader.serial.conversion;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -12,7 +12,6 @@ import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class SerialRemoteFileDesc implements Serializable {
 
@@ -38,7 +37,7 @@ class SerialRemoteFileDesc implements Serializable {
 
     private boolean _replyToMulticast;
 
-    private LimeXMLDocument[] _xmlDocs;
+    private SerialXml[] _xmlDocs;
 
     private Set<URN> _urns;
 
@@ -136,8 +135,8 @@ class SerialRemoteFileDesc implements Serializable {
         return _replyToMulticast;
     }
 
-    public LimeXMLDocument[] getXmlDocs() {
-        return _xmlDocs;
+    public String getXml() {
+        return _xmlDocs != null && _xmlDocs.length > 0 ? _xmlDocs[0].getXml() : null;
     }
 
     public Set<URN> getUrns() {

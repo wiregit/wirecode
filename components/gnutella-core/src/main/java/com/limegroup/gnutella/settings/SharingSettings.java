@@ -86,14 +86,14 @@ public class SharingSettings extends LimeProps {
     /**
 	 * A file with a snapshot of current downloading files.
 	 */                
-    public static final FileSetting DOWNLOAD_SNAPSHOT_FILE =
+    public static final FileSetting OLD_DOWNLOAD_SNAPSHOT_FILE =
         FACTORY.createFileSetting("DOWNLOAD_SNAPSHOT_FILE", 
             (new File(INCOMPLETE_DIRECTORY.getValue(), "downloads.dat")));
             
     /**
 	 * A file with a snapshot of current downloading files.
 	 */                
-    public static final FileSetting DOWNLOAD_SNAPSHOT_BACKUP_FILE =
+    public static final FileSetting OLD_DOWNLOAD_SNAPSHOT_BACKUP_FILE =
         FACTORY.createFileSetting("DOWNLOAD_SNAPSHOT_BACKUP_FILE", 
             (new File(INCOMPLETE_DIRECTORY.getValue(), "downloads.bak")));            
     
@@ -176,8 +176,8 @@ public class SharingSettings extends LimeProps {
 		
         DIRECTORY_FOR_SAVING_FILES.setValue(saveDir);
         INCOMPLETE_DIRECTORY.setValue(incDir);
-        DOWNLOAD_SNAPSHOT_FILE.setValue(snapFile);
-        DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBackup);
+        OLD_DOWNLOAD_SNAPSHOT_FILE.setValue(snapFile);
+        OLD_DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBackup);
     }
     
     /**

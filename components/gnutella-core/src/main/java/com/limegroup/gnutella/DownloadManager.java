@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
@@ -12,9 +11,7 @@ import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
-import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -38,7 +35,10 @@ import com.limegroup.gnutella.version.DownloadInformation;
  */
 public interface DownloadManager extends BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate, PushedSocketHandler {
     
-    public void register(PushedSocketHandlerRegistry registry);
+    /**
+     * Adds a new downloader that this will manager.
+     */
+    public void addNewDownloader(AbstractDownloader downloader);
 
     /** 
      * Initializes this manager. <b>This method must be called before any other
@@ -58,12 +58,12 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * 
      * @param lwsManager 
      */
-    public void postGuiInit();
+    public void loadStoredDownloadsAndScheduleWriting();
 
     /**
      * Is the GUI init'd?
      */
-    public boolean isGUIInitd();
+    public boolean isStoredDownloadsLoaded();
 
     /**
      * Determines if an 'In Network' download exists in either active or waiting.
@@ -71,25 +71,12 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     public boolean hasInNetworkDownload();
 
     /**
-     * Determines if any store download exists in either active or waiting
-     * state. 
-     */
-    public boolean hasStoreDownload();
-
-    /**
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
     public void killDownloadersNotListed(Collection<? extends DownloadInformation> updates);
 
-    public PushDownloadManager getPushManager();
-
     public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket);
-
-    /**
-     * Schedules the runnable that pumps through waiting downloads.
-     */
-    public void scheduleWaitingPump();
 
     /**
      * Determines if the given URN has an incomplete file.
@@ -121,8 +108,6 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
 
     public Downloader getDownloaderForURN(URN sha1);
 
-    public Downloader getDownloaderForURNString(String urn);
-
     /**
      * Returns the active or waiting downloader that uses or will use 
      * <code>file</code> as incomplete file.
@@ -132,22 +117,6 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     public Downloader getDownloaderForIncompleteFile(File file);
 
     public boolean isGuidForQueryDownloading(GUID guid);
-
-    /**
-     * Clears all downloads.
-     */
-    public void clearAllDownloads();
-
-    /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
-     *  to this, queued.  The queued downloads will restart immediately if slots
-     *  are available.  Returns false iff the file could not be read for any
-     *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. 
-     *  It is public for testing purposes only!  
-     *  @param file the downloads.dat snapshot file */
-    public boolean readAndInitializeSnapshot(File file);
-
-    /* public for testing only right now. */
-    public List<AbstractDownloader> readSnapshot(File file) throws IOException;
 
     /** 
      * Tries to "smart download" any of the given files.<p>  
@@ -311,6 +280,6 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
      *  at any time for checkpointing purposes.  Returns true iff the file was
      *  successfully written. */
-    public boolean writeSnapshot();
+    public void writeSnapshot();
 
 }

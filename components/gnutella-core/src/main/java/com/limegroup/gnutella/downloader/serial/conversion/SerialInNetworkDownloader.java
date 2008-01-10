@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.downloader.serial;
+package com.limegroup.gnutella.downloader.serial.conversion;
 
 import com.limegroup.gnutella.URN;
 

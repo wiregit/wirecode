@@ -17,10 +17,9 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadManagerStub;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
@@ -69,12 +68,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(DownloadManager.class).to(DownloadManagerStub.class);
-            }            
-        });
+        injector = LimeTestUtils.createInjector();
         
 
         hash = TestFile.hash();
@@ -88,7 +82,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         // make sure that we don't wait for network on re-query
         RequeryManager.NO_DELAY = true;
 
-        DownloadManagerStub dm = (DownloadManagerStub) injector.getInstance(DownloadManager.class);
+        DownloadManagerImpl dm = (DownloadManagerImpl) injector.getInstance(DownloadManager.class);
         dm.initialize();
         dm.scheduleWaitingPump();
     }

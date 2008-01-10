@@ -14,6 +14,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
@@ -27,7 +29,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -35,7 +36,6 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
-import com.limegroup.gnutella.PushEndpointCacheImpl;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
@@ -90,6 +90,9 @@ public class HeadTest extends LimeTestCase {
 	
     private Injector injector;
     
+    private Mockery mockery;
+    private DownloadManager downloadManager;
+    
 	public HeadTest(String name) {
 		super(name);
 	}
@@ -101,6 +104,9 @@ public class HeadTest extends LimeTestCase {
 	
 	public void setUp() throws Exception {
 	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
+	    mockery = new Mockery();
+	    downloadManager = mockery.mock(DownloadManager.class);
+	    
 	    
 	    injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
@@ -110,7 +116,7 @@ public class HeadTest extends LimeTestCase {
                 bind(NetworkManager.class).to(NetworkManagerStub.class);
                 bind(UploadManager.class).to(UploadManagerStub.class);
                 bind(FileManager.class).to(FileManagerStub.class);
-                bind(DownloadManager.class).to(DownloadManagerStub.class);
+                bind(DownloadManager.class).toInstance(downloadManager);
             }
 	    });
 	    
@@ -211,6 +217,11 @@ public class HeadTest extends LimeTestCase {
         
         PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", HeadPongFactoryImpl.DEFAULT_PACKET_SIZE);
     }
+	
+	@Override
+	protected void tearDown() throws Exception {
+	    mockery.assertIsSatisfied();
+	}
     
     private void clearStoredProxies() throws Exception {
         PushEndpointCache pushEndpointCache = injector.getInstance(PushEndpointCache.class);
@@ -236,6 +247,11 @@ public class HeadTest extends LimeTestCase {
 	
     /** Tests that a binary headping gets a 404 for large files */
     public void testBinaryLarge() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_largeURN)));
+            will(returnValue(false));
+        }});
+        
         MockHeadPongRequestor ping = new MockHeadPongRequestor();
         ping.setGuid(GUID.makeGuid());
         ping.setUrn(_largeURN);
@@ -255,6 +271,11 @@ public class HeadTest extends LimeTestCase {
 	 * behind firewall or open.
 	 */
 	public void testFirewalledNoAcceptedIncoming() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        	    
 	    NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
 	    networkManager.setAcceptedIncomingConnection(false);
 		
@@ -283,6 +304,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testFirewalledAcceptedIncoming() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
         NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         networkManager.setAcceptedIncomingConnection(true);
 		
@@ -314,8 +340,10 @@ public class HeadTest extends LimeTestCase {
 	 * tests whether the downloading flag is set properly.
 	 */
 	public void testActivelyDownloading() throws Exception {
-	    DownloadManagerStub downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
-	    downloadManager.setActivelyDownloadingSet(_partial.getUrns());
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_partial.getSHA1Urn())));
+            will(returnValue(true));
+        }});
 		HeadPing ping = new HeadPing(_havePartial);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
@@ -324,8 +352,10 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testNotActivelyDownloading() throws Exception {
-        DownloadManagerStub downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
-        downloadManager.setActivelyDownloadingSet(URN.NO_URN_SET);
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
         HeadPing ping = new HeadPing(_havePartial);
         HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
@@ -337,6 +367,11 @@ public class HeadTest extends LimeTestCase {
 	 * as well as requesting too big ranges to fit in packet.
 	 */
 	public void testRangesFit() throws Exception {		
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+	    
 		HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_haveFull,HeadPing.INTERVALS);
 		HeadPing pingi = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.INTERVALS);		
 		HeadPong pong = headPongFactory.create(ping);
@@ -362,6 +397,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testRangesDontFit() throws Exception {		
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
 		//now make the incomplete file desc carry ranges which are too big to
 		//fit in a packet
 		_partial.setRangesByte(_rangesTooBig.toBytes());
@@ -379,6 +419,11 @@ public class HeadTest extends LimeTestCase {
 	}
 	
     public void testLargeRanges() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_largeURN)));
+            will(returnValue(false));
+        }});
+        
        _partialLarge.setRangesByte(_rangesLarge.toBytes());
        HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_largeURN,HeadPing.INTERVALS);
        HeadPong pong = headPongFactory.create(ping);
@@ -389,6 +434,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testOnlyLargeRanges() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_largeURN)));
+            will(returnValue(false));
+        }});
+        
         _partialLarge.setRangesByte(_rangesOnlyLarge.toBytes());
         HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_largeURN,HeadPing.INTERVALS);
         HeadPong pong = headPongFactory.create(ping);
@@ -402,6 +452,11 @@ public class HeadTest extends LimeTestCase {
 	 * tests various values for the queue rank
 	 */
 	public void testQueueStatusEmpty() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+	    
 		HeadPing ping = new HeadPing(_havePartial);		
 		HeadPong pong = headPongFactory.create(ping);
         clearStoredProxies();
@@ -414,6 +469,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testQueueStatusSomeTaken() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
         UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);     
         uploadManager.setUploadsInProgress(10);
@@ -427,6 +487,11 @@ public class HeadTest extends LimeTestCase {
     }
 		
     public void testQueueStatusSomeQueued() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
         UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);
         uploadManager.setNumQueuedUploads(5);
@@ -440,6 +505,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testQueueStatusAllTakenNoneQueued() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
         UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);
         uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
@@ -454,6 +524,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testQueueStatusBusy() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
         UploadManagerStub uploadManager = (UploadManagerStub)injector.getInstance(UploadManager.class);
         HeadPing ping = new HeadPing(_havePartial);
         uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
@@ -474,6 +549,11 @@ public class HeadTest extends LimeTestCase {
 	 * tests handling of alternate locations.
 	 */
 	public void testAltLocsFitWithRanges() throws Exception {	
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+	    
         PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", 600);
         
 		//add some big interval that fill most of the packet but not all
@@ -502,6 +582,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testAltLocsDontFitBecauseOfTooManyRanges() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
         PrivilegedAccessor.setValue(HeadPongFactoryImpl.class, "PACKET_SIZE", 600);
         
 		//now test if no locs will fit because of too many ranges
@@ -531,6 +616,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testPushAltLocsReturned() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
 		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.PUSH_ALTLOCS);
 		assertTrue(ping1.requestsPushLocs());
 		HeadPong pong1 = headPongFactory.create(ping1);
@@ -559,6 +649,11 @@ public class HeadTest extends LimeTestCase {
     }
     
     public void testPushAltLocsWantOnlyFWT() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+        
 		//now ask only for fwt push locs - nothing returned
 		HeadPing ping1 = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
 		assertTrue(ping1.requestsFWTOnlyPushLocs());
@@ -664,6 +759,11 @@ public class HeadTest extends LimeTestCase {
     }
 	
 	public void testMixedLocs() throws Exception {
+        mockery.checking(new Expectations() {{
+            atLeast(1).of(downloadManager).isActivelyDownloading(with(same(_havePartial)));
+            will(returnValue(false));
+        }});
+	    
 		HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),_havePartial,
 				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS);		
 		HeadPong pong = headPongFactory.create(ping);

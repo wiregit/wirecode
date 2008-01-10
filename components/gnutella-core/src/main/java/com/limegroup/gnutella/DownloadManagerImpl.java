@@ -1,37 +1,23 @@
 package com.limegroup.gnutella;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
-import org.limewire.i18n.I18nMarker;
-import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
-import org.limewire.service.MessageService;
-import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
-import org.limewire.util.GenericsUtils;
-import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -44,6 +30,7 @@ import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -54,20 +41,21 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
-import com.limegroup.gnutella.downloader.AbstractDownloader.DownloaderType;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializer.SavedDownloadInfo;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 @Singleton
 public class DownloadManagerImpl implements DownloadManager {
-private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
+    
+    //private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
     /** The time in milliseconds between checkpointing downloads.dat.  The more
      * often this is written, the less the lost data during a crash, but the
@@ -94,7 +82,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     /**
      * Whether or not the GUI has been init'd.
      */
-    private volatile boolean guiInit = false;
+    private volatile boolean downloadsReadFromDisk = false;
     
     /** The number if IN-NETWORK active downloaders.  We don't count these when
      * determing how many downloaders are active.
@@ -136,6 +124,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final GnutellaDownloaderFactory gnutellaDownloaderFactory;
     private final PurchasedStoreDownloaderFactory purchasedDownloaderFactory;
+    private final DownloadSerializer downloadSerializer;
     
     @Inject
     public DownloadManagerImpl(NetworkManager networkManager,
@@ -147,7 +136,8 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
             Provider<TorrentManager> torrentManager,
             Provider<PushDownloadManager> pushDownloadManager,
             GnutellaDownloaderFactory gnutellaDownloaderFactory,
-            PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
+            PurchasedStoreDownloaderFactory purchasedDownloaderFactory,
+            DownloadSerializer downloaderSerializer) {
         this.networkManager = networkManager;
         this.innetworkCallback = innetworkCallback;
         this.btDownloaderFactory = btDownloaderFactory;
@@ -158,11 +148,13 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
         this.pushDownloadManager = pushDownloadManager;
         this.gnutellaDownloaderFactory = gnutellaDownloaderFactory;
         this.purchasedDownloaderFactory = purchasedDownloaderFactory;
+        this.downloadSerializer = downloaderSerializer;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#register(com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry)
      */
+    // DO NOT REMOVE!  Guice calls this because of the @Inject
     @Inject
     public void register(PushedSocketHandlerRegistry registry) {
         registry.register(this);
@@ -176,35 +168,30 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     public void initialize() {
         scheduleWaitingPump();
     }
+    
+    /**
+     * Adds a new downloader to this manager.
+     * @param downloader
+     */
+    public void addNewDownloader(AbstractDownloader downloader) {
+        synchronized(this) {
+            waiting.add(downloader);
+            downloader.initialize();
+            callback(downloader).addDownload(downloader);
+        }
+    }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#postGuiInit()
      */
-    public void postGuiInit() {
-        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
-        // Try once with the real file, then with the backup file.
-        if( !readAndInitializeSnapshot(real) ) {
-            LOG.debug("Reading real downloads.dat failed");
-            // if backup succeeded, copy into real.
-            if( readAndInitializeSnapshot(backup) ) {
-                LOG.debug("Reading backup downloads.bak succeeded.");
-                copyBackupToReal();
-            // only show the error if the files existed but couldn't be read.
-            } else if(backup.exists() || real.exists()) {
-                LOG.debug("Reading both downloads files failed.");
-                MessageService.showError(I18nMarker.marktr("Sorry, but LimeWire was unable to restart your old downloads."));
-            }   
-        } else {
-            LOG.debug("Reading downloads.dat worked!");
-        }
+    public void loadStoredDownloadsAndScheduleWriting() {
+        List<SavedDownloadInfo> downloads = downloadSerializer.readFromDisk();
+        // TODO: initialize!
         
         Runnable checkpointer=new Runnable() {
             public void run() {
                 if (downloadsInProgress() > 0) { //optimization
-                    // If the write failed, move the backup to the real.
-                    if(!writeSnapshot())
-                        copyBackupToReal();
+                    writeSnapshot();
                 }
             }
         };
@@ -212,14 +199,29 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
                                SNAPSHOT_CHECKPOINT_TIME, 
                                SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);                
                                
-        guiInit = true;
+        downloadsReadFromDisk = true;
     }      
+    
+    public void writeSnapshot() {
+        List<AbstractDownloader> buf;
+        synchronized(this) {
+            buf = new ArrayList<AbstractDownloader>(active.size() + waiting.size());
+            buf.addAll(active);
+            buf.addAll(waiting);
+        }
+        
+        downloadSerializer.writeToDisk(convertToSavedDownloadInfo(buf, incompleteFileManager));
+    }
+    
+    private List<SavedDownloadInfo> convertToSavedDownloadInfo(List<? extends AbstractDownloader> downloads, IncompleteFileManager ifm) {
+        return Collections.emptyList();
+    }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#isGUIInitd()
      */
-    public boolean isGUIInitd() {
-        return guiInit;
+    public boolean isStoredDownloadsLoaded() {
+        return downloadsReadFromDisk;
     }
     
     /* (non-Javadoc)
@@ -230,19 +232,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
             return true;
         for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
             if(i.next().getDownloadType() == DownloaderType.INNETWORK)
-                return true;
-        }
-        return false;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#hasStoreDownload()
-     */
-    public synchronized boolean hasStoreDownload() {
-        if(storeDownloadCount > 0)
-            return true;
-        for(Iterator<AbstractDownloader> i = waiting.iterator(); i.hasNext(); ) {
-            if( i.next().getDownloadType() == DownloaderType.STORE)
                 return true;
         }
         return false;
@@ -272,10 +261,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
         UpdateSettings.FAILED_UPDATES.setValue(hopeless);
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getPushManager()
-     */
-    public PushDownloadManager getPushManager() {
+    PushDownloadManager getPushManager() {
         return pushDownloadManager.get();
     }
 
@@ -311,9 +297,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     }
     
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#scheduleWaitingPump()
-     */
     public void scheduleWaitingPump() {
         if(_waitingPump != null)
             return;
@@ -361,17 +344,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
                 md.handleInactivity();
             }
         }
-    }
-    
-    /**
-     * Copies the backup downloads.dat (downloads.bak) file to the
-     * the real downloads.dat location.
-     */
-    private synchronized void copyBackupToReal() {
-        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();        
-        real.delete();
-        FileUtils.copy(backup, real);
     }
     
     /* (non-Javadoc)
@@ -494,10 +466,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
         return false;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#clearAllDownloads()
-     */
-    public void clearAllDownloads() {
+    void clearAllDownloads() {
         List<Downloader> buf;
         synchronized(this) {
             buf = new ArrayList<Downloader>(active.size() + waiting.size());
@@ -509,114 +478,6 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
         for(Downloader md : buf ) 
             md.stop();
     }   
-    
-    
-
-
-    public boolean writeSnapshot() {
-        List<AbstractDownloader> buf;
-        synchronized(this) {
-            buf = new ArrayList<AbstractDownloader>(active.size() + waiting.size());
-            buf.addAll(active);
-            buf.addAll(waiting);
-        }
-        
-        File outFile = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
-        File backupFile = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
-        
-        //must delete in order for renameTo to work.
-        backupFile.delete();
-        outFile.renameTo(backupFile);
-        
-        // Write list of active and waiting downloaders, then block list in
-        //   IncompleteFileManager.
-        ObjectOutputStream out = null;
-        try {
-            out=new ObjectOutputStream(
-                    new BufferedOutputStream(
-                        new FileOutputStream(outFile)));
-            
-            out.writeObject(buf);
-            //Blocks can be written to incompleteFileManager from other threads
-            //while this downloader is being serialized, so lock is needed.
-            synchronized (incompleteFileManager) {
-                out.writeObject(incompleteFileManager);
-            }
-            out.flush();
-            return true;
-        } catch (IOException e) {
-            return false;
-        } finally {
-            IOUtils.close(out);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#readAndInitializeSnapshot(java.io.File)
-     */
-    public synchronized boolean readAndInitializeSnapshot(File file) {
-        List<AbstractDownloader> buf;
-        try {
-            buf = readSnapshot(file);
-        } catch(IOException iox) {
-            LOG.warn("Couldn't read snapshot", iox);
-            return false;
-        }
-
-        //Initialize and start downloaders. This code is a little tricky.  It is
-        //important that instruction (3) follow (1) and (2), because we must not
-        //pass an uninitialized Downloader to the GUI.  (The call to getFileName
-        //will throw NullPointerException.)  I believe the relative order of (1)
-        //and (2) does not matter since this' monitor is held.  (The download
-        //thread must obtain the monitor to acquire a queue slot.)
-        try {
-            for (AbstractDownloader downloader : buf) {
-                
-                waiting.add(downloader);
-                downloader.initialize();
-                callback(downloader).addDownload(downloader);
-            }
-            return true;
-        } finally {
-            // Remove entries that are too old or no longer existent and not actively 
-            // downloaded.  
-            if (incompleteFileManager.initialPurge(getActiveDownloadFiles(buf)))
-                writeSnapshot();
-        }
-    }
-    
-    /* public for testing only right now. */
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#readSnapshot(java.io.File)
-     */
-    public List<AbstractDownloader> readSnapshot(File file) throws IOException {        
-        //Read downloaders from disk.
-        List<AbstractDownloader> buf=null;
-        ObjectInputStream in = null;
-        try {
-            in = new ConverterObjectInputStream(
-                                    new BufferedInputStream(
-                                        new FileInputStream(file)));
-            //This does not try to maintain backwards compatibility with older
-            //versions of LimeWire, which only wrote the list of downloaders.
-            //Note that there is a minor race condition here; if the user has
-            //started some downloads before this method is called, the new and
-            //old downloads will use different IncompleteFileManager instances.
-            //This doesn't really cause an errors, however.
-            buf = GenericsUtils.scanForList(in.readObject(), AbstractDownloader.class, ScanMode.REMOVE);
-            incompleteFileManager=(IncompleteFileManager)in.readObject();
-        } catch(Throwable t) {
-            LOG.error("Unable to read download file", t);
-            throw (IOException)new IOException().initCause(t);
-        } finally {
-            IOUtils.close(in);
-        }
-        
-        // Pump the downloaders through a set, to remove duplicate values.
-        // This is necessary in case LimeWire got into a state where a
-        // downloader was written to disk twice.
-        return new LinkedList<AbstractDownloader>(new LinkedHashSet<AbstractDownloader>(buf));
-    }
     
     private static Collection<File> getActiveDownloadFiles(List<AbstractDownloader> downloaders) {
         List<File> ret = new ArrayList<File>(downloaders.size());

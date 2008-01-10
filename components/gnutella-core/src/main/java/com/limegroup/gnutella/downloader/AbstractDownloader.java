@@ -25,10 +25,6 @@ public abstract class AbstractDownloader implements Downloader {
 
 	protected static final String FILE_SIZE = "fileSize";
 
-    public enum DownloaderType {
-        BTDOWNLOADER, INNETWORK, MAGNET, MANAGED, STORE, TORRENTFETCHER, UNKNOWN
-    };
-    
     /** LOCKING: this */
 	protected volatile Map<String, Serializable> propertiesMap;
 

@@ -2,37 +2,27 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.limegroup.bittorrent.BTDownloaderFactory;
-import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
-import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class BypassedResultsCacheTest extends BaseTestCase {
 
-    private QueryActiveActivityCallback callback;
-    
-    private GUIDActiveDownloadManager manager;
-    
+    private ActivityCallback activityCallback;
+    private Mockery mockery;
+    private DownloadManager downloadManager;
     private GUESSEndpoint point1;
     
     private GUESSEndpoint point2;
     
     private GUESSEndpoint point3;
+    
+    private BypassedResultsCache bypassedResultsCache;
     
     public BypassedResultsCacheTest(String name) {
         super(name);
@@ -40,19 +30,19 @@ public class BypassedResultsCacheTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(ActivityCallback.class).to(QueryActiveActivityCallback.class);
-                bind(DownloadManager.class).to(GUIDActiveDownloadManager.class);
-            };
-        });
-        callback = (QueryActiveActivityCallback)injector.getInstance(ActivityCallback.class);
-        manager = (GUIDActiveDownloadManager)injector.getInstance(DownloadManager.class);
+        mockery = new Mockery();
+        downloadManager = mockery.mock(DownloadManager.class);
+        activityCallback = mockery.mock(ActivityCallback.class);
+        bypassedResultsCache = new BypassedResultsCache(activityCallback, downloadManager); 
         
         point1 = new GUESSEndpoint(InetAddress.getLocalHost(), 5555);
         point2 = new GUESSEndpoint(InetAddress.getLocalHost(), 6666);
         point3 = new GUESSEndpoint(InetAddress.getLocalHost(), 7777);
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        mockery.assertIsSatisfied();
     }
     
     public static Test suite() {
@@ -60,98 +50,82 @@ public class BypassedResultsCacheTest extends BaseTestCase {
     }
     
     public void testAddBypassedSource() {
+        final GUID guid = new GUID();
+        mockery.checking(new Expectations() {{
+            exactly(2).of(activityCallback).isQueryAlive(with(same(guid)));
+            will(returnValue(true));
+        }});
+        assertTrue(bypassedResultsCache.addBypassedSource(guid, point1));
+        assertFalse(bypassedResultsCache.addBypassedSource(guid, point1));
+
+        mockery.checking(new Expectations() {{
+            exactly(2).of(activityCallback).isQueryAlive(with(same(guid)));
+            will(returnValue(false));
+            
+            exactly(2).of(downloadManager).isGuidForQueryDownloading(with(same(guid)));
+            will(returnValue(true));
+        }});
+        assertTrue(bypassedResultsCache.addBypassedSource(guid, point2));
+        assertFalse(bypassedResultsCache.addBypassedSource(guid, point2));
         
-        BypassedResultsCache cache = new BypassedResultsCache(callback, manager);
+        mockery.checking(new Expectations() {{
+            exactly(1).of(activityCallback).isQueryAlive(with(same(guid)));
+            will(returnValue(false));
+            
+            exactly(1).of(downloadManager).isGuidForQueryDownloading(with(same(guid)));
+            will(returnValue(false));
+        }});
+        assertFalse(bypassedResultsCache.addBypassedSource(guid, point3));
         
-        // success
-        callback.isQueryAlive = true;
-        GUID guid = new GUID();
-        assertTrue(cache.addBypassedSource(guid, point1));
-        assertFalse(cache.addBypassedSource(guid, point1));
-        
-        callback.isQueryAlive = false;
-        manager.isGUIDFor = true;
-        assertTrue(cache.addBypassedSource(guid, point2));
-        assertFalse(cache.addBypassedSource(guid, point2));
-        
-        manager.isGUIDFor = false;
-        assertFalse(cache.addBypassedSource(guid, point3));
-        
-        assertContains(cache.getQueryLocs(guid), point1);
-        assertContains(cache.getQueryLocs(guid), point2);
+        assertContains(bypassedResultsCache.getQueryLocs(guid), point1);
+        assertContains(bypassedResultsCache.getQueryLocs(guid), point2);
     }
     
     public void testExpiration() {
-        BypassedResultsCache cache = new BypassedResultsCache(callback, manager);
-        callback.isQueryAlive = true;
-        GUID guid = new GUID();
-        assertTrue(cache.addBypassedSource(guid, point1));
+        final GUID guid = new GUID();       
+ 
+        mockery.checking(new Expectations() {{
+            exactly(1).of(activityCallback).isQueryAlive(with(same(guid)));
+            will(returnValue(true));
+        }});
+        assertTrue(bypassedResultsCache.addBypassedSource(guid, point1));
         
-        manager.isGUIDFor = false;
-        cache.queryKilled(guid);
+        mockery.checking(new Expectations() {{
+            exactly(1).of(downloadManager).isGuidForQueryDownloading(with(same(guid)));
+            will(returnValue(false));
+        }}); 
+        bypassedResultsCache.queryKilled(guid);
         
-        assertTrue(cache.getQueryLocs(guid).isEmpty());
+        assertTrue(bypassedResultsCache.getQueryLocs(guid).isEmpty());
         
-        assertTrue(cache.addBypassedSource(guid, point1));
+        mockery.checking(new Expectations() {{
+            exactly(1).of(activityCallback).isQueryAlive(with(same(guid)));
+            will(returnValue(true));
+        }});
+        assertTrue(bypassedResultsCache.addBypassedSource(guid, point1));
         
-        callback.isQueryAlive = false;
-        cache.downloadFinished(guid);
         
-        assertTrue(cache.getQueryLocs(guid).isEmpty());
+        mockery.checking(new Expectations() {{
+            exactly(1).of(activityCallback).isQueryAlive(with(same(guid)));
+            will(returnValue(false));
+            
+            exactly(1).of(downloadManager).isGuidForQueryDownloading(with(same(guid)));
+            will(returnValue(false));
+        }});
+        bypassedResultsCache.downloadFinished(guid);        
+        assertTrue(bypassedResultsCache.getQueryLocs(guid).isEmpty());
     }
     
     public void testUpperThreshholdIsHonored() throws UnknownHostException {
-        callback.isQueryAlive = true;
-        GUID guid = new GUID();
-        BypassedResultsCache cache = new BypassedResultsCache(callback, manager);
-        
-        for (int i = 0; i < BypassedResultsCache.MAX_BYPASSED_RESULTS; i++) {
-            assertTrue(cache.addBypassedSource(guid, new GUESSEndpoint(InetAddress.getLocalHost(), 500 + i)));
-        }
-        
-        assertFalse(cache.addBypassedSource(guid, point1));
-    }
-
-    private static class QueryActiveActivityCallback extends ActivityCallbackStub {
-        
-        boolean isQueryAlive;
-        
-        @Override
-        public boolean isQueryAlive(GUID guid) {
-            return isQueryAlive;
-        }
-        
-    }
-    
-    @Singleton
-    private static class GUIDActiveDownloadManager extends DownloadManagerStub {
-        
-        boolean isGUIDFor;
-        
-        @Inject
-        public GUIDActiveDownloadManager(NetworkManager networkManager,
-
-                @Named("inNetwork") DownloadCallback innetworkCallback,
-                BTDownloaderFactory btDownloaderFactory,
-                Provider<DownloadCallback> downloadCallback,
-                Provider<MessageRouter> messageRouter,
-                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                Provider<TorrentManager> torrentManager,
-                Provider<PushDownloadManager> pushDownloadManager,
-                BrowseHostHandlerManager browseHostHandlerManager,
-                GnutellaDownloaderFactory gnutellaDownloaderFactory,
-                PurchasedStoreDownloaderFactory purchasedDownloaderFactory) {
-            super(networkManager, innetworkCallback, btDownloaderFactory,
-                    downloadCallback, messageRouter, backgroundExecutor, torrentManager, pushDownloadManager,
-                    gnutellaDownloaderFactory, purchasedDownloaderFactory);
-        }
-
-
-
-        @Override
-        public synchronized boolean isGuidForQueryDownloading(GUID guid) {
-            return isGUIDFor;
-        }
-    }
-    
+        final int max = 150;
+        final GUID guid = new GUID();
+        mockery.checking(new Expectations() {{
+            exactly(max+1).of(activityCallback).isQueryAlive(with(same(guid)));
+            will(returnValue(true));
+        }});
+        for (int i = 0; i < max; i++) {
+            assertTrue(bypassedResultsCache.addBypassedSource(guid, new GUESSEndpoint(InetAddress.getLocalHost(), 500 + i)));
+        }        
+        assertFalse(bypassedResultsCache.addBypassedSource(guid, point1));
+    }    
 }

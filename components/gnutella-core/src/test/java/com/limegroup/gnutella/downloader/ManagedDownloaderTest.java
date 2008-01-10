@@ -45,7 +45,7 @@ import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadManagerStub;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -58,7 +58,6 @@ import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
@@ -79,7 +78,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private static final Log LOG = LogFactory.getLog(ManagedDownloaderTest.class);
     
     private final static int PORT=6666;
-    private DownloadManagerStub downloadManager;
+    private DownloadManagerImpl downloadManager;
     private FileManagerStub fileManager;
     private GnutellaDownloaderFactory gnutellaDownloaderFactory;
     private NetworkManagerStub networkManager;
@@ -109,7 +108,6 @@ public class ManagedDownloaderTest extends LimeTestCase {
            @Override
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-               bind(DownloadManager.class).to(DownloadManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
@@ -124,7 +122,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         localSocketAddressProvider.setLocalAddressPrivate(false);
         LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProvider);
         
-        downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+        downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
         gnutellaDownloaderFactory = injector.getInstance(GnutellaDownloaderFactory.class);
         networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
@@ -276,8 +274,6 @@ public class ManagedDownloaderTest extends LimeTestCase {
         qr=downloader.newRequery();
         // minspeed mask | firewalled | xml | firewall transfer = 226
         assertEquals(226, qr.getMinSpeed());
-            
-        
     }
 
     /** Catches a bug with earlier keyword intersection code. */

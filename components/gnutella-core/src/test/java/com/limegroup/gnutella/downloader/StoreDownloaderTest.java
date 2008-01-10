@@ -14,7 +14,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadManagerStub;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
@@ -35,7 +35,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class StoreDownloaderTest extends LimeTestCase{
 
-    private DownloadManagerStub downloadManager;
+    private DownloadManagerImpl downloadManager;
     private Injector injector; 
     
     public StoreDownloaderTest(String name) {
@@ -60,7 +60,6 @@ public class StoreDownloaderTest extends LimeTestCase{
            @Override
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-               bind(DownloadManager.class).to(DownloadManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
@@ -75,7 +74,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         localSocketAddressProvider.setLocalAddressPrivate(false);
         LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProvider);
         
-        downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);       
+        downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);       
         downloadManager.initialize();
         RequeryManager.NO_DELAY = false;
     }

@@ -33,6 +33,8 @@ import com.limegroup.gnutella.licenses.LicenseType;
  * @author  Sumeet Thadani
  */
 public class LimeXMLDocument implements Serializable, StringLookup {
+
+    private static final long serialVersionUID = 7396170507085078485L;
     
     private static final Log LOG = LogFactory.getLog(LimeXMLDocument.class);
 
@@ -55,9 +57,6 @@ public class LimeXMLDocument implements Serializable, StringLookup {
 	 * Cached hash code for this instance.
 	 */
 	private volatile transient int hashCode = 0;
-
-    /** For backwards compatibility with downloads.dat. */
-    private static final long serialVersionUID = 7396170507085078485L;
 
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 

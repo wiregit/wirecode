@@ -117,6 +117,13 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.RequeryManagerFactory;
 import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettingsImpl;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializerImpl;
+import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
+import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadConverterImpl;
+import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadSettings;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.LocalIPFilter;
@@ -349,6 +356,10 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
+        bind(DownloadSerializer.class).to(DownloadSerializerImpl.class);
+        bind(DownloadSerializeSettings.class).to(DownloadSerializeSettingsImpl.class);
+        bind(OldDownloadConverter.class).to(OldDownloadConverterImpl.class);
+        bind(DownloadSerializeSettings.class).annotatedWith(Names.named("oldDownloadSettings")).to(OldDownloadSettings.class);
         
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);

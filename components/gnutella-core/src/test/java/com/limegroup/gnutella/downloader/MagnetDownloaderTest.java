@@ -8,7 +8,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
@@ -27,7 +26,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public class MagnetDownloaderTest extends LimeTestCase {
 
 	//private static final Log LOG = LogFactory.getLog(MagnetDownloaderTest.class);
-    private DownloadManagerStub downloadManager;
+    private DownloadManager downloadManager;
 	
     /**
      * Creates a new test instance.
@@ -55,7 +54,6 @@ public class MagnetDownloaderTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
            @Override
             protected void configure() {
-               bind(DownloadManager.class).to(DownloadManagerStub.class);
                bind(FileManager.class).to(FileManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
@@ -65,7 +63,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
         ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
         connectionManager.setConnected(true);
         
-        downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+        downloadManager = injector.getInstance(DownloadManager.class);
         downloadManager.initialize();
     }
 

@@ -52,6 +52,11 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
 		callback = (TestActivityCallback) injector.getInstance(ActivityCallback.class);
     }
     
+    public void testREDO() {
+        fail("Reimplement this test!");
+    }
+    
+    /*
     public void testLegacy() throws Exception {
         doTest("downloads_30.dat","mpg4_golem160x90first120.avi",2777638);
         callback.clearDownloaders();
@@ -77,7 +82,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
              name, md.getSaveFile().getName());
         assertEquals("unexpected content length!",
              size, md.getContentLength());
-    }
+    } */
     
     /**
      * Records lists of downloads

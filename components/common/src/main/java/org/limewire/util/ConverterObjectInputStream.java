@@ -104,6 +104,11 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         ObjectStreamClass read = super.readClassDescriptor(); 
         String className = read.getName();        
 
+        boolean array = className.startsWith("[L") && className.endsWith(";");
+        if(array) {
+            className = className.substring(2, className.length()-1);
+        }
+        
         ObjectStreamClass clazzToReturn; 
         String newName = lookups.get(className);
         if (newName != null) {
@@ -125,7 +130,13 @@ public class ConverterObjectInputStream extends ObjectInputStream {
                 clazzToReturn = read;
             }
         }
-
+        
+        // If it's an array, and we modified we we read off disk, convert
+        // to array form.
+        if(array && read != clazzToReturn) {
+            clazzToReturn = ObjectStreamClass.lookup(Class.forName("[L" + clazzToReturn.getName() + ";"));
+        }
+        
         return clazzToReturn;
     } 
 }

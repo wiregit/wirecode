@@ -106,7 +106,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         });
         super.setUp(injector);
 
-        DownloadManager downloadManager = injector.getInstance(DownloadManager.class);
+        DownloadManagerImpl downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         fileManager = injector.getInstance(FileManager.class);
         connectionManager = injector.getInstance(ConnectionManager.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);

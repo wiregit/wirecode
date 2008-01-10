@@ -90,7 +90,7 @@ public class IncompleteFileManager implements Serializable {
      * on disk (VerifyingFile).  Needed for resumptive smart downloads.
      * INVARIANT: all blocks disjoint, no two intervals can be coalesced into
      * one interval.  Note that blocks are not sorted; there are typically few
-     * blocks so performance isn't an issue.  
+     * blocks so performance isn't an issue.
      */
     private Map<File, VerifyingFile> blocks=
         new TreeMap<File, VerifyingFile>(Comparators.fileComparator());

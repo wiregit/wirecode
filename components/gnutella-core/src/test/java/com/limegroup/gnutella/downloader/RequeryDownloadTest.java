@@ -3,9 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -16,12 +14,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -32,16 +28,15 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.MessageHandlerBinder;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.MulticastService;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PongCacher;
@@ -78,12 +73,8 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.QueryUtils;
@@ -99,7 +90,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
 public class RequeryDownloadTest extends LimeTestCase {
 
     /** The main test fixture.  Contains the incomplete file and hash below. */
-    private DownloadManager downloadManager; 
+    private DownloadManagerImpl downloadManager; 
     /** Where to send and receive messages */
     private static TestMessageRouter messageRouter;
     /** The simulated downloads.dat file.  Used only to build _mgr. */
@@ -130,64 +121,68 @@ public class RequeryDownloadTest extends LimeTestCase {
         return buildTestSuite(RequeryDownloadTest.class);
     }
     
-    public void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-          @Override
-            protected void configure() {
-              bind(MessageRouter.class).to(TestMessageRouter.class);
-              bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-              bind(NetworkManager.class).to(NetworkManagerStub.class);  
-            }  
-        });
-        
-        hash = TestFile.hash();
-        NetworkManagerStub networkManager = (NetworkManagerStub) injector
-                .getInstance(NetworkManager.class);
-        networkManager.setListeningPort(ConnectionSettings.PORT.getValue());
-        
-        messageRouter = (TestMessageRouter)injector.getInstance(MessageRouter.class);
-        routeTable = (RouteTable) PrivilegedAccessor.getValue(messageRouter, "_queryRouteTable");
-        
-        forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
-
-        createSnapshot();
-        downloadManager = injector.getInstance(DownloadManager.class);
-        downloadManager.initialize();
-        downloadManager.scheduleWaitingPump();
-        boolean ok = downloadManager.readAndInitializeSnapshot(snapshot);
-        assertTrue("Couldn't read snapshot file", ok);
-        testUploader = injector.getInstance(TestUploader.class);
-        testUploader.start("uploader 6666", 6666, false);
-        testUploader.setRate(Integer.MAX_VALUE);
-        
-        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
-        localSocketAddressProviderStub.setLocalAddressPrivate(false);
-        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
-        RequeryManager.NO_DELAY = true;
-
-        new File(getSaveDirectory(), filename).delete();
+    public void testREDO() {
+        fail("Fix this test");
     }
     
-    /** Creates a downloads.dat file named SNAPSHOT with a faked up
-     *  IncompleteFileManager in it.  All of this because we can't access
-     *  DownloadManager.incompleteFileManager. */
-    private void createSnapshot() throws Exception {
-        try {
-            //Make IncompleteFileManager with appropriate entries...
-            IncompleteFileManager ifm=createIncompleteFile();
-            //...and write it to downloads.dat.
-            snapshot = File.createTempFile(
-                "ResumeByHashTest", ".dat"
-            );
-            ObjectOutputStream out = 
-                new ObjectOutputStream(new FileOutputStream(snapshot));
-            out.writeObject(new ArrayList());   //downloads
-            out.writeObject(ifm);
-            out.close();
-        } catch (IOException e) {
-            fail("Couldn't create temp file", e);
-        }
-    }
+//    public void setUp() throws Exception {
+//        injector = LimeTestUtils.createInjector(new AbstractModule() {
+//          @Override
+//            protected void configure() {
+//              bind(MessageRouter.class).to(TestMessageRouter.class);
+//              bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+//              bind(NetworkManager.class).to(NetworkManagerStub.class);  
+//            }  
+//        });
+//        
+//        hash = TestFile.hash();
+//        NetworkManagerStub networkManager = (NetworkManagerStub) injector
+//                .getInstance(NetworkManager.class);
+//        networkManager.setListeningPort(ConnectionSettings.PORT.getValue());
+//        
+//        messageRouter = (TestMessageRouter)injector.getInstance(MessageRouter.class);
+//        routeTable = (RouteTable) PrivilegedAccessor.getValue(messageRouter, "_queryRouteTable");
+//        
+//        forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
+//
+//        createSnapshot();
+//        downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
+//        downloadManager.initialize();
+//        downloadManager.scheduleWaitingPump();
+//        boolean ok = downloadManager.readAndInitializeSnapshot(snapshot);
+//        assertTrue("Couldn't read snapshot file", ok);
+//        testUploader = injector.getInstance(TestUploader.class);
+//        testUploader.start("uploader 6666", 6666, false);
+//        testUploader.setRate(Integer.MAX_VALUE);
+//        
+//        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
+//        localSocketAddressProviderStub.setLocalAddressPrivate(false);
+//        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
+//        RequeryManager.NO_DELAY = true;
+//
+//        new File(getSaveDirectory(), filename).delete();
+//    }
+    
+//    /** Creates a downloads.dat file named SNAPSHOT with a faked up
+//     *  IncompleteFileManager in it.  All of this because we can't access
+//     *  DownloadManager.incompleteFileManager. */
+//    private void createSnapshot() throws Exception {
+//        try {
+//            //Make IncompleteFileManager with appropriate entries...
+//            IncompleteFileManager ifm=createIncompleteFile();
+//            //...and write it to downloads.dat.
+//            snapshot = File.createTempFile(
+//                "ResumeByHashTest", ".dat"
+//            );
+//            ObjectOutputStream out = 
+//                new ObjectOutputStream(new FileOutputStream(snapshot));
+//            out.writeObject(new ArrayList());   //downloads
+//            out.writeObject(ifm);
+//            out.close();
+//        } catch (IOException e) {
+//            fail("Couldn't create temp file", e);
+//        }
+//    }
 
     /** Creates the incomplete file and returns an IncompleteFileManager with
      *  info for that file. */
