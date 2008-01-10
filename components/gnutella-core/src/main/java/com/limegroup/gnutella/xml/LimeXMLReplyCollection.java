@@ -677,7 +677,6 @@ public class LimeXMLReplyCollection {
                 out.flush();
                 wrote = true;
             } catch(Throwable ignored) {
-                ignored.printStackTrace();
                 LOG.trace("Unable to write", ignored);
             } finally {
                 IOUtils.close(out);
