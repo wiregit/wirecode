@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.StringSetting;
 
 /**
  * Settings to deal with UI.
@@ -106,5 +107,23 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting SHOW_NOTIFICATIONS = 
         FACTORY.createBooleanSetting("SHOW_NOTIFICATIONS", true);
+    
+    /** Url for into pic. */
+    public static final StringSetting INTRO_URL = FACTORY.createRemoteStringSetting("INTRO_URL",
+            "http://clientpix.limewire.com/pix/intro.png", "UI.introUrl");
+    
+    /** Url for after-search pic. */
+    public static final StringSetting AFTER_SEARCH_URL = FACTORY.createRemoteStringSetting("AFTER_SEARCH_URL",
+            "http://clientpix.limewire.com/pix/aftersearch.png", "UI.afterSearchUrl");
+    
+    /** Whether or not to use network-based images, or just always use built-in ones. */
+    public static final BooleanSetting USE_NETWORK_IMAGES = FACTORY.createRemoteBooleanSetting("USE_NETWORK_IMAGES",
+            false, "UI.useNetworkImages");
+    
+    /** Place where you go to after clicking the link. */
+    public static final StringSetting AFTER_SERACH_CLICK_LINK = FACTORY.createRemoteStringSetting("AFTER_SERACH_CLICK_LINK",
+            "http://www.limewire.com/clientpro?", "UI.afterSearchClickLink");
+    
+
 
 }
