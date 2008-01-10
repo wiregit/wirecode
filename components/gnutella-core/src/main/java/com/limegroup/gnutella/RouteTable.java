@@ -10,7 +10,6 @@ import java.util.TreeMap;
 
 import org.limewire.collection.MultiIterable;
 import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.Base32;
@@ -532,134 +531,132 @@ public final class RouteTable  {
         */
     }
 
+
+    /** Inspectable with some general stats about the routing table */
+    @InspectionPoint("query routing table stats")
     @SuppressWarnings("unused")
-    @InspectableContainer
-    private class RTInspectables {
-        
-        /** Inspectable with some general stats about the routing table */
-        @InspectionPoint("query routing table stats")
-        public final Inspectable RTStats = new Inspectable() {
-            public synchronized Object inspect() {
-                Map<String, Object> ret = new HashMap<String, Object>();
-                ret.put("ver",1);
-                ClassCNetworks globalClassC = new ClassCNetworks();
-                List<Double> classCSizes = new ArrayList<Double>();
-                List<Double> repliesRouted = new ArrayList<Double>();
-                List<Double> ttls = new ArrayList<Double>();
-                List<Double> timeToFirstReply = new ArrayList<Double>();
-                List<Double> timeToSecondReply = new ArrayList<Double>();
-                List<Double> timeToThirdReply = new ArrayList<Double>();
-                List<Double> timeTo10Results = new ArrayList<Double>();
-                List<Double> timeTo50Results = new ArrayList<Double>();
-                List<Double> timeTo100Results = new ArrayList<Double>();
-                List<Double> allResultTimes = new ArrayList<Double>();
-                List<Double> allResultCounts = new ArrayList<Double>();
-                List<Integer> networks = Arrays.asList(new Integer[]{0,0,0,0});
-                List<Integer> hops = Arrays.asList(new Integer[]{0,0,0,0,0});
-                List<Integer> ttlsHist = Arrays.asList(new Integer[]{0,0,0,0,0});
-                Iterable<RouteTableEntry> bothMaps = 
-                    new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
-                for(RouteTableEntry rte : bothMaps) {
-                    for (int i =0 ; i < rte.networks.length; i++)
-                        networks.set(i, networks.get(i)+rte.networks[i]);
-                    for (int i =0 ;i < rte.hops.length; i++)
-                        hops.set(i, hops.get(i)+rte.hops[i]);
-                    for (int i =0 ;i < rte.ttls.length; i++)
-                        ttlsHist.set(i, ttlsHist.get(i)+rte.ttls[i]);
-                    classCSizes.add((double)(rte.classCnetworks.getMap().size()));
-                    repliesRouted.add((double)rte.repliesRouted);
-                    ttls.add((double)rte.ttl);
-                    globalClassC.addAll(rte.classCnetworks);
-                    
-                    // get stats on how long it takes to get the first 3 replies
-                    if (rte.resultTimeStamps.size() > 0)
-                        timeToFirstReply.add(rte.resultTimeStamps.get(0));
-                    if (rte.resultTimeStamps.size() > 1)
-                        timeToSecondReply.add(rte.resultTimeStamps.get(1));
-                    if (rte.resultTimeStamps.size() > 2)
-                        timeToThirdReply.add(rte.resultTimeStamps.get(2));
-                    allResultTimes.addAll(rte.resultTimeStamps);
-                    
-                    // get stats on how long it takes to get # of results
-                    int results = 0;
-                    boolean counted10 = false;
-                    boolean counted50 = false;
-                    boolean counted100 = false;
-                    for (int i = 0; i < rte.resultCounts.size(); i++) {
-                        results+=rte.resultCounts.get(i);
-                        if (results > 10 && !counted10) {
-                            counted10 = true;
-                            timeTo10Results.add(rte.resultTimeStamps.get(i));
-                        }
-                        if (results > 50 && !counted50) {
-                            counted50 = true;
-                            timeTo50Results.add(rte.resultTimeStamps.get(i));
-                        }
-                        if (results > 100 && !counted100) {
-                            counted100 = true;
-                            timeTo100Results.add(rte.resultTimeStamps.get(i));
-                            break; // we don't need to go any further
-                        }
+    public final Inspectable RTStats = new Inspectable() {
+        public synchronized Object inspect() {
+            Map<String, Object> ret = new HashMap<String, Object>();
+            ret.put("ver",1);
+            ClassCNetworks globalClassC = new ClassCNetworks();
+            List<Double> classCSizes = new ArrayList<Double>();
+            List<Double> repliesRouted = new ArrayList<Double>();
+            List<Double> ttls = new ArrayList<Double>();
+            List<Double> timeToFirstReply = new ArrayList<Double>();
+            List<Double> timeToSecondReply = new ArrayList<Double>();
+            List<Double> timeToThirdReply = new ArrayList<Double>();
+            List<Double> timeTo10Results = new ArrayList<Double>();
+            List<Double> timeTo50Results = new ArrayList<Double>();
+            List<Double> timeTo100Results = new ArrayList<Double>();
+            List<Double> allResultTimes = new ArrayList<Double>();
+            List<Double> allResultCounts = new ArrayList<Double>();
+            List<Integer> networks = Arrays.asList(new Integer[]{0,0,0,0});
+            List<Integer> hops = Arrays.asList(new Integer[]{0,0,0,0,0});
+            List<Integer> ttlsHist = Arrays.asList(new Integer[]{0,0,0,0,0});
+            Iterable<RouteTableEntry> bothMaps = 
+                new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
+            for(RouteTableEntry rte : bothMaps) {
+                for (int i =0 ; i < rte.networks.length; i++)
+                    networks.set(i, networks.get(i)+rte.networks[i]);
+                for (int i =0 ;i < rte.hops.length; i++)
+                    hops.set(i, hops.get(i)+rte.hops[i]);
+                for (int i =0 ;i < rte.ttls.length; i++)
+                    ttlsHist.set(i, ttlsHist.get(i)+rte.ttls[i]);
+                classCSizes.add((double)(rte.classCnetworks.getMap().size()));
+                repliesRouted.add((double)rte.repliesRouted);
+                ttls.add((double)rte.ttl);
+                globalClassC.addAll(rte.classCnetworks);
+
+                // get stats on how long it takes to get the first 3 replies
+                if (rte.resultTimeStamps.size() > 0)
+                    timeToFirstReply.add(rte.resultTimeStamps.get(0));
+                if (rte.resultTimeStamps.size() > 1)
+                    timeToSecondReply.add(rte.resultTimeStamps.get(1));
+                if (rte.resultTimeStamps.size() > 2)
+                    timeToThirdReply.add(rte.resultTimeStamps.get(2));
+                allResultTimes.addAll(rte.resultTimeStamps);
+
+                // get stats on how long it takes to get # of results
+                int results = 0;
+                boolean counted10 = false;
+                boolean counted50 = false;
+                boolean counted100 = false;
+                for (int i = 0; i < rte.resultCounts.size(); i++) {
+                    results+=rte.resultCounts.get(i);
+                    if (results > 10 && !counted10) {
+                        counted10 = true;
+                        timeTo10Results.add(rte.resultTimeStamps.get(i));
                     }
-                    allResultCounts.addAll(rte.resultCounts);
+                    if (results > 50 && !counted50) {
+                        counted50 = true;
+                        timeTo50Results.add(rte.resultTimeStamps.get(i));
+                    }
+                    if (results > 100 && !counted100) {
+                        counted100 = true;
+                        timeTo100Results.add(rte.resultTimeStamps.get(i));
+                        break; // we don't need to go any further
+                    }
                 }
-
-                ret.put("top10", globalClassC.getTopInspectable(10));
-                ret.put("cs", StatsUtils.quickStatsDouble(classCSizes).getMap());
-                ret.put("csh", StatsUtils.getHistogram(classCSizes, 10));
-                ret.put("rr", StatsUtils.quickStatsDouble(repliesRouted).getMap());
-                ret.put("rrh", StatsUtils.getHistogram(repliesRouted, 10));
-                ret.put("ttl", StatsUtils.quickStatsDouble(ttls).getMap());
-                ret.put("ttlh", StatsUtils.getHistogram(ttls, 5));
-                ret.put("tt1r", StatsUtils.quickStatsDouble(timeToFirstReply).getMap());
-                ret.put("tt1rh", StatsUtils.getHistogram(timeToFirstReply, 10));
-                ret.put("tt2r", StatsUtils.quickStatsDouble(timeToSecondReply).getMap());
-                ret.put("tt2rh", StatsUtils.getHistogram(timeToSecondReply, 10));
-                ret.put("tt3r", StatsUtils.quickStatsDouble(timeToThirdReply).getMap());
-                ret.put("tt3rh", StatsUtils.getHistogram(timeToThirdReply, 10));
-                ret.put("tt10c", StatsUtils.quickStatsDouble(timeTo10Results).getMap());
-                ret.put("tt10ch", StatsUtils.getHistogram(timeTo10Results, 10));
-                ret.put("tt50c", StatsUtils.quickStatsDouble(timeTo50Results).getMap());
-                ret.put("tt50ch", StatsUtils.getHistogram(timeTo50Results, 10));
-                ret.put("tt100c", StatsUtils.quickStatsDouble(timeTo100Results).getMap());
-                ret.put("tt100ch", StatsUtils.getHistogram(timeTo100Results, 10));
-                ret.put("nets", networks);
-                ret.put("hops", hops);
-                ret.put("ttls", ttlsHist);
-                return ret;
+                allResultCounts.addAll(rte.resultCounts);
             }
 
-        };
-        
-        /** 
-         * An actual dump of the routing table.  May get big, so 
-         * its a good idea to first inspect the stats to see how many
-         * entries there are.
-         */
-        @InspectionPoint("query routing table dump")
-        public final Inspectable RTDump = new Inspectable() {
-            public Object inspect() {
-                Map<String, Object> ret = new HashMap<String, Object>();
-                Iterable<Map.Entry<byte[], RouteTableEntry>> bothMaps = 
-                    new MultiIterable<Map.Entry<byte[],RouteTableEntry>>(_newMap.entrySet(),_oldMap.entrySet());
-                for (Map.Entry<byte[], RouteTableEntry> entry : bothMaps) {
-                    RouteTableEntry e = entry.getValue();
-                    Map<String, Object> m = new HashMap<String, Object>();
-                    m.put("br", e.bytesRouted);
-                    m.put("ttl", e.ttl);
-                    m.put("rr", e.repliesRouted);
-                    m.put("cc", e.classCnetworks);
-                    m.put("rt", e.resultTimeStamps);
-                    m.put("rc", e.resultCounts);
-                    m.put("nets", Arrays.asList(e.networks));
-                    m.put("hops", Arrays.asList(e.hops));
-                    m.put("ttls", Arrays.asList(e.ttls));
-                    ret.put(Base32.encode(entry.getKey()), m);
-                }
-                return ret;
+            ret.put("top10", globalClassC.getTopInspectable(10));
+            ret.put("cs", StatsUtils.quickStatsDouble(classCSizes).getMap());
+            ret.put("csh", StatsUtils.getHistogram(classCSizes, 10));
+            ret.put("rr", StatsUtils.quickStatsDouble(repliesRouted).getMap());
+            ret.put("rrh", StatsUtils.getHistogram(repliesRouted, 10));
+            ret.put("ttl", StatsUtils.quickStatsDouble(ttls).getMap());
+            ret.put("ttlh", StatsUtils.getHistogram(ttls, 5));
+            ret.put("tt1r", StatsUtils.quickStatsDouble(timeToFirstReply).getMap());
+            ret.put("tt1rh", StatsUtils.getHistogram(timeToFirstReply, 10));
+            ret.put("tt2r", StatsUtils.quickStatsDouble(timeToSecondReply).getMap());
+            ret.put("tt2rh", StatsUtils.getHistogram(timeToSecondReply, 10));
+            ret.put("tt3r", StatsUtils.quickStatsDouble(timeToThirdReply).getMap());
+            ret.put("tt3rh", StatsUtils.getHistogram(timeToThirdReply, 10));
+            ret.put("tt10c", StatsUtils.quickStatsDouble(timeTo10Results).getMap());
+            ret.put("tt10ch", StatsUtils.getHistogram(timeTo10Results, 10));
+            ret.put("tt50c", StatsUtils.quickStatsDouble(timeTo50Results).getMap());
+            ret.put("tt50ch", StatsUtils.getHistogram(timeTo50Results, 10));
+            ret.put("tt100c", StatsUtils.quickStatsDouble(timeTo100Results).getMap());
+            ret.put("tt100ch", StatsUtils.getHistogram(timeTo100Results, 10));
+            ret.put("nets", networks);
+            ret.put("hops", hops);
+            ret.put("ttls", ttlsHist);
+            return ret;
+        }
+
+    };
+
+    /** 
+     * An actual dump of the routing table.  May get big, so 
+     * its a good idea to first inspect the stats to see how many
+     * entries there are.
+     */
+    @InspectionPoint("query routing table dump")
+    @SuppressWarnings("unused")
+    public final Inspectable RTDump = new Inspectable() {
+        public Object inspect() {
+            Map<String, Object> ret = new HashMap<String, Object>();
+            Iterable<Map.Entry<byte[], RouteTableEntry>> bothMaps = 
+                new MultiIterable<Map.Entry<byte[],RouteTableEntry>>(_newMap.entrySet(),_oldMap.entrySet());
+            for (Map.Entry<byte[], RouteTableEntry> entry : bothMaps) {
+                RouteTableEntry e = entry.getValue();
+                Map<String, Object> m = new HashMap<String, Object>();
+                m.put("br", e.bytesRouted);
+                m.put("ttl", e.ttl);
+                m.put("rr", e.repliesRouted);
+                m.put("cc", e.classCnetworks.getMap());
+                m.put("rt", e.resultTimeStamps);
+                m.put("rc", e.resultCounts);
+                m.put("nets", Arrays.asList(e.networks));
+                m.put("hops", Arrays.asList(e.hops));
+                m.put("ttls", Arrays.asList(e.ttls));
+                ret.put(Base32.encode(entry.getKey()), m);
             }
-        };
-    }
+            return ret;
+        }
+    };
 }
 
 
