@@ -6,8 +6,8 @@
 
 package com.limegroup.gnutella.xml;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,20 +34,15 @@ public class LimeXMLSchemaRepository {
     /** Creates new LimeXMLSchemaRepository */
     @Inject
     LimeXMLSchemaRepository(LimeXMLProperties limeXMLProperties) {
-        // get the schema files
-        File[] schemaFiles = limeXMLProperties.getAllXMLSchemaFiles();
-
-        // if there are some files there,initialize from those files
-        if (schemaFiles != null) {
-            LimeXMLSchema limeXmlSchema;
-            // create schema objects and put them in the _uriSchemaMap
-            for (int i = 0; i < schemaFiles.length; i++) {
+        URL[] schemaUrls = limeXMLProperties.getAllXmlSchemaUrls();
+        
+        // create schema objects and put them in the _uriSchemaMap
+        for (int i = 0; i < schemaUrls.length; i++) {
+            if(schemaUrls[i] != null) {
                 try {
-                    limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
-                    _uriSchemaMap.put(limeXmlSchema.getSchemaURI(),
-                            limeXmlSchema);
-                } catch (IOException ioe) {
-                }
+                    LimeXMLSchema limeXmlSchema= new LimeXMLSchema(schemaUrls[i]);
+                    _uriSchemaMap.put(limeXmlSchema.getSchemaURI(), limeXmlSchema);
+                } catch (IOException ioe) {}
             }
         }
     }

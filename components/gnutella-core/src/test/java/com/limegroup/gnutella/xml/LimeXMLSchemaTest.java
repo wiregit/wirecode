@@ -1,15 +1,9 @@
 package com.limegroup.gnutella.xml;
 
-import java.io.File;
 import java.util.Iterator;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
-
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -18,8 +12,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class LimeXMLSchemaTest extends LimeTestCase {
             
-	private static LimeXMLProperties limeXMLProperties;
-
     public LimeXMLSchemaTest(String name) {
 		super(name);
 	}
@@ -31,16 +23,7 @@ public class LimeXMLSchemaTest extends LimeTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
-	
-	public void setUp() throws Exception {
-	    Expand.expandFile(
-            CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
-            CommonUtils.getUserSettingsDir()
-        );
-		Injector injector = LimeTestUtils.createInjector();
-		limeXMLProperties = injector.getInstance(LimeXMLProperties.class);
-    }
-	
+		
 	/**
 	 * Tests getCanonicalizedFieldName and SchemaFieldInfo.<p>
 	 *
@@ -50,10 +33,7 @@ public class LimeXMLSchemaTest extends LimeTestCase {
 	 * Alter the checks to fix it.
 	 */
     public static void testGetFieldNames() throws Exception {
-        LimeXMLSchema schema = new LimeXMLSchema(new File(
-            limeXMLProperties.getXMLSchemaDir() 
-            + File.separator
-            + "audio.xsd"));
+        LimeXMLSchema schema = new LimeXMLSchema(LimeXMLSchemaTest.class.getClassLoader().getResource("org/limewire/xml/schema/audio.xsd"));
         
         //get the fields and print those
         Iterator iterator = schema.getCanonicalizedFields().iterator();

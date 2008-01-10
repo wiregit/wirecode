@@ -5,15 +5,12 @@
  */
 package com.limegroup.gnutella.xml;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,7 +28,6 @@ import org.limewire.io.Pools;
 import org.limewire.util.I18NConvert;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 /**
  * Contains utility methods
@@ -61,40 +57,6 @@ public class LimeXMLUtils {
     private static final int GZIP = 1;
     private static final int ZLIB = 2;
 
-    /**
-     * Returns an instance of InputSource after reading the file, and trimming
-     * the extraneous white spaces.
-     * @param file The file from where to read
-     * @return The instance of InputSource created from the passed file
-     * @exception IOException If file doesnt get opened or other I/O problems
-     */
-    public static InputSource getInputSource(File file) throws IOException {
-        //open the file, read it, and derive the structure, store internally
-        StringBuilder sb = new StringBuilder();
-        String line = "";
-     
-        //open the file
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(file));
-            while(line != null)
-            {
-                //read a line from file
-                line = br.readLine();
-                if(line != null)
-                {
-                    //append the line (along with the newline that got removed)
-                    sb.append(line + "\n");
-                }
-            }
-        } finally {
-            if( br != null)
-                br.close();
-        }
-      
-        //get & return the input source
-        return new InputSource(new StringReader(sb.toString()));
-    }
     
     /**
      * Gets the text content of the child nodes.

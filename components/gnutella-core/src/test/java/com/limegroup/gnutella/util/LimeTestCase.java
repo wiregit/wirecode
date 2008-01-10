@@ -34,9 +34,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     protected static File _storeDir;
     protected static File _incompleteDir;
     protected static File _settingsDir;
-    protected static File _xmlDir;
-    protected static File _xmlDataDir;
-    protected static File _xmlSchemasDir;
     
 	/**
 	 * Unassigned port for tests to use.
@@ -241,28 +238,15 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         _sharedDir = new File(_baseDir, "shared");
         _settingsDir = new File(_baseDir, "settings");
         _storeDir = new File(_baseDir, "store");
-        _xmlDir = new File(_settingsDir, "xml");
-        _xmlDataDir = new File(_xmlDir, "data");
-        _xmlSchemasDir = new File(_xmlDir, "schemas");
 
         _baseDir.mkdirs();
         _savedDir.mkdirs();
         _sharedDir.mkdirs();
         _storeDir.mkdirs();
         _settingsDir.mkdirs();
-        _xmlDir.mkdirs();
-        _xmlDataDir.mkdirs();
-        _xmlSchemasDir.mkdirs();
         
         // set the settings directory, then immediately change it.
         LimeCoreGlue.preinstall(_settingsDir);
-
-        // Expand the xml.war file.
-        File f = getRootDir();
-        File xmlWar = new File(f, "gui/xml.war");
-        assertTrue(xmlWar.exists());
-        Expand.expandFile(xmlWar, _settingsDir);
-        //make sure it'll delete even if something odd happens.
 
         _baseDir.deleteOnExit();
     }

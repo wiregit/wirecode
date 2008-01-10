@@ -5,8 +5,8 @@
  */
 
 package com.limegroup.gnutella.xml;
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,6 +16,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.limewire.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -55,12 +56,12 @@ public class LimeXMLSchema {
 
     /** 
      * Creates new LimeXMLSchema 
-     * @param schemaFile The filefrom where to read the schema definition
+     * @param schemaUrl The url from where to read the schema definition
      * @exception IOException If the specified schemaFile doesnt exist, or isnt
      * a valid schema file
      */
-    public LimeXMLSchema(File schemaFile) throws IOException {
-        this(LimeXMLUtils.getInputSource(schemaFile));
+    public LimeXMLSchema(URL schemaUrl) throws IOException {
+        this(new InputSource(schemaUrl.openStream()));
     }
     
     /** 
@@ -73,6 +74,7 @@ public class LimeXMLSchema {
     public LimeXMLSchema(InputSource inputSource) throws IOException {
         //initialize schema
         Document document = getDocument(inputSource);
+        IOUtils.close(inputSource.getByteStream()); // make sure we closed the input source.
         _canonicalizedFields = Collections.unmodifiableList(new LimeXMLSchemaFieldExtractor().getFields(document));
         _schemaURI = retrieveSchemaURI(document);
         _rootXMLName = getRootXMLName(document);
