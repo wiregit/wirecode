@@ -535,7 +535,7 @@ public final class RouteTable  {
     /** Inspectable with some general stats about the routing table */
     @InspectionPoint("query routing table stats")
     @SuppressWarnings("unused")
-    public final Inspectable RTStats = new Inspectable() {
+    private final Inspectable RTStats = new Inspectable() {
         public synchronized Object inspect() {
             Map<String, Object> ret = new HashMap<String, Object>();
             ret.put("ver",1);
@@ -635,7 +635,7 @@ public final class RouteTable  {
      */
     @InspectionPoint("query routing table dump")
     @SuppressWarnings("unused")
-    public final Inspectable RTDump = new Inspectable() {
+    private final Inspectable RTDump = new Inspectable() {
         public Object inspect() {
             Map<String, Object> ret = new HashMap<String, Object>();
             Iterable<Map.Entry<byte[], RouteTableEntry>> bothMaps = 
