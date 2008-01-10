@@ -1378,7 +1378,7 @@ public abstract class FileManagerImpl implements FileManager {
 
                 // check LimeXML to determine if is a store file
                 if (isStoreXML(fd.getXMLDocument())) {
-                    addStoreFile(file, urns, addFileType, notify, callback);
+                    addStoreFile(fd, file, urns, addFileType, notify, callback);
                 } else if (addFileType == AddType.ADD_SHARE) {
                     addSharedFile(file, fd, urns, addFileType, notify, callback);
                 }
@@ -1412,7 +1412,7 @@ public abstract class FileManagerImpl implements FileManager {
      * Creates a file descriptor for the given file and places the fd into the set
      * of LWS file descriptors
      */
-    private synchronized void addStoreFile(File file, Set<? extends URN> urns, AddType addFileType,
+    private synchronized void addStoreFile(FileDesc fd, File file, Set<? extends URN> urns, AddType addFileType,
             final boolean notify, final FileEventListener callback) {
         if(LOG.isDebugEnabled())
             LOG.debug("Sharing file: " + file);
@@ -1421,9 +1421,11 @@ public abstract class FileManagerImpl implements FileManager {
         if( addFileType == AddType.ADD_SHARE)
             _data.SPECIAL_STORE_FILES.add(file);
 
+        //store files are not part of the _files list so recreate fd with invalid index in _files
         FileDesc fileDesc = createFileDesc(file, urns, STORE_FILEDESC_INDEX);
-        
-        loadFile(fileDesc, file, EMPTY_DOCUMENTS, urns);
+        //add the xml doc to the new FileDesc
+        if( fd.getXMLDocument() != null )
+            fileDesc.addLimeXMLDocument(fd.getXMLDocument());
     
         _storeToFileDescMap.put(file, fileDesc);
         
@@ -1442,9 +1444,12 @@ public abstract class FileManagerImpl implements FileManager {
             LOG.debug("Sharing file: " + file);
                
         // since we created the FD to test the XML for being an instance of LWS, check to make sure
-        //  the FD is still valid before continueing
+        //  the FD is still valid before continuing
         if( fileDesc.getIndex() != _files.size()) {
+            LimeXMLDocument doc = fileDesc.getXMLDocument();
             fileDesc = createFileDesc(file, urns, _files.size());
+            if( doc != null )
+                fileDesc.addLimeXMLDocument(doc);
         }
         
 

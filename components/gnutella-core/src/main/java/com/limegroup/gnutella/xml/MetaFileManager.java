@@ -413,9 +413,8 @@ public class MetaFileManager extends FileManagerImpl {
                 res = fileManagerController.createPureMetadataResponse();
             } else { // meta-data about a specific file
                 FileDesc fd = getFileDescForFile(file);
-                if (fd == null || isStoreFile(fd.getFile()) || fd instanceof IncompleteFileDesc) {
+                if (fd == null || fd instanceof IncompleteFileDesc) {
                     // fd == null is bad -- would mean MetaFileManager is out of sync.
-                    // fd isStoreFile is not terrible, but can safeguard against responses here
                     // fd incomplete should never happen, but apparently is somehow...
                     continue;
                 } else { // we found a file with the right name

@@ -31,6 +31,7 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -290,8 +291,10 @@ public class LimeXMLReplyCollection {
     protected List<String> getKeyWords(){
         List<String> retList = new ArrayList<String>();
         synchronized(mainMap){
-            for(LimeXMLDocument d : mainMap.values())
-                retList.addAll(d.getKeyWords());
+            for(LimeXMLDocument d : mainMap.values()) {
+                if( !isLWSDoc(d))
+                    retList.addAll(d.getKeyWords());
+            }
         }
         return retList;
     }
@@ -305,8 +308,10 @@ public class LimeXMLReplyCollection {
     protected List<String> getKeyWordsIndivisible(){
         List<String> retList = new ArrayList<String>();
         synchronized(mainMap){
-            for(LimeXMLDocument d : mainMap.values())
-                retList.addAll(d.getKeyWordsIndivisible());
+            for(LimeXMLDocument d : mainMap.values()) {
+                if( !isLWSDoc(d))
+                    retList.addAll(d.getKeyWordsIndivisible());
+            }
         }
         return retList;
     }
@@ -378,15 +383,26 @@ public class LimeXMLReplyCollection {
      */
     public void addReply(FileDesc fd, LimeXMLDocument replyDoc) {
     	assert getSchemaURI().equals(replyDoc.getSchemaURI());
-    	
+
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
             dirty = true;
             mainMap.put(hash,replyDoc);
-            addKeywords(replyDoc);
+            if(!isLWSDoc(replyDoc))
+            	addKeywords(replyDoc);
         }
         
         fd.addLimeXMLDocument(replyDoc);
+    }
+    
+    /**
+     * Determines if the XMLDocument is from the LWS
+     * @return true if this document contains a LWS license, false otherwise
+     */
+    public boolean isLWSDoc(LimeXMLDocument doc) {
+    	if( doc != null && doc.getLicenseString() != null && doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString()))
+    		return true;
+    	return false;
     }
 
     /**
@@ -501,7 +517,8 @@ public class LimeXMLReplyCollection {
             oldDoc = mainMap.put(hash,newDoc);
             assert oldDoc != null : "attempted to replace doc that did not exist!!";
             removeKeywords(oldDoc);
-            addKeywords(newDoc);
+	        if(!isLWSDoc(newDoc))
+            	addKeywords(newDoc);
         }
        
         boolean replaced = fd.replaceLimeXMLDocument(oldDoc, newDoc);

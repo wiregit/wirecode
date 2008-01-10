@@ -85,8 +85,8 @@ public class MetaFileManagerTest extends FileManagerTest {
         // test a match where 50% matches -- should get no matches.
         Response[] r2 = fman.query(queryRequestFactory.createQuery("sam jazz in c",
                                    buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
-        if(r2 != null)
-            assertEquals(0, r2.length);
+        assertNotNull(r2);
+        assertEquals(0, r2.length);
             
             
         // test where the keyword matches only.
@@ -98,8 +98,8 @@ public class MetaFileManagerTest extends FileManagerTest {
         // test where keyword matches, but xml doesn't.
         Response[] r4 = fman.query(queryRequestFactory.createQuery("meaningles",
                                    buildAudioXMLString("artist=\"bob\"")));
-        if(r4 != null)
-            assertEquals(0, r4.length);
+        assertNotNull(r4);
+        assertEquals(0, r4.length);
             
         // more ambiguous tests -- a pure keyword search for "jazz in d"
         // will work, but a keyword search that included XML will fail for
@@ -121,13 +121,100 @@ public class MetaFileManagerTest extends FileManagerTest {
         // keyword, but has XML to check more efficiently.
         Response[] r6 = fman.query(queryRequestFactory.createQuery("jazz in d",
                                    buildAudioXMLString("album=\"jazz in d\"")));
-        if(r6 != null)
-            assertEquals(0, r6.length);
+        assertNotNull(r6);
+        assertEquals(0, r6.length);
                             
         
                                    
     }
 	
+	public void testMetaQueriesStoreFiles() throws Exception{
+	
+	    String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
+	    
+		waitForLoad();
+	    
+		// create a store audio file with limexmldocument preventing sharing
+	    File f1 = createNewNamedTestFile(12, "small town hero");
+		LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+		List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+		l1.add(d1);
+		FileManagerEvent result = addIfShared(f1, l1);
+		assertTrue(result.toString(), result.isAddStoreEvent());
+		assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+		
+		//create a query with just a file name match, should get no responses
+        Response[] r0 = fman.query(queryRequestFactory.createQuery("small town hero"));
+        assertNotNull(r0);
+        assertEquals(0, r0.length);
+		
+		// create a query where keyword matches and partial xml matches, should get no
+        // responses
+	    Response[] r1 = fman.query(queryRequestFactory.createQuery("small town hero",
+                                    buildAudioXMLString("title=\"Alive\"")));    
+        assertNotNull(r1);
+        assertEquals(0, r1.length);
+        
+        // test 100% matches, should get no results
+        Response[] r2 = fman.query(queryRequestFactory.createQuery("small town hero",
+                                   buildAudioXMLString(storeAudio)));
+        assertNotNull(r2);
+        assertEquals(0, r2.length);
+        
+        // test xml matches 100% but keyword doesn't, should get no matches
+        Response[] r3 = fman.query(queryRequestFactory.createQuery("meaningless",
+                                   buildAudioXMLString(storeAudio)));
+        assertNotNull(r3);
+        assertEquals(0, r3.length);
+        
+        //test where nothing matches, should get no results
+        Response[] r4 = fman.query(queryRequestFactory.createQuery("meaningless",
+                                   buildAudioXMLString("title=\"some title\" artist=\"unknown artist\" album=\"this album name\" genre=\"Classical\"")));
+        assertNotNull(r4);
+        assertEquals(0, r4.length);
+        
+        
+		// create a store audio file with xmldocument preventing sharing with video xml attached also
+	    File f2 = createNewNamedTestFile(12, "small town hero 2");
+		LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+	    LimeXMLDocument d3 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString("director=\"francis loopola\" title=\"Alive\""));
+		List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
+		l2.add(d3);
+		l2.add(d2);
+		FileManagerEvent result2 = addIfShared(f2, l2);
+		assertTrue(result2.toString(), result2.isAddStoreEvent());
+			
+	      //create a query with just a file name match, should get no responses
+        Response[] r5 = fman.query(queryRequestFactory.createQuery("small town hero 2"));
+        assertNotNull(r5);
+        assertEquals(0, r5.length);
+		
+        // query with videoxml matching. This in theory SHOULDNT return results. It does however,
+        //  do to the way QRT is built and LimeXMLDocs are stored. Once the new Meta-data parsing
+        //  is fixed to disallow adding new XML docs to files, this in theory shouldn't be 
+        //  possible
+        Response[] r6 = fman.query(queryRequestFactory.createQuery("small town hero 2",
+                                    buildVideoXMLString("director=\"francis loopola\" title=\"Alive\"")));
+        assertNotNull(r6);
+        assertEquals(1, r6.length);
+        
+        // query with videoxml partial matching. This in theory SHOULDNT return results. It does however,
+        //  do to the way QRT is built and LimeXMLDocs are stored. Once the new Meta-data parsing
+        //  is fixed to disallow adding new XML docs to files, this in theory shouldn't be 
+        //  possible
+        Response[] r7 = fman.query(queryRequestFactory.createQuery("small town hero 2",
+                                    buildVideoXMLString("title=\"Alive\"")));
+        assertNotNull(r7);
+        assertEquals(1, r7.length);
+        
+        // test 100% matches minus VideoXxml, should get no results
+        Response[] r8 = fman.query(queryRequestFactory.createQuery("small town hero 2",
+                                    buildAudioXMLString(storeAudio)));
+        assertNotNull(r8);
+        assertEquals(0, r8.length);
+        
+        fman.removeFileIfShared(f2);
+	}
 
     public void testMetaQRT() throws Exception {
         String dir2 = "director=\"francis loopola\"";
@@ -160,6 +247,41 @@ public class MetaFileManagerTest extends FileManagerTest {
         qrt = fman.getQRT();
        
         assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString(dir2))));
+    }
+    
+    public void testMetaQRTStoreFiles() throws Exception {
+        
+        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
+        
+        // share a file
+        File f1 = createNewNamedTestFile(10, "hello");
+        QueryRouteTable qrt = fman.getQRT();
+        assertFalse("should not be in QRT", qrt.contains(get_qr(f1)));
+        waitForLoad();
+        
+        //make sure QRP contains the file f1
+        qrt = fman.getQRT();
+        assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
+        
+        // create a store audio file with xml preventing sharing
+        File f2 = createNewNamedTestFile(12, "small town hero");
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+        l1.add(d1);
+        
+        FileManagerEvent result = addIfShared(f2, l1);
+        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        qrt = fman.getQRT();
+        
+        assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
+   
+        waitForLoad();
+   
+        //store file should not be in QRT table
+        qrt = fman.getQRT();
+        assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
+        assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
     }
 
     public void testMetaQueries() throws Exception {
