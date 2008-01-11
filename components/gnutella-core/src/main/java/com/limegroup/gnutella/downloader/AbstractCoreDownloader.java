@@ -10,30 +10,15 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
 
-public abstract class AbstractDownloader implements Downloader {
+public abstract class AbstractCoreDownloader implements CoreDownloader {
     
-	protected static final String ATTRIBUTES = "attributes";
-
-	protected static final String DEFAULT_FILENAME = "defaultFileName";
-
-	protected static final String FILE_SIZE = "fileSize";
-
-    /** LOCKING: this */
+	/** LOCKING: this */
 	protected volatile Map<String, Serializable> propertiesMap;
 
-	/**
-	 * The key under which the saveFile File is stored in the attribute map
-	 * used in serializing and deserializing ManagedDownloaders. 
-	 */
-	protected static final String SAVE_FILE = "saveFile";
-	
 	/**
 	 * The current priority of this download -- only valid if inactive.
 	 * Has no bearing on the download itself, and is used only so that the
@@ -51,123 +36,78 @@ public abstract class AbstractDownloader implements Downloader {
 
 	protected final SaveLocationManager saveLocationManager;
 	
-	protected AbstractDownloader(SaveLocationManager saveLocationManager) {
+	protected AbstractCoreDownloader(SaveLocationManager saveLocationManager) {
 	    this.saveLocationManager = Objects.nonNull(saveLocationManager, "saveLocationManager");	    
 	    synchronized(this) {
 	        propertiesMap = new HashMap<String, Serializable>();
-	        propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
+	        propertiesMap.put(CoreDownloader.ATTRIBUTES, (Serializable)attributes);
 	    }
 	}
 	
-	/**
-	 * Sets the inactive priority of this download.
-	 */
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#setInactivePriority(int)
+     */
 	public void setInactivePriority(int priority) {
 	    inactivePriority = priority;
 	}
 
-	/**
-	 * Gets the inactive priority of this download.
-	 */
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#getInactivePriority()
+     */
 	public int getInactivePriority() {
 	    return inactivePriority;
 	}
+	
+	@SuppressWarnings("unchecked")
+    public void addNewProperties(Map<String, Serializable> newProperties) {
+	    synchronized(this) {
+    	    for(Map.Entry<String, Serializable> entry : newProperties.entrySet()) {
+    	        if(propertiesMap.get(entry.getKey()) == null)
+    	            propertiesMap.put(entry.getKey(), entry.getValue());
+    	    }
+    	    
+    	    // and go through attributes individually, since this will always have an attr map
+    	    Map<String, Serializable> newAttributes = (Map<String, Serializable>)newProperties.get(CoreDownloader.ATTRIBUTES);
+    	    if(newAttributes != null) {
+    	        for(Map.Entry<String, Serializable> entry : newAttributes.entrySet()) {
+    	            if(attributes.get(entry.getKey()) == null)
+    	                attributes.put(entry.getKey(), entry.getValue());
+    	        }    	            
+    	    }   
+	    }
+	}
 
-	/**
-	 * Sets a new attribute associated with the download.
-	 * The attributes are used eg. by GUI to store some extra
-	 * information about the download.
-	 * @param key A key used to identify the attribute.
-	 * @patam value The value of the key.
-	 * @return A prvious value of the attribute, or <code>null</code>
-	 *         if the attribute wasn't set.
-	 */
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#setAttribute(java.lang.String, java.io.Serializable)
+     */
 	public Serializable setAttribute(String key, Serializable value) {
 	    return attributes.put( key, value );
 	}
 
-	/**
-	 * Gets a value of attribute associated with the download.
-	 * The attributes are used eg. by GUI to store some extra
-	 * information about the download.
-	 * @param key A key which identifies the attribue.
-	 * @return The value of the specified attribute,
-	 *         or <code>null</code> if value was not specified.
-	 */
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#getAttribute(java.lang.String)
+     */
 	public Serializable getAttribute(String key) {
 	    return attributes.get( key );
 	}
 
-	/**
-	 * Removes an attribute associated with this download.
-	 * @param key A key which identifies the attribute do remove.
-	 * @return A value of the attribute or <code>null</code> if
-	 *         attribute was not set.
-	 */
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#removeAttribute(java.lang.String)
+     */
 	public Object removeAttribute(String key) {
 	    return attributes.remove( key );
 	}
-
-	public abstract GUID getQueryGUID();
 	
-	/**
-     * Starts the download.
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#conflictsSaveFile(java.io.File)
      */
-	public abstract void startDownload();
-	
-	/**
-	 * @return whether the download is still alive and cannot be
-	 * restarted.
-	 */
-	public abstract boolean isAlive();
-	
-	/**
-	 * @return whether it makes sense to restart this download.
-	 */
-	public abstract boolean shouldBeRestarted();
-	
-	/**
-	 * @return whether the download should be removed from 
-	 * the waiting list.
-	 */
-	public abstract boolean shouldBeRemoved();
-	
-	/**
-	 * Handles state changes and other operations while
-	 * inactive.
-	 */
-	public abstract void handleInactivity();
-	
-	public abstract boolean isQueuable();
-	
-    /**
-     * Cleans up any resources before this downloader 
-     * is completely disposed.
-     */
-	public abstract void finish();
-	
-	public abstract boolean conflicts(URN urn, long fileSize, File... files);
-	
-	public abstract boolean conflictsWithIncompleteFile(File incomplete);
-	
 	public boolean conflictsSaveFile(File saveFile) {
 		return getSaveFile().equals(saveFile);
 	}
-	
-	public abstract void initialize();
-
-	/**
-	 * Returns the type of download
-	 */
-    public abstract DownloaderType getDownloadType();
     
-	/**
-	 * Sets the file name and directory where the download will be saved once
-	 * complete.
-	 * 
-	 * @param overwrite true if overwriting an existing file is allowed
-	 * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
-	 */
+	/* (non-Javadoc)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#setSaveFile(java.io.File, java.lang.String, boolean)
+     */
 	public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
 	    if (fileName == null) {
 	        fileName = getDefaultFileName();
@@ -221,19 +161,19 @@ public abstract class AbstractDownloader implements Downloader {
 	    synchronized (this) {
 	        if (!isRelocatable())
 	            throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
-	        propertiesMap.put(SAVE_FILE, candidateFile);
+	        propertiesMap.put(CoreDownloader.SAVE_FILE, candidateFile);
 	    }
 	}
 	
     /**
-	 * Returns the value for the key {@link #DEFAULT_FILENAME} from
+	 * Returns the value for the key {@link CoreDownloader#DEFAULT_FILENAME} from
 	 * the properties map.
 	 * <p>
 	 * Subclasses should put the name into the map or override this
 	 * method.
 	 */
     protected synchronized String getDefaultFileName() {       
-        String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
+        String fileName = (String)propertiesMap.get(CoreDownloader.DEFAULT_FILENAME); 
         assert fileName != null : "defaultFileName is null, "+
                          "subclass may have not overridden getDefaultFileName";
 		return CommonUtils.convertFileName(fileName);

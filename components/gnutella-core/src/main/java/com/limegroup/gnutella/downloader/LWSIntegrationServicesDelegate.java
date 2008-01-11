@@ -6,6 +6,6 @@ package com.limegroup.gnutella.downloader;
  */
 public interface LWSIntegrationServicesDelegate {
 
-    Iterable<AbstractDownloader> getAllDownloaders();
+    Iterable<CoreDownloader> getAllDownloaders();
 
 }

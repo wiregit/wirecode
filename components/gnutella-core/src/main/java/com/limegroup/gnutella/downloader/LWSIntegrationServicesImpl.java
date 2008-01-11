@@ -68,7 +68,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 }
                 String[] downloaderIDs = decodedIDs.split(" ");
                 synchronized (lwsIntegrationServicesDelegate) {
-                    for (AbstractDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
+                    for (CoreDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
                         if (d == null) continue;
                         urnLoop: for (String downloaderID : downloaderIDs) {
                             String id = String.valueOf(System.identityHashCode(d));
@@ -147,7 +147,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 try {
                     String urlStr = URLDecoder.decode(baseURL);
                     URL url = new URL(urlStr); 
-                    RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, 
+                    RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(url, 
                             fileName, null, length); // this make the size looked up
                     //
                     // We'll associate the identity hash code of the downloader

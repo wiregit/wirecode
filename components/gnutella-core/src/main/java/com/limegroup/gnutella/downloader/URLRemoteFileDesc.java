@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 
-import java.io.Serializable;
 import java.net.URL;
 import java.util.Set;
 
@@ -16,9 +15,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * standard '/get/<index>/<name>'.  Overrides the getUrl() method of
  * RemoteFileDesc.  
  */
-public class URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
-    /** Ensures versioning. */
-    static final long serialVersionUID = 820347987014466054L;
+public class URLRemoteFileDesc extends RemoteFileDesc {
 
     /** The return value for getUrl */
     private URL _url;

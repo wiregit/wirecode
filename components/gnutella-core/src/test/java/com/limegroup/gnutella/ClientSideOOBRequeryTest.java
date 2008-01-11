@@ -25,7 +25,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -714,7 +713,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         //Thread.sleep((UDP_ACCESS.length * 1000) - 
                      //(System.currentTimeMillis() - currTime));
-        int guessWaitTime = ((Integer)PrivilegedAccessor.getValue(ManagedDownloader.class,"GUESS_WAIT_TIME")).intValue();
+        int guessWaitTime = 5000;
         Thread.sleep(guessWaitTime+2000);
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 

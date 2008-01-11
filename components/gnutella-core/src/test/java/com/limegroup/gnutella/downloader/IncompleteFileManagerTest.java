@@ -14,7 +14,6 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.inject.Providers;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -32,7 +31,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 @SuppressWarnings( { "unchecked", "cast","null" } )
 public class IncompleteFileManagerTest extends LimeTestCase {
     
-    private IncompleteFileManager ifm;
+    private IncompleteFileManager incompleteFileManager;
     private RemoteFileDesc rfd1, rfd2;
     private FileManager fm;
     private VerifyingFileFactory verifyingFileFactory;
@@ -50,9 +49,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector();
         fm = injector.getInstance(FileManager.class);
         verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
-        
-        IncompleteFileManager.globalFileManager = Providers.of(fm);
-        ifm = new IncompleteFileManager();
+        incompleteFileManager = injector.getInstance(IncompleteFileManager.class);
     }
 
     /** @param urn a SHA1 urn, or null */
@@ -76,17 +73,16 @@ public class IncompleteFileManagerTest extends LimeTestCase {
 
 	public void testLegacy() throws Throwable {
         File file=new File(getSaveDirectory(), "T-748-test.txt");
-        IncompleteFileManager ifm=new IncompleteFileManager();
         Iterator iter=null;
         VerifyingFile vf = verifyingFileFactory.createVerifyingFile(748);
         //0 blocks
-        assertNull(ifm.getEntry(file));
-        assertEquals(0, ifm.getBlockSize(file));
+        assertNull(incompleteFileManager.getEntry(file));
+        assertEquals(0, incompleteFileManager.getBlockSize(file));
         //1 block
         vf.addInterval(Range.createRange(0,10));
-        ifm.addEntry(file,vf, false);
-        assertEquals(11, ifm.getBlockSize(file));//full inclusive now
-        iter=ifm.getEntry(file).getBlocks().iterator();
+        incompleteFileManager.addEntry(file,vf, false);
+        assertEquals(11, incompleteFileManager.getBlockSize(file));//full inclusive now
+        iter=incompleteFileManager.getEntry(file).getBlocks().iterator();
         assertEquals(Range.createRange(0, 10), iter.next());
         assertTrue(! iter.hasNext());
         
@@ -118,8 +114,8 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         rfd1=newRFD("some file name", 1839, null);
         rfd2=newRFD("some file name", 1223, null);
         assertTrue(! IncompleteFileManager.same(rfd1, rfd2));
-        File tmp1=ifm.getFile(rfd1);
-        File tmp2=ifm.getFile(rfd2);
+        File tmp1=incompleteFileManager.getFile(rfd1);
+        File tmp2=incompleteFileManager.getFile(rfd2);
         assertNotEquals(tmp2, tmp1);
     }
 
@@ -132,8 +128,8 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         rfd2=newRFD("another file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         assertTrue(IncompleteFileManager.same(rfd1, rfd2));
-        File tmp1=ifm.getFile(rfd1);
-        File tmp2=ifm.getFile(rfd2);
+        File tmp1=incompleteFileManager.getFile(rfd1);
+        File tmp2=incompleteFileManager.getFile(rfd2);
         assertEquals(tmp1, tmp2);
     }
 
@@ -146,8 +142,8 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         rfd2=newRFD("some file name", 1839, 
                     "urn:sha1:LSTHIPQGSGSZTS5FJPAKPZWUGYQYPFBU");
         assertTrue(! IncompleteFileManager.same(rfd1, rfd2));
-        File tmp1=ifm.getFile(rfd1);
-        File tmp2=ifm.getFile(rfd2);
+        File tmp1=incompleteFileManager.getFile(rfd1);
+        File tmp2=incompleteFileManager.getFile(rfd2);
         assertNotEquals(tmp2, tmp1);
     }
 
@@ -157,8 +153,8 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         rfd2=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         assertTrue(IncompleteFileManager.same(rfd1, rfd2));
-        File tmp1=ifm.getFile(rfd1);
-        File tmp2=ifm.getFile(rfd2);
+        File tmp1=incompleteFileManager.getFile(rfd1);
+        File tmp2=incompleteFileManager.getFile(rfd2);
         assertEquals(tmp1, tmp2);
     }
 
@@ -167,20 +163,20 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         //Populate IFM with a hash.
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"); 
-        File tmp1=ifm.getFile(rfd1);
+        File tmp1=incompleteFileManager.getFile(rfd1);
         VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1839);
-        ifm.addEntry(tmp1, vf, false);
+        incompleteFileManager.addEntry(tmp1, vf, false);
 
         //After deleting entry there should be no more blocks...
-        ifm.removeEntry(tmp1);      
-        assertNull(ifm.getEntry(tmp1));
+        incompleteFileManager.removeEntry(tmp1);      
+        assertNull(incompleteFileManager.getEntry(tmp1));
 
         //...and same temp file should be used for different hash. [sic]
         rfd2=newRFD("some file name", 1839, 
                     "urn:sha1:LSTHIPQGSGSZTS5FJPAKPZWUGYQYPFBU");
-        File tmp2=ifm.getFile(rfd2);
+        File tmp2=incompleteFileManager.getFile(rfd2);
         assertEquals(tmp1, tmp2);
-        assertEquals(tmp2, ifm.getFile(newRFD("some file name", 1839, null)));
+        assertEquals(tmp2, incompleteFileManager.getFile(newRFD("some file name", 1839, null)));
     }
     
     /**
@@ -193,9 +189,9 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         //Populate IFM with a hash.
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        File tmp1=ifm.getFile(rfd1);
+        File tmp1=incompleteFileManager.getFile(rfd1);
         VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1839);
-        ifm.addEntry(tmp1, vf, false);
+        incompleteFileManager.addEntry(tmp1, vf, false);
         
         assertEquals(1, fm.getNumIncompleteFiles()); // 1 added.
         
@@ -206,24 +202,24 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         assertNotNull(urn);
         assertInstanceof(IncompleteFileDesc.class, fd);
         
-        ifm.removeEntry(tmp1);
+        incompleteFileManager.removeEntry(tmp1);
         
         assertEquals(0, fm.getNumIncompleteFiles()); // back to 0 shared.
     }   
 
     public void testCompletedHash_NotFound() throws Throwable{
         File tmp2=new File("T-1839-some file name");
-        assertNull(ifm.getCompletedHash(tmp2));
+        assertNull(incompleteFileManager.getCompletedHash(tmp2));
     }
 
     public void testCompletedHash_Found() throws Throwable {
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        File tmp1=ifm.getFile(rfd1);
+        File tmp1=incompleteFileManager.getFile(rfd1);
         try {
             URN urn=URN.createSHA1Urn( 
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-            assertEquals(urn, ifm.getCompletedHash(tmp1));
+            assertEquals(urn, incompleteFileManager.getCompletedHash(tmp1));
         } catch (IOException e) {
             fail("Couldn't make URN", e);
         }
@@ -285,9 +281,9 @@ public class IncompleteFileManagerTest extends LimeTestCase {
                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         RemoteFileDesc rfd1b=newRFD("other file.txt", 1839, 
                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        File file1=ifm.getFile(rfd1);
+        File file1=incompleteFileManager.getFile(rfd1);
         file1.delete(); // getFile will create it, we don't want it created.
-        File file1b=ifm.getFile(rfd1b);
+        File file1b=incompleteFileManager.getFile(rfd1b);
         file1b.delete();
         assertEquals(file1, file1b);
 
@@ -296,9 +292,9 @@ public class IncompleteFileManagerTest extends LimeTestCase {
                                    "urn:sha1:LSTHIPQGSSZGTS5FJUPAKPZWUGYQYPFB");
         RemoteFileDesc rfd2b=newRFD("yet another file.txt", 1839, 
                                    "urn:sha1:LSTHIPQGSSZGTS5FJUPAKPZWUGYQYPFB");
-        File file2=ifm.getFile(rfd2);
+        File file2=incompleteFileManager.getFile(rfd2);
         file2.delete();
-        File file2b=ifm.getFile(rfd2b);
+        File file2b=incompleteFileManager.getFile(rfd2b);
         file2b.delete();
         assertEquals(file2, file2b);
         try {
@@ -308,10 +304,10 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         }
 
         //After purging, only hashes associated with files that exists remain.
-        ifm.initialPurge(Collections.EMPTY_LIST);
-        File file1c=ifm.getFile(rfd1b);
+        incompleteFileManager.initialPurge(Collections.EMPTY_LIST);
+        File file1c=incompleteFileManager.getFile(rfd1b);
         assertNotEquals(file1b, file1c);
-        File file2c=ifm.getFile(rfd2b);
+        File file2c=incompleteFileManager.getFile(rfd2b);
         assertEquals(file2b ,file2c);
         file2.delete();
     }
@@ -322,11 +318,11 @@ public class IncompleteFileManagerTest extends LimeTestCase {
                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         RemoteFileDesc rfd2=newRFD("other file.txt", 1839, 
                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        File file1=ifm.getFile(rfd1);
-        File file2=ifm.getFile(rfd2);
+        File file1=incompleteFileManager.getFile(rfd1);
+        File file2=incompleteFileManager.getFile(rfd2);
         assertEquals(file1, file2);
-        ifm.purge();             //Does nothing
-        File file2b=ifm.getFile(rfd2);
+        incompleteFileManager.purge();             //Does nothing
+        File file2b=incompleteFileManager.getFile(rfd2);
         assertEquals(file2, file2b);
     }
 
@@ -335,13 +331,12 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         File tmp=null;
         try {
             //Create an IFM with one entry, with hash.
-            IncompleteFileManager ifm1=new IncompleteFileManager();
             RemoteFileDesc rfd=newRFD("file name.txt", 1839, 
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-            File incomplete=ifm1.getFile(rfd);
+            File incomplete=incompleteFileManager.getFile(rfd);
             VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1839);
             vf.addInterval(Range.createRange(10, 100));  //inclusive
-            ifm1.addEntry(incomplete, vf, false);
+            incompleteFileManager.addEntry(incomplete, vf, false);
 
             FileManager fm = injector.getInstance(FileManager.class);
             FileDesc fd = fm.getFileDescForUrn(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
@@ -353,9 +348,9 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             tmp=File.createTempFile("IncompleteFileManagerTest", ".dat");
             ObjectOutputStream out=new ObjectOutputStream(
                                        new FileOutputStream(tmp));
-            out.writeObject(ifm1);
+            out.writeObject(incompleteFileManager);
             out.close();
-            ifm1=null;
+            incompleteFileManager=null;
             
             //Read IFM from disk.
             ObjectInputStream in=new ObjectInputStream(
@@ -398,13 +393,12 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         File tmp=null;
         try {
             //Create an IFM with one entry, with hash.
-            IncompleteFileManager ifm1=new IncompleteFileManager();
             RemoteFileDesc rfd=newRFD("file name.txt", 1839, 
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-            File incomplete=ifm1.getFile(rfd);
+            File incomplete=incompleteFileManager.getFile(rfd);
             VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1024 * 1024);
             vf.addInterval(Range.createRange(10, 500000));  //inclusive
-            ifm1.addEntry(incomplete, vf, false);
+            incompleteFileManager.addEntry(incomplete, vf, false);
 
             URN sha1 = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
             FileDesc fd = fm.getFileDescForUrn(sha1);
@@ -414,7 +408,6 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             
             // update with a ttroot
             ifd.setTTRoot(UrnHelper.TTROOT);
-            IncompleteFileManager.globalTigerTreeCache.get();
             TigerTreeCache.addRoot(sha1, UrnHelper.TTROOT);
             assertTrue(ifd.hasUrnsAndPartialData());
             
@@ -422,9 +415,9 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             tmp=File.createTempFile("IncompleteFileManagerTest", ".dat");
             ObjectOutputStream out=new ObjectOutputStream(
                                        new FileOutputStream(tmp));
-            out.writeObject(ifm1);
+            out.writeObject(incompleteFileManager);
             out.close();
-            ifm1=null;
+            incompleteFileManager=null;
             
             //Read IFM from disk.
             ObjectInputStream in=new ObjectInputStream(

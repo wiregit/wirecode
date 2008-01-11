@@ -187,7 +187,7 @@ public class RequeryDownloadTest extends LimeTestCase {
     /** Creates the incomplete file and returns an IncompleteFileManager with
      *  info for that file. */
     public IncompleteFileManager createIncompleteFile() throws Exception {
-       IncompleteFileManager ifm=new IncompleteFileManager();
+       IncompleteFileManager ifm= injector.getInstance(IncompleteFileManager.class);
        Set<URN> urns=new HashSet<URN>(1);
        urns.add(hash);
        RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", PORT, 13l,

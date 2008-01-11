@@ -1603,7 +1603,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		String allWorkers = null;
 		URN urn = _rfd.getSHA1Urn();
 		if (urn != null) {
-			ManagedDownloader myDownloader = (ManagedDownloader)
+			ManagedDownloaderImpl myDownloader = (ManagedDownloaderImpl)
 			downloadManager.getDownloaderForURN(urn);
 			if (myDownloader == null)
 				allWorkers = "couldn't find my downloader???";

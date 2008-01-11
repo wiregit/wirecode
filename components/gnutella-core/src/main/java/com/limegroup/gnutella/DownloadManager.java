@@ -7,8 +7,8 @@ import java.util.List;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
@@ -38,7 +38,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     /**
      * Adds a new downloader that this will manager.
      */
-    public void addNewDownloader(AbstractDownloader downloader);
+    public void addNewDownloader(CoreDownloader downloader);
 
     /** 
      * Initializes this manager. <b>This method must be called before any other
@@ -239,7 +239,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * puts the download back in the waiting list to be finished later.
      *     @modifies this, callback
      */
-    public void remove(AbstractDownloader downloader, boolean completed);
+    public void remove(CoreDownloader downloader, boolean completed);
 
     /**
      * Bumps the priority of an inactive download either up or down
@@ -274,7 +274,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      */
     public float getLastMeasuredBandwidth();
 
-    public Iterable<AbstractDownloader> getAllDownloaders();
+    public Iterable<CoreDownloader> getAllDownloaders();
     
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method

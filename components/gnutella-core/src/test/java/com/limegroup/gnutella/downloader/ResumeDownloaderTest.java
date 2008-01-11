@@ -91,7 +91,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
     private ResumeDownloader newResumeDownloader() throws Exception {
         // this ResumeDownloader is started from the library, not from restart,
         // that is why the last param to init is false
-        ResumeDownloader downloader = injector.getInstance(GnutellaDownloaderFactory.class).createResumeDownloader(
+        ResumeDownloader downloader = injector.getInstance(CoreDownloaderFactory.class).createResumeDownloader(
                 incompleteFile, name, size);
         downloader.initialize();
         downloader.startDownload();
@@ -111,7 +111,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
     public void testLoads32Bit() throws Exception {
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base32
                 .decode(Serialized32Bit1111)));
-        ResumeDownloader loaded = (ResumeDownloader) ois.readObject();
+        ResumeDownloaderImpl loaded = (ResumeDownloaderImpl) ois.readObject();
         assertEquals(1111, loaded.getContentLength());
 
         // serializing this will result in different byte[]
@@ -123,7 +123,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
 
         // which when deserialized will retain the proper size
         ois = new ObjectInputStream(new ByteArrayInputStream(newSerialized));
-        ResumeDownloader newLoaded = (ResumeDownloader) ois.readObject();
+        ResumeDownloaderImpl newLoaded = (ResumeDownloaderImpl) ois.readObject();
         assertEquals(1111, newLoaded.getContentLength());
     }
 
@@ -154,7 +154,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
 
         // deserialize
         ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-        downloader = (ResumeDownloader) in.readObject();
+        downloader = (ResumeDownloaderImpl) in.readObject();
         downloader.initialize();
         downloader.startDownload();
 
@@ -193,7 +193,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         ObjectInputStream in = new ConverterObjectInputStream(new FileInputStream(CommonUtils
                 .getResourceFile(filePath + file)));
         try {
-            ResumeDownloader rd = (ResumeDownloader) in.readObject();
+            ResumeDownloaderImpl rd = (ResumeDownloaderImpl) in.readObject();
             rd.initialize();
             QueryRequest qr = rd.newRequery();
             URN _hash = (URN) PrivilegedAccessor.getValue(rd, "_hash");

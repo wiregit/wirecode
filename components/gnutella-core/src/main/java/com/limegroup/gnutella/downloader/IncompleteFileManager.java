@@ -2,12 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.io.ObjectInputStream.GetField;
-import java.io.ObjectOutputStream.PutField;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,10 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.Range;
+import org.limewire.io.InvalidDataException;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -27,10 +20,12 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializer.SavedDownloadInfo;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
@@ -40,9 +35,8 @@ import com.limegroup.gnutella.tigertree.TigerTreeCache;
  * enables smart resumes across hosts.  Also keeps track of the blocks 
  * downloaded, for smart downloading purposes.  <b>Thread safe.</b><p>
  */
-public class IncompleteFileManager implements Serializable {
-    /** Ensures backwards compatibility. */
-    private static final long serialVersionUID = -7658285233614679878L;
+@Singleton
+public class IncompleteFileManager  {
 
     /** The delimiter to use between the size and a real name of a temporary
      * file.  To make it easier to break the temporary name into its constituent
@@ -51,40 +45,6 @@ public class IncompleteFileManager implements Serializable {
     /** The prefix added to preview copies of incomplete files. */
     public static final String PREVIEW_PREFIX="Preview-";
     
-    private static final Log LOG = LogFactory.getLog(IncompleteFileManager.class);
-    
-    /*
-     * IMPORTANT SERIALIZATION NOTE
-     *
-     * The original version of IncompleteFileManager consisted solely of a
-     * mapping from File to List<Interval> and used default serialization.
-     * Starting with version 1.10 of this file, we started using VerifyingFile
-     * instead of List<Interval> internally.  But because we wanted forward- and
-     * backward-compatibility, we replaced each VerifyingFile with an
-     * equivalent List<Interval> when writing to downloads.dat.  We reversed
-     * this transformation when reading from downloads.dat.  All this was
-     * implemented with custom writeObject and readObject methods.  
-     *
-     * Starting with CVS version 1.15, IncompleteFileManager keeps track of
-     * hashes as well.  This makes it difficult to write a custom readObject
-     * method that maintains backwards compatibility--how do you know whether
-     * HASHES can be read from the input stream?  To get around this, we
-     * reverted back to default Java serialization with one twist; before
-     * delegating to defaultWriteObject, we temporarily transform BLOCKS to use
-     * List<Interval>.  Similarly, we do the inverse transformation after calling
-     * defaultReadObject.  This is backward-compatible and will make versioning
-     * less difficult in the future.
-     * 
-     * Starting with CVS version 1.50, better custom serialization is used,
-     * relying on PutFields & GetFields so that the 'blocks' and 'hashes' variables
-     * never have incorrect data, at any time.  The data is verified and transformed
-     * prior to writing (when serializing) or setting local variables (when deserializing).
-     *
-     * The moral of the story is this: be very careful when modifying this class
-     * in any way!  IncompleteFileManagerTest has some test case to check
-     * backwards compatibility, but you will want to do additional testing.  
-     */
-
     /**
      * A mapping from incomplete files (File) to the blocks of the file stored
      * on disk (VerifyingFile).  Needed for resumptive smart downloads.
@@ -92,7 +52,7 @@ public class IncompleteFileManager implements Serializable {
      * one interval.  Note that blocks are not sorted; there are typically few
      * blocks so performance isn't an issue.
      */
-    private Map<File, VerifyingFile> blocks=
+    private final Map<File, VerifyingFile> blocks=
         new TreeMap<File, VerifyingFile>(Comparators.fileComparator());
     /**
      * Bijection between sha1 hashes (URN) and incomplete files (File).  This is
@@ -113,25 +73,19 @@ public class IncompleteFileManager implements Serializable {
      * INVARIANT: the range (value set) of hashes contains no duplicates.  
      * INVARIANT: for all keys k in hashes, k.isSHA1() 
      */
-    private Map<URN, File> hashes = new HashMap<URN, File>();
+    private final Map<URN, File> hashes = new HashMap<URN, File>();
+    
+    private final Provider<FileManager> fileManager;
+    private final Provider<TigerTreeCache> tigerTreeCache;
+    private final VerifyingFileFactory verifyingFileFactory;
     
     @Inject
-    volatile static Provider<FileManager> globalFileManager;
-    
-    @Inject
-    volatile static Provider<TigerTreeCache> globalTigerTreeCache;
-
-    @Inject
-    private volatile static Provider<VerifyingFileFactory> verifyingFileFactory;
-    
-    private volatile transient FileManager fileManager;
-    private volatile transient TigerTreeCache ttCache;
-    
-    ///////////////////////////////////////////////////////////////////////////
-
-    public IncompleteFileManager() {
-        this.fileManager = globalFileManager.get();
-        ttCache = globalTigerTreeCache.get();
+    public IncompleteFileManager(Provider<FileManager> fileManager,
+            Provider<TigerTreeCache> tigerTreeCache,
+            VerifyingFileFactory verifyingFileFactory) {
+        this.fileManager = fileManager;
+        this.tigerTreeCache = tigerTreeCache;
+        this.verifyingFileFactory = verifyingFileFactory;
     }
     
     /**
@@ -146,7 +100,7 @@ public class IncompleteFileManager implements Serializable {
             File file = iter.next();
             if (!file.exists() ) {
                 ret=true;
-                fileManager.removeFileIfShared(file);
+                fileManager.get().removeFileIfShared(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }
@@ -173,7 +127,7 @@ public class IncompleteFileManager implements Serializable {
             }
             if (!file.exists() || (isOld(file) && !activeFiles.contains(file))) {
                 ret=true;
-                fileManager.removeFileIfShared(file);
+                fileManager.get().removeFileIfShared(file);
                 file.delete();
                 iter.remove();
             }
@@ -390,159 +344,6 @@ public class IncompleteFileManager implements Serializable {
         }            
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    
-    private synchronized void readObject(ObjectInputStream stream) 
-                                   throws IOException, ClassNotFoundException {
-        this.fileManager = globalFileManager.get();
-        this.ttCache = globalTigerTreeCache.get();
-        
-        GetField gets = stream.readFields();
-        blocks = transform(gets.get("blocks", null));
-        hashes = verifyHashes(gets.get("hashes", null));
-        
-        // if we had roots, we should expect them.
-        for (URN urn : hashes.keySet()) {
-            if (!urn.isSHA1())
-                continue;
-            File f = hashes.get(urn);
-            URN ttroot = ttCache.getTTROOT(urn);
-            if (ttroot != null)
-                blocks.get(f).setExpectedHashTreeRoot(ttroot.httpStringValue().substring(11));
-        }
-        
-        //Notify FileManager about the new incomplete files.
-        registerAllIncompleteFiles();
-    }
-
-    private synchronized void writeObject(ObjectOutputStream stream) throws IOException {
-        PutField puts = stream.putFields();
-        puts.put("blocks", invTransform());
-        puts.put("hashes", hashes);
-        stream.writeFields();
-    }
-    
-    /**
-     * Ensures that that integrity of the hashes HashMap is valid.
-     * This must be done to ensure that older version of LimeWire
-     * are started with a valid hashes map.  Previously,
-     * entries added to the map were not canonicalized, resulting
-     * in multiple downloads thinking they're going to seperate files,
-     * but actually going to the same file.
-     */
-    private static Map<URN, File> verifyHashes(Object read) {
-        if(read == null || !(read instanceof Map)) {
-            LOG.debug("Read null or not map hashes: " + read);
-            return new HashMap<URN, File>();
-        }
-        
-        Map<URN, File> retMap = new HashMap<URN, File>();
-        Map map = (Map)read;
-        for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            if(entry.getKey() instanceof URN && entry.getValue() instanceof File) {
-                URN urn = (URN)entry.getKey();
-                if (!urn.isSHA1())
-                    i.remove(); // we don't understand anything but sha1.
-                File f = (File)entry.getValue();
-                try {
-                    f = canonicalize(f);
-                    // We must purge old entries that had mapped
-                    // multiple URNs to uncanonicalized files.
-                    if (!retMap.values().contains(f))
-                        retMap.put(urn, f);
-
-                } catch(IOException ioe) {}
-            }
-        }
-        return retMap;
-    }   
-
-    /** Takes a map of File->List<Interval> and returns a new equivalent Map
-     *  of File->VerifyingFile*/
-    private static Map<File, VerifyingFile> transform(Object read) {
-        if(read == null || !(read instanceof Map)) {
-            LOG.debug("Read null or not map blocks: " + read);
-            return new HashMap<File, VerifyingFile>();
-        }
-        
-        Map map = (Map)read;
-        Map<File, VerifyingFile> retMap = new TreeMap<File, VerifyingFile>(Comparators.fileComparator());
-        for(Iterator i = map.keySet().iterator(); i.hasNext();) {
-            Object incompleteFile = i.next();
-            Object o = map.get(incompleteFile);
-            if(o==null) //no entry??!
-                continue;
-            else if( incompleteFile instanceof File ) {
-                // (o instanceof List) ie. old downloads.dat            
-                //Canonicalize the file to fix older LimeWires that allowed
-                //non-canonicalized files to be inserted into the table.
-                File f = (File)incompleteFile;
-                try {
-                    f = canonicalize(f);
-                }  catch(IOException ioe) {
-                    // ignore entry
-                    continue;
-                }
-                VerifyingFile vf;
-                try {
-                    vf = verifyingFileFactory.get().createVerifyingFile(getCompletedSize(f));
-                } catch (IllegalArgumentException iae) {
-                	continue;
-                }
-                List list = (List)o;
-                for(Iterator iter = list.iterator(); iter.hasNext(); ) {
-                    Object next = iter.next();
-                    if(next instanceof Range) {
-                        Range interval = (Range)next;
-                        // older intervals excuded the high'th byte, so we decrease
-                        // the value of interval.high. An effect of this is that
-                        // an older client with a newer download.dat downloads one
-                        // byte extra for each interval.
-                        interval = Range.createRange(interval.getLow(), interval.getHigh() - 1);
-                        vf.addInterval(interval);
-                    }
-                }
-                
-                if(list.isEmpty()) {
-                	try {
-                		vf.setScanForExistingBlocks(true, f.length());
-                	} catch (IOException badSize) {
-                		continue; 
-                	}
-                }
-                retMap.put(f, vf);
-            }
-        }//end of for
-        return retMap;
-    }
-    
-    /** Takes a map of File->VerifyingFile and returns a new equivalent Map
-     *  of File->List<Interval>*/
-    private Map<File, List<Range>> invTransform() {
-        Map<File, List<Range>> retMap = new HashMap<File, List<Range>>();
-        for(Map.Entry<File, VerifyingFile> entry : blocks.entrySet()) {
-            File incompleteFile = entry.getKey();
-            VerifyingFile vf  = entry.getValue();
-            List<Range> writeList;
-            synchronized(vf) {
-                List<Range> l = vf.getSerializableBlocks();
-                writeList = new ArrayList<Range>(l.size());
-                for(int i=0; i< l.size(); i++ ) {
-                    //clone the list because we cant mutate VerifyingFile's List
-                    Range inter = l.get(i);
-                    //Increment interval.high by 1 to maintain semantics of
-                    //Inerval
-                    Range interval = Range.createRange(inter.getLow(),inter.getHigh()+1);
-                    writeList.add(interval);
-                }
-            }
-            retMap.put(incompleteFile,writeList);
-        }
-        return retMap;
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
     /** 
      * Removes the block and hash information for the given incomplete file.
      * Typically this is called after incompleteFile has been deleted.
@@ -560,7 +361,43 @@ public class IncompleteFileManager implements Serializable {
         }
         
         //Remove the entry from FileManager
-        fileManager.removeFileIfShared(incompleteFile);
+        fileManager.get().removeFileIfShared(incompleteFile);
+    }
+    
+    /**
+     * Initializes entries with URNs, Files & Ranges.
+     */
+    public synchronized void initEntry(SavedDownloadInfo serializedDownload, URN sha1, boolean store) throws InvalidDataException {
+        File incompleteFile = serializedDownload.getIncompleteFile();
+        List<Range> ranges = serializedDownload.getRanges();
+        try {
+            incompleteFile = canonicalize(incompleteFile);
+        } catch(IOException iox) {
+            throw new InvalidDataException(iox);
+        }
+        
+        VerifyingFile verifyingFile;
+        try {
+            verifyingFile = verifyingFileFactory.createVerifyingFile(getCompletedSize(incompleteFile));        
+        } catch(IllegalArgumentException iae) {
+            throw new InvalidDataException(iae);
+        }
+        for(Range range : ranges) {
+            verifyingFile.addInterval(range);
+        }
+        if(ranges.isEmpty()) {
+            try {
+                verifyingFile.setScanForExistingBlocks(true, incompleteFile.length());
+            } catch(IOException iox) {
+                throw new InvalidDataException(iox);
+            }
+        }
+        blocks.put(incompleteFile, verifyingFile);
+        if(sha1 != null)
+            hashes.put(sha1, incompleteFile);
+        if(store)
+            registerIncompleteFile(incompleteFile);
+        
     }
 
     /**
@@ -622,7 +459,7 @@ public class IncompleteFileManager implements Serializable {
         Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
-        fileManager.addIncompleteFile(
+        fileManager.get().addIncompleteFile(
             incompleteFile,
             completeHashes,
             getCompletedName(incompleteFile),
@@ -750,7 +587,7 @@ public class IncompleteFileManager implements Serializable {
         for(Map.Entry<URN, File> entry : hashes.entrySet()) {
             if (incompleteFile.equals(entry.getValue())) {
                 urns.add(entry.getKey());
-                URN ttroot = ttCache.getTTROOT(entry.getKey());
+                URN ttroot = tigerTreeCache.get().getTTROOT(entry.getKey());
                 if (ttroot != null)
                     urns.add(ttroot);
             }

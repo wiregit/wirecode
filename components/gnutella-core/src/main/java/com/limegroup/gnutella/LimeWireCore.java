@@ -17,7 +17,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTContextFactory;
-import com.limegroup.bittorrent.BTDownloaderFactory;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
@@ -46,14 +45,6 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
-import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
-import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
-import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
-import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
-import com.limegroup.gnutella.downloader.RequeryManagerFactory;
-import com.limegroup.gnutella.downloader.SourceRankerFactory;
-import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
@@ -139,20 +130,8 @@ public class LimeWireCore {
         return injector.getInstance(AltLocValueFactory.class);
     }
 
-    public DiskController getDiskController() {
-        return injector.getInstance(DiskController.class);
-    }
-
-    public VerifyingFileFactory getVerifyingFileFactory() {
-        return injector.getInstance(VerifyingFileFactory.class);
-    }
-
     public SocketsManager getSocketsManager() {
         return injector.getInstance(SocketsManager.class);
-    }
-
-    public SourceRankerFactory getSourceRankerFactory() {
-        return injector.getInstance(SourceRankerFactory.class);
     }
 
     public HostDataFactory getHostDataFactory() {
@@ -185,14 +164,6 @@ public class LimeWireCore {
 
     public HeadPongFactory getHeadPongFactory() {
         return injector.getInstance(HeadPongFactory.class);
-    }
-
-    public HTTPDownloaderFactory getHttpDownloaderFactory() {
-        return injector.getInstance(HTTPDownloaderFactory.class);
-    }
-
-    public DownloadWorkerFactory getDownloadWorkerFactory() {
-        return injector.getInstance(DownloadWorkerFactory.class);
     }
 
     public FeaturesWriter getFeaturesWriter() {
@@ -403,10 +374,6 @@ public class LimeWireCore {
         return injector.getInstance(Key.get(DownloadCallback.class, Names.named("inNetwork")));
     }
 
-    public RequeryManagerFactory getRequeryManagerFactory() {
-        return injector.getInstance(RequeryManagerFactory.class);
-    }
-
     public MessageDispatcher getMessageDispatcher() {
         return injector.getInstance(MessageDispatcher.class);
     }
@@ -514,10 +481,6 @@ public class LimeWireCore {
     public BTContextFactory getBTContextFactory() {
         return injector.getInstance(BTContextFactory.class);
     }
-
-    public BTDownloaderFactory getBTDownloaderFactory() {
-        return injector.getInstance(BTDownloaderFactory.class);
-    }
     
     public ActivityCallback getActivityCallback() {
         return injector.getInstance(ActivityCallback.class);
@@ -577,10 +540,6 @@ public class LimeWireCore {
     
     public DownloadCallback getDownloadCallback() {
         return injector.getInstance(DownloadCallback.class);
-    }
-
-    public PushDownloadManager getPushDownloadManager() {
-        return injector.getInstance(PushDownloadManager.class);
     }
 
     public ReplyNumberVendorMessageFactory getReplyNumberVendorMessageFactory() {
@@ -683,14 +642,6 @@ public class LimeWireCore {
         return injector.getInstance(InstantMessengerFactory.class);
     }
 
-    public GnutellaDownloaderFactory getGnutellaDownloaderFactory() {
-        return injector.getInstance(GnutellaDownloaderFactory.class);
-    }
-
-    public PurchasedStoreDownloaderFactory getPurchasedDownloaderFactory() {
-        return injector.getInstance(PurchasedStoreDownloaderFactory.class);
-    }
-
     public BTUploaderFactory getBTUploaderFactory() {
         return injector.getInstance(BTUploaderFactory.class);
     }
@@ -717,6 +668,10 @@ public class LimeWireCore {
     
     public LWSManager getLWSManger() {
         return injector.getInstance(LWSManager.class);
+    }
+
+    public DiskController getDiskController() {
+        return injector.getInstance(DiskController.class);
     }
     
 }

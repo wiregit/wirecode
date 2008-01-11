@@ -8,7 +8,10 @@ import java.util.Set;
 
 import org.limewire.collection.Range;
 
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloaderType;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
 
 public class InNetworkMemento extends GnutellaDownloadMemento {
 
@@ -41,6 +44,14 @@ public class InNetworkMemento extends GnutellaDownloadMemento {
 
     public long getStartTime() {
         return startTime;
+    }
+    
+    public long getSize() {
+        return (Long)getProperties().get(CoreDownloader.FILE_SIZE);
+    }
+    
+    public URN getUrn() {
+        return (URN)getProperties().get(ManagedDownloader.SHA1_URN);
     }
     
 }

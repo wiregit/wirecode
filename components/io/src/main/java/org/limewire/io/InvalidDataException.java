@@ -1,6 +1,6 @@
 package org.limewire.io;
 
-/** Thrown when invalid data from the network is parsed. */
+/** Thrown when invalid data is parsed. */
 public class InvalidDataException extends Exception {
 
     public InvalidDataException() {

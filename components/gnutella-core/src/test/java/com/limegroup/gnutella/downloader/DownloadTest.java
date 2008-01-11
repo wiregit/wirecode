@@ -314,7 +314,7 @@ public class DownloadTest extends DownloadTestCase {
         
         RemoteFileDesc rfd1 = newRFDWithURN(PORTS[0], false);
         RemoteFileDesc[] rfds = {rfd1};
-        ManagedDownloader md = (ManagedDownloader)
+        ManagedDownloaderImpl md = (ManagedDownloaderImpl)
             downloadServices.download(rfds,true,null);
         
         Thread.sleep(5000);
@@ -336,7 +336,7 @@ public class DownloadTest extends DownloadTestCase {
         RemoteFileDesc rfd5 = newRFDWithURN(PORTS[4], false);
         
         RemoteFileDesc[] rfds = {rfd1};
-        ManagedDownloader md = (ManagedDownloader)
+        ManagedDownloaderImpl md = (ManagedDownloaderImpl)
             downloadServices.download(rfds,true,null);
         
         Thread.sleep(5000);
@@ -358,7 +358,7 @@ public class DownloadTest extends DownloadTestCase {
         RemoteFileDesc rfd5 = newRFDWithURN(PORTS[4], false);
         
         RemoteFileDesc[] rfds = {rfd1};
-        ManagedDownloader md = (ManagedDownloader)
+        ManagedDownloaderImpl md = (ManagedDownloaderImpl)
             downloadServices.download(rfds,true,null);
         
         Thread.sleep(5000);
@@ -379,7 +379,7 @@ public class DownloadTest extends DownloadTestCase {
         
         RemoteFileDesc rfd1 = newRFDWithURN(PORTS[0], false);
         RemoteFileDesc[] rfds = {rfd1};
-        ManagedDownloader md = (ManagedDownloader)
+        ManagedDownloaderImpl md = (ManagedDownloaderImpl)
             downloadServices.download(rfds,true,null);
         
         Thread.sleep(5000);
@@ -463,8 +463,8 @@ public class DownloadTest extends DownloadTestCase {
         
         RemoteFileDesc rfd3 = newRFDWithURN(PORTS[2], false);
         
-        ManagedDownloader downloader = null;        
-        downloader=(ManagedDownloader)downloadServices.download(rfds, false, null);
+        ManagedDownloaderImpl downloader = null;        
+        downloader=(ManagedDownloaderImpl)downloadServices.download(rfds, false, null);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getActiveWorkers().size();
         int queued = downloader.getQueuedHostCount();

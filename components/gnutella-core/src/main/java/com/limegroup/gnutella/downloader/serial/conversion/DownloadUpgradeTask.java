@@ -2,7 +2,6 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -36,20 +35,25 @@ public class DownloadUpgradeTask {
         File newSaveBackup = newSettings.getBackupFile();
         File newSave = newSettings.getSaveFile();
         if(!newSaveBackup.exists() && !newSave.exists()) {
-            List<DownloadMemento> mementos = readAndConvertOldFormat();
             try {
+                List<DownloadMemento> mementos = readAndConvertOldFormat();
                 FileUtils.writeObject(newSaveBackup, mementos);
-                if(!newSaveBackup.renameTo(newSave))
+                if(!newSaveBackup.renameTo(newSave)) {
                     LOG.warn("Unable to rename backup to valid!");
+                } else {
+                    // Success! Now delete the old files.
+                    oldDownloadSettings.getSaveFile().delete();
+                    oldDownloadSettings.getBackupFile().delete();
+                }   
             } catch(IOException iox) {
-                LOG.warn("Unable to write to backup!", iox);
+                LOG.warn("Unable to read old file or write to backup!", iox);
             }
         }
     }
 
 
     /** Converts the old serialized format to new mementos. */
-    private List<DownloadMemento> readAndConvertOldFormat() {
+    private List<DownloadMemento> readAndConvertOldFormat() throws IOException {
         try {
             return oldDownloadConverter.readAndConvertOldDownloads(oldDownloadSettings.getSaveFile());
         } catch(Throwable ignored) {
@@ -62,7 +66,7 @@ public class DownloadUpgradeTask {
             LOG.warn("Error trying to convert old normal file.", ignored);
         }
         
-        return Collections.emptyList(); 
+        throw new IOException("Unable to read old files!");
     }
     
 }

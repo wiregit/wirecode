@@ -47,8 +47,6 @@ import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.BTConnectionFactoryImpl;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTContextFactoryImpl;
-import com.limegroup.bittorrent.BTDownloaderFactory;
-import com.limegroup.bittorrent.BTDownloaderFactoryImpl;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.BTUploaderFactoryImpl;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
@@ -99,31 +97,8 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
-import com.limegroup.gnutella.downloader.AutoDownloadDetails;
-import com.limegroup.gnutella.downloader.DownloadWorkerFactory;
-import com.limegroup.gnutella.downloader.DownloadWorkerFactoryImpl;
-import com.limegroup.gnutella.downloader.GnutellaDownloaderFactory;
-import com.limegroup.gnutella.downloader.GnutellaDownloaderFactoryImpl;
-import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
-import com.limegroup.gnutella.downloader.HTTPDownloaderFactoryImpl;
-import com.limegroup.gnutella.downloader.InNetworkCallback;
-import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
-import com.limegroup.gnutella.downloader.LWSIntegrationServicesImpl;
-import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactory;
-import com.limegroup.gnutella.downloader.PurchasedStoreDownloaderFactoryImpl;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
-import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
-import com.limegroup.gnutella.downloader.RequeryManagerFactory;
-import com.limegroup.gnutella.downloader.RequeryManagerFactoryImpl;
-import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
-import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettingsImpl;
-import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
-import com.limegroup.gnutella.downloader.serial.DownloadSerializerImpl;
-import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
-import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadConverterImpl;
-import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadSettings;
+import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.LocalIPFilter;
@@ -226,6 +201,7 @@ public class LimeWireCoreModule extends AbstractModule {
     protected void configure() {
         binder().install(new LimeWireCommonModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
+        binder().install(new LimeWireDownloadModule());
         
         bind(LimeWireCore.class);
         
@@ -234,7 +210,6 @@ public class LimeWireCoreModule extends AbstractModule {
         }        
 
         bind(DownloadCallback.class).to(ActivityCallback.class);
-        bind(DownloadCallback.class).annotatedWith(Names.named("inNetwork")).to(InNetworkCallback.class);        
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
         bind(DHTControllerFactory.class).to(DHTControllerFactoryImpl.class);
@@ -246,8 +221,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ManagedTorrentFactory.class).to(ManagedTorrentFactoryImpl.class);
         bind(TrackerManagerFactory.class).to(TrackerManagerFactoryImpl.class);
         bind(TrackerFactory.class).to(TrackerFactoryImpl.class);
-        bind(DownloadWorkerFactory.class).to(DownloadWorkerFactoryImpl.class);
-        bind(HTTPDownloaderFactory.class).to(HTTPDownloaderFactoryImpl.class);
         bind(HeadPongFactory.class).to(HeadPongFactoryImpl.class);
         bind(UploadManager.class).to(HTTPUploadManager.class);
         bind(HTTPUploadSessionManager.class).to(HTTPUploadManager.class);
@@ -263,7 +236,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FileManagerController.class).to(FileManagerControllerImpl.class);
         bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
-        bind(RequeryManagerFactory.class).to(RequeryManagerFactoryImpl.class);
         bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
         bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImpl.class);
         bind(UDPSelectorProviderFactory.class).to(DefaultUDPSelectorProviderFactory.class);
@@ -275,7 +247,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(RUDPSettings.class).to(LimeRUDPSettings.class);
         bind(RUDPMessageFactory.class).annotatedWith(Names.named("delegate")).to(DefaultMessageFactory.class);
         bind(BTContextFactory.class).to(BTContextFactoryImpl.class);
-        bind(BTDownloaderFactory.class).to(BTDownloaderFactoryImpl.class);
         bind(LifecycleManager.class).to(LifecycleManagerImpl.class);
         bind(LocalPongInfo.class).to(LocalPongInfoImpl.class);
         bind(ConnectionServices.class).to(ConnectionServicesImpl.class);
@@ -295,7 +266,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPReplyHandlerCache.class).to(UDPReplyHandlerCacheImpl.class);
         bind(BTConnectionFactory.class).to(BTConnectionFactoryImpl.class);
         bind(SocketProcessor.class).to(AcceptorImpl.class);
-        bind(PushedSocketHandlerRegistry.class).to(PushDownloadManager.class);
         bind(DownloadManager.class).to(DownloadManagerImpl.class).asEagerSingleton();
         bind(BrowseHostHandlerManagerImpl.class).asEagerSingleton();
         bind(ReplyNumberVendorMessageFactory.class).to(ReplyNumberVendorMessageFactoryImpl.class);
@@ -315,8 +285,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
         bind(InstantMessengerFactory.class).to(InstantMessengerFactoryImpl.class);
         bind(SaveLocationManager.class).to(DownloadManager.class);
-        bind(GnutellaDownloaderFactory.class).to(GnutellaDownloaderFactoryImpl.class);
-        bind(PurchasedStoreDownloaderFactory.class).to(PurchasedStoreDownloaderFactoryImpl.class);
         bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
         bind(PingRequestFactory.class).to(PingRequestFactoryImpl.class);
         bind(IpPortContentAuthorityFactory.class).to(IpPortContentAuthorityFactoryImpl.class);
@@ -329,7 +297,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
         bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);
-        bind(LWSIntegrationServices.class).to(LWSIntegrationServicesImpl.class);
         bind(LWSIntegrationServicesDelegate.class).to(DownloadManager.class);
         bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
         bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
@@ -356,11 +323,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
-        bind(DownloadSerializer.class).to(DownloadSerializerImpl.class);
-        bind(DownloadSerializeSettings.class).to(DownloadSerializeSettingsImpl.class);
-        bind(OldDownloadConverter.class).to(OldDownloadConverterImpl.class);
-        bind(DownloadSerializeSettings.class).annotatedWith(Names.named("oldDownloadSettings")).to(OldDownloadSettings.class);
-        
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
@@ -373,8 +335,6 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(AddressToken.class);
         requestStaticInjection(RemoteFileDesc.class);
         requestStaticInjection(HashTree.class);
-        requestStaticInjection(IncompleteFileManager.class);
-        requestStaticInjection(AutoDownloadDetails.class);
         requestStaticInjection(LimeXMLDocument.class);
         requestStaticInjection(StatisticsManager.class);
         requestStaticInjection(Pools.class);

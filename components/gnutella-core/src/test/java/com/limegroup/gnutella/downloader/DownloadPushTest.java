@@ -422,7 +422,7 @@ public class DownloadPushTest extends DownloadTestCase {
         // create a listener for the headping
         UDPAcceptor l = new UDPAcceptor(PORTS[1]);
 
-        ManagedDownloader download = (ManagedDownloader) downloadServices.download(
+        ManagedDownloaderImpl download = (ManagedDownloaderImpl) downloadServices.download(
                 new RemoteFileDesc[] { rfd }, RemoteFileDesc.EMPTY_LIST, null, false);
         LOG.debug("started download");
 

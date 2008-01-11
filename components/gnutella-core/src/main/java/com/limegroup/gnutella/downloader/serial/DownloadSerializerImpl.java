@@ -3,16 +3,20 @@ package com.limegroup.gnutella.downloader.serial;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
+import org.limewire.io.InvalidDataException;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.downloader.CoreDownloader;
+import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
 
 @Singleton
 public class DownloadSerializerImpl implements DownloadSerializer {
@@ -20,15 +24,17 @@ public class DownloadSerializerImpl implements DownloadSerializer {
     private static final Log LOG = LogFactory.getLog(DownloadSerializerImpl.class);
     
     private final DownloadSerializeSettings downloadSerializeSettings;
+    private final CoreDownloaderFactory coreDownloaderFactory;
     
     @Inject
-    public DownloadSerializerImpl(DownloadSerializeSettings downloadSerializeSettings) {
+    public DownloadSerializerImpl(CoreDownloaderFactory coreDownloaderFactory,
+            DownloadSerializeSettings downloadSerializeSettings) {
         this.downloadSerializeSettings = downloadSerializeSettings;
+        this.coreDownloaderFactory = coreDownloaderFactory;
     }
     
     public List<SavedDownloadInfo> readFromDisk() {
         List<DownloadMemento> mementos = readMementos();
-
         List<SavedDownloadInfo> replies = convertMementosToDownloads(mementos);
         return replies;
     }
@@ -40,7 +46,17 @@ public class DownloadSerializerImpl implements DownloadSerializer {
     }
     
     List<SavedDownloadInfo> convertMementosToDownloads(List<? extends DownloadMemento> mementos) {
-        return Collections.emptyList();
+        List<SavedDownloadInfo> savedDownloads = new ArrayList<SavedDownloadInfo>(mementos.size());
+        for(DownloadMemento memento : mementos) {
+            CoreDownloader coreDownloader;
+            try {
+                coreDownloader = coreDownloaderFactory.createFromMemento(memento);
+                savedDownloads.add(new SavedDownloadInfo(coreDownloader, memento.getRanges(), memento.getIncompleteFile()));
+            } catch (InvalidDataException e) {
+                LOG.warn("Unable to create downloader from memento: " + memento, e);
+            }
+        }
+        return savedDownloads;
     }
     
     /** Reads all mementos from disk. */

@@ -11,7 +11,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 @Singleton
-public class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
+class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
     
     private final HTTPDownloaderFactory httpDownloaderFactory;
     private final ScheduledExecutorService backgroundExecutor;
@@ -37,7 +37,7 @@ public class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.DownloadWorkerFactory#create(com.limegroup.gnutella.downloader.ManagedDownloader, com.limegroup.gnutella.RemoteFileDesc, com.limegroup.gnutella.downloader.VerifyingFile)
      */
-    public DownloadWorker create(ManagedDownloader manager,
+    public DownloadWorker create(DownloadWorkerSupport manager,
             RemoteFileDesc rfd, VerifyingFile vf) {
         return new DownloadWorker(manager, rfd, vf, httpDownloaderFactory,
                 backgroundExecutor, nioExecutor, pushDownloadManager,

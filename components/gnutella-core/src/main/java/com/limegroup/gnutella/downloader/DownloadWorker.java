@@ -189,7 +189,7 @@ public class DownloadWorker {
      */
     private static final int RETRY_AFTER_SOME_ACTIVE = 60 * 10; // 10 minutes
 
-    private final ManagedDownloader _manager;
+    private final DownloadWorkerSupport _manager;
 
     private final RemoteFileDesc _rfd;
 
@@ -235,7 +235,7 @@ public class DownloadWorker {
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final SocketsManager socketsManager;
 
-    protected DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd,
+    protected DownloadWorker(DownloadWorkerSupport manager, RemoteFileDesc rfd,
             VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory,
             ScheduledExecutorService backgroundExecutor,
             ScheduledExecutorService nioExecutor,

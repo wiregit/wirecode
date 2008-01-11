@@ -94,7 +94,7 @@ public class DownloadTestCase extends LimeTestCase {
 
     protected ActivityCallbackStub activityCallback;
 
-    protected ManagedDownloader managedDownloader;
+    protected ManagedDownloaderImpl managedDownloader;
 
     protected TigerTreeCache tigerTreeCache;
 
@@ -491,7 +491,7 @@ public class DownloadTestCase extends LimeTestCase {
 
         @Override
         public void addDownload(Downloader d) {
-            managedDownloader = (ManagedDownloader) d;
+            managedDownloader = (ManagedDownloaderImpl) d;
         }
 
         @SuppressWarnings("unchecked")

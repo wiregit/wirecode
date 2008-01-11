@@ -11,7 +11,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 class DownloadWorkerStub extends DownloadWorker {
 
 
-    public DownloadWorkerStub(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf,
+    public DownloadWorkerStub(DownloadWorkerSupport manager, RemoteFileDesc rfd, VerifyingFile vf,
             HTTPDownloaderFactory httpDownloaderFactory,
             ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager) {

@@ -42,6 +42,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
+import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTask;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.licenses.LicenseFactory;
@@ -118,6 +119,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<LWSIntegrationServices> lwsItegrationServices;
     private final Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer;
     private final Provider<BrowseHostHandlerManager> browseHostHandlerManager;
+    private final Provider<DownloadUpgradeTask> downloadUpgradeTask;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -175,7 +177,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<LWSManager> lwsManager,
             Provider<LWSIntegrationServices> lwsItegrationServices,
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
-            Provider<BrowseHostHandlerManager> browseHostHandlerManager) { 
+            Provider<BrowseHostHandlerManager> browseHostHandlerManager,
+            Provider<DownloadUpgradeTask> downloadUpgradeTask) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -220,6 +223,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.lwsItegrationServices = lwsItegrationServices;
         this.outOfBandThroughputMeasurer = outOfBandThroughputMeasurer;
         this.browseHostHandlerManager = browseHostHandlerManager;
+        this.downloadUpgradeTask = downloadUpgradeTask;
     }
     
     /* (non-Javadoc)
@@ -361,6 +365,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		activityCallback.get().componentLoading(I18nMarker.marktr("Loading Connection Management..."));
         connectionManager.get().initialize();
 		LOG.trace("STOP ConnectionManager");
+		
+		LOG.trace("Running download upgrade task");
+		downloadUpgradeTask.get().upgrade();
+		LOG.trace("Download upgrade task run!");
 		
 		LOG.trace("START DownloadManager");
 		activityCallback.get().componentLoading(I18nMarker.marktr("Loading Download Management..."));

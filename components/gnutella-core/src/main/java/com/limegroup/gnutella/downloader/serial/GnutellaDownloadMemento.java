@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.limewire.collection.Range;
 
+import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class GnutellaDownloadMemento implements DownloadMemento {
@@ -63,6 +64,10 @@ public class GnutellaDownloadMemento implements DownloadMemento {
 
     public Set<RemoteHostMemento> getRemoteHosts() {
         return remoteHosts;
+    }
+    
+    public String getDefaultFileName() {
+        return (String)properties.get(CoreDownloader.DEFAULT_FILENAME);
     }
 
 

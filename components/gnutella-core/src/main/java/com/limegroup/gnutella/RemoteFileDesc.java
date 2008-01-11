@@ -2,10 +2,8 @@ package com.limegroup.gnutella;
 
 
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -13,9 +11,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -26,8 +22,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
-import org.limewire.service.ErrorService;
-import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -36,7 +30,6 @@ import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 /**
  * A reference to a single file on a remote machine.  In this respect
@@ -54,11 +47,9 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
  * version of LimeWire will simply discard any extra fields F if reading from a
  * newer serialized file.  
  */
-public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDetails {
+public class RemoteFileDesc implements IpPort, Connectable, FileDetails {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
-    
-    private static final long serialVersionUID = 6619479308616716538L;
     
     private static final int COPY_INDEX = Integer.MAX_VALUE;
 
@@ -74,8 +65,6 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 	private final long _index;
 	private final byte[] _clientGUID;
 	private final int _speed;
-    @Deprecated
-	private final int _size;
 	private final boolean _chatEnabled;
     private final int _quality;
     private final boolean _replyToMulticast;
@@ -175,9 +164,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      */
     private transient long _creationTime;
     
-    /**
-     * Whether to serialize the push proxies
-     */
+    /** Whether to serialize the push proxies */
     private transient volatile boolean _serializeProxies = false;
 	
 	/**
@@ -189,18 +176,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
     private transient int _secureStatus = SecureMessage.INSECURE;
     
     private transient volatile long longSize;
-    /**
-     * A map of various properties we want to serialize.  Currently we use
-     * this object only during de/serialization, but we keep it cached if we
-     * ever create one
-     */
-    private Map<String, Serializable> propertiesMap; 
-    
-    /** A list of keys of properties inserted into the propertiesMap. */
-    private static enum RFDProperties {
-        PUSH_ADDR, CONNECT_TYPE, LONG_SIZE;
-    }
-    
+        
     @Inject
     private static Provider<PushEndpointFactory> globalPushEndpointFactory;
     
@@ -376,7 +352,7 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
      * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
      * no PE object is passed a new one is created.
      */
-    private RemoteFileDesc (String host, int port, long index, String filename,
+    public RemoteFileDesc (String host, int port, long index, String filename,
             long size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
@@ -409,7 +385,6 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
 		_port = port;
 		_index = index;
 		_filename = filename;
-		_size = size <= Integer.MAX_VALUE ? (int) size : -1;
         longSize = size;
         _firewalled = firewalled;
 		
@@ -451,105 +426,8 @@ public class RemoteFileDesc implements IpPort, Connectable, Serializable, FileDe
         _http11 = ( !_urns.isEmpty() );
 	}
 
-    private void readObject(ObjectInputStream stream) 
-		throws IOException, ClassNotFoundException {
-        pushEndpointFactory = globalPushEndpointFactory.get();
-        stream.defaultReadObject();
-        // port should never be invalid, so if it is, something messed up
-        if(!NetworkUtils.isValidPort(_port))
-            throw new IOException("invalid port!");
-        
-        //Older downloads.dat files do not have _urns, so _urns will be null
-        //(the default Java value).  Hence we also initialize
-        //_browseHostEnabled.  See class overview for more details.
-        if(_urns == null) {
-            _urns = Collections.emptySet();
-            _browseHostEnabled= false;
-        } else {
-            // According to some bug reports, it seems that the
-            // Urn Set has some java.io.Files inserted into it.
-            // Here we check for this case and remove the offending object.
-            Set<URN> newUrns = GenericsUtils.scanForSet(_urns,
-                                                        URN.class,
-                                                        GenericsUtils.ScanMode.NEW_COPY_REMOVED,
-                                                        UrnSet.class);
-            
-            // if it was converted or recreated while scanning,
-            // ensure it's unmodifiable.
-            if(_urns != newUrns)
-                _urns = Collections.unmodifiableSet(newUrns);
-        }
-                
-		// preserve the invariant that the LimeXMLDocument array either be
-		// null or have at least one element
-		if(_xmlDocs != null && _xmlDocs.length == 0) {
-			_xmlDocs = null;
-		}
-        // http11 must be set manually, because older clients did not have this
-        // field but did have urns.
-        _http11 = ( _http11 || !_urns.isEmpty() );
-        
-        // if we saved any properties, read them now
-        if (propertiesMap != null) {
-            Boolean tlsCapable = (Boolean)propertiesMap.get(RFDProperties.CONNECT_TYPE.name());
-            if(tlsCapable != null)
-                _tlsCapable = tlsCapable.booleanValue();
-            
-            String http = (String)propertiesMap.get(RFDProperties.PUSH_ADDR.name());
-            // try the older serialized name if it didn't have the newer one.
-            if(http == null)
-                http = (String)propertiesMap.get("_pushAddr");
-            if (http != null) {
-                try {
-                    _pushAddr = pushEndpointFactory.createPushEndpoint(http);
-                    if (!_firewalled) {
-                        ErrorService.error(new IllegalStateException(
-                                "deserialized RFD had PE but wasn't firewalled, "+this+" "+_pushAddr));
-                        _firewalled = true;
-                    }
-                } catch (IOException iox) {}
-            }
-            
-            Long size64 = (Long)propertiesMap.get(RFDProperties.LONG_SIZE.name());
-            if (size64 == null)
-                longSize = _size;
-            else
-                longSize = size64.longValue();
-            // erase the map so it's reconstructed with the most recent
-            // values upon the first write.
-            propertiesMap = null;
-        } else {
-            // very old format, make sure we get the size right
-            longSize = _size;
-        }
-    }
-    
     public void setSerializeProxies() {
         _serializeProxies = true;
-    }
-    
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        if (longSize > Integer.MAX_VALUE) {
-            initPropertiesMap();
-            propertiesMap.put(RFDProperties.LONG_SIZE.name(), longSize);
-        } 
-        if(_tlsCapable) {
-            initPropertiesMap();
-            propertiesMap.put(RFDProperties.CONNECT_TYPE.name(), Boolean.TRUE);
-        }
-        
-        if (_serializeProxies && _pushAddr != null) {
-            initPropertiesMap();
-            // this will also update the PE in case it changed since last serialization
-            propertiesMap.put(RFDProperties.PUSH_ADDR.name(), _pushAddr.httpStringValue());
-        }
-        
-        stream.defaultWriteObject();
-    }
-    
-    private void initPropertiesMap() {
-        if(propertiesMap == null)
-            propertiesMap = new HashMap<String, Serializable>();
     }
     
     /** Returns true if the host supports TLS. */

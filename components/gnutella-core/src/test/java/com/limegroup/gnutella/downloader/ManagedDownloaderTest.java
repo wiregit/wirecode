@@ -80,7 +80,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private final static int PORT=6666;
     private DownloadManagerImpl downloadManager;
     private FileManagerStub fileManager;
-    private GnutellaDownloaderFactory gnutellaDownloaderFactory;
+    private CoreDownloaderFactory gnutellaDownloaderFactory;
     private NetworkManagerStub networkManager;
     private Injector injector;
     private ScheduledExecutorService background;
@@ -124,7 +124,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
         downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        gnutellaDownloaderFactory = injector.getInstance(GnutellaDownloaderFactory.class);
+        gnutellaDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
         networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         
         downloadManager.initialize();
@@ -183,7 +183,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	HTTPDownloaderFactory httpDownloaderFactory =injector.getInstance(HTTPDownloaderFactory.class);
     	AltLocDownloaderStub fakeDownloader = (AltLocDownloaderStub)httpDownloaderFactory.create(null, other, null, false);
     	
-    	ManagedDownloader md = gnutellaDownloaderFactory.createManagedDownloader(new RemoteFileDesc[] { rfd}, null, null, null, false);
+    	ManagedDownloaderImpl md = (ManagedDownloaderImpl)gnutellaDownloaderFactory.createManagedDownloader(new RemoteFileDesc[] { rfd}, null, null, null, false);
         DownloadWorkerFactory downloadWorkerFactory = injector.getInstance(DownloadWorkerFactory.class);
         AltLocWorkerStub worker = (AltLocWorkerStub)downloadWorkerFactory.create(md, rfd, null);
         worker.setHTTPDownloader(fakeDownloader);
@@ -248,7 +248,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             newRFD("Susheel/cool\\Daswani.txt",
                    "urn:sha1:XXXXGIPQGXXXXS5FJUPAKPZWUGYQYPFB")   //ignored
         };
-        ManagedDownloader downloader= gnutellaDownloaderFactory.createManagedDownloader(rfds, null, null, null, false);
+        ManagedDownloaderImpl downloader= (ManagedDownloaderImpl)gnutellaDownloaderFactory.createManagedDownloader(rfds, null, null, null, false);
         downloader.initialize();
         QueryRequest qr=downloader.newRequery();
         assertNotNull("Couldn't make query", qr);
@@ -280,7 +280,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     public void testNewRequery2() throws Exception {
         LOG.info("testing new requery 2");
         RemoteFileDesc[] rfds={ newRFD("LimeWire again LimeWire the 34") };
-        ManagedDownloader downloader= gnutellaDownloaderFactory.createManagedDownloader(rfds, null, null, null, false);
+        ManagedDownloaderImpl downloader= (ManagedDownloaderImpl) gnutellaDownloaderFactory.createManagedDownloader(rfds, null, null, null, false);
         downloader.initialize();
         QueryRequest qr=downloader.newRequery();
         assertEquals("limewire again", qr.getQuery());
@@ -293,7 +293,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
         networkManager.setAddress(new byte[] { 127, 0, 0, 1 });
         
-        IncompleteFileManager ifm=new IncompleteFileManager();
+        IncompleteFileManager ifm = injector.getInstance(IncompleteFileManager.class);
         RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
@@ -324,7 +324,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         //Deserialize it as a different instance.  Initialize.
         ObjectInputStream in=new ObjectInputStream(
             new ByteArrayInputStream(baos.toByteArray()));
-        downloader=(ManagedDownloader)in.readObject();
+        downloader=(ManagedDownloaderImpl)in.readObject();
         in.close();
         downloader.initialize();
         requestStart(downloader);
@@ -578,8 +578,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
     
     @SuppressWarnings("unchecked")
     private void requestStart(ManagedDownloader dl) throws Exception {
-        List<AbstractDownloader> waiting = (List<AbstractDownloader>)PrivilegedAccessor.getValue(downloadManager, "waiting");
-        List<AbstractDownloader> active = (List<AbstractDownloader>)PrivilegedAccessor.getValue(downloadManager, "active");
+        List<CoreDownloader> waiting = (List<CoreDownloader>)PrivilegedAccessor.getValue(downloadManager, "waiting");
+        List<CoreDownloader> active = (List<CoreDownloader>)PrivilegedAccessor.getValue(downloadManager, "active");
         synchronized(downloadManager) {
             waiting.remove(dl);
             active.add(dl);
@@ -742,7 +742,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.socketsManager = socketsManager;
         }
         
-        public DownloadWorker create(ManagedDownloader manager,
+        public DownloadWorker create(DownloadWorkerSupport manager,
                 RemoteFileDesc rfd, VerifyingFile vf) {
             return new AltLocWorkerStub(manager, rfd, vf, httpDownloaderFactory,
                     backgroundExecutor, nioExecutor, pushDownloadManager,
@@ -753,7 +753,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private static class AltLocWorkerStub extends DownloadWorkerStub {
         private volatile HTTPDownloader httpDownloader;
         
-        public AltLocWorkerStub(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf,
+        public AltLocWorkerStub(DownloadWorkerSupport manager, RemoteFileDesc rfd, VerifyingFile vf,
                 HTTPDownloaderFactory httpDownloaderFactory,
                 ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager) {
