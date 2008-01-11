@@ -35,6 +35,14 @@ public final class SWTBrowserSettings extends LimeProps {
                                           "Browser", 
                                           "SWTBrowserSettings.swtBrowserTitle");
     
+    /**
+     * The name of the browser in the tab, with ampserands for better functionality.
+     */
+   public static final StringSetting SWT_BROWSER_TITLE_WITH_AMPS =
+       FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE_WITH_AMPS", 
+                                         "&Browser", 
+                                         "SWTBrowserSettings.swtBrowserTitleWithAmps");    
+    
     public static final StringSetting SWT_BROWSER_TOOLTIP =
         FACTORY.createRemoteStringSetting("SWT_BROWSER_TOOLTIP", 
                                           "Browse The Web", 
