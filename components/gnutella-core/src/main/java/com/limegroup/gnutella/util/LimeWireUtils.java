@@ -448,7 +448,7 @@ public final class LimeWireUtils {
         }
         
         if(root == null || "".equals(root))
-            root = CommonUtils.getUserHomeDir().getParent();
+            root = CommonUtils.getUserHomeDir().getPath();
         
         return new File(root, "LimeWire");
     }

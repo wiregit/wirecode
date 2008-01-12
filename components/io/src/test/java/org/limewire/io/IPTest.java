@@ -1,9 +1,8 @@
 package org.limewire.io;
 
-import org.limewire.util.BaseTestCase;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.limewire.util.BaseTestCase;
 
 /**
  * Unit tests for IP, IPFilter, IPList
@@ -16,7 +15,7 @@ public class IPTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(IPTest.class);
+        return buildTestSuite(IPTest.class);
     }
 
     public static void main(String[] args) {
