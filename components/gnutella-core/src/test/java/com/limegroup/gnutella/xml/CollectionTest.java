@@ -437,12 +437,15 @@ public class CollectionTest extends LimeTestCase {
     private void populateDirectory() {
         File audioFile = CommonUtils.getResourceFile(fileLocation + "audio.collection");
         File videoFile = CommonUtils.getResourceFile(fileLocation + "video.collection");
+        limeXMLProperties.getXMLDocsDir().mkdirs();
         File newAudio  = new File(limeXMLProperties.getXMLDocsDir(), "audio.sxml");
         File newVideo  = new File(limeXMLProperties.getXMLDocsDir(), "video.sxml");
         assertTrue("Necessary file audio.collection cannot be found!", audioFile.exists());
         assertTrue("Necessary file video.collection cannot be found!", videoFile.exists());
-        audioFile.renameTo(newAudio);
-        videoFile.renameTo(newVideo);
+        if(!audioFile.renameTo(newAudio))
+            fail("couldn't rename audio file to: " + newAudio);
+        if(!videoFile.renameTo(newVideo))
+            fail("couldn't rename video file to: " + newVideo);
     }
     
     private static URN getHash(File f) {

@@ -22,15 +22,6 @@ public class SharingSettingsTest extends LimeTestCase {
         TestSuite suite = new TestSuite(SharingSettingsTest.class);
         return suite;
     }
-    
-    public void setUp() throws Exception {
-        
-    }
-        
-    
-    public void tearDown() {
-       
-    }
 
     /**
      * Tests if all settings are set to the default save directory.

@@ -29,7 +29,6 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class PingReplyFactoryImpl implements PingReplyFactory {
@@ -41,11 +40,8 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private final Provider<HostCatcher> hostCatcher;
     private final Provider<DHTManager> dhtManager;
     private final LocalPongInfo localPongInfo;
-    private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
+    private final MACCalculatorRepositoryManager macCalculatorRepositoryManager;
     
-    /** Cached constant for the vendor GGEP extension.*/
-    private final byte[] CACHED_VENDOR = new byte[5];
-
     // TODO: All these objects should be folded into LocalPongInfo
     @Inject
     public PingReplyFactoryImpl(NetworkManager networkManager,
@@ -62,12 +58,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         this.hostCatcher = hostCatcher;
         this.dhtManager = dhtManager;
         this.localPongInfo = localPongInfo;
-        this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
-        
-        // set 'LIME'
-        System.arraycopy(LimeWireUtils.QHD_VENDOR_NAME.getBytes(), 0, CACHED_VENDOR, 0,
-                LimeWireUtils.QHD_VENDOR_NAME.getBytes().length);
-        CACHED_VENDOR[4] = 0;
+        this.macCalculatorRepositoryManager = MACCalculatorRepositoryManager;
     }
 
     public PingReply create(byte[] guid, byte ttl,
@@ -240,7 +231,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
         try {
             return new PingReplyImpl(guid, ttl, (byte) 0, payload, ggep, ip,
-                    Network.UNKNOWN, MACCalculatorRepositoryManager);
+                    Network.UNKNOWN, macCalculatorRepositoryManager);
         } catch (BadPacketException e) {
             throw new IllegalStateException(e);
         }
@@ -278,21 +269,6 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         GGEP ggep = parseGGEP(payload);
 
         if (ggep != null) {
-            if (ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
-                byte[] vendorBytes = null;
-                try {
-                    vendorBytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                } catch (BadGGEPPropertyException e) {
-                    ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
-                    throw new BadPacketException("bad GGEP: " + vendorBytes);
-                }
-                if (vendorBytes.length < 4) {
-                    ReceivedErrorStat.PING_REPLY_INVALID_VENDOR.incrementStat();
-                    throw new BadPacketException("invalid vendor length: "
-                            + vendorBytes.length);
-                }
-            }
-
             if (ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
                     ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
@@ -349,7 +325,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                         + e.getMessage());
             }
         }
-        return new PingReplyImpl(guid, ttl, hops, payload, ggep, ip, network, MACCalculatorRepositoryManager);
+        return new PingReplyImpl(guid, ttl, hops, payload, ggep, ip, network, macCalculatorRepositoryManager);
     }
 
     public PingReply mutateGUID(PingReply pingReply, byte[] guid) {
@@ -375,11 +351,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
 
         if (isGUESSCapable && isUltrapeer) {
-            // indicate guess support
-            byte[] vNum = { convertToGUESSFormat(LimeWireUtils
-                    .getGUESSMajorVersionNumber(), LimeWireUtils
-                    .getGUESSMinorVersionNumber()) };
-            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
+            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
         }
 
         // indicate UP support
@@ -388,9 +360,6 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
         // add DHT support
         addDHTExtension(ggep);
-
-        // all pongs should have vendor info
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR);
 
         // add our support of TLS
         if (SSLSettings.isIncomingTLSEnabled())
@@ -501,14 +470,15 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
      */
     private void addUltrapeerExtension(GGEP ggep) {
         byte[] payload = new byte[3];
-        // put version
-        payload[0] = convertToGUESSFormat(LimeWireUtils
-                .getUPMajorVersionNumber(), LimeWireUtils
-                .getUPMinorVersionNumber());
+        // historically, payload[0] contained the major/minor version of ultrapeer support.
+        // the data was never used, the format used to send it didn't scale well, and
+        // the version never went beyond the first revision.  so, for now we just 
+        // put a blank number there, and in the future if we decide to use the info
+        // or increment the version, we can include it somewhere else in a more scalable
+        // form.
+        payload[0] = 0;
         payload[1] = localPongInfo.getNumFreeLimeWireLeafSlots();
         payload[2] = localPongInfo.getNumFreeLimeWireNonLeafSlots();
-
-        // add it
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
     }
 
@@ -629,22 +599,4 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         else
             return 1073741824; //1<<30
     }
-    
-    /** puts major as the high order bits, minor as the low order bits.
-     *  @exception IllegalArgumentException thrown if major/minor is greater 
-     *  than 15 or less than 0.
-     */
-    @Deprecated // this is broken!
-    private byte convertToGUESSFormat(int major, int minor) throws IllegalArgumentException {
-        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
-            throw new IllegalArgumentException();
-        // set major
-        int retInt = major;
-        retInt = retInt << 4;
-        // set minor
-        retInt |= minor;
-    
-        return (byte) retInt;
-    }
-
 }

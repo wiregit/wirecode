@@ -237,9 +237,11 @@ public class SharingSettings extends LimeProps {
      *          If the "dir" parameter is null.
      */
     public static final void setSaveLWSDirectory(File storeDir) throws IOException { 
-        if(storeDir == null) throw new NullPointerException();
-        if(!storeDir.isDirectory()) {
-            if(!storeDir.mkdirs()) throw new IOException("could not create save dir");
+        if (storeDir == null)
+            throw new NullPointerException();
+        if (!storeDir.isDirectory()) {
+            if (!storeDir.mkdirs())
+                throw new IOException("could not create save dir at: " + storeDir);
         }
         
         FileUtils.setWriteable(storeDir);

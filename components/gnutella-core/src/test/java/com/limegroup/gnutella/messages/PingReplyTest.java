@@ -210,12 +210,7 @@ public class PingReplyTest extends LimeTestCase {
         // make sure we reject bad ggep
         GGEP ggep = new GGEP();
         payload = new byte[3];
-        // set 'LIM'  -- incorrect value to make sure it fails
-        System.arraycopy("LIM".getBytes(),
-                         0, payload, 0,
-                         2);
-         // add it
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, payload);  
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, payload);  
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ggep.write(baos);
 
@@ -390,9 +385,6 @@ public class PingReplyTest extends LimeTestCase {
         assertEquals(6349, pong.getPort());
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         assertFalse(pong.supportsUnicast());
-        assertEquals("LIME", pong.getVendor());
-        assertEquals(2, pong.getVendorMajorVersion());
-        assertEquals(7, pong.getVendorMinorVersion());
         assertTrue(pong.isTLSCapable());
         // make sure it's still capable if we turn our settings off.
         SSLSettings.TLS_INCOMING.setValue(false);
@@ -425,7 +417,6 @@ public class PingReplyTest extends LimeTestCase {
         byte[] bytes=baos.toByteArray(); 
         int duLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
         int gueLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
-        int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
         int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
         int tlsLength = GGEP.GGEP_HEADER_TLS_CAPABLE.length();
@@ -437,15 +428,11 @@ public class PingReplyTest extends LimeTestCase {
                       +1   //"GUE" extension flags
                       +gueLength // ID
                       +1   //data length
-                      +1   //data bytes
+                      +0   //data bytes
                       +1   //"UP" extension flags
                       +upLength // ID
                       +1   // data length
                       +3  // data bytes
-                      +1   //"VC" extension flags
-                      +vcLength // ID
-                      +1   // data length
-                      +5   // data bytes
                       +1  //"DHT" extension flags
                       +dhtLength
                       +1   // data length
@@ -467,19 +454,11 @@ public class PingReplyTest extends LimeTestCase {
         assertEquals((byte)'G',  bytes[offset+2+dhtLength+5+duLength+4]);
         assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+5]);
         assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+6]);
-        assertEquals((byte)'T',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3]);
-        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+4]);
-        assertEquals((byte)'S',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+5]);
-        assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2]);
-        assertEquals((byte)'P',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+3]);
-        assertEquals((byte)'V',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+5]);
-        assertEquals((byte)'C',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+6]);
-        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+8]);
-        assertEquals((byte)'I',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+9]);
-        assertEquals((byte)'M',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+10]);
-        assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+11]);
-        assertEquals((byte)39,   bytes[offset+2+dhtLength+5+duLength+4+gueLength+3+tlsLength+2+upLength+12]);
-
+        assertEquals((byte)'T',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+2]);
+        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+3]);
+        assertEquals((byte)'S',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+4]);
+        assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+2+tlsLength+2]);
+        assertEquals((byte)'P',  bytes[offset+2+dhtLength+5+duLength+4+gueLength+2+tlsLength+3]);
 
         //Decode and check contents.
         Message m=messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
@@ -489,9 +468,6 @@ public class PingReplyTest extends LimeTestCase {
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         assertEquals(523, pong.getDailyUptime());
         assertTrue(pong.supportsUnicast());
-        assertEquals("LIME", pong.getVendor());
-        assertEquals(2, pong.getVendorMajorVersion());
-        assertEquals(7, pong.getVendorMinorVersion());
         assertTrue(pong.isTLSCapable());
 
     }
@@ -506,7 +482,6 @@ public class PingReplyTest extends LimeTestCase {
         pr.write(baos);
         byte[] bytes=baos.toByteArray(); 
         int duLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
-        int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
         int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
         int tlsLength = GGEP.GGEP_HEADER_TLS_CAPABLE.length();
@@ -519,10 +494,6 @@ public class PingReplyTest extends LimeTestCase {
                       +upLength // ID
                       +1   // data length
                       +3  // data bytes
-                      +1   //"VC" extension flags
-                      +vcLength // ID
-                      +1   // data length
-                      +5   // data bytes
                       +1  //"DHT" extension flags
                       +dhtLength
                       +1   // data length
@@ -546,14 +517,6 @@ public class PingReplyTest extends LimeTestCase {
         assertEquals((byte)'S',  bytes[offset+2+dhtLength+5+duLength+6]);
         assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2]);
         assertEquals((byte)'P',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+3]);
-        assertEquals((byte)'V',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+5]);
-        assertEquals((byte)'C',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+6]);
-        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+8]);
-        assertEquals((byte)'I',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+9]);
-        assertEquals((byte)'M',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+10]);
-        assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+11]);
-        assertEquals((byte)39,   bytes[offset+2+dhtLength+5+duLength+4+tlsLength+2+upLength+12]);
-
 
         //Decode and check contents.
         Message m=messageFactory.read(new ByteArrayInputStream(bytes), Network.TCP);
@@ -563,9 +526,6 @@ public class PingReplyTest extends LimeTestCase {
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         assertEquals(523, pong.getDailyUptime());
         assertFalse(pong.supportsUnicast());
-        assertEquals("LIME", pong.getVendor());
-        assertEquals(2, pong.getVendorMajorVersion());
-        assertEquals(7, pong.getVendorMinorVersion());
         assertTrue(pong.isTLSCapable());
     }
     
@@ -580,7 +540,6 @@ public class PingReplyTest extends LimeTestCase {
         pr.write(baos);
         byte[] bytes=baos.toByteArray(); 
         int duLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
-        int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
         int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
         int ggepLength=1   //magic number
@@ -592,10 +551,6 @@ public class PingReplyTest extends LimeTestCase {
                       +upLength // ID
                       +1   // data length
                       +3  // data bytes
-                      +1   //"VC" extension flags
-                      +vcLength // ID
-                      +1   // data length
-                      +5   // data bytes
                       +1  //"DHT" extension flags
                       +dhtLength
                       +1   // data length
@@ -613,13 +568,6 @@ public class PingReplyTest extends LimeTestCase {
         assertEquals((byte)0x02, bytes[offset+2+dhtLength+9]); // big byte of 523
         assertEquals((byte)'U',  bytes[offset+2+dhtLength+5+duLength+4]);
         assertEquals((byte)'P',  bytes[offset+2+dhtLength+5+duLength+5]);
-        assertEquals((byte)'V',  bytes[offset+2+dhtLength+5+duLength+4+upLength+5]);
-        assertEquals((byte)'C',  bytes[offset+2+dhtLength+5+duLength+4+upLength+6]);
-        assertEquals((byte)'L',  bytes[offset+2+dhtLength+5+duLength+4+upLength+8]);
-        assertEquals((byte)'I',  bytes[offset+2+dhtLength+5+duLength+4+upLength+9]);
-        assertEquals((byte)'M',  bytes[offset+2+dhtLength+5+duLength+4+upLength+10]);
-        assertEquals((byte)'E',  bytes[offset+2+dhtLength+5+duLength+4+upLength+11]);
-        assertEquals((byte)39,   bytes[offset+2+dhtLength+5+duLength+4+upLength+12]);
 
 
         //Decode and check contents.
@@ -630,9 +578,6 @@ public class PingReplyTest extends LimeTestCase {
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         assertEquals(523, pong.getDailyUptime());
         assertFalse(pong.supportsUnicast());
-        assertEquals("LIME", pong.getVendor());
-        assertEquals(2, pong.getVendorMajorVersion());
-        assertEquals(7, pong.getVendorMinorVersion());
         assertFalse(pong.isTLSCapable());
     }
     

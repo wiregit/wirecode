@@ -214,30 +214,15 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 } catch(BadGGEPPropertyException e) {}
             }
 
-            supportsUnicast = 
-                ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT); 
-
-            if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
-                try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    if(bytes.length >= 4)
-                        vendor = new String(bytes, 0, 4);   
-                    if(bytes.length > 4) {
-                        vendorMajor = bytes[4] >> 4;
-                        vendorMinor = bytes[4] & 0xF;
-                    }
-                } catch (BadGGEPPropertyException e) {}
-             }
+            supportsUnicast = ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
 
             if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
                     key = new AddressSecurityToken(bytes, manager);
-                }
-                catch (InvalidSecurityTokenException e) {
+                } catch (InvalidSecurityTokenException e) {
                     throw new BadPacketException("invalid query key");
-                } 
-                catch (BadGGEPPropertyException e) {
+                } catch (BadGGEPPropertyException e) {
                     throw new BadPacketException("invalid query key");
                 }
             }
@@ -551,39 +536,6 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
     public boolean supportsUnicast() {
         return SUPPORTS_UNICAST;
     }
-
-
-    /** Returns the 4-character vendor string associated with this Pong.
-     *
-     * @return the 4-character vendor code reported in the pong, or the
-     *  empty string if no vendor code was successfully read
-     */
-    @Deprecated
-    public String getVendor() {
-        return VENDOR;
-    }
-
-
-    /** Returns the major version number of the vendor returning this pong.
-     * 
-     * @return the major version number of the vendor returning this pong,
-     *  or -1 if the version could not be read
-     */
-    @Deprecated
-    public int getVendorMajorVersion() {
-        return VENDOR_MAJOR_VERSION;
-    }
-
-    /** Returns the minor version number of the vendor returning this pong.
-     * 
-     * @return the minor version number of the vendor returning this pong,
-     *  or -1 if the version could not be read
-     */
-    @Deprecated
-    public int getVendorMinorVersion() {
-        return VENDOR_MINOR_VERSION;
-    }
-
 
     /** Returns the AddressSecurityToken (if any) associated with this pong.  May be null!
      *
