@@ -7,6 +7,8 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
@@ -255,7 +255,7 @@ public class BTMetaInfo implements Serializable {
 			URI trackerURI = new URI(data.getAnnounce());
 			validateURI(trackerURI);
 			_trackers = new URI[] { trackerURI };
-		} catch (URIException mue) {
+		} catch (URISyntaxException mue) {
 			throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
@@ -287,9 +287,7 @@ public class BTMetaInfo implements Serializable {
         if (!"http".equalsIgnoreCase(check.getScheme()))
             throw new ValueException("unsupported tracker protocol: "+check.getScheme());
         boolean hostOk = false;
-        try {
-            hostOk = check.getHost() != null; // validity will be checked upon request
-        } catch (URIException bad) {}
+        hostOk = check.getHost() != null; // validity will be checked upon request
         if (!hostOk)
             throw new ValueException("invalid host");
     }

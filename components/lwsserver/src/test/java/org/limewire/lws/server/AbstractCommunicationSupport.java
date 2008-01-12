@@ -4,11 +4,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.LWSServerUtil;
+import org.limewire.http.LimeWireHttpModule;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.BaseTestCase;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
@@ -166,6 +168,8 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         localThread     = localServer.start();
         remoteThread    = remoteServer.start();
         code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer, remoteServer);
+
+        Injector injector = Guice.createInjector(new LimeWireHttpModule());        
 
         afterSetup();
     }

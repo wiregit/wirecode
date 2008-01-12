@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent.tracking;
 
-import org.apache.commons.httpclient.URI;
+import java.net.URI;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;

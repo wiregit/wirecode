@@ -87,7 +87,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      */
     public void testEmptyOverrides() throws Exception{
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, "test.txt", urn, 10L);
         
         //create a valid download
@@ -116,7 +116,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      */
     public void testRFDCreation() throws Exception {
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         
         // test invalid rfd
         assertNull( StoreDownloader.createRemoteFileDesc(null, "", null, -1) );
@@ -140,7 +140,7 @@ public class StoreDownloaderTest extends LimeTestCase{
     public void testInvalidStoreDownloads() throws Exception {
 
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, "test.txt", urn, 10L);
                 
         //create a valid download
@@ -162,7 +162,7 @@ public class StoreDownloaderTest extends LimeTestCase{
     public void testValidStoreDownloads() throws Exception {
         
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, "test.txt", urn, 10L);
         
         

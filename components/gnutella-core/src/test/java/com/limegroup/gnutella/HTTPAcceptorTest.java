@@ -2,27 +2,29 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.nio.NHttpConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
 import org.limewire.http.HttpAcceptorListener;
+import org.limewire.http.HttpClientManager;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
+
+import junit.framework.Test;
 
 //ITEST
 public class HTTPAcceptorTest extends BaseTestCase {
@@ -34,6 +36,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
     private HttpClient client;
 
     private SocketAcceptor socketAcceptor;
+    private Injector injector;
 
     public HTTPAcceptorTest(String name) {
         super(name);
@@ -54,11 +57,8 @@ public class HTTPAcceptorTest extends BaseTestCase {
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
         
         socketAcceptor.bind(PORT);
-        
-        client = new HttpClient();
-        HostConfiguration config = new HostConfiguration();
-        config.setHost("localhost", PORT);
-        client.setHostConfiguration(config);
+
+        client = new DefaultHttpClient();
     }
 
     @Override
@@ -70,20 +70,21 @@ public class HTTPAcceptorTest extends BaseTestCase {
     public void testGetRequest() throws Exception {
         httpAcceptor.start();
 
-        GetMethod method = new GetMethod("/");
+        HttpGet method = new HttpGet("http://localhost:" + PORT + "/");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HTTPStatus.BAD_REQUEST, response);
+            response = client.execute(method);
+            assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
 
-        method = new GetMethod("/update.xml");
+        method = new HttpGet("http://localhost:" + PORT + "/update.xml");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HTTPStatus.BAD_REQUEST, response);
+            response = client.execute(method);
+            assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
     }
 
@@ -93,11 +94,13 @@ public class HTTPAcceptorTest extends BaseTestCase {
         httpAcceptor.start();
         assertFalse(listener.opened);
         assertFalse(listener.closed);
-        
-        GetMethod method = new GetMethod("/");
-        try{ 
-            int response = client.executeMethod(method);
-            assertEquals(HTTPStatus.BAD_REQUEST, response);
+
+
+        HttpGet method = new HttpGet("http://localhost:" + PORT + "/");
+        HttpResponse response = null;
+        try {
+            response = client.execute(method);
+            assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
             LimeTestUtils.waitForNIO();
             assertTrue(listener.opened);
             // bad request, so connection should have been closed
@@ -110,54 +113,55 @@ public class HTTPAcceptorTest extends BaseTestCase {
             LimeTestUtils.waitForNIO();
             assertNotNull(listener.response);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
-        
+
         listener.opened = false;
         listener.closed = false;
         listener.request = null;
         listener.response = null;
-        
+
         httpAcceptor.removeAcceptorListener(listener);
-        method = new GetMethod("/");
-        try{ 
-            client.executeMethod(method);
+        method = new HttpGet("http://localhost:" + PORT + "/");
+        try {
+            client.execute(method);
             assertFalse(listener.opened);
             assertFalse(listener.closed);
             assertNull(listener.request);
             assertNull(listener.response);
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
     }
 
     public void testRegisterUnregisterHandler() throws Exception {
         HttpRequestHandler handler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
-                    HttpContext context) throws org.apache.http.HttpException,
+                               HttpContext context) throws org.apache.http.HttpException,
                     IOException {
                 response.setStatusCode(HttpStatus.SC_ACCEPTED);
             }
-            
+
         };
         httpAcceptor.start();
 
         httpAcceptor.registerHandler("/", handler);
-        GetMethod method = new GetMethod("/");
-        try{ 
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_ACCEPTED, response);
+        HttpGet method = new HttpGet("http://localhost:" + PORT + "/");
+        HttpResponse response = null;
+        try {
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_ACCEPTED, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
 
         httpAcceptor.unregisterHandler("/");
-        method = new GetMethod("/");
-        try{ 
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response);
+        method = new HttpGet("http://localhost:" + PORT + "/");
+        try {
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
     }
 

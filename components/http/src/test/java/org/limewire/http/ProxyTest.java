@@ -3,28 +3,30 @@ package org.limewire.http;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.limewire.http.HttpClientManager;
-import org.limewire.http.LimeWireHttpModule;
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.io.IOUtils;
-import org.limewire.net.ProxySettings.ProxyType;
-import org.limewire.net.ProxySettingsStub;
-import org.limewire.net.SocketsManager;
-import org.limewire.net.LimeWireNetModule;
-import org.limewire.net.ProxySettings;
-import org.limewire.net.SocketBindingSettings;
+import org.limewire.net.ConnectObserverStub;
 import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeTestUtils;
-import org.limewire.net.ConnectObserverStub;
+import org.limewire.net.LimeWireNetModule;
+import org.limewire.net.ProxySettings;
+import org.limewire.net.ProxySettings.ProxyType;
+import org.limewire.net.ProxySettingsStub;
+import org.limewire.net.SocketBindingSettings;
+import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 import junit.framework.Test;
 
@@ -63,6 +65,10 @@ public class ProxyTest extends BaseTestCase {
             protected void configure() {
                 bind(ProxySettings.class).toInstance(proxySettings);
                 bind(SocketBindingSettings.class).to(EmptySocketBindingSettings.class);
+                SimpleTimer timer = new SimpleTimer(true);
+                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
+                bind(ExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
+                bind(Executor.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
             }
         });        
         
@@ -293,7 +299,7 @@ public class ProxyTest extends BaseTestCase {
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile.txt";
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientManager.getNewClient();
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
         HttpResponse response = client.execute(get);
@@ -312,7 +318,7 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile2.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
         HttpResponse response = client.execute(get);
@@ -331,7 +337,7 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile3.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
         HttpResponse response = client.execute(get);
@@ -350,7 +356,7 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile4.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
         HttpResponse response = client.execute(get);
@@ -373,7 +379,7 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile3.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
         HttpResponse response = client.execute(get);
@@ -396,7 +402,7 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile4.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
         HttpResponse response = client.execute(get);

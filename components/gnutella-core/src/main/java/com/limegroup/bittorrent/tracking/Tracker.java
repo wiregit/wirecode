@@ -2,19 +2,23 @@ package com.limegroup.bittorrent.tracking;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.URISyntaxException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.params.HttpConnectionParams;
+import org.limewire.http.LimeHttpClient;
+import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.net.HttpClientManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.bencoding.Token;
@@ -66,8 +70,9 @@ class Tracker {
 	private final TorrentContext context;
 	
 	private final ManagedTorrent torrent;
-	
-	private int failures;
+    private final Provider<LimeHttpClient> clientProvider;
+
+    private int failures;
     
     /** The key, as required by some trackers */
     private final String key;
@@ -77,12 +82,13 @@ class Tracker {
 	
 	Tracker(URI uri, TorrentContext context, ManagedTorrent torrent,
             NetworkManager networkManager,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices, Provider<LimeHttpClient> clientProvider) {
 	    this.networkManager = networkManager;
         this.applicationServices = applicationServices;
 		this.uri = uri;
 		this.context = context;
 		this.torrent = torrent;
+        this.clientProvider = clientProvider;
         String k = Integer.toHexString((int)(Math.random() * Integer.MAX_VALUE));
         while(k.length() < 8) // make sure length is 8 bytes
             k = k+"0";
@@ -187,36 +193,49 @@ class Tracker {
 	 *            the HTTP GET query string, sent to the tracker
 	 * @return InputStream
 	 */
-	private static TrackerResponse connectHTTP(URI uri, String query) {
-		HttpMethod get = new GetMethod(uri + query);
-		get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
-		get.addRequestHeader("Cache-Control", "no-cache");
-		get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
-				"close");
-		get.setFollowRedirects(true);
-		HttpClient client = HttpClientManager.getNewClient(
-				HTTP_TRACKER_TIMEOUT, HTTP_TRACKER_TIMEOUT);
-		try {
-			HttpClientManager.executeMethodRedirecting(client, get);
+	private TrackerResponse connectHTTP(URI uri, String query) {
+        HttpResponse response = null;
+        HttpGet get = null;
+        LimeHttpClient client = clientProvider.get();
+        try {
+            get = new HttpGet(uri + query);
+            get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
+            get.addHeader("Cache-Control", "no-cache");
+            get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                    "close");
+            
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), HTTP_TRACKER_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(client.getParams(), HTTP_TRACKER_TIMEOUT);
 
-			// response too long
-			if (get.getResponseContentLength() > 32768)
-				return null;
+            response = client.execute(get);
+            // response too long
+            if (response.getEntity() != null) {
+                if (response.getEntity().getContentLength() > 32768) {
+                    return null;
+                }
 
-			byte[] response = get.getResponseBody();
-			
-			if (response == null)
-				return null;
+                byte[] body = IOUtils.readFully(response.getEntity().getContent());
 
-			if (LOG.isDebugEnabled())
-				LOG.debug(new String(response));
-			return new TrackerResponse(Token.parse(response));
-		} catch (IOException e) {
-			return null;
-		} finally {
-			get.releaseConnection();
-		}
-	}
+                if (body.length == 0)
+                    return null;
+
+                if (LOG.isDebugEnabled())
+                    LOG.debug(new String(body));
+                return new TrackerResponse(Token.parse(body));
+            }
+            return null;
+        } catch (IOException e) {
+            return null;
+        } catch (HttpException e) {
+            return null;
+        } catch (URISyntaxException e) {
+            return null;
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            client.releaseConnection(get, response);
+        }
+    }
 
 	/**
 	 * helper method adding a field to the HTTP GET query string

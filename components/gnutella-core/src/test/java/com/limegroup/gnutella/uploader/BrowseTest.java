@@ -10,15 +10,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.limewire.net.HttpClientManager;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.HttpProtocolParams;
+import org.limewire.http.HttpClientManager;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;
@@ -26,12 +26,14 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.Test;
 
 /**
  * Test that a client uploads a list of files correctly.
@@ -44,13 +46,13 @@ public class BrowseTest extends LimeTestCase {
 
     private HttpClient client;
 
-    private HostConfiguration hostConfig;
-
     protected String protocol;
 
     private FileManager fileManager;
 
     private MessageFactory messageFactory;
+    
+    private String host;
     
     public BrowseTest(String name) {
         super(name);
@@ -99,19 +101,23 @@ public class BrowseTest extends LimeTestCase {
         fileManager.loadSettingsAndWait(100000);
 
         client = HttpClientManager.getNewClient();
-        hostConfig = new HostConfiguration();
-        hostConfig.setHost("localhost", PORT, protocol);
-        client.setHostConfiguration(hostConfig);
+        
+        /*client = new DefaultHttpClient();
+        Scheme https = client.getConnectionManager().getSchemeRegistry().getScheme("https");
+        Scheme tls = new Scheme("tls", https.getSocketFactory(), https.getDefaultPort());
+        client.getConnectionManager().getSchemeRegistry().register(tls);*/
+        host = protocol + "://localhost:" + PORT;
     }
 
     public void testBrowse() throws Exception {
-        GetMethod method = new GetMethod("/");
-        method.addRequestHeader("Accept", "application/x-gnutella-packets");
+        HttpGet method = new HttpGet(host + "/");
+        method.addHeader("Accept", "application/x-gnutella-packets");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
 
-            InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
+            InputStream in = new BufferedInputStream(response.getEntity().getContent());
             List<String> files = new ArrayList<String>();
             while (true) {
                 Message m;
@@ -135,7 +141,7 @@ public class BrowseTest extends LimeTestCase {
             }
 
             assertEquals(fileManager.getNumFiles(), files.size());
-            
+
             for (Iterator<Response> it = fileManager.getIndexingIterator(false); it.hasNext();) {
                 Response result = it.next();
                 boolean contained = files.remove(result.getName());
@@ -145,59 +151,62 @@ public class BrowseTest extends LimeTestCase {
             assertTrue("Browse returned more results than shared: " + files,
                     files.isEmpty());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
     }
 
     public void testBrowseHead() throws Exception {
-        HeadMethod method = new HeadMethod("/");
-        method.addRequestHeader("Accept", "application/x-gnutella-packets");
+        HttpHead method = new HttpHead(host + "/");
+        method.addHeader("Accept", "application/x-gnutella-packets");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_OK, response);
-            assertNull(method.getResponseBodyAsString());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            assertNull(response.getEntity());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
     }
 
     public void testBrowseNoAcceptHeader() throws Exception {
-        HttpMethodBase method = new GetMethod("/");
+        HttpUriRequest method = new HttpGet(host + "/");
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
-        
-        method = new HeadMethod("/");
+
+        method = new HttpHead(host + "/");
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
-            assertNull(method.getResponseBodyAsString());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
+            assertNull(response.getEntity());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
     }
 
     public void testBrowseNoAcceptHeaderHttp10() throws Exception {
-        HttpMethodBase method = new GetMethod("/");
-        method.setHttp11(false);
+        HttpUriRequest method = new HttpGet(host + "/");
+        HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
+        HttpResponse response = null;
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
-        
-        method = new HeadMethod("/");
-        method.setHttp11(false);
+
+        method = new HttpHead(host + "/");
+        HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
         try {
-            int response = client.executeMethod(method);
-            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response);
-            assertNull(method.getResponseBodyAsString());
+            response = client.execute(method);
+            assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
+            assertNull(response.getEntity());
         } finally {
-            method.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
     }
 

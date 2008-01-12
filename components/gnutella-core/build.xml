@@ -8,7 +8,7 @@
         <property name="initialized.core" 			  value="true"/>
         <property name="limewire.core.home"           location="${limewire.home}/core"/>
         <property name="limewire.core.src"  		  location="${limewire.core.home}"/>
-        <property name="build.limewire.core.classes"  location="${limewire.core.home}"/>
+        <property name="build.limewire.core.classes"  location="${limewire.core.home}/classes"/>
         <path id="build.limewire.core.classpath">
             <fileset dir="${limewire.lib.jars}" includes="**/*.jar" excludes="tests/**"/>
             <path refid="build.limewire.components.classes.core"/>
@@ -24,7 +24,8 @@
 	<target name="compile-core" 
 	        description="Compiles just the core."
 	        depends="initialize">
-	    <javac destdir      ="${build.limewire.core.classes}"
+        <mkdir dir="${build.limewire.core.classes}"/>
+        <javac destdir      ="${build.limewire.core.classes}"
 			   debug	    ="${compile.debug}"
 			   deprecation  ="${compile.deprecation}"
 	           optimize     ="${compile.optimize}"

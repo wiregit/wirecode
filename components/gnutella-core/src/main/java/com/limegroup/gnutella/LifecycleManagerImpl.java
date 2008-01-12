@@ -16,7 +16,6 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.net.ConnectionDispatcher;
-import org.limewire.net.HttpClientManager;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
@@ -309,7 +308,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
 	    LOG.trace("START RouterService");
 
-        HttpClientManager.initialize();
         if(SSLSettings.isIncomingTLSEnabled() || SSLSettings.isOutgoingTLSEnabled()) {
             LOG.trace("START SSL Test");
             activityCallback.get().componentLoading(I18nMarker.marktr("Loading TLS Encryption..."));

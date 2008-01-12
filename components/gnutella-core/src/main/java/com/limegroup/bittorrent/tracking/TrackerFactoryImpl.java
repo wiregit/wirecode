@@ -1,9 +1,13 @@
 package com.limegroup.bittorrent.tracking;
 
-import org.apache.commons.httpclient.URI;
+import java.net.URI;
+
+import org.limewire.http.LimeHttpClient;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.gnutella.ApplicationServices;
@@ -14,12 +18,15 @@ public class TrackerFactoryImpl implements TrackerFactory {
 
     private final NetworkManager networkManager;
     private final ApplicationServices applicationServices;
+    private final Provider<LimeHttpClient> httpClientProvider;
 
     @Inject
     public TrackerFactoryImpl(NetworkManager networkManager,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices,
+            Provider<LimeHttpClient> httpClientProvider) {
         this.networkManager = networkManager;
         this.applicationServices = applicationServices;
+        this.httpClientProvider = httpClientProvider;
     }
 
     /*
@@ -31,7 +38,7 @@ public class TrackerFactoryImpl implements TrackerFactory {
      */
     public Tracker create(URI uri, TorrentContext context,
             ManagedTorrent torrent) {
-        return new Tracker(uri, context, torrent, networkManager, applicationServices);
+        return new Tracker(uri, context, torrent, networkManager, applicationServices, httpClientProvider);
     }
 
 }

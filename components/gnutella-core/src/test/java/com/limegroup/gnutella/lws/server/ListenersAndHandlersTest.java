@@ -49,7 +49,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
                 handled[0] = true;
             }
         };
-        getLWSManager().registerListener(cmd1, lis1);
+        assertTrue(getLWSManager().registerListener(cmd1, lis1));
 
         String cmd2 = "Foo1";
         LWSManager.AbstractListener lis2 = new LWSManager.AbstractListener(cmd2) {
@@ -60,7 +60,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
                 handled[1] = true;
             }
         };
-        getLWSManager().registerListener(cmd2, lis2);
+        assertTrue(getLWSManager().registerListener(cmd2, lis2));
 
         String cmd3 = "Foo2";
         LWSManager.AbstractListener lis3 = new LWSManager.AbstractListener(cmd3) {
@@ -71,7 +71,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
                 handled[2] = true;
             }
         };
-        getLWSManager().registerListener(cmd3, lis3);
+        assertTrue(getLWSManager().registerListener(cmd3, lis3));
 
         final boolean[] handledHandler = { false, false, false };
 

@@ -113,8 +113,13 @@ public class Periodic {
 		}
 		return false;
 	}
+    
+    public synchronized boolean scheduleAtFixedRate(long delay, long period, TimeUnit timeUnit) {
+        future = scheduler.scheduleAtFixedRate(d, delay, period, timeUnit);
+        return true;
+    }
 	
-	/**
+    /**
 	 * Cancels any scheduled execution of the task.
 	 */
 	public synchronized void unschedule() {

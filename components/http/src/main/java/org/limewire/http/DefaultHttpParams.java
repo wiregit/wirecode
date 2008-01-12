@@ -1,9 +1,10 @@
 package org.limewire.http;
 
+import org.apache.http.client.params.AllClientPNames;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.params.ClientPNames;
 
 public class DefaultHttpParams extends BasicHttpParams {
     
@@ -30,6 +31,6 @@ public class DefaultHttpParams extends BasicHttpParams {
         HttpConnectionParams.setSoTimeout(this, TIMEOUT);
         //HttpConnectionParams.setStaleCheckingEnabled(this, false);
         HttpClientParams.setRedirecting(this, true);
-        setIntParameter(ClientPNames.MAX_REDIRECTS, MAXIMUM_REDIRECTS);    
+        setIntParameter(ClientPNames.MAX_REDIRECTS, MAXIMUM_REDIRECTS);
     }
 }

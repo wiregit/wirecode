@@ -4,16 +4,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URI;
 
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.URI;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
+
+import junit.framework.Test;
 
 public class WeedLicenseTest extends BaseTestCase {
     
@@ -58,7 +58,7 @@ public class WeedLicenseTest extends BaseTestCase {
         assertEquals("http://www.weedshare.com/license/verify_usage_rights.aspx?versionid=2&contentid=1",
                      l.getLicenseURI().toString());
         
-        License l2 = l.copy("text3", new URI("http://uri.com".toCharArray()));
+        License l2 = l.copy("text3", new URI("http://uri.com"));
         assertEquals(null, l2.getLicense());
         assertEquals("http://uri.com", l2.getLicenseURI().toString());
     }

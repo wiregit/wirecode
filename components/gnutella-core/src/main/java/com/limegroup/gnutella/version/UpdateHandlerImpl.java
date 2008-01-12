@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.version;
 
 
-
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,15 +11,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.limewire.http.DefaultHttpParams;
 import org.limewire.io.Connectable;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
@@ -42,12 +48,12 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -491,7 +497,11 @@ public class UpdateHandlerImpl implements UpdateHandler {
             
             backgroundExecutor.schedule(new Runnable() {
                 public void run() {
-                    launchHTTPUpdate(timeoutUpdateLocation);
+                    try {
+                        launchHTTPUpdate(timeoutUpdateLocation);
+                    } catch (URISyntaxException e) {
+                        LOG.warn(e.toString(), e);
+                    }
                 }
             }, when, TimeUnit.MILLISECONDS);
         }
@@ -505,7 +515,11 @@ public class UpdateHandlerImpl implements UpdateHandler {
             backgroundExecutor.schedule(new Runnable() {
                 public void run() {
                     String url = maxedUpdateList.get(RANDOM.nextInt(maxedUpdateList.size()));
-                    launchHTTPUpdate(url);
+                    try {
+                        launchHTTPUpdate(url);
+                    } catch (URISyntaxException e) {
+                        LOG.warn(e.toString(), e);
+                    }
                 }
             }, RANDOM.nextInt(maxMaxHttpRequestDelay) + minMaxHttpRequestDelay, TimeUnit.MILLISECONDS);
         } else {
@@ -516,16 +530,18 @@ public class UpdateHandlerImpl implements UpdateHandler {
     /**
      * Launches an http update to the failover url.
      */
-    private void launchHTTPUpdate(String url) {
+    private void launchHTTPUpdate(String url) throws URISyntaxException {
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpMethod get = new GetMethod(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID()));
-        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
-        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
-        get.setFollowRedirects(true);
+        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID()));
+        get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
+        get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();
-        httpExecutor.get().execute(get, new RequestHandler(), 10000);
+        HttpParams params = new DefaultHttpParams();
+        HttpConnectionParams.setConnectionTimeout(params, 10000);
+        HttpConnectionParams.setSoTimeout(params, 10000);
+        httpExecutor.get().execute(get, params, new RequestHandler());
     }
     
     /**
@@ -863,17 +879,21 @@ public class UpdateHandlerImpl implements UpdateHandler {
     }
 
     private class RequestHandler implements HttpClientListener {
-        public boolean requestComplete(HttpMethod method) {
+
+        public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
             LOG.debug("http request method succeeded");
             
             // remember we made an attempt even if it didn't succeed
             UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
             final byte[] inflated;
             try {
-                if (method.getStatusCode() < 200 || method.getStatusCode() >= 300)
-                    throw new IOException("bad code "+method.getStatusCode());
+                if (response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() >= 300)
+                    throw new IOException("bad code "+response.getStatusLine().getStatusCode());
     
-                byte [] resp = method.getResponseBody();
+                byte [] resp = null;
+                if(response.getEntity() != null) {
+                    resp = IOUtils.readFully(response.getEntity().getContent());
+                }
                 if (resp == null || resp.length == 0)
                     throw new IOException("bad body");
     
@@ -884,7 +904,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
                 LOG.warn("couldn't fetch data ",failed);
                 return false;
             } finally {
-                httpExecutor.get().releaseResources(method);
+                httpExecutor.get().releaseResources(response);
             }
             
             // Handle the data in the background thread.
@@ -900,12 +920,12 @@ public class UpdateHandlerImpl implements UpdateHandler {
             return false; // no more requests
         }
         
-        public boolean requestFailed(HttpMethod m, IOException exc) {
+        public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
             LOG.warn("http failover failed",exc);
             httpRequestControl.requestFinished();
             UpdateSettings.LAST_HTTP_FAILOVER.setValue(clock.now());
             
-            httpExecutor.get().releaseResources(m);
+            httpExecutor.get().releaseResources(response);
             // nothing we can do.
             return false;
         }

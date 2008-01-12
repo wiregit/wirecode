@@ -1,36 +1,45 @@
 package com.limegroup.gnutella;
 
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Locale;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.ByteReader;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.HttpException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.params.HttpProtocolParams;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.http.HttpClientManager;
+import org.limewire.http.SocketWrappingClient;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -53,7 +62,7 @@ public class BrowseHostHandler {
     private static final int EXCHANGING = 3;
     private static final int FINISHED = 4;
 
-    private static final int DIRECT_CONNECT_TIME = 10000; // 10 seconds.
+    static final int DIRECT_CONNECT_TIME = 10000; // 10 seconds.
 
     private static final long EXPIRE_TIME = 15000; // 15 seconds
 
@@ -77,25 +86,23 @@ public class BrowseHostHandler {
     private final ActivityCallback activityCallback;
     private final SocketsManager socketsManager;
     private final Provider<PushDownloadManager> pushDownloadManager;
-    private final Provider<ForMeReplyHandler> forMeReplyHandler;
+    private final Provider<ReplyHandler> forMeReplyHandler;
 
     private final MessageFactory messageFactory;
+    private final Provider<SocketWrappingClient> clientProvider;
 
     /**
-     * @param callback A instance of a ActivityCallback, so I can notify it of
-     *        incoming QReps...
-     * @param router A instance of a MessageRouter, so I can route messages if
-     *        needs be.
      * @param guid The GUID you have associated on the front end with the
      *        results of this Browse Host request.
      * @param serventID May be null, non-null if I need to push
+     * @param clientProvider
      */
     BrowseHostHandler(GUID guid, GUID serventID,
-            BrowseHostHandlerManager.BrowseHostCallback browseHostCallback,
-            ActivityCallback activityCallback, SocketsManager socketsManager,
-            Provider<PushDownloadManager> pushDownloadManager,
-            Provider<ForMeReplyHandler> forMeReplyHandler,
-            MessageFactory messageFactory) {
+                      BrowseHostHandlerManager.BrowseHostCallback browseHostCallback,
+                      ActivityCallback activityCallback, SocketsManager socketsManager,
+                      Provider<PushDownloadManager> pushDownloadManager,
+                      @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
+                      MessageFactory messageFactory, Provider<SocketWrappingClient> clientProvider) {
         _guid = guid;
         _serventID = serventID;
         this.browseHostCallback = browseHostCallback;
@@ -104,6 +111,7 @@ public class BrowseHostHandler {
         this.pushDownloadManager = pushDownloadManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
+        this.clientProvider = clientProvider;
     }
 
     /** 
@@ -163,16 +171,22 @@ public class BrowseHostHandler {
                 Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 DIRECT_CONNECT_TIME, type);
                 LOG.trace("Direct connect successful");
-                browseExchange(socket);
-                
+                browseHost(socket);
+
                 // browse was successful
                 return;
-            } catch (IOException ioe) {
-                LOG.debug("Error during direct transfer", ioe);
-                // try pushing for fun.... (if we have the guid of the servent)
+            } catch (IOException e) {
+                LOG.debug("Error during direct transfer", e);                
+            } catch (HttpException e) {
+                LOG.debug("Error during direct transfer", e);
+            } catch (URISyntaxException e) {
+                LOG.debug("Error during direct transfer", e);
+            } catch (InterruptedException e) {
+                LOG.debug("Error during direct transfer", e);
             }
         }
         
+        // try pushing for fun.... (if we have the guid of the servent)
         // fall back on push if possible
         browseFirewalledHost(host, proxies, canDoFWTransfer);        
     }
@@ -263,142 +277,95 @@ public class BrowseHostHandler {
         activityCallback.browseHostFailed(_guid);
     }
 
-    void browseExchange(Socket socket) throws IOException {
+    void browseHost(Socket socket) throws IOException, URISyntaxException, HttpException, InterruptedException {
     	try {
-    		browseExchangeInternal(socket);
-    	}finally {
+            setState(EXCHANGING);
+            HttpResponse response = makeHTTPRequest(socket);
+            validateResponse(response);
+            readQueryRepliesFromStream(response);
+        } finally {
             IOUtils.close(socket);
     		setState(FINISHED);
     	}
     }
-    private void browseExchangeInternal(Socket socket) throws IOException {
-    	
-    	//when/if we start reusing connections, remove this timeout
-    	socket.setSoTimeout(5000);
 
-        LOG.trace("BHH.browseExchange(): entered.");
-        setState(EXCHANGING);
+    private HttpResponse makeHTTPRequest(Socket socket) throws IOException, URISyntaxException, HttpException, InterruptedException {
+        SocketWrappingClient client = clientProvider.get();
+        client.setSocket(socket);
+        // TODO
+        // hardcoding to "http" should work;
+        // socket has already been established
+        HttpGet get = new HttpGet("http://" + NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort() + "/");
+        HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
         
-        // first write the request...
-        final String LF = "\r\n";
-        String str = null;
-        OutputStream oStream = socket.getOutputStream();
-        LOG.trace("BHH.browseExchange(): got output stream.");
-
-        // ask for the browse results..
-        str = "GET / HTTP/1.1" + LF;
-        oStream.write(str.getBytes());
-        str = "Host: " + NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort() + LF;
-        oStream.write(str.getBytes());
-        str = "User-Agent: " + LimeWireUtils.getVendor() + LF;
-        oStream.write(str.getBytes());
-        str = "Accept: " + Constants.QUERYREPLY_MIME_TYPE + LF;
-        oStream.write(str.getBytes());
-        str = "Content-Length: 0" + LF;
-        oStream.write(str.getBytes());
-        str = "Connection: close" + LF;
-        oStream.write(str.getBytes());
-        str = LF;
-        oStream.write(str.getBytes());
-        oStream.flush();
-        LOG.trace("BHH.browseExchange(): wrote request A-OK.");
+        get.addHeader("Host", NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort());
+        get.addHeader("User-Agent", LimeWireUtils.getVendor());
+        get.addHeader("Accept", Constants.QUERYREPLY_MIME_TYPE);
+        get.addHeader("Content-Length", "0");
+        get.addHeader("Connection", "close");
         
-        // get the results...
-        InputStream in = socket.getInputStream();
-        LOG.trace("BHH.browseExchange(): got input stream");
-
-        // first check the HTTP code, encoding, etc...
-        ByteReader br = new ByteReader(in);
-        LOG.trace("BHH.browseExchange(): trying to get HTTP code....");
-        int code = parseHTTPCode(br.readLine());
-        if ((code < 200) || (code >= 300)) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Bad code: " + code);
-            throw new IOException();
-        }
-        if(LOG.isDebugEnabled())
-            LOG.debug("BHH.browseExchange(): HTTP Response is " + code);
-
-        // now confirm the content-type, the encoding, etc...
-        boolean readingHTTP = true;
-        String currLine = null;
-        while (readingHTTP) {
-            currLine = br.readLine();
-            if(LOG.isDebugEnabled())
-                LOG.debug("BHH.browseExchange(): currLine = " + currLine);
-            if ((currLine == null) || currLine.equals("")) {
-                // start processing queries...
-                readingHTTP = false;
-            }
-            else if (indexOfIgnoreCase(currLine, "Content-Type") > -1) {
-                // make sure it is QRs....
-                if (indexOfIgnoreCase(currLine, 
-                                      Constants.QUERYREPLY_MIME_TYPE) < 0)
-                    throw new IOException();
-            }
-            else if (indexOfIgnoreCase(currLine, "Content-Encoding") > -1) {
-                throw new IOException();  //  decompress currently not supported
-            }
-            else if (markContentLength(currLine))
-                ; // do nothing special
-            
-        }
-        
-        LOG.debug("BHH.browseExchange(): read HTTP seemingly OK.");
-        
-        in = new BufferedInputStream(in);
-
-        // ok, everything checks out, proceed and read QRs...
-        Message m = null;
-        while(true) {
-        	try {
-        		m = null;
-        		LOG.debug("reading message");
-        		m = messageFactory.read(in, Network.TCP);
-        	} catch (BadPacketException bpe) {
-                LOG.debug("BPE while reading", bpe);
-        	} catch (IOException expected){
-        	    LOG.debug("IOE while reading", expected);
-            } // either timeout, or the remote closed.
-            
-        	if(m == null)  {
-                LOG.debug("Unable to read a message");
-        		return;
-            } else {
-        		if(m instanceof QueryReply) {
-        			_currentLength += m.getTotalLength();
-        			if(LOG.isTraceEnabled())
-        				LOG.trace("BHH.browseExchange(): read QR:" + m);
-        			QueryReply reply = (QueryReply)m;
-        			reply.setGUID(_guid);
-        			reply.setBrowseHostReply(true);
-					
-        			forMeReplyHandler.get().handleQueryReply(reply, null);
-        		}
-        	}
-        }
-        
-        
+        return client.execute(get);
     }
-    
-    /**
-     * Reads and marks the content-length for this line, if exists.
-     */
-    private boolean markContentLength(final String line) {
-        int idx = indexOfIgnoreCase(line, "Content-Length:");
-        if( idx < 0 )
-            return false;
-            
-        // get the string after the ':'
-        String length = line.substring("Content-Length:".length()).trim();
-        
-        try {
-            _replyLength = Long.parseLong(length);
-        } catch(NumberFormatException ignored) {
-            // ignore.
+
+    private void validateResponse(HttpResponse response) throws IOException {
+        if(response.getStatusLine().getStatusCode() < 200 || response.getStatusLine().getStatusCode() >= 300) {
+            throw new IOException("HTTP status code = " + response.getStatusLine().getStatusCode()); // TODO create Exception class containing http status code
         }
-        
-        return true;
+        Header contentType = response.getFirstHeader("Content-Type");
+        if(contentType != null && StringUtils.indexOfIgnoreCase(contentType.getValue(), Constants.QUERYREPLY_MIME_TYPE, Locale.ENGLISH) < 0) { // TODO concat all values
+            throw new IOException("Unsupported Content-Type: " + contentType.getValue());
+        }
+        Header contentEncoding = response.getFirstHeader("Content-Encoding");
+        if(contentEncoding != null) { // TODO - define acceptable encoding?
+            throw new IOException("Unsupported Content-Encoding: " + contentEncoding.getValue());
+        }
+        Header contentLength = response.getFirstHeader("Content-Length");
+        if(contentLength != null) {
+            try {
+                _replyLength = Long.parseLong(contentLength.getValue());
+            } catch (NumberFormatException nfe) {
+            }
+        }
+    }
+
+    private void readQueryRepliesFromStream(HttpResponse response) {
+        if(response.getEntity() != null) {
+            InputStream in;
+            try {
+                in = response.getEntity().getContent();
+            } catch (IOException e) {
+                LOG.debug("Unable to read a message", e);
+                return;
+            }
+            Message m = null;
+            while(true) {
+                try {
+                    m = null;
+                    LOG.debug("reading message");
+                    m = messageFactory.read(in, Network.TCP);
+                } catch (BadPacketException bpe) {
+                    LOG.debug("BPE while reading", bpe);
+                } catch (IOException expected){
+                    LOG.debug("IOE while reading", expected);
+                } // either timeout, or the remote closed.
+                
+                if(m == null)  {
+                    LOG.debug("Unable to read a message");
+                    return;
+                } else {
+                    if(m instanceof QueryReply) {
+                        _currentLength += m.getTotalLength();
+                        if(LOG.isTraceEnabled())
+                            LOG.trace("BHH.browseExchange(): read QR:" + m);
+                        QueryReply reply = (QueryReply)m;
+                        reply.setGUID(_guid);
+                        reply.setBrowseHostReply(true);
+                        
+                        forMeReplyHandler.get().handleQueryReply(reply, null);
+                    }
+                }
+            }
+        }
     }
 
 
@@ -422,61 +389,8 @@ public class BrowseHostHandler {
     private boolean isLocalBrowse(IpPort host) {
         return _serventID == null && NetworkUtils.isPrivateAddress(host.getAddress());
     }
-    
-	/**
-	 * a helper method to compare two strings 
-	 * ignoring their case.
-	 */ 
-	private int indexOfIgnoreCase(String str, String section) {
-		// convert both strings to lower case
-		String aaa = str.toLowerCase();
-		String bbb = section.toLowerCase();
-		// then look for the index...
-		return aaa.indexOf(bbb);
-	}
 
-    /**
-     * Returns the HTTP response code from the given string, throwing
-     * an exception if it couldn't be parsed.
-     *
-     * @param str an HTTP response string, e.g., "HTTP 200 OK \r\n"
-     * @exception IOException a problem occurred
-     */
-    private static int parseHTTPCode(String str) throws IOException {		
-        if (str == null)
-            throw new IOException("couldn't read anything");
-		StringTokenizer tokenizer = new StringTokenizer(str, " ");		
-		String token;
-
-		// just a safety
-		if (! tokenizer.hasMoreTokens() )
-			throw new IOException("no tokens to read: " + str);
-
-		token = tokenizer.nextToken();
-		
-		// the first token should contain HTTP
-		if (token.toUpperCase().indexOf("HTTP") < 0 )
-			throw new IOException("didn't contain HTTP, had: " + token);
-		
-		// the next token should be a number
-		// just a safety
-		if (! tokenizer.hasMoreTokens() )
-			throw new IOException("no number token: " + str);
-
-		token = tokenizer.nextToken();
-		
-		String num = token.trim();
-		try {
-		    if(LOG.isDebugEnabled())
-                LOG.debug("BHH.parseHTTPCode(): returning " + num);
-			return java.lang.Integer.parseInt(num);
-		} catch (NumberFormatException e) {
-			throw new IOException("not a number: " + num);
-		}
-
-    }
-
-    public static class PushRequestDetails { 
+	public static class PushRequestDetails {
         private BrowseHostHandler bhh;
         private long timeStamp;
         
