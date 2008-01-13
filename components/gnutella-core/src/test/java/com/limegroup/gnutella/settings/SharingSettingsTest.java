@@ -18,7 +18,7 @@ public class SharingSettingsTest extends LimeTestCase {
     }
     
     public static Test suite() {
-        return buildTestSuite(SharingSettings.class);
+        return buildTestSuite(SharingSettingsTest.class);
     }
 
     /**
