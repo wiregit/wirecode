@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.util.Base64;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSConnectionListener;
@@ -166,6 +167,16 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         //
         //
         cb.process(Responses.OK);
+        //
+        // TODO: Need to do authentication
+        //       This is gross gross gross and needs changing, but can stay for now
+        //
+        get.setDoAuthentication(true);
+        String username = LWSSettings.LWS_AUTHENTICATION_USERNAME.getValue();
+        String password = LWSSettings.LWS_AUTHENTICATION_PASSWORD.getValue();
+        String unecrypted = username + ":" + password;
+        String encrypted = new String(Base64.encode(unecrypted.getBytes()));
+        get.addRequestHeader("Authorization", "Basic " + encrypted);        
         exe.execute(get, new HttpClientListener() {
             
             public boolean requestComplete(HttpMethod method) {

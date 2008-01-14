@@ -3,7 +3,12 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -15,11 +20,14 @@ import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCal
 import com.limegroup.gnutella.lws.server.LWSUtil;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.Tagged;
 import com.limegroup.gnutella.util.URLDecoder;
 
 @Singleton
 public final class LWSIntegrationServicesImpl implements LWSIntegrationServices {
+    
+    private static final Log LOG = LogFactory.getLog(HTTPDownloader.class);
     
     private final LWSManager lwsManager;
     private final DownloadServices downloadServices;
@@ -110,9 +118,11 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 Tagged<String> urlString = LWSUtil.getArg(args, "url", "downloading");
                 if (!urlString.isValid()) return urlString.getValue();
                 //
-                // The file name
+                // The file name.  If this isn't given (mainly for testing), we'll let it
+                // go, but note that it was missing
                 //
-                Tagged<String> fileString = LWSUtil.getArg(args, "file", "downloading");               
+                Tagged<String> fileString = LWSUtil.getArg(args, "file", "downloading");
+                if (!fileString.isValid()) LOG.info("no file name given to downloader...");
                 //
                 // The id of the tag we want to associate with the URN we return
                 // 
@@ -130,23 +140,26 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 } 
                 //
                 // We don't want to pass in a full URL and download it, so have
-                // the remote setting LWSSettings.LWS_DOWNLOAD_HOSTNAME specifying
-                // the hostname of where we're getting the file from and construct
+                // the remote setting LWSSettings.LWS_DOWNLOAD_PREFIX specifying
+                // the entire prefix of where we're getting the file from and construct
                 // the full URL from that
                 //
-                String baseDir = "http://" + LWSSettings.LWS_DOWNLOAD_HOSTNAME.getValue();
-                int port = LWSSettings.LWS_DOWNLOAD_PORT.getValue();
-                if (port > 0) {
-                    baseDir += ":" + port;
-                }
+                String baseDir = "http://" + LWSSettings.LWS_DOWNLOAD_PREFIX.getValue();
                 String fileName = fileString.getValue();
                 if (fileName == null) {
                     fileName = fileNameFromURL(urlString.getValue());
                 }
-                String baseURL = baseDir + urlString.getValue();
+                String urlStr = baseDir + urlString.getValue();
                 try {
-                    String urlStr = URLDecoder.decode(baseURL);
+                    //
+                    // This will need NO url encoding, and will contain ?'s and &'s
+                    // which we want to keep.  So for testing, we can only pass in
+                    // URLs that don't contain spaces
+                    //
                     URL url = new URL(urlStr); 
+                    System.out.println("urlStr:" + urlStr);
+                    System.out.println("fileName:" + fileName);
+                    System.out.println("idOfTheProgressBarString:" + idOfTheProgressBarString.getValue());
                     RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, 
                             fileName, null, length); // this make the size looked up
                     //
@@ -157,9 +170,11 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     File saveDir = SharingSettings.getSaveLWSDirectory();  
                     Downloader d = downloadServices.downloadFromStore(rfd, true, saveDir, fileName);
                     long idOfTheDownloader = System.identityHashCode(d);
-                    return idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
+                    String result = idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
+                    System.out.println("result:"+result);
+                    return result;
                 } catch (IOException e) {
-                    // invalid url or other causes, fail silently
+                    ErrorService.error(e, "Invalid URL: " + urlStr);
                 }
 
                 return "invalid.download";
