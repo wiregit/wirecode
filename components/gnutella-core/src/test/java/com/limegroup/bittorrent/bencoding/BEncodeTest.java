@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 
 import org.limewire.util.BEncoder;
@@ -508,6 +510,22 @@ public class BEncodeTest extends LimeTestCase {
         parsedByte = (byte [])parsed.get(0);
         assertNotEquals(original, StringUtils.getASCIIString(parsedByte)); // the strings don't match with ascii
         assertEquals(original, new String(parsedByte,"UTF-8")); // but if we know the encoding they do
+    }
+    
+    public void testEncodeIterables() throws Exception {
+        Set<Long> s = new HashSet<Long>();
+        s.add(1L);
+        s.add(2L);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BEncoder.getEncoder(baos).encodeList(s);
+        chan.setBytes(baos.toByteArray());
+        Token t = Token.getNextToken(chan);
+        t.handleRead();
+        assertEquals(Token.LIST, t.getType());
+        List parsed = (List)t.getResult();
+        assertEquals(2, parsed.size());
+        System.out.println(parsed);
+        assertTrue(s.containsAll(parsed));
     }
     
     private static class StringByte  {
