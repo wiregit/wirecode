@@ -91,11 +91,9 @@ public class OOBHandler implements MessageHandler, Runnable {
                     MACCalculatorRepositoryManager); 
 			ack = new LimeACKVendorMessage(g, toRequest,t);
 			if (SearchSettings.CREATE_OOB_SESSIONS_EARLY.getValue()) {
-			    synchronized(OOBSessions) {
-			        int hash = Arrays.hashCode(t.getBytes());
-			        OOBSession session = new OOBSession(t, toRequest, new GUID(msg.getGUID()), true);
-			        OOBSessions.put(hash,session);
-			    }
+			    int hash = Arrays.hashCode(t.getBytes());
+			    OOBSession session = new OOBSession(t, toRequest, new GUID(msg.getGUID()), true);
+			    OOBSessions.put(hash,session);
 			}
         } else
             ack = new LimeACKVendorMessage(g, toRequest);
@@ -165,20 +163,20 @@ public class OOBHandler implements MessageHandler, Runnable {
          * Router will handle the reply if it
          * it has a route && we still expect results for this OOB session
          */
-        synchronized (OOBSessions) {
-            // if query is not of interest anymore return
-            GUID queryGUID = new GUID(reply.getGUID());
-            if (!router.isQueryAlive(queryGUID)) {
-                shouldAddBypassedSource = true;
-            }
-            else {
+        // if query is not of interest anymore return
+        GUID queryGUID = new GUID(reply.getGUID());
+        if (!router.isQueryAlive(queryGUID)) {
+            shouldAddBypassedSource = true;
+        }
+        else {
+            synchronized (OOBSessions) {
                 int hashKey = Arrays.hashCode(token.getBytes());
                 OOBSession session = OOBSessions.get(hashKey);
                 if (session == null) {
                     session = new OOBSession(token, requestedResponseCount, queryGUID, false);
                     OOBSessions.put(hashKey, session);
                 }
-                
+
                 int remainingCount = session.getRemainingResultsCount() - numResps; 
                 if (remainingCount >= 0) {
                     if(LOG.isTraceEnabled())
