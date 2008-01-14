@@ -35,8 +35,6 @@ import com.google.inject.name.Names;
 
 public class LimeWireHttpModule extends AbstractModule {
     
-    private static final long IDLE_TIME = 30 * 1000; // 30 seconds.
-    
     protected void configure() {
         requestStaticInjection(HttpClientManager.class);
         bind(ClientConnectionManager.class).annotatedWith(Names.named("nonBlockingConnectionManager")).toProvider(LimeClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
@@ -48,41 +46,47 @@ public class LimeWireHttpModule extends AbstractModule {
     
     private abstract static class AbstractLimeHttpClientProvider implements Provider<LimeHttpClient> {
         private ClientConnectionManager manager;
-        
-        public AbstractLimeHttpClientProvider(ClientConnectionManager manager) {
+        private final ScheduledExecutorService scheduler;
+
+        public AbstractLimeHttpClientProvider(ClientConnectionManager manager, ScheduledExecutorService scheduler) {
             this.manager = manager;
+            this.scheduler = scheduler;
         }
 
         public LimeHttpClient get() {
-            return new LimeHttpClientImpl(manager);
+            return new LimeHttpClientImpl(manager, scheduler);
         }
     }
     
     @Singleton
     private static class BlockingLimeHttpClientProvider extends AbstractLimeHttpClientProvider {
         @Inject
-        public BlockingLimeHttpClientProvider(@Named("blockingConnectionManager") ClientConnectionManager manager) {
-            super(manager);
+        public BlockingLimeHttpClientProvider(@Named("blockingConnectionManager") ClientConnectionManager manager,
+                                              @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
+            super(manager, scheduler.get());
         }        
     }
     
     @Singleton
     private static class NonBlockingLimeHttpClientProvider extends AbstractLimeHttpClientProvider {
         @Inject
-        public NonBlockingLimeHttpClientProvider(@Named("nonBlockingConnectionManager") ClientConnectionManager manager) {
-            super(manager);
+        public NonBlockingLimeHttpClientProvider(@Named("nonBlockingConnectionManager") ClientConnectionManager manager,
+                                                 @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
+            super(manager, scheduler.get());
         }        
     }
     
     @Singleton
     private static class SocketWrappingClientImpl implements Provider<SocketWrappingClient> {
-        
+        private final Provider<ScheduledExecutorService> scheduler;
+
         @Inject
-        public SocketWrappingClientImpl() {
+        public SocketWrappingClientImpl(@Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
+            this.scheduler = scheduler;
         }
 
         public SocketWrappingClient get() {
-            return new LimeHttpClientImpl();
+            return new LimeHttpClientImpl(scheduler.get());
         }
     }
     
@@ -94,10 +98,7 @@ public class LimeWireHttpModule extends AbstractModule {
 
         @Inject
         public DefaultClientConnectionManagerProvider(@Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
-            this.connectionCloser = new Periodic(new Runnable() {
-                public void run() {
-                    manager.closeIdleConnections(IDLE_TIME);
-                }}, scheduler.get());
+            this.connectionCloser = new Periodic(new IdleConnectionCloser(manager), scheduler.get());
         }
         
         protected ClientConnectionManager createObject() {
@@ -132,10 +133,7 @@ public class LimeWireHttpModule extends AbstractModule {
         @Inject
         public LimeClientConnectionManagerProvider(Provider<SocketsManager> socketsManager, @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
             this.socketsManager = socketsManager;
-            this.connectionCloser = new Periodic(new Runnable() {
-                public void run() {
-                    manager.closeIdleConnections(IDLE_TIME);
-                }}, scheduler.get());
+            this.connectionCloser = new Periodic(new IdleConnectionCloser(manager), scheduler.get());
         }
         
         protected ClientConnectionManager createObject() {

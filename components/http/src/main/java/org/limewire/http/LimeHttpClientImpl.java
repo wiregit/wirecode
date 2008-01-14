@@ -1,29 +1,24 @@
 package org.limewire.http;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.Scheme;
-import org.apache.http.conn.SchemeRegistry;
-import org.apache.http.conn.SocketFactory;
+import org.apache.http.conn.*;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.collection.Periodic;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.name.Named;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -34,6 +29,7 @@ public class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrapp
     
     private static HttpParams defaultParams = new DefaultHttpParams();
     private Socket socket;
+    private final ScheduledExecutorService scheduler;
 
     public void setSocket(Socket socket) {
         this.socket = socket;
@@ -43,12 +39,13 @@ public class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrapp
         close(response);
     }
     
-    public LimeHttpClientImpl() {
-        super(null, new BasicHttpParams(defaultParams));
+    public LimeHttpClientImpl(ScheduledExecutorService scheduler) {
+        this(null, scheduler);
     }
 
-    public LimeHttpClientImpl(ClientConnectionManager manager) {
+    public LimeHttpClientImpl(ClientConnectionManager manager, ScheduledExecutorService scheduler) {
         super(manager, new BasicHttpParams(defaultParams));
+        this.scheduler = scheduler;
     }
 
     protected ClientConnectionManager createClientConnectionManager() {
@@ -85,12 +82,14 @@ public class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrapp
         registry.register(new Scheme("https", new SocketWrapperProtocolSocketFactory(socket),80));
         
         HttpParams defaultParams = new BasicHttpParams();
-        // TODO idle connection time
-        //((MultiThreadedHttpConnectionManager)MANAGER).setIdleConnectionTime(IDLE_TIME);
         
         // TODO does this need to be ThreadSafe?
-        // TODO close idle connections
-        return new ThreadSafeClientConnManager(defaultParams, registry);               
+        // TODO does this need to be shutdown ever?
+        ClientConnectionManager manager =  new ThreadSafeClientConnManager(defaultParams, registry);
+        // TODO does this need to be canceled ever?
+        Periodic periodic = new Periodic(new IdleConnectionCloser(manager), scheduler);
+        periodic.scheduleAtFixedRate(0, 10, TimeUnit.SECONDS);
+        return manager;
     }
 
     private static class SocketWrapperProtocolSocketFactory implements SocketFactory {
