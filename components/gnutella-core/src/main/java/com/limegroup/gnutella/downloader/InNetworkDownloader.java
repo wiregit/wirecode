@@ -56,14 +56,16 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     /**
      * Overriden to use a different incomplete directory.
      */
+    @Override
     protected File getIncompleteFile(IncompleteFileManager ifm, String name,
-                                     URN urn, int length) throws IOException {
+                                     URN urn, long length) throws IOException {
         return ifm.getFile(name, urn, length, new File(SharingUtils.PREFERENCE_SHARE, "Incomplete"));
     }
     
     /**
      * Gets a new SourceRanker, using only LegacyRanker (not PingRanker).
      */
+    @Override
     protected SourceRanker getSourceRanker(SourceRanker oldRanker) {
         if(oldRanker != null)
             return oldRanker;
@@ -75,6 +77,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      * Overriden to ensure that the 'downloadSHA1' variable is set & we're listening
      * for alternate locations.
      */
+    @Override
     public void initialize(DownloadReferences downloadReferences) {
         super.initialize(downloadReferences);
         if (downloadSHA1 == null) {
@@ -84,11 +87,13 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
         }
     }
     
+    @Override
     public synchronized void startDownload() {
         downloadAttempts++;
         super.startDownload();
     }
     
+    @Override
     protected boolean shouldValidate(boolean deserialized) {
         return false;
     }
@@ -96,6 +101,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     /**
      * Ensures that the VerifyingFile knows what TTRoot we're expecting.
      */
+    @Override
     protected void initializeVerifyingFile() throws IOException {
         super.initializeVerifyingFile();
         if(commonOutFile != null) {
@@ -107,6 +113,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      * Overrides ManagedDownloader to display a reasonable file size even
      * when no locations have been found.
      */
+    @Override
     public synchronized long getContentLength() {
         return size;
     }
@@ -114,6 +121,7 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     /**
      * Sends a targetted query for this.
      */
+    @Override
     protected synchronized QueryRequest newRequery(int numRequeries) 
     throws CantResumeException {
         QueryRequest qr = super.newRequery(numRequeries);
