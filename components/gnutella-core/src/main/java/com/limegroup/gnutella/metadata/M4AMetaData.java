@@ -14,6 +14,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.ByteOrder;
 
 
+
 /**
  * Limited metadata parsing of m4a files.  This is based on code published
  * by Chris Adamson and released under GPL.  Information about the format was
@@ -120,80 +121,80 @@ public class M4AMetaData extends AudioMetaData {
 	 * @see com.limegroup.gnutella.mp3.MetaData#parseFile(java.io.File)
 	 */
 	protected void parseFile(File f) throws IOException {
-		FileInputStream fin = null;
-		try{
-			
-			_maxLength=(int)f.length();
-			fin = new FileInputStream(f);
-		
-			positionMetaDataStream(fin);
-		
-			Map<Integer, byte[]> metaData = populateMetaDataMap(fin);
-		
-			//the title, artist album and comment tags are in string format.
-			//so we just set them
-			byte []current = metaData.get(new Integer(NAME_ATOM));
-			setTitle(current == null ? "" : new String(current, "UTF-8"));
-		
-			current = metaData.get(new Integer(ARTIST_ATOM));
-			setArtist(current == null ? "" : new String(current, "UTF-8"));
-		
-			current = metaData.get(new Integer(ALBUM_ATOM));
-			setAlbum(current == null ? "" : new String(current,"UTF-8"));
-		
-			current = metaData.get(new Integer(COMMENT_ATOM));
-			setComment(current == null ? "" : new String(current,"UTF-8"));
-		
-		
-			//	the genre is byte encoded the same way as with id3 tags
-			//	except that the table is shifted one position
-			current = metaData.get(new Integer(GENRE_ATOM));
-			if (current!=null) {
-				if (current[3] == 1) {
-					//we have a custom genre.
-					String genre = new String(current,8,current.length-8,"UTF-8");
-					setGenre(genre);
-				} else {
-					short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
-					setGenre(MP3MetaData.getGenreString(genreShort));
-				}
-			}
-		
-		
-			//the date is plaintext.  Store only the year
-			current = metaData.get(new Integer(DATE_ATOM));
-			if (current==null)
-				setYear("");
-			else {
-				String year = new String(current,8,current.length-8);
-				if (year.length()>4)
-					year = year.substring(0,4);
-				setYear(year);
-			}
-		
-			//get the track # & total # of tracks on album
-			current = metaData.get(new Integer(TRACK_ATOM));
-			if (current != null) {
-				short trackShort = ByteOrder.beb2short(current,current.length-6);
-				setTrack(trackShort);
-				short trackTotal = ByteOrder.beb2short(current,current.length-4);
-				setTotalTracks(trackTotal);
-			}
-		
-			//get the disk # & total # of disks on album
-			current = metaData.get(new Integer(DISK_ATOM));
-			if (current != null) {
-				short diskShort = ByteOrder.beb2short(current,current.length-4);
-				setDisk(diskShort);
-				short diskTotal = ByteOrder.beb2short(current,current.length-2);
-				setTotalDisks(diskTotal);
-			}
-		
-		//TODO: add more fields as we discover their meaning.
-			
-		} finally {
-            IOUtils.close(fin);
-		}
+//		FileInputStream fin = null;
+//		try{
+//			
+//			_maxLength=(int)f.length();
+//			fin = new FileInputStream(f);
+//		
+//			positionMetaDataStream(fin);
+//		
+//			Map<Integer, byte[]> metaData = populateMetaDataMap(fin);
+//		
+//			//the title, artist album and comment tags are in string format.
+//			//so we just set them
+//			byte []current = metaData.get(new Integer(NAME_ATOM));
+//			setTitle(current == null ? "" : new String(current, "UTF-8"));
+//		
+//			current = metaData.get(new Integer(ARTIST_ATOM));
+//			setArtist(current == null ? "" : new String(current, "UTF-8"));
+//		
+//			current = metaData.get(new Integer(ALBUM_ATOM));
+//			setAlbum(current == null ? "" : new String(current,"UTF-8"));
+//		
+//			current = metaData.get(new Integer(COMMENT_ATOM));
+//			setComment(current == null ? "" : new String(current,"UTF-8"));
+//		
+//		
+//			//	the genre is byte encoded the same way as with id3 tags
+//			//	except that the table is shifted one position
+//			current = metaData.get(new Integer(GENRE_ATOM));
+//			if (current!=null) {
+//				if (current[3] == 1) {
+//					//we have a custom genre.
+//					String genre = new String(current,8,current.length-8,"UTF-8");
+//					setGenre(genre);
+//				} else {
+//					short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
+//					setGenre(MP3MetaData.getGenreString(genreShort));
+//				}
+//			}
+//		
+//		
+//			//the date is plaintext.  Store only the year
+//			current = metaData.get(new Integer(DATE_ATOM));
+//			if (current==null)
+//				setYear("");
+//			else {
+//				String year = new String(current,8,current.length-8);
+//				if (year.length()>4)
+//					year = year.substring(0,4);
+//				setYear(year);
+//			}
+//		
+//			//get the track # & total # of tracks on album
+//			current = metaData.get(new Integer(TRACK_ATOM));
+//			if (current != null) {
+//				short trackShort = ByteOrder.beb2short(current,current.length-6);
+//				setTrack(trackShort);
+//				short trackTotal = ByteOrder.beb2short(current,current.length-4);
+//				setTotalTracks(trackTotal);
+//			}
+//		
+//			//get the disk # & total # of disks on album
+//			current = metaData.get(new Integer(DISK_ATOM));
+//			if (current != null) {
+//				short diskShort = ByteOrder.beb2short(current,current.length-4);
+//				setDisk(diskShort);
+//				short diskTotal = ByteOrder.beb2short(current,current.length-2);
+//				setTotalDisks(diskTotal);
+//			}
+//		
+//		//TODO: add more fields as we discover their meaning.
+//			
+//		} finally {
+//            IOUtils.close(fin);
+//		}
 		
 	}
 	

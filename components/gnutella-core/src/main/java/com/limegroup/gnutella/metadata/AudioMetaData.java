@@ -38,6 +38,9 @@ public abstract class AudioMetaData extends MetaData {
     private String license;
     private String price;
     private String licensetype;
+    private String channels;
+    private int sampleRate = -1;
+    private boolean isVBR = false;
     
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
@@ -54,18 +57,15 @@ public abstract class AudioMetaData extends MetaData {
     	if (LimeXMLUtils.isMP3File(f))
     		return new MP3MetaData(f);
     	if (LimeXMLUtils.isOGGFile(f))
-			return new OGGMetaData(f);
+    	    return new AudioMetaDataReader(f);
 		if (LimeXMLUtils.isFLACFile(f))
-    		return new FLACMetaData(f);
+    		return new AudioMetaDataReader(f);
     	if (LimeXMLUtils.isM4AFile(f))
-    		return new M4AMetaData(f);
+    	    return new M4AMetaData(f);
         if (LimeXMLUtils.isWMAFile(f))
             return new WMAMetaData(f);
     	
-    	//TODO: add future supported audio types here
-    	
     	return null;
-    	
     }
     
     public String getSchemaURI() {
@@ -95,6 +95,9 @@ public abstract class AudioMetaData extends MetaData {
     public int getLength() { return length; }
     public String getLicense() { return license; }
     public String getLicenseType() { return licensetype; }
+    public String getNumChannels(){ return channels; }
+    public int getSampleRate(){ return sampleRate; }
+    public boolean isVBR(){ return isVBR; }
     
     void setPrice(String price)  { this.price = price; }
     void setTitle(String title) { this.title = title; }
@@ -111,22 +114,25 @@ public abstract class AudioMetaData extends MetaData {
     void setLength(int length) { this.length = length; }    
     void setLicense(String license) { this.license = license; }
     void setLicenseType(String licensetype) { this.licensetype = licensetype; }
+    void setNumChannels(String channels) { this.channels = channels; }
+    void setSampleRate(int sampleRate) { this.sampleRate = sampleRate; }
+    void setVBR(boolean isVBR) { this.isVBR = isVBR; }
     
-    /**
-     * Determines if all fields are valid.
-     */
-    public boolean isComplete() {
-        return isValid(title)
-            && isValid(artist)
-            && isValid(album)
-            && isValid(year)
-            && isValid(comment)
-            && isValid(track)
-            && isValid(genre)
-            && isValid(bitrate)
-            && isValid(length)
-            && isValid(license)
-            && isValid(licensetype);
+//    /**
+//     * Determines if all fields are valid.
+//     */
+    public boolean isComplete() { return false;
+//        return isValid(title)
+//            && isValid(artist)
+//            && isValid(album)
+//            && isValid(year)
+//            && isValid(comment)
+//            && isValid(track)
+//            && isValid(genre)
+//            && isValid(bitrate)
+//            && isValid(length)
+//            && isValid(license)
+//            && isValid(licensetype);
     }
 
     /**
@@ -175,22 +181,22 @@ public abstract class AudioMetaData extends MetaData {
         appendTo.append("\"");
     }
 
-	/**
-	 * Walks back through the byte array to trim off null characters and
-	 * spaces.  A helper for read(...) above.
-	 * @return the number of bytes with nulls and spaces trimmed.
-	 */
-	protected int getTrimmedLength(byte[] bytes, int includedLength) {
-	    int i;
-	    for(i = includedLength - 1;
-	        (i >= 0) && ((bytes[i] == 0) || (bytes[i] == 32));
-	        i--);
-	    //replace the nulls with spaces in the array upto i
-	    for(int j=0; j<=i; j++) 
-	        if(bytes[j]==0)
-	            bytes[j]=(byte)32;
-	    return i + 1;
-	}
+//	/**
+//	 * Walks back through the byte array to trim off null characters and
+//	 * spaces.  A helper for read(...) above.
+//	 * @return the number of bytes with nulls and spaces trimmed.
+//	 */
+//	protected int getTrimmedLength(byte[] bytes, int includedLength) {
+//	    int i;
+//	    for(i = includedLength - 1;
+//	        (i >= 0) && ((bytes[i] == 0) || (bytes[i] == 32));
+//	        i--);
+//	    //replace the nulls with spaces in the array upto i
+//	    for(int j=0; j<=i; j++) 
+//	        if(bytes[j]==0)
+//	            bytes[j]=(byte)32;
+//	    return i + 1;
+//	}
 	
     /**
      * Determines whether a LimeXMLDocument was corrupted by

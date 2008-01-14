@@ -44,7 +44,6 @@
 	<classpathentry kind="lib" path="lib/jars/daap.jar"/>
 	<classpathentry kind="lib" path="lib/jars/foxtrot.jar"/>
 	<classpathentry kind="lib" path="lib/jars/icu4j.jar"/>
-	<classpathentry kind="lib" path="lib/jars/id3v2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
@@ -91,5 +90,6 @@
 	<classpathentry kind="lib" path="lib/jars/tests/pmd.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/saxpath-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/xerces.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/meverett/src/jaudiotaggerv1.0.8/jAudioTagger.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
