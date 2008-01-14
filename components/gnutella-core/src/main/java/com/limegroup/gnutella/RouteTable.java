@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -551,9 +552,9 @@ public final class RouteTable  {
             List<Double> timeTo100Results = new ArrayList<Double>();
             List<Double> allResultTimes = new ArrayList<Double>();
             List<Double> allResultCounts = new ArrayList<Double>();
-            List<Integer> networks = Arrays.asList(new Integer[]{0,0,0,0});
-            List<Integer> hops = Arrays.asList(new Integer[]{0,0,0,0,0});
-            List<Integer> ttlsHist = Arrays.asList(new Integer[]{0,0,0,0,0});
+            List<Integer> networks = Arrays.asList(0,0,0,0);
+            List<Integer> hops = Arrays.asList(0,0,0,0,0);
+            List<Integer> ttlsHist = Arrays.asList(0,0,0,0,0);
             Iterable<RouteTableEntry> bothMaps = 
                 new MultiIterable<RouteTableEntry>(_newMap.values(),_oldMap.values());
             for(RouteTableEntry rte : bothMaps) {
@@ -649,12 +650,18 @@ public final class RouteTable  {
                 m.put("cc", e.classCnetworks.getMap());
                 m.put("rt", e.resultTimeStamps);
                 m.put("rc", e.resultCounts);
-                m.put("nets", Arrays.asList(e.networks));
-                m.put("hops", Arrays.asList(e.hops));
-                m.put("ttls", Arrays.asList(e.ttls));
+                m.put("nets", getBytes(e.networks));
+                m.put("hops", getBytes(e.hops));
+                m.put("ttls", getBytes(e.ttls));
                 ret.put(Base32.encode(entry.getKey()), m);
             }
             return ret;
+        }
+        
+        private byte [] getBytes(int []ints) {
+            ByteBuffer b = ByteBuffer.allocate(ints.length * 4);
+            b.asIntBuffer().put(ints);
+            return b.array();
         }
     };
 }
