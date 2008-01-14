@@ -260,6 +260,14 @@ public final class SearchSettings extends LimeProps {
                 0f, "SearchSettings.DisableOOBV2",0f,1f);
 
     /**
+     * Whether to create OOBSession objects ea[ge]rly for stats purposes.
+     */
+    public static final BooleanSetting CREATE_OOB_SESSIONS_EARLY =
+        FACTORY.createRemoteBooleanSetting("CREATE_OOB_SESSIONS_EARLY", false, 
+                "SearchSettings.createOOBSessionsEarly");
+    
+        
+    /**
      * The TTL for probe queries.
      */
     public static final ByteSetting PROBE_TTL =

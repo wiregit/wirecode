@@ -87,9 +87,16 @@ public class OOBHandler implements MessageHandler, Runnable {
 				
 		LimeACKVendorMessage ack;
         if (msg.isOOBv3()) {
-			ack = new LimeACKVendorMessage(g, toRequest, 
-                    new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest), 
-                            MACCalculatorRepositoryManager));
+            SecurityToken t = new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest), 
+                    MACCalculatorRepositoryManager); 
+			ack = new LimeACKVendorMessage(g, toRequest,t);
+			if (SearchSettings.CREATE_OOB_SESSIONS_EARLY.getValue()) {
+			    synchronized(OOBSessions) {
+			        int hash = Arrays.hashCode(t.getBytes());
+			        OOBSession session = new OOBSession(t, toRequest, new GUID(msg.getGUID()), true);
+			        OOBSessions.put(hash,session);
+			    }
+			}
         } else
             ack = new LimeACKVendorMessage(g, toRequest);
         
@@ -168,7 +175,7 @@ public class OOBHandler implements MessageHandler, Runnable {
                 int hashKey = Arrays.hashCode(token.getBytes());
                 OOBSession session = OOBSessions.get(hashKey);
                 if (session == null) {
-                    session = new OOBSession(token, requestedResponseCount, queryGUID);
+                    session = new OOBSession(token, requestedResponseCount, queryGUID, false);
                     OOBSessions.put(hashKey, session);
                 }
                 
