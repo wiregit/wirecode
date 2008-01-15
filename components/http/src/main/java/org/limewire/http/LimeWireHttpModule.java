@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -21,11 +23,12 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.collection.Periodic;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
+import org.limewire.concurrent.SimpleTimer;
+import org.limewire.inject.AbstractModule;
 import org.limewire.net.SocketBindingSettingsImpl;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NBSocket;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Scopes;
@@ -33,9 +36,13 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
+/**
+ * <code>Guice</code> module to provide bindings for <code>http</code> component classes.
+ */
 public class LimeWireHttpModule extends AbstractModule {
     
     protected void configure() {
+        //bindAll(Names.named("httpExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
         requestStaticInjection(HttpClientManager.class);
         bind(ClientConnectionManager.class).annotatedWith(Names.named("nonBlockingConnectionManager")).toProvider(LimeClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
         bind(ClientConnectionManager.class).annotatedWith(Names.named("blockingConnectionManager")).toProvider(DefaultClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
@@ -190,6 +197,13 @@ public class LimeWireHttpModule extends AbstractModule {
 
         public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
             return socket;
+        }
+    }
+    
+    @Singleton
+    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
+        protected ScheduledExecutorService createObject() {
+            return new SimpleTimer(true);
         }
     }
 }

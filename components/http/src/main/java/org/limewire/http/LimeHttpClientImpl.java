@@ -21,9 +21,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 
+ * An <code>HttpClient</code> extension that supports utility methods defined
+ * in <code>LimeHttpClient</code> and Socket "injection" as defined in
+ * <code>SocketWrappingClient</code> 
  */
-public class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingClient {
+class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingClient {
     
     private static final Log LOG = LogFactory.getLog(LimeHttpClientImpl.class);
     

@@ -26,6 +26,8 @@ import org.limewire.util.CommonUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ApplicationServices;
@@ -127,6 +129,9 @@ public class UpdateHandlerTest extends LimeTestCase {
         saveFile = new File(CommonUtils.getUserSettingsDir(), "version.xml");
         saveFile.delete();
         assertFalse(saveFile.exists());
+        
+        injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("httpExecutor")));
+        int i = 0;
     }
 
     /** tests that we set up bindings correctly */
@@ -187,11 +192,10 @@ public class UpdateHandlerTest extends LimeTestCase {
         clock.setNow(12345);
         h.handleNewData(new byte[0], null);
         
-        // TODO these assertions are invalid b/c other things use the backgroundExecutor
-//        assertGreaterThanOrEquals(1000 * 60, backgroundExecutor.getInitialDelay());
-//        assertLessThanOrEquals(1000 * 60 * 31, backgroundExecutor.getInitialDelay());
-//        assertEquals(-1, backgroundExecutor.getPeriod());
-//        assertNotNull(backgroundExecutor.scheduled);
+        assertGreaterThanOrEquals(1000 * 60, backgroundExecutor.getInitialDelay());
+        assertLessThanOrEquals(1000 * 60 * 31, backgroundExecutor.getInitialDelay());
+        assertEquals(-1, backgroundExecutor.getPeriod());
+        assertNotNull(backgroundExecutor.scheduled);
 
         mockery.checking(new Expectations() {
             {

@@ -95,7 +95,7 @@ public class BrowseHostHandler {
      * @param guid The GUID you have associated on the front end with the
      *        results of this Browse Host request.
      * @param serventID May be null, non-null if I need to push
-     * @param clientProvider
+     * @param clientProvider used to make an HTTP client request over an *incoming* Socket
      */
     BrowseHostHandler(GUID guid, GUID serventID,
                       BrowseHostHandlerManager.BrowseHostCallback browseHostCallback,

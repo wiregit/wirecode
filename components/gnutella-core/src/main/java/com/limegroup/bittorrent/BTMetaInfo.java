@@ -69,7 +69,8 @@ public class BTMetaInfo implements Serializable {
 	 * because at a later date we may want to be able to add trackers to a
 	 * torrent
 	 */
-	private URI[] _trackers;
+    // TODO update serialization code
+    private URI[] _trackers;
 
 	/**
 	 * FileDesc for the GUI

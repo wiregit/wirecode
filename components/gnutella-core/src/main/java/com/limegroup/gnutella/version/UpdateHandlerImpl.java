@@ -500,6 +500,8 @@ public class UpdateHandlerImpl implements UpdateHandler {
                     try {
                         launchHTTPUpdate(timeoutUpdateLocation);
                     } catch (URISyntaxException e) {
+                        httpRequestControl.requestFinished();
+                        httpRequestControl.cancelRequest();
                         LOG.warn(e.toString(), e);
                     }
                 }
@@ -518,6 +520,8 @@ public class UpdateHandlerImpl implements UpdateHandler {
                     try {
                         launchHTTPUpdate(url);
                     } catch (URISyntaxException e) {
+                        httpRequestControl.requestFinished();
+                        httpRequestControl.cancelRequest();
                         LOG.warn(e.toString(), e);
                     }
                 }
