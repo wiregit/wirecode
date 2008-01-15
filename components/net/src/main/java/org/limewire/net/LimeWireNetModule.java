@@ -22,7 +22,7 @@ public class LimeWireNetModule extends AbstractModule {
      *  You MUST also provide a module that binds the settings!
      */
     public LimeWireNetModule() {
-        this(null, null);
+        this(EmptyProxySettings.class, EmptySocketBindingSettings.class);
     }
     
     /** Constructs the module with the given settings for using proxies. */

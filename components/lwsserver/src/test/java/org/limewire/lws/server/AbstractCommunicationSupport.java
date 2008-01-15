@@ -3,14 +3,25 @@ package org.limewire.lws.server;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.common.LimeWireCommonModule;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.http.LimeWireHttpModule;
+import org.limewire.inject.AbstractModule;
+import org.limewire.net.EmptySocketBindingSettings;
+import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
@@ -169,9 +180,20 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         remoteThread    = remoteServer.start();
         code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer, remoteServer);
 
-        Injector injector = Guice.createInjector(new LimeWireHttpModule());        
+        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(), new LimeWireHttpModule(), new AbstractModule() {
+            protected void configure() {
+                bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
+            }
+        });        
 
         afterSetup();
+    }
+    
+    @Singleton
+    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
+        protected ScheduledExecutorService createObject() {
+            return new SimpleTimer(true);
+        }
     }
 
     @Override
