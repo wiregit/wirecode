@@ -395,7 +395,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP FileManager");
 
         LOG.trace("START TorrentManager");
-        activityCallback.get().componentLoading(I18nMarker.marktr("Loading bittorrent Management..."));
+        activityCallback.get().componentLoading(I18nMarker.marktr("Loading BitTorrent Management..."));
 		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get(), incomingConnectionHandler.get());
 		LOG.trace("STOP TorrentManager");
         
