@@ -14,6 +14,7 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.io.NetworkUtils;
 import org.limewire.io.Pools;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -1006,6 +1007,13 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         if (checkOOB && queryReply.isUDP() && !queryReply.isReplyToMulticastQuery())
             return;
 
+        // if the remote side reported an ip and this reply is from us, make sure
+        // its source ip matches.
+        if (myIp != null && 
+                queryReply.isLocal() &&
+                !NetworkUtils.isPrivateAddress(queryReply.getIPBytes()) &&
+                !queryReply.hasSecureData()) // don't mess with signed results
+            queryReply = queryReplyFactory.createWithNewAddress(myIp, queryReply);
         send(queryReply);
     }
 

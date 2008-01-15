@@ -220,4 +220,9 @@ public interface QueryReply extends Message, SecureMessage {
     public void recordDrop();
 
     public byte[] getPayload();
+    
+    /**
+     * @return if this reply is created locally. false means from network.
+     */
+    public boolean isLocal();
 }

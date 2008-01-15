@@ -105,6 +105,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     private final HostDataFactory hostDataFactory;
     private final ResponseFactory responseFactory;
     
+    private final boolean local;
+    
     
     QueryReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
             Network network, HostDataFactory hostDataFactory,
@@ -130,6 +132,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 		    throw new BadPacketException("invalid address");
 		}
 		
+		this.local = false;
         //repOk();
     }
 
@@ -145,7 +148,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 
         this.hostDataFactory = hostDataFactory;
         this.responseFactory = responseFactory;
-
+        this.local = true;
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException("xml too large: " + new String(xmlBytes));
 
@@ -1202,5 +1205,9 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     @Override
     public Class<? extends Message> getHandlerClass() {
         return QueryReply.class;
+    }
+ 
+    public boolean isLocal() {
+        return local;
     }
 }

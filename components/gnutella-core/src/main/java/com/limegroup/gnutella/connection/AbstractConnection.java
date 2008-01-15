@@ -137,6 +137,9 @@ public abstract class AbstractConnection implements Connection {
 
     private final SimpleProtocolBandwidthTracker simpleProtocolBandwidthTracker;
 
+    /** The IP of this connection if reported by the remote side */
+    protected volatile byte []myIp;
+    
     /**
      * Cache the 'connection closed' exception, so we have to allocate one for
      * every closed connection.
@@ -586,6 +589,8 @@ public abstract class AbstractConnection implements Connection {
         if (!NetworkUtils.isValidAddress(ia) || NetworkUtils.isPrivateAddress(ia))
             return;
 
+        myIp = ia.getAddress();
+        
         // If we're forcing, change that if necessary.
         if (ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
             StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
