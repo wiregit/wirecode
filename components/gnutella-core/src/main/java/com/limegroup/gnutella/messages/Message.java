@@ -131,7 +131,7 @@ public interface Message extends Comparable<Message> {
     
     /**
      * counts messages by type and network they came on. 
-     * also counts size in bytes.
+     * also counts size in bytes, hops, ttls.
      */
     public static class MessageCounter implements Inspectable {
         
@@ -179,6 +179,8 @@ public interface Message extends Comparable<Message> {
             private long num, size;
             private Buffer<Long> timestamps;
             private Buffer<Integer> sizes;
+            private Buffer<Byte> hops;
+            private Buffer<Byte> ttls;
 
             /**
              * @param clazz the message class this is counting
@@ -190,6 +192,8 @@ public interface Message extends Comparable<Message> {
                 this.net = net;
                 timestamps = new Buffer<Long>(history); // each entry 6 bytes on network
                 sizes = new Buffer<Integer>(history); // each entry 2 bytes on network
+                hops = new Buffer<Byte>(history);
+                ttls = new Buffer<Byte>(history);
             }
 
             void countMessage(Message m) {
@@ -197,6 +201,8 @@ public interface Message extends Comparable<Message> {
                 size += m.getLength();
                 timestamps.add(System.currentTimeMillis());
                 sizes.add(m.getLength());
+                hops.add(m.getHops());
+                ttls.add(m.getTTL());
             }
 
             Map<String,Object> inspect() {
@@ -207,6 +213,8 @@ public interface Message extends Comparable<Message> {
                 ret.put("size",size);
                 byte [] timesByte = new byte[timestamps.getSize() * 6]; // 6 bytes per timestamp
                 byte [] sizesByte = new byte[sizes.getSize() * 2]; // 2 bytes per size
+                byte [] hopsByte = new byte[hops.getSize()];
+                byte [] ttlsByte = new byte[ttls.getSize()];
 
                 for (int i = 0; i < timestamps.getSize(); i++) {
                     long timestamp = timestamps.get(i);
@@ -220,8 +228,16 @@ public interface Message extends Comparable<Message> {
                     ByteOrder.short2beb(size, sizesByte, i * 2);
                 }
 
+                for (int i = 0; i < hops.getSize(); i++) 
+                    hopsByte[i] = hops.get(i);
+                
+                for (int i = 0; i < ttls.getSize(); i++) 
+                    ttlsByte[i] = ttls.get(i);
+                
                 ret.put("times",timesByte);
                 ret.put("sizes",sizesByte);
+                ret.put("hops", hopsByte);
+                ret.put("ttls", ttlsByte);
                 return ret;
             }
         }

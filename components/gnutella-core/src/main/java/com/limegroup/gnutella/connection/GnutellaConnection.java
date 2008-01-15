@@ -71,6 +71,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.Message.MessageCounter;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
@@ -319,6 +320,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     /** writers of statistics if any */
     enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
     private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
+    private MessageCounter incoming, outgoing;
 
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -426,6 +428,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             statsWriters.put(StatsWriters.DEFLATER, new StatisticGatheringWriter());
             statsWriters.put(StatsWriters.DELAYER, new StatisticGatheringWriter());
             statsWriters.put(StatsWriters.THROTTLE, new StatisticGatheringWriter());
+            incoming = new MessageCounter(10);
+            outgoing = new MessageCounter(10);
+        } else {
+            incoming = new MessageCounter(1);
+            outgoing = new MessageCounter(1);
         }
         
         Properties requestHeaders;
@@ -838,10 +845,12 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     public void processReadMessage(Message m) {
         super.processReadMessage(m);
         _connectionStats.addReceived();
+        incoming.countMessage(m);
         handleMessageInternal(m);
     }
 
     public void processSentMessage(Message m) {
+        outgoing.countMessage(m);
         processWrittenMessage(m);
     }
 
@@ -1353,6 +1362,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // add the writer stats if they exist
         for (StatsWriters name : statsWriters.keySet())
             data.put(name.toString(),statsWriters.get(name).inspect());
+        
+        // message counters
+        data.put("incoming",incoming.inspect());
+        data.put("outgoing",outgoing.inspect());
         
         return data;
     }
