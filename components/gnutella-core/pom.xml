@@ -102,6 +102,16 @@
       <artifactId>jorbis</artifactId>
       <version>0.0.15</version>
     </dependency>
+    <dependency>
+      <groupId>com.onionnetworks.fec</groupId>
+      <artifactId>onion-common</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.onionnetworks.fec</groupId>
+      <artifactId>onion-fec</artifactId>
+      <version>1.0</version>
+    </dependency>
 	<!-- Ibiblio Jars -->
     <dependency>
       <groupId>commons-net</groupId>

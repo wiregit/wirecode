@@ -34,6 +34,18 @@
       <version>1.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.onionnetworks.fec</groupId>
+      <artifactId>onion-common</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.onionnetworks.fec</groupId>
+      <artifactId>onion-fec</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+    </dependency>
     <!-- Ibiblio Jars -->
     <dependency>
       <groupId>jaxen</groupId>
