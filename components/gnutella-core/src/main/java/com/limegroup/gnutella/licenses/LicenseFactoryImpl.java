@@ -1,11 +1,12 @@
 package com.limegroup.gnutella.licenses;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Locale;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -141,18 +142,19 @@ public final class LicenseFactoryImpl implements LicenseFactory {
         String url = license.substring(urlStart).trim();
         URI uri = null;
         try {
-            uri = new URI(url.toCharArray());
+            uri = new URI(url);
             
             // Make sure the scheme is HTTP.
             String scheme = uri.getScheme();
             if(scheme == null || !scheme.equalsIgnoreCase("http"))
-                throw new URIException("Invalid scheme: " + scheme);
+                throw new URISyntaxException(uri.toString(), "Invalid scheme: " + scheme);
             // Make sure the scheme has some authority.
             String authority = uri.getAuthority();
             if(authority == null || authority.equals("") || authority.indexOf(' ') != -1)
-                throw new URIException("Invalid authority: " + authority);
+                throw new URISyntaxException(uri.toString(), "Invalid authority: " + authority);
             
-        } catch(URIException e) {
+        } catch(URISyntaxException e) {
+            ErrorService.error(e);
             uri = null;
             LOG.error("Unable to create URI", e);
         }

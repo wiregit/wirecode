@@ -10,6 +10,7 @@ import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
@@ -42,6 +43,7 @@ import com.google.inject.Provider;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.BTConnectionFactoryImpl;
@@ -226,6 +228,14 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireCommonModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         
+        // TODO  - is there a way to make it more obvious what is happeneing here?
+        // httpExecutor is bound (and used) in LimeWireHttpModule; 
+        // LimeWireCoreModule overrides this.
+        // httpExecutor is an alias
+        //bind(Key.get(ScheduledExecutorService.class, Names.named("httpExecutor"))).to(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
+        
+        binder().install(new LimeWireHttpModule());
+        
         bind(LimeWireCore.class);
         
         if(activityCallbackClass != null) {
@@ -362,6 +372,7 @@ public class LimeWireCoreModule extends AbstractModule {
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
+        bindAll(Names.named("httpExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("dhtExecutor"), ExecutorService.class, DHTExecutorProvider.class, Executor.class);
         bindAll(Names.named("messageExecutor"), ExecutorService.class, MessageExecutorProvider.class, Executor.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);

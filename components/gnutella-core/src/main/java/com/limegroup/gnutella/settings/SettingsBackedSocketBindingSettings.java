@@ -19,6 +19,10 @@ public class SettingsBackedSocketBindingSettings implements SocketBindingSetting
         return ConnectionSettings.CUSTOM_INETADRESS.getValue();
     }
 
+    public int getPortToBindTo() {
+        return 0; // TODO add a ConnectionSettings for this?
+    }
+
     public boolean isSocketBindingRequired() {
         return ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue();
     }

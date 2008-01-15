@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.version;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -8,10 +9,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.URIException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
@@ -23,6 +26,8 @@ import org.limewire.util.CommonUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ApplicationServices;
@@ -37,6 +42,8 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.Test;
 
 public class UpdateHandlerTest extends LimeTestCase {
 
@@ -122,6 +129,9 @@ public class UpdateHandlerTest extends LimeTestCase {
         saveFile = new File(CommonUtils.getUserSettingsDir(), "version.xml");
         saveFile.delete();
         assertFalse(saveFile.exists());
+        
+        injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("httpExecutor")));
+        int i = 0;
     }
 
     /** tests that we set up bindings correctly */
@@ -150,7 +160,9 @@ public class UpdateHandlerTest extends LimeTestCase {
     public void testMaxTriggersHttpAfterSmallDelay() {
         final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
         final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
-        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final HttpGet method = new HttpGet();
+        final HttpResponse response = mockery.mock(HttpResponse.class);
+        final StatusLine statusLine = mockery.mock(StatusLine.class);
         final Sequence requestSequence = mockery.sequence("Request Sequence");
         mockery.checking(new Expectations() {
             {
@@ -187,22 +199,28 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         mockery.checking(new Expectations() {
             {
-                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpGet>() {
                     public void describeTo(org.hamcrest.Description description) {
                         description.appendText("httpMethod");
                     }
 
-                    public boolean matchesSafely(HttpMethod item) {
-                        assertEquals("GET", item.getName());
-                        try {
-                            assertTrue(item.getURI().toString(), item.getURI().toString()
+                    public boolean matchesSafely(HttpGet item) {
+                        assertEquals("GET", item.getMethod());
+                        assertTrue(item.getURI().toString(), item.getURI().toString()
                                     .startsWith("http://127.0.0.1:9999/update.def?"));
-                        } catch (URIException e) {
-                            fail(e);
-                        }
                         return true;
                     }
-                }), with(new TypeSafeMatcher<HttpClientListener>() {
+                }), with(new TypeSafeMatcher<HttpParams>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpParams item) {
+                        assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
+                        assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
+                        return true;
+                    }
+                }),
+                    with(new TypeSafeMatcher<HttpClientListener>() {
                     public void describeTo(Description description) {
                     }
 
@@ -210,7 +228,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         httpClientListenerRef.set(item);
                         return true;
                     }
-                }), with(equal(10000)));
+                }));
                 inSequence(requestSequence);
             }
         });
@@ -221,16 +239,20 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         mockery.checking(new Expectations() {
             {
-                atLeast(1).of(method).getStatusCode();
+                atLeast(1).of(response).getStatusLine();
+                will(returnValue(statusLine));
+                inSequence(requestSequence);
+                
+                atLeast(1).of(statusLine).getStatusCode();
                 will(returnValue(100));
                 inSequence(requestSequence);
 
-                one(httpExecutor).releaseResources(with(same(method)));
+                one(httpExecutor).releaseResources(with(same(response)));
                 inSequence(requestSequence);
             }
         });
 
-        httpClientListenerRef.get().requestComplete(method);
+        httpClientListenerRef.get().requestComplete(method, response);
         assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
         assertEquals(0, h.getLatestId());
         assertFalse(saveFile.exists());
@@ -310,19 +332,24 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         mockery.checking(new Expectations() {
             {
-                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpGet>() {
                     public void describeTo(org.hamcrest.Description description) {
                         description.appendText("httpMethod");
                     }
 
-                    public boolean matchesSafely(HttpMethod item) {
-                        assertEquals("GET", item.getName());
-                        try {
-                            assertTrue(item.getURI().toString(), item.getURI().toString()
-                                    .startsWith("http://127.0.0.1:9999/update.def?"));
-                        } catch (URIException e) {
-                            fail(e);
-                        }
+                    public boolean matchesSafely(HttpGet item) {
+                        assertEquals("GET", item.getMethod());
+                        assertTrue(item.getURI().toString(), item.getURI().toString()
+                                .startsWith("http://127.0.0.1:9999/update.def?"));
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpParams>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpParams item) {
+                        assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
+                        assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
                         return true;
                     }
                 }), with(new TypeSafeMatcher<HttpClientListener>() {
@@ -333,7 +360,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         httpClientListenerRef.set(item);
                         return true;
                     }
-                }), with(equal(10000)));
+                }));
                 inSequence(requestSequence);
             }
         });
@@ -341,25 +368,37 @@ public class UpdateHandlerTest extends LimeTestCase {
         backgroundExecutor.scheduled.run();
         assertNotNull(httpClientListenerRef.get());
 
-        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final HttpGet method = new HttpGet();
+        final HttpResponse response = mockery.mock(HttpResponse.class);
+        final StatusLine statusLine = mockery.mock(StatusLine.class);
+        final HttpEntity httpEntity = mockery.mock(HttpEntity.class);
         final UpdateCollection httpCollection = mockery.mock(UpdateCollection.class);
         mockery.checking(new Expectations() {
             {
-                atLeast(1).of(method).getStatusCode();
+                atLeast(1).of(response).getStatusLine();
+                will(returnValue(statusLine));
+                inSequence(requestSequence);
+                
+                atLeast(1).of(statusLine).getStatusCode();
                 will(returnValue(200));
+                inSequence(requestSequence);                
+
+                atLeast(1).of(response).getEntity();
+                will(returnValue(httpEntity));
+                inSequence(requestSequence);
+                
+                one(httpEntity).getContent();
+                byte [] b = new byte[1];
+                ByteArrayInputStream bis = new ByteArrayInputStream(b);
+                will(returnValue(bis));
                 inSequence(requestSequence);
 
-                one(method).getResponseBody();
-                byte[] b = new byte[1];
-                will(returnValue(b));
-                inSequence(requestSequence);
-
-                one(updateMessageVerifier).inflateNetworkData(with(same(b)));
+                one(updateMessageVerifier).inflateNetworkData(with(LimeTestUtils.createByteMatcher(b)));
                 byte[] inflated = new byte[2];
                 inSequence(requestSequence);
                 will(returnValue(inflated));
 
-                one(httpExecutor).releaseResources(with(same(method)));
+                one(httpExecutor).releaseResources(with(same(response)));
                 inSequence(requestSequence);
 
                 one(updateMessageVerifier).getVerifiedData(with(same(inflated)));
@@ -386,7 +425,7 @@ public class UpdateHandlerTest extends LimeTestCase {
             }
         });
 
-        httpClientListenerRef.get().requestComplete(method);
+        httpClientListenerRef.get().requestComplete(method, response);
         assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
         assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
         assertEquals(Integer.MAX_VALUE, h.getLatestId());
@@ -431,19 +470,24 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         mockery.checking(new Expectations() {
             {
-                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpGet>() {
                     public void describeTo(org.hamcrest.Description description) {
                         description.appendText("httpMethod");
                     }
 
-                    public boolean matchesSafely(HttpMethod item) {
-                        assertEquals("GET", item.getName());
-                        try {
-                            assertTrue(item.getURI().toString(), item.getURI().toString()
-                                    .startsWith("http://127.0.0.1:9999/update.def?"));
-                        } catch (URIException e) {
-                            fail(e);
-                        }
+                    public boolean matchesSafely(HttpGet item) {
+                        assertEquals("GET", item.getMethod());
+                        assertTrue(item.getURI().toString(), item.getURI().toString()
+                                .startsWith("http://127.0.0.1:9999/update.def?"));
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpParams>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpParams item) {
+                        assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
+                        assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
                         return true;
                     }
                 }), with(new TypeSafeMatcher<HttpClientListener>() {
@@ -454,7 +498,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         httpClientListenerRef.set(item);
                         return true;
                     }
-                }), with(equal(10000)));
+                }));
                 inSequence(requestSequence);
             }
         });
@@ -462,25 +506,37 @@ public class UpdateHandlerTest extends LimeTestCase {
         backgroundExecutor.scheduled.run();
         assertNotNull(httpClientListenerRef.get());
 
-        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final HttpGet method = new HttpGet();
+        final HttpResponse response = mockery.mock(HttpResponse.class);
+        final StatusLine statusLine = mockery.mock(StatusLine.class);
+        final HttpEntity httpEntity = mockery.mock(HttpEntity.class);
         final UpdateCollection httpCollection = mockery.mock(UpdateCollection.class);
         mockery.checking(new Expectations() {
             {
-                atLeast(1).of(method).getStatusCode();
+                atLeast(1).of(response).getStatusLine();
+                will(returnValue(statusLine));
+                inSequence(requestSequence);
+                
+                atLeast(1).of(statusLine).getStatusCode();
                 will(returnValue(200));
+                inSequence(requestSequence);                
+
+                atLeast(1).of(response).getEntity();
+                will(returnValue(httpEntity));
+                inSequence(requestSequence);
+                
+                one(httpEntity).getContent();
+                byte [] b = new byte[1];
+                ByteArrayInputStream bis = new ByteArrayInputStream(b);
+                will(returnValue(bis));
                 inSequence(requestSequence);
 
-                one(method).getResponseBody();
-                byte[] b = new byte[1];
-                will(returnValue(b));
-                inSequence(requestSequence);
-
-                one(updateMessageVerifier).inflateNetworkData(with(same(b)));
+                one(updateMessageVerifier).inflateNetworkData(with(LimeTestUtils.createByteMatcher(b)));
                 byte[] inflated = new byte[2];
                 inSequence(requestSequence);
                 will(returnValue(inflated));
 
-                one(httpExecutor).releaseResources(with(same(method)));
+                one(httpExecutor).releaseResources(with(same(response)));
                 inSequence(requestSequence);
 
                 one(updateMessageVerifier).getVerifiedData(with(same(inflated)));
@@ -507,7 +563,7 @@ public class UpdateHandlerTest extends LimeTestCase {
             }
         });
 
-        httpClientListenerRef.get().requestComplete(method);
+        httpClientListenerRef.get().requestComplete(method, response);
         assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
         assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
         assertEquals(0, h.getLatestId());
@@ -551,19 +607,24 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         mockery.checking(new Expectations() {
             {
-                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpMethod>() {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpGet>() {
                     public void describeTo(org.hamcrest.Description description) {
                         description.appendText("httpMethod");
                     }
 
-                    public boolean matchesSafely(HttpMethod item) {
-                        assertEquals("GET", item.getName());
-                        try {
-                            assertTrue(item.getURI().toString(), item.getURI().toString()
-                                    .startsWith("http://127.0.0.1:9999/update.def?"));
-                        } catch (URIException e) {
-                            fail(e);
-                        }
+                    public boolean matchesSafely(HttpGet item) {
+                        assertEquals("GET", item.getMethod());
+                        assertTrue(item.getURI().toString(), item.getURI().toString()
+                                .startsWith("http://127.0.0.1:9999/update.def?"));
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpParams>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                    }
+
+                    public boolean matchesSafely(HttpParams item) {
+                        assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
+                        assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
                         return true;
                     }
                 }), with(new TypeSafeMatcher<HttpClientListener>() {
@@ -574,7 +635,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         httpClientListenerRef.set(item);
                         return true;
                     }
-                }), with(equal(10000)));
+                }));
                 inSequence(requestSequence);
             }
         });
@@ -582,25 +643,37 @@ public class UpdateHandlerTest extends LimeTestCase {
         backgroundExecutor.scheduled.run();
         assertNotNull(httpClientListenerRef.get());
 
-        final HttpMethod method = mockery.mock(HttpMethod.class);
+        final HttpGet method = new HttpGet();
+        final HttpResponse response = mockery.mock(HttpResponse.class);
+        final StatusLine statusLine = mockery.mock(StatusLine.class);
+        final HttpEntity httpEntity = mockery.mock(HttpEntity.class);
         final UpdateCollection httpCollection = mockery.mock(UpdateCollection.class);
         mockery.checking(new Expectations() {
             {
-                atLeast(1).of(method).getStatusCode();
+                atLeast(1).of(response).getStatusLine();
+                will(returnValue(statusLine));
+                inSequence(requestSequence);
+                
+                atLeast(1).of(statusLine).getStatusCode();
                 will(returnValue(200));
+                inSequence(requestSequence);                
+
+                atLeast(1).of(response).getEntity();
+                will(returnValue(httpEntity));
+                inSequence(requestSequence);
+                
+                one(httpEntity).getContent();
+                byte [] b = new byte[1];
+                ByteArrayInputStream bis = new ByteArrayInputStream(b);
+                will(returnValue(bis));
                 inSequence(requestSequence);
 
-                one(method).getResponseBody();
-                byte[] b = new byte[1];
-                will(returnValue(b));
-                inSequence(requestSequence);
-
-                one(updateMessageVerifier).inflateNetworkData(with(same(b)));
+                one(updateMessageVerifier).inflateNetworkData(with(any(byte [].class)));
                 byte[] inflated = new byte[2];
                 inSequence(requestSequence);
                 will(returnValue(inflated));
 
-                one(httpExecutor).releaseResources(with(same(method)));
+                one(httpExecutor).releaseResources(with(same(response)));
                 inSequence(requestSequence);
 
                 one(updateMessageVerifier).getVerifiedData(with(same(inflated)));
@@ -627,7 +700,7 @@ public class UpdateHandlerTest extends LimeTestCase {
             }
         });
 
-        httpClientListenerRef.get().requestComplete(method);
+        httpClientListenerRef.get().requestComplete(method, response);
         assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
         assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
         assertEquals(Integer.MAX_VALUE, h.getLatestId());

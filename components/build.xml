@@ -156,7 +156,7 @@
 	
 	<target name="compile-tests"
 	        description="Compiles the tests of every component (and the source if necessary)"
-	        depends="compile-src, lw-test-util.compile-src, lw-setting.compile-tests, lw-statistic.compile-tests, lw-rudp.compile-tests, lw-nio.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests, mojito.compile-tests, mojito-ui.compile-tests, lw-http.compile-tests, lw-net.compile-tests, lw-lwsserver.compile-tests">
+	        depends="compile-src, lw-test-util.compile-src, lw-setting.compile-tests, lw-statistic.compile-tests, lw-rudp.compile-tests, lw-nio.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests, mojito.compile-tests, mojito-ui.compile-tests, lw-net.compile-tests, lw-http.compile-tests, lw-lwsserver.compile-tests">
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
     

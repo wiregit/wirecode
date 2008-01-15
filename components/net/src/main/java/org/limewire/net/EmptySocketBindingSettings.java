@@ -10,6 +10,10 @@ public class EmptySocketBindingSettings implements SocketBindingSettings {
         return null;
     }
 
+    public int getPortToBindTo() {
+        return 0;
+    }
+
     public boolean isSocketBindingRequired() {
         return false;
     }

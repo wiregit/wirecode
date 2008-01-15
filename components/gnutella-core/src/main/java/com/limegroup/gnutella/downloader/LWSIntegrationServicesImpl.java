@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
+import org.apache.http.HttpException;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadServices;
@@ -160,6 +162,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     return idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
                 } catch (IOException e) {
                     // invalid url or other causes, fail silently
+                } catch (HttpException e) {
+                    // invalid url or other causes, fail silently
+                } catch (InterruptedException e) {
+                    // invalid url or other causes, fail silently 
                 }
 
                 return "invalid.download";

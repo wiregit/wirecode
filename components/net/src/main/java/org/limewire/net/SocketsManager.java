@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.NIOSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
@@ -27,6 +28,42 @@ public interface SocketsManager {
             return factory;
         }
     }
+
+    /**
+     * Creates a new <code>Socket<code>. Does NOT bind or connnect the <code>Socket</code>
+     * 
+     * The creation will use the specified connection type.
+     * For example, to make a plain socket, use ConnectType.PLAIN.
+     * To connect with a TLS Socket, use ConnectType.TLS.
+     * 
+     * @param type the type of <code>Socket</code> to create
+     * @return
+     * @throws IOException
+     */
+    public Socket create(ConnectType type) throws IOException;
+    
+    /**
+     * Connects and returns a socket to the given host, with a timeout.
+     * The timeout only applies to network conditions.  More time might be spent
+     * waiting for an available slot to connect with.
+     * 
+     * The connection will be attempted with the specified connection type.
+     * For example, to make a plain socket, use ConnectType.PLAIN.
+     * To connect with a TLS Socket, use ConnectType.TLS.
+     *
+     * @param socket the socket to connect; if <code>null</code> a new <code>Socket</code> will be created
+     * @param bindingSettings the <code>SocketBindingSettings</code> to use; can be null
+     * @param addr the host/port to connect to
+     * @param timeout the desired timeout for connecting, in milliseconds,
+     *  or 0 for no timeout. In case of a proxy connection, this timeout
+     *  might be exceeded
+     * @param type the type of connection to attempt
+     * @return the connected Socket
+     * @throws IOException the connections couldn't be made in the 
+     *  requested time
+     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     */
+    public Socket connect(NBSocket socket, SocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
     
     /**
      * Connects and returns a socket to the given host, with a timeout.

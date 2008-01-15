@@ -5,9 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
-import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -22,6 +19,8 @@ import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.Test;
  
 public class ContentManagerNetworkTest extends LimeTestCase {
     
@@ -36,7 +35,6 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     private Observer one;
     
     private static  int LISTEN_PORT = 9172;
-    private static  int SEND_PORT = 9876;
     
     private MessageRouter messageRouter;
     private Acceptor acceptor;
@@ -91,8 +89,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     }
     
     public void testMessageSent() throws Exception {
-        InetSocketAddress addr = new InetSocketAddress(SEND_PORT);
-        DatagramSocket socket = new DatagramSocket(addr);
+        DatagramSocket socket = new DatagramSocket();
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
         
@@ -119,8 +116,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     }
     
     public void testDelayedRequestSent() throws Exception {
-        InetSocketAddress addr = new InetSocketAddress(SEND_PORT);
-        final DatagramSocket socket = new DatagramSocket(addr);
+        final DatagramSocket socket = new DatagramSocket();
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
         final IpPort authority = new IpPortImpl("127.0.0.1", socket.getLocalPort());

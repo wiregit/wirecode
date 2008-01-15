@@ -22,7 +22,7 @@ public class LimeWireNetModule extends AbstractModule {
      *  You MUST also provide a module that binds the settings!
      */
     public LimeWireNetModule() {
-        this(null, null);
+        this(EmptyProxySettings.class, EmptySocketBindingSettings.class);
     }
     
     /** Constructs the module with the given settings for using proxies. */
@@ -36,8 +36,6 @@ public class LimeWireNetModule extends AbstractModule {
         bind(SocketsManager.class).to(SocketsManagerImpl.class);
         bind(ProxyManager.class).to(ProxyManagerImpl.class);
         bind(WhoIsRequestFactory.class).to(WhoIsRequestFactoryImpl.class);
-        
-        requestStaticInjection(HttpClientManager.class);
         
         if(OSUtils.isSocketChallengedWindows())
             bind(SocketController.class).to(LimitedSocketController.class);

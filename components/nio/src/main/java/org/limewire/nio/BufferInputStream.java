@@ -140,8 +140,9 @@ class BufferInputStream extends InputStream implements Shutdownable {
             if(shutdown)
                 throw new IOException("socket closed");
                 
-            if(looped && timeout != 0)
-                throw new java.io.InterruptedIOException("read timed out (" + timeout + ")");
+            if(looped && timeout != 0) 
+                throw new java.net.SocketTimeoutException("read timed out (" + timeout + ")");
+            
             
             nioStream.readHappening();
             

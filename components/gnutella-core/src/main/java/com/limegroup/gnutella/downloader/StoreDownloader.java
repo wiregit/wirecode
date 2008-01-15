@@ -3,13 +3,16 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.Set;
 
-import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
 import org.limewire.util.FileUtils;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -189,7 +192,7 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
      */
     @SuppressWarnings("deprecation")
     public static RemoteFileDesc createRemoteFileDesc(URL url,
-        String filename, URN urn, long size) throws IOException{
+        String filename, URN urn, long size) throws IOException, HttpException, InterruptedException {
         if (url==null) {
             LOG.debug("createRemoteFileDesc called with null URL");        
             return null;
@@ -205,14 +208,22 @@ public class StoreDownloader extends ManagedDownloader implements Serializable {
         if (urn!=null)
             urns.add(urn);
         
-        URI uri = new URI(url);    
+        URI uri = null;
+        try {
+            uri = new URI(url.toString());
+        } catch (URISyntaxException e) {
+            ErrorService.error(e);
+            IOException ioe = new IOException("malormed URL: " + url);
+            ioe.initCause(e);
+            throw ioe;
+        }  
 
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
                 0l,             //index--doesn't matter since we won't push
                 filename != null ? filename : MagnetOptions.extractFileName(uri),
-                size <= 0 ? HTTPUtils.contentLength(url) : size,
+                size <= 0 ? HTTPUtils.contentLength(uri) : size,
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
                 false,          //no chat support
