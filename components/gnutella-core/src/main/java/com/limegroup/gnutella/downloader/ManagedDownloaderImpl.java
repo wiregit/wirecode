@@ -4,6 +4,7 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,6 +63,9 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
+import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
@@ -981,8 +985,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
         if (incompleteFile == null) { 
-            incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
-                                               downloadSHA1, getContentLength());
+            incompleteFile = getIncompleteFile(getSaveFile().getName(), downloadSHA1,
+                                               getContentLength());
         }
         
         if(LOG.isWarnEnabled())
@@ -993,9 +997,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Retrieves an incomplete file from the given incompleteFileManager with the
      * given name, URN & content-length.
      */
-    protected File getIncompleteFile(IncompleteFileManager ifm, String name,
-                                     URN urn, long length) throws IOException {
-        return ifm.getFile(name, urn, length);
+    protected File getIncompleteFile(String name, URN urn,
+                                     long length) throws IOException {
+        return incompleteFileManager.getFile(name, urn, length);
     }
     
     /**
@@ -3096,5 +3100,21 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 throw new IllegalStateException("invalid type: " + queryType);
             }
         }
+    }
+
+    public synchronized DownloadMemento toMemento() {
+        return new GnutellaDownloadMemento(getDownloadType(), 
+                new HashMap<String, Serializable>(propertiesMap), 
+                commonOutFile == null ? null : commonOutFile.getSerializableBlocks(),
+                incompleteFile,
+                getRemoteHostMementos());
+    }
+    
+    private Set<RemoteHostMemento> getRemoteHostMementos() {
+        Set<RemoteHostMemento> mementos = new HashSet<RemoteHostMemento>(cachedRFDs.size());
+        for(RemoteFileDesc rfd : cachedRFDs) {
+            mementos.add(rfd.toMemento());
+        }
+        return mementos;
     }
 }

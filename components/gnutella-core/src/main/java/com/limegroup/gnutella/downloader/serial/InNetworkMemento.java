@@ -47,11 +47,11 @@ public class InNetworkMemento extends GnutellaDownloadMemento {
     }
     
     public long getSize() {
-        return (Long)getProperties().get(CoreDownloader.FILE_SIZE);
+        return (Long)getPropertiesMap().get(CoreDownloader.FILE_SIZE);
     }
     
     public URN getUrn() {
-        return (URN)getProperties().get(ManagedDownloader.SHA1_URN);
+        return (URN)getPropertiesMap().get(ManagedDownloader.SHA1_URN);
     }
     
 }

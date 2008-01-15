@@ -3,6 +3,7 @@ package org.limewire.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -207,36 +208,38 @@ public class CommonUtils {
     		parentFile.mkdirs();
     
     	ClassLoader cl = CommonUtils.class.getClassLoader();			
-    	
+        //load resource using my class loader or system class loader
+        //Can happen if Launcher loaded by system class loader
+        URL resource = cl != null
+            ?  cl.getResource(fileName)
+            :  ClassLoader.getSystemResource(fileName);
+            
+        if(resource == null)
+            throw new IOException("resource: " + fileName + " doesn't exist.");
+        
+    	copyStream(resource.openStream(), newFile);
+    }
+    
+    public static void copyFile(File src, File dst) throws IOException {
+        copyStream(new FileInputStream(src), dst);
+    }
+    
+    public static void copyStream(InputStream inStream, File newFile) throws IOException {
     	BufferedInputStream bis = null;
     	BufferedOutputStream bos = null;            
     	try {
-    		//load resource using my class loader or system class loader
-    		//Can happen if Launcher loaded by system class loader
-            URL resource = cl != null
-    			?  cl.getResource(fileName)
-    			:  ClassLoader.getSystemResource(fileName);
-                
-            if(resource == null)
-                throw new IOException("resource: " + fileName + " doesn't exist.");
-            
-            InputStream is = resource.openStream();
-    		
     		//buffer the streams to improve I/O performance
     		final int bufferSize = 2048;
-    		bis = new BufferedInputStream(is, bufferSize);
-    		bos = 
-    			new BufferedOutputStream(new FileOutputStream(newFile), 
-    									 bufferSize);
-    		byte[] buffer = new byte[bufferSize];
-    		int c = 0;
+            bis = new BufferedInputStream(inStream, bufferSize);
+            bos = new BufferedOutputStream(new FileOutputStream(newFile), bufferSize);
+            byte[] buffer = new byte[bufferSize];
+            int c = 0;
     		
     		do { //read and write in chunks of buffer size until EOF reached
     			c = bis.read(buffer, 0, bufferSize);
                 if (c > 0)
                     bos.write(buffer, 0, c);
-    		}
-    		while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
+    		} while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
             
             bos.flush();
     	} catch(IOException e) {

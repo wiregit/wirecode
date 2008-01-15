@@ -6,7 +6,7 @@ import java.io.ObjectInputStream.GetField;
 
 import com.limegroup.gnutella.URN;
 
-class SerialMagnetDownloader extends SerialManagedDownloader {
+class SerialMagnetDownloader extends SerialManagedDownloaderImpl {
     private static final long serialVersionUID = 9092913030585214105L;
     
     private transient String _textQuery;

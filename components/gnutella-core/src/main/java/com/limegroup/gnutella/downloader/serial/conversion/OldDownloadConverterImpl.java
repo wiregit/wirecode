@@ -4,7 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,30 +19,44 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.DownloaderType;
+import com.limegroup.gnutella.downloader.FileNotFoundException;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
+import com.limegroup.gnutella.downloader.serial.conversion.DownloadConverterObjectInputStream.Version;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 public class OldDownloadConverterImpl implements OldDownloadConverter {
     
+    
     private static Log LOG = LogFactory.getLog(OldDownloadConverterImpl.class);
     
     public List<DownloadMemento> readAndConvertOldDownloads(File inputFile) throws IOException {
-        ObjectInputStream in = null;
+        if(!inputFile.exists())
+            throw new FileNotFoundException("file doesn't exist!");
+        
+        DownloadConverterObjectInputStream in = null;
         List roots = null;
         SerialIncompleteFileManager sifm = null;
+        Version[] versions = Version.values();
         
-        try {
-            in = new DownloadConverterObjectInputStream(new BufferedInputStream(new FileInputStream(inputFile)));
-            roots = (List)in.readObject();
-            sifm = (SerialIncompleteFileManager)in.readObject();
-        } catch(ClassNotFoundException cnfe) {
-            throw (IOException)new IOException().initCause(cnfe);
-        } finally {
-            IOUtils.close(in);
+        for(int i = 0; i < versions.length; i++) {
+            try {
+                in = new DownloadConverterObjectInputStream(new BufferedInputStream(new FileInputStream(inputFile)));
+                in.deserializeVersion(versions[i]);
+                roots = (List)in.readObject();
+                sifm = (SerialIncompleteFileManager)in.readObject();
+                break;
+            } catch(StreamCorruptedException sce) {
+                LOG.debug("Unable to deserialize from version: " + versions[i], sce);
+                continue;
+            } catch(ClassNotFoundException cnfe) {
+                throw (IOException)new IOException().initCause(cnfe);
+            } finally {
+                IOUtils.close(in);
+            }
         }
         
         if(roots != null && sifm != null)
@@ -143,9 +157,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
             }
 
             Number size = (Number)download.getProperties().get("fileSize");
-            if(download instanceof SerialInNetworkDownloader)
-                size = ((SerialInNetworkDownloader)download).getSize();
-            else if(download instanceof SerialResumeDownloader)
+            if(download instanceof SerialResumeDownloader)
                 size = ((SerialResumeDownloader)download).getSize();
             
             if (saveFile != null && size != null) {
@@ -161,9 +173,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     private URN getSha1(SerialManagedDownloader download) {
         URN sha1 = null;
         
-        if(download instanceof SerialInNetworkDownloader)
-            sha1 = ((SerialInNetworkDownloader)download).getUrn();
-        else if(download instanceof SerialMagnetDownloader)
+        if(download instanceof SerialMagnetDownloader)
             sha1 = ((SerialMagnetDownloader)download).getUrn();
         else if(download instanceof SerialResumeDownloader)
             sha1 = ((SerialResumeDownloader)download).getUrn();

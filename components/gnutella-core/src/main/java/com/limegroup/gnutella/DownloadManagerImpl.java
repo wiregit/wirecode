@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -42,8 +41,9 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
-import com.limegroup.gnutella.downloader.serial.DownloadSerializer.SavedDownloadInfo;
+import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -71,6 +71,7 @@ public class DownloadManagerImpl implements DownloadManager {
     /** The list of all queued ManagedDownloader. 
      *  INVARIANT: waiting contains no duplicates 
      *  LOCKING: obtain this' monitor */
+    
     private final List <CoreDownloader> waiting=new LinkedList<CoreDownloader>();
     
     private final MultiIterable<CoreDownloader> activeAndWaiting = 
@@ -179,20 +180,41 @@ public class DownloadManagerImpl implements DownloadManager {
      * @see com.limegroup.gnutella.DownloadMI#postGuiInit()
      */
     public void loadStoredDownloadsAndScheduleWriting() {
-        List<SavedDownloadInfo> downloads = downloadSerializer.readFromDisk();
-        for(SavedDownloadInfo download : downloads) {
-            CoreDownloader coreDownloader = download.getDownloader();
-            if(coreDownloader instanceof ManagedDownloader) {
-                try {
-                    incompleteFileManager.initEntry(download, coreDownloader.getSHA1Urn(), coreDownloader instanceof StoreDownloader);
-                } catch (InvalidDataException e) {
-                    LOG.warn("Unable to register serialized download: " + download, e);
-                    continue;
-                }
-            }
-            addNewDownloader(coreDownloader);
+        loadStoredDownloads();
+        scheduleSnapshots();
+    }
+    
+    public void loadStoredDownloads() {
+        List<DownloadMemento> mementos = downloadSerializer.readFromDisk();
+        for(DownloadMemento memento : mementos) {
+            CoreDownloader coreDownloader = prepareMemento(memento);
+            if(coreDownloader != null)
+                addNewDownloader(coreDownloader);
         }
-        
+        downloadsReadFromDisk = true;
+    }
+    
+    public CoreDownloader prepareMemento(DownloadMemento memento) {
+        CoreDownloader coreDownloader;
+        try {
+            coreDownloader = coreDownloaderFactory.createFromMemento(memento);
+        } catch(InvalidDataException ide) {
+            LOG.warn("Unable to read download from memento: " + memento, ide);
+            return null;
+        }
+        if(coreDownloader instanceof ManagedDownloader) {
+            GnutellaDownloadMemento gmem = (GnutellaDownloadMemento)memento;
+            try {
+                incompleteFileManager.initEntry(gmem.getIncompleteFile(), gmem.getRanges(), coreDownloader.getSHA1Urn(), coreDownloader instanceof StoreDownloader);
+            } catch (InvalidDataException e) {
+                LOG.warn("Unable to register serialized download: " + coreDownloader, e);
+                return null;
+            }
+        }
+        return coreDownloader;
+    }
+    
+    public void scheduleSnapshots() {
         Runnable checkpointer=new Runnable() {
             public void run() {
                 if (downloadsInProgress() > 0) { //optimization
@@ -202,24 +224,19 @@ public class DownloadManagerImpl implements DownloadManager {
         };
         backgroundExecutor.scheduleWithFixedDelay(checkpointer, 
                                SNAPSHOT_CHECKPOINT_TIME, 
-                               SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);                
-                               
-        downloadsReadFromDisk = true;
+                               SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);   
     }      
     
     public void writeSnapshot() {
-        List<CoreDownloader> buf;
+        List<DownloadMemento> mementos;
         synchronized(this) {
-            buf = new ArrayList<CoreDownloader>(active.size() + waiting.size());
-            buf.addAll(active);
-            buf.addAll(waiting);
+            mementos = new ArrayList<DownloadMemento>(active.size() + waiting.size());
+            for(CoreDownloader downloader : activeAndWaiting) {
+                mementos.add(downloader.toMemento());
+            }
         }
         
-        downloadSerializer.writeToDisk(convertToSavedDownloadInfo(buf, incompleteFileManager));
-    }
-    
-    private List<SavedDownloadInfo> convertToSavedDownloadInfo(List<? extends CoreDownloader> downloads, IncompleteFileManager ifm) {
-        return Collections.emptyList();
+        downloadSerializer.writeToDisk(mementos);
     }
     
     /* (non-Javadoc)
@@ -482,24 +499,7 @@ public class DownloadManagerImpl implements DownloadManager {
         }
         for(Downloader md : buf ) 
             md.stop();
-    }   
-    
-    private static Collection<File> getActiveDownloadFiles(List<CoreDownloader> downloaders) {
-        List<File> ret = new ArrayList<File>(downloaders.size());
-        for (Downloader d : downloaders) {
-            File f = d.getFile();
-            if (f != null) {
-                try {
-                    ret.add(FileUtils.getCanonicalFile(f));
-                } catch (IOException iox) { 
-                    ret.add(f.getAbsoluteFile());
-                }
-            }
-        }
-        
-        return ret;
     }
-    ////////////////////////// Main Public Interface ///////////////////////
            
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#download(com.limegroup.gnutella.RemoteFileDesc[], java.util.List, com.limegroup.gnutella.GUID, boolean, java.io.File, java.lang.String)

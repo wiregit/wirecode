@@ -7,6 +7,7 @@ import java.util.Map;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
 public interface CoreDownloader extends Downloader {
 
@@ -78,5 +79,8 @@ public interface CoreDownloader extends Downloader {
     
     /** Adds all new properties & attributes, not overwriting old ones. */
     public void addNewProperties(Map<String, Serializable> newProperties);
+    
+    /** Constructs a memento that will be used for serialization. */
+    DownloadMemento toMemento();
 
 }

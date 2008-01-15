@@ -50,7 +50,7 @@ public class GnutellaDownloadMemento implements DownloadMemento {
         return downloadType;
     }
 
-    public Map<String, Serializable> getProperties() {
+    public Map<String, Serializable> getPropertiesMap() {
         return properties;
     }
 

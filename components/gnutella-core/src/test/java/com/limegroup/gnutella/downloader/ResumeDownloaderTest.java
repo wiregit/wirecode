@@ -1,21 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.util.Base32;
-import org.limewire.util.CommonUtils;
-import org.limewire.util.ConverterObjectInputStream;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.DownloadManager;
@@ -24,25 +17,18 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
-import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializerImpl;
+import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
+import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadConverterImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-/**
- * Unit tests small parts of ResumeDownloader. See RequeryDownloadTest for
- * larger integration tests.
- * 
- * @see RequeryDownloadTest
- */
+/** Unit tests small parts of ResumeDownloader. */
 public class ResumeDownloaderTest extends LimeTestCase {
 
-    private static final String filePath = "com/limegroup/gnutella/downloader/";
-
-    private static final String queryName = "filename";
-
     private static final String name = "filename.txt";
-
-    /** A serialized version with 32 bit size field with value 11111 */
-    private static final String Serialized32Bit1111 = "VTWQABLTOIADEY3PNUXGY2LNMVTXE33VOAXGO3TVORSWY3DBFZSG653ONRXWCZDFOIXFEZLTOVWWKRDPO5XGY33BMRSXFQINDZ76ODOS3QBAABCJAACV643JPJSUYAAFL5UGC43IOQABYTDDN5WS63DJNVSWO4TPOVYC6Z3OOV2GK3DMMEXVKUSOHNGAAD27NFXGG33NOBWGK5DFIZUWYZLUAAHEY2TBOZQS62LPF5DGS3DFHNGAABK7NZQW2ZLUAAJEY2TBOZQS63DBNZTS6U3UOJUW4ZZ3PBZAAM3DN5WS43DJNVSWO4TPOVYC4Z3OOV2GK3DMMEXGI33XNZWG6YLEMVZC4TLBNZQWOZLEIRXXO3TMN5QWIZLSEZ5CM5KUZ6S4SAYAAB4HEABUMNXW2LTMNFWWKZ3SN52XALTHNZ2XIZLMNRQS4ZDPO5XGY33BMRSXELSBMJZXI4TBMN2EI33XNZWG6YLEMVZIZV6IVOQERQWOAIAAA6DQONZAAELKMF3GCLTVORUWYLSIMFZWQU3FOS5EJBMVS24LONADAAAHQ4DXBQAAAAAQH5AAAAAAAAAAA6DTOIADOY3PNUXGY2LNMVTXE33VOAXGO3TVORSWY3DBFZSG653ONRXWCZDFOIXES3TDN5WXA3DFORSUM2LMMVGWC3TBM5SXFFNYJYT4LRYQXIBQAASMAADGE3DPMNVXG5AAB5GGUYLWMEXXK5DJNQXU2YLQHNGAABTIMFZWQZLTOEAH4AAKPBYHG4QACFVGC5TBFZ2XI2LMFZEGC43IJVQXABIH3LA4GFTA2EBQAASGAAFGY33BMRDGCY3UN5ZESAAJORUHEZLTNBXWYZDYOA7UAAAAAAAAADDXBAAAAAAQAAAAAALTOIAAY2TBOZQS42LPFZDGS3DFAQW2IRIOBXSP6AYAAFGAABDQMF2GQ4IAPYAAG6DQOQAEEQZ2LRRXSZ3XNFXFY2DPNVSVY6TCMFWGK5TTNN4VY3DJNVSVY2DFMFSFY3DJNVSXO2LSMVOFILJRGEYS22LOMNXW24DMMV2GKRTJNRSTGMTXAIAFY6DTOIABG2TBOZQS45LUNFWC4QLSOJQXSTDJON2HRAOSDWM4OYM5AMAACSIAARZWS6TFPBYAAAAAAB3QIAAAAAAHQ6DTOEAH4AAMH5AAAAAAAAAAY5YIAAAAAEAAAAAAA6DYONYQA7QABQ7UAAAAAAAAADDXBAAAAAAQAAAAAALUAAFGC5DUOJUWE5LUMVZXG4IAPYAAYP2AAAAAAAAABR3QQAAAAAIAAAAAAB4HQ6AAAACFO4DTOEAH4AAOOQABMVBNGEYTCLLJNZRW63LQNRSXIZKGNFWGKMZSO4BAAXDYOQAAYZTJNRSW4YLNMUXHI6DU";
 
     private static final int size = 1111;
 
@@ -70,7 +56,6 @@ public class ResumeDownloaderTest extends LimeTestCase {
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector();
         
-
         hash = TestFile.hash();
         rfd = newRFD(name, size, hash);
         ifm = injector.getInstance(IncompleteFileManager.class);
@@ -84,7 +69,6 @@ public class ResumeDownloaderTest extends LimeTestCase {
 
         DownloadManagerImpl dm = (DownloadManagerImpl) injector.getInstance(DownloadManager.class);
         dm.initialize();
-        dm.scheduleWaitingPump();
     }
     
     /** Returns a new ResumeDownloader with stubbed-out DownloadManager, etc. */
@@ -106,25 +90,28 @@ public class ResumeDownloaderTest extends LimeTestCase {
                 true, null, urns, false, false, "", null, -1, false);
     }
 
-    // //////////////////////////////////////////////////////////////////////////
-
     public void testLoads32Bit() throws Exception {
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base32
-                .decode(Serialized32Bit1111)));
-        ResumeDownloaderImpl loaded = (ResumeDownloaderImpl) ois.readObject();
-        assertEquals(1111, loaded.getContentLength());
-
-        // serializing this will result in different byte[]
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(loaded);
-        byte[] newSerialized = baos.toByteArray();
-        assertNotEquals(Serialized32Bit1111, Base32.encode(newSerialized));
-
-        // which when deserialized will retain the proper size
-        ois = new ObjectInputStream(new ByteArrayInputStream(newSerialized));
-        ResumeDownloaderImpl newLoaded = (ResumeDownloaderImpl) ois.readObject();
-        assertEquals(1111, newLoaded.getContentLength());
+        OldDownloadConverter oldDownloadConverter = new OldDownloadConverterImpl();
+        File downloadDat = LimeTestUtils.getResourceInPackage("resume_4.1.1-32bit-size.dat", ResumeDownloaderTest.class);
+        List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(downloadDat);
+        assertEquals(1, mementos.size());
+        
+        CoreDownloaderFactory coreDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
+        CoreDownloader downloader = coreDownloaderFactory.createFromMemento(mementos.get(0));
+        assertEquals(1111, downloader.getContentLength());
+        
+        DownloadMemento memento = downloader.toMemento();
+        File tmp = File.createTempFile("lwc", "save");
+        tmp.delete();
+        tmp.deleteOnExit();
+        DownloadSerializeSettings downloadSerializeSettings = new DownloadSerialSettingsStub(tmp, tmp);
+        DownloadSerializer serializer = new DownloadSerializerImpl(downloadSerializeSettings);
+        serializer.writeToDisk(Collections.singletonList(memento));
+        
+        mementos = serializer.readFromDisk();
+        coreDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
+        downloader = coreDownloaderFactory.createFromMemento(mementos.get(0));
+        assertEquals(1111, downloader.getContentLength());
     }
 
     /**
@@ -143,91 +130,26 @@ public class ResumeDownloaderTest extends LimeTestCase {
         Thread.sleep(1000);
         assertEquals(DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
-
-        // serialize
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream out = new ObjectOutputStream(baos);
-        out.writeObject(downloader);
-        out.flush();
-        out.close();
+                
+        DownloadMemento memento = downloader.toMemento();
         downloader.stop();
-
-        // deserialize
-        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-        downloader = (ResumeDownloaderImpl) in.readObject();
-        downloader.initialize();
-        downloader.startDownload();
+        
+        // Verify that in a new instance of LW, things are still right.
+        Injector newInjector = LimeTestUtils.createInjector();
+        DownloadManagerImpl newDM = (DownloadManagerImpl)newInjector.getInstance(DownloadManager.class);
+        CoreDownloader newDownloader = newDM.prepareMemento(memento);
+        newDownloader.initialize();
+        assertEquals(amountDownloaded, newDownloader.getAmountRead());
+        newDownloader.startDownload();
 
         // Check same state as before serialization.
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
         }
-        assertEquals(DownloadStatus.WAITING_FOR_USER, downloader.getState());
-        assertEquals(amountDownloaded, downloader.getAmountRead());
-        downloader.stop();
+        assertEquals(DownloadStatus.WAITING_FOR_USER, newDownloader.getState());
+        assertEquals(amountDownloaded, newDownloader.getAmountRead());
+        newDownloader.stop();
     }
-
-    /**
-     * Tests serialization of version 1.2 of ResumeDownloader. (LimeWire
-     * 2.7.0/2.7.1 beta.)
-     */
-    public void testSerialization12() throws Exception {
-        deserialize("ResumeDownloader.1_2.dat", false);
-    }
-
-    /**
-     * Tests serialization of version 1.3 of ResumeDownloader. (LimeWire 2.7.3)
-     */
-    public void testSerialization13() throws Exception {
-        deserialize("ResumeDownloader.1_3.dat", true);
-    }
-
-    /**
-     * Generic serialization testing routing.
-     * 
-     * @param file the serialized ResumeDownloader to read
-     * @param expectHash true iff there should be a hash in the downloader
-     */
-    private void deserialize(String file, boolean expectHash) throws Exception {
-        ObjectInputStream in = new ConverterObjectInputStream(new FileInputStream(CommonUtils
-                .getResourceFile(filePath + file)));
-        try {
-            ResumeDownloaderImpl rd = (ResumeDownloaderImpl) in.readObject();
-            rd.initialize();
-            QueryRequest qr = rd.newRequery();
-            URN _hash = (URN) PrivilegedAccessor.getValue(rd, "_hash");
-            if (expectHash) {
-                assertEquals("unexpected hash", hash, _hash);
-                // filenames were put in hash queries since everyone drops //
-                assertEquals("hash query should have name", queryName, qr.getQuery());
-            }
-
-            // we never send URNs
-            assertEquals("unexpected amount of urns", 0, qr.getQueryUrns().size());
-            assertEquals("unexpected query name", "filename", qr.getQuery());
-            assertEquals("unexpected filename", "filename.txt", rd.getSaveFile().getName());
-        } finally {
-            in.close();
-        }
-    }
-
-//    /**
-//     * Writes the ResumeDownloader.dat file generated for testSerialization.
-//     * This should be run to generate a new version when ResumeDownloader
-//     * changes.
-//     */
-//    public static void main(String args[]) {
-//        try {
-//            ResumeDownloader rd = newResumeDownloader();
-//            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(CommonUtils
-//                    .getResourceFile(filePath + "ResumeDownloader.dat")));
-//            out.writeObject(rd);
-//            out.flush();
-//            out.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
 }

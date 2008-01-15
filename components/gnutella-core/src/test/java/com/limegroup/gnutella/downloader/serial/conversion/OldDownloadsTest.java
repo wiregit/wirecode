@@ -1,0 +1,105 @@
+package com.limegroup.gnutella.downloader.serial.conversion;
+
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
+import junit.framework.Test;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.util.CommonUtils;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.downloader.DownloadSerialSettingsStub;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializerImpl;
+import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTask;
+import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadConverterImpl;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+
+/**
+ * Tests backwards compatibility with old downloads.dat files.
+ */
+public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
+        
+    private static final Log LOG = LogFactory.getLog(OldDownloadsTest.class);
+    
+    public OldDownloadsTest(String name) {
+        super(name);
+    }
+    
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
+    public static Test suite() {
+        return buildTestSuite(OldDownloadsTest.class);
+    }
+    
+    public void testLime3x0() throws Exception {
+        doTest("downloads_30.dat", "mpg4_golem160x90first120.avi", 2777638);
+    }
+    
+    public void testLime4x12x7() throws Exception {
+        doTest("downloads_4.12.7.dat", "LimeWireWin4.12.6.exe", 3064200);
+    }
+    
+    private void doTest(String downloadName, String fileName, long length) throws Exception {
+        final DownloadSerializer serializer = getSerializerFor(downloadName);
+        final TestActivityCallback callback = new TestActivityCallback();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(DownloadSerializer.class).toInstance(serializer);
+                bind(ActivityCallback.class).toInstance(callback);
+            }
+        });
+        DownloadManager manager = injector.getInstance(DownloadManager.class);
+        manager.loadStoredDownloadsAndScheduleWriting();
+        assertEquals("unexpected amount of downloaders added to gui", 1, callback.downloaders.size());
+        ManagedDownloader md = (ManagedDownloader)callback.downloaders.get(0);
+        assertEquals("unexpected filename", fileName, md.getSaveFile().getName());
+        assertEquals("unexpected content length!", length, md.getContentLength());
+    }
+
+    private DownloadSerializer getSerializerFor(String file) throws Exception {
+        LOG.debug("-Trying to read downloads.dat from \""+file+"\"");
+        File downloadDat = LimeTestUtils.getResourceInPackage(file, OldDownloadsTest.class);
+        File copiedDat = File.createTempFile("lwc", "copyDat");
+        CommonUtils.copyFile(downloadDat, copiedDat);
+        File newSaveFile = File.createTempFile("lwc", "saveTmp");
+        newSaveFile.delete();
+        
+        DownloadSerializeSettings oldSettings = new DownloadSerialSettingsStub(copiedDat, copiedDat);
+        DownloadSerializeSettings newSettings = new DownloadSerialSettingsStub(newSaveFile, newSaveFile);
+        
+        DownloadUpgradeTask downloadUpgradeTask = new DownloadUpgradeTask(new OldDownloadConverterImpl(), oldSettings, newSettings); 
+        downloadUpgradeTask.upgrade();
+        
+        return new DownloadSerializerImpl(newSettings);
+    }
+            
+    private static class TestActivityCallback extends ActivityCallbackStub {
+        private List<Downloader> downloaders=new LinkedList<Downloader>();
+    
+        public void addDownload(Downloader d) {
+            downloaders.add(d);
+        }
+    
+        public void removeDownload(Downloader d) {
+            downloaders.remove(d);
+        }
+        
+        public void clearDownloaders() {
+            downloaders.clear();
+        }
+    }
+}

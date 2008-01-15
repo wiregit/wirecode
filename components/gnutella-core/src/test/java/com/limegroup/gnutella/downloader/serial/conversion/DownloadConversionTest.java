@@ -18,19 +18,7 @@ import org.limewire.util.GenericsUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.limegroup.bittorrent.BTMetaInfo;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.downloader.serial.conversion.DownloadConverterObjectInputStream;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialBTDownloader;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialInNetworkDownloader;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialIncompleteFileManager;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialMagnetDownloader;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialManagedDownloader;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialRemoteFileDesc;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialRequeryDownloader;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialResumeDownloader;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialRoot;
-import com.limegroup.gnutella.downloader.serial.conversion.SerialStoreDownloader;
 import com.limegroup.gnutella.helpers.UrnHelper;
 
 public class DownloadConversionTest extends BaseTestCase {
@@ -124,20 +112,8 @@ public class DownloadConversionTest extends BaseTestCase {
         }
         
         {
-            SerialInNetworkDownloader sind = (SerialInNetworkDownloader)serialRead.get(2);
-            SerialRemoteFileDesc srfd = sind.getDefaultRFD();
-            Set<SerialRemoteFileDesc> setSRFD = sind.getRemoteFileDescs();
-            SerialIncompleteFileManager sifm = sind.getIncompleteFileManager();
-            Map<String, Serializable> properties = sind.getProperties();
- 
-            assertSame(sifm, serialIncompleteFileManager);
-            assertEquals(0, setSRFD.size());
-            assertNull(srfd);
-            assertEquals("updateName", properties.get("defaultFileName"));
-            assertEquals(12356, sind.getSize());
-            assertEquals("7OKOEWONKM27RIQPQCCLPKECC5FKUOPRFF2NDVI", sind.getTtRoot());
-            assertEquals(URN.createSHA1Urn("urn:sha1:MTSUIEFABDVUDXZMJEBQWNI6RVYHTNIJ"), sind.getUrn());
-            assertEquals(1235, sind.getStartTime());
+            // No need to check anything other than existence -- we don't convert these.
+            assertInstanceof(SerialInNetworkDownloader.class, serialRead.get(2));
         }
         
         {

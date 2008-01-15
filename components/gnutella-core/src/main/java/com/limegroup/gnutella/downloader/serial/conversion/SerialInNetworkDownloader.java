@@ -2,7 +2,8 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 
 import com.limegroup.gnutella.URN;
 
-class SerialInNetworkDownloader extends SerialManagedDownloader {
+@SuppressWarnings("unused")
+class SerialInNetworkDownloader extends SerialManagedDownloaderImpl {
     private static final long serialVersionUID = -7785186190441081641L;
     
     /** The size of the completed file. */    
@@ -19,27 +20,6 @@ class SerialInNetworkDownloader extends SerialManagedDownloader {
     
     /** The time we created this download */
     private long startTime;
-
-    public long getSize() {
-        return size;
-    }
-
-    public URN getUrn() {
-        return urn;
-    }
-
-    public String getTtRoot() {
-        return ttRoot;
-    }
-
-    public int getDownloadAttempts() {
-        return downloadAttempts;
-    }
-
-    public long getStartTime() {
-        return startTime;
-    }
-    
     
     
 }

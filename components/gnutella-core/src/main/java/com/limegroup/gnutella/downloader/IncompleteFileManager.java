@@ -25,7 +25,6 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.downloader.serial.DownloadSerializer.SavedDownloadInfo;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
@@ -367,9 +366,7 @@ public class IncompleteFileManager  {
     /**
      * Initializes entries with URNs, Files & Ranges.
      */
-    public synchronized void initEntry(SavedDownloadInfo serializedDownload, URN sha1, boolean store) throws InvalidDataException {
-        File incompleteFile = serializedDownload.getIncompleteFile();
-        List<Range> ranges = serializedDownload.getRanges();
+    public synchronized void initEntry(File incompleteFile, List<Range> ranges, URN sha1, boolean store) throws InvalidDataException {
         try {
             incompleteFile = canonicalize(incompleteFile);
         } catch(IOException iox) {
@@ -382,10 +379,12 @@ public class IncompleteFileManager  {
         } catch(IllegalArgumentException iae) {
             throw new InvalidDataException(iae);
         }
-        for(Range range : ranges) {
-            verifyingFile.addInterval(range);
+        if(ranges != null) {
+            for(Range range : ranges) {
+                verifyingFile.addInterval(range);
+            }
         }
-        if(ranges.isEmpty()) {
+        if(ranges == null || ranges.isEmpty()) {
             try {
                 verifyingFile.setScanForExistingBlocks(true, incompleteFile.length());
             } catch(IOException iox) {
@@ -395,7 +394,7 @@ public class IncompleteFileManager  {
         blocks.put(incompleteFile, verifyingFile);
         if(sha1 != null)
             hashes.put(sha1, incompleteFile);
-        if(store)
+        if(!store)
             registerIncompleteFile(incompleteFile);
         
     }

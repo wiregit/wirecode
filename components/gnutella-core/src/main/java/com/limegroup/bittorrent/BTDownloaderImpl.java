@@ -2,6 +2,7 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
@@ -23,6 +24,8 @@ import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
 /**
  * This class enables the rest of LW to treat this as a regular download.
@@ -35,7 +38,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	
 	private volatile long startTime, stopTime;
 	
-	private NumericBuffer<Float> averagedBandwidth = new NumericBuffer<Float>(10);
+	private final NumericBuffer<Float> averagedBandwidth = new NumericBuffer<Float>(10);
     
     /** Whether finish() has been invoked on this */
     private volatile boolean finished;
@@ -51,26 +54,27 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
      * Non-final because it's nulled when the torrent is done.
      */
     private volatile BTMetaInfo btMetaInfo;
+    private volatile TorrentContext torrentContext;    
         
     private final DownloadManager downloadManager;
     private final IncompleteFileManager incompleteFileManager;
-    private final TorrentContext torrentContext;    
     private final Provider<TorrentManager> torrentManager;
     private final BTUploaderFactory btUploaderFactory;
+    private final ManagedTorrentFactory managedTorrentFactory;
+    private final BTContextFactory btContextFactory;
 
     @Inject
 	BTDownloaderImpl(BTContextFactory btContextFactory,
             SaveLocationManager saveLocationManager, Provider<TorrentManager> torrentManager,
             BTUploaderFactory btUploaderFactory, DownloadManager downloadManager,
             ManagedTorrentFactory managedTorrentFactory) {
-	    super(saveLocationManager);
-        this.torrentContext = btContextFactory.createBTContext(btMetaInfo);        
+	    super(saveLocationManager);        
         this.downloadManager = downloadManager;
         this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
         this.incompleteFileManager = downloadManager.getIncompleteFileManager();
-        
-        this.torrent = managedTorrentFactory.create(torrentContext);
+        this.managedTorrentFactory = managedTorrentFactory;
+        this.btContextFactory = btContextFactory;
     }
     
     /* (non-Javadoc)
@@ -82,6 +86,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		    propertiesMap.put(METAINFO, btMetaInfo);
 		    propertiesMap.put(CoreDownloader.DEFAULT_FILENAME, btMetaInfo.getName());
 		}
+        this.torrentContext = btContextFactory.createBTContext(btMetaInfo);
+        this.torrent = managedTorrentFactory.create(torrentContext);
 	}
     
     @Override
@@ -489,5 +495,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     
     private TorrentFileSystem torrentFileSystem() {
         return btMetaInfo.getFileSystem();
+    }
+
+    public synchronized DownloadMemento toMemento() {
+        if(finished)
+            throw new IllegalStateException("writing finished BT download!");
+        return new BTDownloadMemento(new HashMap<String, Serializable>(propertiesMap));
     }
 }

@@ -34,20 +34,9 @@ import com.limegroup.gnutella.version.DownloadInformation;
  */
 class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetworkDownloader {
     
-    /** The size of the completed file. */    
-    private volatile long size;
-    
-    /** The URN to persist throughout sessions, even if no RFDs are remembered. */
-    private volatile URN urn;
-    
-    /** The TigerTree root for this download. */
-    private volatile String ttRoot;
-    
-    /** The number of times we have attempted this download */
-    private int downloadAttempts;
-    
-    /** The time we created this download */
-    private volatile long startTime;
+    private static String TT_ROOT = "innetwork.ttRoot";
+    private static String START_TIME = "innetwork.startTime";
+    private static String DOWNLOAD_ATTEMPTS = "innetwork.downloadAttempts";
     
     /** 
      * Constructs a new downloader that's gonna work off the network.
@@ -77,100 +66,90 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
      * @see com.limegroup.gnutella.downloader.InNetworkDownloader#initDownloadInformation(com.limegroup.gnutella.version.DownloadInformation, long)
      */
     public void initDownloadInformation(DownloadInformation downloadInformation, long startTime) {
-
-        // note: even though we support bigger files, this is a good sanity
-        // check
+        // note: even though we support bigger files, this is a good sanity check
         if (downloadInformation.getSize() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("size too big for now.");
-
-        this.size = downloadInformation.getSize();
-        this.urn = downloadInformation.getUpdateURN();
-        this.ttRoot = downloadInformation.getTTRoot();
-        this.startTime = startTime;
+        propertiesMap.put(FILE_SIZE, downloadInformation.getSize());
+        propertiesMap.put(SHA1_URN, downloadInformation.getUpdateURN());
+        propertiesMap.put(TT_ROOT, downloadInformation.getTTRoot());
+        propertiesMap.put(START_TIME, startTime);
+        propertiesMap.put(DOWNLOAD_ATTEMPTS, 0);
     }    
     
     /**
      * Overriden to use a different incomplete directory.
      */
-    protected File getIncompleteFile(IncompleteFileManager ifm, String name,
-                                     URN urn, int length) throws IOException {
-        return ifm.getFile(name, urn, length, new File(SharingUtils.PREFERENCE_SHARE, "Incomplete"));
+    @Override
+    protected File getIncompleteFile(String name, URN urn,
+                                     long length) throws IOException {
+        return incompleteFileManager.getFile(name, urn, length, new File(SharingUtils.PREFERENCE_SHARE, "Incomplete"));
     }
     
     /**
      * Gets a new SourceRanker, using only LegacyRanker (not PingRanker).
      */
+    @Override
     protected SourceRanker getSourceRanker(SourceRanker oldRanker) {
         if(oldRanker != null)
             return oldRanker;
         else
             return new LegacyRanker();
     }
-    
-    /**
-     * Overriden to ensure that the 'downloadSHA1' variable is set & we're listening
-     * for alternate locations.
-     */
-    public void initialize() {
-        super.initialize();
-        if (downloadSHA1 == null) {
-            downloadSHA1 = urn;
-            // the listener is removed by ManagedDownloader.finished()
-            altLocManager.addListener(downloadSHA1, this);
-        }
-    }
-    
+        
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.InNetworkDownloader#startDownload()
      */
+    @Override
     public synchronized void startDownload() {
-        downloadAttempts++;
+        Integer i = (Integer)propertiesMap.get(DOWNLOAD_ATTEMPTS);
+        if(i == null)
+            i = 1;
+        else
+            i = i+1;
+        propertiesMap.put(DOWNLOAD_ATTEMPTS, i);
         super.startDownload();
     }
     
-    protected boolean shouldValidate(boolean deserialized) {
+    @Override
+    protected boolean shouldValidate() {
         return false;
     }
     
     /**
      * Ensures that the VerifyingFile knows what TTRoot we're expecting.
      */
+    @Override
     protected void initializeVerifyingFile() throws IOException {
         super.initializeVerifyingFile();
         if(commonOutFile != null) {
-            commonOutFile.setExpectedHashTreeRoot(ttRoot);
+            commonOutFile.setExpectedHashTreeRoot((String)propertiesMap.get(TT_ROOT));
         }
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.InNetworkDownloader#getContentLength()
-     */
-    public synchronized long getContentLength() {
-        return size;
     }
     
     /**
-     * Sends a targetted query for this.
+     * Sends a targeted query for this.
      */
-    public synchronized QueryRequest newRequery() 
-    throws CantResumeException {
+    @Override
+    public synchronized QueryRequest newRequery() throws CantResumeException {
         QueryRequest qr = super.newRequery();
-        qr.setTTL((byte)2);
+        qr.setTTL((byte) 2);
         return qr;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.downloader.InNetworkDownloader#getNumAttempts()
      */
     public synchronized int getNumAttempts() {
-        return downloadAttempts;
+        return (Integer)propertiesMap.get(DOWNLOAD_ATTEMPTS);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.InNetworkDownloader#getStartTime()
      */
     public long getStartTime() {
-        return startTime;
+        return (Long)propertiesMap.get(START_TIME);
     }
     
     @Override

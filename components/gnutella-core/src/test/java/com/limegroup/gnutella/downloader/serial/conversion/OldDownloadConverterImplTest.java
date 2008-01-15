@@ -72,7 +72,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(true, rmem.isFirewalled());
             assertEquals("MNGD", rmem.getVendor());
             
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             Map<?, ?> attributes = (Map)properties.get("attributes");
             assertEquals("VALUE", attributes.get("KEY"));
             assertEquals(123L, properties.get("fileSize"));
@@ -102,7 +102,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(false, rmem.isReplyToMulticast());
             assertEquals(true, rmem.isFirewalled());
             assertEquals("STOR", rmem.getVendor());
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             assertEquals(new HashMap(), properties.get("attributes"));
             assertEquals(123L, properties.get("fileSize"));
             assertEquals("fileB.txt", properties.get("defaultFileName"));
@@ -118,7 +118,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(new File("T-123453-incompleteName"), mem.getIncompleteFile());
             assertEquals(0, mem.getRanges().size());
             assertEquals(0, mem.getRemoteHosts().size());            
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             assertEquals(new HashMap(), properties.get("attributes"));
             assertEquals(123453L, properties.get("fileSize"));
             assertEquals("incompleteName", properties.get("defaultFileName"));
@@ -132,7 +132,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(null, mem.getIncompleteFile());
             assertEquals(0, mem.getRanges().size());
             assertEquals(0, mem.getRemoteHosts().size());            
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             assertEquals(null, properties.get("fileSize"));
             assertEquals("magnetName", properties.get("defaultFileName"));
             assertEquals(UrnHelper.URNS[1], properties.get("sha1Urn"));
@@ -179,7 +179,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(1, mem.getRanges().size());
             assertEquals(Range.createRange(3276800, 3316399), mem.getRanges().get(0));
             
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             Map<?, ?> attributes = (Map)properties.get("attributes");
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
             assertEquals("*", so.getMediaType().getMimeType());
@@ -245,7 +245,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(Range.createRange(786432, 823029), mem.getRanges().get(1));
             assertEquals(Range.createRange(3801088, 3932159), mem.getRanges().get(2));
             
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             Map<?, ?> attributes = (Map)properties.get("attributes");
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
             assertEquals("*", so.getMediaType().getMimeType());
@@ -272,7 +272,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(Range.createRange(2621440, 2661103), mem.getRanges().get(4));
             assertEquals(Range.createRange(3145728, 3381279), mem.getRanges().get(5));
             
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             Map<?, ?> attributes = (Map)properties.get("attributes");
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
             assertEquals("*", so.getMediaType().getMimeType());
@@ -297,7 +297,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(Range.createRange(1572864, 1654783), mem.getRanges().get(2));
             assertEquals(Range.createRange(1835008, 2097151), mem.getRanges().get(3));
             
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             Map<?, ?> attributes = (Map)properties.get("attributes");
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
             assertEquals("*", so.getMediaType().getMimeType());
@@ -323,7 +323,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(Range.createRange(1310720, 2621439), mem.getRanges().get(3));
             assertEquals(Range.createRange(3145728, 3238639), mem.getRanges().get(4));
             
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             Map<?, ?> attributes = (Map)properties.get("attributes");
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
             assertEquals("*", so.getMediaType().getMimeType());
@@ -347,7 +347,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(Range.createRange(1572864, 1886959), mem.getRanges().get(1));
             assertEquals(Range.createRange(2097152, 2191925), mem.getRanges().get(2));
             
-            Map<String, Serializable> properties = mem.getProperties();
+            Map<String, Serializable> properties = mem.getPropertiesMap();
             Map<?, ?> attributes = (Map)properties.get("attributes");
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
             assertEquals("*", so.getMediaType().getMimeType());
@@ -378,7 +378,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         assertEquals(Range.createRange(0, 1310719), mem.getRanges().get(0));
         assertEquals(Range.createRange(4718592, 4890161), mem.getRanges().get(1));
         assertEquals(1, mem.getRemoteHosts().size());            
-        Map<String, Serializable> properties = mem.getProperties();
+        Map<String, Serializable> properties = mem.getPropertiesMap();
         assertEquals(12229522L, properties.get("fileSize"));
         assertEquals("01-steve_winwood-dear_mr_fantasy-jun.mp3", properties.get("defaultFileName"));
         assertEquals(URN.createSHA1Urn("urn:sha1:VSHERRKVKU4FZVUDOB6UVERRC2BOEBG4"), properties.get("sha1Urn"));
@@ -403,7 +403,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         assertEquals(1, mem.getRanges().size());
         assertEquals(Range.createRange(0, 131071), mem.getRanges().get(0));
         assertEquals(1, mem.getRemoteHosts().size());            
-        Map<String, Serializable> properties = mem.getProperties();
+        Map<String, Serializable> properties = mem.getPropertiesMap();
         assertEquals(12229522L, properties.get("fileSize"));
         assertEquals("01-steve_winwood-dear_mr_fantasy-jun.mp3", properties.get("defaultFileName"));
         assertEquals(URN.createSHA1Urn("urn:sha1:VSHERRKVKU4FZVUDOB6UVERRC2BOEBG4"), properties.get("sha1Urn"));

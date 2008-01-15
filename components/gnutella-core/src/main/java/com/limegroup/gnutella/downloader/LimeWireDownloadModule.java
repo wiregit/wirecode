@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTDownloaderImpl;
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettingsImpl;
@@ -37,8 +36,6 @@ public class LimeWireDownloadModule extends AbstractModule {
         bind(DownloadSerializeSettings.class).to(DownloadSerializeSettingsImpl.class);
         bind(OldDownloadConverter.class).to(OldDownloadConverterImpl.class);
         bind(DownloadSerializeSettings.class).annotatedWith(Names.named("oldDownloadSettings")).to(OldDownloadSettings.class);
-        
-        requestStaticInjection(IncompleteFileManager.class);
     }
 
 }

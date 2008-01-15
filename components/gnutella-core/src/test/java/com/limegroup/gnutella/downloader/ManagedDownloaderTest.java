@@ -1,12 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,6 +59,7 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -313,19 +310,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
-
-        //Serialize it!
-        ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        ObjectOutputStream out=new ObjectOutputStream(baos);
-        out.writeObject(downloader);
-        out.flush(); out.close();
+        
+        DownloadMemento memento = downloader.toMemento();
         downloader.stop();
-
-        //Deserialize it as a different instance.  Initialize.
-        ObjectInputStream in=new ObjectInputStream(
-            new ByteArrayInputStream(baos.toByteArray()));
-        downloader=(ManagedDownloaderImpl)in.readObject();
-        in.close();
+        downloader = (ManagedDownloader)downloadManager.prepareMemento(memento);
         downloader.initialize();
         requestStart(downloader);
 

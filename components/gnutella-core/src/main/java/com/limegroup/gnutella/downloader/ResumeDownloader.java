@@ -4,6 +4,6 @@ import java.io.File;
 
 public interface ResumeDownloader extends ManagedDownloader {
 
-    public void initIncompleteFile(File incompleteFile, String name, long size);
+    public void initIncompleteFile(File incompleteFile, long size);
 
 }

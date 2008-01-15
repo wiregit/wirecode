@@ -27,6 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
+import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -107,80 +108,80 @@ public class RemoteFileDesc implements IpPort, Connectable, FileDetails {
     private boolean _http11;
     
     /** True if this host is TLS capable. */
-    public transient boolean _tlsCapable;
+    public boolean _tlsCapable;
     
     /**
      * The <tt>PushEndpoint</tt> for this RFD.
      * if null, the rfd is not behind a push proxy.
      */
-    private transient PushEndpoint _pushAddr;
+    private PushEndpoint _pushAddr;
 		
 
     /**
      * The list of available ranges.
      * This is NOT SERIALIZED.
      */
-    private transient IntervalSet _availableRanges = null;
+    private IntervalSet _availableRanges = null;
     
     /**
      * The last known queue status of the remote host
      * negative values mean free slots
      */
-    private transient int _queueStatus = Integer.MAX_VALUE;
+    private int _queueStatus = Integer.MAX_VALUE;
     
     /**
      * The number of times this download has failed while attempting
      * to transfer data.
      */
-    private transient int _failedCount = 0;
+    private int _failedCount = 0;
 
     /**
      * The earliest time to retry this host in milliseconds since 01-01-1970
      */
-    private transient volatile long _earliestRetryTime = 0;
+    private volatile long _earliestRetryTime = 0;
 
     /**
      * The cached hash code for this RFD.
      */
-    private transient int _hashCode = 0;
+    private int _hashCode = 0;
 
     /**
      * Whether or not THEX retrieval has failed with this host.
      */
-    private transient boolean _THEXFailed = false;
+    private boolean _THEXFailed = false;
 
     /**
      * The cached RemoteHostData for this rfd.
      */
-    private transient RemoteHostData _hostData = null;
+    private RemoteHostData _hostData = null;
     
     /**
      * Whether or not this RFD is/was used for downloading.
      */
-    private transient volatile boolean _isDownloading = false;
+    private volatile boolean _isDownloading = false;
     
     /**
      * The creation time of this file.
      */
-    private transient long _creationTime;
+    private long _creationTime;
     
     /** Whether to serialize the push proxies */
-    private transient volatile boolean _serializeProxies = false;
+    private volatile boolean _serializeProxies = false;
 	
 	/**
 	 * the spam rating of this rfd.
 	 */
-	private transient float _spamRating = 0.f;
+	private float _spamRating = 0.f;
     
     /** the security of this RemoteFileDesc. */
-    private transient int _secureStatus = SecureMessage.INSECURE;
+    private int _secureStatus = SecureMessage.INSECURE;
     
-    private transient volatile long longSize;
+    private volatile long longSize;
         
     @Inject
     private static Provider<PushEndpointFactory> globalPushEndpointFactory;
     
-    private transient volatile PushEndpointFactory pushEndpointFactory;    
+    private volatile PushEndpointFactory pushEndpointFactory;    
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -957,4 +958,29 @@ public class RemoteFileDesc implements IpPort, Connectable, FileDetails {
     public void setSecureStatus(int secureStatus) {
         this._secureStatus = secureStatus;
     }
+    
+    /**
+     * Returns a memento that can be used for serializing this object.
+     */
+    public RemoteHostMemento toMemento() {
+        return new RemoteHostMemento(_host, _port, _filename, _index, _clientGUID, _speed,
+                longSize, _chatEnabled, _quality, _replyToMulticast, xmlString(), _urns,
+                _browseHostEnabled, _firewalled, _vendor, _http11, _tlsCapable, pushAddrString()); 
+    }
+    
+    private String xmlString() {
+        if(_xmlDocs == null || _xmlDocs.length == 0)
+            return null;
+        else
+            return _xmlDocs[0].getXMLString();
+    }
+    
+    private String pushAddrString() {
+        if(_serializeProxies && _pushAddr != null)
+            return _pushAddr.httpStringValue();
+        else
+            return null;
+    }
+    
+    
 }
