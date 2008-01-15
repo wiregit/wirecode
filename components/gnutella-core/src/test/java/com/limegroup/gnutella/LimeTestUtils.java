@@ -16,9 +16,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
+import org.limewire.util.Base32;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -227,5 +231,34 @@ public class LimeTestUtils {
         finally {
             IOUtils.close(s);
         }
+    }
+    
+    /**
+     * @return a <tt>Matcher</tt> to use with JMock that compares byte []
+     * using Arrays.equals
+     */
+    public static Matcher<byte []> createByteMatcher(byte [] toMatch) {
+        return new ByteMatcher(toMatch);
+    }
+    
+    private static class ByteMatcher extends BaseMatcher<byte []> {
+        
+        private final byte[] toMatch;
+        
+        ByteMatcher(byte [] toMatch) {
+            this.toMatch = toMatch;
+        }
+        
+        public boolean matches(Object item) {
+            if (! (item instanceof byte []))
+                return false;
+            byte [] b = (byte [])item;
+            return Arrays.equals(toMatch,b);
+        }
+
+        public void describeTo(Description description) {
+            description.appendText("byte [] matcher for "+Base32.encode(toMatch));
+        }
+        
     }
 }

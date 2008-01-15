@@ -1,26 +1,19 @@
 package com.limegroup.gnutella.browser;
 
+import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.util.EncodingUtils;
+import com.limegroup.gnutella.util.URLDecoder;
+import org.limewire.service.ErrorService;
+import org.limewire.util.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-
-import org.limewire.util.FileUtils;
-
-import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.EncodingUtils;
-import com.limegroup.gnutella.util.URLDecoder;
+import java.util.*;
 
 /**
  * Contains information fields extracted from a magnet link.
@@ -310,7 +303,8 @@ public class MagnetOptions implements Serializable {
 					return URN.createSHA1Urn(uri.getQuery());
 				}
 			} catch (URISyntaxException e) {
-			} catch (IOException e) {
+                ErrorService.error(e);
+            } catch (IOException e) {
 			}
 		}
 		return null;
@@ -414,7 +408,8 @@ public class MagnetOptions implements Serializable {
 					String nextURL = it.next();
 					new URI(nextURL);  // is it a valid URI?
 				} catch(URISyntaxException e) {
-					it.remove(); // if not, remove it from the list.
+                    ErrorService.error(e);
+                    it.remove(); // if not, remove it from the list.
 					localizedErrorMessage = e.getLocalizedMessage();
 				}
 			}
@@ -479,6 +474,7 @@ public class MagnetOptions implements Serializable {
                     return tempFileName;
                 }
             } catch (URISyntaxException e) {
+                ErrorService.error(e);
             }
         }
         try {

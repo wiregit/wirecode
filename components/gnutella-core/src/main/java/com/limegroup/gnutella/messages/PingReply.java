@@ -113,27 +113,6 @@ public interface PingReply extends Message {
      */
     boolean supportsUnicast();
 
-    /** Returns the 4-character vendor string associated with this Pong.
-     *
-     * @return the 4-character vendor code reported in the pong, or the
-     *  empty string if no vendor code was successfully read
-     */
-    String getVendor();
-
-    /** Returns the major version number of the vendor returning this pong.
-     * 
-     * @return the major version number of the vendor returning this pong,
-     *  or -1 if the version could not be read
-     */
-    int getVendorMajorVersion();
-
-    /** Returns the minor version number of the vendor returning this pong.
-     * 
-     * @return the minor version number of the vendor returning this pong,
-     *  or -1 if the version could not be read
-     */
-    int getVendorMinorVersion();
-
     /** Returns the AddressSecurityToken (if any) associated with this pong.  May be null!
      *
      * @return the <tt>AddressSecurityToken</tt> for this pong, or <tt>null</tt> if no

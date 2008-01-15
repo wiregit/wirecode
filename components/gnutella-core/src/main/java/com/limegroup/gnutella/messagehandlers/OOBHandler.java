@@ -9,11 +9,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.IntSet;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -28,8 +26,6 @@ import com.limegroup.gnutella.BypassedResultsCache;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -91,9 +87,14 @@ public class OOBHandler implements MessageHandler, Runnable {
 				
 		LimeACKVendorMessage ack;
         if (msg.isOOBv3()) {
-			ack = new LimeACKVendorMessage(g, toRequest, 
-                    new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest), 
-                            MACCalculatorRepositoryManager));
+            SecurityToken t = new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest), 
+                    MACCalculatorRepositoryManager); 
+			ack = new LimeACKVendorMessage(g, toRequest,t);
+			if (SearchSettings.CREATE_OOB_SESSIONS_EARLY.getValue()) {
+			    int hash = Arrays.hashCode(t.getBytes());
+			    OOBSession session = new OOBSession(t, toRequest, new GUID(msg.getGUID()), true);
+			    OOBSessions.put(hash,session);
+			}
         } else
             ack = new LimeACKVendorMessage(g, toRequest);
         
@@ -162,20 +163,20 @@ public class OOBHandler implements MessageHandler, Runnable {
          * Router will handle the reply if it
          * it has a route && we still expect results for this OOB session
          */
-        synchronized (OOBSessions) {
-            // if query is not of interest anymore return
-            GUID queryGUID = new GUID(reply.getGUID());
-            if (!router.isQueryAlive(queryGUID)) {
-                shouldAddBypassedSource = true;
-            }
-            else {
+        // if query is not of interest anymore return
+        GUID queryGUID = new GUID(reply.getGUID());
+        if (!router.isQueryAlive(queryGUID)) {
+            shouldAddBypassedSource = true;
+        }
+        else {
+            synchronized (OOBSessions) {
                 int hashKey = Arrays.hashCode(token.getBytes());
                 OOBSession session = OOBSessions.get(hashKey);
                 if (session == null) {
-                    session = new OOBSession(token, requestedResponseCount, queryGUID);
+                    session = new OOBSession(token, requestedResponseCount, queryGUID, false);
                     OOBSessions.put(hashKey, session);
                 }
-                
+
                 int remainingCount = session.getRemainingResultsCount() - numResps; 
                 if (remainingCount >= 0) {
                     if(LOG.isTraceEnabled())
@@ -230,97 +231,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         return null;
 	}
 
-    /**
-     * Keeps track of how many results have been received for a security
-     * token. 
-     */
-    private class OOBSession implements Inspectable {
-        // inspection-related fields
-        private final List<Long> responseTimestamps = new ArrayList<Long>(10);
-        private final List<Integer> responseCounts = new ArrayList<Integer>(10);
-        private final List<Integer> addedResponses = new ArrayList<Integer>(10);
-    	// end inspection-related fields
-        
-        private final SecurityToken token;
-        private final IntSet urnHashCodes;
-        
-        private IntSet responseHashCodes;
-        
-        private final int requestedResponseCount;
-        private final GUID guid;
-    	
-        private final long start;
-        
-        public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
-            this.token = token;
-            this.requestedResponseCount = requestedResponseCount;
-            this.urnHashCodes = new IntSet(requestedResponseCount);
-            this.guid = guid;
-            start = System.currentTimeMillis();
-    	}
-        
-        GUID getGUID() {
-            return guid;
-        }
-    	
-        /**
-         * Counts the responses uniquely. 
-         */
-        public int countAddedResponses(Response[] responses) {
-            int added = 0;
-            for (Response response : responses) {
-                Set<URN> urns = response.getUrns();
-                if (!urns.isEmpty()) {
-                    added += urnHashCodes.add(urns.iterator().next().hashCode()) ? 1 : 0;
-                }
-                else {
-                    // create lazily since responses should have urns
-                    if (responseHashCodes == null) {
-                        responseHashCodes = new IntSet();
-                    }
-                    added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
-                }
-            }
-            
-            // inspection-related code
-            responseTimestamps.add(System.currentTimeMillis());
-            responseCounts.add(responses.length);
-            addedResponses.add(added);
-            // end inspection-related code
-            
-            return added;
-        }
-        
-        /**
-         * Returns the number of results that are still expected to come in.
-         */
-        public final int getRemainingResultsCount() {
-            return requestedResponseCount - urnHashCodes.size() - (responseHashCodes != null ? responseHashCodes.size() : 0); 
-        }
-        
-    	public boolean equals(Object o) {
-    		if (! (o instanceof OOBSession))
-    			return false;
-    		OOBSession other = (OOBSession) o;
-    		return Arrays.equals(token.getBytes(), other.token.getBytes());
-    	}
-        
-        
-        public Object inspect() {
-            Map<String,Object> ret = new HashMap<String,Object>();
-            ret.put("start",start);
-            ret.put("urnh",urnHashCodes.size());
-            if (responseHashCodes != null)
-                ret.put("rhh",responseHashCodes.size());
-            ret.put("rrc",requestedResponseCount);
-            ret.put("timestamps",responseTimestamps);
-            ret.put("rcounts",responseCounts);
-            ret.put("added",addedResponses);
-            return ret;
-        }
-	}
-	
-	private void expire() {
+    private void expire() {
 		synchronized (OOBSessions) {
 			for (Iterator<Map.Entry<Integer, OOBSession>> iter = 
 			    OOBSessions.entrySet().iterator(); iter.hasNext();) {

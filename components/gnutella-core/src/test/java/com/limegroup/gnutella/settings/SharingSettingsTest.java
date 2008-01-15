@@ -3,7 +3,6 @@ package com.limegroup.gnutella.settings;
 import java.io.File;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -19,17 +18,7 @@ public class SharingSettingsTest extends LimeTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite(SharingSettingsTest.class);
-        return suite;
-    }
-    
-    public void setUp() throws Exception {
-        
-    }
-        
-    
-    public void tearDown() {
-       
+        return buildTestSuite(SharingSettingsTest.class);
     }
 
     /**
@@ -89,7 +78,7 @@ public class SharingSettingsTest extends LimeTestCase {
         File dir = new File(tmpFile.getParentFile(), "subdir");
         dir.mkdir();
         dir.deleteOnExit();
-        
+                
         // test the lws directory
         SharingSettings.setSaveLWSDirectory(dir);
         

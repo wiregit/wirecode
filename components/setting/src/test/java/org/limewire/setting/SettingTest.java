@@ -8,7 +8,6 @@ import java.util.BitSet;
 import java.util.Properties;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.OSUtils;
@@ -98,8 +97,7 @@ public class SettingTest extends BaseTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite(SettingTest.class);
-        return suite;
+        return buildTestSuite(SettingTest.class);
     }
     
     public void setUp() throws Exception {

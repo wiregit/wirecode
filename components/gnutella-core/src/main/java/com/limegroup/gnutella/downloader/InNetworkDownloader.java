@@ -56,8 +56,9 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
     /**
      * Overriden to use a different incomplete directory.
      */
+    @Override
     protected File getIncompleteFile(IncompleteFileManager ifm, String name,
-                                     URN urn, int length) throws IOException {
+                                     URN urn, long length) throws IOException {
         return ifm.getFile(name, urn, length, new File(SharingUtils.PREFERENCE_SHARE, "Incomplete"));
     }
     

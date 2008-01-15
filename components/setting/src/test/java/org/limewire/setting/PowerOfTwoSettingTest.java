@@ -3,7 +3,6 @@ package org.limewire.setting;
 import java.util.Properties;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.limewire.util.BaseTestCase;
 
@@ -21,16 +20,7 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite(PowerOfTwoSettingTest.class);
-        return suite;
-    }
-    
-    public void setUp() throws Exception {
-        
-    }
-        
-    public void tearDown() {
-       
+        return buildTestSuite(PowerOfTwoSettingTest.class);
     }
     
     public void testConstructors() throws Exception {

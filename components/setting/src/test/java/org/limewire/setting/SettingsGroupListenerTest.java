@@ -3,7 +3,6 @@ package org.limewire.setting;
 import java.io.File;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.limewire.setting.evt.SettingsGroupEvent;
 import org.limewire.setting.evt.SettingsGroupListener;
@@ -17,8 +16,7 @@ public class SettingsGroupListenerTest extends BaseTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite(SettingsGroupListenerTest.class);
-        return suite;
+        return buildTestSuite(SettingsGroupListenerTest.class);
     }
     
     public static void main(java.lang.String[] args) {

@@ -393,7 +393,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 will(returnValue(bis));
                 inSequence(requestSequence);
 
-                one(updateMessageVerifier).inflateNetworkData(with(any(byte [].class)));
+                one(updateMessageVerifier).inflateNetworkData(with(LimeTestUtils.createByteMatcher(b)));
                 byte[] inflated = new byte[2];
                 inSequence(requestSequence);
                 will(returnValue(inflated));
@@ -531,7 +531,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 will(returnValue(bis));
                 inSequence(requestSequence);
 
-                one(updateMessageVerifier).inflateNetworkData(with(any(byte [].class)));
+                one(updateMessageVerifier).inflateNetworkData(with(LimeTestUtils.createByteMatcher(b)));
                 byte[] inflated = new byte[2];
                 inSequence(requestSequence);
                 will(returnValue(inflated));

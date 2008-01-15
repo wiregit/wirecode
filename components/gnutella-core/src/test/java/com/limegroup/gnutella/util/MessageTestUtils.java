@@ -20,11 +20,6 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 public class MessageTestUtils {
 
     /**
-     * Cached constant for the vendor GGEP extension.
-     */
-    private static final byte[] CACHED_VENDOR = new byte[5];
-
-    /**
      * Should never be instantiated.
      */
     private MessageTestUtils() {}
@@ -171,20 +166,13 @@ public class MessageTestUtils {
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
         
         if (isGUESSCapable && isUltrapeer) {
-            // indicate guess support
-            byte[] vNum = {
-                convertToGUESSFormat(LimeWireUtils.getGUESSMajorVersionNumber(),
-                                     LimeWireUtils.getGUESSMinorVersionNumber())};
-            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
+            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
         }
         
         if (isUltrapeer) { 
             // indicate UP support
             addUltrapeerExtension(ggep, freeLeaf, freeUP);
         }
-        
-        // all pongs should have vendor info
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
 
         return ggep;
     }
@@ -198,43 +186,11 @@ public class MessageTestUtils {
      * @param ggep the <tt>GGEP</tt> instance to add the extension to
      */
     private static void addUltrapeerExtension(GGEP ggep, boolean freeLeaf, 
-                                              boolean freeUP) {
+                                              boolean freeUp) {
         byte[] payload = new byte[3];
-        // put version
-        payload[0] = convertToGUESSFormat(LimeWireUtils.getUPMajorVersionNumber(),
-                                          LimeWireUtils.getUPMinorVersionNumber()
-                                          );
-        if(freeLeaf) {
-            payload[1] = (byte)10;
-        } else {
-            payload[1] = (byte)0;
-        }
-        if(freeUP) {
-            payload[2] = (byte)10;
-        } else {
-            payload[2] = (byte)0;
-        }
-
-        // add it
+        payload[0] = 0;
+        payload[1] = freeLeaf ? (byte)10 : (byte)0;
+        payload[2] = freeUp ? (byte)10 : (byte)0;
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
-    }
-
-    /** 
-     * puts major as the high order bits, minor as the low order bits.
-     *
-     * @exception IllegalArgumentException thrown if major/minor is greater 
-     *  than 15 or less than 0.
-     */
-    private static byte convertToGUESSFormat(int major, int minor) 
-        throws IllegalArgumentException {
-        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
-            throw new IllegalArgumentException();
-        // set major
-        int retInt = major;
-        retInt = retInt << 4;
-        // set minor
-        retInt |= minor;
-
-        return (byte) retInt;
     }
 }

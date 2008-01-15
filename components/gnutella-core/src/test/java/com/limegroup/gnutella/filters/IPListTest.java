@@ -1,9 +1,8 @@
 package com.limegroup.gnutella.filters;
 
-import org.limewire.io.IP;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.limewire.io.IP;
 
 public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
     public IPListTest(String name) {
@@ -11,7 +10,7 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(IPListTest.class);
+        return buildTestSuite(IPListTest.class);
     }
 
     public static void main(String[] args) {

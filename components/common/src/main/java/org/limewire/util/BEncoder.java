@@ -130,17 +130,17 @@ public class BEncoder {
     }
 
     /**
-     * Bencodes the given List to the given OutputStream.
+     * Bencodes the given Iterable to the given OutputStream.
      * 
      * Writes "l" for list, the bencoded-form of each of the given objects, and then "e" for end.
      * 
      * @param output An OutputStream for this method to write bencoded data to
-     * @param list   A Java List object to bencode and write
+     * @param iterable   A Java Iterable object to bencode and write
      * @param encoding the encoding to apply to string objects.
      */
-    public void encodeList(List<?> list) throws IOException {
+    public void encodeList(Iterable<?> iterable) throws IOException {
         output.write(L);
-        for(Object next : list) 
+        for(Object next : iterable) 
             encode(next);
         output.write(E);
     }
@@ -199,8 +199,8 @@ public class BEncoder {
     private void encode(Object object) throws IOException {
     	if (object instanceof Map)
     		encodeDict((Map)object);
-    	else if (object instanceof List)
-    		encodeList((List)object);
+    	else if (object instanceof Iterable<?>)
+    		encodeList((Iterable<?>)object);
     	else if (object instanceof Number)
     		encodeInt((Number)object);
     	else if (object instanceof String)

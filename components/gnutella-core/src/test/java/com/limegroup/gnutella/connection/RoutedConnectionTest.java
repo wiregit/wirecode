@@ -167,7 +167,6 @@ public class RoutedConnectionTest extends ServerSideTestCase {
 
 		// not necessary check, and is difficult to mock right.
 		//assertTrue("incorrect daily uptime!", pr.getDailyUptime() > 0);
-		assertEquals("unexpected vendor", "LIME", pr.getVendor());
 		assertTrue("pong should have GGEP", pr.hasGGEPExtension());
 		out.close();
 		conn.close();

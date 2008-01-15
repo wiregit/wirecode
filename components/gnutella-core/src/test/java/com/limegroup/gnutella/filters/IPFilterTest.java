@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -46,7 +45,7 @@ public class IPFilterTest extends LimeTestCase {
     }
 
     public static Test suite() {
-        return new TestSuite(IPFilterTest.class);
+        return buildTestSuite(IPFilterTest.class);
     }
 
     public static void main(String[] args) {

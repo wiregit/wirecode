@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
@@ -192,7 +193,10 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         try {
             uri = new URI(url.toString());
         } catch (URISyntaxException e) {
-            throw new IOException("malormed URL: " + url, e);
+            ErrorService.error(e);
+            IOException ioe = new IOException("malormed URL: " + url);
+            ioe.initCause(e);
+            throw ioe;
         }
 
         return new URLRemoteFileDesc(

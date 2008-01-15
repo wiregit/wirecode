@@ -257,7 +257,8 @@ public class BTMetaInfo implements Serializable {
 			validateURI(trackerURI);
 			_trackers = new URI[] { trackerURI };
 		} catch (URISyntaxException mue) {
-			throw new ValueException("bad tracker: " + data.getAnnounce());
+            ErrorService.error(mue);
+            throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
         isPrivate = data.isPrivate();

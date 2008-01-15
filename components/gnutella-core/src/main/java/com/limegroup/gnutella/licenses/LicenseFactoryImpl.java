@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -153,6 +154,7 @@ public final class LicenseFactoryImpl implements LicenseFactory {
                 throw new URISyntaxException(uri.toString(), "Invalid authority: " + authority);
             
         } catch(URISyntaxException e) {
+            ErrorService.error(e);
             uri = null;
             LOG.error("Unable to create URI", e);
         }
