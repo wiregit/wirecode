@@ -155,6 +155,8 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactoryImpl;
+import com.limegroup.gnutella.messages.vendor.InspectionResponseFactory;
+import com.limegroup.gnutella.messages.vendor.InspectionResponseFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
@@ -185,6 +187,8 @@ import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.FECUtils;
+import com.limegroup.gnutella.util.FECUtilsImpl;
 import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateCollectionFactoryImpl;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -352,6 +356,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
+        bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
+        bind(FECUtils.class).to(FECUtilsImpl.class);
         
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);

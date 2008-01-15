@@ -22,5 +22,7 @@ public interface InspectionRequest extends Message {
     public IpPort getReturnAddress();
     
     public long getRoutableVersion();
+    
+    public boolean supportsEncoding();
 
 }
