@@ -455,6 +455,23 @@ public class DHTManagerImpl implements DHTManager {
             }
         };
         
+        @InspectionPoint("dht route table dump")
+        public Inspectable RTDump = new Inspectable() {
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                addVersion(data);
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    RouteTable routeTable = dht.getRouteTable();
+                    synchronized(routeTable) {
+                        data.put("active",routeTable.getActiveContacts());
+                        data.put("cached",routeTable.getCachedContacts());
+                    }
+                }
+                return data;
+            }
+        };
+        
         @InspectionPoint("dht route table class C networks")
         public Inspectable routeTableTop10Networks = new Inspectable() {
             public Object inspect() {
