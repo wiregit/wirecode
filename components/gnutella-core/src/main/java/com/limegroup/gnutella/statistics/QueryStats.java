@@ -1,15 +1,11 @@
 package com.limegroup.gnutella.statistics;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
@@ -41,7 +37,7 @@ public class QueryStats {
         return times.first();
     }
 
-    @InspectionPoint("user query stats")
+    @InspectionPoint("user query stats v3")
     @SuppressWarnings("unused")
     private final Inspectable queryStats = new Inspectable() {
         public Object inspect() {
@@ -49,29 +45,17 @@ public class QueryStats {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 /*
                  * version 1 used to send 10 search times in milliseconds
+                 * version 2 used to try to minimize return size
                  */
-                ret.put("ver",2);
+                ret.put("ver",3);
 
-                // if there are less than 200 items (800 bytes) just send them
-                if (times.getSize() <= 200) {
-                    byte[] b = new byte[times.getSize() * 4];
-                    for (int i = 0; i < times.getSize(); i++) {
-                        int time = Float.floatToIntBits((times.get(i)-lifecycleManager.getStartFinishedTime()) / 1000f);
-                        ByteOrder.int2beb(time, b, i*4);
-                    }
-
-                    ret.put("buf",b);
-                    return ret;
+                byte[] b = new byte[times.getSize() * 4];
+                for (int i = 0; i < times.getSize(); i++) {
+                    int time = Float.floatToIntBits((times.get(i)-lifecycleManager.getStartFinishedTime()) / 1000f);
+                    ByteOrder.int2beb(time, b, i*4);
                 }
 
-                // otherwise send the first 10 and some stats too
-                List<Double> l = new ArrayList<Double>();
-                for (long time : times)
-                    l.add((double)(time - lifecycleManager.getStartFinishedTime()));
-                Collections.sort(l);
-                ret.put("times",StatsUtils.quickStatsDouble(l).getMap()); // ~100 bytes
-                ret.put("timesh", StatsUtils.getHistogram(l, 20)); // ~80 bytes
-                ret.put("first10",l.subList(0,10)); // ~80 bytes
+                ret.put("buf",b);
                 return ret;
             }
         }
