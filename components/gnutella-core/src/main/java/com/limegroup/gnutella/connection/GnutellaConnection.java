@@ -263,7 +263,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     /**
      * The last clientGUID a Hops=0 QueryReply had.
      */
-    private byte[] clientGUID = DataUtils.EMPTY_GUID;
+    private volatile byte[] clientGUID = DataUtils.EMPTY_GUID;
 
     /**
      * Whether or not the HandshakeResponder should use locale preferencing
@@ -1358,6 +1358,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("pdn", getConnectionCapabilities().remostHostIsPassiveDHTNode());
         data.put("pan", getConnectionCapabilities().remostHostIsActiveDHTNode());
         data.put("myip", getConnectionCapabilities().getHeadersRead().props().getProperty(HeaderNames.REMOTE_IP));
+        data.put("cguid",getClientGUID());
         
         // add the writer stats if they exist
         for (StatsWriters name : statsWriters.keySet())

@@ -651,10 +651,19 @@ public final class RouteTable  {
                 m.put("rt", e.resultTimeStamps);
                 m.put("rc", e.resultCounts);
                 m.put("ct", e.creationTime);
+                m.put("id", e.handlerID);
                 m.put("nets", getBytes(e.networks));
                 m.put("hops", getBytes(e.hops));
                 m.put("ttls", getBytes(e.ttls));
                 ret.put(Base32.encode(entry.getKey()), m);
+            }
+            for (int id : _idMap.keySet()) {
+                ReplyHandler r = _idMap.get(id);
+                Map<String,Object> m = new HashMap<String,Object>();
+                m.put("ip",r.getAddress());
+                m.put("port", r.getPort());
+                m.put("cguid",r.getClientGUID());
+                ret.put(String.valueOf(id),m);
             }
             return ret;
         }
