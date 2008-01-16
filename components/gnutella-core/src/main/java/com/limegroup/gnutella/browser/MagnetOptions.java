@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -40,7 +41,7 @@ public class MagnetOptions implements Serializable {
         
         public static Option valueFor(String str) {
             for(Option option : values()) {
-                if(str.toUpperCase().startsWith(option.toString()))
+                if(str.toUpperCase(Locale.US).startsWith(option.toString()))
                     return option;
             }
             return null;

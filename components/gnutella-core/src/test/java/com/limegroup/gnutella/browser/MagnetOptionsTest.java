@@ -2,6 +2,7 @@ package com.limegroup.gnutella.browser;
 
 import org.limewire.util.BaseTestCase;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.EncodingUtils;
 
@@ -166,6 +167,19 @@ public class MagnetOptionsTest extends BaseTestCase {
                     + System.getProperty("line.separator")
                     + "magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
         assertEquals("Should have parsed 2 magnets", 4, opts.length);
+    }
+    
+    public void testOldMagnetOptionsSwallowsGuidUrns() {
+        String prefix = "magnet:?dn=filename&kt=keyword&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C";
+        String guidUrn = "urn:guid:" + new GUID().toHexString();
+        String magnet = prefix + "&xs=" + guidUrn;
+        MagnetOptions opts = MagnetOptions.parseMagnet(magnet)[0];
+        assertContains(opts.getXS(), guidUrn);
+        
+        // same for alternate sources
+        magnet = prefix + "&as=" + guidUrn;
+        opts = MagnetOptions.parseMagnet(magnet)[0];
+        assertContains(opts.getAS(), guidUrn);
     }
     
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {

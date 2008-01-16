@@ -12,8 +12,7 @@ import java.util.Set;
  * This is not backed by a HashSet because there are
  * so few URN types that it doesn't need to be.
  * 
- * This currently only supports SHA1 URNs, and thus will
- * only allow a single URN to be added.  If further
+ * This currently only supports SHA1 and TTROOT URNs. If further
  * UrnTypes are created, this class will have to be updated.
  * (Note that there'll have to be MANY changes.)
  * 

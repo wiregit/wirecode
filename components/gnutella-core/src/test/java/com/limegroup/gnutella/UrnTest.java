@@ -2,10 +2,11 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.limewire.util.CommonUtils;
+import java.util.Locale;
 
 import junit.framework.Test;
+
+import org.limewire.util.CommonUtils;
 
 
 /**
@@ -345,4 +346,32 @@ public final class UrnTest extends com.limegroup.gnutella.util.LimeTestCase {
 		}
 	}
 	
+	public void testCreateGUIDUrn() throws IOException {
+	    // test valid urns, we can reuse sha1 urns and just replace sha1 with guid
+	    for (String sha1URN : VALID_URNS) {
+	        String guidURN = sha1URN.toLowerCase(Locale.US).replace("sha1", "guid");
+	        URN urn = URN.createGUIDUrn(guidURN);
+	        assertNotNull(urn);
+	        assertSame(URN.Type.GUID, urn.getUrnType());
+	    }
+	    
+	    // invalid sha1 urns should also be invalid guid urns
+	    for (String sha1URN : INVALID_URNS) {
+	        String guidURN = sha1URN.toLowerCase(Locale.US).replace("sha1", "guid");
+	        try {
+	            URN urn = URN.createGUIDUrn(guidURN);
+	            fail("urn should not have been created for invalid input: " + urn + " original: " + sha1URN);
+	        } catch (IOException ie) {
+	        }
+	    }
+	    
+	    // valid sha1 urns should not be guid urns
+	    for (String sha1URN : VALID_SHA1_URNS) {
+            try {
+                URN urn = URN.createGUIDUrn(sha1URN);
+                fail("urn should not have been created for invalid input: " + urn + " original: " + sha1URN);
+            } catch (IOException ie) {
+            }
+        }
+	}
 }
