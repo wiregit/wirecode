@@ -63,44 +63,67 @@ public class InspectionUtils {
     private static Object getTargetObject(String encodedField, List<Annotation> annotations, Injector injector) 
     throws Throwable {
 
-        // see if this is old-style path
+        // Easy static style lookup.
         if (encodedField.contains(":"))
             return getTargetStaticObject(encodedField, annotations);
+        
+        // Slightly harder case where there's an inner class we have to instantiate,
+        // but it isn't within the container class.
+        Class<?> lookup = null;
+        Class<?> container = null;
+        
+        if(encodedField.contains("|")) {
+            StringTokenizer tokenizer = new StringTokenizer(encodedField, "|");
+            lookup = Class.forName(tokenizer.nextToken());
+            encodedField = tokenizer.nextToken();
+        }
         
         StringTokenizer t = new StringTokenizer(encodedField, ",");
         if (t.countTokens() < 2)
             throw new InspectionException();
         
-        // the first token better be fully qualified class name
         Class<?> clazz = Class.forName(t.nextToken());
+        if(lookup != null) {
+            container = clazz;
+            // Verify that there's an enclosing class.
+            if(clazz.getEnclosingClass() == null)
+                throw new InspectionException("must be a container!");
+            // Verify that the enclosing class is assignable from
+            // our lookup class.
+            if(!lookup.isAssignableFrom(clazz.getEnclosingClass()))
+                throw new InspectionException("wrong container!");
+        } else {
+            container = clazz;
+            if(clazz.getEnclosingClass() != null)
+                lookup = clazz.getEnclosingClass();
+        }
+        
 
         // try to find an instance of the object
         Object instance;
         
         // check if this is an enclosed class
-        Class<?> enclosing = clazz.getEnclosingClass();
-        if (enclosing == null) {
-            if (clazz.getAnnotation(Singleton.class) == null)
-                throw new InspectionException();
-            instance = injector.getInstance(clazz);
-        } else {
-            
+        if (lookup == null) {
+            if (container.getAnnotation(Singleton.class) == null && !container.isInterface())
+                throw new InspectionException("must have singleton annotation or be interface!");
+            instance = injector.getInstance(container);
+        } else {            
             // inner classes must be annoated properly
-            if (enclosing.getAnnotation(Singleton.class) == null)
-                throw new InspectionException();
-            if (clazz.getAnnotation(InspectableContainer.class) == null)
-                throw new InspectionException();
+            if (lookup.getAnnotation(Singleton.class) == null && !lookup.isInterface())
+                throw new InspectionException("lookup class must be singleton or interface!");
+            if (container.getAnnotation(InspectableContainer.class) == null)
+                throw new InspectionException("container must be annotated with InspectableContainer");
             
             // if inner, create one
-            Object enclosingObj = injector.getInstance(enclosing);
-            Constructor []constructors  = clazz.getDeclaredConstructors();
+            Object enclosingObj = injector.getInstance(lookup);
+            Constructor[] constructors = container.getDeclaredConstructors();
             if (constructors.length != 1)
-                throw new InspectionException();
-            Class [] parameters = constructors[0].getParameterTypes();
-            if (parameters.length != 1 || !parameters[0].equals(enclosing)) 
-                throw new InspectionException();
+                throw new InspectionException("wrong constructors length: " + constructors.length);
+            Class[] parameters = constructors[0].getParameterTypes();
+            if (parameters.length != 1 || !lookup.isAssignableFrom(parameters[0]))
+                throw new InspectionException("wrong parameter count or type for constructor");
             constructors[0].setAccessible(true);
-            instance = constructors[0].newInstance(new Object[]{enclosingObj});
+            instance = constructors[0].newInstance(new Object[] { enclosingObj });
         }
         
         while (t.hasMoreTokens())

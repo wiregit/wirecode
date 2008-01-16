@@ -14,7 +14,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 
-@SuppressWarnings("unchecked")
 public class InspectionUtilsTest extends BaseTestCase {
     public InspectionUtilsTest(String name) {
         super(name);
@@ -32,6 +31,7 @@ public class InspectionUtilsTest extends BaseTestCase {
                 bind(TestInterface2.class).to(TestClass2.class);
                 bind(SyncListInterface.class).to(SyncList.class);
                 bind(OutterI.class).to(Outter.class);
+                bind(Parent.class).to(ConcreteChild.class);
             }
         };
         injector = Guice.createInjector(m);
@@ -131,8 +131,8 @@ public class InspectionUtilsTest extends BaseTestCase {
     
     public void testInspectableForSize() throws Exception {
         TestInterface t = injector.getInstance(TestInterface.class);
-        List member = new ArrayList();
-        List inspectable= new ArrayList();
+        List<Object> member = new ArrayList<Object>();
+        List<Object> inspectable= new ArrayList<Object>();
         member.add(new Object());
         inspectable.add(new Object());
         inspectable.add(new Object());
@@ -151,7 +151,7 @@ public class InspectionUtilsTest extends BaseTestCase {
     
     
 
-    
+    @SuppressWarnings("unchecked")
     public void testSyncCollection() throws Exception {
         SyncList syncList = injector.getInstance(SyncList.class);
         syncList.l = Collections.synchronizedList(new ArrayList());
@@ -162,6 +162,11 @@ public class InspectionUtilsTest extends BaseTestCase {
     public void testContainer() throws Exception {
         Object ret = InspectionUtils.inspectValue("org.limewire.inspection.Outter$Inner,inspectable", injector);
         assertEquals("asdf",ret);
+    }
+    
+    public void testContainerInParent() throws Exception {
+        Object ret = InspectionUtils.inspectValue("org.limewire.inspection.Parent|org.limewire.inspection.AbstractParent$Inner,inspectable", injector);
+        assertEquals("abcd", ret);
     }
 }
 
@@ -292,3 +297,20 @@ class NotGuiced {
     
     static Inspectable inspectable;
 }
+
+interface Parent {}
+
+@SuppressWarnings("unused")
+abstract class AbstractParent implements Parent {
+    @InspectableContainer
+    private class Inner {
+        private final Inspectable inspectable = new Inspectable() {
+            public Object inspect() {
+                return "abcd";
+            }
+        };
+    }
+}
+
+@Singleton
+class ConcreteChild extends AbstractParent {}

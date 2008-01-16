@@ -19,7 +19,13 @@ package org.limewire.inspection;
  */
 public class InspectionException extends Exception {
 
-    public InspectionException(){}
+    public InspectionException() {
+    }
+
+    public InspectionException(String msg) {
+        super(msg);
+    }
+
     public InspectionException(Throwable cause) {
         super(cause);
     }
