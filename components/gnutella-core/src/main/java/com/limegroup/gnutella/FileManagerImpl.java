@@ -47,7 +47,6 @@ import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
@@ -72,7 +71,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *
  * This class is thread-safe.
  */
-@Singleton
+//@Singleton // abstract, so not a singleton -- subclasses are.
 public abstract class FileManagerImpl implements FileManager {
 	
     private static final Log LOG = LogFactory.getLog(FileManagerImpl.class);

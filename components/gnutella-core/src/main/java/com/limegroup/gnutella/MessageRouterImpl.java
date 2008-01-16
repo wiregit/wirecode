@@ -48,7 +48,6 @@ import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.Connection;
@@ -128,7 +127,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * as they pass through.  To do so, it aggregates a ConnectionManager that
  * maintains a list of connections.
  */
-@Singleton
+//@Singleton // not here because it's not constructed, subclass is!
 public abstract class MessageRouterImpl implements MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(MessageRouterImpl.class);
@@ -154,12 +153,14 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
+    @InspectionPoint("ping routing table dump")
     private RouteTable _pingRouteTable = 
         new RouteTable(2*60, MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
      * typically around 13000 entries, but never more than 100,000 entries.
      */
+    @InspectionPoint("query routing table dump")
     private RouteTable _queryRouteTable = 
         new RouteTable(5*60, MAX_ROUTE_TABLE_SIZE);
     /**
@@ -167,6 +168,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * minutes, typically around 3500 entries, but never more than 100,000
      * entries.  
      */
+    @InspectionPoint("push routing table dump")
     private RouteTable _pushRouteTable = 
         new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
     
@@ -174,6 +176,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * Maps HeadPong guids to the originating pingers.  Short-lived since
      * we expect replies from our leaves quickly.
      */
+    @InspectionPoint("headpong routing table dump")
     private RouteTable _headPongRouteTable = 
     	new RouteTable(10, MAX_ROUTE_TABLE_SIZE);
 

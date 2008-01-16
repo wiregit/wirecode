@@ -89,6 +89,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         }};
     }
     
+    @SuppressWarnings("unchecked")
     public void testRespondsToRequest() throws Exception {
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         mockery.checking(createExpectations(request, false, "inspected"));

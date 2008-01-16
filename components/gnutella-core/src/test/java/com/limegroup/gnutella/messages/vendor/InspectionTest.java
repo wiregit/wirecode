@@ -7,7 +7,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.Inflater;
@@ -40,9 +39,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
-import com.onionnetworks.fec.FECCode;
-import com.onionnetworks.fec.FECCodeFactory;
-import com.onionnetworks.util.Buffer;
 
 @Singleton
 public class InspectionTest extends ServerSideTestCase {

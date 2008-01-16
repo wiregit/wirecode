@@ -79,8 +79,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * 
  */
 @Singleton
-public class UPnPManager extends ControlPoint implements DeviceChangeListener {
-
+public class UPnPManager  {
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
 	/** some schemas */
@@ -125,31 +124,33 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	
 	private final AtomicBoolean started = new AtomicBoolean(false);
 	
+	private final ControlPoint controlPoint;
+	
 	@Inject
 	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
 	    this.lifecycleManager = lifecycleManager;	
 	    this.acceptor = acceptor;
+	    this.controlPoint = new ControlPoint();
     }
     
-	@Override
-    public boolean start() {
+    public void start() {
         if (!started.getAndSet(true)) {
             LOG.debug("Starting UPnP Manager.");
-
-            addDeviceChangeListener(this);
+            controlPoint.addDeviceChangeListener(new DeviceListener());
 
             synchronized (DEVICE_LOCK) {
                 try {
-                    return super.start();
+                    controlPoint.start();
                 } catch (Exception bad) {
                     ConnectionSettings.DISABLE_UPNP.setValue(true);
                     ErrorService.error(bad);
-                    return false;
                 }
             }
-        } else {
-            return false; // already started
         }
+    }
+    
+    public void stop() {
+        controlPoint.stop();
     }
 	
 	/**
@@ -206,40 +207,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
         }
         
     }
-	
-	/**
-	 * this method will be called when we discover a UPnP device.
-	 */
-	public void deviceAdded(Device dev) {
-        if (isNATPresent())
-            return;
-	    synchronized(DEVICE_LOCK) {
-            if(LOG.isTraceEnabled())
-                LOG.trace("Device added: " + dev.getFriendlyName());
-    		
-    		// did we find a router?
-    		if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
-    			_router = dev;
-    		
-    		if (_router == null) {
-    			LOG.debug("didn't get router device");
-    			return;
-    		}
-    		
-    		discoverService();
-    		
-    		// did we find the service we need?
-    		if (_service == null) {
-    			LOG.debug("couldn't find service");
-    			_router=null;
-    		} else {
-    		    if(LOG.isDebugEnabled())
-    		        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
-                DEVICE_LOCK.notify();
-    			stop();
-    		}
-        }
-	}
 	
 	/**
 	 * Traverses the structure of the router device looking for 
@@ -452,10 +419,42 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
     	    return _guidSuffix;
         }
 	}
-	/**
-	 * stub 
-	 */
-	public void deviceRemoved(Device dev) {}
+	
+	private class DeviceListener implements DeviceChangeListener {
+        /** this method will be called when we discover a UPnP device. */
+        public void deviceAdded(Device dev) {
+            if (isNATPresent())
+                return;
+            synchronized(DEVICE_LOCK) {
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Device added: " + dev.getFriendlyName());
+                
+                // did we find a router?
+                if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
+                    _router = dev;
+                
+                if (_router == null) {
+                    LOG.debug("didn't get router device");
+                    return;
+                }
+                
+                discoverService();
+                
+                // did we find the service we need?
+                if (_service == null) {
+                    LOG.debug("couldn't find service");
+                    _router=null;
+                } else {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
+                    DEVICE_LOCK.notify();
+                    stop();
+                }
+            }
+        }
+    	
+    	public void deviceRemoved(Device dev) {}
+	}
 	
 	private final class Mapping {
 		public final String _externalAddress;
