@@ -1,7 +1,8 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader;
 
 import java.io.File;
 import java.io.IOException;
+
 
 
 /**
@@ -40,7 +41,7 @@ public class WMAMetaData extends AudioMetaData {
         setArtist(data.getArtist());
         setYear(data.getYear());
         setComment(data.getComment());
-        setTrack(data.getTrack());
+        setTrack(String.valueOf(data.getTrack()));
         setBitrate(data.getBitrate());
         setLength(data.getLength());
         setGenre(data.getGenre());

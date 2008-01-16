@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.metadata.WRMXML;
-import com.limegroup.gnutella.metadata.WeedInfo;
+import com.limegroup.gnutella.metadata.reader.AudioMetaData;
+import com.limegroup.gnutella.metadata.reader.WRMXML;
+import com.limegroup.gnutella.metadata.reader.WeedInfo;
 
 public enum LicenseType {    
     NO_LICENSE(""),

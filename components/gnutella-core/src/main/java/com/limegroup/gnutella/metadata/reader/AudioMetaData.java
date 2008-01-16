@@ -4,7 +4,7 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public abstract class AudioMetaData extends MetaData {
     private String album ;
     private String year;
     private String comment;
-    private short track = -1;
+    private String track;
     private String genre;
     private int bitrate = -1;
     private int length = -1;
@@ -53,15 +53,15 @@ public abstract class AudioMetaData extends MetaData {
     }
     
     
-    public static AudioMetaData parseAudioFile(File f) throws IOException {
+    public static AudioMetaData parseAudioFile(File f) throws IOException { 
     	if (LimeXMLUtils.isMP3File(f))
     		return new MP3MetaData(f);
     	if (LimeXMLUtils.isOGGFile(f))
-    	    return new AudioMetaDataReader(f);
+    	    return new AudioDataReader(f);
 		if (LimeXMLUtils.isFLACFile(f))
-    		return new AudioMetaDataReader(f);
+    		return new AudioDataReader(f);
     	if (LimeXMLUtils.isM4AFile(f))
-    	    return new M4AMetaData(f);
+    	    return new AudioDataReader(f);
         if (LimeXMLUtils.isWMAFile(f))
             return new WMAMetaData(f);
     	
@@ -86,7 +86,7 @@ public abstract class AudioMetaData extends MetaData {
     public String getAlbum() { return album; }
     public String getYear() { return year; }
     public String getComment()  { return comment; }
-    public short getTrack() { return track; }
+    public String getTrack() { return track; }
     public short getTotalTracks() {return totalTracks;}
     public short getDisk() {return disk;}
     public short getTotalDisks() {return totalDisks;}
@@ -105,7 +105,7 @@ public abstract class AudioMetaData extends MetaData {
     void setAlbum(String album) { this.album = album; }
     void setYear(String year) { this.year = year; }
     void setComment(String comment) { this.comment = comment; }    
-    void setTrack(short track) { this.track = track; }    
+    void setTrack(String track) { this.track = track; }    
     void setTotalTracks(short total) { totalTracks = total; }    
     void setDisk(short disk) { this.disk =disk; }
     void setTotalDisks(short total) { totalDisks=total; }

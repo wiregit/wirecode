@@ -1,5 +1,5 @@
 
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.writer;
 
 
 import org.jaudiotagger.audio.AudioFile;
@@ -11,12 +11,13 @@ import org.jaudiotagger.tag.id3.ID3v23Tag;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
-
 /**
- * An editor specifically for mp3 files with id3 tags
+ * Returns the correct ID3 tag for the mp3. ID3v2 tags are considered better than
+ * version ID3v1 tags. There for if both tags exists, the ID3v2 tag is updated. 
+ * If no tag exists yet, creates and returns an ID3v2.3. If we happen across a 
+ * ID3v1.0 tag, we update it to a ID3v1.1b tag which adds comments, track and genre. 
  */
 public class MP3DataEditor extends AudioDataEditor {
-
     @Override
     protected Tag createTag(AudioFile audioFile) {
         
@@ -40,7 +41,6 @@ public class MP3DataEditor extends AudioDataEditor {
             return new ID3v23Tag();
         }
     }
-
 
     @Override
     protected boolean isValidFileType(String fileName) {

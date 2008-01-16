@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.writer;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;

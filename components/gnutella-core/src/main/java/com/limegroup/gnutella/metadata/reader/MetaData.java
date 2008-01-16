@@ -1,5 +1,5 @@
 
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.NameValue;
 
+import com.limegroup.gnutella.metadata.reader.video.VideoMetaData;
+import com.limegroup.gnutella.metadata.reader.video.WMVMetaData;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**

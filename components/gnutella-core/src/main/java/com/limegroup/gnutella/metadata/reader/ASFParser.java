@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -18,6 +18,8 @@ import org.limewire.util.ByteOrder;
 
 
 
+
+
 /**
  * A parser for reading ASF files.
  * Everything we understand is stored.
@@ -29,7 +31,7 @@ import org.limewire.util.ByteOrder;
  * which in turn was based off the work from the avifile project, at 
  *  http://avifile.sourceforge.net/ .
  */
-class ASFParser {
+public class ASFParser {
     
     private static final Log LOG = LogFactory.getLog(ASFParser.class); 
     
@@ -49,27 +51,27 @@ class ASFParser {
     private WeedInfo _weed;
     private WRMXML _wrmdata;
     
-    String getAlbum() { return _album; }
-    String getArtist() { return _artist; }
-    String getTitle() { return _title; }
-    String getYear() { return _year; }
-    String getCopyright() { return _copyright; }
-    String getRating() { return _rating; }
-    String getGenre() { return _genre; }
-    String getComment() { return _comment; }
-    short getTrack() { return _track; }
-    int getBitrate() { return _bitrate; }
-    int getLength() { return _length; }
-    int getWidth() { return _width; }
-    int getHeight() { return _height; }
+    public String getAlbum() { return _album; }
+    public String getArtist() { return _artist; }
+    public String getTitle() { return _title; }
+    public String getYear() { return _year; }
+    public String getCopyright() { return _copyright; }
+    public String getRating() { return _rating; }
+    public String getGenre() { return _genre; }
+    public String getComment() { return _comment; }
+    public short getTrack() { return _track; }
+    public int getBitrate() { return _bitrate; }
+    public int getLength() { return _length; }
+    public int getWidth() { return _width; }
+    public int getHeight() { return _height; }
     
     WeedInfo getWeedInfo() { return _weed; }
     WRMXML getWRMXML() { return _wrmdata; }
     
     boolean hasAudio() { return _hasAudio; }
-    boolean hasVideo() { return _hasVideo; }
+    public boolean hasVideo() { return _hasVideo; }
     
-    String getLicenseInfo() {
+    public String getLicenseInfo() {
         if(_weed != null)
             return _weed.getLicenseInfo();
         else if(_wrmdata != null && _drmType != null)
@@ -81,7 +83,7 @@ class ASFParser {
     /**
      * Constructs a new ASFParser based off the given file, parsing all the known properties.
      */
-    ASFParser(File f) throws IOException {
+    public ASFParser(File f) throws IOException {
         parseFile(f);
     }
 

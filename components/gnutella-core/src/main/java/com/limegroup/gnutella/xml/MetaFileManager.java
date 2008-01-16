@@ -27,7 +27,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.reader.AudioMetaData;
 
 /**
  * This class handles querying shared files with XML data and returning XML data

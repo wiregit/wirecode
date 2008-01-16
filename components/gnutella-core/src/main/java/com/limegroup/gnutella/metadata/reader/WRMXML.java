@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader;
 
 import java.io.IOException;
 

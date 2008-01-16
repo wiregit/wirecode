@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader.video;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
@@ -12,6 +12,8 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 import org.limewire.io.Pools;
+
+
 
 
 /**

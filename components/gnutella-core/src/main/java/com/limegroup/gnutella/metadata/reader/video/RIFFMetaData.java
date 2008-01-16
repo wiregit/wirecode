@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader.video;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -8,6 +8,8 @@ import java.io.InputStream;
 
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteOrder;
+
+
 
 
 public class RIFFMetaData extends VideoMetaData {

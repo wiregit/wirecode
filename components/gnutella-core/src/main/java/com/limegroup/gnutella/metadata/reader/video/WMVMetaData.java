@@ -1,7 +1,10 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader.video;
 
 import java.io.File;
 import java.io.IOException;
+
+import com.limegroup.gnutella.metadata.reader.ASFParser;
+
 
 
 /**
@@ -11,7 +14,7 @@ public class WMVMetaData extends VideoMetaData {
     
     /** Sets WMV data. */
     public WMVMetaData(File f) throws IOException {
-        super(f);
+        super();
     }
     
     /** Constructs a WMVMetadata from a parser. */

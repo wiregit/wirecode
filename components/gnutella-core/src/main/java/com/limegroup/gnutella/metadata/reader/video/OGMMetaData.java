@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader.video;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -10,6 +10,8 @@ import java.util.Set;
 
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteOrder;
+
+
 
 
 public class OGMMetaData extends VideoMetaData {

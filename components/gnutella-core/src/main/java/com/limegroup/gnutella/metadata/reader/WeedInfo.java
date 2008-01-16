@@ -1,4 +1,6 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.reader;
+
+
 
 /**
  * Encapsulates information about Weedified files.
