@@ -54,6 +54,7 @@ public class MagnetOptions implements Serializable {
 	private transient String localizedErrorMessage;
 	private transient URN urn;
 	private transient String extractedFileName;
+	private transient List<URN> guidUrns;
 	
 	/**
 	 * Creates a MagnetOptions object from file details.
@@ -167,8 +168,8 @@ public class MagnetOptions implements Serializable {
 		if ( arg.endsWith("'") )
 			arg = arg.substring(0,arg.length()-1);
 		
-		// Parse query  -  TODO: case sensitive?
-		if ( !arg.startsWith(MagnetOptions.MAGNET) )
+		// Parse query
+		if (!arg.toLowerCase(Locale.US).startsWith(MagnetOptions.MAGNET))
 			return new MagnetOptions[0];
 
 		// Parse and assemble magnet options together.
@@ -325,8 +326,18 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
 	public boolean isDownloadable() {
-		 return getDefaultURLs().length > 0  
-		 || (getSHA1Urn() != null && getQueryString() != null);
+		 if (getDefaultURLs().length > 0) {
+		     return true;
+		 }
+		 if (getSHA1Urn() != null) {
+		     if (getQueryString() != null) {
+		         return true;
+		     }
+		     if (!getGUIDUrns().isEmpty()) {
+		         return true;
+		     }
+		 }
+		 return false;
 	}
 	
 	/**
@@ -394,10 +405,27 @@ public class MagnetOptions implements Serializable {
 		return urls;
 	}
 	
+	private List<String> getPotentialURNs() {
+        List<String> urls = new ArrayList<String>();
+        urls.addAll(getPotentialURNs(getExactTopics()));
+        urls.addAll(getPotentialURNs(getXS()));
+        urls.addAll(getPotentialURNs(getAS()));
+        return urls;
+    }
+	
+	private List<String> getPotentialURNs(List<String> strings) {
+        List<String> ret = new ArrayList<String>();
+        for(String str: strings) {
+            if(str.toLowerCase(Locale.US).startsWith(URN.Type.URN_NAMESPACE_ID))
+                ret.add(str);
+        }
+        return ret;
+    }
+	
 	private List<String> getPotentialURLs(List<String> strings) {
 		List<String> ret = new ArrayList<String>();
         for(String str: strings) {
-            if(str.startsWith(HTTP))
+            if(str.toLowerCase(Locale.US).startsWith(HTTP))
                 ret.add(str);
         }
 		return ret;
@@ -423,6 +451,41 @@ public class MagnetOptions implements Serializable {
 		}
 		return defaultURLs;
 	}
+	
+	/**
+	 * Returns immutable list of all valid GUID urns than can be tried for downloading.
+	 * 
+	 * GUID urns denote possibly firewalled hosts in the network that can be looked up
+	 * as possible download sources for this magnet link.
+	 */
+    public List<URN> getGUIDUrns() {
+        if (guidUrns != null) {
+            return guidUrns;
+        }
+        List<URN> urns = null;
+        List<String> potentialUrns = getPotentialURNs();
+        for (String candidate : potentialUrns) {
+            try {
+                URN urn = URN.createGUIDUrn(candidate);
+                if (urn.isGUID()) {
+                    if (urns == null) {
+                        urns = new ArrayList<URN>(2);
+                    }
+                    urns.add(urn);
+                }
+            } catch (IOException ie) {
+                // ignore, just not a valid guid urn 
+            }
+        }
+        if (urns == null) {
+            urns = Collections.emptyList();
+        } else {
+            urns = Collections.unmodifiableList(urns);
+        }
+        // only set after list is full to avoid race condition where some other thread sees the half full list
+        guidUrns = urns;
+        return urns;
+    }
 	
 	/**
 	 * Returns the display name, i.e. filename or <code>null</code>.
@@ -579,5 +642,6 @@ public class MagnetOptions implements Serializable {
         	return DOWNLOAD_PREFIX;
         }
     }
+
 }
 

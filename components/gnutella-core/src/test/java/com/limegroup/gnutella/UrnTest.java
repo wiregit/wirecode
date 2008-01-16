@@ -346,13 +346,13 @@ public final class UrnTest extends com.limegroup.gnutella.util.LimeTestCase {
 		}
 	}
 	
-	public void testCreateGUIDUrn() throws IOException {
+	public void testCreateGUIDUrnFromString() throws IOException {
 	    // test valid urns, we can reuse sha1 urns and just replace sha1 with guid
 	    for (String sha1URN : VALID_URNS) {
 	        String guidURN = sha1URN.toLowerCase(Locale.US).replace("sha1", "guid");
 	        URN urn = URN.createGUIDUrn(guidURN);
 	        assertNotNull(urn);
-	        assertSame(URN.Type.GUID, urn.getUrnType());
+	        assertTrue(urn.isGUID());
 	    }
 	    
 	    // invalid sha1 urns should also be invalid guid urns
@@ -373,5 +373,13 @@ public final class UrnTest extends com.limegroup.gnutella.util.LimeTestCase {
             } catch (IOException ie) {
             }
         }
+	}
+	
+	public void testCreateGUIDUrnFromGUID() {
+	    GUID guid = new GUID();
+	    URN urn = URN.createGUIDUrn(guid);
+	    assertTrue(urn.isGUID());
+	    assertEquals(guid.toHexString(), urn.getNamespaceSpecificString());
+	    assertEquals("urn:guid:" + guid.toHexString(), urn.toString());
 	}
 }

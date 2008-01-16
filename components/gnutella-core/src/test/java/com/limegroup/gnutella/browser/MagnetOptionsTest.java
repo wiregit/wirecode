@@ -1,5 +1,10 @@
 package com.limegroup.gnutella.browser;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.GUID;
@@ -9,9 +14,16 @@ import com.limegroup.gnutella.util.EncodingUtils;
 public class MagnetOptionsTest extends BaseTestCase {
 
     MagnetOptions[] validMagnets;
+    private String[] guidMagnets;
     
     public void setUp() {
         validMagnets = MagnetOptions.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
+        guidMagnets = new String[] {
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URN.createGUIDUrn(new GUID()),
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URN.createGUIDUrn(new GUID()),
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&as=" + URN.createGUIDUrn(new GUID()),
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URN.createGUIDUrn(new GUID()),
+        };
     }
 
 	public MagnetOptionsTest(String name) {
@@ -95,6 +107,13 @@ public class MagnetOptionsTest extends BaseTestCase {
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		
 	}
+
+    public void testIsDownloadableWithOnlyGUIDUrns() {
+        for (String magnet : guidMagnets) {
+            MagnetOptions options = MagnetOptions.parseMagnet(magnet)[0];
+            assertTrue(options + " should be downloadable", options.isDownloadable());
+        }
+    }
 	
 	public void testIsHashOnly() {
 		
@@ -116,6 +135,7 @@ public class MagnetOptionsTest extends BaseTestCase {
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
 		assertFalse("Should not be hash only", opts[0].isHashOnly());
+		assertTrue(opts[0].getGUIDUrns().isEmpty());
 	}
 
 	public void testGetFileNameForSaving() throws Exception {
@@ -169,7 +189,7 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertEquals("Should have parsed 2 magnets", 4, opts.length);
     }
     
-    public void testOldMagnetOptionsSwallowsGuidUrns() {
+    public void testMagnetOptionsParsingSwallowsGuidUrns() {
         String prefix = "magnet:?dn=filename&kt=keyword&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C";
         String guidUrn = "urn:guid:" + new GUID().toHexString();
         String magnet = prefix + "&xs=" + guidUrn;
@@ -182,6 +202,27 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertContains(opts.getAS(), guidUrn);
     }
     
+    public void testGetGUIDUrns() {
+        List<String> magnets = new ArrayList<String>(Arrays.asList(guidMagnets));
+        // and add them as all upper case too
+        for (String magnet : guidMagnets) {
+            magnets.add(magnet.toUpperCase(Locale.US));
+        }
+        for (String magnet : magnets) {
+            MagnetOptions options = MagnetOptions.parseMagnet(magnet)[0];
+            List<URN> urns = options.getGUIDUrns();
+            assertFalse(urns.isEmpty());
+            for (URN urn : urns) {
+                assertTrue(urn.isGUID());
+            }
+        }
+        
+        // magnets without GUID urns
+        for (MagnetOptions magnet : validMagnets) {
+            assertTrue(magnet.getGUIDUrns().isEmpty());
+        }
+    }
+     
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < opts.length; i++) {
