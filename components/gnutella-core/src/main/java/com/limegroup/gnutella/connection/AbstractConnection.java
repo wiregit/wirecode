@@ -85,6 +85,9 @@ public abstract class AbstractConnection implements Connection {
 
     /** The address of the remote host. */
     private final String host;
+    
+    /** The IP of the remote side in byte[] format */
+    private final byte []hostBytes;
 
     /** The port the remote host is listening on. */
     private volatile int port;
@@ -196,7 +199,12 @@ public abstract class AbstractConnection implements Connection {
         this.networkManager = networkManager;
         this.acceptor = acceptor;
         this.simpleProtocolBandwidthTracker = new SimpleProtocolBandwidthTracker();
-
+        byte [] hostBytes = null;
+        try {
+            hostBytes = InetAddress.getByName(getAddress()).getAddress();
+        } catch (UnknownHostException bad) {
+        }
+        this.hostBytes = hostBytes;
         if (!outgoing) {
             connectionBandwidthStatistics.setTlsOption(SSLUtils.isTLSEnabled(socket), SSLUtils
                     .getSSLBandwidthTracker(socket));
@@ -277,6 +285,10 @@ public abstract class AbstractConnection implements Connection {
         return host;
     }
 
+    public byte [] getAddressBytes() {
+        return hostBytes;
+    }
+    
     /*
      * (non-Javadoc)
      * 

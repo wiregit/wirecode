@@ -973,7 +973,20 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             return resp;
     }
 
-    public boolean isSpam(Message m) {
+    boolean isSpam(Message m) {
+        // leafs can only send hops == 0
+        if (isSupernodeClientConnection() && m.getHops() != 0)
+            return true;
+        
+        // replies with hops 0 must match the address.
+        if (m instanceof QueryReply && m.getHops() == 0) {
+            QueryReply reply = (QueryReply)m;
+            byte [] ip = reply.getIPBytes();
+            if (!NetworkUtils.isPrivateAddress(ip) &&
+                    !reply.hasSecureData() &&
+                    !Arrays.equals(ip, getAddressBytes()))
+                    return true;
+        }
         return !_routeFilter.allow(m);
     }
 
